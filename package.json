@@ -1,0 +1,17 @@
+{
+  "devDependencies": {
+    "gitbook-plugin-anchor-navigation-ex": "^1.0.14",
+    "gitbook-plugin-chapter-fold": "^0.0.4",
+    "gitbook-plugin-code": "^0.1.0",
+    "gitbook-plugin-copy-code-button": "^0.0.2",
+    "gitbook-plugin-expandable-chapters": "^0.2.0",
+    "gitbook-plugin-highlight": "^2.0.3",
+    "gitbook-plugin-katex": "^1.1.4",
+    "gitbook-plugin-prism": "^2.4.0",
+    "gitbook-plugin-search-pro": "^2.0.2",
+    "gitbook-plugin-sharing-plus": "^0.0.2",
+    "gitbook-plugin-splitter": "^0.0.8",
+    "gitbook-plugin-tbfed-pagefooter": "^0.0.1",
+    "honkit": "^6.0.2"
+  }
+}

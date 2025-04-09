@@ -1,0 +1,873 @@
+# CSS3视觉效果
+
+## 1. 圆角与边框
+
+CSS3引入了多种边框特性，使设计师无需使用图片即可创建丰富的边框效果，这些特性在智慧水利平台界面设计中能显著提升视觉吸引力。
+
+### 1.1 border-radius属性
+
+`border-radius`属性允许设计师创建圆角元素，从而使界面更加现代化、友好。
+
+#### 基本用法
+
+```css
+/* 所有角相同的圆角 */
+.card {
+    border-radius: 8px;
+    background-color: white;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 指定不同角的圆角 */
+.panel-top {
+    border-radius: 8px 8px 0 0; /* 上左、上右、下右、下左 */
+    background-color: #1890ff;
+    color: white;
+    padding: 10px 15px;
+}
+
+/* 椭圆形圆角 */
+.pill-button {
+    border-radius: 50px;
+    padding: 8px 20px;
+    background-color: #1890ff;
+    color: white;
+    border: none;
+}
+
+/* 创建圆形 */
+.avatar {
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+}
+```
+
+#### 在智慧水利平台中的应用
+
+```css
+/* 数据卡片圆角 */
+.data-card {
+    border-radius: 12px;
+    background-color: white;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+/* 状态指示器圆角 */
+.status-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.status-normal {
+    background-color: #f6ffed;
+    color: #52c41a;
+}
+
+.status-warning {
+    background-color: #fffbe6;
+    color: #faad14;
+}
+
+.status-danger {
+    background-color: #fff2f0;
+    color: #ff4d4f;
+}
+```
+
+### 1.2 box-shadow属性
+
+`box-shadow`属性允许为元素添加阴影效果，增加界面的深度感和层次感。
+
+#### 基本用法
+
+```css
+/* 基础阴影 */
+.card {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 多重阴影 */
+.floating-panel {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1),
+                0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+/* 内阴影 */
+.inset-panel {
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* 有色阴影 */
+.primary-button {
+    box-shadow: 0 4px 12px rgba(24, 144, 255, 0.4);
+}
+```
+
+#### 在智慧水利平台中的应用
+
+```css
+/* 水平面板悬浮效果 */
+.dashboard-card {
+    background-color: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12);
+}
+
+/* 按钮阴影 */
+.primary-button {
+    background-color: #1890ff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    box-shadow: 0 2px 6px rgba(24, 144, 255, 0.4);
+    transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+.primary-button:hover {
+    background-color: #40a9ff;
+    box-shadow: 0 4px 12px rgba(24, 144, 255, 0.6);
+}
+
+/* 警告卡片阴影 */
+.alert-card {
+    border-left: 4px solid #ff4d4f;
+    background-color: #fff2f0;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 0 4px 4px 0;
+    box-shadow: 0 2px 8px rgba(255, 77, 79, 0.2);
+}
+```
+
+### 1.3 border-image属性
+
+`border-image`属性允许使用图像作为元素的边框，创建复杂的边框效果。
+
+#### 基本用法
+
+```css
+.decorated-panel {
+    border: 15px solid transparent;
+    border-image: url('border-pattern.png') 30 round;
+    padding: 20px;
+}
+```
+
+#### 在智慧水利平台中的应用
+
+```css
+/* 水纹边框 */
+.water-card {
+    border: 10px solid transparent;
+    border-image: url('/images/water-border.png') 20 repeat;
+    padding: 20px;
+    background-color: #f0f9ff;
+}
+
+/* 渐变边框 */
+.gradient-border-card {
+    border: 5px solid;
+    border-image: linear-gradient(45deg, #1890ff, #69c0ff) 1;
+    padding: 20px;
+}
+```
+
+## 2. 背景与渐变
+
+CSS3大幅增强了背景处理能力，包括多重背景、背景尺寸控制和渐变背景等特性，使界面设计更加灵活和富有表现力。
+
+### 2.1 多重背景
+
+CSS3允许为元素设置多个背景图像，这些背景图像按照声明顺序从上到下层叠。
+
+```css
+.header-section {
+    background-image: 
+        url('logo-watermark.png'),
+        linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+        url('header-bg.jpg');
+    background-position: 
+        center right 20px,
+        center,
+        center;
+    background-repeat: 
+        no-repeat,
+        repeat,
+        no-repeat;
+    background-size: 
+        auto 60%,
+        cover,
+        cover;
+    height: 300px;
+    color: white;
+    padding: 40px;
+}
+```
+
+### 2.2 背景尺寸与定位
+
+CSS3引入了更精确控制背景尺寸和位置的新属性。
+
+```css
+/* 背景尺寸 */
+.cover-bg {
+    background-image: url('map.jpg');
+    background-size: cover; /* 覆盖整个容器 */
+    background-position: center;
+}
+
+.contain-bg {
+    background-image: url('icon.png');
+    background-size: contain; /* 保持比例缩放以适应容器 */
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+/* 具体尺寸 */
+.fixed-bg {
+    background-image: url('pattern.png');
+    background-size: 50px 50px;
+    background-repeat: repeat;
+}
+
+/* 背景定位 */
+.positioned-bg {
+    background-image: url('marker.png');
+    background-size: 30px 30px;
+    background-repeat: no-repeat;
+    background-position: right 20px bottom 10px; /* 距右边20px，距底部10px */
+}
+```
+
+### 2.3 线性渐变
+
+线性渐变创建沿着直线方向颜色平滑过渡的图像。
+
+```css
+/* 基础线性渐变 - 从上到下 */
+.vertical-gradient {
+    background: linear-gradient(#1890ff, #0050b3);
+}
+
+/* 指定方向 */
+.angle-gradient {
+    background: linear-gradient(45deg, #1890ff, #0050b3);
+}
+
+/* 多色渐变 */
+.multi-color-gradient {
+    background: linear-gradient(to right, #1890ff, #69c0ff, #bae7ff);
+}
+
+/* 指定渐变位置 */
+.positioned-gradient {
+    background: linear-gradient(to bottom, 
+        #1890ff 0%, 
+        #69c0ff 40%, 
+        #bae7ff 100%);
+}
+
+/* 硬边界渐变 */
+.hard-stop-gradient {
+    background: linear-gradient(to right,
+        #1890ff 50%,
+        #0050b3 50%);
+}
+```
+
+### 2.4 径向渐变
+
+径向渐变创建从中心点辐射的颜色过渡效果。
+
+```css
+/* 基础径向渐变 */
+.radial-gradient {
+    background: radial-gradient(#1890ff, #0050b3);
+}
+
+/* 指定形状和大小 */
+.ellipse-gradient {
+    background: radial-gradient(ellipse at center, #1890ff, #0050b3);
+}
+
+.circle-gradient {
+    background: radial-gradient(circle at center, #1890ff, #0050b3);
+}
+
+/* 指定位置 */
+.positioned-radial {
+    background: radial-gradient(circle at top right, #1890ff, #0050b3);
+}
+
+/* 多色径向渐变 */
+.multi-color-radial {
+    background: radial-gradient(circle,
+        #bae7ff 0%,
+        #69c0ff 50%,
+        #1890ff 100%);
+}
+```
+
+### 2.5 重复渐变
+
+重复渐变可以创建条纹和纹理效果。
+
+```css
+/* 重复线性渐变 - 创建条纹 */
+.striped-background {
+    background: repeating-linear-gradient(
+        45deg,
+        #e6f7ff,
+        #e6f7ff 10px,
+        #bae7ff 10px,
+        #bae7ff 20px
+    );
+}
+
+/* 重复径向渐变 - 创建水波纹效果 */
+.ripple-background {
+    background: repeating-radial-gradient(
+        circle at center,
+        #e6f7ff,
+        #e6f7ff 10px,
+        #bae7ff 10px,
+        #bae7ff 20px
+    );
+}
+```
+
+### 2.6 在智慧水利平台中的应用
+
+```css
+/* 水位监测面板背景 */
+.water-level-panel {
+    background: linear-gradient(to bottom, #e6f7ff, #ffffff);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+/* 流量指示器背景 */
+.flow-indicator {
+    height: 60px;
+    border-radius: 30px;
+    background: repeating-linear-gradient(
+        90deg,
+        #bae7ff,
+        #bae7ff 10px,
+        #e6f7ff 10px,
+        #e6f7ff 20px
+    );
+    background-size: 200% 100%;
+    animation: flowAnimation 10s linear infinite;
+    position: relative;
+}
+
+@keyframes flowAnimation {
+    0% { background-position: 0% 0%; }
+    100% { background-position: 200% 0%; }
+}
+
+/* 降雨强度图 */
+.rainfall-intensity-map {
+    height: 300px;
+    width: 300px;
+    border-radius: 50%;
+    background: radial-gradient(
+        circle,
+        #ffffff 0%,
+        #bae7ff 40%,
+        #69c0ff 70%,
+        #1890ff 85%,
+        #0050b3 100%
+    );
+    box-shadow: 0 4px 20px rgba(24, 144, 255, 0.3);
+}
+
+/* 仪表盘标题背景 */
+.dashboard-header {
+    background-image: 
+        url('/images/logo-watermark.png'),
+        linear-gradient(90deg, #1890ff, #096dd9);
+    background-position: 
+        right 20px center,
+        center;
+    background-repeat: 
+        no-repeat,
+        no-repeat;
+    background-size: 
+        auto 60%,
+        cover;
+    color: white;
+    padding: 20px;
+    border-radius: 8px 8px 0 0;
+}
+```
+
+## 3. 文本效果
+
+CSS3引入了多种增强文本表现力的特性，使文字内容更具可读性和视觉吸引力。
+
+### 3.1 文本阴影
+
+`text-shadow`属性为文本添加阴影效果，增强文字的立体感和可读性。
+
+```css
+/* 基础文本阴影 */
+.title {
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* 发光文本效果 */
+.glow-text {
+    color: white;
+    text-shadow: 0 0 10px rgba(24, 144, 255, 0.8);
+}
+
+/* 多重阴影 */
+.multi-shadow-text {
+    color: #1890ff;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3),
+                 0 0 8px rgba(24, 144, 255, 0.5);
+}
+
+/* 文字浮雕效果 */
+.embossed-text {
+    color: #444;
+    text-shadow: 1px 1px 1px white;
+}
+
+.pressed-text {
+    color: #444;
+    text-shadow: -1px -1px 1px white;
+}
+```
+
+### 3.2 文本溢出
+
+CSS3提供了更好的方法来处理文本溢出情况。
+
+```css
+/* 单行文本溢出显示省略号 */
+.truncate {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+}
+
+/* 多行文本溢出 */
+.multi-line-truncate {
+    display: -webkit-box;
+    -webkit-line-clamp: 3; /* 显示行数 */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    max-height: 4.5em; /* 行高 × 行数 */
+}
+```
+
+### 3.3 字体特性
+
+CSS3增强了对字体的控制能力，包括网页字体和字体特性控制。
+
+```css
+/* 使用@font-face导入自定义字体 */
+@font-face {
+    font-family: 'WaterIcons';
+    src: url('/fonts/water-icons.woff2') format('woff2'),
+         url('/fonts/water-icons.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+.water-icon {
+    font-family: 'WaterIcons';
+}
+
+/* 字体平滑 */
+body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* 字体特性控制 */
+.tabular-nums {
+    font-variant-numeric: tabular-nums; /* 等宽数字，适合数据表格 */
+}
+```
+
+### 3.4 文本修饰
+
+CSS3提供了更多文本修饰选项。
+
+```css
+/* 文本下划线 */
+.custom-underline {
+    text-decoration: underline;
+    text-decoration-color: #1890ff;
+    text-decoration-thickness: 2px;
+    text-decoration-style: wavy;
+}
+
+/* 文本描边 */
+.outlined-text {
+    -webkit-text-stroke: 1px black;
+    color: white;
+}
+```
+
+### 3.5 在智慧水利平台中的应用
+
+```css
+/* 数据面板标题 */
+.panel-title {
+    font-size: 20px;
+    font-weight: 500;
+    color: #1890ff;
+    text-shadow: 0 1px 2px rgba(24, 144, 255, 0.2);
+    margin-bottom: 16px;
+}
+
+/* 站点名称溢出处理 */
+.station-name {
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+}
+
+/* 警告文本 */
+.warning-text {
+    color: #faad14;
+    font-weight: 500;
+    text-shadow: 0 0 4px rgba(250, 173, 20, 0.4);
+}
+
+.danger-text {
+    color: #ff4d4f;
+    font-weight: 600;
+    text-shadow: 0 0 4px rgba(255, 77, 79, 0.4);
+}
+
+/* 数据值显示 */
+.data-value {
+    font-family: 'DIN Condensed', sans-serif;
+    font-variant-numeric: tabular-nums;
+    font-size: 24px;
+    font-weight: 500;
+    color: #1890ff;
+}
+
+/* 降雨量大值特殊显示 */
+.rainfall-heavy {
+    color: #096dd9;
+    font-weight: bold;
+    text-decoration: underline;
+    text-decoration-color: #096dd9;
+    text-decoration-thickness: 2px;
+}
+```
+
+## 4. 颜色与透明度
+
+CSS3提供了多种颜色表示方法，包括RGBA、HSLA以及透明度控制。
+
+### 4.1 RGBA颜色
+
+RGBA允许设置颜色的同时控制其透明度。
+
+```css
+/* RGBA颜色 - RGB + Alpha通道 */
+.overlay {
+    background-color: rgba(0, 0, 0, 0.5); /* 半透明黑色 */
+}
+
+.highlight {
+    background-color: rgba(24, 144, 255, 0.2); /* 淡蓝色高亮 */
+    border: 1px solid rgba(24, 144, 255, 0.5);
+}
+```
+
+### 4.2 HSLA颜色
+
+HSLA基于色相、饱和度、亮度和透明度定义颜色，更加直观。
+
+```css
+/* HSLA颜色 - 色相、饱和度、亮度、透明度 */
+.primary-button {
+    background-color: hsla(210, 100%, 50%, 1); /* 蓝色 */
+}
+
+.primary-button:hover {
+    background-color: hsla(210, 100%, 55%, 1); /* 稍亮的蓝色 */
+}
+
+.overlay-panel {
+    background-color: hsla(0, 0%, 0%, 0.7); /* 70%不透明黑色 */
+}
+```
+
+### 4.3 透明度控制
+
+CSS3允许通过多种方式控制元素透明度。
+
+```css
+/* 使用opacity属性 - 影响整个元素及其子元素 */
+.faded {
+    opacity: 0.7;
+}
+
+/* 使用rgba背景 - 只影响背景色 */
+.translucent-bg {
+    background-color: rgba(255, 255, 255, 0.8);
+}
+
+/* 使用透明色 */
+.transparent-border {
+    border: 1px solid transparent;
+}
+```
+
+### 4.4 在智慧水利平台中的应用
+
+```css
+/* 数据图表提示框 */
+.chart-tooltip {
+    background-color: rgba(0, 0, 0, 0.75);
+    color: white;
+    padding: 10px;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* 水位预警指示器 */
+.water-level-indicator {
+    position: relative;
+}
+
+.water-level-indicator::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 77, 79, 0.2);
+    border-radius: inherit;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 0.2; }
+    50% { opacity: 0.5; }
+    100% { opacity: 0.2; }
+}
+
+/* 叠加信息面板 */
+.map-overlay-panel {
+    background-color: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(5px); /* 模糊背景效果 */
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* 状态色彩系统 */
+:root {
+    --normal-color: hsla(135, 60%, 39%, 1);
+    --normal-bg: hsla(135, 60%, 95%, 1);
+    --warning-color: hsla(38, 100%, 50%, 1);
+    --warning-bg: hsla(38, 100%, 95%, 1);
+    --danger-color: hsla(0, 100%, 65%, 1);
+    --danger-bg: hsla(0, 100%, 96%, 1);
+}
+
+.status-normal {
+    color: var(--normal-color);
+    background-color: var(--normal-bg);
+}
+
+.status-warning {
+    color: var(--warning-color);
+    background-color: var(--warning-bg);
+}
+
+.status-danger {
+    color: var(--danger-color);
+    background-color: var(--danger-bg);
+}
+```
+
+## 5. 高级视觉效果
+
+CSS3提供了多种创建高级视觉效果的功能，如模糊、滤镜和混合模式等。
+
+### 5.1 滤镜效果
+
+CSS3的`filter`属性允许应用图形滤镜效果，如模糊、亮度调整、对比度等。
+
+```css
+/* 模糊效果 */
+.blur {
+    filter: blur(5px);
+}
+
+/* 灰度效果 */
+.grayscale {
+    filter: grayscale(100%);
+}
+
+/* 亮度调整 */
+.brighten {
+    filter: brightness(150%);
+}
+
+/* 对比度调整 */
+.increase-contrast {
+    filter: contrast(180%);
+}
+
+/* 阴影效果 */
+.drop-shadow {
+    filter: drop-shadow(3px 3px 5px rgba(0, 0, 0, 0.3));
+}
+
+/* 多重滤镜组合 */
+.vintage {
+    filter: sepia(50%) contrast(120%) brightness(90%);
+}
+```
+
+### 5.2 背景模糊效果
+
+使用`backdrop-filter`属性可以对元素背后的内容应用模糊或其他滤镜效果。
+
+```css
+/* 背景模糊面板 */
+.glass-panel {
+    background-color: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+```
+
+### 5.3 混合模式
+
+CSS3的混合模式允许指定元素内容或背景如何与底层元素混合。
+
+```css
+/* 混合模式 - 将内容与背景混合 */
+.multiply-blend {
+    background-image: url('texture.jpg');
+    background-color: #1890ff;
+    background-blend-mode: multiply;
+}
+
+/* 混合模式 - 将元素与其下方元素混合 */
+.overlay-blend {
+    mix-blend-mode: overlay;
+}
+```
+
+### 5.4 渐变蒙版
+
+使用渐变和混合模式创建蒙版效果。
+
+```css
+/* 渐变蒙版 */
+.fade-mask {
+    position: relative;
+}
+
+.fade-mask::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 100px;
+    background: linear-gradient(transparent, white);
+    pointer-events: none; /* 允许点击穿透 */
+}
+```
+
+### 5.5 在智慧水利平台中的应用
+
+```css
+/* 水库照片灰度效果（历史数据） */
+.historical-image {
+    filter: grayscale(80%) contrast(110%);
+    transition: filter 0.3s ease;
+}
+
+.historical-image:hover {
+    filter: grayscale(0%) contrast(100%);
+}
+
+/* 天气状态指示器 */
+.weather-icon.rainy {
+    filter: drop-shadow(0 0 2px rgba(0, 110, 255, 0.5));
+}
+
+.weather-icon.sunny {
+    filter: brightness(120%) saturate(120%);
+}
+
+/* 模糊状态面板 */
+.glass-status-panel {
+    background-color: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+/* 卫星图像增强 */
+.satellite-image {
+    filter: contrast(120%) saturate(110%) brightness(105%);
+}
+
+/* 热力图效果 */
+.heatmap-overlay {
+    background-image: url('/images/heatmap-gradient.png');
+    mix-blend-mode: multiply;
+    opacity: 0.8;
+}
+
+/* 图表数据区域渐变蒙版 */
+.chart-container {
+    position: relative;
+}
+
+.chart-scroll-indicator {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 50px;
+    background: linear-gradient(to right, transparent, white);
+    pointer-events: none;
+}
+```
+
+通过这些CSS3视觉效果，智慧水利平台的界面可以变得更加现代化、专业化，并且能够更有效地传达信息和提升用户体验。圆角、阴影和渐变等特性不仅仅是装饰，它们也能引导用户注意力、表达关系层级，并使复杂信息更加直观易懂。 

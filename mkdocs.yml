@@ -1,0 +1,139 @@
+site_name: 智慧水利平台架构与开发
+site_description: 智慧水利平台架构与开发教材
+site_author: 授课教师
+
+# 主题配置
+theme:
+  name: material  # 使用Material主题
+  language: zh    # 设置为中文
+  features:
+    - navigation.instant  # 即时导航
+    - navigation.tracking # 导航跟踪
+    - navigation.tabs     # 顶部导航标签
+    - navigation.indexes  # 导航索引
+    - toc.follow          # 目录跟随滚动
+    - content.code.copy   # 代码复制按钮
+
+# 导航结构
+nav:
+  - 主页: index.md
+  - 第一部分 基础知识:
+    - 第一章 绪论:
+      - 章节介绍: chapters/chapter01/chapter01.md
+      - 第一节 软件概述: chapters/chapter01/section01-01.md
+      - 第二节 软件工程概述: chapters/chapter01/section01-02.md
+      - 第三节 软件工程方法: chapters/chapter01/section01-03.md
+      - 第四节 国内外典型应用案例分析: chapters/chapter01/section01-04.md
+    - 第二章 系统平台架构:
+      - 章节介绍: chapters/chapter02/chapter02.md
+      - 第一节 软件工程基础概念: chapters/chapter02/section02-01.md
+      - 第二节 水利软件开发生命周期: chapters/chapter02/section02-02.md
+      - 第三节 需求分析与设计方法: chapters/chapter02/section02-03.md
+      - 第四节 软件质量保证与测试: chapters/chapter02/section02-04.md
+      - 第五节 项目管理基础知识: chapters/chapter02/section02-05.md
+    - 第三章 现代软件开发方法与工具:
+      - 章节介绍: chapters/chapter03/chapter03.md
+      - 第一节 版本控制与协作开发: 
+        - 概述: chapters/chapter03/section03-01.md
+        - 1.1 版本控制基础概念: chapters/chapter03/section03-01-01.md
+        - 1.2 Git工作流与最佳实践: chapters/chapter03/section03-01-02.md
+        - 1.3 实际应用案例: chapters/chapter03/section03-01-03.md
+        - 1.4 学习资源与实践指南: chapters/chapter03/section03-01-04.md
+      - 第二节 敏捷开发入门:
+        - 概述: chapters/chapter03/section03-02.md
+        - 2.1 敏捷开发概述: chapters/chapter03/section03-02-01.md
+        - 2.2 主要敏捷方法论: chapters/chapter03/section03-02-02.md
+        - 2.3 敏捷实践在智慧水利项目中的应用: chapters/chapter03/section03-02-03.md
+        - 2.4 敏捷转型与挑战: chapters/chapter03/section03-02-04.md
+        - 2.5 案例研究：某流域智慧水利平台的敏捷开发实践: chapters/chapter03/section03-02-05.md
+      - 第三节 微服务架构基础:
+        - 概述: chapters/chapter03/section03-03.md
+        - 3.1 微服务架构基础概念: chapters/chapter03/section03-03-01.md
+        - 3.2 微服务设计原则: chapters/chapter03/section03-03-02.md
+        - 3.3 服务发现与负载均衡: chapters/chapter03/section03-03-03.md
+        - 3.4 API网关与服务通信: chapters/chapter03/section03-03-04.md
+        - 3.5 微服务的部署与监控: chapters/chapter03/section03-03-05.md
+        - 3.6 智慧水利平台中的微服务实践案例: chapters/chapter03/section03-03-06.md
+      - 第四节 开发环境配置与工具使用: 
+        - 概述: chapters/chapter03/section03-04.md
+        - 4.1 开发环境搭建基础: chapters/chapter03/section03-04-01.md
+        - 4.2 集成开发环境(IDE)使用: chapters/chapter03/section03-04-02.md
+        - 4.3 容器化技术与Docker: chapters/chapter03/section03-04-03.md
+        - 4.4 持续集成与部署工具: chapters/chapter03/section03-04-04.md
+        - 4.5 开发辅助工具与插件: chapters/chapter03/section03-04-05.md
+        - 4.6 智慧水利开发环境最佳实践: chapters/chapter03/section03-04-06.md
+  - 第二部分 前后端开发:
+    - 第四章 前端开发基础:
+      - 章节介绍: chapters/chapter04/chapter04.md
+      - 第一节 HTML5与CSS3入门: chapters/chapter04/section04-01.md
+      - 第二节 JavaScript基础: chapters/chapter04/section04-02.md
+      - 第三节 Vue.js框架简介: chapters/chapter04/section04-03.md
+      - 第四节 水利平台前端界面设计: chapters/chapter04/section04-04.md
+      - 第五节 前端工程基础工具: chapters/chapter04/section04-05.md
+    - 第五章 后端开发基础:
+      - 章节介绍: chapters/chapter05/chapter05.md
+      - 第一节 后端开发概述: chapters/chapter05/section05-01.md
+      - 第二节 Java/Python基础与应用: chapters/chapter05/section05-02.md
+      - 第三节 RESTful API设计原则: chapters/chapter05/section05-03.md
+      - 第四节 Spring Boot框架入门: chapters/chapter05/section05-04.md
+      - 第五节 数据库技术基础: chapters/chapter05/section05-05.md
+      - 第六节 后端服务配置与部署: chapters/chapter05/section05-06.md
+  - 第三部分 三维场景与应用:
+    - 第六章 智慧水利三维场景构建:
+      - 章节介绍: chapters/chapter06/chapter06.md
+      - 第一节 三维场景技术概述: chapters/chapter06/section06-01.md
+      - 第二节 GIS地图服务应用: chapters/chapter06/section06-02.md
+      - 第三节 水利工程三维模型制作: chapters/chapter06/section06-03.md
+      - 第四节 倾斜摄影技术应用: chapters/chapter06/section06-04.md
+      - 第五节 水利场景渲染方法: chapters/chapter06/section06-05.md
+    - 第七章 监测数据与三维场景融合:
+      - 章节介绍: chapters/chapter07/chapter07.md
+      - 第一节 水利监测数据类型与特点: chapters/chapter07/section07-01.md
+      - 第二节 数据可视化基础方法: chapters/chapter07/section07-02.md
+      - 第三节 三维场景中的监测点设计: chapters/chapter07/section07-03.md
+      - 第四节 监测数据交互与查询技术: chapters/chapter07/section07-04.md
+    - 第八章 智慧水利平台典型应用:
+      - 章节介绍: chapters/chapter08/chapter08.md
+      - 第一节 水利工程安全监测平台开发: chapters/chapter08/section08-01.md
+      - 第二节 水利工程三维场景设计: chapters/chapter08/section08-02.md
+      - 第三节 监测数据处理与展示模块: chapters/chapter08/section08-03.md
+      - 第四节 预警分析与评价系统: chapters/chapter08/section08-04.md
+      - 第五节 综合应用案例实践: chapters/chapter08/section08-05.md
+  - 附录:
+    - 附录A：常用开发工具与环境配置: appendix/appendixA.md
+    - 附录B：编程基础知识速查: appendix/appendixB.md
+    - 附录C：项目实践指导: appendix/appendixC.md
+
+# Markdown扩展
+markdown_extensions:
+  - admonition           # 警告、提示框
+  - footnotes            # 脚注
+  - pymdownx.highlight    # 代码高亮
+  - pymdownx.superfences  # 代码块、图表
+  - pymdownx.tabbed       # 选项卡
+  - attr_list             # 属性列表
+  - def_list              # 定义列表
+  - tables                # 表格
+  - pymdownx.emoji:       # 表情符号
+      emoji_generator: 'material.extensions.twemoji'
+
+# 插件
+plugins:
+  - search               # 搜索功能
+  - git-revision-date-localized:  # 显示最后更新日期
+      enable_creation_date: true
+      fallback_to_build_date: true
+      enable_git_follow: false
+
+# 版权信息
+copyright: Copyright &copy; 2025
+
+# 额外CSS和JavaScript
+extra_css:
+  - assets/css/extra.css
+
+# 社交链接
+extra:
+  social:
+    - icon: fontawesome/solid/globe
+      link: https://example.com 
