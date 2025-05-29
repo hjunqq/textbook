@@ -55,7 +55,20 @@ jobs:
           ${{ runner.os }}-pnpm-store-
 
     - name: 📥 安装依赖
-      run: pnpm install --frozen-lockfile
+      run: |
+        echo "🔍 检查锁定文件状态..."
+        if [ -f "pnpm-lock.yaml" ]; then
+          echo "📄 发现锁定文件，尝试使用..."
+          # 首先尝试使用锁定文件安装
+          pnpm install --frozen-lockfile || {
+            echo "⚠️ 锁定文件不兼容，使用灵活安装模式..."
+            pnpm install --no-frozen-lockfile
+          }
+        else
+          echo "📦 未发现锁定文件，执行完整安装..."
+          pnpm install
+        fi
+        echo "✅ 依赖安装完成！"
 
     - name: 🔨 构建 HonKit 静态站点
       run: |

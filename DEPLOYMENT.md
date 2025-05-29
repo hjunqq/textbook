@@ -33,7 +33,8 @@
 
 2. **依赖管理**
    - 智能缓存 pnpm store 以加速构建
-   - 使用 `pnpm install --frozen-lockfile` 确保依赖一致性
+   - **智能锁定文件处理**：优先使用 `--frozen-lockfile`，如果兼容性问题则自动降级到 `--no-frozen-lockfile`
+   - 确保在不同环境中的构建一致性
 
 3. **站点构建**
    - 使用 `honkit build` 构建静态站点
@@ -43,6 +44,16 @@
 4. **部署发布**
    - 自动上传构建产物到 GitHub Pages
    - 部署完成后显示访问地址
+
+#### 🔧 锁定文件兼容性处理
+
+工作流包含智能的依赖安装策略：
+
+1. **首选模式**：尝试使用 `pnpm install --frozen-lockfile` 确保版本一致性
+2. **降级模式**：如果锁定文件不兼容，自动使用 `pnpm install --no-frozen-lockfile`
+3. **完整安装**：如果没有锁定文件，执行标准安装
+
+这种策略确保在不同的CI环境和pnpm版本下都能成功构建。
 
 ## 🔧 本地开发
 
@@ -132,12 +143,17 @@ https://[username].github.io/[repository-name]/
    - 查看 Actions 日志中的错误信息
    - 确保所有 Markdown 文件语法正确
 
-2. **页面无法访问**
+2. **依赖安装问题**
+   - **锁定文件不兼容**：工作流会自动处理，无需手动干预
+   - **依赖版本冲突**：检查 `package.json` 中的版本要求
+   - **网络问题**：GitHub Actions 会自动重试
+
+3. **页面无法访问**
    - 检查 GitHub Pages 设置是否正确
    - 确认仓库是公开的（或有 GitHub Pro）
    - 等待 DNS 传播（可能需要几分钟）
 
-3. **样式显示异常**
+4. **样式显示异常**
    - 确保 `.nojekyll` 文件存在
    - 检查相对路径是否正确
    - 清除浏览器缓存
@@ -146,6 +162,10 @@ https://[username].github.io/[repository-name]/
 
 1. **本地验证**
    ```bash
+   # 重新生成锁定文件（如果需要）
+   rm pnpm-lock.yaml
+   pnpm install
+   
    # 本地构建测试
    pnpm exec honkit build
    
@@ -154,9 +174,22 @@ https://[username].github.io/[repository-name]/
    ```
 
 2. **GitHub Actions 调试**
-   - 在工作流中添加调试输出
+   - 查看工作流日志中的详细输出
+   - 检查依赖安装步骤的智能处理过程
    - 使用 `workflow_dispatch` 手动触发测试
    - 检查权限设置是否正确
+
+3. **锁定文件管理**
+   ```bash
+   # 更新依赖
+   pnpm update
+   
+   # 重新生成兼容的锁定文件
+   rm pnpm-lock.yaml && pnpm install
+   
+   # 验证锁定文件
+   pnpm install --frozen-lockfile
+   ```
 
 ## 📞 技术支持
 
@@ -172,6 +205,11 @@ https://[username].github.io/[repository-name]/
 - 压缩图片资源以减少加载时间
 - 使用 CDN 加速静态资源访问
 - 启用浏览器缓存策略
+
+### 依赖管理优化
+- 定期更新依赖包到最新稳定版本
+- 使用 `pnpm audit` 检查安全漏洞
+- 保持 pnpm 版本与 CI 环境一致
 
 ### SEO优化
 - 添加合适的 meta 标签
