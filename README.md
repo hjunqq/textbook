@@ -218,6 +218,14 @@ pnpm exec honkit mobi
 - 🐛 问题反馈：GitHub Issues
 - 💬 讨论交流：GitHub Discussions
 
+## 🛠️ 技术支持
+
+如在使用过程中遇到问题：
+
+- 📖 [部署指南](DEPLOYMENT.md) - 详细的部署和配置说明
+- 🔧 [故障排除](TROUBLESHOOTING.md) - 常见问题和解决方案
+- 📝 [部署后配置](POST_DEPLOY_SETUP.md) - 部署后的配置步骤
+
 ## 🙏 致谢
 
 感谢所有为智慧水利教育事业贡献力量的老师、学生和开发者！

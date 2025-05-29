@@ -54,7 +54,7 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-pnpm-store-
 
-    - name: 📥 安装依赖
+    - name: 📥 安装项目依赖
       run: |
         echo "🔍 检查锁定文件状态..."
         if [ -f "pnpm-lock.yaml" ]; then
@@ -68,7 +68,7 @@ jobs:
           echo "📦 未发现锁定文件，执行完整安装..."
           pnpm install
         fi
-        echo "✅ 依赖安装完成！"
+        echo "✅ 项目依赖安装完成！"
 
     - name: 🔨 构建 HonKit 静态站点
       run: |
