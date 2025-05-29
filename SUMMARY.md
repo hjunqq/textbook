@@ -3,10 +3,10 @@
 * [教材简介](README.md)
 
 ## 第一部分 基础知识
-* [第一章 绪论](chapters/chapter01/chapter01.md)
-    * [第一节 软件概述](chapters/chapter01/section01-01.md)
-    * [第二节 软件工程概述](chapters/chapter01/section01-02.md)
-    * [第三节 软件工程方法](chapters/chapter01/section01-03.md)
+* [第一章 总论](chapters/chapter01/chapter01.md)
+    * [第一节 智慧水利平台概述与发展背景](chapters/chapter01/section01-01.md)
+    * [第二节 平台核心组成部分](chapters/chapter01/section01-02.md)
+    * [第三节 平台主要功能介绍](chapters/chapter01/section01-03.md)
     * [第四节 国内外典型应用案例分析](chapters/chapter01/section01-04.md)
 * [第二章 系统平台架构](chapters/chapter02/chapter02.md)
     * [第一节 软件工程基础概念](chapters/chapter02/section02-01.md)
