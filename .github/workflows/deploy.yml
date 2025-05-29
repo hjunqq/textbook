@@ -1,0 +1,112 @@
+name: 🚀 部署智慧水利教材到 GitHub Pages
+
+on:
+  # 当推送到 main 分支时触发
+  push:
+    branches: [ main ]
+  
+  # 允许手动触发工作流
+  workflow_dispatch:
+
+# 设置 GITHUB_TOKEN 的权限以允许部署到 GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 允许一个并发部署
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  # 构建作业
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📚 检出代码
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0 # 获取完整历史记录以支持 git 信息
+
+    - name: 🔧 配置 Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+
+    - name: 📦 安装 pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: 8
+        run_install: false
+
+    - name: 🏗️ 获取 pnpm store 目录
+      shell: bash
+      run: |
+        echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+    - name: 💾 设置 pnpm 缓存
+      uses: actions/cache@v3
+      with:
+        path: ${{ env.STORE_PATH }}
+        key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+        restore-keys: |
+          ${{ runner.os }}-pnpm-store-
+
+    - name: 📥 安装依赖
+      run: pnpm install --frozen-lockfile
+
+    - name: 🔨 构建 HonKit 静态站点
+      run: |
+        echo "📖 开始构建智慧水利平台架构与开发教材..."
+        pnpm exec honkit build
+        echo "✅ 构建完成！"
+
+    - name: 🗂️ 配置构建产物
+      run: |
+        # 创建 .nojekyll 文件以禁用 Jekyll 处理
+        touch _book/.nojekyll
+        
+        # 添加自定义域名文件（如果需要的话）
+        # echo "your-domain.com" > _book/CNAME
+        
+        # 显示构建产物信息
+        echo "📁 构建产物目录结构："
+        ls -la _book/
+        
+        echo "📊 构建产物大小："
+        du -sh _book/
+
+    - name: 📤 上传构建产物
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: ./_book
+
+  # 部署作业
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    
+    steps:
+    - name: 🌐 部署到 GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4
+
+    - name: 🎉 部署成功通知
+      run: |
+        echo "🎊 智慧水利平台架构与开发教材已成功部署！"
+        echo "🔗 访问地址: ${{ steps.deployment.outputs.page_url }}"
+        echo "📚 教材包含以下章节："
+        echo "   第一章: 总论"
+        echo "   第二章: 软件工程基础与需求分析"
+        echo "   第三章: 现代软件开发方法与工具"
+        echo "   第四章: 前端开发基础"
+        echo "   第五章: 后端开发基础"
+        echo "   第六章: 智慧水利三维场景构建"
+        echo "   第七章: 监测数据与三维场景融合"
+        echo "   第八章: 智慧水利平台典型应用" 

@@ -1,0 +1,57 @@
+MIT License
+
+Copyright (c) 2025 智慧水利平台架构与开发教材编写组
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+
+# 教材使用声明
+
+本教材《智慧水利平台架构与开发》是为教育目的而创建的开源教材，遵循以下使用原则：
+
+## 教育用途
+- 本教材主要用于水利工程专业本科教学
+- 鼓励教师、学生和研究人员用于教学、学习和研究
+- 支持非营利性的教育培训活动
+
+## 商业使用
+- 允许在遵守MIT许可证的前提下进行商业使用
+- 建议商业使用前联系原作者获得授权
+- 商业培训机构使用请注明教材来源
+
+## 内容声明
+- 教材中的技术案例和数据均为教学示例
+- 不保证所有技术方案在生产环境中的适用性
+- 使用者应根据实际情况进行技术选型和实施
+
+## 贡献协议
+- 欢迎社区贡献内容改进和错误修正
+- 贡献者的内容将以相同许可证发布
+- 重大贡献者将在致谢中列出
+
+## 免责声明
+- 教材内容仅供参考，不构成专业技术指导
+- 作者不对使用本教材产生的任何后果承担责任
+- 建议在专业指导下进行实际项目开发
+
+## 联系方式
+如有疑问或需要特殊授权，请通过以下方式联系：
+- GitHub Issues: 提出技术问题和改进建议
+- 电子邮件: [联系邮箱] 

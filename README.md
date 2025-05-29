@@ -2,6 +2,24 @@
 
 > 为水利专业本科大三年级学生设计的智慧水利平台架构与开发教材
 
+<!--
+部署后请替换以下链接中的占位符：
+[![🚀 部署状态](https://github.com/[用户名]/[仓库名]/actions/workflows/deploy.yml/badge.svg)](https://github.com/[用户名]/[仓库名]/actions/workflows/deploy.yml)
+[![📖 在线阅读](https://img.shields.io/badge/在线阅读-GitHub%20Pages-blue)](https://[用户名].github.io/[仓库名]/)
+[![📚 教材版本](https://img.shields.io/badge/版本-v1.0-green)](https://github.com/[用户名]/[仓库名]/releases)
+-->
+
+## 🌐 在线访问
+
+📖 **在线阅读地址**: 部署后将在GitHub Pages上提供访问链接
+
+该教材已配置自动部署到GitHub Pages，支持：
+- 📱 响应式设计，支持移动端访问
+- 🔍 全文搜索功能
+- 📑 章节导航和目录
+- 💡 代码高亮和复制功能
+- 🎨 专业的技术文档主题
+
 ## 教材简介
 
 随着信息技术与水利行业的深度融合，智慧水利已成为推动水利现代化的重要方向。本教材旨在为水利专业学生提供全面的智慧水利平台架构与开发知识，培养具备现代软件开发能力的复合型水利人才。
@@ -39,7 +57,7 @@
 - 平台主要功能介绍
 - 国内外典型应用案例分析
 
-**第二章 系统平台架构**
+**第二章 软件工程基础与需求分析**
 - 软件工程基础概念
 - 水利软件开发生命周期
 - 需求分析与设计方法
@@ -111,38 +129,77 @@
 3. **智慧灌区管理系统**：前后端分离架构的Web应用开发
 4. **防洪预警系统**：微服务架构下的分布式系统开发
 
-## 使用说明
+## 🚀 快速开始
 
 ### 在线阅读
+部署后将提供在线版本进行学习，支持全文搜索、书签、笔记等功能。
 
-访问 GitBook 在线版本进行学习，支持全文搜索、书签、笔记等功能。
-
-### 离线使用
+### 本地开发
 
 ```bash
 # 克隆代码仓库
-git clone https://github.com/yourname/smart-water-platform-book.git
-cd smart-water-platform-book
+git clone <仓库地址>
+cd <仓库目录>
 
 # 安装依赖
-npm install
+pnpm install
 
 # 本地服务
-npm run serve
+pnpm exec honkit serve --port 4000
+# 访问地址: http://localhost:4000
 ```
+
+### 构建部署
+
+```bash
+# 构建静态站点
+pnpm exec honkit build
+
+# 产物位于 _book/ 目录
+```
+
+## 📚 使用说明
 
 ### 导出电子书
 
 ```bash
 # 导出PDF
-npm run pdf
+pnpm exec honkit pdf
 
 # 导出EPUB
-npm run epub
+pnpm exec honkit epub
 
 # 导出MOBI
-npm run mobi
+pnpm exec honkit mobi
 ```
+
+### 自动部署
+
+本项目配置了GitHub Actions自动部署：
+
+1. 推送代码到 `main` 分支
+2. 自动触发构建和部署流程
+3. 几分钟后更新内容即可在线访问
+
+详细部署说明请参考：[📖 部署指南](DEPLOYMENT.md)
+
+## 🤝 贡献指南
+
+欢迎提出建议和贡献内容：
+
+1. Fork 本仓库
+2. 创建特性分支 (`git checkout -b feature/AmazingFeature`)
+3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
+4. 推送到分支 (`git push origin feature/AmazingFeature`)
+5. 开启 Pull Request
+
+### 内容贡献
+
+- 🐛 报告错误和问题
+- 💡 提出改进建议
+- 📝 完善教材内容
+- 🎨 优化界面设计
+- 📚 添加实践案例
 
 ## 配套资源
 
@@ -151,10 +208,26 @@ npm run mobi
 - **开发环境**：Docker容器化的开发环境配置
 - **在线课程**：配套的在线视频课程和实验指导
 
+## 📄 许可证
+
+本教材采用 [MIT License](LICENSE) 开源协议。
+
+## 📞 联系方式
+
+- 📧 邮箱：[您的邮箱]
+- 🐛 问题反馈：GitHub Issues
+- 💬 讨论交流：GitHub Discussions
+
+## 🙏 致谢
+
+感谢所有为智慧水利教育事业贡献力量的老师、学生和开发者！
+
 ## 版权声明
 
 本教材由智慧水利平台架构与开发教材编写组编写，仅供教学使用。教材中的案例数据均为示例数据，不代表真实的水利工程情况。
 
 ---
 
-**开始学习** → [第一章 总论](chapters/chapter01/chapter01.md) 
+**开始学习** → [📁 本地开发](#本地开发) | [📖 部署指南](DEPLOYMENT.md)
+
+🌟 如果这个教材对您有帮助，请给我们一个Star！ 
