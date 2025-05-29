@@ -1,0 +1,139 @@
+/* 智慧水利平台架构与开发教材 - 电子书样式 */
+
+/* 基础字体设置 */
+body {
+  font-family: "思源宋体", "Source Han Serif", "Noto Serif CJK SC", serif;
+  line-height: 1.8;
+  font-size: 14px;
+  color: #2c3e50;
+}
+
+/* 标题样式 */
+h1, h2, h3, h4, h5, h6 {
+  font-family: "思源黑体", "Source Han Sans", "Noto Sans CJK SC", sans-serif;
+  font-weight: bold;
+  margin-top: 2em;
+  margin-bottom: 1em;
+  page-break-after: avoid;
+}
+
+h1 {
+  font-size: 1.8em;
+  text-align: center;
+  border-bottom: 2px solid #2c3e50;
+  padding-bottom: 0.5em;
+}
+
+h2 {
+  font-size: 1.5em;
+  color: #34495e;
+}
+
+h3 {
+  font-size: 1.3em;
+  color: #2c3e50;
+}
+
+/* 段落样式 */
+p {
+  margin: 1em 0;
+  text-indent: 2em;
+  text-align: justify;
+}
+
+/* 图片样式 */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 2em auto;
+  page-break-inside: avoid;
+}
+
+/* 表格样式 */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5em 0;
+  page-break-inside: avoid;
+  font-size: 0.9em;
+}
+
+th, td {
+  border: 1px solid #bdc3c7;
+  padding: 8px;
+  text-align: left;
+}
+
+th {
+  background-color: #ecf0f1;
+  font-weight: bold;
+}
+
+/* 代码块样式 */
+pre, code {
+  font-family: "Consolas", "Monaco", "Courier New", monospace;
+  font-size: 0.85em;
+}
+
+pre {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  padding: 1em;
+  margin: 1em 0;
+  page-break-inside: avoid;
+}
+
+code {
+  background: #f1f3f4;
+  padding: 0.2em 0.4em;
+  border-radius: 3px;
+}
+
+/* 引用块样式 */
+blockquote {
+  border-left: 4px solid #bdc3c7;
+  margin: 1.5em 0;
+  padding: 0.5em 1em;
+  background: #f8f9fa;
+  font-style: italic;
+}
+
+/* 列表样式 */
+ul, ol {
+  margin: 1em 0;
+  padding-left: 2em;
+}
+
+li {
+  margin: 0.5em 0;
+}
+
+/* 数学公式样式 */
+.katex {
+  font-size: 1em;
+}
+
+.katex-display {
+  margin: 1.5em 0;
+  text-align: center;
+  page-break-inside: avoid;
+}
+
+/* 分页控制 */
+.chapter {
+  page-break-before: always;
+}
+
+.section {
+  page-break-before: avoid;
+}
+
+/* 脚注样式 */
+.footnote {
+  font-size: 0.8em;
+  line-height: 1.4;
+  margin-top: 2em;
+  border-top: 1px solid #bdc3c7;
+  padding-top: 1em;
+} 

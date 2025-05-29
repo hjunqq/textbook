@@ -1,2 +1,45 @@
-﻿site
+﻿# GitBook 构建输出
+_book/
+*.epub
+*.mobi
+*.pdf
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 操作系统
+.DS_Store
+Thumbs.db
+
+# 编辑器
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 临时文件
+*.tmp
+*.temp
+
+# 日志文件
+*.log
+
+# 缓存目录
+.cache/
+.tmp/
+
+# 输出目录
+output/
+dist/
+
+# MkDocs 相关（保留）
+site/
+.venv/
+
+# 备份文件
+*.bak
+*~
 参考

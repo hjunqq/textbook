@@ -1,0 +1,333 @@
+/* 智慧水利平台架构与开发教材 - GitBook 样式 */
+
+/* 修复布局和缩进问题 */
+.book {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.book-summary {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 300px;
+  background: #fafbfc;
+  overflow-y: auto;
+  border-right: 1px solid #e1e4e8;
+  z-index: 1;
+}
+
+.book-body {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 300px;
+  bottom: 0;
+  overflow-y: auto;
+  background: #fff;
+}
+
+.book-body .body-inner {
+  position: relative;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.markdown-section {
+  max-width: 800px !important;
+  margin: 0 auto !important;
+  padding: 40px !important;
+  position: relative !important;
+  box-sizing: border-box !important;
+}
+
+/* 确保内容不会累积缩进 */
+.page-wrapper {
+  position: relative !important;
+  outline: 0 !important;
+  box-sizing: border-box !important;
+}
+
+.page-inner {
+  position: relative !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* 数学公式样式优化 */
+.katex {
+  font-size: 1.1em;
+}
+
+.katex-display {
+  margin: 1.5em 0;
+  text-align: center;
+}
+
+/* 图片样式优化 */
+.markdown-section img {
+  max-width: 100%;
+  height: auto;
+  margin: 1.5em auto;
+  display: block;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  border: 1px solid #e1e4e8;
+}
+
+/* 图片说明文字 */
+.markdown-section p:has(img) + p {
+  text-align: center;
+  font-style: italic;
+  color: #666;
+  font-size: 0.9em;
+  margin-top: -1em;
+  margin-bottom: 2em;
+}
+
+/* 代码块优化 */
+.markdown-section pre {
+  background: #f8f9fa;
+  border-left: 4px solid #007acc;
+  margin: 1.5em 0;
+  padding: 1em;
+  border-radius: 4px;
+}
+
+.markdown-section code {
+  background: #f1f3f4;
+  padding: 0.2em 0.4em;
+  border-radius: 3px;
+  font-size: 0.9em;
+}
+
+/* 表格样式 */
+.markdown-section table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5em 0;
+  font-size: 0.9em;
+}
+
+.markdown-section table th,
+.markdown-section table td {
+  border: 1px solid #ddd;
+  padding: 12px 8px;
+  text-align: left;
+}
+
+.markdown-section table th {
+  background-color: #f5f7fa;
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+.markdown-section table tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+/* 引用块样式 */
+.markdown-section blockquote {
+  border-left: 4px solid #42b883;
+  margin: 1.5em 0;
+  padding: 0.8em 1.2em;
+  background: #f8fffe;
+  border-radius: 0 4px 4px 0;
+}
+
+.markdown-section blockquote p {
+  margin: 0;
+  color: #2c3e50;
+}
+
+/* 提示框样式 */
+.markdown-section .warning,
+.markdown-section .info,
+.markdown-section .success,
+.markdown-section .danger {
+  padding: 1em;
+  margin: 1.5em 0;
+  border-radius: 4px;
+  border-left: 4px solid;
+}
+
+.markdown-section .info {
+  background: #e7f3ff;
+  border-color: #2196f3;
+  color: #0d47a1;
+}
+
+.markdown-section .success {
+  background: #e8f5e8;
+  border-color: #4caf50;
+  color: #1b5e20;
+}
+
+.markdown-section .warning {
+  background: #fff8e1;
+  border-color: #ff9800;
+  color: #e65100;
+}
+
+.markdown-section .danger {
+  background: #ffebee;
+  border-color: #f44336;
+  color: #b71c1c;
+}
+
+/* 章节标题优化 */
+.markdown-section h1 {
+  color: #2c3e50;
+  border-bottom: 3px solid #42b883;
+  padding-bottom: 0.5em;
+  margin-top: 2em;
+}
+
+.markdown-section h2 {
+  color: #34495e;
+  border-bottom: 2px solid #ecf0f1;
+  padding-bottom: 0.3em;
+  margin-top: 1.8em;
+}
+
+.markdown-section h3 {
+  color: #2c3e50;
+  margin-top: 1.5em;
+}
+
+/* 列表样式优化 */
+.markdown-section ul,
+.markdown-section ol {
+  margin: 1em 0;
+  padding-left: 2em;
+}
+
+.markdown-section li {
+  margin: 0.5em 0;
+  line-height: 1.6;
+}
+
+/* 水利工程专业术语高亮 */
+.term {
+  background: linear-gradient(120deg, #a8e6cf 0%, #dcedc1 100%);
+  padding: 0.1em 0.3em;
+  border-radius: 3px;
+  font-weight: 500;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .book-summary {
+    width: 280px;
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+  }
+  
+  .book-summary.opened {
+    transform: translateX(0);
+  }
+  
+  .book-body {
+    left: 0;
+  }
+  
+  .markdown-section {
+    padding: 20px !important;
+  }
+  
+  .markdown-section img {
+    margin: 1em 0;
+  }
+  
+  .markdown-section table {
+    font-size: 0.8em;
+  }
+  
+  .markdown-section pre {
+    overflow-x: auto;
+  }
+}
+
+/* 导航栏自定义 */
+.book-summary ul.summary li.chapter a {
+  color: #2c3e50;
+  transition: all 0.2s ease;
+  display: block !important;
+  padding: 8px 15px !important;
+  margin: 0 !important;
+  border: none !important;
+}
+
+.book-summary ul.summary li.chapter a:hover {
+  color: #42b883;
+  background: #f0f9ff;
+}
+
+.book-summary ul.summary li.chapter.active > a {
+  color: #42b883;
+  background: #e8f5e8;
+  font-weight: bold;
+}
+
+/* 搜索框样式 */
+.book-search input {
+  border: 2px solid #e1e4e8;
+  border-radius: 6px;
+  padding: 8px 12px;
+}
+
+.book-search input:focus {
+  border-color: #42b883;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(66, 184, 131, 0.1);
+}
+
+/* 页脚样式 */
+.page-footer {
+  border-top: 1px solid #e1e4e8;
+  padding-top: 1em;
+  margin-top: 2em;
+  color: #666;
+}
+
+/* 自定义滚动条 */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a1a1a1;
+}
+
+/* 强制重置可能导致缩进的样式 */
+* {
+  box-sizing: border-box;
+}
+
+.book-body .body-inner .page-wrapper {
+  position: relative !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* 修复可能的缩进累积问题 */
+.book-body .body-inner .page-wrapper .page-inner {
+  position: static !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+} 

@@ -1,0 +1,90 @@
+/* 自定义样式 */
+
+/* 标题样式优化 */
+h1, h2, h3, h4, h5, h6 {
+    color: #2c3e50;
+    font-weight: 600;
+}
+
+h1 {
+    font-size: 2em;
+    border-bottom: 1px solid #eaecef;
+    padding-bottom: 0.3em;
+}
+
+h2 {
+    font-size: 1.5em;
+    border-bottom: 1px solid #eaecef;
+    padding-bottom: 0.3em;
+}
+
+/* 正文样式优化 */
+body {
+    color: #333;
+    line-height: 1.6;
+}
+
+/* 代码块样式 */
+pre, code {
+    background-color: #f6f8fa;
+    border-radius: 3px;
+}
+
+/* 表格样式 */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1.5em;
+}
+
+table th, table td {
+    padding: 0.5em 1em;
+    border: 1px solid #dfe2e5;
+}
+
+table th {
+    background-color: #f6f8fa;
+    font-weight: 600;
+}
+
+/* 水利主题颜色 */
+:root {
+    --md-primary-fg-color: #1976d2;
+    --md-primary-fg-color--light: #42a5f5;
+    --md-primary-fg-color--dark: #0d47a1;
+    --md-accent-fg-color: #0288d1;
+}
+
+/* 提示框样式 */
+.admonition {
+    margin: 1.5em 0;
+    padding: 0.8em;
+    border-left: 0.25em solid var(--md-primary-fg-color);
+    background-color: rgba(25, 118, 210, 0.1);
+    border-radius: 0.2em;
+}
+
+.admonition-title {
+    color: var(--md-primary-fg-color);
+    font-weight: bold;
+    margin-bottom: 0.5em;
+}
+
+/* 图片样式 */
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 1em auto;
+}
+
+/* 页脚样式 */
+.md-footer {
+    background-color: var(--md-primary-fg-color--dark);
+}
+
+/* 导航样式 */
+.md-nav__item .md-nav__link--active {
+    color: var(--md-accent-fg-color);
+    font-weight: bold;
+} 

@@ -1,0 +1,519 @@
+/* 智慧水利平台架构与开发教材 - GitBook 样式 */
+
+/* 全局重置 */
+* {
+  box-sizing: border-box !important;
+}
+
+/* 强制重置GitBook布局 - 解决缩进累积问题 */
+.book {
+  position: relative !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* 侧边栏固定定位 */
+.book-summary {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  bottom: 0 !important;
+  width: 280px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: #fafbfc !important;
+  overflow-y: auto !important;
+  border-right: 1px solid #e1e4e8 !important;
+  z-index: 100 !important;
+  transform: none !important;
+  box-shadow: 2px 0 8px rgba(0,0,0,0.1) !important;
+}
+
+/* 主内容区域固定定位 - 优化大屏幕显示 */
+.book-body {
+  position: fixed !important;
+  top: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  left: 280px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow-y: auto !important;
+  background: #fff !important;
+  transform: none !important;
+  display: flex !important;
+  justify-content: center !important;
+}
+
+/* 内容包装器强制重置 */
+.book-body .body-inner {
+  position: relative !important;
+  width: 100% !important;
+  max-width: 1200px !important;
+  margin: 0 !important;
+  padding: 0 60px !important;
+  transform: none !important;
+  left: 0 !important;
+  right: 0 !important;
+}
+
+/* 页面包装器强制重置 */
+.book-body .body-inner .page-wrapper {
+  position: relative !important;
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  transform: none !important;
+  outline: 0 !important;
+}
+
+/* 页面内容强制重置 */
+.book-body .body-inner .page-wrapper .page-inner {
+  position: relative !important;
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  transform: none !important;
+}
+
+/* Markdown内容区域 - 优化阅读体验 */
+.markdown-section {
+  position: relative !important;
+  max-width: 900px !important;
+  margin: 0 auto !important;
+  padding: 60px 40px !important;
+  left: 0 !important;
+  right: 0 !important;
+  transform: none !important;
+  box-sizing: border-box !important;
+  line-height: 1.7 !important;
+  font-size: 16px !important;
+}
+
+/* 防止任何元素产生偏移或累积 */
+.book-body * {
+  transform: none !important;
+}
+
+/* 清除可能的浮动和定位问题 */
+.page-wrapper,
+.page-inner,
+.normal {
+  position: relative !important;
+  float: none !important;
+  clear: both !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  transform: none !important;
+}
+
+/* 数学公式样式优化 */
+.katex {
+  font-size: 1.1em;
+}
+
+.katex-display {
+  margin: 2em 0;
+  text-align: center;
+}
+
+/* 图片样式优化 */
+.markdown-section img {
+  max-width: 100%;
+  height: auto;
+  margin: 2.5em auto;
+  display: block;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+  border: 1px solid #e1e4e8;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.markdown-section img:hover {
+  transform: scale(1.02);
+  box-shadow: 0 12px 48px rgba(0,0,0,0.18);
+}
+
+/* 图片说明文字 */
+.markdown-section p:has(img) + p {
+  text-align: center;
+  font-style: italic;
+  color: #666;
+  font-size: 0.9em;
+  margin-top: -1.5em;
+  margin-bottom: 3em;
+}
+
+/* 代码块优化 */
+.markdown-section pre {
+  background: linear-gradient(135deg, #f8f9fa 0%, #f1f3f4 100%);
+  border-left: 4px solid #007acc;
+  margin: 2em 0;
+  padding: 1.5em;
+  border-radius: 8px;
+  font-size: 14px;
+  line-height: 1.5;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  overflow-x: auto;
+}
+
+.markdown-section code {
+  background: #f1f3f4;
+  padding: 0.2em 0.5em;
+  border-radius: 4px;
+  font-size: 0.9em;
+  color: #d73a49;
+  font-family: 'SF Mono', 'Monaco', 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+}
+
+/* 表格样式 */
+.markdown-section table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 2.5em 0;
+  font-size: 0.9em;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.markdown-section table th,
+.markdown-section table td {
+  border: 1px solid #e1e4e8;
+  padding: 14px 12px;
+  text-align: left;
+}
+
+.markdown-section table th {
+  background: linear-gradient(135deg, #42b883 0%, #369870 100%);
+  font-weight: bold;
+  color: white;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.markdown-section table tr:nth-child(even) {
+  background-color: #f8f9fa;
+}
+
+.markdown-section table tr:hover {
+  background-color: #e8f5e8;
+  transition: background-color 0.2s ease;
+}
+
+/* 引用块样式 */
+.markdown-section blockquote {
+  border-left: 4px solid #42b883;
+  margin: 2em 0;
+  padding: 1.2em 1.8em;
+  background: linear-gradient(135deg, #f8fffe 0%, #f0f9ff 100%);
+  border-radius: 0 8px 8px 0;
+  box-shadow: 0 2px 8px rgba(66, 184, 131, 0.1);
+  position: relative;
+}
+
+.markdown-section blockquote::before {
+  content: '"';
+  font-size: 4em;
+  color: #42b883;
+  position: absolute;
+  left: 0.3em;
+  top: -0.2em;
+  opacity: 0.3;
+}
+
+.markdown-section blockquote p {
+  margin: 0;
+  color: #2c3e50;
+  font-style: italic;
+  position: relative;
+  z-index: 1;
+}
+
+/* 提示框样式增强 */
+.markdown-section .warning,
+.markdown-section .info,
+.markdown-section .success,
+.markdown-section .danger {
+  padding: 1.5em;
+  margin: 2em 0;
+  border-radius: 8px;
+  border-left: 5px solid;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  position: relative;
+}
+
+.markdown-section .info {
+  background: linear-gradient(135deg, #e7f3ff 0%, #f0f8ff 100%);
+  border-color: #2196f3;
+  color: #0d47a1;
+}
+
+.markdown-section .success {
+  background: linear-gradient(135deg, #e8f5e8 0%, #f0fff4 100%);
+  border-color: #4caf50;
+  color: #1b5e20;
+}
+
+.markdown-section .warning {
+  background: linear-gradient(135deg, #fff8e1 0%, #fffbf0 100%);
+  border-color: #ff9800;
+  color: #e65100;
+}
+
+.markdown-section .danger {
+  background: linear-gradient(135deg, #ffebee 0%, #fff5f5 100%);
+  border-color: #f44336;
+  color: #b71c1c;
+}
+
+/* 章节标题优化 */
+.markdown-section h1 {
+  color: #2c3e50;
+  border-bottom: 3px solid #42b883;
+  padding-bottom: 0.5em;
+  margin-top: 2.5em;
+  margin-bottom: 1.5em;
+  font-size: 2.2em;
+  position: relative;
+}
+
+.markdown-section h1::after {
+  content: '';
+  position: absolute;
+  bottom: -3px;
+  left: 0;
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(90deg, #42b883, #369870);
+  border-radius: 2px;
+}
+
+.markdown-section h2 {
+  color: #34495e;
+  border-bottom: 2px solid #ecf0f1;
+  padding-bottom: 0.4em;
+  margin-top: 2.2em;
+  margin-bottom: 1.2em;
+  font-size: 1.8em;
+}
+
+.markdown-section h3 {
+  color: #2c3e50;
+  margin-top: 1.8em;
+  margin-bottom: 1em;
+  font-size: 1.4em;
+}
+
+.markdown-section h4 {
+  color: #34495e;
+  margin-top: 1.5em;
+  margin-bottom: 0.8em;
+  font-size: 1.2em;
+}
+
+/* 列表样式优化 */
+.markdown-section ul,
+.markdown-section ol {
+  margin: 1.5em 0;
+  padding-left: 2.5em;
+}
+
+.markdown-section li {
+  margin: 0.8em 0;
+  line-height: 1.7;
+}
+
+.markdown-section ul li::marker {
+  color: #42b883;
+}
+
+.markdown-section ol li::marker {
+  color: #42b883;
+  font-weight: bold;
+}
+
+/* 水利工程专业术语高亮 */
+.term {
+  background: linear-gradient(120deg, #a8e6cf 0%, #dcedc1 100%);
+  padding: 0.2em 0.4em;
+  border-radius: 4px;
+  font-weight: 600;
+  color: #2d5016;
+  box-shadow: 0 1px 3px rgba(168, 230, 207, 0.3);
+}
+
+/* 导航链接重置 */
+.book-summary ul.summary li.chapter a {
+  display: block !important;
+  position: relative !important;
+  margin: 0 !important;
+  padding: 12px 20px !important;
+  transform: none !important;
+  color: #2c3e50;
+  transition: all 0.3s ease;
+  border: none !important;
+  border-radius: 0 20px 20px 0 !important;
+  margin-right: 8px !important;
+}
+
+.book-summary ul.summary li.chapter a:hover {
+  color: #42b883;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e8f5e8 100%);
+  transform: translateX(5px) !important;
+}
+
+.book-summary ul.summary li.chapter.active > a {
+  color: #42b883;
+  background: linear-gradient(135deg, #e8f5e8 0%, #d4f1d4 100%);
+  font-weight: bold;
+  box-shadow: 0 2px 8px rgba(66, 184, 131, 0.2);
+}
+
+/* 搜索框样式 */
+.book-search input {
+  border: 2px solid #e1e4e8;
+  border-radius: 8px;
+  padding: 10px 15px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.book-search input:focus {
+  border-color: #42b883;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(66, 184, 131, 0.1);
+  transform: scale(1.02);
+}
+
+/* 页脚样式 */
+.page-footer {
+  border-top: 2px solid #e1e4e8;
+  padding-top: 2em;
+  margin-top: 4em;
+  color: #666;
+  text-align: center;
+}
+
+/* 自定义滚动条 */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f8f9fa;
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #42b883, #369870);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #369870, #2d7a5f);
+}
+
+/* 响应式优化 */
+@media (min-width: 1600px) {
+  .book-summary {
+    width: 320px !important;
+  }
+  
+  .book-body {
+    left: 320px !important;
+  }
+  
+  .book-body .body-inner {
+    padding: 0 80px !important;
+  }
+  
+  .markdown-section {
+    max-width: 1000px !important;
+    padding: 80px 60px !important;
+    font-size: 17px !important;
+  }
+}
+
+@media (max-width: 1200px) {
+  .book-body .body-inner {
+    padding: 0 40px !important;
+  }
+  
+  .markdown-section {
+    max-width: 800px !important;
+    padding: 50px 30px !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .book-summary {
+    width: 280px !important;
+    transform: translateX(-100%) !important;
+    transition: transform 0.25s ease !important;
+  }
+  
+  .book-summary.opened {
+    transform: translateX(0) !important;
+  }
+  
+  .book-body {
+    left: 0 !important;
+  }
+  
+  .book-body .body-inner {
+    padding: 0 20px !important;
+  }
+  
+  .markdown-section {
+    padding: 30px 20px !important;
+    font-size: 15px !important;
+  }
+  
+  .markdown-section img {
+    margin: 1.5em 0;
+    border-radius: 8px;
+  }
+  
+  .markdown-section table {
+    font-size: 0.8em;
+  }
+  
+  .markdown-section pre {
+    overflow-x: auto;
+    padding: 1em;
+  }
+  
+  .markdown-section h1 {
+    font-size: 1.8em;
+  }
+  
+  .markdown-section h2 {
+    font-size: 1.5em;
+  }
+}
+
+@media (max-width: 480px) {
+  .markdown-section {
+    padding: 20px 15px !important;
+    font-size: 14px !important;
+  }
+  
+  .markdown-section h1 {
+    font-size: 1.6em;
+  }
+  
+  .markdown-section h2 {
+    font-size: 1.3em;
+  }
+} 
