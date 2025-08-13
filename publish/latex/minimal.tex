@@ -1,0 +1,85 @@
+% 智慧水利平台架构与开发教材 - 最简版本
+\documentclass[12pt,a4paper,openany]{ctexbook}
+
+% 基础包
+\usepackage{amsmath,amssymb}
+\usepackage{geometry}
+\usepackage{enumitem}
+
+% 中文字体
+\setCJKmainfont{SimSun}[BoldFont=SimHei]
+
+% 页面设置
+\geometry{left=25mm,right=20mm,top=25mm,bottom=25mm}
+
+% Pandoc命令
+\providecommand{\tightlist}{\setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+% 简单的环境定义
+\newenvironment{learningobjectives}{\begin{quote}\textbf{学习目标：}}{\end{quote}}
+\newenvironment{keyoncept}{\begin{quote}\textbf{关键概念：}}{\end{quote}}
+\newenvironment{chaptersummary}{\begin{quote}\textbf{本章小结：}}{\end{quote}}
+
+% 忽略不存在的命令
+\providecommand{\includesvg}[1]{\texttt{[图片: #1]}}
+
+% 文档信息
+\title{智慧水利平台架构与开发}
+\author{教学团队}
+\date{\today}
+
+\begin{document}
+
+% 封面和目录
+\maketitle
+\tableofcontents
+\clearpage
+
+% 主要内容
+\part{基础篇}
+
+\chapter{绪论}
+\section{智慧水利概述}
+智慧水利是运用物联网、大数据、人工智能、云计算等新一代信息技术，与水利工程、水利管理、水利服务深度融合，构建具有预报、预警、预演、预案功能的智慧水利体系。
+
+\section{平台架构}
+智慧水利平台采用分层架构设计，包括：
+\begin{itemize}\tightlist
+\item 数据采集层
+\item 数据处理层
+\item 业务应用层
+\item 展示交互层
+\end{itemize}
+
+\chapter{软件工程基础}
+\section{软件开发方法}
+现代软件开发采用敏捷方法，注重：
+\begin{itemize}\tightlist
+\item 快速迭代
+\item 持续集成
+\item 用户反馈
+\end{itemize}
+
+\section{需求分析}
+需求分析是软件开发的重要环节，包括功能需求和非功能需求的分析。
+
+% 简化后续章节
+\chapter{系统设计}
+系统设计是将需求转化为技术实现的关键步骤。
+
+\chapter{前端开发}
+前端开发使用现代Web技术栈。
+
+\chapter{后端开发}
+后端开发基于微服务架构。
+
+\chapter{数据库设计}
+数据库设计遵循关系型数据库设计原则。
+
+\chapter{系统集成}
+系统集成确保各模块协同工作。
+
+\chapter{测试与运维}
+测试与运维保证系统稳定运行。
+
+\end{document}

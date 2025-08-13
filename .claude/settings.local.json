@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python:*)",
+      "Bash(mv:*)",
+      "Bash(cp:*)",
+      "Bash(__NEW_LINE__ echo \"验证第二章.md的图片引用数量:\")",
+      "Bash(__NEW_LINE__ grep -c \"images/\" 第二章.md)",
+      "Bash(__NEW_LINE__ echo -e \"\\n检查是否还有base64残留:\")",
+      "Bash(__NEW_LINE__ grep -c \"data:image\" 第二章.md)",
+      "Bash(grep:*)",
+      "Bash(echo:*)",
+      "Bash(rm:*)",
+      "Bash(mkdir:*)"
+    ],
+    "deny": []
+  }
+}

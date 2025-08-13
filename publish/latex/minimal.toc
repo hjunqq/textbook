@@ -1,0 +1,13 @@
+\contentsline {part}{第一部分\hspace {1em}基础篇}{3}{}%
+\contentsline {chapter}{\numberline {第一章\hspace {.3em}}绪论}{4}{}%
+\contentsline {section}{\numberline {1.1}智慧水利概述}{4}{}%
+\contentsline {section}{\numberline {1.2}平台架构}{4}{}%
+\contentsline {chapter}{\numberline {第二章\hspace {.3em}}软件工程基础}{5}{}%
+\contentsline {section}{\numberline {2.1}软件开发方法}{5}{}%
+\contentsline {section}{\numberline {2.2}需求分析}{5}{}%
+\contentsline {chapter}{\numberline {第三章\hspace {.3em}}系统设计}{6}{}%
+\contentsline {chapter}{\numberline {第四章\hspace {.3em}}前端开发}{7}{}%
+\contentsline {chapter}{\numberline {第五章\hspace {.3em}}后端开发}{8}{}%
+\contentsline {chapter}{\numberline {第六章\hspace {.3em}}数据库设计}{9}{}%
+\contentsline {chapter}{\numberline {第七章\hspace {.3em}}系统集成}{10}{}%
+\contentsline {chapter}{\numberline {第八章\hspace {.3em}}测试与运维}{11}{}%

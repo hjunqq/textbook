@@ -1,0 +1,913 @@
+\section{第三节 RESTful
+API设计原则}\label{ux7b2cux4e09ux8282-restful-apiux8bbeux8ba1ux539fux5219}
+
+\subsection{本节内容}\label{ux672cux8282ux5185ux5bb9}
+
+本节将介绍REST架构风格及其在智慧水利平台API设计中的应用，包括RESTful
+API的基本概念、设计原则、安全策略以及实际案例分析。
+
+\subsubsection{本节目录}\label{ux672cux8282ux76eeux5f55}
+
+\begin{itemize}
+\tightlist
+\item
+  5.3.1 REST架构风格概述
+\item
+  5.3.2 RESTful API设计原则
+\item
+  5.3.3 API安全与认证
+\item
+  5.3.4 API版本管理与演进
+\item
+  5.3.5 智慧水利平台API设计案例
+\end{itemize}
+
+\subsection{5.3.1
+REST架构风格概述}\label{restux67b6ux6784ux98ceux683cux6982ux8ff0}
+
+\subsubsection{REST的基本概念}\label{restux7684ux57faux672cux6982ux5ff5}
+
+REST (Representational State Transfer) 是一种架构风格，由Roy
+Fielding在2000年的博士论文中提出。REST不是协议或标准，而是一组设计原则和约束，目的是创建松耦合、可扩展的分布式系统。
+
+REST的核心理念是将系统的各个部分抽象为资源，通过统一的接口对资源进行操作，实现系统组件间的松散耦合。
+
+\subsubsection{REST的主要特征}\label{restux7684ux4e3bux8981ux7279ux5f81}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{资源标识}：每个资源都有唯一的标识符（URI）
+\item
+  \textbf{统一接口}：使用标准HTTP方法操作资源
+\item
+  \textbf{自描述消息}：消息包含足够的信息来描述如何处理
+\item
+  \textbf{无状态通信}：服务器不保存客户端状态
+\item
+  \textbf{超媒体驱动}：客户端通过超媒体链接发现可用操作
+\end{enumerate}
+
+\subsubsection{REST与SOAP的比较}\label{restux4e0esoapux7684ux6bd4ux8f83}
+
+\begin{longtable}[]{@{}lll@{}}
+\toprule\noalign{}
+特性 & REST & SOAP \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+通信协议 & 主要使用HTTP & 支持多种协议 \\
+消息格式 & 灵活（JSON、XML等） & 仅XML \\
+状态 & 无状态 & 可以有状态 \\
+带宽使用 & 较低 & 较高 \\
+学习曲线 & 平缓 & 陡峭 \\
+缓存支持 & 原生支持 & 需自行实现 \\
+安全性 & 依赖HTTPS和认证机制 & 内置安全标准 \\
+适用场景 & 互联网应用、移动应用 & 企业级集成、需要严格事务的场景 \\
+\end{longtable}
+
+\subsection{5.3.2 RESTful
+API设计原则}\label{restful-apiux8bbeux8ba1ux539fux5219}
+
+\subsubsection{资源设计}\label{ux8d44ux6e90ux8bbeux8ba1}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{资源命名规范}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    使用名词而非动词
+  \item
+    使用复数形式表示集合
+  \item
+    使用具体而有意义的名称
+  \item
+    保持命名风格一致
+  \end{itemize}
+
+\begin{lstlisting}
+# 好的示例
+/stations           # 水文站集合
+/stations/st12345   # 特定水文站
+/stations/st12345/water-levels  # 特定水文站的水位记录集合
+
+# 不好的示例
+/getStations        # 使用了动词
+/station            # 单数形式不明确
+/st                 # 缩写不直观
+\end{lstlisting}
+\item
+  \textbf{资源关系表示}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    子资源表示：/reservoirs/res001/monitoring-points
+  \item
+    引用资源：/water-levels?station\_id=st12345
+  \item
+    资源间关系：/stations/st12345/related-reservoirs
+  \end{itemize}
+\item
+  \textbf{复杂操作的处理}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    对于不符合CRUD的操作，可以使用：
+
+    \begin{itemize}
+    \tightlist
+    \item
+      将操作视为资源的属性
+    \item
+      使用控制器资源模式
+    \item
+      使用自定义操作端点（谨慎使用）
+    \end{itemize}
+  \end{itemize}
+
+\begin{lstlisting}
+# 表示状态转换的端点
+POST /reservoirs/res001/discharge-plans
+
+# 控制器资源模式
+POST /flood-simulations
+\end{lstlisting}
+\end{enumerate}
+
+\subsubsection{HTTP方法的正确使用}\label{httpux65b9ux6cd5ux7684ux6b63ux786eux4f7fux7528}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  \textbf{基本HTTP方法}
+
+  \begin{longtable}[]{@{}lll@{}}
+  \toprule\noalign{}
+  方法 & 语义 & 示例 \\
+  \midrule\noalign{}
+  \endhead
+  \bottomrule\noalign{}
+  \endlastfoot
+  GET & 获取资源 & GET /stations/st12345 \\
+  POST & 创建资源 & POST /stations \\
+  PUT & 全量更新资源 & PUT /stations/st12345 \\
+  PATCH & 部分更新资源 & PATCH /stations/st12345 \\
+  DELETE & 删除资源 & DELETE /stations/st12345 \\
+  \end{longtable}
+\item
+  \textbf{安全性与幂等性}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    安全方法：不会修改资源状态（GET、HEAD、OPTIONS）
+  \item
+    幂等方法：多次调用产生相同结果（GET、PUT、DELETE、HEAD、OPTIONS）
+  \end{itemize}
+\item
+  \textbf{方法使用指南}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    GET：查询数据，不应有副作用
+  \item
+    POST：创建资源或触发处理过程
+  \item
+    PUT：全量更新，客户端提供完整资源表示
+  \item
+    PATCH：部分更新，客户端提供需要更改的部分
+  \item
+    DELETE：移除资源
+  \end{itemize}
+\end{enumerate}
+
+\subsubsection{请求与响应设计}\label{ux8bf7ux6c42ux4e0eux54cdux5e94ux8bbeux8ba1}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  \textbf{请求参数类型}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    路径参数：/stations/\{id\}
+  \item
+    查询参数：/water-levels?start\_date=2023-01-01\&end\_date=2023-01-31
+  \item
+    请求体：POST、PUT、PATCH请求中的JSON数据
+  \end{itemize}
+\item
+  \textbf{查询参数最佳实践}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    分页：page、page\_size 或 offset、limit
+  \item
+    排序：sort=field1:asc,field2:desc
+  \item
+    过滤：filter{[}field{]}=value 或 field=value
+  \item
+    字段选择：fields=id,name,location
+  \end{itemize}
+\item
+  \textbf{HTTP状态码使用}
+
+  \begin{longtable}[]{@{}lll@{}}
+  \toprule\noalign{}
+  状态码 & 含义 & 使用场景 \\
+  \midrule\noalign{}
+  \endhead
+  \bottomrule\noalign{}
+  \endlastfoot
+  200 OK & 成功 & GET请求成功 \\
+  201 Created & 已创建 & POST请求创建资源成功 \\
+  204 No Content & 无内容 & DELETE请求成功 \\
+  400 Bad Request & 请求错误 & 请求参数有误 \\
+  401 Unauthorized & 未授权 & 缺少认证信息 \\
+  403 Forbidden & 禁止访问 & 无权限访问资源 \\
+  404 Not Found & 未找到 & 资源不存在 \\
+  409 Conflict & 冲突 & 资源状态冲突 \\
+  429 Too Many Requests & 请求过多 & 超出请求频率限制 \\
+  500 Internal Server Error & 服务器错误 & 服务器内部异常 \\
+  \end{longtable}
+\item
+  \textbf{响应数据结构}
+
+\begin{lstlisting}
+// 成功响应
+{
+  "data": {
+    "id": "st12345",
+    "name": "金沙江水文站",
+    "location": {
+      "longitude": 104.0668,
+      "latitude": 30.5728
+    },
+    "latest_water_level": 5.24,
+    "warning_level": 8.0
+  },
+  "links": {
+    "self": "/api/v1/stations/st12345",
+    "water_levels": "/api/v1/stations/st12345/water-levels",
+    "related_reservoirs": "/api/v1/stations/st12345/related-reservoirs"
+  }
+}
+
+// 错误响应
+{
+  "error": {
+    "code": "INVALID_PARAMETER",
+    "message": "查询参数无效",
+    "details": "start_date必须是有效的ISO日期格式",
+    "timestamp": "2023-06-15T08:30:45Z",
+    "request_id": "req-123456"
+  }
+}
+\end{lstlisting}
+\item
+  \textbf{分页响应}
+
+\begin{lstlisting}
+{
+  "data": [
+    {
+      "id": "st12345",
+      "name": "金沙江水文站",
+      "latest_water_level": 5.24
+    },
+    // ... 更多记录
+  ],
+  "pagination": {
+    "page": 1,
+    "page_size": 10,
+    "total_items": 157,
+    "total_pages": 16
+  },
+  "links": {
+    "self": "/api/v1/stations?page=1&page_size=10",
+    "next": "/api/v1/stations?page=2&page_size=10",
+    "last": "/api/v1/stations?page=16&page_size=10"
+  }
+}
+\end{lstlisting}
+\end{enumerate}
+
+\subsubsection{内容协商}\label{ux5185ux5bb9ux534fux5546}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{媒体类型}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    使用Accept和Content-Type头部进行内容协商
+  \item
+    常用媒体类型：application/json, application/xml
+  \item
+    自定义媒体类型：application/vnd.waterplatform.v1+json
+  \end{itemize}
+\item
+  \textbf{语言与编码}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    使用Accept-Language进行语言协商
+  \item
+    使用Accept-Encoding协商压缩格式
+  \end{itemize}
+\item
+  \textbf{版本信息}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    URL路径版本：/api/v1/stations
+  \item
+    媒体类型版本：Accept: application/vnd.waterplatform.v1+json
+  \item
+    请求头版本：X-API-Version: 1
+  \end{itemize}
+\end{enumerate}
+
+\subsection{5.3.3
+API安全与认证}\label{apiux5b89ux5168ux4e0eux8ba4ux8bc1}
+
+\subsubsection{认证方法}\label{ux8ba4ux8bc1ux65b9ux6cd5}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{基本认证}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    HTTP基本认证（用户名和密码）
+  \item
+    简单但不够安全，应配合HTTPS使用
+  \end{itemize}
+\item
+  \textbf{API密钥认证}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    使用API Key进行认证
+  \item
+    可通过请求头、查询参数传递
+  \item
+    适合内部系统或可信合作方
+  \end{itemize}
+\item
+  \textbf{OAuth 2.0}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    授权框架，支持多种授权流程
+  \item
+    适合第三方应用访问用户资源
+  \item
+    智慧水利平台集成第三方应用时的首选
+  \end{itemize}
+\item
+  \textbf{JWT认证}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    JSON Web Token
+  \item
+    自包含用户信息和权限
+  \item
+    无需服务器状态，适合分布式系统
+  \end{itemize}
+\end{enumerate}
+
+\subsubsection{授权控制}\label{ux6388ux6743ux63a7ux5236}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{基于角色的访问控制(RBAC)}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    常见角色：管理员、操作员、监测员、访客
+  \item
+    根据角色分配权限
+  \end{itemize}
+\item
+  \textbf{基于属性的访问控制(ABAC)}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    更细粒度的控制
+  \item
+    考虑用户属性、资源属性、环境属性等
+  \end{itemize}
+\item
+  \textbf{水利行业特殊授权需求}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    地理区域限制：只能访问特定区域的水利数据
+  \item
+    数据敏感度分级：不同级别数据的访问控制
+  \item
+    应急响应场景：紧急情况下的临时授权机制
+  \end{itemize}
+\end{enumerate}
+
+\subsubsection{安全最佳实践}\label{ux5b89ux5168ux6700ux4f73ux5b9eux8df5}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{传输安全}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    全程使用HTTPS
+  \item
+    设置安全相关HTTP头部
+  \item
+    实施HTTP严格传输安全(HSTS)
+  \end{itemize}
+\item
+  \textbf{接口防护}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    输入验证和清洁
+  \item
+    防御SQL注入、XSS等攻击
+  \item
+    API请求限流和节流
+  \end{itemize}
+\item
+  \textbf{敏感数据处理}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    敏感数据加密存储
+  \item
+    响应中屏蔽敏感信息
+  \item
+    遵循最小权限原则
+  \end{itemize}
+\item
+  \textbf{审计与监控}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    记录API访问日志
+  \item
+    监控异常访问模式
+  \item
+    设置安全告警机制
+  \end{itemize}
+\end{enumerate}
+
+\subsection{5.3.4
+API版本管理与演进}\label{apiux7248ux672cux7ba1ux7406ux4e0eux6f14ux8fdb}
+
+\subsubsection{版本管理策略}\label{ux7248ux672cux7ba1ux7406ux7b56ux7565}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{语义化版本控制}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    主版本号(Major)：不兼容的API变更
+  \item
+    次版本号(Minor)：向后兼容的功能性新增
+  \item
+    修订号(Patch)：向后兼容的问题修正
+  \end{itemize}
+\item
+  \textbf{版本标识方法}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    URL路径版本：/api/v1/stations
+  \item
+    请求头版本：X-API-Version: 1
+  \item
+    媒体类型版本：application/vnd.waterplatform.v1+json
+  \item
+    查询参数版本：/api/stations?version=1
+  \end{itemize}
+\item
+  \textbf{版本兼容性}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    向后兼容：新版本支持旧版本客户端
+  \item
+    向前兼容：旧版本服务支持新版本客户端
+  \end{itemize}
+\end{enumerate}
+
+\subsubsection{API变更与演进}\label{apiux53d8ux66f4ux4e0eux6f14ux8fdb}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{兼容性变更}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    添加新的可选字段或端点
+  \item
+    增加新的资源类型
+  \item
+    添加新的请求参数（必须设默认值）
+  \end{itemize}
+\item
+  \textbf{不兼容变更}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    删除或重命名字段、端点
+  \item
+    更改字段类型或格式
+  \item
+    更改响应结构
+  \end{itemize}
+\item
+  \textbf{API废弃流程}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    明确公告废弃计划和时间表
+  \item
+    在响应中添加废弃提示
+  \item
+    提供迁移指南和工具
+  \item
+    设置过渡期，逐步淘汰
+  \end{itemize}
+\end{enumerate}
+
+\subsubsection{文档与开发者体验}\label{ux6587ux6863ux4e0eux5f00ux53d1ux8005ux4f53ux9a8c}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{API文档}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    使用OpenAPI/Swagger记录API规范
+  \item
+    提供示例请求和响应
+  \item
+    包含错误码和处理说明
+  \end{itemize}
+\item
+  \textbf{开发者门户}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    集中展示API文档、示例代码
+  \item
+    提供SDK和客户端库
+  \item
+    发布API更新和变更说明
+  \end{itemize}
+\item
+  \textbf{API测试与调试}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    提供交互式API测试工具
+  \item
+    设置沙箱环境供开发者测试
+  \item
+    提供详细的错误反馈
+  \end{itemize}
+\end{enumerate}
+
+\subsection{5.3.5
+智慧水利平台API设计案例}\label{ux667aux6167ux6c34ux5229ux5e73ux53f0apiux8bbeux8ba1ux6848ux4f8b}
+
+\subsubsection{案例一：水文监测API}\label{ux6848ux4f8bux4e00ux6c34ux6587ux76d1ux6d4bapi}
+
+\textbf{资源设计}： - 水文站点：/stations - 水位数据：/water-levels -
+降雨数据：/rainfall-data - 流量数据：/discharge-data
+
+\textbf{请求示例}：
+
+\begin{lstlisting}
+# 获取特定站点的最新水位
+GET /api/v1/stations/st12345/latest-water-level HTTP/1.1
+Host: api.waterplatform.com
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+# 查询历史水位数据
+GET /api/v1/water-levels?station_id=st12345&start_date=2023-01-01T00:00:00Z&end_date=2023-01-31T23:59:59Z&interval=hour HTTP/1.1
+Host: api.waterplatform.com
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+\end{lstlisting}
+
+\textbf{响应示例}：
+
+\begin{lstlisting}
+// 单站点水位响应
+{
+  "data": {
+    "station_id": "st12345",
+    "station_name": "金沙江水文站",
+    "timestamp": "2023-05-01T14:30:00Z",
+    "water_level": 5.24,
+    "warning_level": 8.0,
+    "status": "normal"
+  },
+  "meta": {
+    "last_updated": "2023-05-01T14:30:00Z"
+  },
+  "links": {
+    "self": "/api/v1/stations/st12345/latest-water-level",
+    "history": "/api/v1/water-levels?station_id=st12345"
+  }
+}
+
+// 历史水位数据响应
+{
+  "data": [
+    {
+      "timestamp": "2023-01-01T00:00:00Z",
+      "water_level": 4.82,
+      "status": "normal"
+    },
+    {
+      "timestamp": "2023-01-01T01:00:00Z",
+      "water_level": 4.85,
+      "status": "normal"
+    },
+    // ... 更多数据点
+  ],
+  "pagination": {
+    "page": 1,
+    "page_size": 100,
+    "total_items": 744,
+    "total_pages": 8
+  },
+  "meta": {
+    "station_id": "st12345",
+    "station_name": "金沙江水文站",
+    "interval": "hour",
+    "unit": "meter"
+  },
+  "links": {
+    "self": "/api/v1/water-levels?station_id=st12345&start_date=2023-01-01T00:00:00Z&end_date=2023-01-31T23:59:59Z&interval=hour&page=1",
+    "next": "/api/v1/water-levels?station_id=st12345&start_date=2023-01-01T00:00:00Z&end_date=2023-01-31T23:59:59Z&interval=hour&page=2",
+    "last": "/api/v1/water-levels?station_id=st12345&start_date=2023-01-01T00:00:00Z&end_date=2023-01-31T23:59:59Z&interval=hour&page=8"
+  }
+}
+\end{lstlisting}
+
+\subsubsection{案例二：水库调度API}\label{ux6848ux4f8bux4e8cux6c34ux5e93ux8c03ux5ea6api}
+
+\textbf{资源设计}： - 水库：/reservoirs - 调度计划：/scheduling-plans -
+泄洪记录：/discharge-records - 水库状态：/reservoir-status
+
+\textbf{创建调度计划请求}：
+
+\begin{lstlisting}
+POST /api/v1/scheduling-plans HTTP/1.1
+Host: api.waterplatform.com
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+Content-Type: application/json
+
+{
+  "reservoir_id": "res001",
+  "name": "2023年6月汛期调度计划",
+  "period_start": "2023-06-01T00:00:00Z",
+  "period_end": "2023-06-30T23:59:59Z",
+  "description": "基于6月降雨预报的水库汛期调度计划",
+  "target_water_levels": [
+    {
+      "date": "2023-06-10T00:00:00Z",
+      "level": 145.5
+    },
+    {
+      "date": "2023-06-20T00:00:00Z",
+      "level": 143.0
+    },
+    {
+      "date": "2023-06-30T00:00:00Z",
+      "level": 142.0
+    }
+  ],
+  "considerations": {
+    "flood_control": true,
+    "power_generation": true,
+    "irrigation": true,
+    "ecological_flow": true
+  }
+}
+\end{lstlisting}
+
+\textbf{响应示例}：
+
+\begin{lstlisting}
+{
+  "data": {
+    "id": "plan20230601",
+    "reservoir_id": "res001",
+    "reservoir_name": "某某水库",
+    "name": "2023年6月汛期调度计划",
+    "status": "draft",
+    "created_at": "2023-05-25T09:15:30Z",
+    "created_by": "user123",
+    "period_start": "2023-06-01T00:00:00Z",
+    "period_end": "2023-06-30T23:59:59Z",
+    "description": "基于6月降雨预报的水库汛期调度计划",
+    "target_water_levels": [
+      {
+        "date": "2023-06-10T00:00:00Z",
+        "level": 145.5
+      },
+      {
+        "date": "2023-06-20T00:00:00Z",
+        "level": 143.0
+      },
+      {
+        "date": "2023-06-30T00:00:00Z",
+        "level": 142.0
+      }
+    ],
+    "considerations": {
+      "flood_control": true,
+      "power_generation": true,
+      "irrigation": true,
+      "ecological_flow": true
+    }
+  },
+  "links": {
+    "self": "/api/v1/scheduling-plans/plan20230601",
+    "reservoir": "/api/v1/reservoirs/res001",
+    "approve": "/api/v1/scheduling-plans/plan20230601/approve",
+    "simulate": "/api/v1/scheduling-plans/plan20230601/simulate"
+  }
+}
+\end{lstlisting}
+
+\subsubsection{案例三：水利工程监测预警API}\label{ux6848ux4f8bux4e09ux6c34ux5229ux5de5ux7a0bux76d1ux6d4bux9884ux8b66api}
+
+\textbf{资源设计}： - 工程：/projects - 监测点：/monitoring-points -
+监测数据：/monitoring-data - 预警规则：/alert-rules - 预警事件：/alerts
+
+\textbf{触发预警处理操作}：
+
+\begin{lstlisting}
+POST /api/v1/alerts/alert12345/actions HTTP/1.1
+Host: api.waterplatform.com
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+Content-Type: application/json
+
+{
+  "action_type": "acknowledge",
+  "comment": "已确认预警，正在组织人员检查大坝渗流情况",
+  "assigned_to": "team_dam_safety"
+}
+\end{lstlisting}
+
+\textbf{预警事件响应}：
+
+\begin{lstlisting}
+{
+  "data": {
+    "id": "alert12345",
+    "project_id": "dam001",
+    "project_name": "某某大坝",
+    "monitoring_point_id": "mp0023",
+    "monitoring_point_name": "大坝渗流监测点S3",
+    "alert_type": "seepage_anomaly",
+    "severity": "warning",
+    "threshold": {
+      "value": 0.5,
+      "unit": "liter/second"
+    },
+    "measured_value": {
+      "value": 0.72,
+      "unit": "liter/second",
+      "timestamp": "2023-05-15T03:45:22Z"
+    },
+    "status": "acknowledged",
+    "created_at": "2023-05-15T03:46:15Z",
+    "updated_at": "2023-05-15T04:02:30Z",
+    "actions": [
+      {
+        "action_type": "acknowledge",
+        "performed_by": "user456",
+        "performed_at": "2023-05-15T04:02:30Z",
+        "comment": "已确认预警，正在组织人员检查大坝渗流情况",
+        "assigned_to": "team_dam_safety"
+      }
+    ]
+  },
+  "links": {
+    "self": "/api/v1/alerts/alert12345",
+    "project": "/api/v1/projects/dam001",
+    "monitoring_point": "/api/v1/monitoring-points/mp0023",
+    "related_data": "/api/v1/monitoring-data?point_id=mp0023&start_time=2023-05-14T00:00:00Z"
+  }
+}
+\end{lstlisting}
+
+\subsection{学习要点}\label{ux5b66ux4e60ux8981ux70b9}
+
+\begin{itemize}
+\tightlist
+\item
+  理解REST架构风格的核心原则和特征
+\item
+  掌握RESTful API设计的基本准则
+\item
+  了解HTTP方法的正确使用和响应状态码的选择
+\item
+  掌握API安全认证的主要方法和最佳实践
+\item
+  理解API版本管理和演进的策略
+\item
+  能够结合智慧水利平台特点设计合理的API
+\end{itemize}
+
+\subsection{思考题}\label{ux601dux8003ux9898}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  为智慧水利平台设计一套资源命名规范和URL结构，要考虑水文、水库、工程安全等不同业务领域。
+\item
+  分析在水利数据API中，如何设计既满足查询灵活性又保证性能的查询参数体系。
+\item
+  设计一个水文实时数据API，考虑数据实时性、查询效率和安全性要求。
+\item
+  比较OAuth 2.0和JWT在智慧水利平台API认证中的适用场景。
+\item
+  某水利平台API需要进行重大升级，设计一个合理的版本过渡和废弃策略。
+\end{enumerate}
+
+\subsection{参考文献}\label{ux53c2ux8003ux6587ux732e}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Roy Thomas Fielding. ``Architectural Styles and the Design of
+  Network-based Software Architectures''. 2000.
+\item
+  Leonard Richardson, Sam Ruby. ``RESTful Web Services''. O'Reilly
+  Media, 2007.
+\item
+  Mark Masse. ``REST API Design Rulebook''. O'Reilly Media, 2011.
+\item
+  Matthias Biehl. ``API Architecture: The Big Picture for Building
+  APIs''. 2015.
+\item
+  水利部信息中心. ``水利数据接口规范''. 2021.
+\end{enumerate}

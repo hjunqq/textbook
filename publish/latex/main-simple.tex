@@ -1,0 +1,94 @@
+% 智慧水利平台架构与开发教材
+% 测试版本 - 简化配置
+\documentclass[12pt,a4paper,openany]{ctexbook}
+
+% ===== 基础包导入 =====
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{geometry}
+\usepackage{setspace}
+\usepackage{fancyhdr}
+
+% ===== 中文字体设置 =====
+\setCJKmainfont{SimSun}[
+    BoldFont=SimHei,
+    ItalicFont=KaiTi
+]
+
+% ===== 页面设置 =====
+\geometry{
+    left=25mm,
+    right=20mm,
+    top=25mm,
+    bottom=25mm,
+    headheight=15pt
+}
+
+% ===== Pandoc命令定义 =====
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+% ===== 列表包 =====
+\usepackage{enumitem}
+
+% ===== 代码高亮 =====
+\usepackage{listings}
+\usepackage{xeCJK-listings}
+
+% 简化的代码样式
+\lstset{
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue},
+    commentstyle=\color{gray},
+    stringstyle=\color{red},
+    frame=single,
+    breaklines=true,
+    showstringspaces=false,
+    numbers=left,
+    numberstyle=\tiny\color{gray}
+}
+
+% ===== 文档信息 =====
+\title{智慧水利平台架构与开发}
+\author{教学团队}
+\date{\today}
+
+% ===== 文档开始 =====
+\begin{document}
+
+% 封面
+\maketitle
+\newpage
+
+% 目录
+\tableofcontents
+\newpage
+
+% ===== 主要内容 =====
+
+% 第一章
+\include{chapters/chapter01/chapter01}
+
+% 第二章
+\include{chapters/chapter02/chapter02}
+
+% 第三章
+\include{chapters/chapter03/chapter03}
+
+% 第四章
+\include{chapters/chapter04/chapter04}
+
+% 第五章
+\include{chapters/chapter05/chapter05}
+
+% 第六章
+\include{chapters/chapter06/chapter06}
+
+% 第七章
+\include{chapters/chapter07/chapter07}
+
+% 第八章
+\include{chapters/chapter08/chapter08}
+
+\end{document}

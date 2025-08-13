@@ -1,0 +1,206 @@
+% ========================================
+% 附录
+% ========================================
+
+\chapter*{附\quad 录}
+\addcontentsline{toc}{chapter}{附录}
+
+\section*{附录A 开发环境配置指南}
+
+\subsection*{A.1 Java开发环境}
+
+\begin{enumerate}
+\item \textbf{JDK安装}
+   \begin{itemize}
+   \item 下载地址：https://www.oracle.com/java/technologies/downloads/
+   \item 推荐版本：JDK 11 或 JDK 17
+   \item 配置环境变量：JAVA\_HOME, PATH
+   \end{itemize}
+
+\item \textbf{Maven配置}
+   \begin{itemize}
+   \item 下载地址：https://maven.apache.org/download.cgi
+   \item 配置环境变量：MAVEN\_HOME, PATH
+   \item 配置镜像源：阿里云或华为云镜像
+   \end{itemize}
+\end{enumerate}
+
+\subsection*{A.2 前端开发环境}
+
+\begin{enumerate}
+\item \textbf{Node.js安装}
+   \begin{itemize}
+   \item 下载地址：https://nodejs.org/
+   \item 推荐版本：Node.js 16+ 或 18+
+   \item 包管理器：npm 或 yarn
+   \end{itemize}
+
+\item \textbf{Vue CLI安装}
+   \begin{lstlisting}[style=bash]
+npm install -g @vue/cli
+vue --version
+   \end{lstlisting}
+\end{enumerate}
+
+\section*{附录B 常用命令参考}
+
+\subsection*{B.1 Docker命令}
+
+\begin{lstlisting}[style=bash]
+# 构建镜像
+docker build -t image-name .
+
+# 运行容器
+docker run -d -p 8080:8080 image-name
+
+# 查看运行中的容器
+docker ps
+
+# 停止容器
+docker stop container-id
+
+# 查看日志
+docker logs container-id
+\end{lstlisting}
+
+\subsection*{B.2 Kubernetes命令}
+
+\begin{lstlisting}[style=bash]
+# 应用配置
+kubectl apply -f deployment.yaml
+
+# 查看Pod状态
+kubectl get pods
+
+# 查看服务
+kubectl get services
+
+# 查看日志
+kubectl logs pod-name
+
+# 进入容器
+kubectl exec -it pod-name -- /bin/bash
+\end{lstlisting}
+
+\section*{附录C 配置文件模板}
+
+\subsection*{C.1 Docker Compose配置}
+
+\begin{lstlisting}[style=yaml]
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+    depends_on:
+      - database
+      - redis
+
+  database:
+    image: postgres:13
+    environment:
+      POSTGRES_DB: waterconservancy
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:6
+    ports:
+      - "6379:6379"
+
+volumes:
+  db_data:
+\end{lstlisting}
+
+\subsection*{C.2 Spring Boot配置}
+
+\begin{lstlisting}[style=yaml]
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/waterconservancy
+    username: admin
+    password: password
+    driver-class-name: org.postgresql.Driver
+  
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  redis:
+    host: localhost
+    port: 6379
+    timeout: 2000ms
+
+logging:
+  level:
+    com.waterconservancy: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+\end{lstlisting}
+
+\section*{附录D 故障排查指南}
+
+\subsection*{D.1 常见问题及解决方案}
+
+\begin{enumerate}
+\item \textbf{端口占用问题}
+   \begin{lstlisting}[style=bash]
+# 查看端口占用
+netstat -an | grep :8080
+# 或使用
+lsof -i :8080
+
+# 杀死进程
+kill -9 PID
+   \end{lstlisting}
+
+\item \textbf{内存不足}
+   \begin{itemize}
+   \item 增加JVM堆内存：-Xmx2g
+   \item 优化数据库连接池配置
+   \item 使用缓存减少数据库访问
+   \end{itemize}
+
+\item \textbf{数据库连接失败}
+   \begin{itemize}
+   \item 检查数据库服务状态
+   \item 验证连接字符串和凭据
+   \item 确认网络连接和防火墙设置
+   \end{itemize}
+\end{enumerate}
+
+\subsection*{D.2 性能优化建议}
+
+\begin{enumerate}
+\item \textbf{数据库优化}
+   \begin{itemize}
+   \item 创建合适的索引
+   \item 优化SQL查询语句
+   \item 使用连接池
+   \item 分库分表策略
+   \end{itemize}
+
+\item \textbf{应用优化}
+   \begin{itemize}
+   \item 使用缓存技术（Redis）
+   \item 异步处理长时间任务
+   \item 代码优化和重构
+   \item 合理使用线程池
+   \end{itemize}
+\end{enumerate}

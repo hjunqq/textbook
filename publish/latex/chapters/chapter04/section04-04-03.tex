@@ -1,0 +1,1000 @@
+\section{智慧水利平台界面组件设计}\label{ux667aux6167ux6c34ux5229ux5e73ux53f0ux754cux9762ux7ec4ux4ef6ux8bbeux8ba1}
+
+智慧水利平台需要专业且直观的界面组件，以支持各种复杂的业务场景。本节将介绍平台中常用的核心界面组件设计。
+
+\subsection{3.1
+导航与布局系统}\label{ux5bfcux822aux4e0eux5e03ux5c40ux7cfbux7edf}
+
+智慧水利平台的导航系统应清晰、高效，能够帮助用户快速定位所需功能。
+
+\subsubsection{多级导航结构示例}\label{ux591aux7ea7ux5bfcux822aux7ed3ux6784ux793aux4f8b}
+
+\begin{lstlisting}[language=HTML]
+<!-- 多级导航结构示例 -->
+<header class="platform-header">
+  <div class="logo-area">
+    <img src="/assets/logo.png" alt="智慧水利平台">
+    <h1>某流域智慧水利管理平台</h1>
+  </div>
+  
+  <nav class="main-nav">
+    <ul>
+      <li class="nav-item active">
+        <a href="/dashboard">
+          <i class="icon-dashboard"></i>
+          <span>监控中心</span>
+        </a>
+      </li>
+      <li class="nav-item has-submenu">
+        <a href="/monitoring">
+          <i class="icon-monitor"></i>
+          <span>水情监测</span>
+        </a>
+        <ul class="submenu">
+          <li><a href="/monitoring/water-level">水位监测</a></li>
+          <li><a href="/monitoring/flow">流量监测</a></li>
+          <li><a href="/monitoring/rainfall">降雨监测</a></li>
+        </ul>
+      </li>
+      <!-- 其他导航项 -->
+    </ul>
+  </nav>
+  
+  <div class="user-controls">
+    <div class="notifications">
+      <i class="icon-bell"></i>
+      <span class="badge">3</span>
+    </div>
+    <div class="user-profile">
+      <img src="/assets/avatar.jpg" alt="用户头像">
+      <span>张工程师</span>
+    </div>
+  </div>
+</header>
+\end{lstlisting}
+
+\subsubsection{导航设计考量}\label{ux5bfcux822aux8bbeux8ba1ux8003ux91cf}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{信息层级清晰}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    一级导航：包含主要功能模块，如监控中心、水情监测、工程管理等
+  \item
+    二级导航：各模块的具体功能，如水位监测、闸门控制等
+  \item
+    快捷入口：常用功能的直接访问路径
+  \end{itemize}
+\item
+  \textbf{导航状态与反馈}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    当前位置高亮显示
+  \item
+    悬停状态反馈
+  \item
+    通知和徽标提示
+  \end{itemize}
+\item
+  \textbf{移动端导航适配}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    折叠式菜单
+  \item
+    手势操作支持
+  \item
+    关键功能优先显示
+  \end{itemize}
+\end{enumerate}
+
+\subsubsection{常见布局模式}\label{ux5e38ux89c1ux5e03ux5c40ux6a21ux5f0f}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{控制台布局}：适用于监控中心，顶部导航+侧边栏+主内容区
+
+  \begin{itemize}
+  \tightlist
+  \item
+    顶部放置全局导航、用户信息和系统通知
+  \item
+    侧边栏提供二级导航
+  \item
+    主内容区采用卡片式布局，展示关键指标和数据
+  \end{itemize}
+\item
+  \textbf{地图中心布局}：以地图为主体，控制面板悬浮或可折叠
+
+  \begin{itemize}
+  \tightlist
+  \item
+    地图占据主要视口
+  \item
+    控制面板可折叠或悬浮在地图上
+  \item
+    功能按钮集中在地图边缘或顶部工具栏
+  \end{itemize}
+\item
+  \textbf{数据仪表盘布局}：多卡片网格布局，便于监控各项指标
+
+  \begin{itemize}
+  \tightlist
+  \item
+    自适应网格布局
+  \item
+    卡片大小根据数据重要性和复杂度调整
+  \item
+    支持用户自定义布局和内容
+  \end{itemize}
+\item
+  \textbf{表单向导布局}：用于数据录入和配置向导场景
+
+  \begin{itemize}
+  \tightlist
+  \item
+    步骤指示器
+  \item
+    单页聚焦单一任务
+  \item
+    清晰的前进/后退导航
+  \end{itemize}
+\end{enumerate}
+
+\subsection{3.2
+数据展示组件}\label{ux6570ux636eux5c55ux793aux7ec4ux4ef6}
+
+水利监测数据是平台的核心，需设计专业的数据展示组件。
+
+\subsubsection{水位监测面板}\label{ux6c34ux4f4dux76d1ux6d4bux9762ux677f}
+
+\begin{lstlisting}
+<template>
+  <div class="water-level-panel" :class="{ 'alert-state': isInAlertState }">
+    <div class="panel-header">
+      <h3>{{ stationName }} - 水位监测</h3>
+      <div class="status-indicator" :class="statusClass"></div>
+    </div>
+    
+    <div class="panel-body">
+      <div class="current-reading">
+        <div class="value">{{ currentLevel }}<span class="unit">m</span></div>
+        <div class="trend-indicator">
+          <i :class="trendIconClass"></i>
+          <span>{{ trendText }}</span>
+        </div>
+      </div>
+      
+      <div class="level-chart">
+        <!-- 水位图表组件 -->
+        <water-level-chart :data="levelHistory" :warning-level="warningLevel" />
+      </div>
+      
+      <div class="key-metrics">
+        <div class="metric">
+          <div class="label">警戒水位</div>
+          <div class="value">{{ warningLevel }}<span class="unit">m</span></div>
+        </div>
+        <div class="metric">
+          <div class="label">今日最高</div>
+          <div class="value">{{ dailyMax }}<span class="unit">m</span></div>
+        </div>
+        <div class="metric">
+          <div class="label">今日最低</div>
+          <div class="value">{{ dailyMin }}<span class="unit">m</span></div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="panel-footer">
+      <div class="last-updated">更新: {{ lastUpdated }}</div>
+      <button class="refresh-btn" @click="refreshData">
+        <i class="icon-refresh"></i>
+        刷新
+      </button>
+    </div>
+  </div>
+</template>
+
+<style>
+.water-level-panel {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.water-level-panel.alert-state {
+  box-shadow: 0 2px 12px rgba(255, 77, 79, 0.3);
+  animation: pulse 2s infinite;
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.status-indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.status-indicator.normal { background-color: #52c41a; }
+.status-indicator.warning { background-color: #faad14; }
+.status-indicator.danger { background-color: #ff4d4f; }
+
+.current-reading {
+  text-align: center;
+  padding: 20px 0;
+}
+
+.current-reading .value {
+  font-size: 32px;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.current-reading .unit {
+  font-size: 16px;
+  margin-left: 4px;
+}
+
+.trend-indicator {
+  margin-top: 8px;
+  color: #8c8c8c;
+}
+
+.level-chart {
+  height: 200px;
+  margin-bottom: 16px;
+}
+
+.key-metrics {
+  display: flex;
+  justify-content: space-around;
+  padding: 0 16px 16px;
+}
+
+.metric {
+  text-align: center;
+}
+
+.metric .label {
+  color: #8c8c8c;
+  margin-bottom: 4px;
+}
+
+.panel-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: #f9f9f9;
+  border-top: 1px solid #f0f0f0;
+}
+
+.last-updated {
+  color: #8c8c8c;
+  font-size: 12px;
+}
+
+.refresh-btn {
+  border: none;
+  background: none;
+  color: #1890ff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.refresh-btn i {
+  margin-right: 4px;
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(255, 77, 79, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(255, 77, 79, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 77, 79, 0); }
+}
+</style>
+\end{lstlisting}
+
+\subsubsection{数据展示组件设计原则}\label{ux6570ux636eux5c55ux793aux7ec4ux4ef6ux8bbeux8ba1ux539fux5219}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{信息分层}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    主要指标：最显眼位置，大字号显示
+  \item
+    趋势指标：图表形式直观展示
+  \item
+    参考指标：辅助数据，适当位置展示
+  \item
+    元数据：更新时间、数据来源等
+  \end{itemize}
+\item
+  \textbf{状态可视化}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    正常/警告/危险状态的视觉区分
+  \item
+    动态变化的视觉反馈（如数值上升/下降）
+  \item
+    阈值标记在图表中的显示
+  \end{itemize}
+\item
+  \textbf{数据密度与清晰度平衡}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    关键信息一目了然
+  \item
+    深层信息可通过交互获取
+  \item
+    避免过度密集的数据展示
+  \end{itemize}
+\end{enumerate}
+
+\subsubsection{其他常用数据组件}\label{ux5176ux4ed6ux5e38ux7528ux6570ux636eux7ec4ux4ef6}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{水库蓄水量图表}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    水库剖面图结合实时水位
+  \item
+    蓄水量与容量比例可视化
+  \item
+    历史蓄水量趋势对比
+  \end{itemize}
+\item
+  \textbf{流量监测面板}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    实时流量数值展示
+  \item
+    上下游流量对比
+  \item
+    流量变化趋势图表
+  \end{itemize}
+\item
+  \textbf{降雨量分布图}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    地理分布热力图
+  \item
+    时间序列降雨量柱状图
+  \item
+    累计降雨量与预警阈值对比
+  \end{itemize}
+\item
+  \textbf{水质参数监测卡片}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    关键水质指标并列展示
+  \item
+    指标变化趋势迷你图
+  \item
+    超标参数的醒目提示
+  \end{itemize}
+\item
+  \textbf{水利工程结构健康监测面板}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    工程结构示意图与监测点
+  \item
+    变形量、渗流量等指标可视化
+  \item
+    安全状态综合评估指示
+  \end{itemize}
+\end{enumerate}
+
+\subsection{3.3
+地图与空间数据组件}\label{ux5730ux56feux4e0eux7a7aux95f4ux6570ux636eux7ec4ux4ef6}
+
+智慧水利平台需要高效展示地理空间信息。
+
+\begin{lstlisting}
+<template>
+  <div class="hydro-map-container">
+    <div id="map" class="map-view"></div>
+    
+    <div class="map-controls">
+      <div class="layer-control">
+        <h4>图层</h4>
+        <div v-for="layer in mapLayers" :key="layer.id" class="layer-item">
+          <input 
+            type="checkbox" 
+            :id="'layer-' + layer.id" 
+            :checked="layer.visible"
+            @change="toggleLayer(layer.id)"
+          >
+          <label :for="'layer-' + layer.id">{{ layer.name }}</label>
+        </div>
+      </div>
+      
+      <div class="legend">
+        <h4>图例</h4>
+        <div class="legend-items">
+          <div class="legend-item">
+            <span class="legend-color" style="background-color: #52c41a;"></span>
+            <span>正常</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-color" style="background-color: #faad14;"></span>
+            <span>注意</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-color" style="background-color: #ff4d4f;"></span>
+            <span>警戒</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="map-toolbar">
+      <button @click="zoomIn"><i class="icon-plus"></i></button>
+      <button @click="zoomOut"><i class="icon-minus"></i></button>
+      <button @click="resetView"><i class="icon-home"></i></button>
+      <button @click="toggleFullscreen"><i class="icon-fullscreen"></i></button>
+    </div>
+    
+    <div v-if="selectedFeature" class="feature-popup">
+      <div class="popup-header">
+        <h4>{{ selectedFeature.name }}</h4>
+        <button class="close-btn" @click="closePopup"><i class="icon-close"></i></button>
+      </div>
+      <div class="popup-content">
+        <!-- 动态内容根据选中的要素类型显示不同信息 -->
+        <template v-if="selectedFeature.type === 'reservoir'">
+          <div class="feature-info">
+            <p><strong>当前水位：</strong> {{ selectedFeature.waterLevel }}m</p>
+            <p><strong>蓄水量：</strong> {{ selectedFeature.storage }}亿m³</p>
+            <p><strong>状态：</strong> <span :class="'status-' + selectedFeature.status">{{ statusText }}</span></p>
+          </div>
+          <div class="action-links">
+            <a @click="viewDetails">查看详情</a>
+            <a @click="viewHistory">历史数据</a>
+          </div>
+        </template>
+        <!-- 其他类型的模板 -->
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+export default {
+  data() {
+    return {
+      mapLayers: [
+        { id: 'baseMap', name: '底图', visible: true },
+        { id: 'reservoirs', name: '水库', visible: true },
+        { id: 'rivers', name: '河流', visible: true },
+        { id: 'stations', name: '监测站', visible: true },
+        { id: 'rainfall', name: '降雨分布', visible: false },
+        { id: 'waterQuality', name: '水质监测', visible: false }
+      ],
+      selectedFeature: null
+    }
+  },
+  computed: {
+    statusText() {
+      if (!this.selectedFeature) return '';
+      
+      switch (this.selectedFeature.status) {
+        case 'normal': return '正常';
+        case 'attention': return '注意';
+        case 'warning': return '警戒';
+        default: return '未知';
+      }
+    }
+  },
+  methods: {
+    toggleLayer(layerId) {
+      const layer = this.mapLayers.find(l => l.id === layerId);
+      if (layer) {
+        layer.visible = !layer.visible;
+        // 实际应用中调用地图API的图层显示/隐藏方法
+      }
+    },
+    // 其他地图操作方法...
+  },
+  mounted() {
+    // 初始化地图
+    // 实际应用中使用高德地图、OpenLayers等地图库
+  }
+}
+</script>
+\end{lstlisting}
+
+\subsubsection{地图功能设计考量}\label{ux5730ux56feux529fux80fdux8bbeux8ba1ux8003ux91cf}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{多尺度地图展示}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    流域级：展示整体水系概况
+  \item
+    河段级：展示河段的水文监测点与工程
+  \item
+    工程级：展示单个水利工程的详细结构与监测点
+  \end{itemize}
+\item
+  \textbf{图层管理与切换}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    基础图层：底图、行政区划、水系等
+  \item
+    专题图层：水位、水质、降雨等监测数据
+  \item
+    工程图层：水库、水电站、闸坝等工程设施
+  \end{itemize}
+\item
+  \textbf{专题地图设计}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    水位专题图：使用颜色编码表示水位状态
+  \item
+    降雨专题图：使用热力图展示降雨分布
+  \item
+    水质专题图：使用颜色和图标表示水质状况
+  \end{itemize}
+\item
+  \textbf{空间分析与查询功能}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    缓冲区分析：如洪水影响范围模拟
+  \item
+    空间查询：如查找特定区域内的监测站
+  \item
+    路径分析：如水流路径或最佳应急路线分析
+  \end{itemize}
+\item
+  \textbf{移动端地图优化设计}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    简化控制界面，增大触控区域
+  \item
+    减少图层复杂度，提高性能
+  \item
+    适配离线地图功能，支持野外作业
+  \end{itemize}
+\end{enumerate}
+
+\subsection{3.4
+操作与控制界面}\label{ux64cdux4f5cux4e0eux63a7ux5236ux754cux9762}
+
+智慧水利平台需要提供安全、高效的操作控制界面。
+
+\begin{lstlisting}
+<template>
+  <div class="gate-control-panel">
+    <div class="section-header">
+      <h3>闸门控制</h3>
+      <div class="status-badge" :class="systemStatusClass">
+        {{ systemStatusText }}
+      </div>
+    </div>
+    
+    <div class="control-warning" v-if="showWarning">
+      <i class="icon-warning"></i>
+      <span>警告：当前水位超过警戒线，操作前请确认安全措施已到位</span>
+    </div>
+    
+    <div class="gates-overview">
+      <div v-for="gate in gates" :key="gate.id" 
+           class="gate-card" 
+           :class="{ 'selected': selectedGate && selectedGate.id === gate.id }"
+           @click="selectGate(gate)">
+        <div class="gate-status" :class="'status-' + gate.status"></div>
+        <div class="gate-info">
+          <div class="gate-name">{{ gate.name }}</div>
+          <div class="gate-reading">开度: {{ gate.openingDegree }}%</div>
+          <div class="gate-mode">{{ gate.mode === 'auto' ? '自动' : '手动' }}</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="control-interface" v-if="selectedGate">
+      <div class="gate-details">
+        <h4>{{ selectedGate.name }}</h4>
+        <div class="detail-item">
+          <span class="label">当前状态:</span>
+          <span class="value" :class="'status-text-' + selectedGate.status">
+            {{ gateStatusText }}
+          </span>
+        </div>
+        <div class="detail-item">
+          <span class="label">开度:</span>
+          <span class="value">{{ selectedGate.openingDegree }}%</span>
+        </div>
+        <div class="detail-item">
+          <span class="label">控制模式:</span>
+          <span class="value">{{ selectedGate.mode === 'auto' ? '自动' : '手动' }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="label">上游水位:</span>
+          <span class="value">{{ selectedGate.upstreamLevel }}m</span>
+        </div>
+        <div class="detail-item">
+          <span class="label">下游水位:</span>
+          <span class="value">{{ selectedGate.downstreamLevel }}m</span>
+        </div>
+      </div>
+      
+      <div class="control-actions">
+        <div class="mode-switch">
+          <span>控制模式:</span>
+          <label class="switch">
+            <input type="checkbox" 
+                   :checked="selectedGate.mode === 'auto'"
+                   @change="toggleMode">
+            <span class="slider"></span>
+          </label>
+          <span>{{ selectedGate.mode === 'auto' ? '自动' : '手动' }}</span>
+        </div>
+        
+        <div class="manual-controls" v-if="selectedGate.mode === 'manual'">
+          <div class="slider-control">
+            <span>开度调节:</span>
+            <input type="range" min="0" max="100" 
+                   v-model="targetOpeningDegree">
+            <span>{{ targetOpeningDegree }}%</span>
+          </div>
+          
+          <div class="action-buttons">
+            <button class="btn secondary" @click="resetControls">
+              重置
+            </button>
+            <button class="btn danger" v-if="selectedGate.openingDegree > 0" 
+                    @click="emergencyClose">
+              紧急关闭
+            </button>
+            <button class="btn primary" 
+                    @click="applySettings"
+                    :disabled="!isSettingsChanged">
+              应用更改
+            </button>
+          </div>
+        </div>
+        
+        <div class="auto-settings" v-else>
+          <p>自动模式下，系统将根据设定的规则自动调节闸门开度</p>
+          <button class="btn secondary" @click="showRuleSettings">
+            查看自动规则
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <div class="operation-log">
+      <h4>操作日志</h4>
+      <div class="log-entries">
+        <div v-for="(log, index) in operationLogs" :key="index" class="log-entry">
+          <span class="log-time">{{ log.time }}</span>
+          <span class="log-user">{{ log.user }}</span>
+          <span class="log-action">{{ log.action }}</span>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 确认对话框 -->
+    <div class="confirm-modal" v-if="showConfirmDialog">
+      <!-- 确认对话框内容 -->
+    </div>
+  </div>
+</template>
+\end{lstlisting}
+
+\subsubsection{操作界面设计原则}\label{ux64cdux4f5cux754cux9762ux8bbeux8ba1ux539fux5219}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{安全优先}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    关键操作需二次确认，如闸门控制、泄洪操作
+  \item
+    权限控制，确保只有授权人员可执行关键操作
+  \item
+    危险操作需特殊标识，如红色警示
+  \item
+    自动监测与阻断机制，避免危险操作
+  \end{itemize}
+\item
+  \textbf{状态明确}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    系统当前状态清晰可见
+  \item
+    操作反馈及时直观
+  \item
+    异常状态明显标识
+  \item
+    过渡状态（如执行中）有明确指示
+  \end{itemize}
+\item
+  \textbf{防错设计}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    重要操作需确认机制
+  \item
+    危险参数有合理范围限制
+  \item
+    操作步骤引导与检查
+  \item
+    错误提示清晰具体，并提供纠正建议
+  \end{itemize}
+\item
+  \textbf{日志记录}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    所有关键操作可追溯记录
+  \item
+    操作人员、时间、内容完整记录
+  \item
+    操作前后状态变化记录
+  \item
+    审计与复查功能
+  \end{itemize}
+\item
+  \textbf{紧急控制}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    紧急情况下的快速操作入口
+  \item
+    简化的紧急模式界面
+  \item
+    紧急操作的优先级保障
+  \item
+    应急预案的界面支持
+  \end{itemize}
+\end{enumerate}
+
+\subsection{3.5
+报警与通知组件}\label{ux62a5ux8b66ux4e0eux901aux77e5ux7ec4ux4ef6}
+
+水利监控系统的报警机制至关重要。
+
+\begin{lstlisting}
+<template>
+  <div class="alerts-panel">
+    <div class="panel-header">
+      <h3>预警信息</h3>
+      <div class="alert-stats">
+        <span class="stat-item critical">{{ criticalCount }}</span>
+        <span class="stat-item warning">{{ warningCount }}</span>
+        <span class="stat-item info">{{ infoCount }}</span>
+      </div>
+    </div>
+    
+    <div class="filter-bar">
+      <div class="search-box">
+        <i class="icon-search"></i>
+        <input type="text" placeholder="搜索预警..." v-model="searchQuery">
+      </div>
+      
+      <div class="filter-options">
+        <label>
+          <input type="checkbox" v-model="filters.showCritical">
+          严重
+        </label>
+        <label>
+          <input type="checkbox" v-model="filters.showWarning">
+          警告
+        </label>
+        <label>
+          <input type="checkbox" v-model="filters.showInfo">
+          提示
+        </label>
+      </div>
+      
+      <div class="time-filter">
+        <select v-model="timeFilter">
+          <option value="all">全部</option>
+          <option value="today">今天</option>
+          <option value="week">本周</option>
+          <option value="month">本月</option>
+        </select>
+      </div>
+    </div>
+    
+    <div class="alerts-list">
+      <div v-for="alert in filteredAlerts" :key="alert.id" 
+           class="alert-item" 
+           :class="{ 
+             'critical': alert.level === 'critical',
+             'warning': alert.level === 'warning',
+             'info': alert.level === 'info',
+             'unread': !alert.read,
+             'acknowledged': alert.acknowledged
+           }"
+           @click="selectAlert(alert)">
+        <div class="alert-icon">
+          <i :class="alertIconClass(alert)"></i>
+        </div>
+        
+        <div class="alert-content">
+          <div class="alert-title">{{ alert.title }}</div>
+          <div class="alert-message">{{ alert.message }}</div>
+          <div class="alert-meta">
+            <span class="location">{{ alert.location }}</span>
+            <span class="time">{{ formatTime(alert.time) }}</span>
+          </div>
+        </div>
+        
+        <div class="alert-actions">
+          <button v-if="!alert.acknowledged" 
+                  class="acknowledge-btn"
+                  @click.stop="acknowledgeAlert(alert)">
+            确认
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <div v-if="filteredAlerts.length === 0" class="empty-state">
+      <i class="icon-bell-slash"></i>
+      <p>没有符合条件的预警信息</p>
+    </div>
+    
+    <div class="panel-footer">
+      <button @click="markAllAsRead" 
+              :disabled="unreadCount === 0">
+        标记所有为已读
+      </button>
+      <button @click="exportAlerts">
+        导出
+      </button>
+    </div>
+    
+    <!-- 详细预警对话框 -->
+    <div v-if="selectedAlert" class="alert-detail-modal">
+      <!-- 预警详情内容 -->
+    </div>
+  </div>
+</template>
+\end{lstlisting}
+
+\subsubsection{预警设计考量}\label{ux9884ux8b66ux8bbeux8ba1ux8003ux91cf}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{分级预警系统}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    严重级别（红色）：需立即处理的紧急情况
+  \item
+    警告级别（橙色）：需密切关注的异常情况
+  \item
+    注意级别（黄色）：需要留意的潜在问题
+  \item
+    信息级别（蓝色）：一般性通知信息
+  \end{itemize}
+\item
+  \textbf{预警推送与通知方式}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    系统内通知：界面顶部或侧边通知栏
+  \item
+    弹窗提醒：关键预警的模态弹窗
+  \item
+    声音提示：不同级别预警的差异化声音
+  \item
+    外部推送：短信、邮件、移动应用推送等
+  \item
+    集中展示：预警信息中心汇总展示
+  \end{itemize}
+\item
+  \textbf{预警确认与处理流程}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    预警确认机制：明确责任人已知晓
+  \item
+    处理状态跟踪：待处理、处理中、已解决
+  \item
+    处理记录：处理措施、结果的记录
+  \item
+    升级机制：未及时处理的预警自动升级
+  \end{itemize}
+\item
+  \textbf{历史预警查询与分析}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    高级搜索功能：按时间、类型、位置等
+  \item
+    趋势分析：预警频率、类型分布等统计
+  \item
+    关联分析：相关预警的关联展示
+  \item
+    导出与报表功能
+  \end{itemize}
+\item
+  \textbf{移动端预警推送适配}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    紧凑型界面设计
+  \item
+    优先级醒目显示
+  \item
+    快速操作支持
+  \item
+    离线预警存储与同步
+  \end{itemize}
+\end{enumerate}
+
+通过这些设计考量，智慧水利平台的界面组件能够为用户提供直观、高效、安全的操作体验，支持复杂的水利业务场景和应急情况处理。

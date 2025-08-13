@@ -1,0 +1,283 @@
+% ========================================
+% 基础配置模板 - 智慧水利平台架构与开发
+% 版本: v1.0
+% 更新: 2025年8月7日
+% ========================================
+
+% ========================================
+% 基础包引入
+% ========================================
+
+% 数学支持
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{mathtools}
+
+% 图形和颜色
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows,positioning,calc,decorations.pathreplacing}
+
+% 页面布局
+\usepackage[
+    top=2.5cm,
+    bottom=2.5cm,
+    left=2.8cm,
+    right=2.2cm,
+    bindingoffset=0.5cm,
+    headheight=15pt,
+    footskip=1.5cm
+]{geometry}
+
+% 字体和编码
+\usepackage{fontspec}
+\usepackage{setspace}
+\onehalfspacing  % 1.5倍行距
+
+% 表格增强
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{multicol}
+\usepackage{tabularx}
+
+% 列表环境
+\usepackage{enumitem}
+
+% Pandoc生成的紧凑列表命令
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+% 代码环境
+\usepackage{listings}
+\usepackage{fancyvrb}
+
+% SVG支持包
+\usepackage{svg}
+
+% 美化框架
+\usepackage{tcolorbox}
+\tcbuselibrary{most}
+
+% 页眉页脚
+\usepackage{fancyhdr}
+
+% 超链接
+\usepackage{hyperref}
+
+% 参考文献 - 只使用biblatex，避免与cite包冲突
+\usepackage[style=gb7714-2015,backend=biber]{biblatex}
+
+% 图标字体
+\usepackage{fontawesome5}
+
+% 索引
+\usepackage{makeidx}
+\makeindex
+
+% 其他实用包
+\usepackage{float}
+\usepackage{subcaption}
+\usepackage{wrapfig}
+\usepackage{textcomp}
+\usepackage{xspace}
+
+% ========================================
+% 中文字体配置
+% ========================================
+
+% 设置中文字体
+\setCJKmainfont{SimSun}[
+    BoldFont=SimHei,
+    ItalicFont=KaiTi,
+    AutoFakeBold=2.5,
+    AutoFakeSlant=0.3
+]
+\setCJKsansfont{SimHei}[
+    AutoFakeBold=2.5
+]
+\setCJKmonofont{FangSong}[
+    AutoFakeBold=2.5
+]
+
+% 英文字体配置
+\setmainfont{Times New Roman}[
+    BoldFont={Times New Roman Bold},
+    ItalicFont={Times New Roman Italic},
+    BoldItalicFont={Times New Roman Bold Italic}
+]
+\setsansfont{Arial}[
+    BoldFont={Arial Bold},
+    ItalicFont={Arial Italic},
+    BoldItalicFont={Arial Bold Italic}
+]
+\setmonofont{Courier New}[
+    BoldFont={Courier New Bold},
+    ItalicFont={Courier New Italic},
+    BoldItalicFont={Courier New Bold Italic}
+]
+
+% ========================================
+% 配色方案定义
+% ========================================
+
+% 主色调 - 水利行业蓝色系
+\definecolor{primarycolor}{RGB}{30, 130, 200}      % 水利蓝
+\definecolor{secondarycolor}{RGB}{0, 102, 153}     % 深水蓝
+\definecolor{accentcolor}{RGB}{40, 167, 69}        % 环保绿
+\definecolor{warningcolor}{RGB}{255, 193, 7}       % 警告黄
+\definecolor{dangercolor}{RGB}{220, 53, 69}        % 危险红
+\definecolor{infocolor}{RGB}{23, 162, 184}         % 信息蓝
+
+% 灰度系列
+\definecolor{lightgray}{RGB}{248, 249, 250}
+\definecolor{mediumgray}{RGB}{173, 181, 189}
+\definecolor{darkgray}{RGB}{73, 80, 87}
+
+% 代码配色
+\definecolor{codeblue}{RGB}{40, 90, 200}
+\definecolor{codegreen}{RGB}{0, 150, 0}
+\definecolor{codered}{RGB}{200, 0, 0}
+\definecolor{codepurple}{RGB}{150, 0, 150}
+\definecolor{codegray}{RGB}{128, 128, 128}
+\definecolor{codeorange}{RGB}{255, 140, 0}
+\definecolor{backcolour}{RGB}{248, 248, 248}
+\definecolor{framecolor}{RGB}{220, 220, 220}
+
+% 背景色
+\definecolor{lightblue}{RGB}{230, 245, 255}
+\definecolor{lightgreen}{RGB}{240, 255, 240}
+\definecolor{lightyellow}{RGB}{255, 255, 224}
+\definecolor{lightred}{RGB}{255, 240, 240}
+
+% ========================================
+% 页面样式配置
+% ========================================
+
+% 页眉页脚样式
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[LE]{\small\leftmark}
+\fancyhead[RO]{\small\rightmark}
+\fancyfoot[LE,RO]{\small\thepage}
+\fancyfoot[CE,CO]{\small 智慧水利平台架构与开发}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.2pt}
+
+% 首页样式
+\fancypagestyle{plain}{
+    \fancyhf{}
+    \fancyfoot[CE,CO]{\small\thepage}
+    \renewcommand{\headrulewidth}{0pt}
+    \renewcommand{\footrulewidth}{0.2pt}
+}
+
+% ========================================
+% 章节样式配置
+% ========================================
+
+\ctexset{
+    part={
+        format={\centering\Huge\bfseries},
+        beforeskip=50pt,
+        afterskip=40pt
+    },
+    chapter={
+        format={\centering\LARGE\bfseries},
+        name={第,章},
+        number={\chinese{chapter}},
+        beforeskip=20pt,
+        afterskip=40pt,
+        titleformat={\color{primarycolor}\LARGE\bfseries}
+    },
+    section={
+        format={\Large\bfseries},
+        beforeskip=20pt,
+        afterskip=10pt,
+        titleformat={\color{primarycolor}\Large\bfseries}
+    },
+    subsection={
+        format={\large\bfseries},
+        beforeskip=15pt,
+        afterskip=8pt,
+        titleformat={\color{secondarycolor}\large\bfseries}
+    },
+    subsubsection={
+        format={\normalsize\bfseries},
+        beforeskip=10pt,
+        afterskip=5pt,
+        titleformat={\color{secondarycolor}\normalsize\bfseries}
+    }
+}
+
+% ========================================
+% 定理环境配置
+% ========================================
+
+% 定义定理样式
+\newtheoremstyle{waterconservancy}% 样式名
+{10pt}% 上方间距
+{10pt}% 下方间距
+{\itshape}% 正文字体
+{0pt}% 缩进
+{\bfseries\color{primarycolor}}% 标题字体
+{：}% 标题后标点
+{0.5em}% 标题后间距
+{}% 标题格式
+
+\theoremstyle{waterconservancy}
+\newtheorem{definition}{定义}[chapter]
+\newtheorem{theorem}{定理}[chapter]
+\newtheorem{lemma}{引理}[chapter]
+\newtheorem{example}{例}[chapter]
+\newtheorem{remark}{注释}[chapter]
+
+% ========================================
+% 浮动体配置
+% ========================================
+
+% 图表标题格式
+\usepackage{caption}
+\captionsetup{
+    font={small,bf},
+    labelfont={color=primarycolor},
+    textfont={color=darkgray},
+    margin=10pt,
+    aboveskip=10pt,
+    belowskip=5pt
+}
+
+% 代码清单标题
+\renewcommand{\lstlistingname}{代码清单}
+\renewcommand{\lstlistlistingname}{代码清单目录}
+
+% ========================================
+% 交叉引用配置
+% ========================================
+
+% 图表引用格式
+\renewcommand{\figurename}{图}
+\renewcommand{\tablename}{表}
+\renewcommand{\lstlistingname}{代码清单}
+
+% ========================================
+% 其他自定义配置
+% ========================================
+
+% 脚注样式
+\renewcommand{\thefootnote}{\textcolor{primarycolor}{\arabic{footnote}}}
+
+% 项目符号
+\setlist[itemize,1]{label=\textcolor{primarycolor}{\textbullet}}
+\setlist[itemize,2]{label=\textcolor{secondarycolor}{\textendash}}
+\setlist[enumerate,1]{label=\textcolor{primarycolor}{\arabic*.}}
+\setlist[enumerate,2]{label=\textcolor{secondarycolor}{\alph*)}}
+
+% 行间距调整
+\setlength{\parskip}{3pt}
+\setlength{\parindent}{2em}
+
+% 目录深度
+\setcounter{tocdepth}{3}
+\setcounter{secnumdepth}{4}

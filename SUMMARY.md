@@ -1,6 +1,8 @@
 # Summary
 
 * [教材简介](README.md)
+* [前言](前言.md)
+* [需求文档](需求文档.md)
 
 ## 第一部分 基础知识
 * [第一章 总论](chapters/chapter01/chapter01.md)

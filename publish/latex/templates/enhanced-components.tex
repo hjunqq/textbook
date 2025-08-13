@@ -1,0 +1,427 @@
+% ========================================
+% 美化组件配置 - 智慧水利平台架构与开发
+% 提供丰富的教学组件和美化元素
+% 版本: v1.0
+% 更新: 2025年8月7日
+% ========================================
+
+% ========================================
+% 学习目标组件
+% ========================================
+
+\newtcolorbox{learningobjectives}[1][]{
+    enhanced,
+    title={\faLightbulb\ 学习目标},
+    attach boxed title to top left={yshift=-2mm, xshift=5mm},
+   % 小节开始标记
+\newcommand{\customsubsectionmark}[1]{
+    \begin{center}
+        \textcolor{secondarycolor}{\faChevronRight\ #1 \ \faChevronLeft}
+    \end{center}
+} title style={
+        size=small,
+        colback=primarycolor,
+        colframe=primarycolor,
+        sharp corners=all,
+        font=\bfseries\color{white}
+    },
+    colback=lightblue,
+    colframe=primarycolor,
+    sharp corners=northwest,
+    arc=3mm,
+    boxrule=0.8pt,
+    left=8pt,
+    right=8pt,
+    top=8pt,
+    bottom=8pt,
+    fonttitle=\bfseries\color{white},
+    #1
+}
+
+% ========================================
+% 重要概念组件
+% ========================================
+
+\newtcolorbox{keyoncept}[1][]{
+    enhanced,
+    title={\faKey\ 关键概念},
+    attach boxed title to top left={yshift=-2mm, xshift=5mm},
+    boxed title style={
+        size=small,
+        colback=accentcolor,
+        colframe=accentcolor,
+        sharp corners=all,
+        font=\bfseries\color{white}
+    },
+    colback=lightgreen,
+    colframe=accentcolor,
+    sharp corners=northwest,
+    arc=3mm,
+    boxrule=0.8pt,
+    left=8pt,
+    right=8pt,
+    top=8pt,
+    bottom=8pt,
+    fonttitle=\bfseries\color{white},
+    #1
+}
+
+% ========================================
+% 技术要点组件
+% ========================================
+
+\newtcolorbox{techpoint}[1][]{
+    enhanced,
+    title={\faCog\ 技术要点},
+    attach boxed title to top left={yshift=-2mm, xshift=5mm},
+    boxed title style={
+        size=small,
+        colback=secondarycolor,
+        colframe=secondarycolor,
+        sharp corners=all,
+        font=\bfseries\color{white}
+    },
+    colback=lightblue,
+    colframe=secondarycolor,
+    sharp corners=northwest,
+    arc=3mm,
+    boxrule=0.8pt,
+    left=8pt,
+    right=8pt,
+    top=8pt,
+    bottom=8pt,
+    fonttitle=\bfseries\color{white},
+    #1
+}
+
+% ========================================
+% 实践案例组件
+% ========================================
+
+\newtcolorbox{practicecase}[1][]{
+    enhanced,
+    title={\faFileCode\ 实践案例},
+    attach boxed title to top left={yshift=-2mm, xshift=5mm},
+    boxed title style={
+        size=small,
+        colback=infocolor,
+        colframe=infocolor,
+        sharp corners=all,
+        font=\bfseries\color{white}
+    },
+    colback=lightgray,
+    colframe=infocolor,
+    sharp corners=northwest,
+    arc=3mm,
+    boxrule=0.8pt,
+    left=8pt,
+    right=8pt,
+    top=8pt,
+    bottom=8pt,
+    fonttitle=\bfseries\color{white},
+    #1
+}
+
+% ========================================
+% 思考题组件
+% ========================================
+
+\newtcolorbox{thinkingquestion}[1][]{
+    enhanced,
+    title={\faQuestionCircle\ 思考题},
+    attach boxed title to top left={yshift=-2mm, xshift=5mm},
+    boxed title style={
+        size=small,
+        colback=warningcolor,
+        colframe=warningcolor,
+        sharp corners=all,
+        font=\bfseries\color{black}
+    },
+    colback=lightyellow,
+    colframe=warningcolor,
+    sharp corners=northwest,
+    arc=3mm,
+    boxrule=0.8pt,
+    left=8pt,
+    right=8pt,
+    top=8pt,
+    bottom=8pt,
+    fonttitle=\bfseries\color{black},
+    #1
+}
+
+% ========================================
+% 注意事项组件
+% ========================================
+
+\newtcolorbox{attention}[1][]{
+    enhanced,
+    title={\faExclamationTriangle\ 注意事项},
+    attach boxed title to top left={yshift=-2mm, xshift=5mm},
+    boxed title style={
+        size=small,
+        colback=dangercolor,
+        colframe=dangercolor,
+        sharp corners=all,
+        font=\bfseries\color{white}
+    },
+    colback=lightred,
+    colframe=dangercolor,
+    sharp corners=northwest,
+    arc=3mm,
+    boxrule=0.8pt,
+    left=8pt,
+    right=8pt,
+    top=8pt,
+    bottom=8pt,
+    fonttitle=\bfseries\color{white},
+    #1
+}
+
+% ========================================
+% 提示信息组件
+% ========================================
+
+\newtcolorbox{tip}[1][]{
+    enhanced,
+    title={\faInfoCircle\ 提示},
+    attach boxed title to top left={yshift=-2mm, xshift=5mm},
+    boxed title style={
+        size=small,
+        colback=infocolor,
+        colframe=infocolor,
+        sharp corners=all,
+        font=\bfseries\color{white}
+    },
+    colback=lightblue,
+    colframe=infocolor,
+    sharp corners=northwest,
+    arc=3mm,
+    boxrule=0.8pt,
+    left=8pt,
+    right=8pt,
+    top=8pt,
+    bottom=8pt,
+    fonttitle=\bfseries\color{white},
+    #1
+}
+
+% ========================================
+% 代码说明组件
+% ========================================
+
+\newtcolorbox{codeexplanation}[1][]{
+    enhanced,
+    title={\faCode\ 代码说明},
+    attach boxed title to top left={yshift=-2mm, xshift=5mm},
+    boxed title style={
+        size=small,
+        colback=codegray,
+        colframe=codegray,
+        sharp corners=all,
+        font=\bfseries\color{white}
+    },
+    colback=backcolour,
+    colframe=codegray,
+    sharp corners=northwest,
+    arc=3mm,
+    boxrule=0.8pt,
+    left=8pt,
+    right=8pt,
+    top=8pt,
+    bottom=8pt,
+    fonttitle=\bfseries\color{white},
+    #1
+}
+
+% ========================================
+% 架构图组件
+% ========================================
+
+\newtcolorbox{architecture}[1][]{
+    enhanced,
+    title={\faSitemap\ 架构设计},
+    attach boxed title to top left={yshift=-2mm, xshift=5mm},
+    boxed title style={
+        size=small,
+        colback=primarycolor,
+        colframe=primarycolor,
+        sharp corners=all,
+        font=\bfseries\color{white}
+    },
+    colback=white,
+    colframe=primarycolor,
+    sharp corners=northwest,
+    arc=3mm,
+    boxrule=0.8pt,
+    left=8pt,
+    right=8pt,
+    top=8pt,
+    bottom=8pt,
+    fonttitle=\bfseries\color{white},
+    #1
+}
+
+% ========================================
+% 本章小结组件
+% ========================================
+
+\newtcolorbox{chaptersummary}[1][]{
+    enhanced,
+    title={\faClipboardList\ 本章小结},
+    attach boxed title to top left={yshift=-2mm, xshift=5mm},
+    boxed title style={
+        size=small,
+        colback=secondarycolor,
+        colframe=secondarycolor,
+        sharp corners=all,
+        font=\bfseries\color{white}
+    },
+    colback=lightgray,
+    colframe=secondarycolor,
+    sharp corners=northwest,
+    arc=3mm,
+    boxrule=0.8pt,
+    left=8pt,
+    right=8pt,
+    top=8pt,
+    bottom=8pt,
+    fonttitle=\bfseries\color{white},
+    #1
+}
+
+% ========================================
+% 自定义命令
+% ========================================
+
+% 强调文本
+\newcommand{\highlight}[1]{\textcolor{primarycolor}{\textbf{#1}}}
+
+% 技术术语
+\newcommand{\tech}[1]{\textcolor{secondarycolor}{\texttt{#1}}}
+
+% 文件路径
+\newcommand{\filepath}[1]{\textcolor{codegray}{\texttt{#1}}}
+
+% API接口
+\newcommand{\api}[1]{\textcolor{codeblue}{\texttt{#1}}}
+
+% 数据库表名
+\newcommand{\dbtablename}[1]{\textcolor{codepurple}{\texttt{#1}}}
+
+% 配置项
+\newcommand{\config}[1]{\textcolor{codeorange}{\texttt{#1}}}
+
+% 版本号
+\newcommand{\version}[1]{\textcolor{accentcolor}{\texttt{v#1}}}
+
+% 快捷键
+\newcommand{\shortcut}[1]{\textcolor{darkgray}{\texttt{#1}}}
+
+% URL链接美化
+\newcommand{\weburl}[1]{\textcolor{infocolor}{\texttt{#1}}}
+
+% ========================================
+% 特殊环境
+% ========================================
+
+% 代码块环境（带标题）
+\lstnewenvironment{smartcode}[2][]{
+    \lstset{
+        style=#2,
+        title={#1},
+        #1
+    }
+}{}
+
+% 终端命令环境
+\lstnewenvironment{terminal}[1][]{
+    \lstset{
+        style=terminal,
+        title={终端命令},
+        #1
+    }
+}{}
+
+% 配置文件环境
+\lstnewenvironment{configfile}[2][]{
+    \lstset{
+        style=config,
+        title={配置文件：#2},
+        #1
+    }
+}{}
+
+% ========================================
+% 流程图样式
+% ========================================
+
+% 定义流程图基础样式
+\tikzstyle{startend} = [
+    rectangle, 
+    rounded corners, 
+    minimum width=3cm, 
+    minimum height=1cm,
+    text centered, 
+    draw=primarycolor, 
+    fill=lightblue,
+    thick
+]
+
+\tikzstyle{process} = [
+    rectangle, 
+    minimum width=3cm, 
+    minimum height=1cm, 
+    text centered, 
+    draw=secondarycolor, 
+    fill=lightgreen,
+    thick
+]
+
+\tikzstyle{decision} = [
+    diamond, 
+    minimum width=3cm, 
+    minimum height=1cm, 
+    text centered, 
+    draw=warningcolor, 
+    fill=lightyellow,
+    thick
+]
+
+\tikzstyle{arrow} = [
+    thick,
+    ->,
+    >=stealth,
+    color=primarycolor
+]
+
+% ========================================
+% 表格样式增强
+% ========================================
+
+% 表格样式定义
+% 注意：\rowcolors需要在\begin{document}后使用
+
+% 表格标题样式
+\newcommand{\tableheader}[1]{
+    \rowcolor{primarycolor}
+    \textcolor{white}{\textbf{#1}}
+}
+
+% ========================================
+% 页面装饰元素
+% ========================================
+
+% 章节分隔线
+\newcommand{\sectionseparator}{
+    \begin{center}
+        \textcolor{primarycolor}{\rule{0.5\textwidth}{0.5pt}}
+    \end{center}
+}
+
+% 小节开始标记
+\newcommand{\subsectionmark}[1]{
+    \begin{center}
+        \textcolor{secondarycolor}{\faChevronRight\ #1 \ \faChevronLeft}
+    \end{center}
+}

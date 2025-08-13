@@ -1,0 +1,1179 @@
+\section{集成开发环境(IDE)使用指南}\label{ux96c6ux6210ux5f00ux53d1ux73afux5883ideux4f7fux7528ux6307ux5357}
+
+\begin{quote}
+本小节是\href{section03-04.md}{第四节 开发环境配置与工具使用}的一部分
+\end{quote}
+
+集成开发环境(Integrated Development Environment,
+IDE)是开发者工作的核心工具，它将编辑器、编译器、调试器等开发工具集成在一个应用程序中，极大地提高了开发效率。本小节将介绍智慧水利平台开发中常用IDE的选择、配置和使用技巧。
+
+\subsection{3.4.5.1
+常用IDE比较与选择}\label{ux5e38ux7528ideux6bd4ux8f83ux4e0eux9009ux62e9}
+
+\subsubsection{IDE选择的考虑因素}\label{ideux9009ux62e9ux7684ux8003ux8651ux56e0ux7d20}
+
+在为智慧水利平台开发选择IDE时，需要考虑以下因素：
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{开发语言支持}：IDE对于项目使用的主要编程语言的支持程度
+\item
+  \textbf{框架集成}：与Spring Boot、Vue.js等框架的集成程度
+\item
+  \textbf{团队协作功能}：代码审查、版本控制集成等
+\item
+  \textbf{扩展生态}：可用插件和扩展的数量和质量
+\item
+  \textbf{性能与资源占用}：在大型项目下的响应速度和内存占用
+\item
+  \textbf{学习曲线}：团队成员适应和掌握的难易程度
+\item
+  \textbf{许可成本}：商业许可或开源免费
+\end{enumerate}
+
+\subsubsection{后端开发IDE对比}\label{ux540eux7aefux5f00ux53d1ideux5bf9ux6bd4}
+
+以下是智慧水利平台后端开发常用IDE的对比：
+
+\begin{longtable}[]{@{}lllll@{}}
+\toprule\noalign{}
+特性 & IntelliJ IDEA & Eclipse & Visual Studio Code & NetBeans \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\textbf{Java支持} & 极佳 & 很好 & 良好(需插件) & 很好 \\
+\textbf{Spring支持} & 内置 & 需插件 & 需插件 & 需插件 \\
+\textbf{数据库工具} & 内置 & 需插件 & 需插件 & 内置 \\
+\textbf{性能} & 较高(需较多内存) & 中等 & 轻量级 & 中等 \\
+\textbf{智能补全} & 极佳 & 良好 & 良好 & 良好 \\
+\textbf{调试功能} & 强大 & 很好 & 基础 & 很好 \\
+\textbf{许可} & 商业/社区版 & 开源免费 & 开源免费 & 开源免费 \\
+\textbf{UI设计器} & 基础 & 较好 & 无 & 强大 \\
+\textbf{版本控制} & 内置多种 & 需插件 & 内置多种 & 内置Git \\
+\end{longtable}
+
+\subsubsection{前端开发IDE对比}\label{ux524dux7aefux5f00ux53d1ideux5bf9ux6bd4}
+
+智慧水利平台前端开发常用IDE对比：
+
+\begin{longtable}[]{@{}lllll@{}}
+\toprule\noalign{}
+特性 & Visual Studio Code & WebStorm & Sublime Text & Atom \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\textbf{JavaScript支持} & 极佳 & 极佳 & 良好 & 良好 \\
+\textbf{Vue/React支持} & 需插件(很好) & 内置 & 需插件 & 需插件 \\
+\textbf{性能} & 轻量级 & 较高(需较多内存) & 极轻量级 & 中等 \\
+\textbf{智能补全} & 很好 & 极佳 & 基础 & 良好 \\
+\textbf{调试功能} & 内置 & 强大 & 基础 & 需插件 \\
+\textbf{许可} & 开源免费 & 商业 & 免费/商业 & 开源免费 \\
+\textbf{扩展生态} & 极丰富 & 较丰富 & 丰富 & 丰富 \\
+\textbf{实时预览} & 需插件 & 内置 & 需插件 & 需插件 \\
+\end{longtable}
+
+\subsubsection{全栈开发IDE推荐}\label{ux5168ux6808ux5f00ux53d1ideux63a8ux8350}
+
+对于智慧水利平台的全栈开发，常见的选择有：
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{IntelliJ IDEA Ultimate + 内置前端工具}：
+
+  \begin{itemize}
+  \tightlist
+  \item
+    优点：一站式解决方案，无需切换IDE
+  \item
+    缺点：商业许可费用，资源占用较高
+  \end{itemize}
+\item
+  \textbf{IntelliJ IDEA Community(后端) + Visual Studio Code(前端)}：
+
+  \begin{itemize}
+  \tightlist
+  \item
+    优点：各专注于自己擅长的领域，VSCode免费
+  \item
+    缺点：需要在两个IDE间切换
+  \end{itemize}
+\item
+  \textbf{Eclipse(后端) + Visual Studio Code(前端)}：
+
+  \begin{itemize}
+  \tightlist
+  \item
+    优点：完全免费开源
+  \item
+    缺点：Eclipse在某些方面不如IDEA智能
+  \end{itemize}
+\item
+  \textbf{Visual Studio Code + 各类扩展}：
+
+  \begin{itemize}
+  \tightlist
+  \item
+    优点：轻量级，统一环境，扩展丰富
+  \item
+    缺点：在复杂Java项目上不如专业Java IDE功能丰富
+  \end{itemize}
+\end{enumerate}
+
+\textbf{案例}：某省级水利大数据平台开发团队采用了''IntelliJ IDEA
+Ultimate(后端) + Visual Studio
+Code(前端)``的组合，Java开发人员使用IDEA，前端开发人员使用VSCode，通过Git进行代码协作，在该团队20人的规模下取得了良好的开发效率。
+
+\subsection{3.4.5.2 IntelliJ
+IDEA配置与使用}\label{intellij-ideaux914dux7f6eux4e0eux4f7fux7528}
+
+IntelliJ
+IDEA是智慧水利平台Java后端开发的首选IDE，下面介绍其基本配置和最佳实践。
+
+\subsubsection{基本配置}\label{ux57faux672cux914dux7f6e}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  \textbf{JDK配置}：
+
+\begin{lstlisting}
+File > Project Structure > Platform Settings > SDKs > + > JDK
+\end{lstlisting}
+
+  选择安装的JDK路径，配置项目的JDK版本。
+\item
+  \textbf{Maven/Gradle配置}：
+
+\begin{lstlisting}
+File > Settings > Build, Execution, Deployment > Build Tools > Maven(或Gradle)
+\end{lstlisting}
+
+  配置Maven的安装路径、settings.xml文件、本地仓库位置等。
+\item
+  \textbf{编码与换行符设置}：
+
+\begin{lstlisting}
+File > Settings > Editor > File Encodings
+\end{lstlisting}
+
+  推荐设置：
+
+  \begin{itemize}
+  \tightlist
+  \item
+    IDE Encoding: UTF-8
+  \item
+    Project Encoding: UTF-8
+  \item
+    Default encoding for properties files: UTF-8
+  \item
+    换行符：根据团队约定选择(Unix或Windows)
+  \end{itemize}
+\item
+  \textbf{代码风格配置}：
+
+\begin{lstlisting}
+File > Settings > Editor > Code Style
+\end{lstlisting}
+
+  可以导入Google Java Style或Alibaba Java Coding Guidelines等标准配置。
+\end{enumerate}
+
+\subsubsection{常用快捷键}\label{ux5e38ux7528ux5febux6377ux952e}
+
+高效使用IntelliJ IDEA的常用快捷键(Windows/Linux)：
+
+\begin{longtable}[]{@{}ll@{}}
+\toprule\noalign{}
+操作 & 快捷键 \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+搜索所有内容 & 双击Shift \\
+查找文件 & Ctrl + Shift + N \\
+查找类 & Ctrl + N \\
+查找符号 & Ctrl + Alt + Shift + N \\
+查找/替换 & Ctrl + F / Ctrl + R \\
+全局查找替换 & Ctrl + Shift + F / Ctrl + Shift + R \\
+最近文件 & Ctrl + E \\
+导航至声明 & Ctrl + B 或 Ctrl + 鼠标点击 \\
+查看实现 & Ctrl + Alt + B \\
+查看类层次结构 & Ctrl + H \\
+查看方法层次结构 & Ctrl + Shift + H \\
+查看调用层次结构 & Ctrl + Alt + H \\
+自动完成 & Ctrl + Space \\
+智能自动完成 & Ctrl + Shift + Space \\
+格式化代码 & Ctrl + Alt + L \\
+优化导入 & Ctrl + Alt + O \\
+重构菜单 & Ctrl + Alt + Shift + T \\
+重命名 & Shift + F6 \\
+提取方法 & Ctrl + Alt + M \\
+提取变量 & Ctrl + Alt + V \\
+生成代码 & Alt + Insert \\
+运行当前配置 & Shift + F10 \\
+调试当前配置 & Shift + F9 \\
+显示错误信息 & Ctrl + F1 \\
+切换书签 & F11 \\
+注释/取消注释 & Ctrl + / \\
+\end{longtable}
+
+\subsubsection{常用插件推荐}\label{ux5e38ux7528ux63d2ux4ef6ux63a8ux8350}
+
+提高智慧水利平台开发效率的IDEA插件：
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Lombok}：简化Java实体类的getter/setter/constructor等模板代码
+
+  \begin{itemize}
+  \tightlist
+  \item
+    安装后需配置：\passthrough{\lstinline!Settings > Build, Execution, Deployment > Compiler > Annotation Processors > Enable annotation processing!}
+  \end{itemize}
+\item
+  \textbf{Spring Assistant}：提供Spring配置文件的自动完成和导航
+
+  \begin{itemize}
+  \tightlist
+  \item
+    对YAML配置文件的属性提供智能提示和自动完成
+  \end{itemize}
+\item
+  \textbf{Maven Helper}：管理Maven依赖和冲突
+
+  \begin{itemize}
+  \tightlist
+  \item
+    右键POM文件可查看依赖树和分析冲突
+  \end{itemize}
+\item
+  \textbf{Database Navigator}：增强的数据库工具，支持多种数据库
+
+  \begin{itemize}
+  \tightlist
+  \item
+    支持数据库连接、查询、导航和数据编辑
+  \end{itemize}
+\item
+  \textbf{SonarLint}：实时代码质量检查
+
+  \begin{itemize}
+  \tightlist
+  \item
+    根据SonarQube规则检查代码质量问题
+  \end{itemize}
+\item
+  \textbf{GitToolBox}：增强Git集成
+
+  \begin{itemize}
+  \tightlist
+  \item
+    显示行级别的最后修改信息，提升代码协作
+  \end{itemize}
+\item
+  \textbf{Rainbow Brackets}：用彩色区分嵌套的括号
+
+  \begin{itemize}
+  \tightlist
+  \item
+    提高代码嵌套层次的可读性
+  \end{itemize}
+\item
+  \textbf{Key Promoter X}：快捷键学习助手
+
+  \begin{itemize}
+  \tightlist
+  \item
+    提示可用的快捷键，帮助养成使用快捷键的习惯
+  \end{itemize}
+\item
+  \textbf{PlantUML Integration}：支持UML图直接在IDE中编辑和预览
+
+  \begin{itemize}
+  \tightlist
+  \item
+    对水利系统架构和流程图绘制很有帮助
+  \end{itemize}
+\end{enumerate}
+
+\subsubsection{Spring
+Boot项目配置}\label{spring-bootux9879ux76eeux914dux7f6e}
+
+配置智慧水利平台的Spring Boot项目：
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{运行配置}：
+
+  \begin{itemize}
+  \tightlist
+  \item
+    创建Spring
+    Boot运行配置：\passthrough{\lstinline!Run > Edit Configurations > + > Spring Boot!}
+  \item
+    设置主类、环境变量、JVM参数等
+  \end{itemize}
+\item
+  \textbf{多环境配置}：
+
+  \begin{itemize}
+  \tightlist
+  \item
+    使用Spring Profiles管理不同环境
+  \item
+    在运行配置的\passthrough{\lstinline!Environment Variables!}中添加：\passthrough{\lstinline!spring.profiles.active=dev!}
+  \end{itemize}
+\item
+  \textbf{热部署配置}：
+
+  \begin{itemize}
+  \tightlist
+  \item
+    添加Spring Boot DevTools依赖
+  \end{itemize}
+
+\begin{lstlisting}[language=XML]
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-devtools</artifactId>
+    <scope>runtime</scope>
+    <optional>true</optional>
+</dependency>
+\end{lstlisting}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    设置：\passthrough{\lstinline!Settings > Build, Execution, Deployment > Compiler > Build project automatically!}
+  \item
+    开启运行时自动重载：\passthrough{\lstinline!Registry (Ctrl+Alt+Shift+/)!}中勾选\passthrough{\lstinline!compiler.automake.allow.when.app.running!}
+  \end{itemize}
+\item
+  \textbf{Actuator配置}：
+
+  \begin{itemize}
+  \tightlist
+  \item
+    添加Spring Boot Actuator依赖
+  \end{itemize}
+
+\begin{lstlisting}[language=XML]
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-actuator</artifactId>
+</dependency>
+\end{lstlisting}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Actuator端点可在IDE中直接访问和查看
+  \end{itemize}
+\end{enumerate}
+
+\subsection{3.4.5.3 Visual Studio
+Code配置与使用}\label{visual-studio-codeux914dux7f6eux4e0eux4f7fux7528}
+
+Visual Studio
+Code因其轻量级、高扩展性成为智慧水利平台前端开发的主流选择。
+
+\subsubsection{基本配置}\label{ux57faux672cux914dux7f6e-1}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  \textbf{设置配置}：
+
+  \begin{itemize}
+  \tightlist
+  \item
+    打开设置：\passthrough{\lstinline!File > Preferences > Settings!} 或
+    \passthrough{\lstinline!Ctrl+,!}
+  \item
+    使用JSON配置：点击右上角的\passthrough{\lstinline!\{\}!} 图标
+  \end{itemize}
+\item
+  \textbf{常用设置}：
+
+\begin{lstlisting}
+{
+  "editor.formatOnSave": true,
+  "editor.tabSize": 2,
+  "editor.fontSize": 14,
+  "editor.wordWrap": "on",
+  "files.autoSave": "afterDelay",
+  "files.autoSaveDelay": 1000,
+  "workbench.colorTheme": "One Dark Pro",
+  "terminal.integrated.shell.windows": "C:\\Program Files\\Git\\bin\\bash.exe",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  }
+}
+\end{lstlisting}
+\end{enumerate}
+
+\subsubsection{前端开发扩展推荐}\label{ux524dux7aefux5f00ux53d1ux6269ux5c55ux63a8ux8350}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{ESLint}：JavaScript代码质量检查
+
+  \begin{itemize}
+  \tightlist
+  \item
+    配置：在项目根目录创建\passthrough{\lstinline!.eslintrc.js!}
+  \end{itemize}
+\item
+  \textbf{Prettier - Code formatter}：代码格式化工具
+
+  \begin{itemize}
+  \tightlist
+  \item
+    配置：在项目根目录创建\passthrough{\lstinline!.prettierrc!}
+  \end{itemize}
+
+\begin{lstlisting}
+{
+  "semi": false,
+  "singleQuote": true,
+  "trailingComma": "none",
+  "printWidth": 100
+}
+\end{lstlisting}
+\item
+  \textbf{Vetur}：Vue.js工具
+
+  \begin{itemize}
+  \tightlist
+  \item
+    提供语法高亮、智能感知、调试等功能
+  \end{itemize}
+\item
+  \textbf{Vue VSCode Snippets}：Vue代码片段
+
+  \begin{itemize}
+  \tightlist
+  \item
+    快速生成Vue组件模板
+  \end{itemize}
+\item
+  \textbf{Auto Import}：自动导入语句
+
+  \begin{itemize}
+  \tightlist
+  \item
+    自动添加import语句，提高开发效率
+  \end{itemize}
+\item
+  \textbf{Path Intellisense}：路径自动完成
+
+  \begin{itemize}
+  \tightlist
+  \item
+    在导入文件时提供路径建议
+  \end{itemize}
+\item
+  \textbf{Debugger for Chrome}：浏览器调试
+
+  \begin{itemize}
+  \tightlist
+  \item
+    在VSCode中直接调试Chrome中运行的JavaScript
+  \end{itemize}
+\item
+  \textbf{REST Client}：API测试工具
+
+  \begin{itemize}
+  \tightlist
+  \item
+    在编辑器中直接发送HTTP请求和查看响应
+  \end{itemize}
+\item
+  \textbf{Live Server}：本地开发服务器
+
+  \begin{itemize}
+  \tightlist
+  \item
+    提供实时重载功能的轻量级服务器
+  \end{itemize}
+\end{enumerate}
+
+\subsubsection{常用快捷键}\label{ux5e38ux7528ux5febux6377ux952e-1}
+
+提高Visual Studio Code使用效率的快捷键(Windows)：
+
+\begin{longtable}[]{@{}ll@{}}
+\toprule\noalign{}
+操作 & 快捷键 \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+命令面板 & Ctrl + Shift + P \\
+快速打开文件 & Ctrl + P \\
+设置 & Ctrl + , \\
+侧边栏切换 & Ctrl + B \\
+集成终端 & Ctrl + ` \\
+多光标编辑 & Alt + 点击 \\
+向上/下选择多行 & Ctrl + Alt + ↑/↓ \\
+选择当前单词的所有匹配项 & Ctrl + Shift + L \\
+向上/下移动行 & Alt + ↑/↓ \\
+向上/下复制行 & Shift + Alt + ↑/↓ \\
+删除行 & Ctrl + Shift + K \\
+在下方插入行 & Ctrl + Enter \\
+在上方插入行 & Ctrl + Shift + Enter \\
+转到定义 & F12 \\
+查看引用 & Shift + F12 \\
+格式化文档 & Shift + Alt + F \\
+代码折叠/展开 & Ctrl + Shift + {[} / {]} \\
+重命名符号 & F2 \\
+注释/取消注释 & Ctrl + / \\
+\end{longtable}
+
+\subsubsection{Vue项目配置}\label{vueux9879ux76eeux914dux7f6e}
+
+在VS Code中配置智慧水利平台的Vue前端项目：
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{项目启动配置}：
+
+  \begin{itemize}
+  \tightlist
+  \item
+    创建启动配置：\passthrough{\lstinline!.vscode/launch.json!}
+  \end{itemize}
+
+\begin{lstlisting}
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "Launch Chrome against localhost",
+      "url": "http://localhost:8080",
+      "webRoot": "${workspaceFolder}"
+    }
+  ]
+}
+\end{lstlisting}
+\item
+  \textbf{ESLint + Prettier集成}：
+
+  \begin{itemize}
+  \tightlist
+  \item
+    安装依赖：
+  \end{itemize}
+
+\begin{lstlisting}[language=bash]
+npm install --save-dev eslint prettier eslint-plugin-vue eslint-config-prettier eslint-plugin-prettier
+\end{lstlisting}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    配置\passthrough{\lstinline!.eslintrc.js!}:
+  \end{itemize}
+
+\begin{lstlisting}
+module.exports = {
+  root: true,
+  env: {
+    node: true
+  },
+  extends: [
+    'plugin:vue/essential',
+    'eslint:recommended',
+    'plugin:prettier/recommended'
+  ],
+  rules: {
+    'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
+    'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off'
+  },
+  parserOptions: {
+    parser: 'babel-eslint'
+  }
+}
+\end{lstlisting}
+\item
+  \textbf{VS Code工作区设置}：
+
+  \begin{itemize}
+  \tightlist
+  \item
+    创建\passthrough{\lstinline!.vscode/settings.json!}:
+  \end{itemize}
+
+\begin{lstlisting}
+{
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  },
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "vue"
+  ],
+  "vetur.format.defaultFormatter.html": "prettier",
+  "vetur.format.defaultFormatter.js": "prettier",
+  "vetur.format.defaultFormatter.css": "prettier"
+}
+\end{lstlisting}
+\end{enumerate}
+
+\subsection{3.4.5.4
+调试与性能分析工具}\label{ux8c03ux8bd5ux4e0eux6027ux80fdux5206ux6790ux5de5ux5177}
+
+智慧水利平台开发过程中的调试和性能分析工具介绍。
+
+\subsubsection{Java应用调试工具}\label{javaux5e94ux7528ux8c03ux8bd5ux5de5ux5177}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{IntelliJ IDEA调试器}：
+
+  \begin{itemize}
+  \tightlist
+  \item
+    基本调试：断点、步进、步过、步出
+  \item
+    条件断点：右键断点 \textgreater{} More \textgreater{} Condition
+  \item
+    表达式求值：选择表达式 \textgreater{} 右键 \textgreater{} Evaluate
+    Expression
+  \item
+    观察窗口：调试时使用Variables、Watches窗口
+  \item
+    远程调试：\passthrough{\lstinline!Run > Edit Configurations > + > Remote JVM Debug!}
+  \end{itemize}
+\item
+  \textbf{JVisualVM}：
+
+  \begin{itemize}
+  \tightlist
+  \item
+    可视化JVM监控和性能分析工具
+  \item
+    监控CPU、内存使用情况
+  \item
+    提供堆转储和线程转储分析
+  \item
+    安装步骤：
+  \end{itemize}
+
+\begin{lstlisting}[language=bash]
+# 从Oracle官网下载并安装
+# 或使用SDKMAN安装
+sdk install visualvm
+\end{lstlisting}
+\item
+  \textbf{Arthas}：
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Alibaba开源的Java诊断工具
+  \item
+    实时排查线上问题
+  \item
+    安装使用：
+  \end{itemize}
+
+\begin{lstlisting}[language=bash]
+# 下载arthas
+curl -O https://arthas.aliyun.com/arthas-boot.jar
+# 启动arthas
+java -jar arthas-boot.jar
+\end{lstlisting}
+\item
+  \textbf{Java Flight Recorder}：
+
+  \begin{itemize}
+  \tightlist
+  \item
+    JDK内置的性能数据收集工具
+  \item
+    几乎零性能影响的数据收集
+  \item
+    使用示例：
+  \end{itemize}
+
+\begin{lstlisting}[language=bash]
+# 启动应用时开启JFR
+java -XX:+FlightRecorder -XX:StartFlightRecording=duration=60s,filename=myrecording.jfr MyApp
+
+# 对运行中的应用启动JFR
+jcmd <pid> JFR.start duration=60s filename=myrecording.jfr
+\end{lstlisting}
+\end{enumerate}
+
+\subsubsection{JavaScript/前端调试工具}\label{javascriptux524dux7aefux8c03ux8bd5ux5de5ux5177}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Chrome DevTools}：
+
+  \begin{itemize}
+  \tightlist
+  \item
+    元素面板：检查和修改DOM
+  \item
+    控制台：JavaScript调试和执行
+  \item
+    源代码面板：设置断点和单步执行
+  \item
+    网络面板：分析HTTP请求
+  \item
+    性能面板：分析运行时性能
+  \item
+    内存面板：查找内存泄漏
+  \item
+    应用面板：管理存储和缓存
+  \end{itemize}
+\item
+  \textbf{Vue Devtools}：
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Vue专用的调试工具
+  \item
+    组件树浏览和检查
+  \item
+    Vuex状态管理检查
+  \item
+    性能分析
+  \item
+    安装：Chrome/Firefox商店搜索''Vue Devtools''
+  \end{itemize}
+\item
+  \textbf{JavaScript性能分析}：
+
+  \begin{itemize}
+  \tightlist
+  \item
+    使用Performance API:
+  \end{itemize}
+
+\begin{lstlisting}
+// 开始计时
+performance.mark('startTask');
+
+// 执行任务
+doSomethingExpensive();
+
+// 结束计时
+performance.mark('endTask');
+
+// 计算并输出耗时
+performance.measure('Task Duration', 'startTask', 'endTask');
+console.log(performance.getEntriesByName('Task Duration')[0].duration);
+\end{lstlisting}
+\end{enumerate}
+
+\subsubsection{数据库调试工具}\label{ux6570ux636eux5e93ux8c03ux8bd5ux5de5ux5177}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{DataGrip / Database工具}：
+
+  \begin{itemize}
+  \tightlist
+  \item
+    IntelliJ IDEA内置或独立的数据库工具
+  \item
+    支持多种数据库系统
+  \item
+    提供SQL编辑、执行、优化功能
+  \item
+    支持数据导出和导入
+  \end{itemize}
+\item
+  \textbf{MySQL Explain}：
+
+  \begin{itemize}
+  \tightlist
+  \item
+    分析SQL查询的执行计划
+  \end{itemize}
+
+\begin{lstlisting}[language=SQL]
+EXPLAIN SELECT * FROM water_stations WHERE basin_id = 5;
+\end{lstlisting}
+\item
+  \textbf{PostgreSQL EXPLAIN ANALYZE}：
+
+  \begin{itemize}
+  \tightlist
+  \item
+    分析SQL查询的执行计划和实际执行情况
+  \end{itemize}
+
+\begin{lstlisting}[language=SQL]
+EXPLAIN ANALYZE 
+SELECT s.name, avg(wl.water_level) 
+FROM stations s 
+JOIN water_levels wl ON s.id = wl.station_id 
+WHERE wl.measurement_time > NOW() - INTERVAL '24 hours' 
+GROUP BY s.name;
+\end{lstlisting}
+\item
+  \textbf{Redis CLI Monitor}：
+
+  \begin{itemize}
+  \tightlist
+  \item
+    实时监控Redis命令
+  \end{itemize}
+
+\begin{lstlisting}[language=bash]
+redis-cli monitor
+\end{lstlisting}
+\end{enumerate}
+
+\subsubsection{接口测试工具}\label{ux63a5ux53e3ux6d4bux8bd5ux5de5ux5177}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Postman}：
+
+  \begin{itemize}
+  \tightlist
+  \item
+    API测试和文档工具
+  \item
+    创建请求集合和环境
+  \item
+    自动化测试脚本
+  \item
+    团队共享和协作
+  \end{itemize}
+\item
+  \textbf{IntelliJ IDEA HTTP Client}：
+
+  \begin{itemize}
+  \tightlist
+  \item
+    创建\passthrough{\lstinline!.http!}文件：
+  \end{itemize}
+
+\begin{lstlisting}
+### 获取所有站点
+GET http://localhost:8080/api/stations
+Accept: application/json
+
+### 创建新站点
+POST http://localhost:8080/api/stations
+Content-Type: application/json
+
+{
+  "name": "测试站点",
+  "code": "TEST001",
+  "latitude": 32.0584,
+  "longitude": 118.7965,
+  "type": "RIVER"
+}
+\end{lstlisting}
+\item
+  \textbf{VS Code REST Client}：
+
+  \begin{itemize}
+  \tightlist
+  \item
+    类似于IDEA的HTTP Client
+  \item
+    支持环境变量和文件上传
+  \item
+    可直接在编辑器中查看响应
+  \end{itemize}
+\end{enumerate}
+
+\subsection{3.4.5.5
+智慧水利项目IDE最佳实践}\label{ux667aux6167ux6c34ux5229ux9879ux76eeideux6700ux4f73ux5b9eux8df5}
+
+基于实际项目经验，以下是智慧水利平台开发的IDE最佳实践。
+
+\subsubsection{团队IDE标准化}\label{ux56e2ux961fideux6807ux51c6ux5316}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{统一IDE版本}：
+
+  \begin{itemize}
+  \tightlist
+  \item
+    团队使用相同版本的IDE，避免兼容性问题
+  \item
+    例如：IntelliJ IDEA 2023.1和VS Code 1.70.0
+  \end{itemize}
+\item
+  \textbf{共享IDE配置}：
+
+  \begin{itemize}
+  \tightlist
+  \item
+    提交.idea目录下的选定文件或.vscode目录
+  \item
+    使用IDE配置同步功能（如IDEA的Settings Repository）
+  \end{itemize}
+\item
+  \textbf{标准化代码风格}：
+
+  \begin{itemize}
+  \tightlist
+  \item
+    使用EditorConfig维护跨IDE的代码风格
+  \item
+    创建\passthrough{\lstinline!.editorconfig!}文件：
+  \end{itemize}
+
+\begin{lstlisting}
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+indent_style = space
+indent_size = 2
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+[*.java]
+indent_size = 4
+
+[*.md]
+trim_trailing_whitespace = false
+\end{lstlisting}
+\item
+  \textbf{代码质量工具集成}：
+
+  \begin{itemize}
+  \tightlist
+  \item
+    在IDE中集成统一的代码检查工具（如SonarLint）
+  \item
+    配置相同的规则集和检查级别
+  \end{itemize}
+\end{enumerate}
+
+\subsubsection{大型项目性能优化}\label{ux5927ux578bux9879ux76eeux6027ux80fdux4f18ux5316}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{IntelliJ IDEA性能优化}：
+
+  \begin{itemize}
+  \tightlist
+  \item
+    调整JVM内存：\passthrough{\lstinline!Help > Edit Custom VM Options!}
+  \end{itemize}
+
+\begin{lstlisting}
+-Xms1g
+-Xmx4g
+\end{lstlisting}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    关闭不必要的插件：\passthrough{\lstinline!File > Settings > Plugins!}
+  \item
+    使用SSD存储项目文件
+  \item
+    排除大型目录：\passthrough{\lstinline!File > Settings > Project > Directories!}将\passthrough{\lstinline!node\_modules!}等标记为\passthrough{\lstinline!Excluded!}
+  \end{itemize}
+\item
+  \textbf{VS Code性能优化}：
+
+  \begin{itemize}
+  \tightlist
+  \item
+    限制扩展在特定工作区的启用
+  \item
+    使用\passthrough{\lstinline!.gitignore!}减少文件索引
+  \item
+    设置`:
+  \end{itemize}
+
+\begin{lstlisting}
+{
+  "files.watcherExclude": {
+    "**/node_modules/**": true,
+    "**/dist/**": true
+  },
+  "files.exclude": {
+    "**/node_modules": true,
+    "**/dist": true
+  }
+}
+\end{lstlisting}
+\end{enumerate}
+
+\subsubsection{典型项目配置实例}\label{ux5178ux578bux9879ux76eeux914dux7f6eux5b9eux4f8b}
+
+\textbf{智慧水利监测系统项目结构及IDE配置}：
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{项目结构}：
+\end{enumerate}
+
+\begin{lstlisting}
+water-monitoring-system/
+├── backend/                 # Spring Boot后端
+│   ├── .idea/               # IDEA配置目录
+│   ├── src/
+│   ├── pom.xml
+│   └── .editorconfig
+├── frontend/                # Vue.js前端
+│   ├── .vscode/             # VS Code配置目录
+│   ├── src/
+│   ├── package.json
+│   └── .eslintrc.js
+├── docker/                  # Docker配置
+├── .gitignore
+└── README.md
+\end{lstlisting}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{1}
+\tightlist
+\item
+  \textbf{后端IDEA配置(\passthrough{\lstinline!backend/.idea/runConfigurations/!})}：
+\end{enumerate}
+
+\begin{lstlisting}[language=XML]
+<!-- 开发环境运行配置 -->
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="WaterMonitoringApplication DEV" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+    <module name="water-monitoring-application" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="com.example.water.WaterMonitoringApplication" />
+    <option name="VM_PARAMETERS" value="-Xms512m -Xmx1g" />
+    <option name="ALTERNATIVE_JRE_PATH" />
+    <envs>
+      <env name="spring.profiles.active" value="dev" />
+    </envs>
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
+\end{lstlisting}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{2}
+\tightlist
+\item
+  \textbf{前端VS
+  Code工作区配置(\passthrough{\lstinline!frontend/.vscode/settings.json!})}：
+\end{enumerate}
+
+\begin{lstlisting}
+{
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  },
+  "files.autoSave": "afterDelay",
+  "files.autoSaveDelay": 1000,
+  "eslint.validate": ["javascript", "vue"],
+  "vetur.format.defaultFormatter.html": "prettier",
+  "vetur.format.defaultFormatter.js": "prettier",
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/dist": true
+  }
+}
+\end{lstlisting}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{3}
+\tightlist
+\item
+  \textbf{前端启动和调试配置(\passthrough{\lstinline!frontend/.vscode/launch.json!})}：
+\end{enumerate}
+
+\begin{lstlisting}
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "Launch Chrome against localhost",
+      "url": "http://localhost:8080",
+      "webRoot": "${workspaceFolder}",
+      "sourceMapPathOverrides": {
+        "webpack:///src/*": "${webRoot}/src/*"
+      }
+    }
+  ]
+}
+\end{lstlisting}
+
+\subsection{思考与练习}\label{ux601dux8003ux4e0eux7ec3ux4e60}
+
+\subsubsection{思考题}\label{ux601dux8003ux9898}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  对于一个典型的智慧水利平台开发团队，在选择IDE时应考虑哪些因素？如何权衡不同IDE的优缺点来做出最适合团队的选择？
+\item
+  在使用IntelliJ
+  IDEA开发智慧水利平台后端时，有哪些配置和插件可以显著提高开发效率？请结合具体的开发场景进行分析。
+\item
+  对于同时包含前端和后端的智慧水利全栈项目，如何配置IDE环境以实现更高效的开发？是选择单一IDE还是不同角色使用不同IDE？为什么？
+\item
+  智慧水利平台通常需要处理大量数据，在开发过程中如何利用IDE的调试和性能分析工具发现并解决性能瓶颈？
+\end{enumerate}
+
+\subsubsection{实践练习}\label{ux5b9eux8df5ux7ec3ux4e60}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  使用IntelliJ IDEA配置一个完整的Spring
+  Boot项目环境，要求：配置多环境(dev/test/prod)、集成lombok、配置热加载、设置合理的代码风格和检查规则。
+\item
+  在Visual Studio
+  Code中设置一个Vue.js前端项目的开发环境，包括ESLint+Prettier代码格式化、调试配置、组件库(如Element
+  UI)集成，提交配置文件到版本控制系统。
+\item
+  使用IDE的性能分析工具，对一个示例智慧水利数据处理函数进行性能分析，找出瓶颈并优化，对比优化前后的性能指标。
+\end{enumerate}

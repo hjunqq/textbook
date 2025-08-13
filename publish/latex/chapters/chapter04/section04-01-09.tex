@@ -1,0 +1,454 @@
+\section{CSS3响应式设计}\label{css3ux54cdux5e94ux5f0fux8bbeux8ba1}
+
+\subsection{1.
+响应式设计概述}\label{ux54cdux5e94ux5f0fux8bbeux8ba1ux6982ux8ff0}
+
+响应式设计是一种网页设计方法，使网站能够自动适应不同设备和屏幕尺寸。在智慧水利平台中，响应式设计确保系统在电脑、平板和手机等各种设备上都能提供良好的用户体验。
+
+响应式设计主要包含三个核心技术： - 流体网格布局（Fluid Grid） -
+灵活的图像（Flexible Images） - 媒体查询（Media Queries）
+
+\subsection{2. 媒体查询基础}\label{ux5a92ux4f53ux67e5ux8be2ux57faux7840}
+
+媒体查询是CSS3中的核心功能，允许我们根据设备特性（如屏幕宽度、高度、方向等）有选择地应用样式。
+
+\subsubsection{基本语法}\label{ux57faux672cux8bedux6cd5}
+
+\begin{lstlisting}
+@media mediatype and (expression) {
+  /* CSS规则 */
+}
+\end{lstlisting}
+
+常用的媒体类型： - \passthrough{\lstinline!all!}：适用于所有设备 -
+\passthrough{\lstinline!screen!}：适用于屏幕 -
+\passthrough{\lstinline!print!}：适用于打印预览模式/打印页面
+
+常用的媒体特性： -
+\passthrough{\lstinline!width!}/\passthrough{\lstinline!min-width!}/\passthrough{\lstinline!max-width!}：视口宽度
+-
+\passthrough{\lstinline!height!}/\passthrough{\lstinline!min-height!}/\passthrough{\lstinline!max-height!}：视口高度
+- \passthrough{\lstinline!orientation!}：设备方向（portrait或landscape）
+- \passthrough{\lstinline!aspect-ratio!}：视口宽高比
+
+\subsubsection{媒体查询示例}\label{ux5a92ux4f53ux67e5ux8be2ux793aux4f8b}
+
+\begin{lstlisting}
+/* 当屏幕宽度小于768px时应用 */
+@media screen and (max-width: 768px) {
+  .water-data-container {
+    flex-direction: column;
+  }
+  
+  .monitoring-station {
+    width: 100%;
+  }
+}
+
+/* 当屏幕宽度在768px到1024px之间时应用 */
+@media screen and (min-width: 768px) and (max-width: 1024px) {
+  .dashboard-card {
+    width: 45%;
+  }
+}
+\end{lstlisting}
+
+\subsection{3.
+智慧水利平台的响应式布局策略}\label{ux667aux6167ux6c34ux5229ux5e73ux53f0ux7684ux54cdux5e94ux5f0fux5e03ux5c40ux7b56ux7565}
+
+\subsubsection{移动优先设计}\label{ux79fbux52a8ux4f18ux5148ux8bbeux8ba1}
+
+移动优先设计是一种先考虑移动设备然后再扩展到更大屏幕的方法。
+
+\begin{lstlisting}
+/* 基本样式（移动设备） */
+.water-monitoring-panel {
+  width: 100%;
+  padding: 10px;
+}
+
+/* 平板设备 */
+@media screen and (min-width: 768px) {
+  .water-monitoring-panel {
+    width: 80%;
+    padding: 15px;
+  }
+}
+
+/* 桌面设备 */
+@media screen and (min-width: 1024px) {
+  .water-monitoring-panel {
+    width: 70%;
+    padding: 20px;
+  }
+}
+\end{lstlisting}
+
+\subsubsection{断点设置}\label{ux65adux70b9ux8bbeux7f6e}
+
+智慧水利平台的常用断点：
+
+\begin{lstlisting}
+/* 小型移动设备 */
+@media screen and (max-width: 480px) { ... }
+
+/* 大型移动设备/小型平板 */
+@media screen and (min-width: 481px) and (max-width: 767px) { ... }
+
+/* 平板设备 */
+@media screen and (min-width: 768px) and (max-width: 1023px) { ... }
+
+/* 小型桌面 */
+@media screen and (min-width: 1024px) and (max-width: 1279px) { ... }
+
+/* 大型桌面 */
+@media screen and (min-width: 1280px) { ... }
+\end{lstlisting}
+
+\subsection{4.
+弹性盒子布局（Flexbox）}\label{ux5f39ux6027ux76d2ux5b50ux5e03ux5c40flexbox}
+
+Flexbox是实现响应式布局的强大工具，特别适合一维布局（行或列）。
+
+\subsubsection{基本用法}\label{ux57faux672cux7528ux6cd5}
+
+\begin{lstlisting}
+.water-data-dashboard {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.data-card {
+  flex: 1 0 300px;
+  margin: 10px;
+}
+
+@media screen and (max-width: 768px) {
+  .data-card {
+    flex: 1 0 100%;
+  }
+}
+\end{lstlisting}
+
+\subsubsection{智慧水利平台应用场景}\label{ux667aux6167ux6c34ux5229ux5e73ux53f0ux5e94ux7528ux573aux666f}
+
+\begin{lstlisting}
+/* 水位监测站点列表 */
+.monitoring-stations-list {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.station-card {
+  flex: 1 0 23%;
+  margin: 1%;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* 平板设备 */
+@media screen and (max-width: 1024px) {
+  .station-card {
+    flex: 1 0 48%;
+  }
+}
+
+/* 移动设备 */
+@media screen and (max-width: 480px) {
+  .station-card {
+    flex: 1 0 100%;
+  }
+}
+\end{lstlisting}
+
+\subsection{5. 网格布局（Grid
+Layout）}\label{ux7f51ux683cux5e03ux5c40grid-layout}
+
+CSS Grid是二维布局系统，对于复杂的页面结构特别有用。
+
+\subsubsection{基本用法}\label{ux57faux672cux7528ux6cd5-1}
+
+\begin{lstlisting}
+.dashboard-layout {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-gap: 20px;
+}
+
+@media screen and (max-width: 1024px) {
+  .dashboard-layout {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .dashboard-layout {
+    grid-template-columns: 1fr;
+  }
+}
+\end{lstlisting}
+
+\subsubsection{智慧水利平台仪表盘示例}\label{ux667aux6167ux6c34ux5229ux5e73ux53f0ux4eeaux8868ux76d8ux793aux4f8b}
+
+\begin{lstlisting}
+.water-dashboard {
+  display: grid;
+  grid-template-areas:
+    "header header header"
+    "sidebar main main"
+    "sidebar stats stats";
+  grid-template-rows: 80px 1fr 200px;
+  grid-template-columns: 250px 1fr 1fr;
+  height: 100vh;
+}
+
+.dashboard-header { grid-area: header; }
+.dashboard-sidebar { grid-area: sidebar; }
+.dashboard-main { grid-area: main; }
+.dashboard-stats { grid-area: stats; }
+
+/* 平板布局 */
+@media screen and (max-width: 1024px) {
+  .water-dashboard {
+    grid-template-areas:
+      "header header"
+      "sidebar main"
+      "stats stats";
+    grid-template-rows: 80px 1fr 200px;
+    grid-template-columns: 200px 1fr;
+  }
+}
+
+/* 移动设备布局 */
+@media screen and (max-width: 768px) {
+  .water-dashboard {
+    grid-template-areas:
+      "header"
+      "main"
+      "sidebar"
+      "stats";
+    grid-template-rows: 80px 1fr auto auto;
+    grid-template-columns: 1fr;
+  }
+}
+\end{lstlisting}
+
+\subsection{6.
+响应式图像和视频}\label{ux54cdux5e94ux5f0fux56feux50cfux548cux89c6ux9891}
+
+\subsubsection{响应式图像}\label{ux54cdux5e94ux5f0fux56feux50cf}
+
+\begin{lstlisting}
+.responsive-image {
+  max-width: 100%;
+  height: auto;
+}
+\end{lstlisting}
+
+使用\passthrough{\lstinline!srcset!}属性为不同屏幕提供不同分辨率的图像：
+
+\begin{lstlisting}[language=HTML]
+<img 
+  srcset="water-map-small.jpg 480w,
+          water-map-medium.jpg 768w,
+          water-map-large.jpg 1200w"
+  sizes="(max-width: 480px) 100vw,
+         (max-width: 768px) 80vw,
+         70vw"
+  src="water-map-medium.jpg"
+  alt="水利地图"
+  class="responsive-image">
+\end{lstlisting}
+
+\subsubsection{响应式视频}\label{ux54cdux5e94ux5f0fux89c6ux9891}
+
+\begin{lstlisting}
+.video-container {
+  position: relative;
+  overflow: hidden;
+  padding-top: 56.25%; /* 16:9 比例 */
+}
+
+.video-container iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+\end{lstlisting}
+
+\subsection{7. 响应式单位}\label{ux54cdux5e94ux5f0fux5355ux4f4d}
+
+\subsubsection{相对单位}\label{ux76f8ux5bf9ux5355ux4f4d}
+
+\begin{itemize}
+\tightlist
+\item
+  \passthrough{\lstinline!em!}：相对于父元素的字体大小
+\item
+  \passthrough{\lstinline!rem!}：相对于根元素（html）的字体大小
+\item
+  \passthrough{\lstinline!vw!}/\passthrough{\lstinline!vh!}：视口宽度/高度的百分比
+\item
+  \passthrough{\lstinline!\%!}：相对于父元素的百分比
+\end{itemize}
+
+\subsubsection{智慧水利平台中的应用}\label{ux667aux6167ux6c34ux5229ux5e73ux53f0ux4e2dux7684ux5e94ux7528}
+
+\begin{lstlisting}
+:root {
+  font-size: 16px;
+}
+
+.water-level-indicator {
+  height: 20vh;
+  width: 100%;
+  padding: 1rem;
+  font-size: 0.9rem;
+}
+
+.flow-rate-chart {
+  width: 90%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* 小屏幕设备 */
+@media screen and (max-width: 480px) {
+  :root {
+    font-size: 14px;
+  }
+  
+  .water-level-indicator {
+    height: 30vh;
+  }
+}
+\end{lstlisting}
+
+\subsection{8.
+响应式导航设计}\label{ux54cdux5e94ux5f0fux5bfcux822aux8bbeux8ba1}
+
+\subsubsection{移动端汉堡菜单}\label{ux79fbux52a8ux7aefux6c49ux5821ux83dcux5355}
+
+\begin{lstlisting}
+/* 桌面导航 */
+.nav-menu {
+  display: flex;
+  list-style: none;
+}
+
+.nav-item {
+  margin: 0 15px;
+}
+
+/* 汉堡菜单图标 */
+.menu-toggle {
+  display: none;
+}
+
+/* 移动设备 */
+@media screen and (max-width: 768px) {
+  .nav-menu {
+    display: none;
+    flex-direction: column;
+    position: absolute;
+    top: 60px;
+    left: 0;
+    width: 100%;
+    background: #fff;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  }
+  
+  .nav-menu.active {
+    display: flex;
+  }
+  
+  .nav-item {
+    margin: 0;
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .menu-toggle {
+    display: block;
+  }
+}
+\end{lstlisting}
+
+\subsection{9. 性能优化}\label{ux6027ux80fdux4f18ux5316}
+
+\subsubsection{优化响应式设计的性能}\label{ux4f18ux5316ux54cdux5e94ux5f0fux8bbeux8ba1ux7684ux6027ux80fd}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  使用\passthrough{\lstinline!will-change!}属性提前告知浏览器元素将要改变：
+\end{enumerate}
+
+\begin{lstlisting}
+.animated-water-flow {
+  will-change: transform;
+}
+\end{lstlisting}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{1}
+\tightlist
+\item
+  减少媒体查询的数量，合并相似的断点：
+\end{enumerate}
+
+\begin{lstlisting}
+/* 不推荐 */
+@media screen and (max-width: 768px) { ... }
+@media screen and (max-width: 767px) { ... }
+
+/* 推荐 */
+@media screen and (max-width: 768px) { ... }
+\end{lstlisting}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{2}
+\tightlist
+\item
+  避免过度使用高耗能的CSS属性，如\passthrough{\lstinline!box-shadow!}和\passthrough{\lstinline!filter!}。
+\end{enumerate}
+
+\subsection{10.
+跨浏览器兼容性}\label{ux8de8ux6d4fux89c8ux5668ux517cux5bb9ux6027}
+
+确保响应式设计在不同浏览器上的一致性：
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  使用Autoprefixer添加供应商前缀
+\item
+  使用Feature Queries检测功能支持：
+\end{enumerate}
+
+\begin{lstlisting}
+@supports (display: grid) {
+  .dashboard {
+    display: grid;
+  }
+}
+
+@supports not (display: grid) {
+  .dashboard {
+    display: flex;
+    flex-wrap: wrap;
+  }
+}
+\end{lstlisting}
+
+\subsection{总结}\label{ux603bux7ed3}
+
+响应式设计对智慧水利平台至关重要，它使系统界面能在各种设备上提供一致、优质的用户体验。通过媒体查询、弹性布局和响应式单位，我们可以创建适应不同屏幕尺寸的水利监测界面，确保数据可视化和操作控制在移动设备上同样高效和直观。

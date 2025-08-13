@@ -1,0 +1,121 @@
+% ========================================
+% 智慧水利平台架构与开发 - 主文档
+% 基于最佳实践的LaTeX教材模板
+% 版本: v1.0
+% 创建时间: 2025年8月7日
+% ========================================
+
+\documentclass[
+    12pt,           % 字体大小
+    a4paper,        % 纸张大小
+    twoside,        % 双面排版
+    openright,      % 章节从右页开始
+    UTF8            % UTF-8编码
+]{ctexbook}
+
+% ========================================
+% 引入模板配置
+% ========================================
+
+% 基础配置和样式定义
+\input{templates/basic-config}
+
+% 代码高亮配置
+\input{templates/code-highlighting}
+
+% 美化组件配置
+\input{templates/enhanced-components}
+
+% ========================================
+% 文档信息
+% ========================================
+
+\title{智慧水利平台架构与开发}
+\author{智慧水利教研团队}
+\date{2025年8月}
+
+% 设置PDF元数据
+\hypersetup{
+    pdftitle={智慧水利平台架构与开发},
+    pdfauthor={智慧水利教研团队},
+    pdfsubject={水利信息化、平台架构、软件开发},
+    pdfkeywords={智慧水利,平台架构,软件开发,大数据,人工智能},
+    pdfcreator={LaTeX with XeLaTeX},
+    colorlinks=true,
+    linkcolor=primarycolor,
+    citecolor=primarycolor,
+    urlcolor=primarycolor,
+    filecolor=primarycolor
+}
+
+% ========================================
+% 文档开始
+% ========================================
+
+\begin{document}
+
+% 封面页
+\frontmatter
+\maketitle
+
+% 版权页
+\input{templates/copyright}
+
+% 前言
+\input{templates/preface}
+
+% 目录
+\tableofcontents
+\listoffigures
+\listoftables
+\lstlistoflistings
+
+% ========================================
+% 正文内容
+% ========================================
+
+\mainmatter
+
+% 第一章 总论
+\input{chapters/chapter01/chapter01}
+
+% 第二章 软件工程基础与需求分析
+\input{chapters/chapter02/chapter02}
+
+% 第三章 软件模块详细设计
+\input{chapters/chapter03/chapter03}
+
+% 第四章 前端架构设计与开发
+\input{chapters/chapter04/chapter04}
+
+% 第五章 后端架构设计与开发
+\input{chapters/chapter05/chapter05}
+
+% 第六章 数据库设计与优化
+\input{chapters/chapter06/chapter06}
+
+% 第七章 系统集成与部署
+\input{chapters/chapter07/chapter07}
+
+% 第八章 系统测试与运维管理
+\input{chapters/chapter08/chapter08}
+
+% ========================================
+% 后记部分
+% ========================================
+
+\backmatter
+
+% 参考文献
+\input{templates/bibliography}
+
+% 附录
+\input{templates/appendices}
+
+% 术语表
+\input{templates/glossary}
+
+% 索引
+\printindex
+
+\end{document}

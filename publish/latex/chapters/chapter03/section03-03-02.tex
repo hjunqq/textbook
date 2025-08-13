@@ -1,0 +1,580 @@
+\section{微服务架构的核心原则}\label{ux5faeux670dux52a1ux67b6ux6784ux7684ux6838ux5fc3ux539fux5219}
+
+\begin{quote}
+本小节是\href{section03-03.md}{第三节 微服务架构基础}的一部分
+\end{quote}
+
+微服务架构的成功实施依赖于一系列核心原则的应用。这些原则指导着服务的设计、开发、部署和治理，确保微服务架构能够发挥其优势，而不是陷入分布式系统的复杂性陷阱。本小节将详细探讨这些核心原则，并结合智慧水利平台的具体场景进行分析。
+
+\subsection{3.2.1
+服务边界划分}\label{ux670dux52a1ux8fb9ux754cux5212ux5206}
+
+服务边界划分是微服务架构设计中最关键的环节之一，它直接影响系统的可维护性、扩展性和团队协作效率。良好的服务边界应该反映业务领域的自然边界，保持高内聚低耦合的特性。
+
+\subsubsection{按业务能力划分}\label{ux6309ux4e1aux52a1ux80fdux529bux5212ux5206}
+
+基于企业的业务能力和领域模型来划分服务是最常用的方法。业务能力代表组织为实现特定业务目标所需的能力，通常比组织结构更稳定。
+
+\textbf{智慧水利平台示例}： - 水情监测能力 → 水情监测服务 - 工程监测能力
+→ 工程安全监测服务 - 水资源管理能力 → 水资源管理服务 - 防汛抗旱能力 →
+防汛抗旱服务 - 水质监测能力 → 水质监测服务
+
+这种划分方式使得服务边界与业务领域一致，便于理解和维护。
+
+\subsubsection{领域驱动设计(DDD)方法}\label{ux9886ux57dfux9a71ux52a8ux8bbeux8ba1dddux65b9ux6cd5}
+
+领域驱动设计(Domain-Driven Design,
+DDD)提供了一套系统化的方法来识别服务边界。DDD中的几个关键概念对微服务划分尤为重要：
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  \textbf{限界上下文(Bounded
+  Context)}：限界上下文是一个明确定义的边界，在这个边界内，特定的领域模型和语言保持一致。不同上下文中，相同术语可能有不同的含义。
+
+  \textbf{示例}：在水利平台中，``水位''在水文监测上下文中可能表示河道或水库的实时水位高程，而在防汛预警上下文中则与警戒水位、保证水位等阈值关联。这两个上下文可以划分为不同的微服务。
+\item
+  \textbf{聚合根(Aggregate
+  Root)}：聚合是一组相关对象的集合，被视为一个单元进行数据变更。聚合根是聚合中的主实体，是外部访问聚合的唯一入口。
+
+  \textbf{示例}：在水库调度上下文中，``调度方案''可以作为一个聚合根，包含调度时间、目标水位、下泄流量等相关信息。
+\item
+  \textbf{领域事件(Domain
+  Event)}：领域事件是领域专家关心的事件，代表领域中发生的重要变化。
+
+  \textbf{示例}：在防汛抗旱服务中，``水位超过警戒线''是一个重要的领域事件，可能触发一系列预警和响应操作。
+\end{enumerate}
+
+通过识别限界上下文、聚合根和领域事件，可以更科学地划分微服务边界。
+
+\subsubsection{单一职责原则}\label{ux5355ux4e00ux804cux8d23ux539fux5219}
+
+一个服务应该只负责一个特定的业务功能或一组相关功能。遵循单一职责原则有助于保持服务的简单性和可维护性。
+
+\textbf{错误示例}：一个''水库管理服务''同时负责水位监测、水质分析、闸门控制和发电管理。
+
+\textbf{正确示例}：拆分为''水库监测服务''、``水质分析服务''、``闸门控制服务''和''发电管理服务''，每个服务专注于自己的职责领域。
+
+\subsubsection{高内聚低耦合}\label{ux9ad8ux5185ux805aux4f4eux8026ux5408}
+
+高内聚意味着服务内部的功能紧密相关，低耦合则要求服务之间的依赖最小化。这一原则有助于提高系统的可维护性和可扩展性。
+
+\textbf{高内聚示例}：水质监测服务包含水样采集、水质参数分析、水质评价等紧密相关的功能。
+
+\textbf{低耦合示例}：水质监测服务通过定义良好的API与水环境评价服务交互，而不是直接访问对方的数据库或共享内存。
+
+\subsubsection{服务边界的调整与演进}\label{ux670dux52a1ux8fb9ux754cux7684ux8c03ux6574ux4e0eux6f14ux8fdb}
+
+服务边界不是一成不变的，随着业务的发展和系统的演进，服务边界可能需要调整。微服务架构应该支持服务的拆分、合并和重组。
+
+\textbf{服务拆分}：当一个服务变得过于复杂或承担了过多职责时，可以考虑将其拆分为多个更小的服务。
+
+\textbf{服务合并}：如果发现两个服务之间的交互过于频繁，或者它们在业务上紧密相关，可以考虑将它们合并为一个服务。
+
+\textbf{重构边界}：随着对业务理解的深入，可能需要重新调整服务边界，使其更好地反映业务领域的结构。
+
+\subsection{3.2.2
+服务通信机制}\label{ux670dux52a1ux901aux4fe1ux673aux5236}
+
+微服务之间需要进行通信以完成复杂的业务流程。选择合适的通信机制对于系统的性能、可靠性和可维护性至关重要。微服务通信机制主要分为同步通信和异步通信两类。
+
+\subsubsection{同步通信}\label{ux540cux6b65ux901aux4fe1}
+
+同步通信是一种请求-响应模式，调用者发出请求后需要等待接收者的响应才能继续执行。
+
+\paragraph{REST API}\label{rest-api}
+
+REST(Representational State
+Transfer)是一种基于HTTP协议的轻量级通信方式，使用JSON或XML格式传输数据。
+
+\textbf{特点}： - 简单易用，无需特殊客户端库 - 基于标准HTTP方法（GET,
+POST, PUT, DELETE等） - 无状态，提高可伸缩性 - 良好的缓存支持
+
+\textbf{适用场景}：适合简单的请求-响应场景，如查询水库水位、获取降雨量等。
+
+\textbf{智慧水利示例}：
+
+\begin{lstlisting}
+// 获取水库实时水位
+GET /api/reservoirs/123/water-level
+
+// 响应
+{
+  "reservoirId": "123",
+  "name": "某水库",
+  "waterLevel": 105.6,
+  "unit": "m",
+  "timestamp": "2023-01-01T12:00:00Z",
+  "warningLevel": 110.0
+}
+\end{lstlisting}
+
+\paragraph{gRPC}\label{grpc}
+
+gRPC是Google开发的高性能RPC框架，基于HTTP/2协议和Protocol
+Buffers序列化机制，支持多种编程语言。
+
+\textbf{特点}： - 高性能，HTTP/2支持多路复用 -
+强类型接口定义（使用Protocol Buffers） - 支持双向流和流控制 -
+内置认证机制
+
+\textbf{适用场景}：适合对性能要求高、接口稳定的服务间通信，如实时数据采集、模型计算等。
+
+\textbf{智慧水利示例}：
+
+\begin{lstlisting}
+// 服务定义 (water_monitoring.proto)
+service WaterMonitoring {
+  rpc GetWaterLevelData(WaterLevelRequest) returns (WaterLevelResponse);
+  rpc StreamWaterLevelData(WaterLevelRequest) returns (stream WaterLevelData);
+}
+
+message WaterLevelRequest {
+  string station_id = 1;
+  int64 start_time = 2;
+  int64 end_time = 3;
+}
+
+message WaterLevelData {
+  string station_id = 1;
+  double water_level = 2;
+  int64 timestamp = 3;
+}
+
+message WaterLevelResponse {
+  repeated WaterLevelData data = 1;
+}
+\end{lstlisting}
+
+\paragraph{GraphQL}\label{graphql}
+
+GraphQL是Facebook开发的查询语言和运行时，允许客户端精确指定所需的数据，避免过度获取或获取不足的问题。
+
+\textbf{特点}： - 客户端可以精确指定所需的数据字段 -
+单一请求获取多个资源，减少网络往返 - 强类型系统，自我文档化 -
+版本化API的有效替代方案
+
+\textbf{适用场景}：适合复杂的数据查询和聚合场景，如综合数据看板、多维数据分析等。
+
+\textbf{智慧水利示例}：
+
+\begin{lstlisting}
+# 查询多个水库的水位、入库流量和下泄流量
+query {
+  reservoirs(ids: ["123", "456"]) {
+    id
+    name
+    waterLevel {
+      value
+      unit
+      timestamp
+    }
+    inflow {
+      value
+      unit
+    }
+    outflow {
+      value
+      unit
+    }
+  }
+}
+\end{lstlisting}
+
+\subsubsection{异步通信}\label{ux5f02ux6b65ux901aux4fe1}
+
+异步通信允许服务之间不直接耦合，发送者不需要等待接收者的响应。这种模式提高了系统的弹性和可扩展性。
+
+\paragraph{消息队列}\label{ux6d88ux606fux961fux5217}
+
+消息队列是一种点对点的通信机制，发送者将消息发送到队列，一个或多个消费者从队列接收消息。常用的消息队列产品有RabbitMQ、Kafka等。
+
+\textbf{特点}： - 解耦生产者和消费者 - 提供消息缓冲，处理流量峰值 -
+支持消息持久化，防止数据丢失 - 消息确认和重试机制
+
+\textbf{适用场景}：适合请求处理、任务分发等场景，如水质数据处理、报告生成等。
+
+\textbf{智慧水利示例}：
+
+\begin{lstlisting}[language=Java]
+// 水质监测服务发布水质异常消息
+public void publishWaterQualityAlert(WaterQualityAlert alert) {
+    String message = objectMapper.writeValueAsString(alert);
+    channel.basicPublish("water-alerts", "water-quality", 
+                         MessageProperties.PERSISTENT_TEXT_PLAIN, 
+                         message.getBytes());
+}
+
+// 预警服务消费水质异常消息
+public void consumeWaterQualityAlert() {
+    channel.basicConsume("water-quality-alerts", false, 
+        (consumerTag, delivery) -> {
+            String message = new String(delivery.getBody());
+            WaterQualityAlert alert = objectMapper.readValue(message, WaterQualityAlert.class);
+            processWaterQualityAlert(alert);
+            channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
+        }, 
+        consumerTag -> { });
+}
+\end{lstlisting}
+
+\paragraph{事件驱动架构}\label{ux4e8bux4ef6ux9a71ux52a8ux67b6ux6784}
+
+事件驱动架构是一种基于事件发布和订阅的通信模式。服务在发生重要状态变化时发布事件，其他对此事件感兴趣的服务可以订阅并响应。
+
+\textbf{特点}： - 高度解耦，发布者不关心谁在消费事件 -
+支持一对多通信，一个事件可以触发多个服务响应 -
+促进系统的可扩展性，新功能可以通过订阅现有事件实现 -
+提高系统的响应性和弹性
+
+\textbf{适用场景}：适合状态变化通知、跨系统集成等场景，如水位预警、闸门操作记录等。
+
+\textbf{智慧水利示例}：
+
+\begin{lstlisting}[language=Java]
+// 水位监测服务发布水位超警事件
+@EventListener
+public void onWaterLevelExceedsWarning(WaterLevelMeasurement measurement) {
+    if (measurement.getValue() > getWarningLevel(measurement.getStationId())) {
+        WaterLevelWarningEvent event = new WaterLevelWarningEvent(
+            measurement.getStationId(),
+            measurement.getValue(),
+            measurement.getTimestamp(),
+            WarningLevel.LEVEL_3
+        );
+        eventPublisher.publishEvent(event);
+    }
+}
+
+// 预警服务订阅水位超警事件
+@EventListener
+public void handleWaterLevelWarning(WaterLevelWarningEvent event) {
+    // 生成预警信息
+    Alert alert = createAlertFromEvent(event);
+    // 持久化预警信息
+    alertRepository.save(alert);
+    // 触发预警通知流程
+    notificationService.sendWarningNotifications(alert);
+}
+\end{lstlisting}
+
+\subsubsection{通信方式选择指南}\label{ux901aux4fe1ux65b9ux5f0fux9009ux62e9ux6307ux5357}
+
+在智慧水利平台中，不同场景适合不同的通信方式。以下是一些选择指南：
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  \textbf{实时性要求高的场景}：如水库调度、防汛预警等需要即时响应的场景，适合使用同步通信（REST、gRPC）。
+\item
+  \textbf{数据采集和处理场景}：如传感器数据采集、水质分析等涉及大量数据处理的场景，适合使用异步通信（消息队列、事件流）。
+\item
+  \textbf{复杂查询和数据聚合}：如综合态势分析、决策支持等需要从多个服务获取数据的场景，适合使用GraphQL或API组合。
+\item
+  \textbf{状态变化通知}：如水位预警、闸门操作等需要通知多个相关系统的场景，适合使用事件驱动模式。
+\item
+  \textbf{长时间运行的处理}：如水文模型计算、大数据分析等需要较长时间处理的任务，适合使用异步通信和后台作业。
+\end{enumerate}
+
+\subsection{3.2.3 服务治理}\label{ux670dux52a1ux6cbbux7406}
+
+随着微服务数量的增加，如何有效管理这些服务成为一个关键挑战。服务治理提供了一套机制来管理服务的注册、发现、配置、负载均衡、熔断、监控等方面，确保系统的可用性、可靠性和可维护性。
+
+\subsubsection{服务注册与发现}\label{ux670dux52a1ux6ce8ux518cux4e0eux53d1ux73b0}
+
+服务注册与发现是微服务架构的基础设施，它解决了服务实例如何被其他服务找到的问题。
+
+\textbf{工作原理}： 1.
+服务实例启动时向注册中心注册自己的网络位置和健康状态 2.
+服务实例定期发送心跳以确认其活动状态 3.
+服务消费者查询注册中心获取目标服务的位置信息 4.
+服务消费者使用负载均衡策略选择一个服务实例进行调用
+
+\textbf{主要技术}： -
+Eureka：Netflix开发的服务注册与发现工具，适合AWS环境 -
+Consul：HashiCorp开发的服务网格解决方案，提供服务发现、配置管理等功能 -
+Nacos：阿里巴巴开发的动态服务发现、配置管理和服务管理平台 - Kubernetes
+Service：容器编排平台提供的服务发现机制
+
+\textbf{智慧水利示例}：
+在智慧水利平台中，各区域的水位监测站服务可以注册到服务注册中心，当防汛决策支持服务需要获取特定区域的水位数据时，可以通过服务发现机制找到对应的监测站服务。
+
+\begin{lstlisting}
+# Nacos服务注册配置
+spring:
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 192.168.1.100:8848
+        namespace: water-monitoring
+        group: reservoir-monitoring
+        service: reservoir-water-level-service
+\end{lstlisting}
+
+\subsubsection{负载均衡}\label{ux8d1fux8f7dux5747ux8861}
+
+负载均衡将请求分配到多个服务实例，提高系统的吞吐量和可用性。
+
+\textbf{策略类型}： - 轮询（Round Robin）：按顺序将请求分配给后端服务器
+- 加权轮询（Weighted Round Robin）：根据服务器权重分配请求 -
+最少连接（Least Connection）：将请求发送到连接数最少的服务器 -
+随机（Random）：随机选择服务器处理请求 - 一致性哈希（Consistent
+Hashing）：确保特定请求总是路由到相同的服务器
+
+\textbf{实现方式}： -
+客户端负载均衡：客户端直接从服务注册中心获取服务列表，自行决定调用哪个实例
+- 服务端负载均衡：通过负载均衡器（如Nginx、HAProxy）作为代理，转发请求
+
+\textbf{智慧水利示例}：
+在流域监测系统中，多个实例的数据处理服务并行工作，客户端通过负载均衡器访问这些服务，确保系统能够处理高峰期的大量数据。
+
+\begin{lstlisting}[language=Java]
+// Spring Cloud LoadBalancer配置
+@Configuration
+public class LoadBalancerConfig {
+    @Bean
+    public ServiceInstanceListSupplier discoveryClientServiceInstanceListSupplier(
+            DiscoveryClient discoveryClient) {
+        return new WeightedServiceInstanceListSupplier(
+                new DiscoveryClientServiceInstanceListSupplier(discoveryClient),
+                new ConfigurableWeightedServiceInstanceListSupplier());
+    }
+}
+\end{lstlisting}
+
+\subsubsection{配置管理}\label{ux914dux7f6eux7ba1ux7406}
+
+集中式配置管理允许动态更新服务配置，而无需重启服务，提高系统的可管理性和灵活性。
+
+\textbf{特性}： - 配置中心化：所有配置集中管理，避免配置分散 -
+环境隔离：支持不同环境（开发、测试、生产）的配置隔离 -
+动态刷新：配置变更后自动通知相关服务刷新配置 -
+版本控制：跟踪配置变更历史，支持回滚 - 配置加密：敏感配置信息加密存储
+
+\textbf{主要技术}： - Spring Cloud Config：Spring Cloud生态的配置服务器
+- Apollo：携程开发的分布式配置中心 - Nacos：阿里巴巴开发的配置管理服务 -
+Consul KV Store：Consul提供的键值存储功能
+
+\textbf{智慧水利示例}：
+智慧水利平台可以通过配置中心管理不同水库的预警阈值、调度规则等配置，当需要调整这些参数时，只需在配置中心修改，无需重启相关服务。
+
+\begin{lstlisting}
+# Spring Cloud Config客户端配置
+spring:
+  cloud:
+    config:
+      uri: http://config-server:8888
+      name: reservoir-management
+      profile: production
+      label: master
+\end{lstlisting}
+
+\subsubsection{API网关}\label{apiux7f51ux5173}
+
+API网关作为系统的统一入口，负责请求路由、组合、协议转换等功能，简化客户端与微服务的交互。
+
+\textbf{核心功能}： - 路由转发：将请求路由到相应的后端服务 -
+认证与授权：集中处理身份验证和权限控制 -
+请求限流：控制API的调用频率，防止过载 -
+请求聚合：组合多个服务的响应，减少客户端请求次数 -
+协议转换：在不同协议之间进行转换（如HTTP到gRPC） -
+缓存：缓存频繁请求的响应，减轻后端服务负担
+
+\textbf{主要技术}： - Spring Cloud Gateway：基于Spring
+WebFlux的响应式API网关 - Zuul：Netflix开发的API网关，基于阻塞I/O -
+Kong：基于Nginx的API网关，提供丰富的插件生态 -
+APISIX：基于Nginx和etcd的云原生API网关
+
+\textbf{智慧水利示例}：
+智慧水利平台的API网关负责处理来自Web门户、移动应用和第三方系统的请求，进行身份验证、权限控制和请求路由，将请求转发到相应的微服务。
+
+\begin{lstlisting}
+# Spring Cloud Gateway路由配置
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: water-monitoring-service
+          uri: lb://water-monitoring-service
+          predicates:
+            - Path=/api/monitoring/**
+          filters:
+            - StripPrefix=2
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 10
+                redis-rate-limiter.burstCapacity: 20
+\end{lstlisting}
+
+\subsubsection{容错与熔断}\label{ux5bb9ux9519ux4e0eux7194ux65ad}
+
+容错与熔断机制用于处理服务故障，防止故障级联传播，提高系统的弹性。
+
+\textbf{关键模式}： - 断路器（Circuit
+Breaker）：监控服务调用的失败率，当失败率达到阈值时，断开电路，快速失败，防止请求堆积
+-
+隔舱（Bulkhead）：将服务调用隔离在独立的线程池中，防止一个服务的故障影响其他服务
+- 超时（Timeout）：为调用设置超时时间，避免长时间等待不响应的服务 -
+重试（Retry）：在遇到临时故障时自动重试请求 -
+回退（Fallback）：在服务调用失败时提供替代响应或执行替代逻辑
+
+\textbf{主要技术}： - Resilience4j：轻量级容错库，适用于Java
+8和函数式编程 - Hystrix：Netflix开发的延迟和容错库（已处于维护模式） -
+Sentinel：阿里巴巴开发的面向分布式服务架构的流量控制组件
+
+\textbf{智慧水利示例}：
+在防汛指挥系统中，即使某个水库的水位监测服务暂时不可用，系统也能通过断路器快速识别故障，提供上一次成功获取的数据作为回退，并触发告警，保证系统功能的基本可用。
+
+\begin{lstlisting}[language=Java]
+// Resilience4j断路器配置
+@Bean
+public CircuitBreaker waterLevelServiceCircuitBreaker() {
+    CircuitBreakerConfig config = CircuitBreakerConfig.custom()
+        .failureRateThreshold(50)
+        .waitDurationInOpenState(Duration.ofMillis(1000))
+        .slidingWindowSize(10)
+        .build();
+    return CircuitBreaker.of("waterLevelService", config);
+}
+
+// 使用断路器包装服务调用
+public WaterLevelData getWaterLevel(String stationId) {
+    return CircuitBreaker.decorateSupplier(
+        waterLevelServiceCircuitBreaker(),
+        () -> waterLevelService.getWaterLevel(stationId)
+    ).recover(throwable -> getLastKnownWaterLevel(stationId)).get();
+}
+\end{lstlisting}
+
+\subsubsection{监控与追踪}\label{ux76d1ux63a7ux4e0eux8ffdux8e2a}
+
+分布式监控与追踪系统帮助运维人员了解系统的运行状况，快速定位问题，提高系统的可观察性。
+
+\textbf{监控指标}： - 系统指标：CPU、内存、磁盘、网络等资源使用情况 -
+应用指标：请求数、响应时间、错误率、吞吐量等性能指标 -
+业务指标：特定业务流程的完成率、平均处理时间等
+
+\textbf{分布式追踪}： - 追踪请求在不同服务间的调用路径 -
+识别系统瓶颈和性能问题 - 分析请求延迟的来源 - 可视化服务间的依赖关系
+
+\textbf{主要技术}： - 监控系统：Prometheus、Grafana、Elastic Stack -
+分布式追踪：Jaeger、Zipkin、SkyWalking - 日志管理：ELK
+Stack、Loki、Fluentd
+
+\textbf{智慧水利示例}：
+在流域管理系统中，运维团队可以通过监控系统实时掌握各个微服务的健康状况和性能指标，当用户报告某个功能响应缓慢时，可以通过分布式追踪系统快速定位问题所在的服务及其调用链路。
+
+\begin{lstlisting}
+# Spring Boot Actuator监控配置
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+  tracing:
+    sampling:
+      probability: 1.0
+    propagation:
+      type: b3
+\end{lstlisting}
+
+\subsection{3.2.4
+微服务安全治理}\label{ux5faeux670dux52a1ux5b89ux5168ux6cbbux7406}
+
+在微服务架构中，安全问题变得更加复杂，需要特别关注身份认证、授权管理、通信加密等方面的安全治理。
+
+\subsubsection{身份认证与授权}\label{ux8eabux4efdux8ba4ux8bc1ux4e0eux6388ux6743}
+
+微服务架构中的身份认证和授权通常采用集中式管理，常见的模式包括：
+
+\textbf{单点登录(SSO)}： - 用户只需登录一次，即可访问所有授权的服务 -
+减少用户输入凭据的次数，提高用户体验 - 统一认证逻辑，降低安全风险
+
+\textbf{OAuth 2.0/OpenID Connect}： - OAuth
+2.0提供授权框架，允许第三方应用获取有限的访问权限 - OpenID
+Connect建立在OAuth 2.0之上，添加了身份验证层 -
+支持不同类型的客户端（Web应用、移动应用、单页应用等）
+
+\textbf{JWT(JSON Web Token)}： - 自包含令牌，包括用户信息和权限声明 -
+无需在服务器端存储会话状态 - 便于在微服务之间传递身份信息
+
+\textbf{智慧水利示例}： 智慧水利平台可以使用OAuth
+2.0和JWT实现身份认证和授权，用户登录后获取JWT令牌，之后的请求都携带该令牌，API网关验证令牌有效性并转发请求到相应的微服务。
+
+\begin{lstlisting}[language=Java]
+// Spring Security OAuth2资源服务器配置
+@Configuration
+@EnableResourceServer
+public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
+    @Override
+    public void configure(HttpSecurity http) throws Exception {
+        http.authorizeRequests()
+            .antMatchers("/api/public/**").permitAll()
+            .antMatchers("/api/admin/**").hasRole("ADMIN")
+            .antMatchers("/api/monitoring/**").hasRole("OPERATOR")
+            .anyRequest().authenticated();
+    }
+}
+\end{lstlisting}
+
+\subsubsection{通信安全}\label{ux901aux4fe1ux5b89ux5168}
+
+服务间通信的安全性对于微服务架构至关重要，需要考虑数据加密、传输安全等方面。
+
+\textbf{传输层安全(TLS/SSL)}： - 加密服务间通信，防止数据被窃听 -
+验证服务身份，防止中间人攻击 - 保证数据完整性，防止数据被篡改
+
+\textbf{服务间认证(mTLS)}： -
+相互TLS认证，客户端和服务器互相验证对方的身份 -
+提供端到端的加密和身份验证 - 防止未授权的服务访问内部API
+
+\textbf{API密钥和客户端证书}： - 为不同的服务或客户端分配唯一的API密钥 -
+使用客户端证书进行身份验证 - 实现细粒度的访问控制
+
+\textbf{智慧水利示例}：
+智慧水利平台可以使用服务网格（如Istio）实现服务间的mTLS通信，确保所有服务间流量都经过加密和身份验证，防止敏感的水利数据被泄露或篡改。
+
+\begin{lstlisting}
+# Istio mTLS配置
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: water-system-mtls
+  namespace: water-system
+spec:
+  mtls:
+    mode: STRICT
+\end{lstlisting}
+
+\subsection{思考与练习}\label{ux601dux8003ux4e0eux7ec3ux4e60}
+
+\subsubsection{思考题}\label{ux601dux8003ux9898}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  在智慧水利平台中，如何应用领域驱动设计的方法来划分微服务边界？请举例说明。
+\item
+  对于水文监测数据的处理流程，应该选择同步通信还是异步通信？请分析理由。
+\item
+  微服务架构中的服务治理为智慧水利平台带来哪些好处？在实际项目中可能面临哪些挑战？
+\end{enumerate}
+
+\subsubsection{实践练习}\label{ux5b9eux8df5ux7ec3ux4e60}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  设计一个水库安全监测系统的微服务架构，明确服务边界并说明划分理由。
+\item
+  选择一种服务通信方式（REST、gRPC、消息队列等），针对流域水情监测场景设计接口或消息格式。
+\item
+  使用Spring
+  Cloud或其他微服务框架，实现一个简单的服务注册与发现示例，体验服务治理的基本功能。
+\end{enumerate}
