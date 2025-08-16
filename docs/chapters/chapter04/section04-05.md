@@ -1,900 +1,973 @@
-# 第五节 前端工程基础工具
+## 4.1.5 CSS3选择器与样式设计
 
-## 1. 前端开发环境配置
+CSS3（Cascading Style Sheets Level 3）是CSS技术的最新发展阶段，采用模块化设计理念，将不同功能划分为独立的规范模块[14]。这种设计策略使得浏览器厂商能够根据实际情况逐步实现各个模块，推动了Web样式技术的快速发展。CSS3在选择器、布局、视觉效果、动画等方面都有重大突破，为现代Web应用的界面设计提供了强大的表现力[15]。
 
-### 1.1 Node.js与npm
-Node.js是前端开发的基础环境，npm (Node Package Manager) 是JavaScript包管理器，是前端工程化的核心工具：
-- 安装与配置Node.js环境
-- npm的基本使用：安装包、版本管理、脚本运行
-- package.json文件的配置与管理
-- 依赖管理：开发依赖与生产依赖
+在智慧水利平台开发中，CSS3技术的价值体现在多个层面：精确的选择器为复杂界面的样式控制提供了便利；强大的布局技术支持响应式设计，确保平台在各种设备上的良好表现；丰富的视觉效果提升了用户体验；动画技术为数据变化、状态转换等提供了直观的视觉反馈。
 
-```json
-// 智慧水利平台前端项目的package.json示例
-{
-  "name": "smart-water-resources-platform",
-  "version": "1.0.0",
-  "description": "智慧水利平台前端工程",
-  "main": "index.js",
-  "scripts": {
-    "dev": "vue-cli-service serve",
-    "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint",
-    "test:unit": "vue-cli-service test:unit",
-    "build:report": "vue-cli-service build --report"
-  },
-  "dependencies": {
-    "axios": "^0.21.1",
-    "echarts": "^5.1.2",
-    "element-ui": "^2.15.3",
-    "lodash": "^4.17.21",
-    "moment": "^2.29.1",
-    "vue": "^2.6.14",
-    "vue-router": "^3.5.2",
-    "vuex": "^3.6.2"
-  },
-  "devDependencies": {
-    "@vue/cli-plugin-babel": "~4.5.13",
-    "@vue/cli-plugin-eslint": "~4.5.13",
-    "@vue/cli-plugin-router": "~4.5.13",
-    "@vue/cli-plugin-unit-jest": "~4.5.13",
-    "@vue/cli-plugin-vuex": "~4.5.13",
-    "@vue/cli-service": "~4.5.13",
-    "@vue/eslint-config-standard": "^5.1.2",
-    "@vue/test-utils": "^1.2.1",
-    "babel-eslint": "^10.1.0",
-    "eslint": "^7.29.0",
-    "less": "^4.1.1",
-    "less-loader": "^7.3.0",
-    "lint-staged": "^11.0.0",
-    "vue-template-compiler": "^2.6.14"
-  }
+### CSS3选择器增强
+
+CSS3大幅扩展了选择器的功能，提供了更精确、更灵活的元素定位能力。这些新增的选择器不仅简化了样式编写，还提高了CSS代码的可维护性。
+
+#### 属性选择器扩展
+
+CSS3增强了属性选择器的功能，支持更复杂的属性值匹配模式：
+
+```css
+/* 基础属性选择器 */
+input[type="email"] {
+    background-image: url('icons/email.svg');
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    padding-right: 35px;
+}
+
+/* 属性值前缀匹配 (^=) */
+input[name^="water"] {
+    border-left: 4px solid #2196F3;
+}
+
+/* 属性值后缀匹配 ($=) */
+input[id$="Level"] {
+    font-weight: bold;
+    color: #1976D2;
+}
+
+/* 属性值包含匹配 (*=) */
+div[class*="alert"] {
+    padding: 15px;
+    border-radius: 4px;
+    margin-bottom: 15px;
+}
+
+/* 属性值单词匹配 (~=) */
+div[class~="status"] {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+/* 属性值语言匹配 (|=) */
+p[lang|="zh"] {
+    font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+}
+
+/* 自定义数据属性 */
+[data-station-type="river"] {
+    background-color: #E3F2FD;
+    border-color: #2196F3;
+}
+
+[data-alert-level="high"] {
+    background-color: #FFEBEE;
+    border-color: #F44336;
+    animation: pulse-warning 2s infinite;
+}
+
+@keyframes pulse-warning {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+/* 组合属性选择器 */
+input[type="number"][required] {
+    border: 2px solid #4CAF50;
+}
+
+input[type="number"][required]:invalid {
+    border-color: #F44336;
+    background-color: #FFF5F5;
 }
 ```
 
-### 1.2 IDE与编辑器
-选择适合的集成开发环境对提高开发效率至关重要：
-- Visual Studio Code：轻量高效的代码编辑器
-- WebStorm：功能全面的专业JavaScript IDE
-- 常用插件与配置
-  - ESLint/Prettier：代码格式化与检查
-  - Vetur：Vue.js支持
-  - GitLens：Git集成增强
+#### 结构伪类选择器
 
-### 1.3 浏览器开发工具
-现代浏览器提供了强大的开发者工具，用于调试和优化前端应用：
-- Chrome DevTools / Firefox Developer Tools
-- Vue.js开发者工具扩展
-- 性能分析工具
-- 响应式设计测试工具
-- 网络监控工具
+CSS3引入了强大的结构伪类选择器，能够根据元素在文档树中的位置进行精确选择：
 
-## 2. 前端构建工具
+```css
+/* 第n个子元素 */
+.station-list li:nth-child(odd) {
+    background-color: #F5F5F5;
+}
 
-### 2.1 Webpack基础
-Webpack是前端模块打包工具，负责资源处理和依赖管理：
-- 基本概念：入口(entry)、输出(output)、加载器(loader)、插件(plugin)
-- 配置文件：webpack.config.js
-- 资源处理：JavaScript、CSS、图片等
-- 开发环境与生产环境配置
+.station-list li:nth-child(even) {
+    background-color: #FFFFFF;
+}
 
-```javascript
-// 智慧水利平台的webpack配置示例
-const path = require('path');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const { VueLoaderPlugin } = require('vue-loader');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+/* 每三个元素为一组 */
+.data-grid .data-item:nth-child(3n+1) {
+    clear: left;
+    margin-left: 0;
+}
 
-module.exports = {
-  // 入口文件
-  entry: './src/main.js',
-  
-  // 输出配置
-  output: {
-    path: path.resolve(__dirname, 'dist'),
-    filename: 'js/[name].[contenthash:8].js',
-    publicPath: '/'
-  },
-  
-  // 模块规则
-  module: {
-    rules: [
-      // Vue文件处理
-      {
-        test: /\.vue$/,
-        loader: 'vue-loader'
-      },
-      // JavaScript处理
-      {
-        test: /\.js$/,
-        exclude: /node_modules/,
-        use: {
-          loader: 'babel-loader',
-          options: {
-            presets: ['@babel/preset-env']
-          }
-        }
-      },
-      // CSS处理
-      {
-        test: /\.css$/,
-        use: [
-          process.env.NODE_ENV !== 'production'
-            ? 'vue-style-loader'
-            : MiniCssExtractPlugin.loader,
-          'css-loader',
-          'postcss-loader'
-        ]
-      },
-      // 图片处理
-      {
-        test: /\.(png|jpe?g|gif|svg)$/,
-        loader: 'url-loader',
-        options: {
-          limit: 10000,
-          name: 'img/[name].[hash:7].[ext]'
-        }
-      }
-    ]
-  },
-  
-  // 插件配置
-  plugins: [
-    new HtmlWebpackPlugin({
-      template: './public/index.html',
-      title: '智慧水利平台',
-      favicon: './public/favicon.ico'
-    }),
-    new VueLoaderPlugin(),
-    new MiniCssExtractPlugin({
-      filename: 'css/[name].[contenthash:8].css'
-    })
-  ],
-  
-  // 开发服务器配置
-  devServer: {
-    contentBase: path.join(__dirname, 'public'),
-    compress: true,
-    port: 8080,
-    hot: true,
-    proxy: {
-      '/api': {
-        target: 'http://localhost:3000',
-        changeOrigin: true
-      }
-    }
-  },
-  
-  // 优化配置
-  optimization: {
-    splitChunks: {
-      chunks: 'all',
-      cacheGroups: {
-        vendors: {
-          test: /[\\/]node_modules[\\/]/,
-          name: 'vendors',
-          priority: -10
-        },
-        commons: {
-          name: 'commons',
-          minChunks: 2,
-          priority: -20
-        }
-      }
-    }
-  }
-};
-```
+/* 前三个元素 */
+.monitoring-alerts .alert-item:nth-child(-n+3) {
+    border-left: 4px solid #FF9800;
+    font-weight: bold;
+}
 
-### 2.2 Vue CLI工具
-Vue CLI是Vue.js官方脚手架工具，简化项目创建和管理：
-- 项目初始化与配置
-- 插件系统与预设
-- 图形用户界面
-- 智慧水利项目的Vue CLI配置最佳实践
+/* 最后三个元素 */
+.recent-reports .report-item:nth-last-child(-n+3) {
+    border-bottom: 2px solid #E0E0E0;
+}
 
-```bash
-# 创建智慧水利平台项目
-vue create smart-water-platform
+/* 特定类型的第n个元素 */
+.content-section h2:nth-of-type(1) {
+    color: #1976D2;
+    font-size: 24px;
+}
 
-# 选择预设或自定义配置
-# 通常选择：Vue 2, Babel, Router, Vuex, CSS Pre-processors, Linter
+.content-section h2:nth-of-type(2) {
+    color: #388E3C;
+    font-size: 22px;
+}
 
-# 添加Element UI插件
-vue add element
+/* 唯一子元素 */
+.widget-container div:only-child {
+    width: 100%;
+    text-align: center;
+}
 
-# 添加ECharts等第三方库
-npm install echarts --save
-```
+/* 唯一类型元素 */
+.article-content p:only-of-type {
+    font-style: italic;
+    text-align: center;
+}
 
-### 2.3 Vite
-Vite是现代前端构建工具，提供更快的开发服务器和构建体验：
-- Vite的优势：快速的冷启动、即时的模块热更新
-- 基本配置与使用
-- 与Vue 3的集成
-- 从Webpack迁移到Vite的考量
+/* 第一个和最后一个子元素 */
+.navigation-menu li:first-child a {
+    border-top-left-radius: 4px;
+    border-bottom-left-radius: 4px;
+}
 
-```javascript
-// vite.config.js 配置示例
-import { defineConfig } from 'vite'
-import vue from '@vitejs/plugin-vue'
-import path from 'path'
+.navigation-menu li:last-child a {
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+}
 
-export default defineConfig({
-  plugins: [vue()],
-  resolve: {
-    alias: {
-      '@': path.resolve(__dirname, 'src')
-    }
-  },
-  server: {
-    port: 3000,
-    proxy: {
-      '/api': {
-        target: 'http://localhost:8080',
-        changeOrigin: true
-      }
-    }
-  },
-  build: {
-    outDir: 'dist',
-    assetsDir: 'assets',
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          vendor: ['vue', 'vue-router', 'vuex'],
-          echarts: ['echarts']
-        }
-      }
-    }
-  }
-})
-```
-
-## 3. 代码质量工具
-
-### 3.1 ESLint
-ESLint是JavaScript代码检查工具，帮助团队保持代码质量和一致性：
-- 配置与规则设置
-- 与IDE的集成
-- 自动修复功能
-- 智慧水利平台的ESLint配置实践
-
-```javascript
-// .eslintrc.js 示例配置
-module.exports = {
-  root: true,
-  env: {
-    node: true,
-    browser: true
-  },
-  extends: [
-    'plugin:vue/recommended',
-    'eslint:recommended',
-    '@vue/standard'
-  ],
-  parserOptions: {
-    parser: 'babel-eslint'
-  },
-  rules: {
-    'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
-    'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
-    'vue/max-attributes-per-line': ['error', {
-      singleline: 3,
-      multiline: {
-        max: 1,
-        allowFirstLine: false
-      }
-    }],
-    'vue/singleline-html-element-content-newline': 'off',
-    'vue/multiline-html-element-content-newline': 'off',
-    'vue/component-name-in-template-casing': ['error', 'PascalCase'],
-    'vue/no-v-html': 'off',
-    'vue/html-self-closing': ['error', {
-      html: {
-        void: 'always',
-        normal: 'never',
-        component: 'always'
-      }
-    }]
-  },
-  overrides: [
-    {
-      files: ['**/__tests__/*.{j,t}s?(x)', '**/tests/unit/**/*.spec.{j,t}s?(x)'],
-      env: {
-        jest: true
-      }
-    }
-  ]
+/* 空元素 */
+.data-container:empty::before {
+    content: "暂无数据";
+    color: #757575;
+    font-style: italic;
+    display: block;
+    text-align: center;
+    padding: 20px;
 }
 ```
 
-### 3.2 Prettier
-Prettier是代码格式化工具，确保代码风格统一：
-- 与ESLint的结合使用
-- 配置选项
-- Git钩子集成
-- 团队协作中的代码风格管理
+#### UI状态伪类选择器
 
-```javascript
-// .prettierrc.js 示例配置
-module.exports = {
-  printWidth: 100,
-  tabWidth: 2,
-  useTabs: false,
-  semi: true,
-  singleQuote: true,
-  quoteProps: 'as-needed',
-  jsxSingleQuote: false,
-  trailingComma: 'es5',
-  bracketSpacing: true,
-  jsxBracketSameLine: false,
-  arrowParens: 'avoid',
-  endOfLine: 'lf'
+CSS3新增了多个UI状态伪类选择器，用于响应用户交互和表单状态：
+
+```css
+/* 表单状态选择器 */
+input:valid {
+    border-color: #4CAF50;
+    background-image: url('icons/check.svg');
+}
+
+input:invalid {
+    border-color: #F44336;
+    background-image: url('icons/error.svg');
+}
+
+input:required {
+    box-shadow: inset 0 0 0 1px #FF9800;
+}
+
+input:optional {
+    background-color: #F9F9F9;
+}
+
+input:in-range {
+    border-color: #4CAF50;
+}
+
+input:out-of-range {
+    border-color: #F44336;
+    animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+/* 启用/禁用状态 */
+button:enabled {
+    cursor: pointer;
+    background-color: #2196F3;
+    color: white;
+}
+
+button:disabled {
+    cursor: not-allowed;
+    background-color: #E0E0E0;
+    color: #9E9E9E;
+}
+
+/* 选中状态 */
+input[type="checkbox"]:checked + label {
+    font-weight: bold;
+    color: #1976D2;
+}
+
+input[type="radio"]:checked + label::before {
+    content: "✓ ";
+    color: #4CAF50;
+}
+
+/* 焦点状态 */
+input:focus,
+textarea:focus,
+select:focus {
+    outline: 2px solid #2196F3;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.2);
+}
+
+/* 目标伪类 */
+section:target {
+    background-color: #FFFDE7;
+    border: 2px solid #FFEB3B;
+    animation: highlight-target 3s ease-out;
+}
+
+@keyframes highlight-target {
+    from { background-color: #FFEB3B; }
+    to { background-color: #FFFDE7; }
 }
 ```
 
-### 3.3 单元测试工具
-测试工具帮助保证代码质量和减少回归错误：
-- Jest：JavaScript测试框架
-- Vue Test Utils：Vue组件测试工具
-- 测试策略与最佳实践
-- 智慧水利平台组件测试案例
+#### 伪元素选择器增强
 
-```javascript
-// 水位监测组件的单元测试示例
-import { shallowMount } from '@vue/test-utils'
-import WaterLevelIndicator from '@/components/WaterLevelIndicator.vue'
+CSS3对伪元素选择器进行了标准化和扩展：
 
-describe('WaterLevelIndicator.vue', () => {
-  it('正确显示当前水位值', () => {
-    const waterLevel = 85.6
-    const wrapper = shallowMount(WaterLevelIndicator, {
-      propsData: { waterLevel }
-    })
-    expect(wrapper.find('.current-level').text()).toContain('85.6')
-  })
-  
-  it('当水位超过警戒线时显示警告状态', () => {
-    const wrapper = shallowMount(WaterLevelIndicator, {
-      propsData: {
-        waterLevel: 95.0,
-        warningLevel: 90.0
-      }
-    })
-    expect(wrapper.classes()).toContain('warning-state')
-    expect(wrapper.find('.status-indicator').classes()).toContain('danger')
-  })
-  
-  it('水位变化时触发状态变更事件', async () => {
-    const wrapper = shallowMount(WaterLevelIndicator, {
-      propsData: {
-        waterLevel: 85.0,
-        warningLevel: 90.0
-      }
-    })
-    
-    await wrapper.setProps({ waterLevel: 92.0 })
-    
-    expect(wrapper.emitted('status-change')).toBeTruthy()
-    expect(wrapper.emitted('status-change')[0][0]).toEqual({
-      previousStatus: 'normal',
-      currentStatus: 'warning',
-      waterLevel: 92.0
-    })
-  })
-})
-```
+```css
+/* ::before 和 ::after 伪元素 */
+.water-level-indicator::before {
+    content: "💧";
+    color: #2196F3;
+    margin-right: 5px;
+}
 
-## 4. 版本控制与协作工具
+.alert-message::after {
+    content: " ⚠️";
+    color: #FF9800;
+}
 
-### 4.1 Git工作流
-Git是前端项目不可或缺的版本控制工具：
-- 分支管理策略：feature分支、develop分支、master分支
-- 提交规范与信息模板
-- 冲突解决策略
-- 智慧水利平台的Git工作流最佳实践
+/* 图标字体应用 */
+.icon-station::before {
+    content: "\f041"; /* FontAwesome 图标编码 */
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+    margin-right: 8px;
+    color: #1976D2;
+}
 
-```bash
-# 智慧水利平台项目Git工作流示例
-# 1. 克隆项目
-git clone https://github.com/example/smart-water-platform.git
-cd smart-water-platform
+/* 装饰性元素 */
+.section-title::before {
+    content: "";
+    display: inline-block;
+    width: 4px;
+    height: 20px;
+    background-color: #2196F3;
+    margin-right: 10px;
+    vertical-align: middle;
+}
 
-# 2. 创建功能分支
-git checkout -b feature/water-level-monitoring
+/* 计数器应用 */
+.numbered-list {
+    counter-reset: item-counter;
+}
 
-# 3. 开发功能并提交
-git add .
-git commit -m "feat: 添加水位监测功能组件"
+.numbered-list li::before {
+    counter-increment: item-counter;
+    content: counter(item-counter) ". ";
+    font-weight: bold;
+    color: #1976D2;
+}
 
-# 4. 推送分支到远程仓库
-git push origin feature/water-level-monitoring
+/* 多级计数器 */
+.nested-list {
+    counter-reset: section-counter;
+}
 
-# 5. 创建合并请求(Pull Request)
-# 在GitHub/GitLab等平台操作
+.nested-list > li {
+    counter-increment: section-counter;
+    counter-reset: subsection-counter;
+}
 
-# 6. 代码审查后合并到开发分支
-git checkout develop
-git merge feature/water-level-monitoring
-git push origin develop
+.nested-list > li::before {
+    content: counter(section-counter) ". ";
+}
 
-# 7. 版本发布
-git checkout master
-git merge develop
-git tag v1.0.0
-git push origin master --tags
-```
+.nested-list li li {
+    counter-increment: subsection-counter;
+}
 
-### 4.2 CI/CD工具
-持续集成和持续部署工具自动化构建、测试和部署流程：
-- Jenkins：自动化服务器
-- GitLab CI：GitLab集成的CI/CD工具
-- GitHub Actions：GitHub的工作流自动化
-- 智慧水利平台的CI/CD配置示例
+.nested-list li li::before {
+    content: counter(section-counter) "." counter(subsection-counter) " ";
+}
 
-```yaml
-# GitHub Actions工作流配置示例 (.github/workflows/ci.yml)
-name: 智慧水利平台CI流程
+/* ::first-line 和 ::first-letter 伪元素 */
+.article-content::first-letter {
+    font-size: 3em;
+    float: left;
+    line-height: 1;
+    margin: 0 8px 0 0;
+    color: #1976D2;
+    font-weight: bold;
+}
 
-on:
-  push:
-    branches: [ develop, master ]
-  pull_request:
-    branches: [ develop ]
+.article-content::first-line {
+    font-weight: bold;
+    color: #333;
+}
 
-jobs:
-  build-and-test:
-    runs-on: ubuntu-latest
-    
-    steps:
-    - uses: actions/checkout@v2
-    
-    - name: 设置Node.js环境
-      uses: actions/setup-node@v2
-      with:
-        node-version: '14'
-        cache: 'npm'
-    
-    - name: 安装依赖
-      run: npm ci
-    
-    - name: 代码检查
-      run: npm run lint
-    
-    - name: 运行单元测试
-      run: npm run test:unit
-    
-    - name: 构建项目
-      run: npm run build
-    
-    - name: 上传构建产物
-      uses: actions/upload-artifact@v2
-      with:
-        name: build-files
-        path: dist/
+/* ::selection 伪元素 */
+.selectable-text::selection {
+    background-color: #2196F3;
+    color: white;
+}
 
-  deploy:
-    needs: build-and-test
-    if: github.ref == 'refs/heads/master'
-    runs-on: ubuntu-latest
-    
-    steps:
-    - name: 下载构建产物
-      uses: actions/download-artifact@v2
-      with:
-        name: build-files
-        path: dist
-    
-    - name: 部署到测试服务器
-      uses: appleboy/scp-action@master
-      with:
-        host: ${{ secrets.HOST }}
-        username: ${{ secrets.USERNAME }}
-        key: ${{ secrets.SSH_KEY }}
-        source: "dist/"
-        target: "/var/www/smart-water-platform"
-```
+.data-table td::selection {
+    background-color: #FFF9C4;
+    color: #333;
+}
 
-### 4.3 团队协作工具
-高效的团队协作需要辅助工具：
-- Jira：项目管理和问题追踪
-- Confluence：知识管理与文档协作
-- Notion：团队知识库与项目管理
-- 智慧水利平台开发团队的协作工具最佳实践
+/* ::placeholder 伪元素 */
+input::placeholder {
+    color: #757575;
+    font-style: italic;
+}
 
-## 5. 前端性能优化工具
-
-### 5.1 性能分析工具
-识别和解决性能瓶颈的工具：
-- Lighthouse：网站性能、可访问性、SEO分析
-- Chrome Performance面板：详细性能分析
-- WebPageTest：多地区、多设备测试
-- 智慧水利平台的性能优化方法论
-
-### 5.2 监控与错误追踪
-生产环境问题监控与追踪：
-- Sentry：错误监控与报告
-- Google Analytics：用户行为分析
-- 自定义性能指标收集
-- 智慧水利平台前端监控架构
-
-```javascript
-// 前端错误监控配置示例
-import * as Sentry from '@sentry/vue';
-import { Integrations } from '@sentry/tracing';
-import Vue from 'vue';
-import router from './router';
-
-Sentry.init({
-  Vue,
-  dsn: 'https://examplePublicKey@o0.ingest.sentry.io/0',
-  integrations: [
-    new Integrations.BrowserTracing({
-      routingInstrumentation: Sentry.vueRouterInstrumentation(router),
-      tracingOrigins: ['localhost', 'smart-water-platform.example.com']
-    }),
-  ],
-  tracesSampleRate: 1.0,
-  environment: process.env.NODE_ENV,
-  // 需要屏蔽的错误类型
-  ignoreErrors: [
-    'Network Error',
-    /ChunkLoadError/,
-    /Loading chunk .* failed/
-  ],
-  // 自定义用户信息
-  beforeSend(event) {
-    if (localStorage.getItem('user')) {
-      event.user = JSON.parse(localStorage.getItem('user'));
-    }
-    return event;
-  }
-});
-```
-
-### 5.3 打包分析与优化
-优化前端资源体积与加载性能：
-- webpack-bundle-analyzer：包大小分析
-- Source map explorer：源码映射分析
-- 代码分割与懒加载策略
-- 智慧水利平台的资源优化案例
-
-```javascript
-// vue.config.js中配置webpack-bundle-analyzer
-module.exports = {
-  chainWebpack: config => {
-    if (process.env.NODE_ENV === 'production') {
-      config
-        .plugin('webpack-bundle-analyzer')
-        .use(require('webpack-bundle-analyzer').BundleAnalyzerPlugin, [{
-          analyzerMode: 'static',
-          reportFilename: 'bundle-report.html',
-          openAnalyzer: false
-        }]);
-    }
-  }
+input:focus::placeholder {
+    opacity: 0.5;
 }
 ```
 
-## 6. 智慧水利平台前端工程化最佳实践
+### 盒模型与布局技术
 
-### 6.1 项目架构设计
-合理的项目结构设计是工程化的基础：
-- 目录结构规范
-- 模块划分策略
-- 代码组织原则
-- 智慧水利平台前端架构实例
+CSS3在布局技术方面取得了重大突破，引入了Flexbox和Grid等现代布局方法，彻底改变了传统的布局模式。
 
-```
-智慧水利平台前端项目结构示例：
-src/
-├── api/                # API请求模块
-│   ├── index.js        # API统一出口
-│   ├── request.js      # 请求封装
-│   ├── monitoring.js   # 监测相关API
-│   └── user.js         # 用户相关API
-├── assets/             # 静态资源
-│   ├── icons/          # 图标资源
-│   ├── images/         # 图片资源
-│   └── styles/         # 全局样式
-├── components/         # 公共组件
-│   ├── common/         # 通用组件
-│   └── business/       # 业务组件
-├── constants/          # 常量定义
-├── directives/         # 自定义指令
-├── filters/            # 过滤器
-├── layouts/            # 布局组件
-├── mixins/             # 混入
-├── plugins/            # 插件配置
-├── router/             # 路由配置
-├── store/              # 状态管理
-│   ├── modules/        # 状态模块
-│   ├── index.js        # 入口文件
-│   ├── getters.js      # 全局getters
-│   └── mutation-types.js # mutation常量
-├── utils/              # 工具函数
-├── views/              # 页面组件
-│   ├── dashboard/      # 仪表盘页面
-│   ├── monitoring/     # 监测页面
-│   ├── analysis/       # 分析页面
-│   └── system/         # 系统管理页面
-├── App.vue             # 根组件
-├── main.js             # 入口文件
-└── permission.js       # 权限控制
-```
+#### CSS盒模型详解
 
-### 6.2 组件设计规范
-规范化的组件设计提高可维护性和可复用性：
-- 组件命名规范
-- 组件通信原则
-- 目录组织结构
-- 智慧水利平台组件库建设
+理解盒模型是掌握CSS布局的基础。CSS3提供了box-sizing属性来控制盒模型的计算方式：
 
-```vue
-<!-- 组件设计示例：水位监测卡片组件 -->
-<template>
-  <div
-    class="water-level-card"
-    :class="statusClass"
-    data-test="water-level-card"
-  >
-    <!-- 组件内容 -->
-  </div>
-</template>
-
-<script>
-/**
- * 水位监测卡片组件
- * @description 用于显示水位监测站点的实时水位数据和状态
- * @example
- * <water-level-card
- *   :station-id="station.id"
- *   :station-name="station.name"
- *   :current-level="station.waterLevel"
- *   :warning-level="station.warningLevel"
- *   @click="handleCardClick"
- * />
- */
-export default {
-  name: 'WaterLevelCard',
-  
-  props: {
-    // 站点ID
-    stationId: {
-      type: String,
-      required: true
-    },
-    // 站点名称
-    stationName: {
-      type: String,
-      required: true
-    },
-    // 当前水位
-    currentLevel: {
-      type: Number,
-      required: true
-    },
-    // 警戒水位
-    warningLevel: {
-      type: Number,
-      default: null
-    }
-  },
-  
-  computed: {
-    // 状态类名
-    statusClass() {
-      if (!this.warningLevel) return '';
-      
-      if (this.currentLevel >= this.warningLevel) {
-        return 'status-warning';
-      } else if (this.currentLevel >= this.warningLevel * 0.9) {
-        return 'status-attention';
-      }
-      
-      return 'status-normal';
-    }
-  },
-  
-  methods: {
-    // 处理点击事件
-    handleClick() {
-      this.$emit('click', {
-        stationId: this.stationId,
-        stationName: this.stationName
-      });
-    }
-  }
-}
-</script>
-
-<style lang="less" scoped>
-.water-level-card {
-  // 样式定义
-}
-</style>
-```
-
-### 6.3 API设计与数据流管理
-前端与后端的交互是应用的核心：
-- API模块化管理
-- 统一的数据请求封装
-- 数据缓存与状态管理
-- 智慧水利平台数据流架构
-
-```javascript
-// API请求封装示例
-import axios from 'axios';
-import { Message } from 'element-ui';
-import store from '@/store';
-import router from '@/router';
-
-// 创建axios实例
-const service = axios.create({
-  baseURL: process.env.VUE_APP_API_BASE_URL,
-  timeout: 15000 // 请求超时时间
-});
-
-// 请求拦截器
-service.interceptors.request.use(
-  config => {
-    // 请求前处理
-    if (store.getters.token) {
-      config.headers['Authorization'] = `Bearer ${store.getters.token}`;
-    }
-    return config;
-  },
-  error => {
-    console.error('请求错误:', error);
-    return Promise.reject(error);
-  }
-);
-
-// 响应拦截器
-service.interceptors.response.use(
-  response => {
-    const res = response.data;
+```css
+/* 标准盒模型（content-box） */
+.standard-box {
+    box-sizing: content-box; /* 默认值 */
+    width: 300px;
+    height: 200px;
+    padding: 20px;
+    border: 5px solid #ddd;
+    margin: 15px;
     
-    // 响应状态处理
-    if (res.code !== 200) {
-      Message({
-        message: res.message || '请求失败',
-        type: 'error',
-        duration: 5 * 1000
-      });
-      
-      // 特定错误码处理
-      if (res.code === 401) {
-        // 未授权，跳转到登录页
-        store.dispatch('user/resetToken');
-        router.push('/login');
-      }
-      
-      return Promise.reject(new Error(res.message || '请求失败'));
-    } else {
-      return res.data;
-    }
-  },
-  error => {
-    console.error('响应错误:', error);
-    
-    // 网络错误处理
-    let message = '请求失败';
-    if (error.response) {
-      switch (error.response.status) {
-        case 400: message = '请求错误'; break;
-        case 401: message = '未授权，请登录'; break;
-        case 403: message = '拒绝访问'; break;
-        case 404: message = '请求地址不存在'; break;
-        case 500: message = '服务器内部错误'; break;
-        default: message = `未知错误(${error.response.status})`;
-      }
-    } else {
-      message = error.message;
-    }
-    
-    Message({
-      message,
-      type: 'error',
-      duration: 5 * 1000
-    });
-    
-    return Promise.reject(error);
-  }
-);
-
-export default service;
-```
-
-### 6.4 自动化构建与部署
-流水线自动化提高团队效率：
-- 构建脚本优化
-- 环境配置管理
-- 自动化部署流程
-- 智慧水利平台的DevOps实践
-
-### 6.5 前端安全实践
-保障智慧水利平台的前端安全：
-- XSS防御策略
-- CSRF防护
-- 数据加密与敏感信息保护
-- 第三方库安全审计
-- 权限控制与认证
-
-```javascript
-// 前端安全实践示例 - XSS防护
-import { escape } from 'html-escaper';
-
-// 输入过滤
-export function sanitizeInput(input) {
-  if (typeof input !== 'string') return input;
-  return escape(input);
+    /* 
+    实际占用空间计算：
+    宽度 = margin-left + border-left + padding-left + width + padding-right + border-right + margin-right
+         = 15 + 5 + 20 + 300 + 20 + 5 + 15 = 380px
+    高度 = margin-top + border-top + padding-top + height + padding-bottom + border-bottom + margin-bottom
+         = 15 + 5 + 20 + 200 + 20 + 5 + 15 = 280px
+    */
 }
 
-// CSP配置示例 (在index.html中)
-/*
-<meta http-equiv="Content-Security-Policy" content="
-  default-src 'self';
-  script-src 'self' https://cdn.example.com;
-  style-src 'self' https://fonts.googleapis.com;
-  img-src 'self' data: https://*.example.com;
-  connect-src 'self' https://api.example.com;
-  font-src 'self' https://fonts.gstatic.com;
-">
-*/
+/* IE盒模型（border-box） */
+.border-box {
+    box-sizing: border-box;
+    width: 300px;
+    height: 200px;
+    padding: 20px;
+    border: 5px solid #ddd;
+    margin: 15px;
+    
+    /* 
+    实际占用空间计算：
+    内容区宽度 = width - padding-left - border-left - padding-right - border-right
+              = 300 - 20 - 5 - 20 - 5 = 250px
+    内容区高度 = height - padding-top - border-top - padding-bottom - border-bottom
+              = 200 - 20 - 5 - 20 - 5 = 150px
+    总占用宽度 = margin-left + width + margin-right = 15 + 300 + 15 = 330px
+    */
+}
 
-// CSRF防护 - 在axios配置中添加CSRF令牌
-service.interceptors.request.use(config => {
-  const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-  if (csrfToken) {
-    config.headers['X-CSRF-Token'] = csrfToken;
-  }
-  return config;
-});
+/* 全局设置为border-box */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+/* 响应式容器 */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 0 15px;
+    }
+}
 ```
 
-## 7. 前沿前端工程化趋势
+#### Flexbox弹性布局
 
-### 7.1 微前端架构
-大型应用的模块化解决方案：
-- 微前端基本概念
-- 实现技术与框架
-- 在智慧水利平台中的应用场景与规划
+Flexbox布局模型为一维布局提供了强大而灵活的解决方案：
 
-### 7.2 静态类型检查
-提高代码可靠性的类型系统：
-- TypeScript基础与配置
-- 类型定义与接口设计
-- 智慧水利平台TypeScript迁移策略
+```css
+/* 基础Flex容器 */
+.flex-container {
+    display: flex;
+    flex-direction: row; /* row | row-reverse | column | column-reverse */
+    flex-wrap: wrap; /* nowrap | wrap | wrap-reverse */
+    justify-content: space-between; /* flex-start | flex-end | center | space-between | space-around | space-evenly */
+    align-items: center; /* stretch | flex-start | flex-end | center | baseline */
+    align-content: flex-start; /* 多行对齐 */
+    gap: 20px; /* 项目间距 */
+}
 
-### 7.3 低代码/无代码平台
-加速开发的可视化工具：
-- 低代码平台概述
-- 适用场景与限制
-- 智慧水利平台定制化低代码解决方案
+/* 监测站点卡片布局 */
+.station-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding: 20px;
+}
 
+.station-card {
+    flex: 1 1 300px; /* flex-grow | flex-shrink | flex-basis */
+    min-width: 0; /* 防止内容溢出 */
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
 
+/* 响应式Flex布局 */
+@media (max-width: 768px) {
+    .station-cards {
+        flex-direction: column;
+    }
+    
+    .station-card {
+        flex: 1 1 auto;
+    }
+}
 
-## 思考题与练习
+/* 水平垂直居中 */
+.center-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+}
 
-### 基础题
+/* 导航栏布局 */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    background-color: #1976D2;
+    color: white;
+}
 
-1. 请简述本节的核心概念，并说明其在智慧水利平台开发中的重要性。
-2. 总结本节介绍的主要技术方法，并分析各方法的适用场景。
-3. 结合智慧水利的实际需求，解释本节内容如何应用于实际项目中。
+.nav-brand {
+    flex: 0 0 auto;
+}
 
-### 提高题
+.nav-menu {
+    display: flex;
+    flex: 1 1 auto;
+    justify-content: center;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    gap: 30px;
+}
 
-4. 分析本节涉及的技术难点，并提出可能的解决方案。
-5. 比较本节介绍的不同方法的优缺点，并给出选择建议。
-6. 设计一个简单的案例，说明如何将本节理论应用于智慧水利系统设计。
+.nav-actions {
+    flex: 0 0 auto;
+}
 
-### 讨论题
+/* 表单布局 */
+.form-row {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+}
 
-7. 讨论本节内容与其他相关技术的集成方案，分析可能遇到的挑战。
-8. 展望本节涉及技术的发展趋势，分析其对智慧水利未来发展的影响。
+.form-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
 
-## 本节小结
+.form-group label {
+    margin-bottom: 5px;
+    font-weight: 500;
+}
 
-本节内容为智慧水利平台的设计和开发提供了重要的理论基础和技术指导。通过学习本节内容，学生应能够理解相关概念的内涵和应用价值，掌握基本的分析方法和设计原则，为后续章节的学习和实际项目的开展奠定坚实基础。
+.form-group input,
+.form-group select {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+/* 等高列布局 */
+.equal-height-columns {
+    display: flex;
+    gap: 20px;
+}
+
+.column {
+    flex: 1;
+    background: white;
+    padding: 20px;
+    border: 1px solid #e0e0e0;
+}
+
+/* 自适应侧边栏布局 */
+.main-layout {
+    display: flex;
+    min-height: 100vh;
+    gap: 20px;
+}
+
+.sidebar {
+    flex: 0 0 250px;
+    background: #f5f5f5;
+    padding: 20px;
+}
+
+.main-content {
+    flex: 1;
+    padding: 20px;
+    min-width: 0;
+}
+
+@media (max-width: 768px) {
+    .main-layout {
+        flex-direction: column;
+    }
+    
+    .sidebar {
+        flex: 0 0 auto;
+        order: 2;
+    }
+    
+    .main-content {
+        order: 1;
+    }
+}
+```
+
+#### Grid网格布局
+
+CSS Grid为二维布局提供了强大的解决方案，特别适合复杂的页面布局：
+
+```css
+/* 基础Grid容器 */
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 3列等宽 */
+    grid-template-rows: auto 1fr auto; /* 头部自适应，主体填充，底部自适应 */
+    grid-gap: 20px; /* 或者使用 gap: 20px */
+    min-height: 100vh;
+}
+
+/* 命名网格线 */
+.page-layout {
+    display: grid;
+    grid-template-columns: 
+        [sidebar-start] 250px 
+        [sidebar-end main-start] 1fr 
+        [main-end];
+    grid-template-rows: 
+        [header-start] 60px 
+        [header-end content-start] 1fr 
+        [content-end footer-start] 40px 
+        [footer-end];
+    gap: 20px;
+    min-height: 100vh;
+}
+
+/* 使用grid-template-areas定义布局 */
+.dashboard-layout {
+    display: grid;
+    grid-template-areas:
+        "header header header"
+        "sidebar main aside"
+        "footer footer footer";
+    grid-template-columns: 200px 1fr 200px;
+    grid-template-rows: 60px 1fr 40px;
+    gap: 15px;
+    min-height: 100vh;
+}
+
+.header { grid-area: header; }
+.sidebar { grid-area: sidebar; }
+.main { grid-area: main; }
+.aside { grid-area: aside; }
+.footer { grid-area: footer; }
+
+/* 监测数据网格布局 */
+.data-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}
+
+.data-card {
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* 响应式Grid布局 */
+.responsive-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 20px;
+}
+
+.grid-item-12 { grid-column: span 12; }
+.grid-item-6 { grid-column: span 6; }
+.grid-item-4 { grid-column: span 4; }
+.grid-item-3 { grid-column: span 3; }
+
+@media (max-width: 768px) {
+    .grid-item-6,
+    .grid-item-4,
+    .grid-item-3 {
+        grid-column: span 12;
+    }
+}
+
+/* 复杂的仪表板布局 */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    grid-template-rows: repeat(4, 200px);
+    gap: 15px;
+    padding: 20px;
+}
+
+.overview-panel {
+    grid-column: 1 / 4;
+    grid-row: 1 / 2;
+}
+
+.quick-stats {
+    grid-column: 4 / 7;
+    grid-row: 1 / 2;
+}
+
+.main-chart {
+    grid-column: 1 / 5;
+    grid-row: 2 / 4;
+}
+
+.side-panels {
+    grid-column: 5 / 7;
+    grid-row: 2 / 4;
+    display: grid;
+    grid-template-rows: 1fr 1fr;
+    gap: 15px;
+}
+
+.recent-alerts {
+    grid-column: 1 / 7;
+    grid-row: 4 / 5;
+}
+
+/* Grid项目定位 */
+.featured-item {
+    grid-column: 2 / 5;
+    grid-row: 2 / 4;
+    z-index: 1;
+}
+
+/* 隐式网格 */
+.auto-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-auto-rows: 200px;
+    grid-auto-flow: row dense; /* 自动填充 */
+    gap: 15px;
+}
+
+.span-2 {
+    grid-column: span 2;
+}
+
+.span-2-rows {
+    grid-row: span 2;
+}
+```
+
+### 视觉效果与装饰
+
+CSS3在视觉效果方面提供了丰富的功能，包括圆角、阴影、渐变、变换等，为界面设计提供了强大的表现力。
+
+#### 圆角与边框效果
+
+```css
+/* 基础圆角 */
+.rounded-card {
+    border-radius: 8px;
+    background: white;
+    border: 1px solid #e0e0e0;
+}
+
+/* 不同方向的圆角 */
+.header-card {
+    border-radius: 8px 8px 0 0; /* 上左 上右 下右 下左 */
+}
+
+.footer-card {
+    border-radius: 0 0 8px 8px;
+}
+
+/* 圆形元素 */
+.circular-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    overflow: hidden;
+}
+
+/* 椭圆形按钮 */
+.pill-button {
+    border-radius: 25px;
+    padding: 10px 25px;
+    background: #2196F3;
+    color: white;
+    border: none;
+}
+
+/* 复杂边框样式 */
+.fancy-border {
+    border: 3px solid;
+    border-image: linear-gradient(45deg, #2196F3, #4CAF50, #FF9800) 1;
+    border-radius: 0; /* border-image 不支持圆角 */
+}
+
+/* 多重边框 */
+.multiple-borders {
+    border: 3px solid #2196F3;
+    box-shadow: 
+        0 0 0 6px #4CAF50,
+        0 0 0 9px #FF9800;
+}
+
+/* 渐变边框 */
+.gradient-border {
+    position: relative;
+    background: white;
+    border-radius: 8px;
+}
+
+.gradient-border::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    padding: 2px;
+    background: linear-gradient(45deg, #2196F3, #4CAF50);
+    border-radius: inherit;
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: xor;
+    -webkit-mask-composite: xor;
+}
+```
+
+#### 阴影效果
+
+```css
+/* 基础盒阴影 */
+.card-shadow {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.elevated-card {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.floating-card {
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* 内阴影 */
+.inset-shadow {
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* 多重阴影 */
+.complex-shadow {
+    box-shadow: 
+        0 2px 4px rgba(0, 0, 0, 0.1),
+        0 8px 16px rgba(0, 0, 0, 0.1),
+        0 16px 32px rgba(0, 0, 0, 0.1);
+}
+
+/* 彩色阴影 */
+.colored-shadow {
+    box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+}
+
+/* 文字阴影 */
+.text-shadow {
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.outline-text {
+    color: white;
+    text-shadow: 
+        -1px -1px 0 #000,
+        1px -1px 0 #000,
+        -1px 1px 0 #000,
+        1px 1px 0 #000;
+}
+
+/* 悬停效果 */
+.hover-shadow {
+    transition: box-shadow 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.hover-shadow:hover {
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    transform: translateY(-2px);
+}
+
+/* 分层阴影效果 */
+.layered-shadow {
+    position: relative;
+}
+
+.layered-shadow::before {
+    content: '';
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    right: -10px;
+    bottom: -10px;
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: inherit;
+    z-index: -1;
+}
+```
+
+#### 渐变背景
+
+```css
+/* 线性渐变 */
+.linear-gradient-bg {
+    background: linear-gradient(
+        to right, 
+        #2196F3, 
+        #4CAF50
+    );
+}
+
+.diagonal-gradient {
+    background: linear-gradient(
+        45deg, 
+        #2196F3 0%, 
+        #21CBF3 50%, 
+        #4CAF50 100%
+    );
+}
+
+/* 径向渐变 */
+.radial-gradient-bg {
+    background: radial-gradient(
+        circle at center, 
+        #2196F3, 
+        #1976D2
+    );
+}
+
+.ellipse-gradient {
+    background: radial-gradient(
+        ellipse at top left, 
+        #4CAF50 0%, 
+        #2196F3 100%
+    );
+}
+
+/* 复杂渐变 */
+.complex-gradient {
+    background: linear-gradient(
+        135deg,
+        #667eea 0%,
+        #764ba2 100%
+    );
+}
+
+/* 多重渐变 */
+.multiple-gradients {
+    background: 
+        linear-gradient(217deg, rgba(255,0,0,.8), rgba(255,0,0,0) 70.71%),
+        linear-gradient(127deg, rgba(0,255,0,.8), rgba(0,255,0,0) 70.71%),
+        linear-gradient(336deg, rgba(0,0,255,.8), rgba(0,0,255,0) 70.71%);
+}
+
+/* 渐变文字 */
+.gradient-text {
+    background: linear-gradient(45deg, #2196F3, #4CAF50);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent; /* 降级支持 */
+}
+
+/* 渐变边框（使用伪元素） */
+.gradient-border-alt {
+    position: relative;
+    background: white;
+    border-radius: 8px;
+}
+
+.gradient-border-alt::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    background: linear-gradient(45deg, #2196F3, #4CAF50);
+    border-radius: inherit;
+    z-index: -1;
+}
+
+/* 动态渐变 */
+.animated-gradient {
+    background: linear-gradient(
+        -45deg, 
+        #2196F3, 
+        #21CBF3, 
+        #4CAF50, 
+        #FFC107
+    );
+    background-size: 400% 400%;
+    animation: gradient-shift 4s ease infinite;
+}
+
+@keyframes gradient-shift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+```
+
+这些CSS3选择器和样式技术为智慧水利平台的界面设计提供了强大的技术支撑，能够创建出既美观又实用的用户界面，提升用户体验和系统的整体品质。
