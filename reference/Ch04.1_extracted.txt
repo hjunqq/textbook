@@ -1,0 +1,148 @@
+第1页:
+智慧水利平台
+H
+o
+H
+架构与开发
+a
+i
+U
+n
+i
+v
+第四章：前端开发技术
+e
+r
+s
+i
+t
+y
+齐慧君
+2024年10月8日
+
+第2页:
+目录
+CONTENTS
+1. 前端及前端开发工具
+2. HTML
+3. CSS基础
+4. JavaScript基础
+5. Vue基础
+6. 前端脚手架
+7. 前端部署
+HoHai University
+
+第3页:
+01
+⚫ web ⚫ 网页
+前端及前端开发工具
+⚫ 浏览器 ⚫ 开发工具
+3
+
+第4页:
+4.1前端及前端开发工具
+Web、网页、浏览器
+Web 网页 浏览器
+• Web（World Wide • 网页是构成网站的 • 浏览器是网页运行
+Web）即全球广域 基本元素。网页主 的平台，常见的浏
+网，也称为万维网。 要由文字、图像和 览器有谷歌
+超链接等元素构成。 （Chrome）、
+当然，除了这些元 Safari、火狐
+素，网页中还可以 （Firefox）、IE、
+包含音频、视频以 Edge、Opera等。
+及Flash等。
+4
+
+第5页:
+4.1前端及前端开发工具
+Web、网页、浏览器
+W3C组织
+• W3C：World Wide Web Consortium，万维网联盟组织，用来制定web
+标准的机构（组织）。
+• W3C 万维网联盟是国际最著名的标准化组织。1994年成立后，至今已
+发布近百项相关万维网的标准，对万维网发展做出了杰出的贡献。
+• W3C 组织就类似于现实世界中的联合国。
+为什么要遵循WEB标准呢？
+因为很多浏览器的浏览器内核不同，导致页面解析出来的效果可能会有差异，给开发者增加无谓的工作量。
+因此需要指定统一的标准。
+5
+
+第6页:
+4.1前端及前端开发工具
+Web、网页、浏览器
+Web标准
+• Web标准：制作网页要遵循的规范。
+Web标准通常包括三个方面：
+• 结构标准（HTML）：用于对网页元素进行整理和分类。
+• 超文本标记语言。从语义的角度描述页面的结构。相当于人的身体组织结构。
+• 表现标准（CSS）：用于设置网页元素的版式、颜色、大小等外观样式。
+• CSS（Cascading Style Sheets）：层叠样式表。从审美的角度美化页面的样式。相
+当于人的衣服和打扮。
+• 行为标准（JS）：用于定义网页的交互和行为。
+• JavaScript（简称JS）：从交互的角度描述页面的行为，实现业务逻辑和页面控制。
+相当于人的动作，让人有生命力。
+6
+
+第7页:
+4.1前端及前端开发工具
+Web、网页、浏览器
+常见的浏览器
+浏览器是网页运行的平台，常见的浏览器有谷歌（Chrome）、Safari、火狐（Firefox）、IE、
+Edge、Opera等。
+7
+
+第8页:
+4.1前端及前端开发工具
+Web、网页、浏览器
+浏览器的组成
+用户界面User Interface：
+•用户与浏览器进行交互的部分，包括地址栏、前进/后退按钮、书签栏、刷新按钮、菜单等。
+浏览器引擎Browser Engine：
+•浏览器引擎负责处理用户界面与渲染引擎之间的通信。它协调用户操作与页面内容的显示，如处理点击、滚动
+和加载页面的指令。
+渲染引擎Rendering Engine：
+•渲染引擎将HTML、CSS、JavaScript等文件解析并渲染为用户可以看到和交互的页面。常见的渲染引擎包括
+Chromium的Blink、Mozilla的Gecko等。
+网络层Networking Layer：
+•负责处理网络通信，管理HTTP/HTTPS请求、响应、缓存和资源下载。它与操作系统的网络堆栈直接交互。
+JavaScript 引擎JavaScript Engine：
+•解释和执行JavaScript代码。比如V8引擎是Google Chrome和Chromium使用的JavaScript引擎。
+UI后端UI Backend：
+•绘制基本的窗口小部件，如组合框和窗口。这部分通常依赖于操作系统的UI库。
+数据存储Data Storage：
+8
+•持久化存储部分，用于保存数据，如cookies、书签、本地存储（Local Storage）、IndexedDB等。
+
+第9页:
+4.1前端及前端开发工具
+Web、网页、浏览器
+渲染引擎
+浏览器所采用的「渲染引擎」也称之为「浏览器内核」，用于解析 HTML和CSS、布
+局、渲染等工作。
+渲染引擎决定了浏览器如何显示网页的内容以及页面的格式信息。
+浏览器 内核
+chrome Blink
+opera Blink
+360安全浏览器 Blink
+Edge Blink
+移动端的浏览器内核是什么？
+Safari Webkit
+浏览器渲染引擎发展脉络？
+Firefox 火狐 Gecko
+IE Trident
+9
+
+第10页:
+4.1前端及前端开发工具
+Web、网页、浏览器
+JS引擎
+浏览器本身并不会执行JS代码，而是通过内置 JavaScript 引擎(解释器) 来执行 JS 代
+码 。
+JS 引擎执行代码时会逐行解释每一句源码，转换为机器语言，然后由计算机去执行。
+浏览器 JS 引擎
+chrome V8
+Mozilla Firefox SpiderMonkey（1.0-3.0）/ TraceMonkey（3.5-3.6）/ JaegerMonkey（4.0-）
+Safari JavaScriptCore，也称为Nitro，是 WebKit 引擎的一部分
+IE Trident
+Edge Chakra。此外，ChakraCore是Chakra的开源版本，可以在不同的平台上使用。
+10
