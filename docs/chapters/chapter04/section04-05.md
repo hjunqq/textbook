@@ -50,11 +50,284 @@ Vue.js是构建现代水利监测平台前端界面的核心技术框架。作�
 **传统Web开发模式的局限性**包括：
 
 - **DOM操作复杂度高**：手动操作DOM元素容易出错，代码难以维护
+
+  传统Web开发采用命令式编程模式，要求开发者明确指定每一步操作：查找DOM节点、修改属性、更新内容、处理事件等。这种方式在处理复杂的数据变化和界面更新时会产生大量重复、易错的代码。
+
+  考虑一个实际的用户管理界面需求：当用户点击"删除用户"按钮时，需要完成以下一系列DOM操作：
+
+  ```javascript
+  // 传统方式需要逐步操作每个相关元素
+  function deleteUser(userId) {
+    // 1. 从用户列表中移除该行
+    const userRow = document.getElementById('user-' + userId);
+    userRow.parentNode.removeChild(userRow);
+    
+    // 2. 更新用户总数显示
+    const totalCount = document.getElementById('total-users');
+    const currentCount = parseInt(totalCount.textContent) - 1;
+    totalCount.textContent = currentCount;
+    
+    // 3. 更新分页信息
+    const currentPage = Math.ceil(currentCount / pageSize);
+    document.getElementById('current-page').textContent = currentPage;
+    
+    // 4. 如果当前页没有数据了，跳转到上一页
+    if (currentCount % pageSize === 0 && currentPage > 1) {
+      loadPage(currentPage - 1);
+    }
+    
+    // 5. 更新权限统计（如果被删除的是管理员）
+    if (user.role === 'admin') {
+      const adminCount = document.getElementById('admin-count');
+      adminCount.textContent = parseInt(adminCount.textContent) - 1;
+    }
+    
+    // 6. 显示操作成功提示
+    showToast('用户删除成功');
+    
+    // 7. 如果删除的是当前用户，需要额外处理
+    if (userId === currentUserId) {
+      logout();
+    }
+  }
+  ```
+
+  这种做法存在严重问题。首先是**操作步骤繁琐且容易出错**：开发者必须记住并正确执行每一个更新步骤，任何遗漏都会导致界面状态不一致。比如忘记更新用户总数，或者忘记处理分页逻辑，用户就会看到错误的信息。
+
+  其次是**代码维护困难**：当界面结构发生变化时（比如用户列表改为卡片布局），所有相关的DOM选择器和操作代码都需要重新编写。如果产品经理要求在删除用户时添加确认对话框，或者需要记录操作日志，就要在多个地方插入新的代码逻辑。
+
+  最严重的是**错误定位复杂**：当用户报告"删除用户后页面显示有问题"时，开发者需要检查上述所有步骤，任何一个环节都可能是问题所在。而且这些操作往往有时序依赖关系，A操作失败可能导致B操作的执行环境发生变化，使得错误传播和定位变得非常困难。
+
 - **代码组织困难**：缺乏模块化机制，大型项目结构混乱
+
+  传统Web开发缺乏有效的模块化机制，导致代码组织混乱。开发者往往将不同层次的逻辑混合在一起：数据获取、业务处理、界面更新、事件响应都写在同一个文件中，形成高度耦合的代码结构。
+
+  以一个真实的电商网站购物车功能为例，传统开发方式可能产生如下代码：
+
+  ```javascript
+  // cart.js - 所有购物车功能混合在一个文件中
+  
+  // 全局变量散布各处
+  var cartItems = [];
+  var totalPrice = 0;
+  var discountRate = 0;
+  var shippingFee = 10;
+  
+  // 数据获取函数
+  function loadCartData() {
+    $.ajax({
+      url: '/api/cart',
+      success: function(data) {
+        cartItems = data.items;
+        updateCartDisplay();
+        calculateTotal();
+        updateShippingInfo();
+        checkCouponValidity();
+      }
+    });
+  }
+  
+  // UI更新函数
+  function updateCartDisplay() {
+    var html = '';
+    for (var i = 0; i < cartItems.length; i++) {
+      html += '<div class="cart-item" id="item-' + cartItems[i].id + '">';
+      html += '<span>' + cartItems[i].name + '</span>';
+      html += '<input type="number" value="' + cartItems[i].quantity + '" onchange="updateQuantity(' + cartItems[i].id + ', this.value)">';
+      html += '<button onclick="removeItem(' + cartItems[i].id + ')">删除</button>';
+      html += '</div>';
+    }
+    document.getElementById('cart-list').innerHTML = html;
+  }
+  
+  // 业务逻辑函数
+  function calculateTotal() {
+    totalPrice = 0;
+    for (var i = 0; i < cartItems.length; i++) {
+      totalPrice += cartItems[i].price * cartItems[i].quantity;
+    }
+    totalPrice = totalPrice * (1 - discountRate) + shippingFee;
+    document.getElementById('total-price').textContent = '￥' + totalPrice.toFixed(2);
+  }
+  
+  // 事件处理函数
+  function updateQuantity(itemId, newQuantity) {
+    // 业务逻辑
+    for (var i = 0; i < cartItems.length; i++) {
+      if (cartItems[i].id === itemId) {
+        cartItems[i].quantity = parseInt(newQuantity);
+        break;
+      }
+    }
+    
+    // UI更新
+    calculateTotal();
+    updateInventoryWarning(itemId);
+    saveToLocalStorage();
+    
+    // 数据同步
+    $.post('/api/cart/update', {
+      itemId: itemId,
+      quantity: newQuantity
+    });
+  }
+  ```
+
+  这种代码组织方式存在以下严重问题：
+
+  **功能耦合严重**：数据处理、界面渲染、事件响应、API调用都混合在一起。修改价格计算逻辑可能意外影响到界面渲染，调整界面布局可能破坏事件绑定。
+
+  **全局状态污染**：大量全局变量使得状态管理变得混乱。`cartItems`、`totalPrice`等变量可能在任何地方被修改，很难追踪状态变化的来源和影响范围。
+
+  **代码复用困难**：购物车的计算逻辑、界面组件、数据处理等功能无法独立使用。如果要在其他页面实现类似的商品列表功能，只能复制粘贴部分代码，然后进行大量修改。
+
+  **测试和调试困难**：由于功能高度耦合，很难对单个功能进行独立测试。要测试价格计算是否正确，必须同时准备DOM环境、模拟AJAX请求、设置全局变量等。
+
+  **团队协作冲突**：多个开发者同时修改同一个大文件时，容易产生代码冲突。而且由于缺乏清晰的模块边界，很难进行合理的任务分工。
+
 - **数据同步问题**：界面状态与数据状态不一致，需要大量同步代码
+
+  在传统Web开发中，最令开发者头痛的问题之一就是数据同步。当同一份数据需要在页面的多个位置显示时，保持这些显示的一致性变得极其困难。问题的核心在于缺乏统一的数据源管理机制。
+
+  以一个在线聊天应用为例，当用户的在线状态发生变化时，需要同步更新的地方包括：
+
+  ```javascript
+  // 传统方式：手动同步所有相关显示
+  function updateUserOnlineStatus(userId, isOnline) {
+    // 1. 更新好友列表中的状态图标
+    const friendItem = document.querySelector(`#friend-${userId} .status-icon`);
+    if (friendItem) {
+      friendItem.className = isOnline ? 'status-online' : 'status-offline';
+    }
+    
+    // 2. 更新聊天窗口标题栏的状态
+    const chatTitle = document.querySelector(`#chat-${userId} .user-status`);
+    if (chatTitle) {
+      chatTitle.textContent = isOnline ? '在线' : '离线';
+    }
+    
+    // 3. 更新群聊中的成员列表
+    const groupMembers = document.querySelectorAll(`.group-member[data-user="${userId}"]`);
+    groupMembers.forEach(member => {
+      member.setAttribute('data-status', isOnline ? 'online' : 'offline');
+    });
+    
+    // 4. 更新顶部在线人数统计
+    const onlineCount = document.querySelector('#online-count');
+    if (onlineCount) {
+      const current = parseInt(onlineCount.textContent);
+      onlineCount.textContent = isOnline ? current + 1 : current - 1;
+    }
+    
+    // 5. 更新个人资料页面的状态
+    const profileStatus = document.querySelector(`#profile-${userId} .status`);
+    if (profileStatus) {
+      profileStatus.textContent = isOnline ? '当前在线' : '最后在线：刚刚';
+    }
+  }
+  ```
+
+  这种手动同步方式存在严重问题：
+
+  **遗漏更新风险高**：开发者必须记住所有使用该数据的地方。当添加新功能时（比如在消息气泡旁显示发送者状态），很容易忘记在状态更新函数中添加相应的同步逻辑。
+
+  **状态不一致难以发现**：用户可能看到好友列表显示"在线"，但聊天窗口显示"离线"。这种不一致往往只在特定操作序列下出现，很难重现和调试。
+
+  **代码重复和冗余**：每种数据类型都需要编写类似的同步函数。用户头像、昵称、签名等信息的更新都要写一套类似的代码。
+
+  **时序问题复杂**：如果多个数据同时变化（比如用户既改了头像又改了昵称），必须确保更新的顺序正确，避免出现中间状态。
+
+  **性能问题突出**：每次数据变化都可能触发大量DOM查询和更新操作，即使某些元素当前不可见或不需要更新。
+
+  更严重的是，当业务逻辑复杂化时，数据之间可能存在依赖关系。比如用户状态变化可能影响群组的活跃度计算，群组活跃度又影响推荐算法的权重。这种联动关系使得同步逻辑变得极其复杂，任何一个环节出错都可能产生连锁反应。
+
 - **开发效率低下**：重复编写类似功能，缺乏代码复用机制
 
-在水利监测系统的开发中，这些问题尤为突出。例如，当需要同时更新水位图表、预警状态和数据表格时，传统方式需要分别操作多个DOM元素，代码冗余且容易出错。
+  传统Web开发的低效率主要体现在大量重复性工作上。由于缺乏有效的抽象和组件化机制，开发者经常需要为相似的功能重新编写代码，这不仅浪费时间，还容易引入错误。
+
+  以一个企业管理系统的表格功能为例，系统中可能需要多个数据表格：员工列表、部门列表、项目列表、财务记录等。传统开发方式下，每个表格都需要独立实现：
+
+  ```javascript
+  // 员工列表表格
+  function createEmployeeTable(employees) {
+    var html = '<table class="employee-table">';
+    html += '<thead><tr>';
+    html += '<th onclick="sortEmployees(\'name\')">姓名 <span id="name-sort">↕</span></th>';
+    html += '<th onclick="sortEmployees(\'department\')">部门 <span id="dept-sort">↕</span></th>';
+    html += '<th onclick="sortEmployees(\'salary\')">薪资 <span id="salary-sort">↕</span></th>';
+    html += '<th>操作</th>';
+    html += '</tr></thead><tbody>';
+    
+    for (var i = 0; i < employees.length; i++) {
+      html += '<tr>';
+      html += '<td>' + employees[i].name + '</td>';
+      html += '<td>' + employees[i].department + '</td>';
+      html += '<td>' + employees[i].salary + '</td>';
+      html += '<td><button onclick="editEmployee(' + employees[i].id + ')">编辑</button>';
+      html += '<button onclick="deleteEmployee(' + employees[i].id + ')">删除</button></td>';
+      html += '</tr>';
+    }
+    html += '</tbody></table>';
+    
+    // 分页控制
+    html += '<div class="pagination">';
+    for (var page = 1; page <= Math.ceil(employees.length / 10); page++) {
+      html += '<button onclick="loadEmployeePage(' + page + ')">' + page + '</button>';
+    }
+    html += '</div>';
+    
+    document.getElementById('employee-container').innerHTML = html;
+  }
+  
+  // 项目列表表格 - 几乎相同的代码结构
+  function createProjectTable(projects) {
+    var html = '<table class="project-table">';
+    html += '<thead><tr>';
+    html += '<th onclick="sortProjects(\'name\')">项目名 <span id="name-sort">↕</span></th>';
+    html += '<th onclick="sortProjects(\'status\')">状态 <span id="status-sort">↕</span></th>';
+    html += '<th onclick="sortProjects(\'deadline\')">截止日期 <span id="deadline-sort">↕</span></th>';
+    html += '<th>操作</th>';
+    html += '</tr></thead><tbody>';
+    
+    for (var i = 0; i < projects.length; i++) {
+      html += '<tr>';
+      html += '<td>' + projects[i].name + '</td>';
+      html += '<td>' + projects[i].status + '</td>';
+      html += '<td>' + projects[i].deadline + '</td>';
+      html += '<td><button onclick="editProject(' + projects[i].id + ')">编辑</button>';
+      html += '<button onclick="deleteProject(' + projects[i].id + ')">删除</button></td>';
+      html += '</tr>';
+    }
+    html += '</tbody></table>';
+    
+    // 相同的分页代码
+    html += '<div class="pagination">';
+    for (var page = 1; page <= Math.ceil(projects.length / 10); page++) {
+      html += '<button onclick="loadProjectPage(' + page + ')">' + page + '</button>';
+    }
+    html += '</div>';
+    
+    document.getElementById('project-container').innerHTML = html;
+  }
+  ```
+
+  这种重复开发模式存在以下问题：
+
+  **大量重复代码**：表格的HTML结构、排序逻辑、分页功能在每个实现中都基本相同，但需要重复编写。这不仅浪费开发时间，还会导致代码库膨胀。
+
+  **维护成本高昂**：当需要修改表格样式或功能时（比如改变分页按钮的样式，或添加批量操作功能），必须在每个表格实现中都进行相同的修改。
+
+  **错误重复传播**：如果某个表格实现中存在Bug（比如排序逻辑错误），这个错误很可能在复制粘贴到其他表格时被重复引入。
+
+  **功能不一致**：由于是手动复制和修改，不同表格的行为可能存在细微差异，导致用户体验不一致。
+
+  **新功能开发缓慢**：每次添加新的列表页面时，都需要重新实现整套表格功能，即使核心逻辑几乎相同。
+
+  **技能学习重复**：团队新成员需要理解多个相似但不同的实现，学习成本高，而且容易在不同实现之间产生混淆。
+
+  这种低效率问题在复杂项目中会被显著放大。一个中等规模的Web应用可能包含几十个类似的界面组件，如果没有有效的复用机制，开发团队会把大量时间浪费在重复劳动上，而不是专注于业务逻辑和用户体验的优化。
+
+在实际的业务开发中，这些问题往往同时出现，相互影响，使得传统开发模式难以应对现代Web应用的复杂需求。例如，当需要在一个项目管理系统中同时更新任务状态、团队统计和进度图表时，传统方式需要分别操作多个DOM元素，编写大量同步代码，代码组织混乱且容易出错。
 
 ```javascript
 // 传统jQuery方式更新水利监测数据（示例）
@@ -4754,2141 +5027,161 @@ onUnmounted(() => {
 3. **可组合性**：小组件组合成大组件，构建复杂应用
 4. **可维护性**：单一职责原则，便于测试和维护
 
-让我们通过构建一个水利监测站管理系统来学习Vue组件化开发：
-
-### 单文件组件(.vue)结构详解
-
-Vue的单文件组件将模板、逻辑和样式封装在一个`.vue`文件中，提供了清晰的代码组织结构：
-
-```vue
-<!-- WaterStationCard.vue - 监测站卡片组件 -->
-<template>
-  <!-- 模板部分：定义组件的HTML结构 -->
-  <div class="water-station-card" :class="cardStatusClass">
-    <!-- 组件头部 -->
-    <div class="card-header">
-      <div class="station-info">
-        <h3 class="station-name">{{ station.name }}</h3>
-        <span class="station-id">#{{ station.id }}</span>
-      </div>
-      <div class="status-indicator" :class="`status-${station.status}`">
-        {{ getStatusText(station.status) }}
-      </div>
-    </div>
-    
-    <!-- 监测数据展示 -->
-    <div class="card-body">
-      <div class="measurements-grid">
-        <div 
-          v-for="(value, key) in station.measurements" 
-          :key="key"
-          class="measurement-item"
-          :class="getMeasurementClass(key, value)"
-        >
-          <div class="measurement-label">{{ getMeasurementLabel(key) }}</div>
-          <div class="measurement-value">
-            {{ formatMeasurementValue(key, value) }}
-          </div>
-          <div class="measurement-trend" v-if="station.trends[key]">
-            <trend-indicator 
-              :value="station.trends[key]" 
-              :type="key"
-              @trend-click="handleTrendClick"
-            />
-          </div>
-        </div>
-      </div>
-      
-      <!-- 预警信息 -->
-      <div v-if="station.alerts.length > 0" class="alerts-section">
-        <alert-panel 
-          v-for="alert in station.alerts"
-          :key="alert.id"
-          :alert="alert"
-          :compact="true"
-          @alert-dismiss="dismissAlert"
-        />
-      </div>
-    </div>
-    
-    <!-- 操作按钮 -->
-    <div class="card-footer">
-      <div class="action-buttons">
-        <base-button 
-          variant="primary" 
-          size="small"
-          :loading="isLoading"
-          @click="refreshData"
-        >
-          刷新数据
-        </base-button>
-        
-        <base-button 
-          variant="outline" 
-          size="small"
-          @click="viewDetails"
-        >
-          详细信息
-        </base-button>
-        
-        <base-button 
-          variant="danger" 
-          size="small"
-          v-if="canDelete"
-          @click="confirmDelete"
-        >
-          删除
-        </base-button>
-      </div>
-      
-      <div class="last-update">
-        更新时间: {{ formatTime(station.lastUpdate) }}
-      </div>
-    </div>
-  </div>
-</template>
-
-<script setup>
-// 脚本部分：定义组件的逻辑
-import { computed, ref, watch, onMounted, onUnmounted } from 'vue'
-import TrendIndicator from './TrendIndicator.vue'
-import AlertPanel from './AlertPanel.vue'
-import BaseButton from './BaseButton.vue'
-
-// ===== Props定义 =====
-const props = defineProps({
-  // 监测站数据
-  station: {
-    type: Object,
-    required: true,
-    validator: (station) => {
-      return station && station.id && station.name && station.measurements
-    }
-  },
-  // 是否可删除
-  canDelete: {
-    type: Boolean,
-    default: false
-  },
-  // 自动刷新间隔(秒)
-  autoRefreshInterval: {
-    type: Number,
-    default: 0,
-    validator: (value) => value >= 0
-  },
-  // 预警阈值配置
-  alertThresholds: {
-    type: Object,
-    default: () => ({
-      waterLevel: { min: 2.0, max: 8.0 },
-      flowRate: { min: 500, max: 3000 },
-      pressure: { min: 0.1, max: 1.5 },
-      temperature: { min: 5, max: 35 }
-    })
-  }
-})
-
-// ===== Emits定义 =====
-const emit = defineEmits([
-  'refresh-data',      // 刷新数据事件
-  'view-details',      // 查看详情事件
-  'delete-station',    // 删除监测站事件
-  'alert-dismiss',     // 预警消除事件
-  'trend-analysis',    // 趋势分析事件
-  'status-change'      // 状态变化事件
-])
-
-// ===== 响应式数据 =====
-const isLoading = ref(false)
-const autoRefreshTimer = ref(null)
-
-// ===== 计算属性 =====
-const cardStatusClass = computed(() => {
-  return `card-${props.station.status}`
-})
-
-const alertCount = computed(() => {
-  return props.station.alerts ? props.station.alerts.length : 0
-})
-
-const criticalAlerts = computed(() => {
-  return props.station.alerts ? 
-    props.station.alerts.filter(alert => alert.level === 'critical').length : 0
-})
-
-// ===== 方法定义 =====
-const getStatusText = (status) => {
-  const statusMap = {
-    online: '在线',
-    offline: '离线',
-    warning: '预警',
-    error: '故障',
-    maintenance: '维护中'
-  }
-  return statusMap[status] || '未知'
-}
-
-const getMeasurementLabel = (key) => {
-  const labelMap = {
-    waterLevel: '水位',
-    flowRate: '流量',
-    pressure: '压力',
-    temperature: '水温',
-    ph: 'pH值',
-    dissolvedOxygen: '溶解氧'
-  }
-  return labelMap[key] || key
-}
-
-const formatMeasurementValue = (key, value) => {
-  if (value === null || value === undefined) return '--'
-  
-  const formatMap = {
-    waterLevel: `${value.toFixed(2)} m`,
-    flowRate: `${value.toFixed(1)} m³/s`,
-    pressure: `${value.toFixed(2)} MPa`,
-    temperature: `${value.toFixed(1)} °C`,
-    ph: value.toFixed(2),
-    dissolvedOxygen: `${value.toFixed(1)} mg/L`
-  }
-  
-  return formatMap[key] || `${value}`
-}
-
-const getMeasurementClass = (key, value) => {
-  const threshold = props.alertThresholds[key]
-  if (!threshold || value === null || value === undefined) {
-    return 'measurement-normal'
-  }
-  
-  if (value < threshold.min || value > threshold.max) {
-    return 'measurement-warning'
-  }
-  
-  return 'measurement-normal'
-}
-
-const formatTime = (date) => {
-  if (!date) return '--'
-  return new Date(date).toLocaleString('zh-CN', {
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit'
-  })
-}
-
-// ===== 事件处理方法 =====
-const refreshData = async () => {
-  isLoading.value = true
-  try {
-    emit('refresh-data', props.station.id)
-  } finally {
-    // 设置延迟以显示加载状态
-    setTimeout(() => {
-      isLoading.value = false
-    }, 500)
-  }
-}
-
-const viewDetails = () => {
-  emit('view-details', props.station)
-}
-
-const confirmDelete = () => {
-  if (confirm(`确定要删除监测站 "${props.station.name}" 吗？`)) {
-    emit('delete-station', props.station.id)
-  }
-}
-
-const dismissAlert = (alertId) => {
-  emit('alert-dismiss', props.station.id, alertId)
-}
-
-const handleTrendClick = (trendData) => {
-  emit('trend-analysis', props.station.id, trendData)
-}
-
-// ===== 侦听器 =====
-watch(
-  () => props.station.status,
-  (newStatus, oldStatus) => {
-    if (newStatus !== oldStatus) {
-      emit('status-change', props.station.id, newStatus, oldStatus)
-    }
-  }
-)
-
-// 监听预警数量变化
-watch(
-  alertCount,
-  (newCount, oldCount) => {
-    if (newCount > oldCount) {
-      // 新增预警时的处理
-      console.log(`监测站 ${props.station.name} 新增预警`)
-    }
-  }
-)
-
-// ===== 生命周期钩子 =====
-onMounted(() => {
-  // 设置自动刷新定时器
-  if (props.autoRefreshInterval > 0) {
-    autoRefreshTimer.value = setInterval(() => {
-      if (props.station.status === 'online') {
-        refreshData()
-      }
-    }, props.autoRefreshInterval * 1000)
-  }
-})
-
-onUnmounted(() => {
-  // 清理定时器
-  if (autoRefreshTimer.value) {
-    clearInterval(autoRefreshTimer.value)
-  }
-})
-
-// ===== 对外暴露的方法 =====
-defineExpose({
-  refreshData,
-  isLoading: readonly(isLoading)
-})
-</script>
-
-<style scoped>
-/* 样式部分：组件的CSS样式 */
-.water-station-card {
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
-  overflow: hidden;
-  border-left: 4px solid transparent;
-}
-
-.water-station-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-}
-
-/* 状态相关样式 */
-.card-online {
-  border-left-color: #52c41a;
-}
-
-.card-warning {
-  border-left-color: #faad14;
-}
-
-.card-error {
-  border-left-color: #ff4d4f;
-}
-
-.card-offline {
-  border-left-color: #d9d9d9;
-  opacity: 0.7;
-}
-
-.card-maintenance {
-  border-left-color: #722ed1;
-}
-
-/* 卡片头部 */
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  padding: 16px 20px 12px;
-  border-bottom: 1px solid #f0f0f0;
-}
-
-.station-info {
-  flex: 1;
-}
-
-.station-name {
-  margin: 0 0 4px 0;
-  font-size: 16px;
-  font-weight: 600;
-  color: #262626;
-  line-height: 1.4;
-}
-
-.station-id {
-  color: #8c8c8c;
-  font-size: 12px;
-  font-family: monospace;
-}
-
-.status-indicator {
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 500;
-  white-space: nowrap;
-}
-
-.status-online {
-  background: #f6ffed;
-  color: #52c41a;
-  border: 1px solid #b7eb8f;
-}
-
-.status-warning {
-  background: #fff7e6;
-  color: #faad14;
-  border: 1px solid #ffd591;
-}
-
-.status-error {
-  background: #fff2f0;
-  color: #ff4d4f;
-  border: 1px solid #ffb3b3;
-}
-
-.status-offline {
-  background: #f5f5f5;
-  color: #8c8c8c;
-  border: 1px solid #d9d9d9;
-}
-
-.status-maintenance {
-  background: #f9f0ff;
-  color: #722ed1;
-  border: 1px solid #d3adf7;
-}
-
-/* 卡片主体 */
-.card-body {
-  padding: 16px 20px;
-}
-
-.measurements-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.measurement-item {
-  text-align: center;
-  padding: 8px;
-  border-radius: 4px;
-  background: #fafafa;
-  transition: background-color 0.2s;
-}
-
-.measurement-item.measurement-warning {
-  background: #fff7e6;
-  border: 1px solid #ffd591;
-}
-
-.measurement-item.measurement-normal {
-  background: #f6ffed;
-  border: 1px solid #b7eb8f;
-}
-
-.measurement-label {
-  font-size: 11px;
-  color: #8c8c8c;
-  margin-bottom: 2px;
-  font-weight: 500;
-}
-
-.measurement-value {
-  font-size: 14px;
-  font-weight: 600;
-  color: #262626;
-  margin-bottom: 4px;
-}
-
-.measurement-trend {
-  font-size: 10px;
-}
-
-/* 预警区域 */
-.alerts-section {
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid #f0f0f0;
-}
-
-/* 卡片底部 */
-.card-footer {
-  padding: 12px 20px;
-  background: #fafafa;
-  border-top: 1px solid #f0f0f0;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.action-buttons {
-  display: flex;
-  gap: 8px;
-}
-
-.last-update {
-  font-size: 11px;
-  color: #8c8c8c;
-  white-space: nowrap;
-}
-
-/* 响应式设计 */
-@media (max-width: 768px) {
-  .measurements-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  
-  .card-footer {
-    flex-direction: column;
-    gap: 8px;
-  }
-  
-  .action-buttons {
-    width: 100%;
-    justify-content: center;
-  }
-}
-</style>
-```
-
-### 子组件定义与使用
-
-在上面的监测站卡片组件中，我们使用了几个子组件。让我们定义这些子组件：
-
-```vue
-<!-- TrendIndicator.vue - 趋势指示器组件 -->
-<template>
-  <div 
-    class="trend-indicator" 
-    :class="trendClass"
-    @click="handleClick"
-    :title="trendTooltip"
-  >
-    <span class="trend-icon">{{ trendIcon }}</span>
-    <span class="trend-value">{{ formatTrendValue(value) }}</span>
-  </div>
-</template>
-
-<script setup>
-import { computed } from 'vue'
-
-const props = defineProps({
-  value: {
-    type: Number,
-    required: true
-  },
-  type: {
-    type: String,
-    required: true
-  },
-  threshold: {
-    type: Number,
-    default: 5
-  }
-})
-
-const emit = defineEmits(['trend-click'])
-
-const trendClass = computed(() => {
-  const absValue = Math.abs(props.value)
-  if (absValue < props.threshold) return 'trend-stable'
-  return props.value > 0 ? 'trend-up' : 'trend-down'
-})
-
-const trendIcon = computed(() => {
-  const absValue = Math.abs(props.value)
-  if (absValue < props.threshold) return '→'
-  return props.value > 0 ? '↗' : '↘'
-})
-
-const trendTooltip = computed(() => {
-  const direction = props.value > 0 ? '上升' : '下降'
-  return `${direction} ${Math.abs(props.value).toFixed(1)}%`
-})
-
-const formatTrendValue = (value) => {
-  return `${value > 0 ? '+' : ''}${value.toFixed(1)}%`
-}
-
-const handleClick = () => {
-  emit('trend-click', {
-    type: props.type,
-    value: props.value,
-    timestamp: new Date()
-  })
-}
-</script>
-
-<style scoped>
-.trend-indicator {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  cursor: pointer;
-  padding: 2px 4px;
-  border-radius: 2px;
-  font-weight: 500;
-  transition: background-color 0.2s;
-}
-
-.trend-indicator:hover {
-  background: rgba(0, 0, 0, 0.04);
-}
-
-.trend-up {
-  color: #52c41a;
-}
-
-.trend-down {
-  color: #ff4d4f;
-}
-
-.trend-stable {
-  color: #8c8c8c;
-}
-
-.trend-icon {
-  font-size: 10px;
-}
-
-.trend-value {
-  font-size: 9px;
-}
-</style>
-```
-
-```vue
-<!-- AlertPanel.vue - 预警面板组件 -->
-<template>
-  <div class="alert-panel" :class="alertClass">
-    <div class="alert-content">
-      <span class="alert-icon">{{ alertIcon }}</span>
-      <div class="alert-text">
-        <div class="alert-message">{{ alert.message }}</div>
-        <div v-if="!compact" class="alert-meta">
-          <span class="alert-time">{{ formatTime(alert.createdAt) }}</span>
-          <span v-if="alert.source" class="alert-source">来源: {{ alert.source }}</span>
-        </div>
-      </div>
-    </div>
-    <button 
-      v-if="alert.dismissible !== false"
-      class="alert-dismiss"
-      @click="dismiss"
-      :title="compact ? '忽略预警' : ''"
-    >
-      ×
-    </button>
-  </div>
-</template>
-
-<script setup>
-import { computed } from 'vue'
-
-const props = defineProps({
-  alert: {
-    type: Object,
-    required: true,
-    validator: (alert) => {
-      return alert && alert.id && alert.level && alert.message
-    }
-  },
-  compact: {
-    type: Boolean,
-    default: false
-  }
-})
-
-const emit = defineEmits(['alert-dismiss'])
-
-const alertClass = computed(() => {
-  const classes = [`alert-${props.alert.level}`]
-  if (props.compact) classes.push('alert-compact')
-  return classes.join(' ')
-})
-
-const alertIcon = computed(() => {
-  const iconMap = {
-    info: 'ℹ️',
-    warning: '⚠️',
-    error: '❌',
-    critical: '🚨'
-  }
-  return iconMap[props.alert.level] || '📢'
-})
-
-const formatTime = (date) => {
-  if (!date) return ''
-  return new Date(date).toLocaleString('zh-CN', {
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit'
-  })
-}
-
-const dismiss = () => {
-  emit('alert-dismiss', props.alert.id)
-}
-</script>
-
-<style scoped>
-.alert-panel {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  padding: 8px 12px;
-  border-radius: 4px;
-  border-left: 3px solid;
-  margin-bottom: 4px;
-  font-size: 12px;
-}
-
-.alert-compact {
-  padding: 6px 8px;
-  font-size: 11px;
-}
-
-.alert-info {
-  background: #e6f7ff;
-  border-left-color: #1890ff;
-  color: #1890ff;
-}
-
-.alert-warning {
-  background: #fff7e6;
-  border-left-color: #faad14;
-  color: #faad14;
-}
-
-.alert-error {
-  background: #fff2f0;
-  border-left-color: #ff4d4f;
-  color: #ff4d4f;
-}
-
-.alert-critical {
-  background: #fff0f6;
-  border-left-color: #eb2f96;
-  color: #eb2f96;
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-  0% { opacity: 1; }
-  50% { opacity: 0.7; }
-  100% { opacity: 1; }
-}
-
-.alert-content {
-  flex: 1;
-  display: flex;
-  align-items: flex-start;
-  gap: 6px;
-}
-
-.alert-icon {
-  font-size: 14px;
-  line-height: 1;
-}
-
-.alert-text {
-  flex: 1;
-}
-
-.alert-message {
-  font-weight: 500;
-  line-height: 1.4;
-}
-
-.alert-meta {
-  display: flex;
-  gap: 12px;
-  margin-top: 4px;
-  font-size: 10px;
-  opacity: 0.8;
-}
-
-.alert-dismiss {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 16px;
-  color: inherit;
-  opacity: 0.6;
-  transition: opacity 0.2s;
-  padding: 0;
-  line-height: 1;
-}
-
-.alert-dismiss:hover {
-  opacity: 1;
-}
-</style>
-```
-
-```vue
-<!-- BaseButton.vue - 基础按钮组件 -->
-<template>
-  <button 
-    class="base-button"
-    :class="buttonClass"
-    :disabled="disabled || loading"
-    :type="type"
-    @click="handleClick"
-  >
-    <span v-if="loading" class="button-spinner"></span>
-    <span class="button-content">
-      <slot></slot>
-    </span>
-  </button>
-</template>
-
-<script setup>
-import { computed } from 'vue'
-
-const props = defineProps({
-  variant: {
-    type: String,
-    default: 'default',
-    validator: (value) => {
-      return ['default', 'primary', 'danger', 'outline', 'text'].includes(value)
-    }
-  },
-  size: {
-    type: String,
-    default: 'medium',
-    validator: (value) => {
-      return ['small', 'medium', 'large'].includes(value)
-    }
-  },
-  disabled: {
-    type: Boolean,
-    default: false
-  },
-  loading: {
-    type: Boolean,
-    default: false
-  },
-  type: {
-    type: String,
-    default: 'button',
-    validator: (value) => {
-      return ['button', 'submit', 'reset'].includes(value)
-    }
-  }
-})
-
-const emit = defineEmits(['click'])
-
-const buttonClass = computed(() => {
-  return [
-    `button-${props.variant}`,
-    `button-${props.size}`,
-    {
-      'button-loading': props.loading,
-      'button-disabled': props.disabled
-    }
-  ]
-})
-
-const handleClick = (event) => {
-  if (!props.disabled && !props.loading) {
-    emit('click', event)
-  }
-}
-</script>
-
-<style scoped>
-.base-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  border: 1px solid transparent;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: 500;
-  text-align: center;
-  transition: all 0.2s;
-  user-select: none;
-  white-space: nowrap;
-}
-
-.base-button:focus {
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
-}
-
-/* 尺寸样式 */
-.button-small {
-  padding: 4px 8px;
-  font-size: 12px;
-  min-height: 24px;
-}
-
-.button-medium {
-  padding: 6px 12px;
-  font-size: 14px;
-  min-height: 32px;
-}
-
-.button-large {
-  padding: 8px 16px;
-  font-size: 16px;
-  min-height: 40px;
-}
-
-/* 变体样式 */
-.button-default {
-  background: #ffffff;
-  border-color: #d9d9d9;
-  color: #262626;
-}
-
-.button-default:hover:not(.button-disabled):not(.button-loading) {
-  background: #f5f5f5;
-  border-color: #40a9ff;
-  color: #1890ff;
-}
-
-.button-primary {
-  background: #1890ff;
-  border-color: #1890ff;
-  color: #ffffff;
-}
-
-.button-primary:hover:not(.button-disabled):not(.button-loading) {
-  background: #40a9ff;
-  border-color: #40a9ff;
-}
-
-.button-danger {
-  background: #ff4d4f;
-  border-color: #ff4d4f;
-  color: #ffffff;
-}
-
-.button-danger:hover:not(.button-disabled):not(.button-loading) {
-  background: #ff7875;
-  border-color: #ff7875;
-}
-
-.button-outline {
-  background: transparent;
-  border-color: #1890ff;
-  color: #1890ff;
-}
-
-.button-outline:hover:not(.button-disabled):not(.button-loading) {
-  background: #1890ff;
-  color: #ffffff;
-}
-
-.button-text {
-  background: transparent;
-  border-color: transparent;
-  color: #1890ff;
-}
-
-.button-text:hover:not(.button-disabled):not(.button-loading) {
-  background: rgba(24, 144, 255, 0.1);
-}
-
-/* 状态样式 */
-.button-disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
-}
-
-.button-loading {
-  cursor: not-allowed;
-}
-
-.button-loading .button-content {
-  opacity: 0.6;
-}
-
-/* 加载动画 */
-.button-spinner {
-  width: 14px;
-  height: 14px;
-  border: 2px solid transparent;
-  border-top: 2px solid currentColor;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-</style>
-```
-
-### 组件间通信机制
-
-Vue组件间通信有多种方式，适用于不同的场景：
-
-#### 1. Props - 父组件向子组件传递数据
-
-```vue
-<!-- 父组件 WaterStationManager.vue -->
-<template>
-  <div class="station-manager">
-    <h2>监测站管理</h2>
-    
-    <!-- 通过props传递数据给子组件 -->
-    <water-station-card
-      v-for="station in stations"
-      :key="station.id"
-      :station="station"
-      :can-delete="userPermissions.canDelete"
-      :auto-refresh-interval="refreshInterval"
-      :alert-thresholds="systemThresholds"
-      @refresh-data="handleRefreshStation"
-      @view-details="handleViewDetails"
-      @delete-station="handleDeleteStation"
-      @status-change="handleStatusChange"
-    />
-    
-    <!-- 配置面板 -->
-    <config-panel
-      :current-settings="managerSettings"
-      :available-options="configOptions"
-      @settings-change="handleSettingsChange"
-    />
-  </div>
-</template>
-
-<script setup>
-import { ref, reactive, computed, provide } from 'vue'
-import WaterStationCard from './WaterStationCard.vue'
-import ConfigPanel from './ConfigPanel.vue'
-
-// 父组件数据
-const stations = ref([
-  {
-    id: 'WS001',
-    name: '黄河小浪底监测站',
-    status: 'online',
-    measurements: {
-      waterLevel: 4.25,
-      flowRate: 1580.5,
-      pressure: 0.85,
-      temperature: 18.2
-    },
-    trends: {
-      waterLevel: 2.3,
-      flowRate: -1.8,
-      pressure: 0.5,
-      temperature: 1.2
-    },
-    alerts: [
-      {
-        id: 1,
-        level: 'warning',
-        message: '水位接近警戒线',
-        createdAt: new Date(),
-        dismissible: true
-      }
-    ],
-    lastUpdate: new Date()
-  }
-  // ... 更多监测站数据
-])
-
-const userPermissions = reactive({
-  canDelete: true,
-  canEdit: true,
-  canViewHistory: true
-})
-
-const refreshInterval = ref(30) // 30秒自动刷新
-
-const systemThresholds = ref({
-  waterLevel: { min: 2.0, max: 8.0 },
-  flowRate: { min: 500, max: 3000 },
-  pressure: { min: 0.1, max: 1.5 },
-  temperature: { min: 5, max: 35 }
-})
-
-const managerSettings = reactive({
-  autoRefresh: true,
-  showTrends: true,
-  compactView: false,
-  alertSound: true
-})
-
-const configOptions = ref({
-  refreshIntervals: [10, 30, 60, 120, 300],
-  viewModes: ['detailed', 'compact', 'list'],
-  alertLevels: ['info', 'warning', 'error', 'critical']
-})
-
-// ===== 事件处理方法 =====
-
-const handleRefreshStation = async (stationId) => {
-  console.log(`刷新监测站数据: ${stationId}`)
-  
-  // 模拟API调用
-  const station = stations.value.find(s => s.id === stationId)
-  if (station) {
-    // 模拟数据更新
-    Object.keys(station.measurements).forEach(key => {
-      const current = station.measurements[key]
-      const variation = (Math.random() - 0.5) * 0.2 * current
-      station.measurements[key] = Math.max(0, current + variation)
-    })
-    station.lastUpdate = new Date()
-  }
-}
-
-const handleViewDetails = (station) => {
-  console.log(`查看监测站详情:`, station)
-  // 可以打开详情弹窗或跳转到详情页面
-}
-
-const handleDeleteStation = (stationId) => {
-  console.log(`删除监测站: ${stationId}`)
-  const index = stations.value.findIndex(s => s.id === stationId)
-  if (index > -1) {
-    stations.value.splice(index, 1)
-  }
-}
-
-const handleStatusChange = (stationId, newStatus, oldStatus) => {
-  console.log(`监测站 ${stationId} 状态从 ${oldStatus} 变更为 ${newStatus}`)
-  // 可以在这里处理状态变更逻辑，如发送通知等
-}
-
-const handleSettingsChange = (newSettings) => {
-  Object.assign(managerSettings, newSettings)
-  
-  // 根据设置变更调整行为
-  if (newSettings.autoRefresh !== undefined) {
-    refreshInterval.value = newSettings.autoRefresh ? refreshInterval.value : 0
-  }
-}
-
-// ===== Provide/Inject - 向后代组件提供数据 =====
-provide('stationManager', {
-  permissions: userPermissions,
-  thresholds: systemThresholds,
-  settings: managerSettings
-})
-
-provide('apiService', {
-  refreshStation: handleRefreshStation,
-  updateStation: (stationId, data) => {
-    const station = stations.value.find(s => s.id === stationId)
-    if (station) {
-      Object.assign(station, data)
-    }
-  }
-})
-</script>
-```
-
-#### 2. Emits - 子组件向父组件发送事件
-
-在上面的例子中，我们已经看到了子组件通过`emit`向父组件发送事件。让我们看一个更复杂的事件通信示例：
-
-```vue
-<!-- DataVisualization.vue - 数据可视化组件 -->
-<template>
-  <div class="data-visualization">
-    <div class="chart-header">
-      <h3>{{ title }}</h3>
-      <div class="chart-controls">
-        <select 
-          v-model="selectedTimeRange"
-          @change="handleTimeRangeChange"
-        >
-          <option value="1h">1小时</option>
-          <option value="6h">6小时</option>
-          <option value="24h">24小时</option>
-          <option value="7d">7天</option>
-        </select>
-        
-        <button 
-          class="export-btn"
-          @click="exportData"
-        >
-          导出数据
-        </button>
-      </div>
-    </div>
-    
-    <div class="chart-content">
-      <!-- 简化的图表渲染 -->
-      <svg class="chart-svg" viewBox="0 0 800 400">
-        <g class="chart-lines">
-          <path 
-            v-for="line in chartLines"
-            :key="line.id"
-            :d="line.path"
-            :stroke="line.color"
-            :stroke-width="line.width"
-            fill="none"
-            @click="handleLineClick(line)"
-          />
-        </g>
-        
-        <g class="chart-points">
-          <circle
-            v-for="point in dataPoints"
-            :key="point.id"
-            :cx="point.x"
-            :cy="point.y"
-            :r="point.radius"
-            :fill="point.color"
-            @click="handlePointClick(point)"
-            @mouseenter="showTooltip(point)"
-            @mouseleave="hideTooltip"
-          />
-        </g>
-      </svg>
-      
-      <!-- 工具提示 -->
-      <div 
-        v-if="tooltip.show"
-        class="chart-tooltip"
-        :style="tooltipStyle"
-      >
-        <div class="tooltip-title">{{ tooltip.title }}</div>
-        <div class="tooltip-content">{{ tooltip.content }}</div>
-      </div>
-    </div>
-  </div>
-</template>
-
-<script setup>
-import { ref, computed, watch, nextTick } from 'vue'
-
-const props = defineProps({
-  title: String,
-  data: Array,
-  timeRange: String,
-  chartType: {
-    type: String,
-    default: 'line'
-  }
-})
-
-// 复杂事件定义，包含事件参数验证
-const emit = defineEmits({
-  // 时间范围变更事件
-  'time-range-change': (timeRange) => {
-    return typeof timeRange === 'string' && timeRange.length > 0
-  },
-  // 数据导出事件
-  'export-data': (exportConfig) => {
-    return exportConfig && exportConfig.timeRange && exportConfig.dataType
-  },
-  // 数据点击事件 - 复杂对象参数
-  'data-point-click': (pointData) => {
-    return pointData && typeof pointData.value === 'number' && pointData.timestamp
-  },
-  // 图表区域选择事件
-  'chart-selection': (selectionData) => {
-    return selectionData && selectionData.startTime && selectionData.endTime
-  },
-  // 错误事件
-  'chart-error': (error) => {
-    return error instanceof Error || typeof error === 'string'
-  }
-})
-
-const selectedTimeRange = ref(props.timeRange || '6h')
-const tooltip = reactive({
-  show: false,
-  title: '',
-  content: '',
-  x: 0,
-  y: 0
-})
-
-// 计算图表数据
-const chartLines = computed(() => {
-  if (!props.data || props.data.length === 0) return []
-  
-  try {
-    // 模拟图表线条数据生成
-    return props.data.map((dataset, index) => ({
-      id: dataset.id || index,
-      path: generateLinePath(dataset.values),
-      color: dataset.color || `hsl(${index * 60}, 70%, 50%)`,
-      width: dataset.width || 2
-    }))
-  } catch (error) {
-    emit('chart-error', new Error(`图表数据处理失败: ${error.message}`))
-    return []
-  }
-})
-
-const dataPoints = computed(() => {
-  if (!props.data) return []
-  
-  return props.data.flatMap((dataset, datasetIndex) => 
-    dataset.values.map((value, pointIndex) => ({
-      id: `${dataset.id}-${pointIndex}`,
-      x: (pointIndex / (dataset.values.length - 1)) * 800,
-      y: 400 - (value / Math.max(...dataset.values)) * 300,
-      radius: 4,
-      color: dataset.color || `hsl(${datasetIndex * 60}, 70%, 50%)`,
-      value: value,
-      timestamp: dataset.timestamps?.[pointIndex] || new Date(),
-      datasetId: dataset.id
-    }))
-  )
-})
-
-const tooltipStyle = computed(() => ({
-  position: 'absolute',
-  left: `${tooltip.x}px`,
-  top: `${tooltip.y}px`,
-  transform: 'translate(-50%, -100%)',
-  pointerEvents: 'none'
-}))
-
-// 方法定义
-const generateLinePath = (values) => {
-  if (!values || values.length === 0) return ''
-  
-  const points = values.map((value, index) => {
-    const x = (index / (values.length - 1)) * 800
-    const y = 400 - (value / Math.max(...values)) * 300
-    return `${x},${y}`
-  })
-  
-  return `M ${points.join(' L ')}`
-}
-
-const handleTimeRangeChange = () => {
-  // 发送带有详细配置的事件
-  emit('time-range-change', {
-    timeRange: selectedTimeRange.value,
-    timestamp: new Date(),
-    chartId: props.chartType
-  })
-}
-
-const exportData = () => {
-  const exportConfig = {
-    timeRange: selectedTimeRange.value,
-    dataType: props.chartType,
-    format: 'csv',
-    includeMetadata: true,
-    timestamp: new Date()
-  }
-  
-  emit('export-data', exportConfig)
-}
-
-const handlePointClick = (point) => {
-  // 发送复杂的点击数据
-  emit('data-point-click', {
-    value: point.value,
-    timestamp: point.timestamp,
-    datasetId: point.datasetId,
-    coordinates: { x: point.x, y: point.y },
-    metadata: {
-      timeRange: selectedTimeRange.value,
-      chartType: props.chartType
-    }
-  })
-}
-
-const handleLineClick = (line) => {
-  console.log('线条点击:', line)
-  // 可以发送线条选择事件
-}
-
-const showTooltip = (point) => {
-  tooltip.show = true
-  tooltip.title = `数据点 ${point.datasetId}`
-  tooltip.content = `值: ${point.value}, 时间: ${point.timestamp.toLocaleTimeString()}`
-  tooltip.x = point.x
-  tooltip.y = point.y
-}
-
-const hideTooltip = () => {
-  tooltip.show = false
-}
-
-// 监听数据变化
-watch(() => props.data, (newData) => {
-  if (!newData || newData.length === 0) {
-    emit('chart-error', '图表数据为空')
-  }
-}, { immediate: true })
-</script>
-
-<style scoped>
-.data-visualization {
-  background: white;
-  border-radius: 8px;
-  padding: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.chart-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid #f0f0f0;
-}
-
-.chart-controls {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
-
-.chart-controls select {
-  padding: 6px 12px;
-  border: 1px solid #d9d9d9;
-  border-radius: 4px;
-  background: white;
-}
-
-.export-btn {
-  padding: 6px 12px;
-  background: #1890ff;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 12px;
-}
-
-.chart-content {
-  position: relative;
-}
-
-.chart-svg {
-  width: 100%;
-  height: 400px;
-  border: 1px solid #f0f0f0;
-  border-radius: 4px;
-}
-
-.chart-lines path {
-  cursor: pointer;
-  transition: stroke-width 0.2s;
-}
-
-.chart-lines path:hover {
-  stroke-width: 3;
-}
-
-.chart-points circle {
-  cursor: pointer;
-  transition: r 0.2s;
-}
-
-.chart-points circle:hover {
-  r: 6;
-}
-
-.chart-tooltip {
-  background: rgba(0, 0, 0, 0.8);
-  color: white;
-  padding: 8px 12px;
-  border-radius: 4px;
-  font-size: 12px;
-  z-index: 1000;
-  white-space: nowrap;
-}
-
-.tooltip-title {
-  font-weight: bold;
-  margin-bottom: 2px;
-}
-
-.tooltip-content {
-  font-size: 11px;
-  opacity: 0.9;
-}
-</style>
-```
-
-#### 3. Provide/Inject - 跨层级组件通信
-
-对于深层嵌套的组件，使用provide/inject可以避免props层层传递：
-
-```vue
-<!-- 祖父组件 -->
-<script setup>
-import { provide, reactive, ref } from 'vue'
-
-// 提供全局配置
-const globalConfig = reactive({
-  theme: 'blue',
-  language: 'zh-CN',
-  dateFormat: 'YYYY-MM-DD HH:mm:ss'
-})
-
-// 提供API服务
-const apiService = {
-  async fetchStationData(stationId) {
-    // API调用逻辑
-  },
-  async updateStationConfig(stationId, config) {
-    // 更新配置逻辑
-  }
-}
-
-// 提供事件总线
-const eventBus = reactive({
-  events: new Map(),
-  emit(event, data) {
-    const handlers = this.events.get(event) || []
-    handlers.forEach(handler => handler(data))
-  },
-  on(event, handler) {
-    if (!this.events.has(event)) {
-      this.events.set(event, [])
-    }
-    this.events.get(event).push(handler)
-  },
-  off(event, handler) {
-    const handlers = this.events.get(event) || []
-    const index = handlers.indexOf(handler)
-    if (index > -1) {
-      handlers.splice(index, 1)
-    }
-  }
-})
-
-provide('globalConfig', globalConfig)
-provide('apiService', apiService)
-provide('eventBus', eventBus)
-</script>
-
-<!-- 孙子组件 -->
-<script setup>
-import { inject, onMounted, onUnmounted } from 'vue'
-
-// 注入祖父组件提供的依赖
-const globalConfig = inject('globalConfig')
-const apiService = inject('apiService')
-const eventBus = inject('eventBus')
-
-// 使用注入的依赖
-const handleDataRefresh = async () => {
-  const data = await apiService.fetchStationData('WS001')
-  eventBus.emit('dataUpdated', data)
-}
-
-const handleThemeChange = (newTheme) => {
-  globalConfig.theme = newTheme
-}
-
-// 监听全局事件
-const onGlobalDataUpdate = (data) => {
-  console.log('收到全局数据更新:', data)
-}
-
-onMounted(() => {
-  eventBus.on('globalDataUpdate', onGlobalDataUpdate)
-})
-
-onUnmounted(() => {
-  eventBus.off('globalDataUpdate', onGlobalDataUpdate)
-})
-</script>
-```
-
-### 单页面应用(SPA)架构
-
-组件化开发的最终目标是构建高效的单页面应用。在水利监测系统中，SPA架构能够提供流畅的用户体验和高效的数据管理。
-
-**SPA架构的核心优势：**
-
-1. **无页面刷新**：组件间切换无需重新加载页面，用户体验更流畅
-2. **状态保持**：应用状态在路由切换时得以保持，避免数据丢失
-3. **资源优化**：初次加载后，后续操作只需要获取数据，减少服务器压力
-4. **离线支持**：结合Service Worker可以实现离线访问功能
-
-通过组件化开发，我们可以将复杂的水利监测系统拆分为多个独立、可复用的组件，然后通过路由系统将这些组件组织成完整的应用程序。
-
 ## 4.5.5 路由管理与状态管理
 
 ### Vue Router路由系统
 
-Vue Router是Vue.js的官方路由管理器，它为单页面应用提供了强大的路由功能。在智慧水利平台中，我们需要管理多个功能模块的页面跳转，如监测站管理、数据分析、预警系统等。
+Vue Router是Vue.js的官方路由管理器，负责管理单页面应用的页面切换。在智慧水利平台中，不同功能模块（监测站管理、数据分析、预警系统）都需要独立的页面，路由系统可以优雅地组织这些页面。
 
-#### 路由配置与基础使用
+#### 路由配置基础
 
-首先，让我们配置一个完整的水利监测系统路由：
+路由配置定义了URL路径与页面组件的对应关系：
 
 ```javascript
-// router/index.js - 路由配置文件
+// router/index.js - 路由配置核心结构
 import { createRouter, createWebHistory } from 'vue-router'
-import { useUserStore } from '@/stores/user'
 
-// 路由组件导入
-import Layout from '@/components/Layout.vue'
-import Dashboard from '@/views/Dashboard.vue'
-import StationManagement from '@/views/StationManagement.vue'
-import StationDetail from '@/views/StationDetail.vue'
-import DataAnalysis from '@/views/DataAnalysis.vue'
-import AlertCenter from '@/views/AlertCenter.vue'
-import SystemSettings from '@/views/SystemSettings.vue'
-import Login from '@/views/Login.vue'
-import NotFound from '@/views/NotFound.vue'
-
-// ===== 路由配置 =====
 const routes = [
-  // 登录页面
+  // 基础路由配置
   {
     path: '/login',
     name: 'Login',
     component: Login,
-    meta: {
-      title: '用户登录',
-      requiresAuth: false,
-      hideInMenu: true
-    }
+    meta: { requiresAuth: false }  // 元信息：无需登录
   },
-  
-  // 主应用布局
   {
     path: '/',
-    component: Layout,
-    redirect: '/dashboard',
-    meta: {
-      requiresAuth: true
-    },
+    component: Layout,  // 布局组件
     children: [
-      // 仪表盘 - 系统首页
       {
         path: '/dashboard',
         name: 'Dashboard',
         component: Dashboard,
-        meta: {
-          title: '智慧水利仪表盘',
-          icon: 'dashboard',
-          requiresAuth: true,
-          permissions: ['dashboard:view']
-        }
+        meta: { title: '仪表盘', requiresAuth: true }
       },
-      
-      // 监测站管理模块
       {
         path: '/stations',
         name: 'StationManagement',
         component: StationManagement,
-        meta: {
-          title: '监测站管理',
-          icon: 'monitoring',
-          requiresAuth: true,
-          permissions: ['station:view']
-        }
+        meta: { title: '监测站管理', requiresAuth: true }
       },
-      
-      // 监测站详情页面 - 动态路由
+      // 动态路由 - 路径参数
       {
         path: '/stations/:stationId',
         name: 'StationDetail',
         component: StationDetail,
-        meta: {
-          title: '监测站详情',
-          requiresAuth: true,
-          hideInMenu: true,
-          permissions: ['station:detail']
-        },
-        // 路由参数验证
-        beforeEnter: (to, from, next) => {
-          const stationId = to.params.stationId
-          if (!/^WS\d{3,6}$/.test(stationId)) {
-            next({ name: 'NotFound' })
-          } else {
-            next()
-          }
-        }
-      },
-      
-      // 数据分析模块
-      {
-        path: '/analysis',
-        name: 'DataAnalysis',
-        component: DataAnalysis,
-        meta: {
-          title: '数据分析',
-          icon: 'analytics',
-          requiresAuth: true,
-          permissions: ['analysis:view']
-        },
-        children: [
-          // 嵌套路由 - 历史数据分析
-          {
-            path: 'history',
-            name: 'HistoryAnalysis',
-            component: () => import('@/views/analysis/HistoryAnalysis.vue'),
-            meta: {
-              title: '历史数据分析',
-              requiresAuth: true
-            }
-          },
-          
-          // 实时数据分析
-          {
-            path: 'realtime',
-            name: 'RealtimeAnalysis', 
-            component: () => import('@/views/analysis/RealtimeAnalysis.vue'),
-            meta: {
-              title: '实时数据分析',
-              requiresAuth: true
-            }
-          },
-          
-          // 预测分析
-          {
-            path: 'prediction',
-            name: 'PredictionAnalysis',
-            component: () => import('@/views/analysis/PredictionAnalysis.vue'),
-            meta: {
-              title: '预测分析',
-              requiresAuth: true,
-              permissions: ['analysis:prediction']
-            }
-          }
-        ]
-      },
-      
-      // 预警中心
-      {
-        path: '/alerts',
-        name: 'AlertCenter',
-        component: AlertCenter,
-        meta: {
-          title: '预警中心',
-          icon: 'alert',
-          requiresAuth: true,
-          permissions: ['alert:view']
-        }
-      },
-      
-      // 系统设置
-      {
-        path: '/settings',
-        name: 'SystemSettings',
-        component: SystemSettings,
-        meta: {
-          title: '系统设置',
-          icon: 'settings',
-          requiresAuth: true,
-          permissions: ['system:settings']
-        }
+        meta: { title: '监测站详情', requiresAuth: true }
       }
     ]
-  },
-  
-  // 404页面
-  {
-    path: '/404',
-    name: 'NotFound',
-    component: NotFound,
-    meta: {
-      title: '页面未找到',
-      hideInMenu: true
-    }
-  },
-  
-  // 重定向所有未匹配路径到404
-  {
-    path: '/:pathMatch(.*)*',
-    redirect: '/404'
   }
 ]
 
-// ===== 创建路由实例 =====
+// 创建路由实例
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
-  routes,
-  // 滚动行为配置
-  scrollBehavior(to, from, savedPosition) {
-    if (savedPosition) {
-      // 浏览器前进后退时恢复滚动位置
-      return savedPosition
-    } else if (to.hash) {
-      // 锚点跳转
-      return {
-        el: to.hash,
-        behavior: 'smooth'
-      }
-    } else {
-      // 新页面滚动到顶部
-      return { top: 0 }
-    }
-  }
+  history: createWebHistory(), // HTML5 History模式
+  routes
 })
-
-// ===== 全局路由守卫 =====
-
-// 前置守卫 - 路由跳转前的权限验证
-router.beforeEach(async (to, from, next) => {
-  const userStore = useUserStore()
-  
-  // 设置页面标题
-  if (to.meta.title) {
-    document.title = `${to.meta.title} - 智慧水利平台`
-  }
-  
-  // 检查是否需要认证
-  if (to.meta.requiresAuth === false) {
-    next()
-    return
-  }
-  
-  // 检查用户是否已登录
-  if (!userStore.isAuthenticated) {
-    if (to.path !== '/login') {
-      next({
-        path: '/login',
-        query: { redirect: to.fullPath }
-      })
-      return
-    }
-  }
-  
-  // 检查用户权限
-  if (to.meta.permissions && to.meta.permissions.length > 0) {
-    const hasPermission = to.meta.permissions.some(permission => 
-      userStore.hasPermission(permission)
-    )
-    
-    if (!hasPermission) {
-      // 权限不足，跳转到仪表盘或显示错误页面
-      next({ name: 'Dashboard' })
-      return
-    }
-  }
-  
-  next()
-})
-
-// 后置守卫 - 路由跳转完成后的处理
-router.afterEach((to, from) => {
-  // 记录页面访问日志
-  console.log(`页面跳转: ${from.path} → ${to.path}`)
-  
-  // 可以在这里添加页面访问统计
-  // analytics.trackPageView(to.path)
-})
-
-// 错误处理
-router.onError((error) => {
-  console.error('路由错误:', error)
-  // 可以在这里添加错误上报
-})
-
-export default router
 ```
 
-#### 路由组件中的使用
+**关键概念说明：**
+- **嵌套路由**：`children`配置子路由，适合有公共布局的页面
+- **动态路由**：`:stationId`是路径参数，可匹配`/stations/WS001`等
+- **路由元信息**：`meta`存储自定义数据，如权限要求、页面标题
 
-在组件中使用路由功能：
+#### 路由守卫与权限控制
+
+路由守卫用于控制页面访问权限，确保用户只能访问有权限的页面：
+
+```javascript
+// 全局前置守卫 - 在每次路由跳转前执行
+router.beforeEach((to, from, next) => {
+  // 设置页面标题
+  document.title = to.meta.title || '智慧水利平台'
+  
+  // 权限检查
+  if (to.meta.requiresAuth && !userStore.isAuthenticated) {
+    next('/login')  // 未登录跳转到登录页
+  } else {
+    next()  // 允许访问
+  }
+})
+```
+
+#### 组件中使用路由
+
+在组件中可以通过编程式导航跳转页面：
 
 ```vue
-<!-- StationManagement.vue - 监测站管理页面 -->
+<!-- StationManagement.vue 组件中的路由使用 -->
 <template>
   <div class="station-management">
-    <!-- 页面头部 -->
-    <div class="page-header">
-      <div class="header-left">
-        <h1 class="page-title">监测站管理</h1>
-        <breadcrumb :items="breadcrumbItems" />
-      </div>
-      
-      <div class="header-actions">
-        <!-- 路由导航按钮 -->
-        <router-link 
-          :to="{ name: 'StationDetail', params: { stationId: 'new' } }"
-          class="add-station-btn"
-        >
-          新增监测站
-        </router-link>
-        
-        <!-- 分析页面链接 -->
-        <router-link 
-          :to="{ 
-            name: 'DataAnalysis', 
-            query: { 
-              source: 'stations',
-              selectedStations: selectedStationIds 
-            } 
-          }"
-          class="analysis-btn"
-          :disabled="selectedStationIds.length === 0"
-        >
-          数据分析 ({{ selectedStationIds.length }})
-        </router-link>
-      </div>
-    </div>
+    <!-- 声明式路由导航 -->
+    <router-link to="/dashboard">返回首页</router-link>
     
-    <!-- 搜索和筛选 -->
-    <div class="filters-section">
-      <search-filters
-        v-model="filters"
-        :options="filterOptions"
-        @filter-change="handleFilterChange"
-      />
-    </div>
+    <!-- 带参数的路由链接 -->
+    <router-link 
+      :to="{ name: 'StationDetail', params: { stationId: station.id } }"
+    >
+      查看详情
+    </router-link>
     
-    <!-- 监测站列表 -->
-    <div class="stations-grid">
-      <water-station-card
-        v-for="station in filteredStations"
-        :key="station.id"
-        :station="station"
-        :selected="selectedStationIds.includes(station.id)"
-        @click="handleStationClick(station)"
-        @selection-change="handleSelectionChange"
-        @view-details="navigateToStationDetail"
-      />
-    </div>
-    
-    <!-- 分页 -->
-    <div class="pagination-section">
-      <pagination
-        v-model:current="currentPage"
-        :total="totalStations"
-        :page-size="pageSize"
-        @change="handlePageChange"
-      />
-    </div>
+    <!-- 点击事件触发编程式导航 -->
+    <button @click="navigateToAnalysis">数据分析</button>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { useStationStore } from '@/stores/station'
 
-// ===== 路由和存储 =====
-const router = useRouter()
-const route = useRoute()
-const stationStore = useStationStore()
+const router = useRouter()  // 路由实例
+const route = useRoute()    // 当前路由信息
 
-// ===== 响应式数据 =====
-const selectedStationIds = ref([])
-const currentPage = ref(1)
-const pageSize = ref(12)
-const filters = ref({
-  status: [],
-  region: '',
-  stationType: '',
-  keyword: ''
-})
-
-// ===== 计算属性 =====
-const breadcrumbItems = computed(() => [
-  { text: '首页', to: { name: 'Dashboard' } },
-  { text: '监测站管理', to: { name: 'StationManagement' } }
-])
-
-const filteredStations = computed(() => {
-  return stationStore.getFilteredStations(filters.value)
-})
-
-const totalStations = computed(() => {
-  return stationStore.totalCount
-})
-
-const filterOptions = computed(() => ({
-  statusOptions: [
-    { label: '在线', value: 'online' },
-    { label: '离线', value: 'offline' },
-    { label: '预警', value: 'warning' },
-    { label: '故障', value: 'error' }
-  ],
-  regionOptions: stationStore.regions,
-  typeOptions: stationStore.stationTypes
-}))
-
-// ===== 方法定义 =====
-
-// 导航到监测站详情页面
-const navigateToStationDetail = (station) => {
+// 编程式导航方法
+const navigateToAnalysis = () => {
   router.push({
-    name: 'StationDetail',
-    params: { stationId: station.id },
-    query: {
-      // 传递一些上下文信息
-      from: 'management',
-      page: currentPage.value
-    }
+    name: 'DataAnalysis',
+    query: { stationIds: selectedStations.value }  // 查询参数
   })
 }
 
-// 处理监测站点击
-const handleStationClick = (station) => {
-  // 根据用户权限决定行为
-  if (station.status === 'error') {
-    // 故障状态直接跳转到详情页面
-    navigateToStationDetail(station)
-  } else {
-    // 正常状态可以进行选择或其他操作
-    toggleSelection(station.id)
-  }
-}
-
-// 切换选择状态
-const toggleSelection = (stationId) => {
-  const index = selectedStationIds.value.indexOf(stationId)
-  if (index > -1) {
-    selectedStationIds.value.splice(index, 1)
-  } else {
-    selectedStationIds.value.push(stationId)
-  }
-}
-
-// 处理选择变化
-const handleSelectionChange = (stationId, selected) => {
-  if (selected) {
-    if (!selectedStationIds.value.includes(stationId)) {
-      selectedStationIds.value.push(stationId)
-    }
-  } else {
-    const index = selectedStationIds.value.indexOf(stationId)
-    if (index > -1) {
-      selectedStationIds.value.splice(index, 1)
-    }
-  }
-}
-
-// 处理筛选变化
-const handleFilterChange = (newFilters) => {
-  filters.value = { ...filters.value, ...newFilters }
-  currentPage.value = 1 // 重置到第一页
-  
-  // 更新URL查询参数
-  router.push({
-    name: 'StationManagement',
-    query: {
-      ...route.query,
-      ...newFilters,
-      page: 1
-    }
-  })
-}
-
-// 处理页码变化
-const handlePageChange = (page) => {
-  currentPage.value = page
-  
-  // 更新URL查询参数
-  router.push({
-    name: 'StationManagement',
-    query: {
-      ...route.query,
-      page: page
-    }
-  })
-}
-
-// 从URL查询参数恢复状态
-const restoreStateFromQuery = () => {
-  const query = route.query
-  
-  if (query.page) {
-    currentPage.value = parseInt(query.page) || 1
-  }
-  
-  if (query.status) {
-    filters.value.status = Array.isArray(query.status) ? query.status : [query.status]
-  }
-  
-  if (query.region) {
-    filters.value.region = query.region
-  }
-  
-  if (query.stationType) {
-    filters.value.stationType = query.stationType
-  }
-  
-  if (query.keyword) {
-    filters.value.keyword = query.keyword
-  }
-}
-
-// ===== 监听器 =====
-watch(() => route.query, (newQuery) => {
-  // URL查询参数变化时恢复状态
-  restoreStateFromQuery()
-}, { immediate: true })
-
-// 监听选中的监测站变化，更新URL
-watch(selectedStationIds, (newIds) => {
-  if (newIds.length > 0) {
-    router.replace({
-      name: 'StationManagement',
-      query: {
-        ...route.query,
-        selected: newIds.join(',')
-      }
-    })
-  } else {
-    const query = { ...route.query }
-    delete query.selected
-    router.replace({
-      name: 'StationManagement',
-      query
-    })
-  }
-})
-
-// ===== 生命周期 =====
-onMounted(() => {
-  // 加载监测站数据
-  stationStore.loadStations({
-    page: currentPage.value,
-    pageSize: pageSize.value,
-    filters: filters.value
-  })
-  
-  // 从URL查询参数恢复选中状态
-  if (route.query.selected) {
-    selectedStationIds.value = route.query.selected.split(',')
-  }
-})
+// 获取路由参数
+const stationId = route.params.stationId
+const fromPage = route.query.from
 </script>
 ```
 
-### 状态管理 - Pinia Store
+**编程式导航的几种方式：**
+- `router.push()`：跳转到新页面，会在历史记录中添加记录
+- `router.replace()`：替换当前页面，不会在历史记录中留下记录  
+- `router.go(n)`：在历史记录中前进或后退n步
 
-Vue 3推荐使用Pinia作为状态管理库，它提供了类型安全、开发工具支持和模块化的状态管理解决方案。
+### Pinia状态管理
 
-#### 用户状态管理
+Pinia是Vue 3推荐的状态管理库，用于管理应用的全局状态。在智慧水利平台中，用户信息、监测站数据、系统配置等都适合用状态管理来处理。
+
+#### 为什么需要状态管理？
+
+在复杂应用中，多个组件可能需要共享同一份数据。如果只用组件通信，会造成：
+- 兄弟组件间通信困难
+- 数据传递链路过长
+- 状态难以追踪和调试
+
+状态管理提供了一个集中式的数据存储，所有组件都可以访问和修改。
+
+#### 创建Store
+
+以用户信息管理为例：
 
 ```javascript
 // stores/user.js - 用户状态管理
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { authAPI } from '@/api/auth'
 
 export const useUserStore = defineStore('user', () => {
-  // ===== 状态定义 =====
+  // ===== 状态数据 =====
   const userInfo = ref(null)
   const token = ref(localStorage.getItem('token') || '')
   const permissions = ref([])
-  const preferences = ref({
-    theme: 'light',
-    language: 'zh-CN',
-    autoRefresh: true,
-    refreshInterval: 30,
-    alertSound: true
-  })
   
   // ===== 计算属性 =====
   const isAuthenticated = computed(() => {
@@ -6899,184 +5192,81 @@ export const useUserStore = defineStore('user', () => {
     return userInfo.value?.name || '未知用户'
   })
   
-  const userRole = computed(() => {
-    return userInfo.value?.role || 'guest'
-  })
-  
-  const avatar = computed(() => {
-    return userInfo.value?.avatar || '/default-avatar.png'
-  })
-  
-  // ===== 动作方法 =====
-  
-  // 登录
+  // ===== 操作方法 =====
   const login = async (credentials) => {
     try {
       const response = await authAPI.login(credentials)
-      
       if (response.success) {
         token.value = response.data.token
         userInfo.value = response.data.user
-        permissions.value = response.data.permissions || []
+        permissions.value = response.data.permissions
         
         // 保存到本地存储
         localStorage.setItem('token', token.value)
-        localStorage.setItem('userInfo', JSON.stringify(userInfo.value))
-        localStorage.setItem('permissions', JSON.stringify(permissions.value))
-        
         return { success: true }
-      } else {
-        return { 
-          success: false, 
-          message: response.message || '登录失败' 
-        }
       }
     } catch (error) {
-      console.error('登录错误:', error)
-      return { 
-        success: false, 
-        message: '网络错误，请稍后重试' 
-      }
+      return { success: false, message: '登录失败' }
     }
   }
   
-  // 登出
-  const logout = async () => {
-    try {
-      // 调用登出API
-      await authAPI.logout()
-    } catch (error) {
-      console.error('登出API调用失败:', error)
-    } finally {
-      // 清理本地状态
-      token.value = ''
-      userInfo.value = null
-      permissions.value = []
-      
-      // 清理本地存储
-      localStorage.removeItem('token')
-      localStorage.removeItem('userInfo')
-      localStorage.removeItem('permissions')
-    }
+  const logout = () => {
+    token.value = ''
+    userInfo.value = null
+    permissions.value = []
+    localStorage.removeItem('token')
   }
   
-  // 刷新用户信息
-  const refreshUserInfo = async () => {
-    if (!token.value) return false
-    
-    try {
-      const response = await authAPI.getUserInfo()
-      
-      if (response.success) {
-        userInfo.value = response.data.user
-        permissions.value = response.data.permissions || []
-        
-        // 更新本地存储
-        localStorage.setItem('userInfo', JSON.stringify(userInfo.value))
-        localStorage.setItem('permissions', JSON.stringify(permissions.value))
-        
-        return true
-      }
-    } catch (error) {
-      console.error('刷新用户信息失败:', error)
-      // 如果token过期，自动登出
-      if (error.code === 401) {
-        await logout()
-      }
-    }
-    
-    return false
-  }
-  
-  // 检查用户权限
   const hasPermission = (permission) => {
-    if (!permission) return true
-    if (!permissions.value || permissions.value.length === 0) return false
-    
-    // 支持通配符权限检查
-    return permissions.value.some(p => {
-      if (p === '*') return true // 超级管理员
-      if (p === permission) return true // 精确匹配
-      
-      // 模式匹配 (例如: station:* 匹配 station:view, station:edit)
-      if (p.endsWith('*')) {
-        const prefix = p.slice(0, -1)
-        return permission.startsWith(prefix)
-      }
-      
-      return false
-    })
+    return permissions.value.includes(permission)
   }
   
-  // 检查多个权限 (AND逻辑)
-  const hasAllPermissions = (permissionList) => {
-    if (!permissionList || permissionList.length === 0) return true
-    return permissionList.every(permission => hasPermission(permission))
-  }
-  
-  // 检查多个权限 (OR逻辑)
-  const hasAnyPermission = (permissionList) => {
-    if (!permissionList || permissionList.length === 0) return true
-    return permissionList.some(permission => hasPermission(permission))
-  }
-  
-  // 更新用户偏好设置
-  const updatePreferences = (newPreferences) => {
-    preferences.value = { ...preferences.value, ...newPreferences }
-    localStorage.setItem('userPreferences', JSON.stringify(preferences.value))
-  }
-  
-  // 初始化用户状态 (从本地存储恢复)
-  const initializeUser = () => {
-    try {
-      const savedUserInfo = localStorage.getItem('userInfo')
-      const savedPermissions = localStorage.getItem('permissions')
-      const savedPreferences = localStorage.getItem('userPreferences')
-      
-      if (savedUserInfo) {
-        userInfo.value = JSON.parse(savedUserInfo)
-      }
-      
-      if (savedPermissions) {
-        permissions.value = JSON.parse(savedPermissions)
-      }
-      
-      if (savedPreferences) {
-        preferences.value = { ...preferences.value, ...JSON.parse(savedPreferences) }
-      }
-    } catch (error) {
-      console.error('初始化用户状态失败:', error)
-    }
-  }
-  
-  // 返回store接口
+  // 返回公开的状态和方法
   return {
-    // 状态
-    userInfo: readonly(userInfo),
-    token: readonly(token),
-    permissions: readonly(permissions),
-    preferences,
-    
-    // 计算属性
-    isAuthenticated,
-    userName,
-    userRole,
-    avatar,
-    
-    // 方法
-    login,
-    logout,
-    refreshUserInfo,
-    hasPermission,
-    hasAllPermissions,
-    hasAnyPermission,
-    updatePreferences,
-    initializeUser
+    userInfo, token, permissions,
+    isAuthenticated, userName,
+    login, logout, hasPermission
   }
 })
 ```
 
-#### 监测站状态管理
+**Store的三个核心部分：**
+1. **状态（State）**：存储数据，使用`ref()`或`reactive()`
+2. **计算属性（Getters）**：基于状态的派生数据，使用`computed()`
+3. **动作（Actions）**：修改状态的方法，可以是异步的
+
+#### 在组件中使用Store
+
+```vue
+<template>
+  <div class="user-panel">
+    <div v-if="userStore.isAuthenticated">
+      欢迎，{{ userStore.userName }}！
+      <button @click="handleLogout">退出登录</button>
+    </div>
+    <div v-else>
+      <button @click="showLogin = true">登录</button>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { useUserStore } from '@/stores/user'
+
+const userStore = useUserStore()
+
+const handleLogout = () => {
+  userStore.logout()
+  router.push('/login')
+}
+</script>
+```
+
+通过状态管理，用户信息可以在整个应用中共享，任何组件都能访问登录状态、用户权限等信息。
+
+#### 监测站数据管理Store
+
+针对水利监测站的复杂数据管理需求：
 
 ```javascript
 // stores/station.js - 监测站状态管理
@@ -7085,277 +5275,256 @@ import { ref, computed } from 'vue'
 import { stationAPI } from '@/api/station'
 
 export const useStationStore = defineStore('station', () => {
-  // ===== 状态定义 =====
+  // ===== 状态数据 =====
   const stations = ref([])
   const selectedStation = ref(null)
   const loading = ref(false)
-  const error = ref(null)
-  const lastUpdateTime = ref(null)
-  
-  // 分页信息
-  const pagination = ref({
-    current: 1,
-    pageSize: 12,
-    total: 0
-  })
-  
-  // 筛选信息
-  const filters = ref({
-    status: [],
-    region: '',
-    stationType: '',
-    keyword: ''
-  })
-  
-  // 实时数据订阅状态
-  const subscriptions = ref(new Map())
   
   // ===== 计算属性 =====
-  const totalCount = computed(() => pagination.value.total)
-  
   const onlineStations = computed(() => {
     return stations.value.filter(station => station.status === 'online')
   })
   
-  const offlineStations = computed(() => {
-    return stations.value.filter(station => station.status === 'offline')
-  })
-  
-  const warningStations = computed(() => {
-    return stations.value.filter(station => station.status === 'warning')
-  })
-  
-  const errorStations = computed(() => {
-    return stations.value.filter(station => station.status === 'error')
-  })
-  
   const statusStatistics = computed(() => ({
     total: stations.value.length,
-    online: onlineStations.value.length,
-    offline: offlineStations.value.length,
-    warning: warningStations.value.length,
-    error: errorStations.value.length
+    online: stations.value.filter(s => s.status === 'online').length,
+    offline: stations.value.filter(s => s.status === 'offline').length,
+    warning: stations.value.filter(s => s.status === 'warning').length
   }))
   
-  const regions = computed(() => {
-    const regionSet = new Set(stations.value.map(station => station.region))
-    return Array.from(regionSet).map(region => ({
-      label: region,
-      value: region
-    }))
-  })
-  
-  const stationTypes = computed(() => {
-    const typeSet = new Set(stations.value.map(station => station.type))
-    return Array.from(typeSet).map(type => ({
-      label: type,
-      value: type
-    }))
-  })
-  
-  // ===== 动作方法 =====
-  
-  // 加载监测站列表
-  const loadStations = async (options = {}) => {
+  // ===== 操作方法 =====
+  const loadStations = async () => {
     loading.value = true
-    error.value = null
-    
     try {
-      const params = {
-        page: options.page || pagination.value.current,
-        pageSize: options.pageSize || pagination.value.pageSize,
-        ...filters.value,
-        ...options.filters
-      }
-      
-      const response = await stationAPI.getStations(params)
-      
+      const response = await stationAPI.getStations()
       if (response.success) {
         stations.value = response.data.stations
-        pagination.value = {
-          current: response.data.pagination.current,
-          pageSize: response.data.pagination.pageSize,
-          total: response.data.pagination.total
-        }
-        lastUpdateTime.value = new Date()
-      } else {
-        throw new Error(response.message)
       }
-    } catch (err) {
-      error.value = err.message
-      console.error('加载监测站失败:', err)
+    } catch (error) {
+      console.error('加载监测站失败:', error)
     } finally {
       loading.value = false
     }
   }
   
-  // 获取监测站详情
-  const getStationById = async (stationId) => {
-    try {
-      // 先从缓存中查找
-      const cachedStation = stations.value.find(s => s.id === stationId)
-      if (cachedStation) {
-        selectedStation.value = cachedStation
-        return cachedStation
-      }
-      
-      // 从API获取详情
-      const response = await stationAPI.getStationDetail(stationId)
-      
-      if (response.success) {
-        selectedStation.value = response.data
-        
-        // 更新缓存中的监测站信息
-        const index = stations.value.findIndex(s => s.id === stationId)
-        if (index > -1) {
-          stations.value[index] = response.data
-        }
-        
-        return response.data
-      } else {
-        throw new Error(response.message)
-      }
-    } catch (err) {
-      error.value = err.message
-      console.error('获取监测站详情失败:', err)
-      return null
+  const updateStationData = (stationId, newData) => {
+    const index = stations.value.findIndex(s => s.id === stationId)
+    if (index > -1) {
+      stations.value[index] = { ...stations.value[index], ...newData }
     }
   }
   
-  // 创建监测站
-  const createStation = async (stationData) => {
-    try {
-      const response = await stationAPI.createStation(stationData)
-      
-      if (response.success) {
-        // 添加到本地状态
-        stations.value.unshift(response.data)
-        pagination.value.total += 1
-        
-        return { success: true, data: response.data }
-      } else {
-        return { success: false, message: response.message }
-      }
-    } catch (err) {
-      console.error('创建监测站失败:', err)
-      return { success: false, message: err.message }
-    }
+  const selectStation = (stationId) => {
+    selectedStation.value = stations.value.find(s => s.id === stationId)
   }
   
-  // 更新监测站
-  const updateStation = async (stationId, updateData) => {
-    try {
-      const response = await stationAPI.updateStation(stationId, updateData)
-      
-      if (response.success) {
-        // 更新本地状态
-        const index = stations.value.findIndex(s => s.id === stationId)
-        if (index > -1) {
-          stations.value[index] = { ...stations.value[index], ...response.data }
-        }
-        
-        // 更新选中的监测站
-        if (selectedStation.value?.id === stationId) {
-          selectedStation.value = { ...selectedStation.value, ...response.data }
-        }
-        
-        return { success: true, data: response.data }
-      } else {
-        return { success: false, message: response.message }
-      }
-    } catch (err) {
-      console.error('更新监测站失败:', err)
-      return { success: false, message: err.message }
-    }
+  return {
+    // 状态
+    stations, selectedStation, loading,
+    // 计算属性
+    onlineStations, statusStatistics,
+    // 方法
+    loadStations, updateStationData, selectStation
   }
-  
-  // 删除监测站
-  const deleteStation = async (stationId) => {
-    try {
-      const response = await stationAPI.deleteStation(stationId)
-      
-      if (response.success) {
-        // 从本地状态移除
-        const index = stations.value.findIndex(s => s.id === stationId)
-        if (index > -1) {
-          stations.value.splice(index, 1)
-          pagination.value.total -= 1
-        }
-        
-        // 清除选中状态
-        if (selectedStation.value?.id === stationId) {
-          selectedStation.value = null
-        }
-        
-        // 取消实时数据订阅
-        unsubscribeRealTimeData(stationId)
-        
-        return { success: true }
-      } else {
-        return { success: false, message: response.message }
-      }
-    } catch (err) {
-      console.error('删除监测站失败:', err)
-      return { success: false, message: err.message }
-    }
+})
+```
+
+**在组件中使用监测站Store：**
+
+```vue
+<template>
+  <div class="dashboard">
+    <div class="statistics">
+      <div class="stat-item">
+        <h3>总监测站</h3>
+        <div class="value">{{ stationStore.statusStatistics.total }}</div>
+      </div>
+      <div class="stat-item">
+        <h3>在线监测站</h3>
+        <div class="value">{{ stationStore.statusStatistics.online }}</div>
+      </div>
+    </div>
+    
+    <div class="station-list">
+      <div 
+        v-for="station in stationStore.stations" 
+        :key="station.id"
+        @click="stationStore.selectStation(station.id)"
+      >
+        {{ station.name }} - {{ station.status }}
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { onMounted } from 'vue'
+import { useStationStore } from '@/stores/station'
+
+const stationStore = useStationStore()
+
+onMounted(() => {
+  stationStore.loadStations()
+})
+</script>
+```
+
+### Vue.js开发最佳实践
+
+在智慧水利平台开发过程中，遵循最佳实践能够确保代码质量、提升开发效率并保障系统的长期可维护性。
+
+#### 组件设计原则
+
+**1. 单一职责原则**
+
+每个组件应该只负责一个明确的功能。例如，水位监控组件只处理水位数据显示，不应该包含用户权限验证或网络请求逻辑。
+
+```vue
+<!-- 好的做法：专注于水位显示 -->
+<template>
+  <div class="water-level-display">
+    <div class="current-level">{{ level }} 米</div>
+    <div class="status" :class="statusClass">{{ statusText }}</div>
+  </div>
+</template>
+
+<script setup>
+// 只处理水位显示逻辑
+const props = defineProps({
+  level: { type: Number, required: true },
+  threshold: { type: Number, default: 5.0 }
+})
+
+const statusClass = computed(() => 
+  props.level > props.threshold ? 'warning' : 'normal'
+)
+</script>
+```
+
+**2. 合理的组件粒度**
+
+组件粒度要适中，既不能过度拆分导致组件碎片化，也不能过于庞大难以维护：
+
+- **基础组件**：按钮、输入框、图标等通用元素
+- **业务组件**：监测站卡片、数据图表等业务单元  
+- **页面组件**：完整的功能页面，组合多个业务组件
+
+**3. 清晰的组件接口**
+
+使用TypeScript或详细的PropTypes定义组件接口：
+
+```javascript
+// 清晰定义组件属性
+const props = defineProps({
+  stationData: {
+    type: Object,
+    required: true,
+    validator: (value) => value.id && value.name
+  },
+  editable: {
+    type: Boolean,
+    default: false
   }
-  
-  // 刷新监测站数据
-  const refreshStationData = async (stationId) => {
-    try {
-      const response = await stationAPI.refreshStationData(stationId)
-      
-      if (response.success) {
-        // 更新本地数据
-        const index = stations.value.findIndex(s => s.id === stationId)
-        if (index > -1) {
-          stations.value[index].measurements = response.data.measurements
-          stations.value[index].lastUpdate = response.data.lastUpdate
-          stations.value[index].status = response.data.status
-        }
-        
-        return { success: true, data: response.data }
-      } else {
-        return { success: false, message: response.message }
-      }
-    } catch (err) {
-      console.error('刷新监测站数据失败:', err)
-      return { success: false, message: err.message }
-    }
+})
+
+// 明确定义事件
+const emit = defineEmits(['update', 'delete', 'select'])
+```
+
+#### 状态管理策略
+
+**数据流向原则**：遵循单向数据流，避免多个数据源造成状态混乱。
+
+- **组件内部状态**：使用`ref()`或`reactive()`管理组件私有数据
+- **跨组件状态**：使用Pinia Store管理共享数据
+- **临时状态**：优先考虑Props/Events进行组件间通信
+
+```javascript
+// 状态层次规划示例
+const componentState = ref({})      // 组件级：表单输入、UI状态
+const businessStore = useStationStore() // 应用级：业务数据、用户信息
+const globalStore = useAppStore()   // 全局级：主题、语言设置
+```
+
+#### 性能优化策略
+
+**1. 计算属性优化**
+
+将复杂计算逻辑从模板移到计算属性中：
+
+```javascript
+// 优化前：模板中直接计算
+// <div>{{ stations.filter(s => s.status === 'online').length }}</div>
+
+// 优化后：使用计算属性
+const onlineStationsCount = computed(() => 
+  stations.value.filter(s => s.status === 'online').length
+)
+```
+
+**2. 列表渲染优化**
+
+为`v-for`提供稳定的key值，避免不必要的重新渲染：
+
+```vue
+<!-- 使用稳定的ID作为key -->
+<station-card 
+  v-for="station in stations" 
+  :key="station.id"  
+  :station="station"
+/>
+```
+
+**3. 组件懒加载**
+
+对于大型页面组件，使用懒加载减少初始包大小：
+
+```javascript
+const routes = [
+  {
+    path: '/analysis',
+    name: 'DataAnalysis',
+    // 路由级别的懒加载
+    component: () => import('@/views/DataAnalysis.vue')
   }
-  
-  // 获取筛选后的监测站
-  const getFilteredStations = (filterOptions = {}) => {
-    let filtered = [...stations.value]
+]
+```
+
+### 章节总结
+
+通过本节的学习，我们全面掌握了Vue.js在智慧水利平台开发中的核心技术：
+
+**1. 技术理论基础**
+- 理解了前端框架的演进历程和Vue.js的选择优势
+- 掌握了MVVM架构模式和响应式数据绑定原理
+- 学习了虚拟DOM的工作机制和性能优化价值
+
+**2. 开发实践技能**
+- 熟练掌握Vue实例创建、模板语法和数据绑定
+- 深入理解组件化开发思想和最佳实践
+- 掌握Vue Router路由管理和Pinia状态管理
+
+**3. 水利行业应用**
+- 通过监测站管理、数据可视化等实际场景学习Vue.js应用
+- 理解了如何将技术框架与业务需求相结合
+- 掌握了复杂业务逻辑的前端实现方法
+
+**4. 项目开发准备**
+- 建立了完整的Vue.js开发知识体系
+- 形成了规范的代码组织和项目结构理念
+- 具备了开发现代化水利监测平台前端的技术基础
+
+这些知识为后续章节的深入学习和实际项目开发奠定了坚实基础。在下一章中，我们将学习如何将这些前端技术与后端服务进行整合，构建完整的智慧水利系统架构。
+
+!!! tip "学习建议"
     
-    const currentFilters = { ...filters.value, ...filterOptions }
+    Vue.js作为现代前端开发的核心技术，建议：
     
-    // 状态筛选
-    if (currentFilters.status && currentFilters.status.length > 0) {
-      filtered = filtered.filter(station => 
-        currentFilters.status.includes(station.status)
-      )
-    }
-    
-    // 区域筛选
-    if (currentFilters.region) {
-      filtered = filtered.filter(station => 
-        station.region === currentFilters.region
-      )
-    }
-    
-    // 类型筛选
-    if (currentFilters.stationType) {
-      filtered = filtered.filter(station => 
-        station.type === currentFilters.stationType
-      )
-    }
-    
-    // 关键词搜索
-    if (currentFilters.keyword) {
-      const keyword = currentFilters.keyword.toLowerCase()
-      filtered = filtered.filter(station =>
-        station.name.toLowerCase().includes(keyword) ||
+    1. **多练习**：通过实际编写代码来加深理解
+    2. **重视基础**：响应式系统和组件化思想是关键
+    3. **关注实践**：结合水利行业实际需求进行学习
+    4. **持续学习**：关注Vue.js生态系统的最新发展
+````
         station.id.toLowerCase().includes(keyword) ||
         station.location?.toLowerCase().includes(keyword)
       )

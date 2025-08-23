@@ -51,6 +51,7 @@
     
     ### [第二节 Spring Boot入门与实践](section05-02.md)
     - Spring Boot框架介绍与优势
+    - Spring Boot基础
     - 项目创建与结构解析
     - 自动配置机制与Starter依赖
     - 开发环境搭建与配置管理
