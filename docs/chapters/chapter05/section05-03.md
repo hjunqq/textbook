@@ -1,16 +1,403 @@
 # 5.3 依赖注入与控制反转
 
-依赖注入（Dependency Injection）与控制反转（Inversion of Control）是现代企业级应用开发的基石性设计模式，它们从根本上颠覆了传统面向对象编程中对象间依赖关系的管理方式。这种设计思想不仅解决了传统开发模式中紧耦合、难测试、维护成本高等核心问题，更为构建大规模、可扩展的企业级应用提供了理论基础和实践指导。在水利监测管理系统这样的复杂业务场景中，合理运用IoC和DI模式能够显著提升系统的灵活性、可维护性和可扩展性。
+# 5.3 依赖注入与控制反转
 
-从软件工程发展的历程来看，依赖注入与控制反转的出现标志着软件架构设计从"硬编码依赖"向"配置化管理"的重要转变。这种转变不仅体现在技术实现层面，更重要的是它代表了一种全新的软件设计理念——通过外部化依赖关系管理，实现组件间的松耦合协作。Spring框架作为这一设计思想的杰出实现，通过其强大的IoC容器和依赖注入机制，为Java企业级开发提供了完整、成熟的解决方案。
+## 学习目标
+通过本节学习，学生应能够：
+1. 理解控制反转（IoC）和依赖注入（DI）的核心概念
+2. 掌握Spring IoC容器的工作原理和使用方法
+3. 熟练使用不同类型的依赖注入方式
+4. 能够设计和实现松耦合的水利监测系统架构
 
-## 5.3.1 控制反转理论基础与设计原理
+## 引言
 
-### 传统依赖管理模式的固有缺陷
+**依赖注入（Dependency Injection, DI）**和**控制反转（Inversion of Control, IoC）**是现代软件架构设计的核心思想。在传统编程中，对象需要主动创建和管理它的依赖对象；而在IoC模式下，这个控制权被"反转"给了外部容器，对象只需要声明它需要什么依赖，容器会自动提供。
 
-在传统的面向对象编程中，对象间的依赖关系通过直接实例化建立，这种**主动控制依赖**的方式虽然直观易懂，但在复杂的企业级应用中会引发一系列深层次的设计问题。首先，**紧耦合问题**是最为突出的缺陷，当一个类直接创建其依赖对象时，就与该依赖的具体实现形成了不可分割的绑定关系，这种绑定违背了面向对象设计的开闭原则，使得系统难以适应需求变化和技术演进。
+在水利监测系统中，这种设计模式的价值尤为明显。监测系统包含数据采集、处理、存储、预警等多个模块，传统方式下这些模块之间会形成复杂的依赖关系，难以测试和维护。通过依赖注入，我们可以实现模块间的松耦合，使系统更加灵活和可扩展。
 
-其次，**测试复杂性问题**在传统模式下尤为严重。由于依赖关系被硬编码在类的内部，单元测试时无法轻易地使用Mock对象或测试桩来替换真实的依赖组件，这导致测试用例往往需要初始化整个依赖树，不仅增加了测试的复杂度，也使得测试执行变得缓慢且不可靠。第三，**配置管理分散**的问题使得系统配置信息散布在各个业务类中，当需要调整系统配置时，往往需要修改多个类文件，增加了维护成本和出错风险。
+### IoC在水利系统中的应用价值
+
+**模块解耦**：数据采集模块不需要知道数据存储的具体实现，只需要声明依赖接口即可。
+
+**便于测试**：可以轻松地在测试时注入Mock对象，实现单元测试。
+
+**配置灵活**：不同的部署环境可以注入不同的实现类，如开发环境使用内存存储，生产环境使用数据库存储。
+
+**易于维护**：当需要更换某个模块的实现时，不需要修改使用该模块的代码。
+
+## 5.3.1 控制反转核心概念
+
+### 传统依赖管理的问题
+
+在传统的对象创建方式中，对象需要主动管理它的依赖，这会导致多种问题：
+
+```java
+// 传统方式：对象主动创建依赖
+public class WaterLevelService {
+    
+    // 问题1：硬编码依赖，难以切换实现
+    private DatabaseService database = new MySQLDatabaseService();
+    private ConfigService config = new FileConfigService("/config/water.properties");
+    
+    public WaterLevel getCurrentLevel(String stationId) {
+        // 问题2：测试困难，无法Mock数据库
+        return database.query("SELECT * FROM water_levels WHERE station_id = ?", stationId);
+    }
+}
+```
+
+传统的依赖管理方式存在多个严重问题，这些问题在复杂的水利监测系统中会被放大。**紧耦合问题**是最突出的：代码与具体实现紧密绑定，当我们需要将数据存储从MySQL切换到PostgreSQL时，就必须修改所有使用数据库的代码。这种紧耦合不仅增加了维护成本，也使得系统缺乏灵活性。
+
+**测试困难**是另一个重要问题。在传统方式下，由于对象直接创建真实的依赖（如数据库连接），单元测试变得非常复杂。我们无法轻易地用测试数据替换真实数据库，也无法模拟各种异常情况，这直接影响了代码质量和测试覆盖率。
+
+**配置分散**使得系统配置管理变得混乱。每个类都包含自己的配置信息（如数据库连接字符串、文件路径等），这些配置散落在代码的各个角落，难以统一管理。当需要修改配置时，可能需要在多个文件中进行修改，容易遗漏或出错。
+
+**扩展性差**限制了系统的发展。当业务需求发生变化，需要增加新功能或替换某个模块时，往往需要修改多个相关类的代码。这种"牵一发动全身"的情况使得系统维护成本高昂，也阻碍了快速迭代。
+
+### IoC的解决方案
+
+控制反转通过外部容器管理对象依赖，解决了传统方式的问题：
+
+```java
+// IoC方式：依赖由外部容器注入
+@Service
+public class WaterLevelService {
+    
+    // 优点1：依赖接口而非具体实现，提高灵活性
+    private final DatabaseService database;
+    private final ConfigService config;
+    
+    // 优点2：构造器注入，依赖明确且不可变
+    public WaterLevelService(DatabaseService database, ConfigService config) {
+        this.database = database;
+        this.config = config;
+    }
+    
+    public WaterLevel getCurrentLevel(String stationId) {
+        // 优点3：业务代码专注于业务逻辑，不关心依赖创建
+        return database.query("SELECT * FROM water_levels WHERE station_id = ?", stationId);
+    }
+}
+```
+
+**Python对比示例**：
+```python
+# Python中的依赖注入实现
+class WaterLevelService:
+    def __init__(self, database_service, config_service):
+        """构造器注入依赖"""
+        self.database = database_service
+        self.config = config_service
+    
+    def get_current_level(self, station_id):
+        """获取当前水位"""
+        return self.database.query(
+            "SELECT * FROM water_levels WHERE station_id = %s", 
+            station_id
+        )
+
+# 使用依赖注入容器（如dependency-injector库）
+from dependency_injector import containers, providers
+
+class Container(containers.DeclarativeContainer):
+    # 配置服务提供者
+    config_service = providers.Singleton(FileConfigService)
+    
+    # 数据库服务提供者
+    database_service = providers.Singleton(
+        MySQLDatabaseService,
+        config=config_service
+    )
+    
+    # 水位服务提供者
+    water_level_service = providers.Factory(
+        WaterLevelService,
+        database_service=database_service,
+        config_service=config_service
+    )
+```
+
+## 5.3.2 循序渐进的依赖注入实践
+
+### 基础层次：理解依赖注入概念
+
+让我们从最简单的例子开始理解依赖注入：
+
+```java
+// 基础示例：最简单的依赖注入
+@Component  // Spring会自动创建这个类的实例
+public class SimpleWaterService {
+    
+    private String serviceName = "简单水位服务";
+    
+    public String getServiceInfo() {
+        return serviceName + " - 运行正常";
+    }
+}
+
+@RestController
+public class SimpleController {
+    
+    // @Autowired：告诉Spring自动注入依赖
+    @Autowired
+    private SimpleWaterService waterService;
+    
+    @GetMapping("/service-info")
+    public String getInfo() {
+        // 直接使用注入的服务，无需自己创建
+        return waterService.getServiceInfo();
+    }
+}
+```
+
+### 进阶层次：构造器注入最佳实践
+
+当系统变得复杂时，推荐使用构造器注入：
+
+```java
+// 进阶示例：构造器注入
+@Service
+public class WaterDataService {
+    
+    private final WaterDataRepository repository;
+    private final WaterValidator validator;
+    
+    // 构造器注入：Spring推荐方式
+    public WaterDataService(WaterDataRepository repository, WaterValidator validator) {
+        this.repository = repository;
+        this.validator = validator;
+    }
+    
+    public void saveWaterData(WaterData data) {
+        // 先验证数据
+        if (validator.isValid(data)) {
+            // 再保存数据
+            repository.save(data);
+        } else {
+            throw new InvalidDataException("水位数据验证失败");
+        }
+    }
+}
+
+// 数据验证器
+@Component
+public class WaterValidator {
+    
+    public boolean isValid(WaterData data) {
+        // 验证逻辑：水位不能为负数，不能超过100米
+        return data.getLevel() >= 0 && data.getLevel() <= 100;
+    }
+}
+
+// 数据仓库接口
+public interface WaterDataRepository {
+    void save(WaterData data);
+    WaterData findByStationId(String stationId);
+}
+
+// 数据仓库实现
+@Repository
+public class JpaWaterDataRepository implements WaterDataRepository {
+    
+    @Autowired
+    private JpaRepository<WaterData, Long> jpaRepository;
+    
+    @Override
+    public void save(WaterData data) {
+        jpaRepository.save(data);
+    }
+    
+    @Override
+    public WaterData findByStationId(String stationId) {
+        return jpaRepository.findByStationId(stationId);
+    }
+}
+```
+
+### 高级层次：复杂依赖关系管理
+
+在企业级应用中，依赖关系可能很复杂：
+
+```java
+// 高级示例：复杂的依赖注入场景
+@Service
+@Transactional  // 事务管理
+public class AdvancedWaterMonitorService {
+    
+    private final WaterDataService dataService;
+    private final AlertService alertService;
+    private final ReportService reportService;
+    private final CacheService cacheService;
+    private final WaterConfigProperties config;
+    
+    // 多个依赖的构造器注入
+    public AdvancedWaterMonitorService(
+            WaterDataService dataService,
+            AlertService alertService,
+            ReportService reportService,
+            CacheService cacheService,
+            WaterConfigProperties config) {
+        
+        this.dataService = dataService;
+        this.alertService = alertService;
+        this.reportService = reportService;
+        this.cacheService = cacheService;
+        this.config = config;
+    }
+    
+    public MonitorResult processWaterData(List<WaterData> dataList) {
+        MonitorResult result = new MonitorResult();
+        
+        for (WaterData data : dataList) {
+            try {
+                // 1. 保存数据
+                dataService.saveWaterData(data);
+                
+                // 2. 检查预警
+                if (data.getLevel() > config.getAlertThreshold()) {
+                    alertService.sendAlert("水位超标", data);
+                }
+                
+                // 3. 更新缓存
+                cacheService.updateCache(data.getStationId(), data);
+                
+                result.addSuccessCount();
+                
+            } catch (Exception e) {
+                result.addFailCount();
+                result.addError(e.getMessage());
+            }
+        }
+        
+        // 4. 生成处理报告
+        reportService.generateProcessReport(result);
+        
+        return result;
+    }
+}
+
+// 配置属性类
+@ConfigurationProperties(prefix = "water.monitor")
+@Component
+@Data
+public class WaterConfigProperties {
+    
+    /**
+     * 预警阈值（米）
+     */
+    private Double alertThreshold = 15.0;
+    
+    /**
+     * 缓存超时时间（分钟）
+     */
+    private Integer cacheTimeout = 30;
+    
+    /**
+     * 批处理大小
+     */
+    private Integer batchSize = 100;
+}
+```
+
+## 5.3.3 Bean管理和生命周期
+
+### Bean的作用域
+
+Spring支持不同的Bean作用域，适用于不同场景：
+
+```java
+// Singleton作用域（默认）：整个应用只有一个实例
+@Component
+@Scope("singleton")  // 可以省略，默认就是singleton
+public class ConfigService {
+    // 配置信息通常是单例，所有地方共享同一个实例
+}
+
+// Prototype作用域：每次请求都创建新实例
+@Component
+@Scope("prototype")
+public class DataProcessor {
+    
+    private Map<String, Object> processingState = new HashMap<>();
+    
+    public void processData(WaterData data) {
+        // 每个处理器实例都有自己的状态
+        processingState.put("current", data);
+    }
+}
+
+// 使用不同作用域的示例
+@Service
+public class ProcessingService {
+    
+    private final ConfigService configService;        // 单例，共享配置
+    private final ApplicationContext applicationContext; // 用于获取prototype Bean
+    
+    public ProcessingService(ConfigService configService, 
+                           ApplicationContext applicationContext) {
+        this.configService = configService;
+        this.applicationContext = applicationContext;
+    }
+    
+    public void processDataBatch(List<WaterData> dataList) {
+        for (WaterData data : dataList) {
+            // 每次处理都创建新的处理器实例
+            DataProcessor processor = applicationContext.getBean(DataProcessor.class);
+            processor.processData(data);
+        }
+    }
+}
+```
+
+### Bean生命周期回调
+
+Bean在创建和销毁时可以执行特定的方法：
+
+```java
+// Bean生命周期管理
+@Component
+public class DatabaseConnectionManager {
+    
+    private Connection connection;
+    
+    /**
+     * 初始化方法：Bean创建后调用
+     */
+    @PostConstruct
+    public void initialize() {
+        try {
+            // 建立数据库连接
+            connection = DriverManager.getConnection(
+                "jdbc:mysql://localhost:3306/water_db", 
+                "user", 
+                "password"
+            );
+            System.out.println("数据库连接初始化完成");
+        } catch (SQLException e) {
+            throw new RuntimeException("数据库连接初始化失败", e);
+        }
+    }
+    
+    /**
+     * 销毁方法：Bean销毁前调用
+     */
+    @PreDestroy
+    public void cleanup() {
+        try {
+            if (connection != null && !connection.isClosed()) {
+                connection.close();
+                System.out.println("数据库连接已关闭");
+            }
+        } catch (SQLException e) {
+            System.err.println("关闭数据库连接失败: " + e.getMessage());
+        }
+    }
+    
+    public Connection getConnection() {
+        return connection;
+    }
+}
+```
 
 ```java
 // 传统依赖管理的问题示例
@@ -923,4 +1310,256 @@ public class OptimizedConfiguration {
 }
 ```
 
-通过深入理解依赖注入与控制反转的设计原理和实现机制，我们掌握了现代企业级应用开发的核心技术。IoC和DI不仅是技术实现手段，更代表了软件设计思想的重要演进。它们通过外部化依赖关系管理，实现了组件间的松耦合协作，为构建可维护、可测试、可扩展的大型应用系统提供了坚实的技术基础。在下一节中，我们将在IoC和DI的基础上，深入学习数据持久化技术，进一步完善企业级应用的技术架构。
+通过深入理解依赖注入与控制反转的设计原理和实现机制，我们掌握了现代企业级应用开发的核心技术。IoC和DI不仅是技术实现手段，更代表了软件设计思想的重要演进。
+
+## 5.3.4 实际应用场景
+
+### 水利监测系统的依赖注入实践
+
+让我们通过一个完整的水利监测系统例子，展示依赖注入在实际项目中的应用：
+
+```java
+// 完整的水利监测系统示例
+@RestController
+@RequestMapping("/api/monitor")
+public class WaterMonitorController {
+    
+    private final WaterMonitorService monitorService;
+    
+    public WaterMonitorController(WaterMonitorService monitorService) {
+        this.monitorService = monitorService;
+    }
+    
+    @PostMapping("/stations/{stationId}/data")
+    public ResponseEntity<String> uploadData(
+            @PathVariable String stationId,
+            @RequestBody List<WaterData> dataList) {
+        
+        try {
+            ProcessResult result = monitorService.processStationData(stationId, dataList);
+            return ResponseEntity.ok("处理成功：" + result.getSuccessCount() + "条数据");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("处理失败：" + e.getMessage());
+        }
+    }
+}
+
+@Service
+public class WaterMonitorService {
+    
+    // 多个依赖注入
+    private final WaterDataRepository dataRepository;
+    private final StationConfigService configService;
+    private final AlertService alertService;
+    private final DataQualityChecker qualityChecker;
+    
+    public WaterMonitorService(
+            WaterDataRepository dataRepository,
+            StationConfigService configService,
+            AlertService alertService,
+            DataQualityChecker qualityChecker) {
+        
+        this.dataRepository = dataRepository;
+        this.configService = configService;
+        this.alertService = alertService;
+        this.qualityChecker = qualityChecker;
+    }
+    
+    public ProcessResult processStationData(String stationId, List<WaterData> dataList) {
+        ProcessResult result = new ProcessResult();
+        
+        // 获取站点配置
+        StationConfig config = configService.getConfig(stationId);
+        
+        for (WaterData data : dataList) {
+            try {
+                // 数据质量检查
+                if (!qualityChecker.checkQuality(data, config)) {
+                    result.addSkipCount();
+                    continue;
+                }
+                
+                // 保存数据
+                dataRepository.save(data);
+                result.addSuccessCount();
+                
+                // 检查是否需要预警
+                if (data.getLevel() > config.getAlertThreshold()) {
+                    alertService.sendAlert("水位超标预警", stationId, data);
+                }
+                
+            } catch (Exception e) {
+                result.addFailCount();
+                result.addError("处理数据失败: " + e.getMessage());
+            }
+        }
+        
+        return result;
+    }
+}
+```
+
+### 测试中的依赖注入
+
+依赖注入让单元测试变得简单：
+
+```java
+// 单元测试示例
+@ExtendWith(MockitoExtension.class)
+class WaterMonitorServiceTest {
+    
+    // 创建Mock对象
+    @Mock
+    private WaterDataRepository dataRepository;
+    
+    @Mock
+    private StationConfigService configService;
+    
+    @Mock
+    private AlertService alertService;
+    
+    @Mock
+    private DataQualityChecker qualityChecker;
+    
+    // 测试目标对象
+    @InjectMocks
+    private WaterMonitorService monitorService;
+    
+    @Test
+    void testProcessStationData_Success() {
+        // 准备测试数据
+        String stationId = "A001";
+        WaterData testData = new WaterData(stationId, 12.5, LocalDateTime.now());
+        List<WaterData> dataList = Arrays.asList(testData);
+        
+        StationConfig config = new StationConfig();
+        config.setAlertThreshold(15.0);
+        
+        // 配置Mock行为
+        when(configService.getConfig(stationId)).thenReturn(config);
+        when(qualityChecker.checkQuality(testData, config)).thenReturn(true);
+        
+        // 执行测试
+        ProcessResult result = monitorService.processStationData(stationId, dataList);
+        
+        // 验证结果
+        assertEquals(1, result.getSuccessCount());
+        assertEquals(0, result.getFailCount());
+        
+        // 验证方法调用
+        verify(dataRepository, times(1)).save(testData);
+        verify(alertService, never()).sendAlert(anyString(), anyString(), any());
+    }
+}
+```
+
+## 本节总结
+
+### 核心知识点回顾
+
+通过本节的深入学习，我们全面掌握了依赖注入和控制反转的核心理念与实践方法。**控制反转（IoC）**的本质是将对象依赖的控制权从对象自身转移到外部容器，这种控制权的转移实现了对象间的松耦合，大大提高了系统的灵活性。这一设计思想遵循了著名的"好莱坞原则"：不要主动找我们，我们会主动找你，即对象不再主动寻找依赖，而是被动等待容器注入所需的依赖。
+
+**依赖注入的三种类型**各有其适用场景和特点。**构造器注入**是Spring推荐的首选方式，它通过构造函数参数强制要求必需的依赖，确保对象在创建时就具备了完整的依赖，这种方式创建的对象是不可变的，线程安全性更好。**Setter注入**适用于可选依赖的场景，它允许在对象创建后再设置依赖，提供了更大的灵活性，但也可能导致对象在不完整状态下被使用。**字段注入**虽然代码最为简洁，但它隐藏了依赖关系，使测试变得困难，因此在企业级应用中不推荐使用。
+
+**Bean的生命周期管理**是Spring IoC容器的核心功能。在**作用域管理**方面，Singleton是默认选择，适用于无状态的服务对象；Prototype适用于有状态的对象，每次请求都创建新实例；Request和Session作用域主要在Web应用中使用，分别对应请求和会话的生命周期。**生命周期回调**通过@PostConstruct和@PreDestroy注解实现，允许在Bean初始化完成后和销毁前执行自定义逻辑。**配置方式**的多样性体现了Spring的灵活性：注解驱动是现代开发的主流方式，Java配置提供了类型安全的配置体验，XML配置虽然比较传统但在某些场景下仍有价值。
+
+### 技术选型的综合考量
+
+在Java Spring和Python依赖注入框架之间进行选择时，需要综合考虑多个技术和业务因素。
+
+**类型安全性**是一个重要的考量维度。Java Spring提供编译时类型检查，能够在开发阶段就发现类型相关的错误，这对大型项目的代码质量保障非常重要。Python的依赖注入框架虽然也支持类型提示，但主要依赖运行时检查，在大型项目中可能增加调试复杂度。
+
+**学习曲线**方面，Java Spring的概念相对复杂，需要理解注解、AOP、代理等多种技术概念，学习曲线较陡。Python的依赖注入框架相对简单直观，更容易上手，适合快速原型开发和小规模项目。
+
+**生态系统支持**反映了技术的成熟度。Java Spring拥有十多年的发展历史，生态系统成熟完善，第三方库丰富，文档和社区支持充分。Python的依赖注入框架虽然多样化，但整体成熟度不如Java生态系统。
+
+**性能特征**在高并发场景下差异明显。Java的JVM优化和Spring的高效实现使其在性能方面表现优秀，特别适合高并发的企业级应用。Python虽然在开发效率上有优势，但在高性能要求的场景下可能需要额外的优化工作。
+
+### 实践指导与经验总结
+
+基于多年的企业级项目开发经验，我们总结了依赖注入的核心实践原则。
+
+**构造器注入应当作为首选方案**。这种注入方式具有天然的优势：它强制要求所有必需的依赖在对象创建时就必须提供，避免了对象处于不完整状态的风险。同时，通过final关键字修饰的依赖字段确保了对象的不可变性，这在多线程环境下尤其重要。
+
+```java
+// 构造器注入的标准写法
+private final ServiceA serviceA;
+public MyService(ServiceA serviceA) {
+    this.serviceA = serviceA;
+}
+```
+
+**面向接口编程**是依赖注入设计的核心原则。依赖应该基于接口而非具体实现，这种设计使得系统具有更好的灵活性和可扩展性。当需要更换实现时，只需要提供新的接口实现，而使用该依赖的代码无需任何修改。
+
+```java
+// 正确的依赖声明：依赖接口
+private final UserRepository userRepository;
+
+// 错误的依赖声明：依赖具体实现
+private final JpaUserRepository jpaUserRepository;
+```
+
+**Bean作用域的合理选择**直接影响应用的性能和内存使用。对于无状态的服务对象，应该使用默认的singleton作用域，这样可以减少对象创建开销并提高性能。对于有状态的对象或需要独立生命周期的组件，应该使用prototype作用域。
+
+```java
+@Component  // 无状态服务使用默认的singleton
+public class CalculationService { }
+
+@Component
+@Scope("prototype")  // 有状态对象使用prototype
+public class TaskProcessor { }
+```
+
+### 实践练习建议
+
+**基础练习：创建简单的依赖注入**
+```java
+// 练习目标：理解依赖注入基本概念
+@Service
+public class SimpleCalculatorService {
+    public double calculate(double a, double b) {
+        return a + b;
+    }
+}
+
+@RestController
+public class CalculatorController {
+    private final SimpleCalculatorService calculatorService;
+    
+    public CalculatorController(SimpleCalculatorService calculatorService) {
+        this.calculatorService = calculatorService;
+    }
+}
+```
+
+**进阶练习：多层依赖注入**
+- 创建Repository层、Service层、Controller层
+- 使用不同的注入方式
+- 添加配置类和属性注入
+
+**高级练习：测试驱动开发**
+- 编写完整的单元测试
+- 使用Mock对象模拟依赖
+- 实现不同的Bean作用域
+
+### 常见问题解答
+
+**Q1: 什么时候使用@Autowired？**
+A: 现在推荐使用构造器注入，避免使用@Autowired注解。如果必须使用，优先顺序：
+1. 构造器注入（推荐）
+2. Setter注入（可选依赖）
+3. 字段注入（仅在测试中使用）
+
+Spring框架在处理循环依赖问题上展现了其设计的精巧。Spring可以通过三级缓存机制自动解决基于setter注入的循环依赖问题，但无法解决构造器注入的循环依赖。当遇到循环依赖时，最佳的解决方案是重新审视和设计系统架构，从根本上消除循环依赖关系。如果确实无法避免，可以考虑使用@Lazy注解实现延迟初始化，或者将循环依赖的共同逻辑提取为独立的服务组件。
+
+**Bean作用域的选择**需要根据组件的特性和使用模式来决定。**Singleton作用域**是Spring的默认选择，适用于无状态的服务组件，这类组件可以安全地被多个客户端并发使用。**Prototype作用域**适用于有状态的对象，每次从容器获取时都会创建新的实例，确保状态的独立性。在Web应用中，**Request作用域**适用于在单个HTTP请求范围内需要共享的数据，**Session作用域**则适用于用户会话期间需要保持的数据。
+
+### 下节预告
+
+下一节我们将学习**数据库持久化技术**，包括：
+- JPA和Hibernate的使用
+- 数据库连接池配置
+- 事务管理机制
+- Spring Data JPA实际应用
+
+通过结合依赖注入和数据持久化技术，您将能够构建完整的数据驱动应用程序。
