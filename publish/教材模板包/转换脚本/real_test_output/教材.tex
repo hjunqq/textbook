@@ -1,0 +1,389 @@
+% ========================================
+% 智慧水利教材 - 增强版主文件
+% ========================================
+
+\documentclass[12pt,a4paper,twoside,openright]{ctexbook}
+
+% ========================================
+% 基础包引入
+% ========================================
+
+% 数学支持
+\usepackage{amsmath,amssymb,amsthm}
+
+% 图形和颜色
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows,positioning}
+
+% 页面布局
+\usepackage[
+    top=2.5cm,
+    bottom=2.5cm,
+    left=2.8cm,
+    right=2.2cm,
+    bindingoffset=0.5cm,
+    headheight=15pt,
+    footskip=1.5cm
+]{geometry}
+
+% 字体和编码
+\usepackage{fontspec}
+\usepackage{setspace}
+\onehalfspacing  % 1.5倍行距
+
+% 中文字体配置
+\setCJKmainfont{SimSun}[BoldFont=SimHei, ItalicFont=KaiTi]
+\setCJKsansfont{SimHei}
+\setCJKmonofont{FangSong}
+
+% 表格增强
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{multicol}
+\usepackage{calc}
+
+% 列表环境
+\usepackage{enumitem}
+
+% 代码环境
+\usepackage{listings}
+
+% 美化框架
+\usepackage{tcolorbox}
+\tcbuselibrary{most}
+
+% 页眉页脚
+\usepackage{fancyhdr}
+
+% 超链接
+\usepackage{hyperref}
+
+% 图标字体
+\usepackage{fontawesome5}
+
+% ========================================
+% 配色方案定义
+% ========================================
+
+% 主色调
+\definecolor{primarycolor}{RGB}{52, 152, 219}      % 主蓝色
+\definecolor{secondarycolor}{RGB}{230, 126, 34}    % 橙色
+\definecolor{accentcolor}{RGB}{39, 174, 96}        % 绿色
+\definecolor{warningcolor}{RGB}{241, 196, 15}      % 黄色
+\definecolor{dangercolor}{RGB}{231, 76, 60}        % 红色
+
+% 灰度系列
+\definecolor{lightgray}{RGB}{248, 249, 250}
+\definecolor{mediumgray}{RGB}{173, 181, 189}
+\definecolor{darkgray}{RGB}{73, 80, 87}
+
+% 代码配色
+\definecolor{codeblue}{RGB}{40, 90, 200}
+\definecolor{codegreen}{RGB}{0, 150, 0}
+\definecolor{codered}{RGB}{200, 0, 0}
+\definecolor{codegray}{RGB}{128, 128, 128}
+\definecolor{backcolour}{RGB}{248, 248, 248}
+
+% ========================================
+% 页面样式配置
+% ========================================
+
+% 页眉页脚样式
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[LE]{\leftmark}
+\fancyhead[RO]{\rightmark}
+\fancyfoot[LE,RO]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0pt}
+
+% 章节样式
+\ctexset{
+    chapter={
+        format={\centering\Huge\bfseries},
+        name={第,章},
+        number={\chinese{chapter}},
+        beforeskip=20pt,
+        afterskip=40pt
+    },
+    section={
+        format={\Large\bfseries},
+        beforeskip=20pt,
+        afterskip=10pt
+    },
+    subsection={
+        format={\large\bfseries},
+        beforeskip=15pt,
+        afterskip=8pt
+    }
+}
+
+% ========================================
+% 定理环境配置
+% ========================================
+
+% 定义定理样式
+\theoremstyle{definition}
+\newtheorem{definition}{定义}[chapter]
+\newtheorem{theorem}{定理}[chapter]
+\newtheorem{lemma}{引理}[chapter]
+\newtheorem{example}{例}[chapter]
+\newtheorem{exercise}{练习}[chapter]
+
+% ========================================
+% 列表样式配置
+% ========================================
+
+% 设置列表样式
+\setlist[itemize,1]{label=\textbullet}
+\setlist[itemize,2]{label=\textendash}
+\setlist[itemize,3]{label=\textasteriskcentered}
+
+\setlist[enumerate,1]{label=\arabic*.}
+\setlist[enumerate,2]{label=(\alph*)}
+\setlist[enumerate,3]{label=\roman*.}
+
+% ========================================
+% 自定义命令
+% ========================================
+
+% Pandoc兼容性命令
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+% 强调命令
+\newcommand{\highlight}[1]{\textcolor{primarycolor}{\textbf{#1}}}
+\newcommand{\important}[1]{\textcolor{dangercolor}{\textbf{#1}}}
+\newcommand{\note}[1]{\textcolor{secondarycolor}{\textit{#1}}}
+
+% 代码相关命令
+\newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\file}[1]{\texttt{\textbf{#1}}}
+\newcommand{\variable}[1]{\texttt{\textit{#1}}}
+
+% 快捷符号
+\providecommand{\checkmark}{\textcolor{accentcolor}{\faCheck}}
+\newcommand{\crossmark}{\textcolor{dangercolor}{\faTimes}}
+\newcommand{\infomark}{\textcolor{primarycolor}{\faInfoCircle}}
+\newcommand{\warningmark}{\textcolor{warningcolor}{\faExclamationTriangle}}
+
+% ========================================
+% 特殊环境定义
+% ========================================
+
+% 学习目标
+\newcommand{\learningobjectives}[1]{
+    \begin{tcolorbox}[
+        colback=primarycolor!10,
+        colframe=primarycolor,
+        title=\faLightbulb\ 学习目标,
+        fonttitle=\bfseries,
+        left=5pt,
+        right=5pt,
+        top=5pt,
+        bottom=5pt
+    ]
+    #1
+    \end{tcolorbox}
+}
+
+% 关键概念
+\newcommand{\keypoints}[1]{
+    \begin{tcolorbox}[
+        colback=secondarycolor!10,
+        colframe=secondarycolor,
+        title=\faKey\ 关键概念,
+        fonttitle=\bfseries,
+        left=5pt,
+        right=5pt,
+        top=5pt,
+        bottom=5pt
+    ]
+    #1
+    \end{tcolorbox}
+}
+
+% 实践练习
+\newcommand{\practiceexercise}[1]{
+    \begin{tcolorbox}[
+        colback=accentcolor!10,
+        colframe=accentcolor,
+        title=\faCogs\ 实践练习,
+        fonttitle=\bfseries,
+        left=5pt,
+        right=5pt,
+        top=5pt,
+        bottom=5pt
+    ]
+    #1
+    \end{tcolorbox}
+}
+
+% 注意事项
+\newcommand{\attention}[1]{
+    \begin{tcolorbox}[
+        colback=warningcolor!10,
+        colframe=warningcolor,
+        title=\faExclamationTriangle\ 注意,
+        fonttitle=\bfseries,
+        left=5pt,
+        right=5pt,
+        top=5pt,
+        bottom=5pt
+    ]
+    #1
+    \end{tcolorbox}
+}
+
+% 章节摘要
+\newcommand{\chaptersummary}[1]{
+    \begin{tcolorbox}[
+        colback=lightgray,
+        colframe=primarycolor,
+        title=本章要点,
+        fonttitle=\bfseries,
+        left=5pt,
+        right=5pt,
+        top=5pt,
+        bottom=5pt
+    ]
+    #1
+    \end{tcolorbox}
+}
+
+% ========================================
+% 代码高亮配置
+% ========================================
+
+\lstset{
+    backgroundcolor=\color{backcolour},
+    commentstyle=\color{codegreen}\itshape,
+    keywordstyle=\color{codeblue}\bfseries,
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codered},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=8pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=4,
+    frame=single,
+    rulecolor=\color{mediumgray},
+    framexleftmargin=8pt,
+    framexrightmargin=8pt,
+    framextopmargin=8pt,
+    framexbottommargin=8pt,
+    xleftmargin=15pt,
+    xrightmargin=15pt
+}
+
+% 代码语言样式
+\lstdefinestyle{csharp}{
+    language=[Sharp]C,
+    keywordstyle=\color{codeblue}\bfseries,
+    commentstyle=\color{codegreen}\itshape,
+    stringstyle=\color{codered}
+}
+
+\lstdefinestyle{javascript}{
+    language=JavaScript,
+    keywordstyle=\color{codeblue}\bfseries,
+    commentstyle=\color{codegreen}\itshape,
+    stringstyle=\color{codered}
+}
+
+\lstdefinestyle{python}{
+    language=Python,
+    keywordstyle=\color{codeblue}\bfseries,
+    commentstyle=\color{codegreen}\itshape,
+    stringstyle=\color{codered}
+}
+
+\lstdefinestyle{java}{
+    language=Java,
+    keywordstyle=\color{codeblue}\bfseries,
+    commentstyle=\color{codegreen}\itshape,
+    stringstyle=\color{codered}
+}
+
+\lstdefinestyle{sql}{
+    language=SQL,
+    keywordstyle=\color{codeblue}\bfseries,
+    commentstyle=\color{codegreen}\itshape,
+    stringstyle=\color{codered}
+}
+
+\lstdefinestyle{terminal}{
+    basicstyle=\ttfamily\footnotesize\color{white},
+    backgroundcolor=\color{black},
+    showstringspaces=false,
+    numbers=none,
+    frame=single
+}
+
+% ========================================
+% 超链接配置
+% ========================================
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=primarycolor,
+    filecolor=primarycolor,
+    urlcolor=primarycolor,
+    citecolor=primarycolor,
+    bookmarksnumbered=true,
+    bookmarksopen=true
+}
+
+% ========================================
+% 文档配置
+% ========================================
+
+% 设置段落缩进
+\setlength{\parindent}{2em}
+\setlength{\parskip}{0.5ex plus 0.2ex minus 0.1ex}
+
+% 防止过长行
+\setlength{\emergencystretch}{3em}
+\setcounter{secnumdepth}{5}
+
+% 图表标题样式
+\usepackage{caption}
+\captionsetup{
+    font=small,
+    labelfont=bf,
+    textfont=it,
+    margin=10pt
+}
+
+% ========================================
+% 文档开始
+% ========================================
+
+\begin{document}
+
+% 目录
+\tableofcontents
+\newpage
+
+\input{main_content.tex}
+\input{chapters/chapter01.tex}
+\input{chapters/chapter02.tex}
+\input{chapters/chapter03.tex}
+\input{chapters/chapter04.tex}
+\input{chapters/chapter05.tex}
+\input{chapters/chapter06.tex}
+\input{chapters/chapter07.tex}
+\input{chapters/chapter08.tex}
+\input{chapters/chapter09.tex}
+
+\end{document}

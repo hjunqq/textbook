@@ -1,0 +1,290 @@
+% ========================================
+% 智慧水利教材专用Pandoc模板
+% 基于Pandoc默认LaTeX模板修改
+% ========================================
+
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode$for(hyperrefoptions)$,$hyperrefoptions$$endfor$}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+$if(colorlinks)$
+\PassOptionsToPackage{dvipsnames,svgnames,x11names}{xcolor}
+$endif$
+
+\documentclass[
+$if(fontsize)$
+  $fontsize$,
+$endif$
+$if(papersize)$
+  $papersize$paper,
+$endif$
+$for(classoption)$
+  $classoption$$sep$,
+$endfor$
+]{$documentclass$}
+
+% ========================================
+% 基础包引入
+% ========================================
+
+% 数学支持
+\usepackage{amsmath,amssymb,amsthm}
+
+% 图形和颜色
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows,positioning}
+
+% 页面布局
+$if(geometry)$
+\usepackage[$for(geometry)$$geometry$$sep$,$endfor$]{geometry}
+$else$
+\usepackage[
+    top=2.5cm,
+    bottom=2.5cm,
+    left=2.8cm,
+    right=2.2cm,
+    bindingoffset=0.5cm,
+    headheight=15pt,
+    footskip=1.5cm
+]{geometry}
+$endif$
+
+% 字体和编码
+\usepackage{fontspec}
+\usepackage{setspace}
+$if(linestretch)$
+\setstretch{$linestretch$}
+$else$
+\onehalfspacing  % 1.5倍行距
+$endif$
+
+% 中文字体配置
+$if(CJKmainfont)$
+\setCJKmainfont[$for(CJKoptions)$$CJKoptions$$sep$,$endfor$]{$CJKmainfont$}
+$if(CJKsansfont)$
+\setCJKsansfont[$for(CJKoptions)$$CJKoptions$$sep$,$endfor$]{$CJKsansfont$}
+$endif$
+$if(CJKmonofont)$
+\setCJKmonofont[$for(CJKoptions)$$CJKoptions$$sep$,$endfor$]{$CJKmonofont$}
+$endif$
+$else$
+\setCJKmainfont{SimSun}[BoldFont=SimHei, ItalicFont=KaiTi]
+\setCJKsansfont{SimHei}
+\setCJKmonofont{FangSong}
+$endif$
+
+% 表格增强
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{multicol}
+
+% 列表环境
+\usepackage{enumitem}
+
+% 代码环境
+\usepackage{listings}
+% \usepackage{minted} % 暂时禁用minted
+
+% 美化框架
+\usepackage{tcolorbox}
+\tcbuselibrary{most}
+
+% 页眉页脚
+\usepackage{fancyhdr}
+
+% 超链接
+\usepackage{hyperref}
+\hypersetup{
+$if(title-meta)$
+  pdftitle={$title-meta$},
+$endif$
+$if(author-meta)$
+  pdfauthor={$author-meta$},
+$endif$
+$if(colorlinks)$
+  colorlinks=true,
+  linkcolor={$if(linkcolor)$$linkcolor$$else$Maroon$endif$},
+  filecolor={$if(filecolor)$$filecolor$$else$Maroon$endif$},
+  citecolor={$if(citecolor)$$citecolor$$else$Blue$endif$},
+  urlcolor={$if(urlcolor)$$urlcolor$$else$Blue$endif$},
+$else$
+  hidelinks,
+$endif$
+  pdfcreator={LaTeX via pandoc}
+}
+
+% ========================================
+% 颜色定义
+% ========================================
+\definecolor{primarycolor}{RGB}{41,128,185}
+\definecolor{secondarycolor}{RGB}{52,73,94}
+\definecolor{accentcolor}{RGB}{231,76,60}
+\definecolor{successcolor}{RGB}{39,174,96}
+\definecolor{warningcolor}{RGB}{241,196,15}
+\definecolor{dangercolor}{RGB}{231,76,60}
+\definecolor{lightgray}{RGB}{236,240,241}
+\definecolor{darkgray}{RGB}{52,73,94}
+\definecolor{codecolor}{RGB}{46,51,56}
+\definecolor{linkcolor}{RGB}{41,128,185}
+
+% ========================================
+% 字体设置
+% ========================================
+\usepackage{fontawesome5}
+
+% ========================================
+% 定理环境设置
+% ========================================
+\newtheorem{definition}{定义}[chapter]
+\newtheorem{theorem}{定理}[chapter]
+\newtheorem{lemma}[theorem]{引理}
+\newtheorem{example}{例}[chapter]
+\newtheorem{exercise}{练习}[chapter]
+
+% ========================================
+% 自定义命令定义
+% ========================================
+
+% 文本样式命令
+\newcommand{\highlight}[1]{\colorbox{yellow!30}{\textbf{#1}}}
+\newcommand{\important}[1]{\textcolor{accentcolor}{\textbf{#1}}}
+\newcommand{\note}[1]{\textcolor{secondarycolor}{\textit{#1}}}
+\newcommand{\code}[1]{\texttt{\colorbox{lightgray}{#1}}}
+\newcommand{\file}[1]{\texttt{\textbf{#1}}}
+\newcommand{\variable}[1]{\texttt{\textit{#1}}}
+
+% 快捷符号
+\providecommand{\checkmark}{\textcolor{accentcolor}{\faCheck}}
+\newcommand{\crossmark}{\textcolor{dangercolor}{\faTimes}}
+\newcommand{\infomark}{\textcolor{primarycolor}{\faInfoCircle}}
+\newcommand{\warningmark}{\textcolor{warningcolor}{\faExclamationTriangle}}
+
+% ========================================
+% 特殊环境定义
+% ========================================
+
+% 学习目标框
+\newcommand{\learningobjectives}[1]{
+    \begin{tcolorbox}[
+        colback=primarycolor!10,
+        colframe=primarycolor,
+        title=\faTarget\ 学习目标,
+        fonttitle=\bfseries,
+        left=5pt,
+        right=5pt,
+        top=5pt,
+        bottom=5pt
+    ]
+    #1
+    \end{tcolorbox}
+}
+
+% 关键概念框
+\newcommand{\keypoints}[1]{
+    \begin{tcolorbox}[
+        colback=successcolor!10,
+        colframe=successcolor,
+        title=\faKey\ 关键概念,
+        fonttitle=\bfseries,
+        left=5pt,
+        right=5pt,
+        top=5pt,
+        bottom=5pt
+    ]
+    #1
+    \end{tcolorbox}
+}
+
+% 实践练习框
+\newcommand{\practiceexercise}[1]{
+    \begin{tcolorbox}[
+        colback=accentcolor!10,
+        colframe=accentcolor,
+        title=\faCog\ 实践练习,
+        fonttitle=\bfseries,
+        left=5pt,
+        right=5pt,
+        top=5pt,
+        bottom=5pt
+    ]
+    #1
+    \end{tcolorbox}
+}
+
+% 注意事项
+\newcommand{\attention}[1]{
+    \begin{tcolorbox}[
+        colback=warningcolor!10,
+        colframe=warningcolor,
+        title=\faExclamationTriangle\ 注意,
+        fonttitle=\bfseries,
+        left=5pt,
+        right=5pt,
+        top=5pt,
+        bottom=5pt
+    ]
+    #1
+    \end{tcolorbox}
+}
+
+% 章节摘要框
+\newcommand{\chaptersummary}[1]{
+    \begin{tcolorbox}[
+        colback=secondarycolor!10,
+        colframe=secondarycolor,
+        title=\faClipboardList\ 章节摘要,
+        fonttitle=\bfseries,
+        left=5pt,
+        right=5pt,
+        top=5pt,
+        bottom=5pt
+    ]
+    #1
+    \end{tcolorbox}
+}
+
+% 标题设置
+$if(title)$
+\title{$title$}
+$endif$
+$if(author)$
+\author{$for(author)$$author$$sep$ \and $endfor$}
+$endif$
+$if(date)$
+\date{$date$}
+$endif$
+
+% 防止过长行
+\setlength{\emergencystretch}{3em}
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+$if(numbersections)$
+\setcounter{secnumdepth}{$if(secnumdepth)$$secnumdepth$$else$5$endif$}
+$else$
+\setcounter{secnumdepth}{-\maxdimen}
+$endif$
+
+% 开始文档
+\begin{document}
+
+$if(title)$
+\maketitle
+$endif$
+
+$if(toc)$
+{
+$if(colorlinks)$
+\hypersetup{linkcolor=$if(toccolor)$$toccolor$$else$$endif$}
+$endif$
+\setcounter{tocdepth}{$toc-depth$}
+\tableofcontents
+}
+$endif$
+
+$body$
+
+\end{document}

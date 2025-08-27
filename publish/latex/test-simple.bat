@@ -1,26 +1,20 @@
 @echo off
 chcp 65001 >nul
+
+echo 测试简化版编译...
+
 cd /d "%~dp0"
 
-echo Testing simplified LaTeX compilation...
+if not exist "output" mkdir output
 
-echo Step 1: Compiling with XeLaTeX (simple version)...
-xelatex -interaction=nonstopmode main-simple.tex
+echo 编译 main-simple.tex...
+xelatex -interaction=nonstopmode -output-directory=output main-simple.tex
 
-if errorlevel 1 (
-    echo First compilation failed. Check main-simple.log
-    pause
-    exit /b 1
-)
-
-echo Step 2: Second pass for cross-references...
-xelatex -interaction=nonstopmode main-simple.tex
-
-if exist main-simple.pdf (
-    echo Success! Simple PDF generated: main-simple.pdf
-    start main-simple.pdf
+if exist "output\main-simple.pdf" (
+    echo 编译成功!
+    echo PDF文件: output\main-simple.pdf
 ) else (
-    echo Compilation failed. Check main-simple.log
+    echo 编译失败，请检查日志: output\main-simple.log
 )
 
 pause

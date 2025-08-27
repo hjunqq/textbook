@@ -1,0 +1,76 @@
+<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .title { font: bold 16px sans-serif; text-anchor: middle; }
+      .component { font: bold 10px sans-serif; text-anchor: middle; fill: white; }
+      .label { font: 12px sans-serif; text-anchor: middle; }
+      .gcp { font: bold 8px sans-serif; text-anchor: middle; fill: white; }
+    </style>
+  </defs>
+  
+  <!-- 标题 -->
+  <text x="400" y="30" class="title">无人机倾斜摄影测量系统结构图</text>
+  
+  <!-- 无人机平台 -->
+  <rect x="350" y="80" width="100" height="60" rx="5" fill="#87CEEB" stroke="#000" stroke-width="2"/>
+  <text x="400" y="115" class="component">无人机平台</text>
+  
+  <!-- 五个相机 -->
+  <!-- 垂直相机 -->
+  <rect x="375" y="160" width="50" height="30" rx="3" fill="#FFD700" stroke="#000"/>
+  <text x="400" y="180" class="component">垂直相机</text>
+  
+  <!-- 前视相机 -->
+  <rect x="375" y="210" width="50" height="30" rx="3" fill="#FFD700" stroke="#000"/>
+  <text x="400" y="230" class="component">前视相机</text>
+  
+  <!-- 后视相机 -->
+  <rect x="375" y="260" width="50" height="30" rx="3" fill="#FFD700" stroke="#000"/>
+  <text x="400" y="280" class="component">后视相机</text>
+  
+  <!-- 左视相机 -->
+  <rect x="280" y="210" width="50" height="30" rx="3" fill="#FFD700" stroke="#000"/>
+  <text x="305" y="230" class="component">左视相机</text>
+  
+  <!-- 右视相机 -->
+  <rect x="470" y="210" width="50" height="30" rx="3" fill="#FFD700" stroke="#000"/>
+  <text x="495" y="230" class="component">右视相机</text>
+  
+  <!-- 地面控制点 -->
+  <circle cx="150" cy="450" r="20" fill="#FF4500" stroke="#000"/>
+  <text x="150" y="455" class="gcp">GCP</text>
+  
+  <circle cx="300" cy="450" r="20" fill="#FF4500" stroke="#000"/>
+  <text x="300" y="455" class="gcp">GCP</text>
+  
+  <circle cx="500" cy="450" r="20" fill="#FF4500" stroke="#000"/>
+  <text x="500" y="455" class="gcp">GCP</text>
+  
+  <circle cx="650" cy="450" r="20" fill="#FF4500" stroke="#000"/>
+  <text x="650" y="455" class="gcp">GCP</text>
+  
+  <!-- 拍摄连线 (虚线表示拍摄范围) -->
+  <line x1="400" y1="190" x2="150" y2="430" stroke="#32CD32" stroke-width="1" stroke-dasharray="5,5" opacity="0.7"/>
+  <line x1="400" y1="190" x2="300" y2="430" stroke="#32CD32" stroke-width="1" stroke-dasharray="5,5" opacity="0.7"/>
+  <line x1="400" y1="190" x2="500" y2="430" stroke="#32CD32" stroke-width="1" stroke-dasharray="5,5" opacity="0.7"/>
+  <line x1="400" y1="190" x2="650" y2="430" stroke="#32CD32" stroke-width="1" stroke-dasharray="5,5" opacity="0.7"/>
+  
+  <line x1="400" y1="240" x2="150" y2="430" stroke="#32CD32" stroke-width="1" stroke-dasharray="5,5" opacity="0.5"/>
+  <line x1="400" y1="240" x2="300" y2="430" stroke="#32CD32" stroke-width="1" stroke-dasharray="5,5" opacity="0.5"/>
+  <line x1="400" y1="240" x2="500" y2="430" stroke="#32CD32" stroke-width="1" stroke-dasharray="5,5" opacity="0.5"/>
+  <line x1="400" y1="240" x2="650" y2="430" stroke="#32CD32" stroke-width="1" stroke-dasharray="5,5" opacity="0.5"/>
+  
+  <line x1="305" y1="240" x2="150" y2="430" stroke="#32CD32" stroke-width="1" stroke-dasharray="5,5" opacity="0.5"/>
+  <line x1="305" y1="240" x2="300" y2="430" stroke="#32CD32" stroke-width="1" stroke-dasharray="5,5" opacity="0.5"/>
+  
+  <line x1="495" y1="240" x2="500" y2="430" stroke="#32CD32" stroke-width="1" stroke-dasharray="5,5" opacity="0.5"/>
+  <line x1="495" y1="240" x2="650" y2="430" stroke="#32CD32" stroke-width="1" stroke-dasharray="5,5" opacity="0.5"/>
+  
+  <!-- 标签 -->
+  <text x="400" y="520" class="label">地面控制点 (GCP)</text>
+  
+  <!-- 连接线（无人机与相机） -->
+  <line x1="400" y1="140" x2="400" y2="160" stroke="#000" stroke-width="2"/>
+  <line x1="380" y1="140" x2="305" y2="210" stroke="#000" stroke-width="2"/>
+  <line x1="420" y1="140" x2="495" y2="210" stroke="#000" stroke-width="2"/>
+</svg> 

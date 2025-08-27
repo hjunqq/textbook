@@ -1,0 +1,258 @@
+% ========================================
+% 智慧水利教材 - 主文件 (修复版)
+% ========================================
+
+\documentclass[12pt,a4paper]{book}
+
+% ========================================
+% 基础包引入
+% ========================================
+
+% 数学支持
+\usepackage{amsmath,amssymb,amsthm}
+
+% 图形和颜色
+\usepackage{graphicx}
+\usepackage{xcolor}
+
+% 页面布局
+\usepackage[
+    top=2.5cm,
+    bottom=2.5cm,
+    left=2.8cm,
+    right=2.2cm,
+    bindingoffset=0.5cm,
+    headheight=15pt,
+    footskip=1.5cm
+]{geometry}
+
+% 中文支持
+\usepackage[UTF8]{ctex}
+
+% 字体和行距配置
+\usepackage{setspace}
+\onehalfspacing  % 1.5倍行距
+\setCJKmainfont{SimSun}[BoldFont=SimHei, ItalicFont=KaiTi]
+\setCJKsansfont{SimHei}
+\setCJKmonofont{FangSong}
+
+% 超链接和目录
+\usepackage{hyperref}
+\usepackage{url}
+
+% 列表和表格
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{wrapfig}
+\usepackage{float}
+\usepackage{colortbl}
+\usepackage{pdflscape}
+\usepackage{tabu}
+\usepackage{threeparttable}
+\usepackage{threeparttablex}
+\usepackage[normalem]{ulem}
+\usepackage{makecell}
+\usepackage{calc}
+
+% 代码高亮
+\usepackage{fancyvrb}
+\usepackage{listings}
+
+% 额外的包支持
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows,positioning}
+\usepackage{fontspec}
+\usepackage{multicol}
+\usepackage{enumitem}
+\usepackage{tcolorbox}
+\usepackage{fontawesome5}
+
+% 页眉页脚
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[LE,RO]{\thepage}
+\fancyhead[LO]{\rightmark}
+\fancyhead[RE]{\leftmark}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% ========================================
+% 颜色定义
+% ========================================
+\definecolor{primarycolor}{RGB}{41,128,185}
+\definecolor{secondarycolor}{RGB}{52,73,94}
+\definecolor{accentcolor}{RGB}{231,76,60}
+\definecolor{successcolor}{RGB}{39,174,96}
+\definecolor{warningcolor}{RGB}{241,196,15}
+\definecolor{dangercolor}{RGB}{231,76,60}
+\definecolor{lightgray}{RGB}{236,240,241}
+\definecolor{darkgray}{RGB}{52,73,94}
+\definecolor{codecolor}{RGB}{46,51,56}
+\definecolor{linkcolor}{RGB}{41,128,185}
+
+% ========================================
+% 定理环境设置
+% ========================================
+\newtheorem{definition}{定义}[chapter]
+\newtheorem{theorem}{定理}[chapter]
+\newtheorem{lemma}[theorem]{引理}
+\newtheorem{example}{例}[chapter]
+\newtheorem{exercise}{练习}[chapter]
+
+% ========================================
+% 自定义命令定义 (重要：必须在此定义所有用到的命令)
+% ========================================
+
+% 列表环境命令（来自Pandoc，必须定义）
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+% 文本样式命令
+\newcommand{\highlight}[1]{\colorbox{yellow!30}{\textbf{#1}}}
+\newcommand{\important}[1]{\textcolor{accentcolor}{\textbf{#1}}}
+\newcommand{\note}[1]{\textcolor{secondarycolor}{\textit{#1}}}
+\newcommand{\code}[1]{\texttt{\colorbox{lightgray}{#1}}}
+\newcommand{\file}[1]{\texttt{\textbf{#1}}}
+\newcommand{\variable}[1]{\texttt{\textit{#1}}}
+
+% 快捷符号
+\providecommand{\checkmark}{\textcolor{accentcolor}{\faCheck}}
+\newcommand{\crossmark}{\textcolor{dangercolor}{\faTimes}}
+\newcommand{\infomark}{\textcolor{primarycolor}{\faInfoCircle}}
+\newcommand{\warningmark}{\textcolor{warningcolor}{\faExclamationTriangle}}
+
+% ========================================
+% 特殊环境定义
+% ========================================
+
+% 学习目标框
+\newcommand{\learningobjectives}[1]{
+    \begin{tcolorbox}[
+        colback=primarycolor!10,
+        colframe=primarycolor,
+        title=\faTarget\ 学习目标,
+        fonttitle=\bfseries,
+        left=5pt,
+        right=5pt,
+        top=5pt,
+        bottom=5pt
+    ]
+    #1
+    \end{tcolorbox}
+}
+
+% 关键概念框
+\newcommand{\keypoints}[1]{
+    \begin{tcolorbox}[
+        colback=successcolor!10,
+        colframe=successcolor,
+        title=\faKey\ 关键概念,
+        fonttitle=\bfseries,
+        left=5pt,
+        right=5pt,
+        top=5pt,
+        bottom=5pt
+    ]
+    #1
+    \end{tcolorbox}
+}
+
+% 实践练习框
+\newcommand{\practiceexercise}[1]{
+    \begin{tcolorbox}[
+        colback=accentcolor!10,
+        colframe=accentcolor,
+        title=\faCog\ 实践练习,
+        fonttitle=\bfseries,
+        left=5pt,
+        right=5pt,
+        top=5pt,
+        bottom=5pt
+    ]
+    #1
+    \end{tcolorbox}
+}
+
+% 注意事项
+\newcommand{\attention}[1]{
+    \begin{tcolorbox}[
+        colback=warningcolor!10,
+        colframe=warningcolor,
+        title=\faExclamationTriangle\ 注意,
+        fonttitle=\bfseries,
+        left=5pt,
+        right=5pt,
+        top=5pt,
+        bottom=5pt
+    ]
+    #1
+    \end{tcolorbox}
+}
+
+% 章节摘要框
+\newcommand{\chaptersummary}[1]{
+    \begin{tcolorbox}[
+        colback=secondarycolor!10,
+        colframe=secondarycolor,
+        title=\faClipboardList\ 章节摘要,
+        fonttitle=\bfseries,
+        left=5pt,
+        right=5pt,
+        top=5pt,
+        bottom=5pt
+    ]
+    #1
+    \end{tcolorbox}
+}
+
+% ========================================
+% 超链接设置
+% ========================================
+\hypersetup{
+    colorlinks=true,
+    linkcolor=linkcolor,
+    filecolor=linkcolor,
+    citecolor=linkcolor,
+    urlcolor=linkcolor,
+    pdfcreator={LaTeX via pandoc}
+}
+
+% ========================================
+% 代码高亮配置
+% ========================================
+\lstset{
+    basicstyle=\ttfamily\footnotesize,
+    backgroundcolor=\color{lightgray!20},
+    frame=single,
+    breaklines=true,
+    numbers=left,
+    numberstyle=\tiny\color{darkgray},
+    showstringspaces=false,
+    commentstyle=\color{darkgray},
+    keywordstyle=\color{primarycolor}\bfseries,
+    stringstyle=\color{accentcolor}
+}
+
+% ========================================
+% 文档开始
+% ========================================
+\begin{document}
+
+% 目录
+\tableofcontents
+\newpage
+
+\input{main_content.tex}
+\input{chapters/chapter01.tex}
+\input{chapters/chapter02.tex}
+\input{chapters/chapter03.tex}
+\input{chapters/chapter04.tex}
+\input{chapters/chapter05.tex}
+\input{chapters/chapter06.tex}
+\input{chapters/chapter07.tex}
+\input{chapters/chapter08.tex}
+\input{chapters/chapter09.tex}
+
+\end{document}
