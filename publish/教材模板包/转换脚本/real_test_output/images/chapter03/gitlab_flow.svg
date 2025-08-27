@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="650" height="350" xmlns="http://www.w3.org/2000/svg">
+  <!-- 背景 -->
+  <rect width="650" height="350" fill="#f9f9f9"/>
+  
+  <!-- 标题 -->
+  <text x="325" y="25" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#333">GitLab Flow 工作流程</text>
+  
+  <!-- 定义箭头和点 -->
+  <defs>
+    <marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L6,3 z" fill="#666"/>
+    </marker>
+    <circle id="commit" r="4" fill="#4CAF50"/>
+  </defs>
+  
+  <!-- 分支标签 -->
+  <text x="30" y="80" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#333">main</text>
+  <text x="30" y="120" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#2196F3">feature</text>
+  <text x="30" y="160" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#FF9800">pre-production</text>
+  <text x="30" y="200" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#4CAF50">production</text>
+  
+  <!-- 主分支 -->
+  <line x1="100" y1="75" x2="600" y2="75" stroke="#333" stroke-width="3"/>
+  <use href="#commit" x="130" y="75"/>
+  <use href="#commit" x="230" y="75"/>
+  <use href="#commit" x="330" y="75"/>
+  <use href="#commit" x="430" y="75"/>
+  <use href="#commit" x="530" y="75"/>
+  
+  <!-- Feature分支 -->
+  <line x1="130" y1="115" x2="230" y2="115" stroke="#2196F3" stroke-width="2"/>
+  <use href="#commit" x="160" y="115"/>
+  <use href="#commit" x="200" y="115"/>
+  
+  <!-- Feature分支连接 -->
+  <line x1="130" y1="75" x2="130" y2="115" stroke="#2196F3" stroke-width="1" stroke-dasharray="3,3"/>
+  <line x1="230" y1="115" x2="230" y2="75" stroke="#2196F3" stroke-width="1" stroke-dasharray="3,3"/>
+  
+  <!-- 另一个Feature分支 -->
+  <line x1="330" y1="120" x2="430" y2="120" stroke="#2196F3" stroke-width="2"/>
+  <use href="#commit" x="360" y="120"/>
+  <use href="#commit" x="400" y="120"/>
+  
+  <!-- 第二个Feature分支连接 -->
+  <line x1="330" y1="75" x2="330" y2="120" stroke="#2196F3" stroke-width="1" stroke-dasharray="3,3"/>
+  <line x1="430" y1="120" x2="430" y2="75" stroke="#2196F3" stroke-width="1" stroke-dasharray="3,3"/>
+  
+  <!-- Pre-production分支 -->
+  <line x1="230" y1="155" x2="600" y2="155" stroke="#FF9800" stroke-width="2"/>
+  <use href="#commit" x="280" y="155"/>
+  <use href="#commit" x="380" y="155"/>
+  <use href="#commit" x="480" y="155"/>
+  <use href="#commit" x="550" y="155"/>
+  
+  <!-- Pre-production分支连接 -->
+  <line x1="230" y1="75" x2="230" y2="155" stroke="#FF9800" stroke-width="1" stroke-dasharray="3,3"/>
+  <line x1="430" y1="75" x2="430" y2="155" stroke="#FF9800" stroke-width="1" stroke-dasharray="3,3"/>
+  
+  <!-- Production分支 -->
+  <line x1="380" y1="195" x2="600" y2="195" stroke="#4CAF50" stroke-width="2"/>
+  <use href="#commit" x="420" y="195"/>
+  <use href="#commit" x="520" y="195"/>
+  
+  <!-- Production分支连接 -->
+  <line x1="380" y1="155" x2="380" y2="195" stroke="#4CAF50" stroke-width="1" stroke-dasharray="3,3"/>
+  <line x1="520" y1="155" x2="520" y2="195" stroke="#4CAF50" stroke-width="1" stroke-dasharray="3,3"/>
+  
+  <!-- 环境标签 -->
+  <rect x="500" y="50" width="80" height="20" fill="#E3F2FD" stroke="#2196F3" rx="3"/>
+  <text x="540" y="63" text-anchor="middle" font-size="9" fill="#1976D2">开发环境</text>
+  
+  <rect x="500" y="135" width="80" height="20" fill="#FFF3E0" stroke="#FF9800" rx="3"/>
+  <text x="540" y="148" text-anchor="middle" font-size="9" fill="#F57C00">预生产环境</text>
+  
+  <rect x="500" y="175" width="80" height="20" fill="#E8F5E8" stroke="#4CAF50" rx="3"/>
+  <text x="540" y="188" text-anchor="middle" font-size="9" fill="#388E3C">生产环境</text>
+  
+  <!-- 流程说明 -->
+  <g transform="translate(80, 240)">
+    <text x="0" y="15" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#555">GitLab Flow 流程：</text>
+    <text x="0" y="35" font-size="10" fill="#666">1. 从main创建feature分支进行开发</text>
+    <text x="0" y="50" font-size="10" fill="#666">2. 通过Merge Request合并到main分支</text>
+    <text x="0" y="65" font-size="10" fill="#666">3. main分支自动部署到pre-production环境测试</text>
+    <text x="0" y="80" font-size="10" fill="#666">4. 测试通过后，合并到production分支并部署到生产环境</text>
+  </g>
+  
+  <!-- 优势说明 -->
+  <text x="325" y="320" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#555">适合有多环境部署需求的项目</text>
+</svg>

@@ -41,17 +41,3 @@
 ## 本节小结
 
 本节内容为智慧水利平台的设计和开发提供了重要的理论基础和技术指导。通过学习本节内容，学生应能够理解相关概念的内涵和应用价值，掌握基本的分析方法和设计原则，为后续章节的学习和实际项目的开展奠定坚实基础。
-
-## 参考文献
-
-[1] Pressman R S, Maxim B R. 软件工程：实践者的研究方法[M]. 8版. 机械工业出版社, 2016.
-
-[2] IEEE. IEEE Std 1074-2006: IEEE Standard for Developing a Software Project Life Cycle Process[S]. IEEE Computer Society, 2006.
-
-[3] Sommerville I. 软件工程[M]. 10版. 机械工业出版社, 2017.
-
-[4] ISO/IEC. ISO/IEC 12207:2017 Systems and software engineering — Software life cycle processes[S]. International Organization for Standardization, 2017.
-
-[5] 张海藩, 牟永敏. 软件工程导论[M]. 6版. 清华大学出版社, 2013.
-
-[6] 国家质量技术监督局. GB/T 16260-2006 软件工程 产品质量[S]. 中国标准出版社, 2006.

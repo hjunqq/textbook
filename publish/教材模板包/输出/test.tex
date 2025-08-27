@@ -1,0 +1,34 @@
+\documentclass[12pt,a4paper]{book}
+
+% 基础包
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage[UTF8]{ctex}
+\usepackage{setspace}
+\usepackage{hyperref}
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{calc}
+
+% 定义命令
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+\begin{document}
+
+测试文档
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 4\tabcolsep) * \real{0.3000}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 4\tabcolsep) * \real{0.3000}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 4\tabcolsep) * \real{0.4000}}@{}}
+\toprule
+概念 & 定义 & 重要性 \\
+\midrule
+智慧水利 & 运用物联网、大数据、人工智能等技术，实现水利工程智能化管理的综合体系 & 水利现代化的核心标志 \\
+\bottomrule
+\end{longtable}
+
+\end{document}

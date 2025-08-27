@@ -186,19 +186,3 @@
 ## 本节小结
 
 本节内容为智慧水利平台的设计和开发提供了重要的理论基础和技术指导。通过学习本节内容，学生应能够理解相关概念的内涵和应用价值，掌握基本的分析方法和设计原则，为后续章节的学习和实际项目的开展奠定坚实基础。
-
-## 参考文献
-
-[1] Bass L, Clements P, Kazman R. 软件架构实践[M]. 4版. 清华大学出版社, 2021.
-
-[2] IEEE. IEEE Std 1471-2000: IEEE Recommended Practice for Architectural Description of Software-Intensive Systems[S]. IEEE Computer Society, 2000.
-
-[3] Shaw M, Garlan D. 软件体系结构：系统设计的抽象层面[M]. 机械工业出版社, 2002.
-
-[4] Fowler M. 企业应用架构模式[M]. 机械工业出版社, 2004.
-
-[5] Richards M, Ford N. 软件架构基础[M]. 机械工业出版社, 2020.
-
-[6] Kruchten P. The 4+1 View Model of Architecture[J]. IEEE Software, 1995, 12(6): 42-50.
-
-[7] ISO/IEC/IEEE. ISO/IEC/IEEE 42010:2011 Systems and software engineering — Architecture description[S]. International Organization for Standardization, 2011.

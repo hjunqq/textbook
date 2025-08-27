@@ -1,0 +1,729 @@
+\contentsline {section}{\numberline {0.1}}{2}{section.0.1}%
+\contentsline {subsection}{\numberline {0.1.1}}{2}{subsection.0.1.1}%
+\contentsline {subsubsection}{}{2}{section*.2}%
+\contentsline {subsubsection}{}{2}{section*.3}%
+\contentsline {subsubsection}{}{2}{section*.4}%
+\contentsline {subsection}{\numberline {0.1.2}}{2}{subsection.0.1.2}%
+\contentsline {subsubsection}{}{2}{section*.5}%
+\contentsline {subsubsection}{}{3}{section*.6}%
+\contentsline {subsubsection}{}{3}{section*.7}%
+\contentsline {subsection}{\numberline {0.1.3}}{4}{subsection.0.1.3}%
+\contentsline {subsubsection}{}{4}{section*.8}%
+\contentsline {subsubsection}{}{4}{section*.9}%
+\contentsline {subsection}{\numberline {0.1.4}}{4}{subsection.0.1.4}%
+\contentsline {subsection}{\numberline {0.1.5}}{4}{subsection.0.1.5}%
+\contentsline {subsubsection}{}{4}{section*.10}%
+\contentsline {subsubsection}{}{4}{section*.11}%
+\contentsline {subsubsection}{}{5}{section*.12}%
+\contentsline {subsection}{\numberline {0.1.6}}{5}{subsection.0.1.6}%
+\contentsline {subsubsection}{}{5}{section*.13}%
+\contentsline {subsubsection}{}{5}{section*.14}%
+\contentsline {subsection}{\numberline {0.1.7}}{5}{subsection.0.1.7}%
+\contentsline {subsubsection}{}{5}{section*.15}%
+\contentsline {subsection}{\numberline {0.1.8}}{6}{subsection.0.1.8}%
+\contentsline {subsection}{\numberline {0.1.9}}{6}{subsection.0.1.9}%
+\contentsline {subsection}{\numberline {0.1.10}}{6}{subsection.0.1.10}%
+\contentsline {subsection}{\numberline {0.1.11}}{6}{subsection.0.1.11}%
+\contentsline {subsection}{\numberline {0.1.12}}{6}{subsection.0.1.12}%
+\contentsline {subsection}{\numberline {0.1.13}}{6}{subsection.0.1.13}%
+\contentsline {section}{\numberline {0.2}}{6}{section.0.2}%
+\contentsline {subsection}{\numberline {0.2.1}}{6}{subsection.0.2.1}%
+\contentsline {subsection}{\numberline {0.2.2}}{6}{subsection.0.2.2}%
+\contentsline {subsection}{\numberline {0.2.3}}{7}{subsection.0.2.3}%
+\contentsline {subsection}{\numberline {0.2.4}}{7}{subsection.0.2.4}%
+\contentsline {subsubsection}{}{7}{section*.16}%
+\contentsline {subsubsection}{}{7}{section*.17}%
+\contentsline {subsubsection}{}{7}{section*.18}%
+\contentsline {subsection}{\numberline {0.2.5}}{7}{subsection.0.2.5}%
+\contentsline {subsection}{\numberline {0.2.6}}{8}{subsection.0.2.6}%
+\contentsline {subsection}{\numberline {0.2.7}}{8}{subsection.0.2.7}%
+\contentsline {subsection}{\numberline {0.2.8}}{8}{subsection.0.2.8}%
+\contentsline {section}{\numberline {0.3}}{8}{section.0.3}%
+\contentsline {subsection}{\numberline {0.3.1}}{8}{subsection.0.3.1}%
+\contentsline {subsection}{\numberline {0.3.2}}{9}{subsection.0.3.2}%
+\contentsline {subsection}{\numberline {0.3.3}}{9}{subsection.0.3.3}%
+\contentsline {subsection}{\numberline {0.3.4}1.1}{9}{subsection.0.3.4}%
+\contentsline {subsubsection}{1.1.1}{9}{section*.19}%
+\contentsline {subsubsection}{1.1.2}{10}{section*.20}%
+\contentsline {subsubsection}{1.1.3}{10}{section*.21}%
+\contentsline {subsubsection}{1.1.4}{10}{section*.22}%
+\contentsline {subsubsection}{1.1.5}{11}{section*.23}%
+\contentsline {subsection}{\numberline {0.3.5}}{11}{subsection.0.3.5}%
+\contentsline {subsubsection}{}{11}{section*.24}%
+\contentsline {subsubsection}{}{11}{section*.25}%
+\contentsline {subsubsection}{}{11}{section*.26}%
+\contentsline {subsection}{\numberline {0.3.6}}{12}{subsection.0.3.6}%
+\contentsline {subsection}{\numberline {0.3.7}}{12}{subsection.0.3.7}%
+\contentsline {subsection}{\numberline {0.3.8}1.2}{12}{subsection.0.3.8}%
+\contentsline {subsubsection}{1.2.1}{12}{section*.27}%
+\contentsline {subsubsection}{1.2.2}{13}{section*.28}%
+\contentsline {subsubsection}{1.2.3}{13}{section*.29}%
+\contentsline {subsubsection}{1.2.4}{13}{section*.30}%
+\contentsline {subsubsection}{1.2.5}{14}{section*.31}%
+\contentsline {subsection}{\numberline {0.3.9}}{14}{subsection.0.3.9}%
+\contentsline {subsubsection}{}{14}{section*.32}%
+\contentsline {subsubsection}{}{14}{section*.33}%
+\contentsline {subsubsection}{}{14}{section*.34}%
+\contentsline {subsection}{\numberline {0.3.10}}{14}{subsection.0.3.10}%
+\contentsline {subsection}{\numberline {0.3.11}}{14}{subsection.0.3.11}%
+\contentsline {subsection}{\numberline {0.3.12}1.3}{16}{subsection.0.3.12}%
+\contentsline {subsection}{\numberline {0.3.13}}{17}{subsection.0.3.13}%
+\contentsline {subsubsection}{}{17}{section*.35}%
+\contentsline {subsubsection}{}{17}{section*.36}%
+\contentsline {subsubsection}{}{17}{section*.37}%
+\contentsline {subsection}{\numberline {0.3.14}}{17}{subsection.0.3.14}%
+\contentsline {section}{\numberline {0.4}}{17}{section.0.4}%
+\contentsline {subsection}{\numberline {0.4.1}}{17}{subsection.0.4.1}%
+\contentsline {subsection}{\numberline {0.4.2}}{17}{subsection.0.4.2}%
+\contentsline {subsection}{\numberline {0.4.3}}{17}{subsection.0.4.3}%
+\contentsline {subsection}{\numberline {0.4.4}}{18}{subsection.0.4.4}%
+\contentsline {subsection}{\numberline {0.4.5}2.1}{18}{subsection.0.4.5}%
+\contentsline {subsubsection}{2.1.1}{18}{section*.38}%
+\contentsline {subsubsection}{2.1.2}{19}{section*.39}%
+\contentsline {subsubsection}{2.1.3}{19}{section*.40}%
+\contentsline {subsection}{\numberline {0.4.6}}{19}{subsection.0.4.6}%
+\contentsline {subsubsection}{}{19}{section*.41}%
+\contentsline {subsubsection}{}{19}{section*.42}%
+\contentsline {subsubsection}{}{19}{section*.43}%
+\contentsline {subsection}{\numberline {0.4.7}}{19}{subsection.0.4.7}%
+\contentsline {subsection}{\numberline {0.4.8}2.2}{19}{subsection.0.4.8}%
+\contentsline {subsubsection}{2.2.1}{19}{section*.44}%
+\contentsline {subsubsection}{2.2.2}{19}{section*.45}%
+\contentsline {subsubsection}{2.2.3}{20}{section*.46}%
+\contentsline {subsubsection}{2.2.4}{21}{section*.47}%
+\contentsline {subsubsection}{2.2.5}{21}{section*.48}%
+\contentsline {subsubsection}{2.2.6}{22}{section*.49}%
+\contentsline {subsubsection}{2.2.7}{23}{section*.50}%
+\contentsline {subsubsection}{2.2.8}{23}{section*.51}%
+\contentsline {subsection}{\numberline {0.4.9}2.3}{23}{subsection.0.4.9}%
+\contentsline {subsubsection}{2.3.1}{23}{section*.52}%
+\contentsline {subsubsection}{2.3.2}{23}{section*.53}%
+\contentsline {subsubsection}{2.3.3}{24}{section*.54}%
+\contentsline {subsubsection}{2.3.4}{24}{section*.55}%
+\contentsline {subsubsection}{2.3.5}{25}{section*.56}%
+\contentsline {subsection}{\numberline {0.4.10}2.4}{25}{subsection.0.4.10}%
+\contentsline {subsubsection}{2.4.1}{25}{section*.57}%
+\contentsline {subsubsection}{2.4.2}{25}{section*.58}%
+\contentsline {subsection}{\numberline {0.4.11}2.5}{25}{subsection.0.4.11}%
+\contentsline {subsubsection}{2.5.1}{26}{section*.59}%
+\contentsline {subsubsection}{2.5.2}{26}{section*.60}%
+\contentsline {subsubsection}{2.5.3}{26}{section*.61}%
+\contentsline {subsubsection}{2.5.4}{27}{section*.62}%
+\contentsline {subsubsection}{2.5.5}{28}{section*.63}%
+\contentsline {subsection}{\numberline {0.4.12}2.6}{30}{subsection.0.4.12}%
+\contentsline {section}{\numberline {0.5}}{30}{section.0.5}%
+\contentsline {subsection}{\numberline {0.5.1}}{30}{subsection.0.5.1}%
+\contentsline {subsection}{\numberline {0.5.2}}{30}{subsection.0.5.2}%
+\contentsline {subsection}{\numberline {0.5.3}}{30}{subsection.0.5.3}%
+\contentsline {subsection}{\numberline {0.5.4}}{31}{subsection.0.5.4}%
+\contentsline {subsection}{\numberline {0.5.5}}{31}{subsection.0.5.5}%
+\contentsline {subsection}{\numberline {0.5.6}}{31}{subsection.0.5.6}%
+\contentsline {subsection}{\numberline {0.5.7}3.1}{32}{subsection.0.5.7}%
+\contentsline {subsubsection}{3.1.1}{32}{section*.64}%
+\contentsline {subsubsection}{3.1.1}{32}{section*.65}%
+\contentsline {subsubsection}{3.1.2}{32}{section*.66}%
+\contentsline {paragraph}{1 UML}{33}{section*.67}%
+\contentsline {paragraph}{2}{34}{section*.68}%
+\contentsline {subsection}{\numberline {0.5.8}}{34}{subsection.0.5.8}%
+\contentsline {subsubsection}{}{34}{section*.69}%
+\contentsline {subsubsection}{}{34}{section*.70}%
+\contentsline {subsubsection}{}{34}{section*.71}%
+\contentsline {subsection}{\numberline {0.5.9}}{34}{subsection.0.5.9}%
+\contentsline {subsection}{\numberline {0.5.10}3.2}{34}{subsection.0.5.10}%
+\contentsline {subsubsection}{3.2.1}{34}{section*.72}%
+\contentsline {paragraph}{1}{34}{section*.73}%
+\contentsline {paragraph}{2 Separation of Concerns}{35}{section*.74}%
+\contentsline {paragraph}{3 Cohesion}{35}{section*.75}%
+\contentsline {paragraph}{4 Coupling}{35}{section*.76}%
+\contentsline {paragraph}{5}{35}{section*.77}%
+\contentsline {paragraph}{6}{35}{section*.78}%
+\contentsline {subsubsection}{3.2.2}{35}{section*.79}%
+\contentsline {paragraph}{1}{35}{section*.80}%
+\contentsline {paragraph}{2}{36}{section*.81}%
+\contentsline {paragraph}{3 Information Hiding}{36}{section*.82}%
+\contentsline {paragraph}{4}{36}{section*.83}%
+\contentsline {paragraph}{5 SafeHome}{36}{section*.84}%
+\contentsline {paragraph}{6}{36}{section*.85}%
+\contentsline {subsubsection}{3.2.3}{37}{section*.86}%
+\contentsline {paragraph}{1}{37}{section*.87}%
+\contentsline {subsubsection}{2 SafeHome}{37}{section*.88}%
+\contentsline {subsection}{\numberline {0.5.11}3.3}{37}{subsection.0.5.11}%
+\contentsline {subsubsection}{3.3.1}{37}{section*.89}%
+\contentsline {paragraph}{1 Layered Architecture}{37}{section*.90}%
+\contentsline {paragraph}{2 /Client-Server Architecture}{38}{section*.91}%
+\contentsline {paragraph}{3 Distributed Architecture}{38}{section*.92}%
+\contentsline {subsubsection}{3.3.2}{38}{section*.93}%
+\contentsline {subsubsection}{1 MVC}{38}{section*.94}%
+\contentsline {subsubsection}{2 Microservices}{39}{section*.95}%
+\contentsline {subsubsection}{3 Event - Driven}{39}{section*.96}%
+\contentsline {subsubsection}{4}{39}{section*.97}%
+\contentsline {subsubsection}{3.3.3}{39}{section*.98}%
+\contentsline {paragraph}{1}{39}{section*.99}%
+\contentsline {paragraph}{2}{39}{section*.100}%
+\contentsline {paragraph}{3}{39}{section*.101}%
+\contentsline {subsection}{\numberline {0.5.12}3.4}{39}{subsection.0.5.12}%
+\contentsline {subsubsection}{3.4.1}{39}{section*.102}%
+\contentsline {paragraph}{1}{39}{section*.103}%
+\contentsline {paragraph}{2}{40}{section*.104}%
+\contentsline {subsubsection}{3.4.2}{40}{section*.105}%
+\contentsline {subsubsection}{3.4.3}{40}{section*.106}%
+\contentsline {subsection}{\numberline {0.5.13}3.5}{41}{subsection.0.5.13}%
+\contentsline {subsubsection}{3.5.1}{41}{section*.107}%
+\contentsline {subsubsection}{3.5.2}{41}{section*.108}%
+\contentsline {subsection}{\numberline {0.5.14}}{41}{subsection.0.5.14}%
+\contentsline {subsubsection}{}{41}{section*.109}%
+\contentsline {subsubsection}{}{41}{section*.110}%
+\contentsline {subsubsection}{}{42}{section*.111}%
+\contentsline {subsection}{\numberline {0.5.15}}{42}{subsection.0.5.15}%
+\contentsline {subsection}{\numberline {0.5.16}3.6 Web}{42}{subsection.0.5.16}%
+\contentsline {subsubsection}{3.6.1}{42}{section*.112}%
+\contentsline {subsubsection}{3.6.2}{42}{section*.113}%
+\contentsline {subsection}{\numberline {0.5.17}}{43}{subsection.0.5.17}%
+\contentsline {subsubsection}{}{43}{section*.114}%
+\contentsline {subsubsection}{}{43}{section*.115}%
+\contentsline {subsubsection}{}{43}{section*.116}%
+\contentsline {subsection}{\numberline {0.5.18}}{43}{subsection.0.5.18}%
+\contentsline {subsection}{\numberline {0.5.19}3.7 SafeHome}{43}{subsection.0.5.19}%
+\contentsline {subsubsection}{3.7.1}{43}{section*.117}%
+\contentsline {subsubsection}{3.7.2}{44}{section*.118}%
+\contentsline {subsection}{\numberline {0.5.20}3.8}{44}{subsection.0.5.20}%
+\contentsline {subsection}{\numberline {0.5.21}}{44}{subsection.0.5.21}%
+\contentsline {subsubsection}{}{44}{section*.119}%
+\contentsline {subsubsection}{}{44}{section*.120}%
+\contentsline {subsubsection}{}{44}{section*.121}%
+\contentsline {subsection}{\numberline {0.5.22}}{45}{subsection.0.5.22}%
+\contentsline {section}{\numberline {0.6}}{45}{section.0.6}%
+\contentsline {subsection}{\numberline {0.6.1}}{45}{subsection.0.6.1}%
+\contentsline {subsection}{\numberline {0.6.2}}{45}{subsection.0.6.2}%
+\contentsline {subsection}{\numberline {0.6.3}}{45}{subsection.0.6.3}%
+\contentsline {subsection}{\numberline {0.6.4}}{45}{subsection.0.6.4}%
+\contentsline {subsection}{\numberline {0.6.5}}{46}{subsection.0.6.5}%
+\contentsline {subsection}{\numberline {0.6.6}}{46}{subsection.0.6.6}%
+\contentsline {subsection}{\numberline {0.6.7}}{47}{subsection.0.6.7}%
+\contentsline {subsection}{\numberline {0.6.8}}{47}{subsection.0.6.8}%
+\contentsline {subsection}{\numberline {0.6.9}}{48}{subsection.0.6.9}%
+\contentsline {subsection}{\numberline {0.6.10}}{49}{subsection.0.6.10}%
+\contentsline {subsection}{\numberline {0.6.11}}{49}{subsection.0.6.11}%
+\contentsline {section}{\numberline {0.7}4.1.1 Web}{49}{section.0.7}%
+\contentsline {subsection}{\numberline {0.7.1}Web}{49}{subsection.0.7.1}%
+\contentsline {subsection}{\numberline {0.7.2}Web}{49}{subsection.0.7.2}%
+\contentsline {subsection}{\numberline {0.7.3}}{49}{subsection.0.7.3}%
+\contentsline {subsection}{\numberline {0.7.4}}{50}{subsection.0.7.4}%
+\contentsline {subsection}{\numberline {0.7.5}JavaScript}{50}{subsection.0.7.5}%
+\contentsline {subsection}{\numberline {0.7.6}}{50}{subsection.0.7.6}%
+\contentsline {subsection}{\numberline {0.7.7}}{50}{subsection.0.7.7}%
+\contentsline {section}{\numberline {0.8}4.2 HTML}{50}{section.0.8}%
+\contentsline {subsection}{\numberline {0.8.1}HTML}{51}{subsection.0.8.1}%
+\contentsline {subsubsection}{HTML}{51}{section*.122}%
+\contentsline {subsubsection}{HTML}{51}{section*.123}%
+\contentsline {subsubsection}{CSS}{80}{section*.124}%
+\contentsline {subsubsection}{CSS}{80}{section*.125}%
+\contentsline {subsection}{\numberline {0.8.2}4.3.1 CSS3}{81}{subsection.0.8.2}%
+\contentsline {subsubsection}{CSS}{81}{section*.126}%
+\contentsline {paragraph}{1. - HTML}{81}{section*.127}%
+\contentsline {paragraph}{2. -}{81}{section*.128}%
+\contentsline {paragraph}{3. ID -}{82}{section*.129}%
+\contentsline {paragraph}{4. - HTML}{82}{section*.130}%
+\contentsline {subsubsection}{CSS3}{82}{section*.131}%
+\contentsline {paragraph}{1. -}{82}{section*.132}%
+\contentsline {paragraph}{2. -}{83}{section*.133}%
+\contentsline {paragraph}{3. -}{83}{section*.134}%
+\contentsline {subsubsection}{CSS3}{83}{section*.135}%
+\contentsline {paragraph}{1.}{83}{section*.136}%
+\contentsline {paragraph}{2.}{84}{section*.137}%
+\contentsline {subsection}{\numberline {0.8.3}4.3.2 CSS3}{84}{subsection.0.8.3}%
+\contentsline {subsubsection}{Flexbox}{84}{section*.138}%
+\contentsline {paragraph}{1. Flex}{84}{section*.139}%
+\contentsline {paragraph}{2. Flex}{84}{section*.140}%
+\contentsline {paragraph}{3. Flex}{85}{section*.141}%
+\contentsline {subsubsection}{Grid}{85}{section*.142}%
+\contentsline {paragraph}{1. Grid}{85}{section*.143}%
+\contentsline {paragraph}{2. Grid}{85}{section*.144}%
+\contentsline {paragraph}{3. Grid}{90}{section*.145}%
+\contentsline {subsubsection}{}{90}{section*.146}%
+\contentsline {paragraph}{1.}{90}{section*.147}%
+\contentsline {paragraph}{2.}{100}{section*.148}%
+\contentsline {subsection}{\numberline {0.8.4}4.3.4 CSS3}{101}{subsection.0.8.4}%
+\contentsline {subsubsection}{CSS3}{101}{section*.149}%
+\contentsline {paragraph}{1.}{101}{section*.150}%
+\contentsline {paragraph}{2.}{109}{section*.151}%
+\contentsline {subsubsection}{CSS3}{109}{section*.152}%
+\contentsline {paragraph}{1.}{109}{section*.153}%
+\contentsline {paragraph}{2.}{110}{section*.154}%
+\contentsline {paragraph}{3.}{110}{section*.155}%
+\contentsline {subsection}{\numberline {0.8.5}4.3.4 UI}{110}{subsection.0.8.5}%
+\contentsline {subsubsection}{}{110}{section*.156}%
+\contentsline {paragraph}{1.}{110}{section*.157}%
+\contentsline {paragraph}{2.}{111}{section*.158}%
+\contentsline {subsubsection}{}{111}{section*.159}%
+\contentsline {paragraph}{1.}{111}{section*.160}%
+\contentsline {paragraph}{2.}{111}{section*.161}%
+\contentsline {paragraph}{3.}{111}{section*.162}%
+\contentsline {subsubsection}{}{112}{section*.163}%
+\contentsline {paragraph}{1.}{112}{section*.164}%
+\contentsline {section}{\numberline {0.9}4.4 JavaScript}{112}{section.0.9}%
+\contentsline {subsection}{\numberline {0.9.1}JavaScript}{112}{subsection.0.9.1}%
+\contentsline {subsubsection}{JavaScript}{112}{section*.165}%
+\contentsline {subsubsection}{JavaScriptWeb}{113}{section*.166}%
+\contentsline {subsubsection}{JavaScript}{113}{section*.167}%
+\contentsline {paragraph}{1.}{113}{section*.168}%
+\contentsline {paragraph}{4.}{115}{section*.169}%
+\contentsline {paragraph}{5.}{116}{section*.170}%
+\contentsline {subparagraph}{}{119}{section*.171}%
+\contentsline {subparagraph}{}{119}{section*.172}%
+\contentsline {subparagraph}{}{120}{section*.173}%
+\contentsline {subparagraph}{}{120}{section*.174}%
+\contentsline {subparagraph}{}{120}{section*.175}%
+\contentsline {subparagraph}{}{121}{section*.176}%
+\contentsline {subparagraph}{}{121}{section*.177}%
+\contentsline {subparagraph}{OR (\textbar \textbar ) -}{125}{section*.178}%
+\contentsline {subparagraph}{}{126}{section*.179}%
+\contentsline {subparagraph}{}{133}{section*.180}%
+\contentsline {subparagraph}{}{134}{section*.181}%
+\contentsline {subparagraph}{}{140}{section*.182}%
+\contentsline {subparagraph}{}{141}{section*.183}%
+\contentsline {subparagraph}{}{146}{section*.184}%
+\contentsline {subparagraph}{}{147}{section*.185}%
+\contentsline {subparagraph}{}{147}{section*.186}%
+\contentsline {paragraph}{3. -}{198}{section*.187}%
+\contentsline {paragraph}{4. -}{200}{section*.188}%
+\contentsline {paragraph}{5.}{202}{section*.189}%
+\contentsline {subsubsection}{-}{204}{section*.190}%
+\contentsline {paragraph}{1. JavaScript}{204}{section*.191}%
+\contentsline {subsubsection}{}{248}{section*.192}%
+\contentsline {subsection}{\numberline {0.9.2}4.4.2 Promise}{249}{subsection.0.9.2}%
+\contentsline {subsubsection}{Promise}{249}{section*.193}%
+\contentsline {subsubsection}{async/await}{249}{section*.194}%
+\contentsline {subsubsection}{}{249}{section*.195}%
+\contentsline {subsubsection}{Promise}{250}{section*.196}%
+\contentsline {subsection}{\numberline {0.9.3}4.4.3 DOM}{250}{subsection.0.9.3}%
+\contentsline {subsubsection}{DOM}{250}{section*.197}%
+\contentsline {subsubsection}{}{251}{section*.198}%
+\contentsline {subsection}{\numberline {0.9.4}4.4.4}{251}{subsection.0.9.4}%
+\contentsline {subsubsection}{ES6}{251}{section*.199}%
+\contentsline {subsubsection}{}{252}{section*.200}%
+\contentsline {subsection}{\numberline {0.9.5}}{253}{subsection.0.9.5}%
+\contentsline {subsubsection}{}{253}{section*.201}%
+\contentsline {subsubsection}{}{253}{section*.202}%
+\contentsline {subsubsection}{}{253}{section*.203}%
+\contentsline {subsubsection}{}{262}{section*.204}%
+\contentsline {subsection}{\numberline {0.9.6}4.5.3 Vue}{314}{subsection.0.9.6}%
+\contentsline {subsubsection}{Vue}{314}{section*.205}%
+\contentsline {paragraph}{}{382}{section*.206}%
+\contentsline {paragraph}{}{383}{section*.207}%
+\contentsline {paragraph}{Store}{386}{section*.208}%
+\contentsline {paragraph}{}{390}{section*.209}%
+\contentsline {paragraph}{}{390}{section*.210}%
+\contentsline {subsubsection}{}{391}{section*.211}%
+\contentsline {subsubsection}{}{401}{section*.212}%
+\contentsline {subsubsection}{Vue CLI}{404}{section*.213}%
+\contentsline {subsubsection}{Vue CLI}{405}{section*.214}%
+\contentsline {subsubsection}{}{406}{section*.215}%
+\contentsline {subsection}{\numberline {0.9.7}4.6.3 WebpackVite}{409}{subsection.0.9.7}%
+\contentsline {subsubsection}{}{409}{section*.216}%
+\contentsline {subsubsection}{Webpack}{410}{section*.217}%
+\contentsline {subsubsection}{Vite}{413}{section*.218}%
+\contentsline {subsubsection}{Webpack vs Vite}{415}{section*.219}%
+\contentsline {subsection}{\numberline {0.9.8}4.6.4}{416}{subsection.0.9.8}%
+\contentsline {subsubsection}{}{416}{section*.220}%
+\contentsline {subsubsection}{}{417}{section*.221}%
+\contentsline {subsubsection}{}{422}{section*.222}%
+\contentsline {subsection}{\numberline {0.9.9}4.6.5}{428}{subsection.0.9.9}%
+\contentsline {subsubsection}{}{428}{section*.223}%
+\contentsline {subsubsection}{Prettier}{437}{section*.224}%
+\contentsline {subsubsection}{Git Hooks}{439}{section*.225}%
+\contentsline {subsubsection}{TypeScript}{442}{section*.226}%
+\contentsline {subsubsection}{}{455}{section*.227}%
+\contentsline {paragraph}{Tree Shaking}{455}{section*.228}%
+\contentsline {paragraph}{}{455}{section*.229}%
+\contentsline {paragraph}{}{455}{section*.230}%
+\contentsline {subsection}{\numberline {0.9.10}4.7.2 CDN}{455}{subsection.0.9.10}%
+\contentsline {subsubsection}{CDN}{455}{section*.231}%
+\contentsline {paragraph}{CDN}{456}{section*.232}%
+\contentsline {paragraph}{}{456}{section*.233}%
+\contentsline {subsubsection}{}{456}{section*.234}%
+\contentsline {subsubsection}{Nginx}{456}{section*.235}%
+\contentsline {subsubsection}{CDN}{457}{section*.236}%
+\contentsline {paragraph}{CDN}{457}{section*.237}%
+\contentsline {paragraph}{CDN}{457}{section*.238}%
+\contentsline {subsection}{\numberline {0.9.11}4.7.3}{458}{subsection.0.9.11}%
+\contentsline {subsubsection}{}{458}{section*.239}%
+\contentsline {paragraph}{}{458}{section*.240}%
+\contentsline {paragraph}{Core Web Vitals}{458}{section*.241}%
+\contentsline {subsubsection}{}{458}{section*.242}%
+\contentsline {paragraph}{}{458}{section*.243}%
+\contentsline {paragraph}{}{458}{section*.244}%
+\contentsline {paragraph}{}{459}{section*.245}%
+\contentsline {subsubsection}{}{459}{section*.246}%
+\contentsline {paragraph}{}{459}{section*.247}%
+\contentsline {paragraph}{}{459}{section*.248}%
+\contentsline {subsection}{\numberline {0.9.12}4.7.4}{460}{subsection.0.9.12}%
+\contentsline {subsubsection}{}{460}{section*.249}%
+\contentsline {paragraph}{}{460}{section*.250}%
+\contentsline {paragraph}{}{460}{section*.251}%
+\contentsline {subsubsection}{}{460}{section*.252}%
+\contentsline {paragraph}{}{460}{section*.253}%
+\contentsline {paragraph}{}{460}{section*.254}%
+\contentsline {subsubsection}{Git}{461}{section*.255}%
+\contentsline {paragraph}{}{461}{section*.256}%
+\contentsline {paragraph}{}{461}{section*.257}%
+\contentsline {subsubsection}{}{461}{section*.258}%
+\contentsline {paragraph}{CI/CD}{461}{section*.259}%
+\contentsline {paragraph}{}{461}{section*.260}%
+\contentsline {subsubsection}{}{462}{section*.261}%
+\contentsline {paragraph}{}{462}{section*.262}%
+\contentsline {paragraph}{}{462}{section*.263}%
+\contentsline {subsection}{\numberline {0.9.13}4.7.5}{462}{subsection.0.9.13}%
+\contentsline {subsubsection}{}{462}{section*.264}%
+\contentsline {subsubsection}{}{463}{section*.265}%
+\contentsline {subsubsection}{}{463}{section*.266}%
+\contentsline {subsubsection}{}{463}{section*.267}%
+\contentsline {subsubsection}{}{463}{section*.268}%
+\contentsline {subsection}{\numberline {0.9.14}4.7.5}{464}{subsection.0.9.14}%
+\contentsline {subsubsection}{}{464}{section*.269}%
+\contentsline {subsubsection}{}{464}{section*.270}%
+\contentsline {subsubsection}{}{465}{section*.271}%
+\contentsline {subsubsection}{}{465}{section*.272}%
+\contentsline {subsubsection}{}{466}{section*.273}%
+\contentsline {section}{\numberline {0.10}}{466}{section.0.10}%
+\contentsline {subsection}{\numberline {0.10.1}}{466}{subsection.0.10.1}%
+\contentsline {subsection}{\numberline {0.10.2}}{466}{subsection.0.10.2}%
+\contentsline {subsection}{\numberline {0.10.3}}{467}{subsection.0.10.3}%
+\contentsline {subsection}{\numberline {0.10.4}}{468}{subsection.0.10.4}%
+\contentsline {subsection}{\numberline {0.10.5}}{468}{subsection.0.10.5}%
+\contentsline {subsection}{\numberline {0.10.6}}{469}{subsection.0.10.6}%
+\contentsline {subsection}{\numberline {0.10.7}}{470}{subsection.0.10.7}%
+\contentsline {subsection}{\numberline {0.10.8}}{470}{subsection.0.10.8}%
+\contentsline {subsection}{\numberline {0.10.9}}{471}{subsection.0.10.9}%
+\contentsline {subsubsection}{}{471}{section*.274}%
+\contentsline {section}{\numberline {0.11}5.1}{472}{section.0.11}%
+\contentsline {subsection}{\numberline {0.11.1}5.1.1}{472}{subsection.0.11.1}%
+\contentsline {subsubsection}{}{472}{section*.275}%
+\contentsline {subsubsection}{}{472}{section*.276}%
+\contentsline {subsubsection}{}{514}{section*.277}%
+\contentsline {subsection}{\numberline {0.11.2}5.2.3}{516}{subsection.0.11.2}%
+\contentsline {subsubsection}{}{516}{section*.278}%
+\contentsline {subsection}{\numberline {0.11.3}5.2.6 Spring Boot}{543}{subsection.0.11.3}%
+\contentsline {subsubsection}{}{543}{section*.279}%
+\contentsline {subsubsection}{}{543}{section*.280}%
+\contentsline {subsubsection}{}{543}{section*.281}%
+\contentsline {subsubsection}{}{543}{section*.282}%
+\contentsline {subsubsection}{}{544}{section*.283}%
+\contentsline {subsubsection}{}{544}{section*.284}%
+\contentsline {subsubsection}{}{544}{section*.285}%
+\contentsline {section}{\numberline {0.12}5.3}{544}{section.0.12}%
+\contentsline {subsection}{\numberline {0.12.1}5.3.1}{544}{subsection.0.12.1}%
+\contentsline {subsubsection}{}{544}{section*.286}%
+\contentsline {section}{\numberline {0.13}5.4}{567}{section.0.13}%
+\contentsline {subsection}{\numberline {0.13.1}5.4.1}{567}{subsection.0.13.1}%
+\contentsline {subsubsection}{JDBC}{567}{section*.287}%
+\contentsline {section}{\numberline {0.14}5.5}{609}{section.0.14}%
+\contentsline {subsection}{\numberline {0.14.1}RESTful API}{609}{subsection.0.14.1}%
+\contentsline {subsubsection}{REST}{609}{section*.288}%
+\contentsline {section}{\numberline {0.15}5.6 PythonWeb}{645}{section.0.15}%
+\contentsline {subsection}{\numberline {0.15.1}5.6.1 Python Web}{646}{subsection.0.15.1}%
+\contentsline {subsubsection}{Python}{646}{section*.289}%
+\contentsline {subsubsection}{Django}{675}{section*.290}%
+\contentsline {subsubsection}{Python Web}{686}{section*.291}%
+\contentsline {subsection}{\numberline {0.15.2}}{686}{subsection.0.15.2}%
+\contentsline {section}{\numberline {0.16}}{686}{section.0.16}%
+\contentsline {subsection}{\numberline {0.16.1}}{686}{subsection.0.16.1}%
+\contentsline {subsection}{\numberline {0.16.2}}{687}{subsection.0.16.2}%
+\contentsline {subsection}{\numberline {0.16.3}}{687}{subsection.0.16.3}%
+\contentsline {subsection}{\numberline {0.16.4}}{687}{subsection.0.16.4}%
+\contentsline {subsection}{\numberline {0.16.5}}{688}{subsection.0.16.5}%
+\contentsline {subsection}{\numberline {0.16.6}}{688}{subsection.0.16.6}%
+\contentsline {subsection}{\numberline {0.16.7}}{688}{subsection.0.16.7}%
+\contentsline {subsection}{\numberline {0.16.8}}{689}{subsection.0.16.8}%
+\contentsline {subsection}{\numberline {0.16.9}}{689}{subsection.0.16.9}%
+\contentsline {subsection}{\numberline {0.16.10}}{689}{subsection.0.16.10}%
+\contentsline {subsubsection}{}{689}{section*.292}%
+\contentsline {subsubsection}{}{689}{section*.293}%
+\contentsline {subsubsection}{}{690}{section*.294}%
+\contentsline {subsection}{\numberline {0.16.11}}{690}{subsection.0.16.11}%
+\contentsline {subsection}{\numberline {0.16.12}}{690}{subsection.0.16.12}%
+\contentsline {subsection}{\numberline {0.16.13}}{690}{subsection.0.16.13}%
+\contentsline {subsubsection}{}{690}{section*.295}%
+\contentsline {subsubsection}{}{690}{section*.296}%
+\contentsline {subsubsection}{}{690}{section*.297}%
+\contentsline {subsection}{\numberline {0.16.14}}{690}{subsection.0.16.14}%
+\contentsline {subsection}{\numberline {0.16.15}6.1}{690}{subsection.0.16.15}%
+\contentsline {subsubsection}{6.1.1}{690}{section*.298}%
+\contentsline {paragraph}{6.1.1.1}{691}{section*.299}%
+\contentsline {paragraph}{6.1.1.2}{691}{section*.300}%
+\contentsline {paragraph}{6.1.1.3}{692}{section*.301}%
+\contentsline {paragraph}{6.1.1.4}{692}{section*.302}%
+\contentsline {paragraph}{6.1.1.5}{692}{section*.303}%
+\contentsline {subsubsection}{6.1.2}{692}{section*.304}%
+\contentsline {paragraph}{6.1.2.1 (LiDAR)}{692}{section*.305}%
+\contentsline {paragraph}{6.1.2.2}{694}{section*.306}%
+\contentsline {paragraph}{6.1.2.3}{697}{section*.307}%
+\contentsline {paragraph}{6.1.2.4}{698}{section*.308}%
+\contentsline {paragraph}{6.1.2.5 CAD/BIM}{698}{section*.309}%
+\contentsline {subsubsection}{6.1.3}{699}{section*.310}%
+\contentsline {paragraph}{6.1.3.1}{699}{section*.311}%
+\contentsline {subsubsection}{6.7.4}{758}{section*.312}%
+\contentsline {paragraph}{}{758}{section*.313}%
+\contentsline {subsubsection}{6.7.5}{759}{section*.314}%
+\contentsline {paragraph}{}{759}{section*.315}%
+\contentsline {subsection}{\numberline {0.16.16}}{760}{subsection.0.16.16}%
+\contentsline {subsection}{\numberline {0.16.17}}{760}{subsection.0.16.17}%
+\contentsline {subsubsection}{}{760}{section*.317}%
+\contentsline {subsubsection}{}{760}{section*.318}%
+\contentsline {subsubsection}{}{760}{section*.319}%
+\contentsline {section}{\numberline {0.17}}{760}{section.0.17}%
+\contentsline {subsection}{\numberline {0.17.1}}{760}{subsection.0.17.1}%
+\contentsline {subsection}{\numberline {0.17.2}}{761}{subsection.0.17.2}%
+\contentsline {subsection}{\numberline {0.17.3}}{762}{subsection.0.17.3}%
+\contentsline {subsection}{\numberline {0.17.4}}{762}{subsection.0.17.4}%
+\contentsline {subsection}{\numberline {0.17.5}}{763}{subsection.0.17.5}%
+\contentsline {subsection}{\numberline {0.17.6}}{763}{subsection.0.17.6}%
+\contentsline {subsection}{\numberline {0.17.7}}{764}{subsection.0.17.7}%
+\contentsline {subsubsection}{}{765}{section*.320}%
+\contentsline {subsection}{\numberline {0.17.8}}{765}{subsection.0.17.8}%
+\contentsline {subsubsection}{\href {section07-01.md}{}}{765}{section*.321}%
+\contentsline {subsubsection}{\href {section07-02.md}{}}{765}{section*.322}%
+\contentsline {subsubsection}{\href {section07-03.md}{}}{765}{section*.323}%
+\contentsline {subsubsection}{\href {section07-04.md}{}}{765}{section*.324}%
+\contentsline {subsection}{\numberline {0.17.9}}{765}{subsection.0.17.9}%
+\contentsline {subsubsection}{}{765}{section*.325}%
+\contentsline {subsubsection}{}{766}{section*.326}%
+\contentsline {subsubsection}{}{766}{section*.327}%
+\contentsline {subsection}{\numberline {0.17.10}}{766}{subsection.0.17.10}%
+\contentsline {subsubsection}{}{766}{section*.328}%
+\contentsline {subsubsection}{}{766}{section*.329}%
+\contentsline {subsection}{\numberline {0.17.11}}{766}{subsection.0.17.11}%
+\contentsline {subsection}{\numberline {0.17.12}}{767}{subsection.0.17.12}%
+\contentsline {subsection}{\numberline {0.17.13}7.1}{767}{subsection.0.17.13}%
+\contentsline {subsubsection}{7.1.1}{767}{section*.330}%
+\contentsline {paragraph}{}{767}{section*.331}%
+\contentsline {paragraph}{}{768}{section*.332}%
+\contentsline {subsubsection}{7.1.2}{768}{section*.333}%
+\contentsline {paragraph}{}{768}{section*.334}%
+\contentsline {paragraph}{}{782}{section*.335}%
+\contentsline {paragraph}{}{782}{section*.336}%
+\contentsline {subsubsection}{}{782}{section*.337}%
+\contentsline {paragraph}{}{782}{section*.338}%
+\contentsline {paragraph}{}{783}{section*.339}%
+\contentsline {subsubsection}{}{783}{section*.340}%
+\contentsline {paragraph}{}{783}{section*.341}%
+\contentsline {paragraph}{}{785}{section*.342}%
+\contentsline {subsubsection}{}{786}{section*.343}%
+\contentsline {paragraph}{}{786}{section*.344}%
+\contentsline {paragraph}{}{786}{section*.345}%
+\contentsline {subsubsection}{}{786}{section*.346}%
+\contentsline {paragraph}{}{786}{section*.347}%
+\contentsline {subsubsection}{}{789}{section*.348}%
+\contentsline {paragraph}{}{789}{section*.349}%
+\contentsline {paragraph}{}{789}{section*.350}%
+\contentsline {subsection}{\numberline {0.17.14}}{794}{subsection.0.17.14}%
+\contentsline {subsection}{\numberline {0.17.15}}{794}{subsection.0.17.15}%
+\contentsline {subsubsection}{}{794}{section*.351}%
+\contentsline {subsubsection}{}{794}{section*.352}%
+\contentsline {subsubsection}{}{794}{section*.353}%
+\contentsline {subsection}{\numberline {0.17.16}}{795}{subsection.0.17.16}%
+\contentsline {section}{\numberline {0.18}}{795}{section.0.18}%
+\contentsline {subsection}{\numberline {0.18.1}}{795}{subsection.0.18.1}%
+\contentsline {subsection}{\numberline {0.18.2}7.2.1}{795}{subsection.0.18.2}%
+\contentsline {subsubsection}{}{795}{section*.354}%
+\contentsline {paragraph}{}{795}{section*.355}%
+\contentsline {paragraph}{}{795}{section*.356}%
+\contentsline {paragraph}{}{811}{section*.357}%
+\contentsline {subsection}{\numberline {0.18.3}7.2.4}{826}{subsection.0.18.3}%
+\contentsline {subsubsection}{}{826}{section*.358}%
+\contentsline {paragraph}{}{826}{section*.359}%
+\contentsline {paragraph}{}{828}{section*.360}%
+\contentsline {subsubsection}{}{831}{section*.361}%
+\contentsline {paragraph}{}{831}{section*.362}%
+\contentsline {subsection}{\numberline {0.18.4}}{835}{subsection.0.18.4}%
+\contentsline {subsection}{\numberline {0.18.5}}{835}{subsection.0.18.5}%
+\contentsline {subsubsection}{}{835}{section*.363}%
+\contentsline {subsubsection}{}{835}{section*.364}%
+\contentsline {subsubsection}{}{835}{section*.365}%
+\contentsline {subsection}{\numberline {0.18.6}}{836}{subsection.0.18.6}%
+\contentsline {section}{\numberline {0.19}}{836}{section.0.19}%
+\contentsline {subsection}{\numberline {0.19.1}}{836}{subsection.0.19.1}%
+\contentsline {subsection}{\numberline {0.19.2}7.3.1}{836}{subsection.0.19.2}%
+\contentsline {subsubsection}{}{836}{section*.366}%
+\contentsline {paragraph}{}{836}{section*.367}%
+\contentsline {subsubsection}{}{839}{section*.368}%
+\contentsline {paragraph}{}{839}{section*.369}%
+\contentsline {paragraph}{}{844}{section*.370}%
+\contentsline {subsubsection}{}{847}{section*.371}%
+\contentsline {paragraph}{LOD}{847}{section*.372}%
+\contentsline {paragraph}{}{849}{section*.373}%
+\contentsline {subsection}{\numberline {0.19.3}7.3.3}{854}{subsection.0.19.3}%
+\contentsline {subsubsection}{}{854}{section*.374}%
+\contentsline {paragraph}{}{854}{section*.375}%
+\contentsline {subsubsection}{}{857}{section*.376}%
+\contentsline {paragraph}{}{857}{section*.377}%
+\contentsline {subsection}{\numberline {0.19.4}}{861}{subsection.0.19.4}%
+\contentsline {subsection}{\numberline {0.19.5}}{862}{subsection.0.19.5}%
+\contentsline {subsubsection}{}{862}{section*.378}%
+\contentsline {subsubsection}{}{862}{section*.379}%
+\contentsline {subsubsection}{}{862}{section*.380}%
+\contentsline {subsection}{\numberline {0.19.6}}{862}{subsection.0.19.6}%
+\contentsline {section}{\numberline {0.20}}{862}{section.0.20}%
+\contentsline {subsection}{\numberline {0.20.1}}{862}{subsection.0.20.1}%
+\contentsline {subsection}{\numberline {0.20.2}7.4.1}{862}{subsection.0.20.2}%
+\contentsline {subsubsection}{}{862}{section*.381}%
+\contentsline {paragraph}{}{862}{section*.382}%
+\contentsline {subsubsection}{}{881}{section*.383}%
+\contentsline {subsection}{\numberline {0.20.3}}{884}{subsection.0.20.3}%
+\contentsline {subsection}{\numberline {0.20.4}}{885}{subsection.0.20.4}%
+\contentsline {subsubsection}{}{885}{section*.384}%
+\contentsline {subsubsection}{}{885}{section*.385}%
+\contentsline {subsubsection}{}{885}{section*.386}%
+\contentsline {subsection}{\numberline {0.20.5}}{885}{subsection.0.20.5}%
+\contentsline {section}{\numberline {0.21}}{885}{section.0.21}%
+\contentsline {subsection}{\numberline {0.21.1}}{885}{subsection.0.21.1}%
+\contentsline {subsection}{\numberline {0.21.2}}{885}{subsection.0.21.2}%
+\contentsline {subsection}{\numberline {0.21.3}}{886}{subsection.0.21.3}%
+\contentsline {subsection}{\numberline {0.21.4}}{887}{subsection.0.21.4}%
+\contentsline {subsection}{\numberline {0.21.5}}{888}{subsection.0.21.5}%
+\contentsline {subsection}{\numberline {0.21.6}}{888}{subsection.0.21.6}%
+\contentsline {subsection}{\numberline {0.21.7}}{889}{subsection.0.21.7}%
+\contentsline {subsection}{\numberline {0.21.8}}{890}{subsection.0.21.8}%
+\contentsline {subsubsection}{}{890}{section*.387}%
+\contentsline {subsubsection}{}{890}{section*.388}%
+\contentsline {subsubsection}{}{890}{section*.389}%
+\contentsline {subsection}{\numberline {0.21.9}}{891}{subsection.0.21.9}%
+\contentsline {subsubsection}{}{891}{section*.390}%
+\contentsline {subsubsection}{}{891}{section*.391}%
+\contentsline {subsubsection}{}{891}{section*.392}%
+\contentsline {subsubsection}{}{891}{section*.393}%
+\contentsline {subsection}{\numberline {0.21.10}}{892}{subsection.0.21.10}%
+\contentsline {subsubsection}{\href {section08-01.md}{}}{892}{section*.394}%
+\contentsline {subsubsection}{\href {section08-02.md}{}}{892}{section*.395}%
+\contentsline {subsubsection}{\href {section08-03.md}{}}{892}{section*.396}%
+\contentsline {subsubsection}{\href {section08-04.md}{}}{892}{section*.397}%
+\contentsline {subsubsection}{\href {section08-05.md}{}}{892}{section*.398}%
+\contentsline {subsection}{\numberline {0.21.11}}{892}{subsection.0.21.11}%
+\contentsline {subsubsection}{}{892}{section*.399}%
+\contentsline {subsubsection}{}{892}{section*.400}%
+\contentsline {subsubsection}{}{892}{section*.401}%
+\contentsline {subsection}{\numberline {0.21.12}}{893}{subsection.0.21.12}%
+\contentsline {subsection}{\numberline {0.21.13}}{893}{subsection.0.21.13}%
+\contentsline {section}{\numberline {0.22}}{894}{section.0.22}%
+\contentsline {subsection}{\numberline {0.22.1}8.1.1}{894}{subsection.0.22.1}%
+\contentsline {subsubsection}{8.1.1.1}{894}{section*.402}%
+\contentsline {subsubsection}{8.1.1.2}{894}{section*.403}%
+\contentsline {paragraph}{}{894}{section*.404}%
+\contentsline {paragraph}{}{894}{section*.405}%
+\contentsline {subsubsection}{8.1.1.3}{894}{section*.406}%
+\contentsline {paragraph}{}{894}{section*.407}%
+\contentsline {paragraph}{}{895}{section*.408}%
+\contentsline {subsection}{\numberline {0.22.2}8.1.2}{895}{subsection.0.22.2}%
+\contentsline {subsubsection}{8.1.2.1}{895}{section*.409}%
+\contentsline {subsection}{\numberline {0.22.3}8.1.3}{897}{subsection.0.22.3}%
+\contentsline {subsubsection}{8.1.3.1}{897}{section*.410}%
+\contentsline {paragraph}{}{897}{section*.411}%
+\contentsline {subsection}{\numberline {0.22.4}8.1.4}{913}{subsection.0.22.4}%
+\contentsline {subsubsection}{8.1.4.1}{913}{section*.412}%
+\contentsline {paragraph}{Docker}{913}{section*.413}%
+\contentsline {paragraph}{Docker Compose}{913}{section*.414}%
+\contentsline {subsubsection}{8.1.4.2}{915}{section*.415}%
+\contentsline {paragraph}{}{915}{section*.416}%
+\contentsline {paragraph}{}{916}{section*.417}%
+\contentsline {subsection}{\numberline {0.22.5}8.1.5}{917}{subsection.0.22.5}%
+\contentsline {subsubsection}{8.1.5.1}{917}{section*.418}%
+\contentsline {subsubsection}{8.1.5.2}{917}{section*.419}%
+\contentsline {subsubsection}{8.1.5.3}{918}{section*.420}%
+\contentsline {subsubsection}{8.1.5.4}{918}{section*.421}%
+\contentsline {subsubsection}{}{918}{section*.422}%
+\contentsline {subsubsection}{}{918}{section*.423}%
+\contentsline {subsubsection}{}{919}{section*.424}%
+\contentsline {subsection}{\numberline {0.22.6}}{919}{subsection.0.22.6}%
+\contentsline {section}{\numberline {0.23}}{919}{section.0.23}%
+\contentsline {subsection}{\numberline {0.23.1}}{919}{subsection.0.23.1}%
+\contentsline {subsection}{\numberline {0.23.2}8.2.1}{919}{subsection.0.23.2}%
+\contentsline {subsubsection}{}{919}{section*.425}%
+\contentsline {paragraph}{}{919}{section*.426}%
+\contentsline {paragraph}{}{919}{section*.427}%
+\contentsline {subsection}{\numberline {0.23.3}8.2.3}{939}{subsection.0.23.3}%
+\contentsline {subsubsection}{}{939}{section*.428}%
+\contentsline {paragraph}{}{939}{section*.429}%
+\contentsline {subsubsection}{}{943}{section*.430}%
+\contentsline {subsection}{\numberline {0.23.4}}{948}{subsection.0.23.4}%
+\contentsline {subsection}{\numberline {0.23.5}}{948}{subsection.0.23.5}%
+\contentsline {subsubsection}{}{948}{section*.431}%
+\contentsline {subsubsection}{}{949}{section*.432}%
+\contentsline {subsubsection}{}{949}{section*.433}%
+\contentsline {subsection}{\numberline {0.23.6}}{949}{subsection.0.23.6}%
+\contentsline {section}{\numberline {0.24}}{949}{section.0.24}%
+\contentsline {subsection}{\numberline {0.24.1}}{949}{subsection.0.24.1}%
+\contentsline {subsection}{\numberline {0.24.2}8.3.1}{949}{subsection.0.24.2}%
+\contentsline {subsubsection}{}{949}{section*.434}%
+\contentsline {subsection}{\numberline {0.24.3}}{974}{subsection.0.24.3}%
+\contentsline {subsection}{\numberline {0.24.4}}{974}{subsection.0.24.4}%
+\contentsline {subsubsection}{}{974}{section*.435}%
+\contentsline {subsubsection}{}{975}{section*.436}%
+\contentsline {subsubsection}{}{975}{section*.437}%
+\contentsline {subsection}{\numberline {0.24.5}}{975}{subsection.0.24.5}%
+\contentsline {section}{\numberline {0.25}}{975}{section.0.25}%
+\contentsline {subsection}{\numberline {0.25.1}}{975}{subsection.0.25.1}%
+\contentsline {subsection}{\numberline {0.25.2}8.4.1}{975}{subsection.0.25.2}%
+\contentsline {subsubsection}{}{975}{section*.438}%
+\contentsline {subsection}{\numberline {0.25.3}8.4.3}{994}{subsection.0.25.3}%
+\contentsline {subsubsection}{}{994}{section*.439}%
+\contentsline {subsection}{\numberline {0.25.4}}{999}{subsection.0.25.4}%
+\contentsline {subsection}{\numberline {0.25.5}}{1000}{subsection.0.25.5}%
+\contentsline {subsubsection}{}{1000}{section*.440}%
+\contentsline {subsubsection}{}{1000}{section*.441}%
+\contentsline {subsubsection}{}{1000}{section*.442}%
+\contentsline {subsection}{\numberline {0.25.6}}{1000}{subsection.0.25.6}%
+\contentsline {section}{\numberline {0.26}}{1000}{section.0.26}%
+\contentsline {subsection}{\numberline {0.26.1}}{1000}{subsection.0.26.1}%
+\contentsline {subsection}{\numberline {0.26.2}8.5.1}{1000}{subsection.0.26.2}%
+\contentsline {subsubsection}{}{1000}{section*.443}%
+\contentsline {subsection}{\numberline {0.26.3}8.5.3}{1017}{subsection.0.26.3}%
+\contentsline {subsubsection}{}{1017}{section*.444}%
+\contentsline {subsubsection}{CI/CD}{1021}{section*.445}%
+\contentsline {subsection}{\numberline {0.26.4}8.5.4}{1024}{subsection.0.26.4}%
+\contentsline {subsubsection}{}{1024}{section*.446}%
+\contentsline {subsection}{\numberline {0.26.5}}{1029}{subsection.0.26.5}%
+\contentsline {subsection}{\numberline {0.26.6}}{1029}{subsection.0.26.6}%
+\contentsline {subsubsection}{}{1029}{section*.447}%
+\contentsline {subsubsection}{}{1030}{section*.448}%
+\contentsline {subsubsection}{}{1030}{section*.449}%
+\contentsline {subsection}{\numberline {0.26.7}}{1030}{subsection.0.26.7}%
+\contentsline {section}{\numberline {0.27}}{1030}{section.0.27}%
+\contentsline {subsection}{\numberline {0.27.1}}{1030}{subsection.0.27.1}%
+\contentsline {subsection}{\numberline {0.27.2}}{1030}{subsection.0.27.2}%
+\contentsline {subsection}{\numberline {0.27.3}}{1030}{subsection.0.27.3}%
+\contentsline {subsubsection}{9.1.3}{1031}{section*.450}%
+\contentsline {subsection}{\numberline {0.27.4}9.2}{1032}{subsection.0.27.4}%
+\contentsline {subsubsection}{9.2.1}{1032}{section*.451}%
+\contentsline {subsubsection}{9.2.2}{1033}{section*.452}%
+\contentsline {subsubsection}{9.2.3}{1033}{section*.453}%
+\contentsline {subsubsection}{9.2.4}{1033}{section*.454}%
+\contentsline {subsection}{\numberline {0.27.5}9.3}{1034}{subsection.0.27.5}%
+\contentsline {subsubsection}{9.3.1}{1034}{section*.455}%
+\contentsline {subsubsection}{9.3.2}{1034}{section*.456}%
+\contentsline {subsection}{\numberline {0.27.6}9.4}{1035}{subsection.0.27.6}%
+\contentsline {subsubsection}{9.4.1}{1035}{section*.457}%
+\contentsline {subsubsection}{9.4.2}{1035}{section*.458}%
+\contentsline {subsubsection}{9.4.3}{1035}{section*.459}%
+\contentsline {subsubsection}{9.5.1}{1036}{section*.460}%
+\contentsline {subsubsection}{9.5.2}{1036}{section*.461}%
+\contentsline {subsection}{\numberline {0.27.7}9.6}{1037}{subsection.0.27.7}%
+\contentsline {subsubsection}{9.1.2}{1037}{section*.462}%
+\contentsline {subsubsection}{9.1.3}{1038}{section*.463}%
+\contentsline {subsection}{\numberline {0.27.8}9.2}{1038}{subsection.0.27.8}%
+\contentsline {subsubsection}{9.2.1}{1038}{section*.464}%
+\contentsline {subsubsection}{9.2.2}{1038}{section*.465}%
+\contentsline {subsubsection}{9.2.3}{1038}{section*.466}%
+\contentsline {subsubsection}{9.2.4}{1039}{section*.467}%
+\contentsline {subsection}{\numberline {0.27.9}9.3}{1039}{subsection.0.27.9}%
+\contentsline {subsubsection}{9.3.1}{1039}{section*.468}%
+\contentsline {subsubsection}{9.3.2}{1039}{section*.469}%
+\contentsline {subsubsection}{9.3.3}{1040}{section*.470}%
+\contentsline {subsection}{\numberline {0.27.10}9.4}{1040}{subsection.0.27.10}%
+\contentsline {subsubsection}{9.4.1}{1040}{section*.471}%
+\contentsline {subsubsection}{9.4.2}{1040}{section*.472}%
+\contentsline {subsection}{\numberline {0.27.11}9.5}{1041}{subsection.0.27.11}%
+\contentsline {subsubsection}{9.5.1}{1041}{section*.473}%
+\contentsline {subsubsection}{9.5.2}{1041}{section*.474}%
+\contentsline {subsubsection}{9.5.3}{1041}{section*.475}%
+\contentsline {subsection}{\numberline {0.27.12}9.6}{1042}{subsection.0.27.12}%
+\contentsline {subsection}{\numberline {0.27.13}}{1042}{subsection.0.27.13}%
