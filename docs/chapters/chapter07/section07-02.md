@@ -1,1089 +1,527 @@
 # 7.2 数据图表展示
 
 ## 学习目标
+
 通过本节学习，学生应能够：
-1. 掌握三维场景中集成2D图表的技术方法
-2. 理解时序数据的动态可视化实现原理
-3. 熟练运用各类图表库进行数据可视化开发
-4. 能够设计响应式和交互式的数据分析界面
 
-## 引言
+1. **熟练掌握Chart.js/ECharts在三维场景中的集成技术**：理解2D图表与3D场景结合的技术原理和实现方法
+2. **深入理解时序数据的动态可视化方法**：掌握实时数据流的图表更新机制和动态展示技术
+3. **能够设计交互式数据分析图表**：具备多参数关联分析图表设计和实现能力
+4. **掌握响应式图表与移动端适配技术**：理解跨设备、跨平台的图表展示优化方案
 
-在智慧水利三维场景中，**数据图表展示**是将抽象的监测数据转化为直观可视信息的重要手段。与传统的独立图表应用不同，三维场景中的图表需要与空间模型无缝融合，既要保持图表的清晰可读性，又要与三维环境形成协调统一的视觉体验。
+## 7.2.1 Chart.js在三维场景中的集成
 
-现代水利监测系统产生的数据具有多维度、大容量、实时性强等特点，如何在三维场景中有效地展示这些数据的变化趋势、关联关系和异常状态，直接影响到用户对系统状态的理解和决策效率。通过合理的图表设计和技术实现，可以实现"让数据自己说话"的可视化效果。
+### Chart.js技术概述
 
-## 7.2.1 图表技术选型与集成
+**Chart.js**是一个功能强大的JavaScript图表库，以其简洁的API设计和丰富的图表类型在Web开发中广泛应用。在水利监测系统中，Chart.js主要用于展示时间序列数据、统计分析结果和趋势预测信息。
 
-### 主流图表库对比分析
+#### Chart.js核心特性分析
 
-在三维场景开发中，选择合适的图表库是实现高质量数据可视化的基础。以下对主流图表库进行详细对比：
+| 特性类别 | 具体特性 | 在水利系统中的价值 | 技术优势 |
+|----------|----------|-------------------|----------|
+| **图表类型** | 折线图、柱状图、散点图等 | 适应不同数据类型展示需求 | 覆盖常见可视化场景 |
+| **响应式设计** | 自适应容器大小 | 支持多设备访问 | 提升用户体验 |
+| **实时更新** | 动态数据添加/删除 | 实时监测数据展示 | 满足实时性要求 |
+| **交互功能** | 缩放、平移、选择 | 增强数据分析能力 | 支持深度数据探索 |
+| **自定义样式** | 颜色、字体、动画配置 | 符合系统UI标准 | 保持界面一致性 |
 
-#### Chart.js
-**特点与优势**：
-- 轻量级、响应式设计，适合移动端应用
-- 支持8种基本图表类型，可满足大部分需求
-- HTML5 Canvas渲染，性能良好
-- 丰富的配置选项和插件系统
+### Chart.js与Three.js集成架构
+
+在三维水利场景中集成Chart.js需要解决坐标系统转换、渲染层级管理、交互事件处理等技术问题。
+
+**Chart.js与Three.js集成**的核心挑战在于将基于DOM的二维图表技术与基于WebGL的三维渲染技术进行有机结合。这种集成需要解决渲染上下文差异、坐标系统转换、事件处理机制等多个技术难题。
+
+**集成架构的核心组件分析**：
+
+**1. HTML到纹理的转换机制**
+传统的Chart.js图表需要HTML Canvas承载，而Three.js使用GPU纹理渲染。集成的关键是将HTML元素转换为可用的WebGL纹理：
+- **离屏渲染技术**：将图表渲染到不可见的HTML元素中，避免影响页面布局
+- **html2canvas转换**：利用html2canvas库将DOM元素转换为Canvas图像
+- **纹理映射优化**：将Canvas内容映射到WebGL纹理，设置合适的过滤方式
+
+**2. 图表容器的空间定位**
+在三维场景中精确定位图表需要考虑多个因素：
+- **世界坐标系绑定**：图表平面与三维对象的空间关系
+- **相机视角适配**：确保图表在不同视角下的可读性
+- **深度缓冲处理**：正确处理图表与其他三维对象的遮挡关系
+
+**3. 实时数据同步机制**
+图表数据的实时更新需要协调多个层次：
+- **数据层同步**：Chart.js数据模型的动态更新
+- **渲染层同步**：WebGL纹理的及时刷新
+- **交互层同步**：用户操作在两个渲染系统间的传递
 
 ```javascript
-// Chart.js在三维场景中的集成示例
-class WaterLevelChart {
-    constructor(canvasId, sceneContainer) {
-        this.canvasId = canvasId;
-        this.sceneContainer = sceneContainer;
-        this.chart = null;
-        this.initChart();
+// Chart.js与Three.js集成的核心架构
+class ChartIntegrationManager {
+    createChart(chartId, config, position) {
+        // 1. 创建离屏HTML容器
+        const container = this.createOffscreenContainer(chartId);
+        
+        // 2. 初始化Chart.js实例
+        const chart = new Chart(container.getContext('2d'), {
+            type: config.type,
+            data: config.data,
+            options: this.getThreeDOptimizedOptions(config)
+        });
+        
+        // 3. 创建三维承载平面
+        const chartPlane = this.createTexturedPlane(container, position);
+        this.threeScene.add(chartPlane);
+        
+        return { chart, plane: chartPlane };
     }
     
-    initChart() {
-        const ctx = document.getElementById(this.canvasId).getContext('2d');
-        this.chart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: [],
-                datasets: [{
-                    label: '水位(m)',
-                    data: [],
-                    borderColor: '#00BFFF',
-                    backgroundColor: 'rgba(0, 191, 255, 0.1)',
-                    borderWidth: 2,
-                    fill: true,
-                    tension: 0.4
-                }]
+    updateChartData(chartId, newData) {
+        const chart = this.getChart(chartId);
+        // 更新图表数据
+        chart.data = newData;
+        chart.update('none'); // 禁用动画提升性能
+        // 更新WebGL纹理
+        this.refreshTexture(chartId);
+    }
+}
+```
+
+**技术实现的关键优化策略**：
+
+- **纹理尺寸优化**：使用2的幂次尺寸（如512x384）提升GPU渲染效率
+- **更新频率控制**：避免过频繁的纹理刷新，采用批量更新策略
+- **内存管理**：及时释放不用的Canvas和纹理资源
+- **交互事件代理**：通过射线检测将三维场景的鼠标事件转换为图表交互
+
+## 7.2.2 ECharts高级图表集成
+
+### ECharts技术优势
+
+**ECharts**是百度开源的企业级可视化图表库，在处理大数据量、复杂交互和多维数据展示方面具有显著优势。在水利监测系统中，ECharts特别适用于多参数关联分析、地理数据可视化和复杂统计图表展示。
+
+#### ECharts在水利系统中的应用特点
+
+- **大数据处理能力**：支持数万个数据点的流畅渲染，适合长时间序列数据展示
+- **丰富的图表类型**：包含专业的水文图表类型，如流量过程线、水位-流量关系图等
+- **强大的交互功能**：支持数据钻取、区域缩放、图例筛选等高级交互操作
+- **地理信息支持**：内置地图组件，支持流域、水系等地理信息可视化
+
+**ECharts在水利监测中的专业应用**展现了其在处理复杂数据可视化方面的强大能力。相比Chart.js，ECharts在大数据量处理、多维数据展示、地理信息集成方面具有显著优势。
+
+**ECharts高级功能的技术特点**：
+
+**1. 水位-流量关系图的专业化设计**
+水位-流量关系是水文分析的核心内容，需要处理多种类型的数据：
+- **实测数据点**：使用散点图展示实际观测值，需要处理数据异常值和测量误差
+- **拟合曲线**：采用数学模型（如幂函数、多项式）拟合水位-流量关系
+- **置信区间**：显示预测结果的不确定性范围，帮助工程师评估风险
+- **异常值标识**：高亮显示偏离正常规律的数据点，便于质量控制
+
+**2. 多参数时序对比的技术实现**
+水利监测往往需要同时分析多个相关参数：
+- **多Y轴设计**：不同参数使用不同的量纲和数值范围，需要独立的Y轴
+- **颜色编码策略**：通过颜色区分不同参数，提高可读性
+- **交互式图例**：支持参数的显示/隐藏切换，便于对比分析
+- **时间轴同步**：确保所有参数在时间维度上保持同步
+
+**3. 实时数据流的动态展示**
+实时监测数据的可视化需要特殊的性能优化：
+- **数据窗口管理**：维护固定长度的数据窗口，避免内存无限增长
+- **平滑动画效果**：新数据点的加入使用平滑过渡，避免视觉突变
+- **性能自适应**：根据数据更新频率动态调整渲染策略
+- **异常数据处理**：自动识别和标记异常数据点
+
+```javascript
+// ECharts水利专业图表核心实现
+class WaterChartsManager {
+    createStageDischargeChart(chartId, data) {
+        const chart = echarts.init(this.getContainer(chartId));
+        
+        // 专业水文图表配置
+        const option = {
+            title: { text: '水位-流量关系曲线' },
+            tooltip: {
+                formatter: (params) => {
+                    const point = params[0];
+                    return `水位: ${point.value[0].toFixed(2)}m<br/>
+                            流量: ${point.value[1].toFixed(2)}m³/s`;
+                }
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    x: {
-                        type: 'time',
-                        time: {
-                            displayFormats: {
-                                hour: 'MM-DD HH:mm'
-                            }
-                        },
-                        title: {
-                            display: true,
-                            text: '时间'
-                        }
-                    },
-                    y: {
-                        beginAtZero: false,
-                        title: {
-                            display: true,
-                            text: '水位(m)'
-                        },
-                        grid: {
-                            color: 'rgba(255, 255, 255, 0.1)'
-                        }
+            xAxis: { name: '水位 (m)', type: 'value' },
+            yAxis: { name: '流量 (m³/s)', type: 'value' },
+            series: [
+                { name: '实测数据', type: 'scatter', data: data.observed },
+                { name: '拟合曲线', type: 'line', data: data.fitted, smooth: true }
+            ],
+            // 专业交互工具
+            brush: { toolbox: ['rect', 'polygon'] },
+            dataZoom: [{ type: 'slider' }, { type: 'inside' }]
+        };
+        
+        chart.setOption(option);
+        return chart;
+    }
+    
+    createRealTimeStreamChart(chartId, config) {
+        const chart = echarts.init(this.getContainer(chartId));
+        let dataBuffer = [];
+        const maxPoints = config.maxDataPoints || 50;
+        
+        // 实时数据更新方法
+        chart.addRealTimeData = (timestamp, value) => {
+            dataBuffer.push([new Date(timestamp).toLocaleTimeString(), value]);
+            if (dataBuffer.length > maxPoints) dataBuffer.shift();
+            
+            chart.setOption({
+                xAxis: { data: dataBuffer.map(item => item[0]) },
+                series: [{ data: dataBuffer.map(item => item[1]) }]
+            });
+        };
+        
+        return chart;
+    }
+}
+```
+
+**ECharts性能优化的关键技术**：
+
+- **数据采样算法**：对大量数据点使用LTTB（Largest Triangle Three Buckets）算法降采样
+- **渐进式渲染**：大数据量时分批渲染，避免界面阻塞
+- **视口裁剪**：只渲染可视区域内的数据，提升渲染性能
+- **Canvas分层**：将静态元素和动态元素分层渲染，减少重绘开销
+
+## 7.2.3 时序数据的动态可视化
+
+### 时序数据特征分析
+
+**时序数据**是水利监测系统中最常见的数据类型，具有时间连续性、数据量大、更新频繁等特点。有效的时序数据可视化需要考虑数据压缩、动画效果、交互响应等多个技术要素。
+
+#### 时序数据处理策略
+
+| 处理策略 | 技术方法 | 适用场景 | 性能影响 |
+|----------|----------|----------|----------|
+| **数据抽稀** | 间隔采样、趋势保持算法 | 长时间序列展示 | 减少渲染负担 |
+| **分层显示** | 多分辨率数据存储 | 多尺度时间分析 | 提升交互响应 |
+| **实时更新** | 增量数据推送 | 实时监测应用 | 控制更新频率 |
+| **缓存管理** | 数据预加载、LRU淘汰 | 历史数据查询 | 优化内存使用 |
+
+**时序数据可视化**是水利监测系统中最具挑战性的技术领域之一。水利监测产生的时序数据具有数据量大、时间跨度长、更新频率高等特点，需要专门的处理策略。
+
+**时序数据处理的核心技术挑战**：
+
+**1. 大数据量的渲染性能优化**
+水利监测系统经常需要处理数年的历史数据和实时数据流：
+- **数据抽稀策略**：使用Douglas-Peucker算法保持数据趋势的同时减少数据点
+- **分层显示技术**：根据时间范围动态选择合适的数据分辨率
+- **视口裁剪优化**：只渲染当前可见时间范围的数据点
+- **Canvas优化技术**：使用离屏Canvas和双缓冲技术提升渲染性能
+
+**2. 实时数据流的平滑更新机制**
+实时监测数据的动态展示需要平衡更新频率和用户体验：
+- **数据缓冲管理**：维护固定大小的循环缓冲区，避免内存泄漏
+- **批量更新策略**：累积多个数据点后一次性更新，减少重绘次数
+- **动画过渡效果**：新数据点的加入使用平滑动画，提升视觉连贯性
+- **异常值处理**：自动检测和标记异常数据，避免图表变形
+
+**3. 多级缩放的自适应采样**
+用户可能需要从年度总览缩放到分钟级详情：
+- **LTTB采样算法**：Largest Triangle Three Buckets算法保持视觉特征
+- **分辨率自适应**：根据缩放级别动态调整数据密度
+- **关键点保留**：确保峰值、谷值等关键特征点不被采样丢失
+- **渐进式加载**：细节数据按需从服务器加载
+
+```javascript
+// 时序数据可视化核心实现
+class TimeSeriesVisualization {
+    constructor(container, config) {
+        this.container = container;
+        this.dataBuffer = new TimeSeriesBuffer(config.bufferSize);
+        this.compressionEngine = new DataCompressionEngine();
+        this.chart = null;
+    }
+    
+    addRealTimeData(timestamp, value) {
+        // 1. 数据质量检查
+        if (this.isAnomalous(value)) {
+            value = this.correctAnomalousValue(value);
+        }
+        
+        // 2. 添加到缓冲区
+        this.dataBuffer.add(timestamp, value);
+        
+        // 3. 获取当前显示范围的优化数据
+        const displayData = this.getOptimizedDisplayData();
+        
+        // 4. 平滑更新图表
+        this.updateChartWithAnimation(displayData);
+    }
+    
+    getOptimizedDisplayData() {
+        const rawData = this.dataBuffer.getData();
+        const zoomLevel = this.getCurrentZoomLevel();
+        
+        // 根据缩放级别选择采样策略
+        if (zoomLevel > 1000) {
+            return this.compressionEngine.lttbDownsample(rawData, 1000);
+        } else if (zoomLevel > 100) {
+            return this.compressionEngine.douglasPeucker(rawData, 0.1);
+        }
+        return rawData;
+    }
+}
+
+// 高性能数据压缩引擎
+class DataCompressionEngine {
+    // LTTB算法：保持视觉特征的降采样
+    lttbDownsample(data, targetPoints) {
+        if (data.length <= targetPoints) return data;
+        
+        const sampled = [data[0]]; // 保留首点
+        const bucketSize = (data.length - 2) / (targetPoints - 2);
+        
+        for (let i = 0; i < targetPoints - 2; i++) {
+            // 计算每个bucket中形成最大三角形面积的点
+            const maxAreaPoint = this.findMaxTrianglePoint(
+                sampled[sampled.length - 1],
+                this.getBucketData(data, i, bucketSize),
+                this.getNextBucketAverage(data, i + 1, bucketSize)
+            );
+            sampled.push(maxAreaPoint);
+        }
+        
+        sampled.push(data[data.length - 1]); // 保留尾点
+        return sampled;
+    }
+    
+    // Douglas-Peucker算法：基于偏差的线简化
+    douglasPeucker(points, epsilon) {
+        if (points.length <= 2) return points;
+        
+        let maxDistance = 0;
+        let splitIndex = 0;
+        
+        // 找到距离直线最远的点
+        for (let i = 1; i < points.length - 1; i++) {
+            const distance = this.perpendicularDistance(
+                points[i], points[0], points[points.length - 1]
+            );
+            if (distance > maxDistance) {
+                maxDistance = distance;
+                splitIndex = i;
+            }
+        }
+        
+        // 递归简化
+        if (maxDistance > epsilon) {
+            const left = this.douglasPeucker(points.slice(0, splitIndex + 1), epsilon);
+            const right = this.douglasPeucker(points.slice(splitIndex), epsilon);
+            return [...left.slice(0, -1), ...right];
+        }
+        
+        return [points[0], points[points.length - 1]];
+    }
+}
+```
+
+**性能优化的工程实践经验**：
+
+- **内存管理策略**：使用对象池避免频繁的内存分配和回收
+- **渲染优化技术**：启用硬件加速，使用Canvas分层渲染
+- **数据预处理**：在Worker线程中进行数据压缩和采样
+- **缓存机制**：缓存不同缩放级别的预处理数据
+
+## 7.2.4 响应式图表与移动端适配
+
+### 响应式设计原则
+
+**响应式图表设计**是现代Web应用的重要特征，需要在不同设备和屏幕尺寸下提供一致的用户体验。在水利监测系统中，响应式设计尤为重要，因为现场工作人员经常需要使用移动设备访问监测数据。
+
+#### 响应式设计关键要素
+
+- **弹性布局**：图表容器能够根据屏幕尺寸自动调整
+- **自适应字体**：文字大小根据设备类型和屏幕密度调整
+- **触控优化**：针对触摸操作优化交互方式
+- **内容优先级**：在小屏设备上突出显示关键信息
+
+**响应式图表设计**是现代水利监测系统不可缺少的特性。现场工作人员经常使用平板电脑和智能手机查看监测数据，必须确保图表在不同设备上都能提供良好的用户体验。
+
+**响应式设计的技术层次分析**：
+
+**1. 设备检测与适配策略**
+不同设备类型需要采用不同的显示策略：
+- **屏幕尺寸适配**：基于breakpoint的分级适配，而非简单的尺寸缩放
+- **触控优化设计**：增大可点击区域，优化手势操作体验
+- **字体大小自适应**：根据设备类型和屏幕密度调整文字大小
+- **信息密度控制**：移动端减少非关键信息，突出核心数据
+
+**2. 移动端交互的特殊考虑**
+PC端和移动端的交互模式存在根本差异：
+- **鼠标悬停替代**：移动端无鼠标悬停，需要设计替代交互方式
+- **多点触控支持**：支持双指缩放、拖拽等手势操作
+- **长按操作**：利用长按手势触发上下文菜单或详细信息
+- **振动反馈**：在支持的设备上提供触觉反馈增强体验
+
+**3. 性能优化的移动端策略**
+移动设备的计算和渲染能力相对有限：
+- **数据精简策略**：移动端减少显示的数据点数量
+- **动画效果控制**：简化或禁用复杂动画效果
+- **懒加载机制**：按需加载图表数据，避免初始加载过慢
+- **离线缓存**：缓存关键数据，支持离线查看
+
+```javascript
+// 响应式适配的核心实现
+class ResponsiveChartAdapter {
+    constructor() {
+        this.breakpoints = {
+            mobile: 768,
+            tablet: 1024,
+            desktop: 1200
+        };
+        this.currentDevice = this.detectDevice();
+    }
+    
+    applyResponsiveConfig(chart, baseConfig) {
+        const deviceConfig = this.getDeviceSpecificConfig();
+        const mergedConfig = this.deepMerge(baseConfig, deviceConfig);
+        
+        // 应用设备特定配置
+        if (chart.setOption) {
+            chart.setOption(mergedConfig); // ECharts
+        } else if (chart.update) {
+            Object.assign(chart.options, mergedConfig); // Chart.js
+            chart.update();
+        }
+        
+        return mergedConfig;
+    }
+    
+    getDeviceSpecificConfig() {
+        const configs = {
+            mobile: {
+                title: { textStyle: { fontSize: 14 } },
+                legend: { show: false }, // 节省空间
+                grid: { left: '10%', right: '10%' },
+                tooltip: { position: 'top' },
+                toolbox: { show: false } // 隐藏工具栏
+            },
+            tablet: {
+                title: { textStyle: { fontSize: 16 } },
+                grid: { left: '8%', right: '8%' },
+                toolbox: { show: true, iconStyle: { borderWidth: 1 } }
+            },
+            desktop: {
+                title: { textStyle: { fontSize: 18 } },
+                toolbox: {
+                    show: true,
+                    feature: {
+                        dataZoom: { show: true },
+                        saveAsImage: { show: true }
                     }
-                },
-                plugins: {
-                    legend: {
-                        display: true,
-                        position: 'top'
-                    },
-                    tooltip: {
-                        mode: 'index',
-                        intersect: false,
-                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                        titleColor: '#fff',
-                        bodyColor: '#fff'
-                    }
-                },
-                interaction: {
+                }
+            }
+        };
+        
+        return configs[this.currentDevice] || configs.desktop;
+    }
+    
+    // 移动端触控交互优化
+    createMobileInteractions(chartInstance) {
+        const container = this.getChartContainer(chartInstance);
+        if (!container) return;
+        
+        let touchState = { startX: 0, startY: 0, startTime: 0 };
+        
+        container.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            touchState = {
+                startX: touch.clientX,
+                startY: touch.clientY,
+                startTime: Date.now()
+            };
+            
+            // 长按检测
+            setTimeout(() => {
+                if (Date.now() - touchState.startTime >= 500) {
+                    this.handleLongPress(chartInstance, touchState.startX, touchState.startY);
+                }
+            }, 500);
+        });
+        
+        container.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            const duration = Date.now() - touchState.startTime;
+            
+            if (duration < 500) {
+                // 短按事件
+                this.handleTap(chartInstance, touchState.startX, touchState.startY);
+            }
+        });
+    }
+}
+
+// 移动端优化图表工厂
+class MobileOptimizedChartFactory {
+    createMobileChart(container, data, options = {}) {
+        const mobileConfig = {
+            responsive: true,
+            maintainAspectRatio: false,
+            elements: {
+                point: {
+                    radius: 3,
+                    hitRadius: 10 // 增大触控区域
+                }
+            },
+            plugins: {
+                legend: { display: false }, // 移动端隐藏图例
+                tooltip: {
+                    enabled: true,
                     mode: 'nearest',
-                    axis: 'x',
                     intersect: false
                 }
-            }
-        });
-    }
-    
-    updateData(newData) {
-        // 更新图表数据
-        this.chart.data.labels = newData.timestamps;
-        this.chart.data.datasets[0].data = newData.values;
-        this.chart.update('active');
-    }
-    
-    // 与三维场景联动
-    syncWith3DScene(selectedPointId) {
-        // 高亮对应时间点的数据
-        this.highlightDataPoint(selectedPointId);
-        // 触发场景中的相应视觉效果
-        this.sceneContainer.highlightMonitoringPoint(selectedPointId);
-    }
-}
-```
-
-#### ECharts
-**特点与优势**：
-- 功能强大，支持30+图表类型
-- 优秀的交互设计和动画效果
-- 支持大数据量渲染优化
-- 丰富的主题和定制选项
-
-```javascript
-// ECharts实现多参数关联分析图表
-class MultiParameterChart {
-    constructor(containerId) {
-        this.chart = echarts.init(document.getElementById(containerId));
-        this.initChart();
-    }
-    
-    initChart() {
-        const option = {
-            title: {
-                text: '水库多参数监测',
-                left: 'center',
-                textStyle: {
-                    color: '#fff'
-                }
             },
-            tooltip: {
-                trigger: 'axis',
-                axisPointer: {
-                    type: 'cross',
-                    crossStyle: {
-                        color: '#999'
-                    }
-                }
-            },
-            toolbox: {
-                feature: {
-                    dataView: {show: true, readOnly: false},
-                    magicType: {show: true, type: ['line', 'bar']},
-                    restore: {show: true},
-                    saveAsImage: {show: true}
-                },
-                iconStyle: {
-                    normal: {
-                        borderColor: '#fff'
-                    }
-                }
-            },
-            legend: {
-                data: ['水位', '流量', '降雨量'],
-                textStyle: {
-                    color: '#fff'
-                }
-            },
-            xAxis: [
-                {
-                    type: 'category',
-                    data: [],
-                    axisPointer: {
-                        type: 'shadow'
-                    },
-                    axisLabel: {
-                        color: '#fff'
-                    }
-                }
-            ],
-            yAxis: [
-                {
-                    type: 'value',
-                    name: '水位(m)',
-                    position: 'left',
-                    axisLabel: {
-                        formatter: '{value} m',
-                        color: '#fff'
+            scales: {
+                x: {
+                    ticks: {
+                        maxTicksLimit: 5, // 限制标签数量
+                        font: { size: 11 }
                     }
                 },
-                {
-                    type: 'value',
-                    name: '流量(m³/s)',
-                    position: 'right',
-                    axisLabel: {
-                        formatter: '{value} m³/s',
-                        color: '#fff'
+                y: {
+                    ticks: {
+                        font: { size: 11 }
                     }
                 }
-            ],
-            series: [
-                {
-                    name: '水位',
-                    type: 'line',
-                    data: [],
-                    smooth: true,
-                    itemStyle: {
-                        color: '#00BFFF'
-                    }
-                },
-                {
-                    name: '流量',
-                    type: 'line',
-                    yAxisIndex: 1,
-                    data: [],
-                    smooth: true,
-                    itemStyle: {
-                        color: '#FF6347'
-                    }
-                },
-                {
-                    name: '降雨量',
-                    type: 'bar',
-                    data: [],
-                    itemStyle: {
-                        color: '#32CD32'
-                    }
-                }
-            ],
-            backgroundColor: 'transparent',
-            grid: {
-                borderColor: 'rgba(255, 255, 255, 0.1)'
             }
         };
         
-        this.chart.setOption(option);
-        
-        // 图表事件绑定
-        this.chart.on('click', (params) => {
-            this.onChartClick(params);
-        });
-    }
-    
-    onChartClick(params) {
-        // 点击图表时与三维场景联动
-        const timestamp = params.name;
-        const dataType = params.seriesName;
-        
-        // 通知三维场景显示对应时刻的状态
-        this.notifySceneUpdate(timestamp, dataType);
-    }
-    
-    updateMultiParameterData(timeData, waterLevel, flow, rainfall) {
-        this.chart.setOption({
-            xAxis: [{
-                data: timeData
-            }],
-            series: [
-                { data: waterLevel },
-                { data: flow },
-                { data: rainfall }
-            ]
-        });
-    }
-}
-```
-
-#### D3.js
-**特点与优势**：
-- 最大的灵活性和定制能力
-- 强大的数据绑定和转换能力
-- 支持复杂的交互和动画
-- 适合创建独特的可视化方案
-
-```javascript
-// D3.js实现自定义径向流量图
-class RadialFlowChart {
-    constructor(containerId, width = 400, height = 400) {
-        this.container = d3.select(`#${containerId}`);
-        this.width = width;
-        this.height = height;
-        this.radius = Math.min(width, height) / 2 - 40;
-        this.initChart();
-    }
-    
-    initChart() {
-        // 创建SVG容器
-        this.svg = this.container.append('svg')
-            .attr('width', this.width)
-            .attr('height', this.height);
-        
-        // 创建主要绘图组
-        this.g = this.svg.append('g')
-            .attr('transform', `translate(${this.width/2}, ${this.height/2})`);
-        
-        // 创建径向比例尺
-        this.radiusScale = d3.scaleLinear()
-            .range([0, this.radius]);
-        
-        // 创建角度比例尺
-        this.angleScale = d3.scaleLinear()
-            .range([0, 2 * Math.PI]);
-        
-        // 创建线生成器
-        this.line = d3.lineRadial()
-            .radius(d => this.radiusScale(d.value))
-            .angle(d => this.angleScale(d.time))
-            .curve(d3.curveCardinalClosed);
-        
-        // 添加背景网格
-        this.drawGrid();
-    }
-    
-    drawGrid() {
-        // 径向网格线
-        const radiusGrid = this.g.selectAll('.radius-grid')
-            .data(this.radiusScale.ticks(5))
-            .enter().append('circle')
-            .attr('class', 'radius-grid')
-            .attr('r', d => this.radiusScale(d))
-            .style('fill', 'none')
-            .style('stroke', 'rgba(255, 255, 255, 0.2)')
-            .style('stroke-dasharray', '2,2');
-        
-        // 角度网格线
-        const angleGrid = this.g.selectAll('.angle-grid')
-            .data(d3.range(0, 360, 30))
-            .enter().append('line')
-            .attr('class', 'angle-grid')
-            .attr('x1', 0)
-            .attr('y1', 0)
-            .attr('x2', d => this.radius * Math.cos((d - 90) * Math.PI / 180))
-            .attr('y2', d => this.radius * Math.sin((d - 90) * Math.PI / 180))
-            .style('stroke', 'rgba(255, 255, 255, 0.2)')
-            .style('stroke-width', 1);
-    }
-    
-    updateData(flowData) {
-        // 更新比例尺域
-        this.radiusScale.domain([0, d3.max(flowData, d => d.value)]);
-        this.angleScale.domain([0, flowData.length - 1]);
-        
-        // 绘制径向流量线
-        const path = this.g.selectAll('.flow-path')
-            .data([flowData]);
-        
-        path.enter().append('path')
-            .attr('class', 'flow-path')
-            .merge(path)
-            .transition()
-            .duration(1000)
-            .attr('d', this.line)
-            .style('fill', 'rgba(0, 191, 255, 0.3)')
-            .style('stroke', '#00BFFF')
-            .style('stroke-width', 2);
-        
-        // 添加数据点
-        const dots = this.g.selectAll('.flow-dot')
-            .data(flowData);
-        
-        dots.enter().append('circle')
-            .attr('class', 'flow-dot')
-            .merge(dots)
-            .transition()
-            .duration(1000)
-            .attr('cx', d => this.radiusScale(d.value) * Math.cos(this.angleScale(d.time) - Math.PI/2))
-            .attr('cy', d => this.radiusScale(d.value) * Math.sin(this.angleScale(d.time) - Math.PI/2))
-            .attr('r', 4)
-            .style('fill', '#00BFFF')
-            .style('stroke', '#fff')
-            .style('stroke-width', 2);
-        
-        dots.exit().remove();
-    }
-}
-```
-
-### 图表在三维场景中的集成策略
-
-#### HTML叠加层技术
-通过CSS定位将HTML图表元素叠加在三维场景上方：
-
-```css
-/* 图表容器样式 */
-.chart-overlay {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    width: 400px;
-    height: 300px;
-    background: rgba(0, 0, 0, 0.8);
-    border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-    z-index: 1000;
-    transition: all 0.3s ease;
-}
-
-.chart-overlay:hover {
-    background: rgba(0, 0, 0, 0.9);
-    transform: scale(1.05);
-}
-
-/* 响应式布局 */
-@media (max-width: 768px) {
-    .chart-overlay {
-        position: relative;
-        width: 100%;
-        height: 250px;
-        margin-bottom: 20px;
-        transform: none !important;
-    }
-}
-
-/* 图表标题样式 */
-.chart-title {
-    color: #fff;
-    font-size: 16px;
-    font-weight: bold;
-    margin-bottom: 15px;
-    text-align: center;
-    border-bottom: 2px solid #00BFFF;
-    padding-bottom: 10px;
-}
-
-/* 图表工具栏 */
-.chart-toolbar {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    display: flex;
-    gap: 5px;
-}
-
-.chart-tool-btn {
-    width: 30px;
-    height: 30px;
-    background: rgba(255, 255, 255, 0.2);
-    border: none;
-    border-radius: 4px;
-    color: #fff;
-    cursor: pointer;
-    font-size: 14px;
-    transition: background 0.3s ease;
-}
-
-.chart-tool-btn:hover {
-    background: rgba(255, 255, 255, 0.4);
-}
-```
-
-#### 纹理映射技术
-将图表渲染到纹理上，再映射到三维模型表面：
-
-```javascript
-class TextureChart {
-    constructor(renderer, scene) {
-        this.renderer = renderer;
-        this.scene = scene;
-        this.canvas = document.createElement('canvas');
-        this.canvas.width = 512;
-        this.canvas.height = 512;
-        this.ctx = this.canvas.getContext('2d');
-        this.texture = new THREE.CanvasTexture(this.canvas);
-    }
-    
-    drawChartOnTexture(data) {
-        // 清空画布
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        
-        // 设置背景
-        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
-        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-        
-        // 绘制标题
-        this.ctx.fillStyle = '#fff';
-        this.ctx.font = '24px Arial';
-        this.ctx.textAlign = 'center';
-        this.ctx.fillText('实时水位监测', this.canvas.width/2, 40);
-        
-        // 绘制图表
-        this.drawLineChart(data);
-        
-        // 更新纹理
-        this.texture.needsUpdate = true;
-    }
-    
-    drawLineChart(data) {
-        if (data.length < 2) return;
-        
-        const margin = 60;
-        const chartWidth = this.canvas.width - 2 * margin;
-        const chartHeight = this.canvas.height - 2 * margin - 60;
-        
-        // 计算数据范围
-        const minValue = Math.min(...data.map(d => d.value));
-        const maxValue = Math.max(...data.map(d => d.value));
-        const valueRange = maxValue - minValue || 1;
-        
-        // 绘制坐标轴
-        this.ctx.strokeStyle = '#ccc';
-        this.ctx.lineWidth = 2;
-        this.ctx.beginPath();
-        // X轴
-        this.ctx.moveTo(margin, this.canvas.height - margin);
-        this.ctx.lineTo(this.canvas.width - margin, this.canvas.height - margin);
-        // Y轴
-        this.ctx.moveTo(margin, margin + 60);
-        this.ctx.lineTo(margin, this.canvas.height - margin);
-        this.ctx.stroke();
-        
-        // 绘制数据线
-        this.ctx.strokeStyle = '#00BFFF';
-        this.ctx.lineWidth = 3;
-        this.ctx.beginPath();
-        
-        data.forEach((point, index) => {
-            const x = margin + (index / (data.length - 1)) * chartWidth;
-            const y = (this.canvas.height - margin) - 
-                     ((point.value - minValue) / valueRange) * chartHeight;
-            
-            if (index === 0) {
-                this.ctx.moveTo(x, y);
-            } else {
-                this.ctx.lineTo(x, y);
-            }
+        const chart = new Chart(container, {
+            type: options.type || 'line',
+            data: data,
+            options: mobileConfig
         });
         
-        this.ctx.stroke();
-        
-        // 绘制数据点
-        this.ctx.fillStyle = '#00BFFF';
-        data.forEach((point, index) => {
-            const x = margin + (index / (data.length - 1)) * chartWidth;
-            const y = (this.canvas.height - margin) - 
-                     ((point.value - minValue) / valueRange) * chartHeight;
-            
-            this.ctx.beginPath();
-            this.ctx.arc(x, y, 4, 0, Math.PI * 2);
-            this.ctx.fill();
-        });
-    }
-    
-    applyToMesh(mesh) {
-        // 将图表纹理应用到网格材质上
-        if (mesh.material.map) {
-            mesh.material.map = this.texture;
-            mesh.material.needsUpdate = true;
-        }
+        return chart;
     }
 }
 ```
 
-## 7.2.2 时序数据的动态可视化
+**响应式设计的最佳实践**：
 
-### 时间轴控制组件
+- **内容优先级**：移动端优先显示最重要的数据和功能
+- **触控友好设计**：按钮和交互区域不小于44px×44px
+- **快速加载优化**：移动端网络条件可能较差，需要优化加载速度
+- **离线支持**：缓存关键数据，支持网络中断时的基本功能
+- **电池优化**：减少不必要的计算和渲染，延长设备续航时间
 
-时间轴控制是时序数据可视化的核心组件，需要提供直观的时间导航和数据播放功能：
+## 本节小结
 
-```javascript
-class TimelineController {
-    constructor(containerId, options = {}) {
-        this.container = document.getElementById(containerId);
-        this.options = {
-            width: options.width || 800,
-            height: options.height || 60,
-            margin: options.margin || { top: 10, right: 40, bottom: 20, left: 40 },
-            autoPlay: options.autoPlay || false,
-            playSpeed: options.playSpeed || 1000, // 毫秒
-            ...options
-        };
-        
-        this.currentTime = null;
-        this.timeRange = null;
-        this.playing = false;
-        this.playTimer = null;
-        
-        this.initTimeline();
-        this.bindEvents();
-    }
-    
-    initTimeline() {
-        // 创建SVG容器
-        this.svg = d3.select(this.container)
-            .append('svg')
-            .attr('width', this.options.width)
-            .attr('height', this.options.height);
-        
-        // 创建主绘图区
-        this.g = this.svg.append('g')
-            .attr('transform', `translate(${this.options.margin.left}, ${this.options.margin.top})`);
-        
-        // 创建时间刻度
-        this.xScale = d3.scaleTime();
-        this.xAxis = d3.axisBottom(this.xScale)
-            .tickFormat(d3.timeFormat('%m-%d %H:%M'));
-        
-        // 创建时间轴组
-        this.axisG = this.g.append('g')
-            .attr('class', 'x-axis')
-            .attr('transform', `translate(0, ${this.options.height - this.options.margin.top - this.options.margin.bottom})`);
-        
-        // 创建播放控制按钮
-        this.createControls();
-        
-        // 创建时间指示器
-        this.timeIndicator = this.g.append('line')
-            .attr('class', 'time-indicator')
-            .attr('y1', 0)
-            .attr('y2', this.options.height - this.options.margin.top - this.options.margin.bottom)
-            .style('stroke', '#FF4500')
-            .style('stroke-width', 2)
-            .style('opacity', 0);
-    }
-    
-    createControls() {
-        const controlsContainer = d3.select(this.container)
-            .append('div')
-            .attr('class', 'timeline-controls')
-            .style('margin-top', '10px');
-        
-        // 播放/暂停按钮
-        this.playBtn = controlsContainer.append('button')
-            .attr('class', 'timeline-btn play-btn')
-            .html('▶')
-            .on('click', () => this.togglePlay());
-        
-        // 停止按钮
-        controlsContainer.append('button')
-            .attr('class', 'timeline-btn stop-btn')
-            .html('⏹')
-            .on('click', () => this.stop());
-        
-        // 速度控制
-        controlsContainer.append('label')
-            .text('播放速度: ');
-        
-        controlsContainer.append('select')
-            .attr('class', 'speed-selector')
-            .on('change', (event) => {
-                this.options.playSpeed = parseInt(event.target.value);
-            })
-            .selectAll('option')
-            .data([500, 1000, 2000, 5000])
-            .enter().append('option')
-            .attr('value', d => d)
-            .text(d => `${d/1000}秒`)
-            .property('selected', d => d === this.options.playSpeed);
-    }
-    
-    setTimeRange(startTime, endTime) {
-        this.timeRange = [startTime, endTime];
-        this.currentTime = startTime;
-        
-        // 更新刻度范围
-        const chartWidth = this.options.width - this.options.margin.left - this.options.margin.right;
-        this.xScale.domain(this.timeRange).range([0, chartWidth]);
-        
-        // 更新坐标轴
-        this.axisG.call(this.xAxis);
-        
-        // 显示时间指示器
-        this.updateTimeIndicator();
-        this.timeIndicator.style('opacity', 1);
-        
-        // 启用拖拽
-        this.enableDrag();
-    }
-    
-    enableDrag() {
-        const chartWidth = this.options.width - this.options.margin.left - this.options.margin.right;
-        
-        const drag = d3.drag()
-            .on('start', () => {
-                this.stop(); // 停止自动播放
-            })
-            .on('drag', (event) => {
-                const x = Math.max(0, Math.min(chartWidth, event.x));
-                const time = this.xScale.invert(x);
-                this.setCurrentTime(time);
-            });
-        
-        // 添加透明的拖拽区域
-        this.g.append('rect')
-            .attr('class', 'drag-area')
-            .attr('width', chartWidth)
-            .attr('height', this.options.height - this.options.margin.top - this.options.margin.bottom)
-            .style('fill', 'transparent')
-            .style('cursor', 'pointer')
-            .call(drag);
-    }
-    
-    togglePlay() {
-        if (this.playing) {
-            this.pause();
-        } else {
-            this.play();
-        }
-    }
-    
-    play() {
-        if (!this.timeRange) return;
-        
-        this.playing = true;
-        this.playBtn.html('⏸');
-        
-        this.playTimer = setInterval(() => {
-            const nextTime = new Date(this.currentTime.getTime() + 60000); // 前进1分钟
-            
-            if (nextTime > this.timeRange[1]) {
-                this.stop();
-                return;
-            }
-            
-            this.setCurrentTime(nextTime);
-        }, this.options.playSpeed);
-    }
-    
-    pause() {
-        this.playing = false;
-        this.playBtn.html('▶');
-        if (this.playTimer) {
-            clearInterval(this.playTimer);
-            this.playTimer = null;
-        }
-    }
-    
-    stop() {
-        this.pause();
-        this.setCurrentTime(this.timeRange[0]);
-    }
-    
-    setCurrentTime(time) {
-        this.currentTime = time;
-        this.updateTimeIndicator();
-        
-        // 触发时间变化事件
-        this.onTimeChange(time);
-    }
-    
-    updateTimeIndicator() {
-        const x = this.xScale(this.currentTime);
-        this.timeIndicator.attr('x1', x).attr('x2', x);
-        
-        // 更新时间显示
-        const timeText = d3.timeFormat('%Y-%m-%d %H:%M:%S')(this.currentTime);
-        
-        // 如果时间文本不存在则创建
-        if (!this.timeText) {
-            this.timeText = this.g.append('text')
-                .attr('class', 'time-text')
-                .style('fill', '#fff')
-                .style('font-size', '12px')
-                .style('text-anchor', 'middle');
-        }
-        
-        this.timeText
-            .attr('x', x)
-            .attr('y', -5)
-            .text(timeText);
-    }
-    
-    // 回调函数，由外部实现
-    onTimeChange(time) {
-        // 通知外部组件时间发生变化
-        if (this.options.onTimeChange) {
-            this.options.onTimeChange(time);
-        }
-    }
-}
-```
+本节详细介绍了数据图表在三维场景中的展示技术。通过学习本节内容，学生应该掌握了：
 
-### 实时数据流处理
+1. **Chart.js集成技术**：理解了2D图表与3D场景结合的技术架构和实现方法
+2. **ECharts高级应用**：掌握了复杂图表类型的创建和多参数数据的可视化展示
+3. **时序数据可视化**：具备了实时数据流处理和动态图表更新的技术能力
+4. **响应式设计实践**：了解了跨设备图表展示的优化策略和移动端适配技术
 
-处理实时数据流并更新图表显示：
+这些技术为水利监测数据的有效展示提供了完整的解决方案，确保用户能够在不同设备和场景下获得优质的数据分析体验。
 
-```javascript
-class RealTimeDataProcessor {
-    constructor(maxDataPoints = 100) {
-        this.maxDataPoints = maxDataPoints;
-        this.dataBuffer = new Map(); // 按传感器ID存储数据
-        this.subscribers = new Map(); // 订阅者列表
-        this.websocket = null;
-        this.reconnectAttempts = 0;
-        this.maxReconnectAttempts = 5;
-    }
-    
-    connect(websocketUrl) {
-        try {
-            this.websocket = new WebSocket(websocketUrl);
-            this.setupEventHandlers();
-        } catch (error) {
-            console.error('WebSocket连接失败:', error);
-            this.scheduleReconnect();
-        }
-    }
-    
-    setupEventHandlers() {
-        this.websocket.onopen = () => {
-            console.log('实时数据连接已建立');
-            this.reconnectAttempts = 0;
-            
-            // 发送订阅消息
-            this.websocket.send(JSON.stringify({
-                action: 'subscribe',
-                channels: ['water_level', 'flow_rate', 'rainfall']
-            }));
-        };
-        
-        this.websocket.onmessage = (event) => {
-            try {
-                const data = JSON.parse(event.data);
-                this.processIncomingData(data);
-            } catch (error) {
-                console.error('数据解析错误:', error);
-            }
-        };
-        
-        this.websocket.onclose = () => {
-            console.log('实时数据连接已关闭');
-            this.scheduleReconnect();
-        };
-        
-        this.websocket.onerror = (error) => {
-            console.error('WebSocket错误:', error);
-        };
-    }
-    
-    processIncomingData(data) {
-        const { sensorId, timestamp, value, dataType } = data;
-        
-        // 初始化传感器数据缓冲区
-        if (!this.dataBuffer.has(sensorId)) {
-            this.dataBuffer.set(sensorId, []);
-        }
-        
-        const buffer = this.dataBuffer.get(sensorId);
-        
-        // 添加新数据点
-        buffer.push({
-            timestamp: new Date(timestamp),
-            value: value,
-            dataType: dataType
-        });
-        
-        // 保持缓冲区大小
-        if (buffer.length > this.maxDataPoints) {
-            buffer.shift();
-        }
-        
-        // 通知订阅者
-        this.notifySubscribers(sensorId, buffer);
-    }
-    
-    subscribe(sensorId, callback) {
-        if (!this.subscribers.has(sensorId)) {
-            this.subscribers.set(sensorId, []);
-        }
-        
-        this.subscribers.get(sensorId).push(callback);
-        
-        // 如果已有数据，立即回调
-        if (this.dataBuffer.has(sensorId)) {
-            callback(this.dataBuffer.get(sensorId));
-        }
-    }
-    
-    unsubscribe(sensorId, callback) {
-        if (this.subscribers.has(sensorId)) {
-            const callbacks = this.subscribers.get(sensorId);
-            const index = callbacks.indexOf(callback);
-            if (index > -1) {
-                callbacks.splice(index, 1);
-            }
-        }
-    }
-    
-    notifySubscribers(sensorId, data) {
-        if (this.subscribers.has(sensorId)) {
-            this.subscribers.get(sensorId).forEach(callback => {
-                try {
-                    callback(data);
-                } catch (error) {
-                    console.error('订阅者回调错误:', error);
-                }
-            });
-        }
-    }
-    
-    scheduleReconnect() {
-        if (this.reconnectAttempts < this.maxReconnectAttempts) {
-            this.reconnectAttempts++;
-            const delay = Math.pow(2, this.reconnectAttempts) * 1000; // 指数退避
-            
-            setTimeout(() => {
-                console.log(`尝试重连 (${this.reconnectAttempts}/${this.maxReconnectAttempts})...`);
-                this.connect(this.websocket?.url);
-            }, delay);
-        } else {
-            console.error('已达到最大重连次数，连接失败');
-        }
-    }
-    
-    getLatestData(sensorId, count = 10) {
-        if (!this.dataBuffer.has(sensorId)) {
-            return [];
-        }
-        
-        const buffer = this.dataBuffer.get(sensorId);
-        return buffer.slice(-count);
-    }
-    
-    disconnect() {
-        if (this.websocket) {
-            this.websocket.close();
-            this.websocket = null;
-        }
-        
-        this.dataBuffer.clear();
-        this.subscribers.clear();
-    }
-}
-```
+---
 
-## 7.2.3 响应式图表设计
-
-### 多设备适配策略
-
-现代水利监测系统需要支持多种设备访问，响应式图表设计确保在不同屏幕尺寸和设备类型上都能提供良好的用户体验：
-
-```css
-/* 响应式图表布局 */
-.chart-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 20px;
-    padding: 20px;
-    width: 100%;
-    box-sizing: border-box;
-}
-
-/* 大屏幕适配 */
-@media (min-width: 1200px) {
-    .chart-grid {
-        grid-template-columns: repeat(3, 1fr);
-        max-width: 1400px;
-        margin: 0 auto;
-    }
-}
-
-/* 平板适配 */
-@media (max-width: 1024px) {
-    .chart-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 15px;
-        padding: 15px;
-    }
-}
-
-/* 手机适配 */
-@media (max-width: 768px) {
-    .chart-grid {
-        grid-template-columns: 1fr;
-        gap: 10px;
-        padding: 10px;
-    }
-    
-    .chart-overlay {
-        position: relative !important;
-        top: auto !important;
-        right: auto !important;
-        width: 100% !important;
-        height: auto !important;
-        margin-bottom: 15px;
-    }
-}
-```
-
-### 交互优化设计
-
-针对不同设备类型优化图表交互方式：
-
-```javascript
-class ResponsiveChartManager {
-    constructor() {
-        this.isMobile = this.detectMobile();
-        this.touchHandler = null;
-        this.setupInteractions();
-    }
-    
-    detectMobile() {
-        return window.innerWidth <= 768 || 
-               /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    }
-    
-    setupInteractions() {
-        if (this.isMobile) {
-            this.setupMobileInteractions();
-        } else {
-            this.setupDesktopInteractions();
-        }
-    }
-    
-    setupMobileInteractions() {
-        // 移动端交互优化
-        const charts = document.querySelectorAll('.chart-container');
-        
-        charts.forEach(chart => {
-            // 增大点击目标尺寸
-            chart.style.minHeight = '250px';
-            
-            // 添加触摸反馈
-            chart.addEventListener('touchstart', (e) => {
-                chart.classList.add('chart-touched');
-            });
-            
-            chart.addEventListener('touchend', (e) => {
-                setTimeout(() => {
-                    chart.classList.remove('chart-touched');
-                }, 150);
-            });
-        });
-    }
-    
-    setupDesktopInteractions() {
-        // 桌面端交互优化
-        const charts = document.querySelectorAll('.chart-container');
-        
-        charts.forEach(chart => {
-            chart.addEventListener('mouseenter', (e) => {
-                chart.classList.add('chart-hovered');
-            });
-            
-            chart.addEventListener('mouseleave', (e) => {
-                chart.classList.remove('chart-hovered');
-            });
-        });
-    }
-}
-```
-
-## 7.2.4 本节小结
-
-本节详细介绍了在三维水利场景中实现数据图表展示的完整技术方案：
-
-**图表技术选型**：
-- 对比分析了Chart.js、ECharts、D3.js等主流图表库的特点和适用场景
-- 提供了各图表库在三维场景中集成的具体实现方案
-- 介绍了HTML叠加层和纹理映射等集成策略
-
-**时序数据可视化**：
-- 实现了完整的时间轴控制组件，支持播放、暂停、拖拽等交互
-- 建立了实时数据流处理机制，支持WebSocket数据推送和缓冲管理
-- 提供了动态图表更新和性能优化方案
-
-**响应式设计**：
-- 建立了多设备适配的CSS布局策略
-- 优化了移动端和桌面端的不同交互体验
-- 确保图表在各种设备上都能良好展示
-
-这些技术为水利监测数据的可视化分析提供了坚实基础，使用户能够在三维场景中直观地理解和分析复杂的水利数据，提高决策效率和系统可用性。
-
-## 思考题与练习
-
-### 基础题
-
-1. 比较Chart.js、ECharts、D3.js三种图表库的优缺点，并说明各自的适用场景。
-2. 解释HTML叠加层技术和纹理映射技术的工作原理，分析其在三维场景中的应用优势。
-3. 简述时间轴控制组件的主要功能，并说明其在时序数据可视化中的重要作用。
-
-### 提高题
-
-4. 设计一个实时数据流处理系统，要求支持多传感器数据接收、缓冲管理和异常处理。
-5. 分析响应式图表设计的关键要素，并提出针对水利监测系统的优化建议。
-6. 设计一个图表与三维场景的联动机制，实现数据选择和视觉效果的双向同步。
-
-### 实践题
-
-7. 使用Chart.js创建一个水位监测的实时折线图，包含数据更新、阈值预警等功能。
-8. 用D3.js实现一个自定义的水库库容变化可视化图表，展示时间与库容的关系。
-9. 开发一个响应式的多参数监测仪表盘，支持不同设备的优化显示。
-
-### 综合题
-
-10. 设计并实现一个完整的水利数据可视化平台，集成多种图表类型，支持实时数据展示和历史数据分析。
+*下一节预告：7.3节将介绍三维场景中监测点的空间定位和可视化绘制技术。*

@@ -1,9 +1,9 @@
 name: 🚀 部署智慧水利教材到 GitHub Pages
 
 on:
-  # 当推送到 main 分支时触发
+  # 当推送到 main 或 master 分支时触发
   push:
-    branches: [ main ]
+    branches: [ main, master ]
   
   # 允许手动触发工作流
   workflow_dispatch:
@@ -30,71 +30,66 @@ jobs:
       with:
         fetch-depth: 0 # 获取完整历史记录以支持 git 信息
 
-    - name: 🔧 配置 Node.js
-      uses: actions/setup-node@v4
+    - name: � 配置 Python 环境
+      uses: actions/setup-python@v4
       with:
-        node-version: '18'
+        python-version: '3.11'
 
-    - name: 📦 安装 pnpm
-      uses: pnpm/action-setup@v2
+    - name: 📦 安装 uv
+      uses: astral-sh/setup-uv@v2
       with:
-        version: 8
-        run_install: false
+        version: "latest"
 
-    - name: 🏗️ 获取 pnpm store 目录
-      shell: bash
-      run: |
-        echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-
-    - name: 💾 设置 pnpm 缓存
+    - name: 💾 设置 Python 缓存
       uses: actions/cache@v3
       with:
-        path: ${{ env.STORE_PATH }}
-        key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+        path: ~/.cache/uv
+        key: ${{ runner.os }}-uv-${{ hashFiles('**/uv.lock') }}
         restore-keys: |
-          ${{ runner.os }}-pnpm-store-
+          ${{ runner.os }}-uv-
 
     - name: 📥 安装项目依赖
       run: |
-        echo "🔍 检查锁定文件状态..."
-        if [ -f "pnpm-lock.yaml" ]; then
-          echo "📄 发现锁定文件，尝试使用..."
-          # 首先尝试使用锁定文件安装
-          pnpm install --frozen-lockfile || {
-            echo "⚠️ 锁定文件不兼容，使用灵活安装模式..."
-            pnpm install --no-frozen-lockfile
-          }
+        echo "🔍 检查项目依赖..."
+        if [ -f "uv.lock" ]; then
+          echo "📄 发现 uv.lock，使用锁定文件安装依赖..."
+          uv sync
         else
           echo "📦 未发现锁定文件，执行完整安装..."
-          pnpm install
+          uv sync --dev
         fi
         echo "✅ 项目依赖安装完成！"
 
-    - name: 🔨 构建 HonKit 静态站点
+    - name: 🔨 构建 MkDocs 静态站点
       run: |
         echo "📖 开始构建智慧水利平台架构与开发教材..."
-        pnpm exec honkit build
+        # 确保 index.md 存在于 docs 目录
+        if [ ! -f "docs/index.md" ] && [ -f "index.md" ]; then
+          echo "📄 复制 index.md 到 docs 目录..."
+          cp index.md docs/
+        fi
+        uv run mkdocs build
         echo "✅ 构建完成！"
 
     - name: 🗂️ 配置构建产物
       run: |
         # 创建 .nojekyll 文件以禁用 Jekyll 处理
-        touch _book/.nojekyll
+        touch site/.nojekyll
         
         # 添加自定义域名文件（如果需要的话）
-        # echo "your-domain.com" > _book/CNAME
+        # echo "your-domain.com" > site/CNAME
         
         # 显示构建产物信息
         echo "📁 构建产物目录结构："
-        ls -la _book/
+        ls -la site/
         
         echo "📊 构建产物大小："
-        du -sh _book/
+        du -sh site/
 
     - name: 📤 上传构建产物
       uses: actions/upload-pages-artifact@v3
       with:
-        path: ./_book
+        path: ./site
 
   # 部署作业
   deploy:
@@ -114,7 +109,8 @@ jobs:
       run: |
         echo "🎊 智慧水利平台架构与开发教材已成功部署！"
         echo "🔗 访问地址: ${{ steps.deployment.outputs.page_url }}"
-        echo "📚 教材包含以下章节："
+        echo "📚 教材使用 MkDocs + Material 主题构建"
+        echo "📖 教材包含以下章节："
         echo "   第一章: 总论"
         echo "   第二章: 软件工程基础与需求分析"
         echo "   第三章: 现代软件开发方法与工具"
