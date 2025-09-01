@@ -54,7 +54,6 @@
 
 % 代码环境
 \usepackage{listings}
-\usepackage{minted}  % 备选方案
 
 % 美化框架
 \usepackage{tcolorbox}
@@ -76,7 +75,7 @@
 % 中文字体配置
 % ========================================
 
-% 设置中文字体
+% 中文字体配置 - Windows系统优化
 \setCJKmainfont{SimSun}[
     BoldFont=SimHei,
     ItalicFont=KaiTi
@@ -130,7 +129,7 @@
     chapter={
         format={\centering\Huge\bfseries},
         name={第,章},
-        number={\chinese{chapter}},
+        number={\arabic{chapter}},  % 使用阿拉伯数字
         beforeskip=20pt,
         afterskip=40pt
     },

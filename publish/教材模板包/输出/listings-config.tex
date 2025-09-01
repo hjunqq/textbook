@@ -32,7 +32,7 @@
     keywordstyle=\color{codeblue}\bfseries, % 关键字样式
     numberstyle=\tiny\color{codegray},    % 行号样式
     stringstyle=\color{codered},          % 字符串样式
-    basicstyle=\ttfamily\footnotesize,    % 基本字体
+    basicstyle=\ttfamily\scriptsize,     % 基本字体(更小)
     breakatwhitespace=false,              % 只在空白处换行
     breaklines=true,                      % 自动换行
     captionpos=b,                         % 标题位置
@@ -53,7 +53,7 @@
     xrightmargin=15pt,                    % 整体右边距
     escapeinside={\%*}{*\)},              % 转义字符
     extendedchars=true,                   % 支持扩展字符
-    literate={·}{{\textperiodcentered}}1  % 中文标点支持
+    literate={·}{{\textperiodcentered}1  % 中文标点支持
 }
 
 % ========================================
@@ -200,7 +200,7 @@
     commentstyle=\color{codegreen}\itshape,
     stringstyle=\color{codered},
     identifierstyle=\color{black},
-    basicstyle=\ttfamily\footnotesize,
+    basicstyle=\ttfamily\scriptsize,
     title=\lstname
 }
 
@@ -219,7 +219,7 @@
     identifierstyle=\color{black},
     keywordstyle=\color{codeblue}\bfseries,
     showstringspaces=false,
-    basicstyle=\ttfamily\footnotesize,
+    basicstyle=\ttfamily\scriptsize,
     title=\lstname
 }
 
@@ -245,7 +245,7 @@
     stringstyle=\color{codered},
     identifierstyle=\color{black},
     showstringspaces=false,
-    basicstyle=\ttfamily\footnotesize,
+    basicstyle=\ttfamily\scriptsize,
     title=\lstname
 }
 
@@ -254,7 +254,7 @@
 % ========================================
 
 \lstdefinestyle{json}{
-    basicstyle=\ttfamily\footnotesize,
+    basicstyle=\ttfamily\scriptsize,
     showstringspaces=false,
     morestring=[b]",
     stringstyle=\color{codered},
@@ -288,7 +288,7 @@
 % ========================================
 
 \lstdefinestyle{pseudocode}{
-    basicstyle=\ttfamily\footnotesize,
+    basicstyle=\ttfamily\scriptsize,
     showstringspaces=false,
     keywordstyle=\color{codeblue}\bfseries,
     commentstyle=\color{codegreen}\itshape,
@@ -317,31 +317,31 @@
 
 % 代码块环境
 \lstnewenvironment{csharpcode}[1][]
-{\lstset{style=csharp, #1}}
+{\lstset{style=csharp, #1}
 {}
 
 \lstnewenvironment{javascriptcode}[1][]
-{\lstset{style=javascript, #1}}
+{\lstset{style=javascript, #1}
 {}
 
 \lstnewenvironment{pythoncode}[1][]
-{\lstset{style=python, #1}}
+{\lstset{style=python, #1}
 {}
 
 \lstnewenvironment{javacode}[1][]
-{\lstset{style=java, #1}}
+{\lstset{style=java, #1}
 {}
 
 \lstnewenvironment{sqlcode}[1][]
-{\lstset{style=sql, #1}}
+{\lstset{style=sql, #1}
 {}
 
 \lstnewenvironment{xmlcode}[1][]
-{\lstset{style=xml, #1}}
+{\lstset{style=xml, #1}
 {}
 
 \lstnewenvironment{terminalcode}[1][]
-{\lstset{style=terminal, #1}}
+{\lstset{style=terminal, #1}
 {}
 
 % ========================================

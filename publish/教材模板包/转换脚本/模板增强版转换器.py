@@ -72,7 +72,7 @@ class TemplateEnhancedConverter:
             '✅': r'\faCheck',
             '❌': r'\faTimes',
             '🔍': r'\faSearch',
-            '📝': r'\faPencil',
+            '📝': r'\faEdit',
         }
 
     def load_config(self, config_file: Optional[str]) -> Dict:
@@ -92,7 +92,7 @@ class TemplateEnhancedConverter:
                 "standardize_format": True,
                 "optimize_images": True,
                 "fix_code_blocks": True,
-                "remove_emojis": False,  # 保留emoji用于转换为图标
+                "remove_emojis": True,  # 启用emoji移除
                 "apply_template_styles": True
             },
             "postprocessing": {
@@ -150,49 +150,57 @@ class TemplateEnhancedConverter:
         """自动发现章节文件"""
         markdown_files = []
         
+        print(f"正在扫描源目录: {source_dir}")
+        
         # 首先添加根目录的主要文件
         main_files = ['index.md', '前言.md', 'README.md']
         for filename in main_files:
-            filepath = os.path.join(source_dir, filename)
-            if os.path.exists(filepath):
-                markdown_files.append(filepath)
-        
-        # 查找docs目录
-        docs_dir = os.path.join(source_dir, 'docs')
-        if os.path.exists(docs_dir):
-            for filename in ['前言.md', 'index.md']:
-                filepath = os.path.join(docs_dir, filename)
+            for potential_dir in [source_dir, os.path.join(source_dir, 'docs')]:
+                filepath = os.path.join(potential_dir, filename)
                 if os.path.exists(filepath):
                     markdown_files.append(filepath)
-            
-            # 查找chapters目录
-            chapters_dir = os.path.join(docs_dir, 'chapters')
-            if os.path.exists(chapters_dir):
-                chapter_dirs = sorted(glob.glob(os.path.join(chapters_dir, "chapter*")))
-                for chapter_dir in chapter_dirs:
-                    if os.path.isdir(chapter_dir):
-                        chapter_name = os.path.basename(chapter_dir)
-                        main_chapter_file = os.path.join(chapter_dir, f"{chapter_name}.md")
-                        if os.path.exists(main_chapter_file):
-                            markdown_files.append(main_chapter_file)
-                        
-                        section_files = sorted(glob.glob(os.path.join(chapter_dir, "section*.md")))
-                        markdown_files.extend(section_files)
-        else:
-            chapters_dir = os.path.join(source_dir, 'chapters')
-            if os.path.exists(chapters_dir):
-                chapter_dirs = sorted(glob.glob(os.path.join(chapters_dir, "chapter*")))
-                for chapter_dir in chapter_dirs:
-                    if os.path.isdir(chapter_dir):
-                        chapter_name = os.path.basename(chapter_dir)
-                        main_chapter_file = os.path.join(chapter_dir, f"{chapter_name}.md")
-                        if os.path.exists(main_chapter_file):
-                            markdown_files.append(main_chapter_file)
-                        
-                        section_files = sorted(glob.glob(os.path.join(chapter_dir, "section*.md")))
-                        markdown_files.extend(section_files)
+                    print(f"找到主要文件: {filepath}")
         
-        return list(dict.fromkeys(markdown_files))
+        # 查找chapters目录 - 支持多个位置
+        possible_chapter_dirs = [
+            os.path.join(source_dir, 'chapters'),
+            os.path.join(source_dir, 'docs', 'chapters'),
+            os.path.join(source_dir, 'docs', 'chapters')
+        ]
+        
+        chapters_dir = None
+        for chapters_path in possible_chapter_dirs:
+            if os.path.exists(chapters_path):
+                chapters_dir = chapters_path
+                print(f"找到章节目录: {chapters_dir}")
+                break
+        
+        if chapters_dir:
+            chapter_dirs = sorted([d for d in os.listdir(chapters_dir) 
+                                  if d.startswith('chapter') and 
+                                  os.path.isdir(os.path.join(chapters_dir, d))])
+            
+            for chapter_dirname in chapter_dirs:
+                chapter_path = os.path.join(chapters_dir, chapter_dirname)
+                
+                # 查找章节主文件
+                main_chapter_file = os.path.join(chapter_path, f"{chapter_dirname}.md")
+                if os.path.exists(main_chapter_file):
+                    markdown_files.append(main_chapter_file)
+                    print(f"找到章节主文件: {main_chapter_file}")
+                
+                # 查找节文件
+                section_files = sorted([f for f in os.listdir(chapter_path) 
+                                       if f.startswith('section') and f.endswith('.md')])
+                for section_file in section_files:
+                    section_path = os.path.join(chapter_path, section_file)
+                    markdown_files.append(section_path)
+                    print(f"找到节文件: {section_path}")
+        else:
+            print("未找到章节目录")
+        
+        print(f"总共找到 {len(markdown_files)} 个文件")
+        return list(dict.fromkeys(markdown_files))  # 去重
     
     def apply_template_style_enhancements(self, content: str) -> str:
         """应用模板样式增强"""
@@ -317,36 +325,36 @@ class TemplateEnhancedConverter:
         for emoji, latex_icon in self.icon_map.items():
             content = content.replace(emoji, latex_icon)
         
-        # 移除其他未知的emoji
-        emoji_pattern = re.compile(
-            "["
-            "\U0001F600-\U0001F64F"  # emoticons
-            "\U0001F300-\U0001F5FF"  # symbols & pictographs  
-            "\U0001F680-\U0001F6FF"  # transport & map symbols
-            "\U0001F1E0-\U0001F1FF"  # flags (iOS)
-            "\U00002702-\U000027B0"
-            "\U000024C2-\U0001F251"
-            "]+",
-            flags=re.UNICODE
-        )
-        content = emoji_pattern.sub('', content)
+        # 不移除其他未知的emoji，以避免误删中文字符
+        # 原来的emoji正则表达式过于宽泛，会匹配到中文字符
+        # 如需移除特定emoji，应使用更精确的模式
         
         return content
     
     def remove_emojis(self, content: str) -> str:
-        """移除emoji字符（保持原有逻辑兼容性）"""
-        emoji_pattern = re.compile(
-            "["
-            "\U0001F600-\U0001F64F"  # emoticons
-            "\U0001F300-\U0001F5FF"  # symbols & pictographs
-            "\U0001F680-\U0001F6FF"  # transport & map symbols
-            "\U0001F1E0-\U0001F1FF"  # flags (iOS)
-            "\U00002702-\U000027B0"
-            "\U000024C2-\U0001F251"
-            "]+",
-            flags=re.UNICODE
-        )
-        content = emoji_pattern.sub('', content)
+        """移除emoji字符，使用更精确的匹配"""
+        # 首先转换已知的emoji为图标
+        for emoji, latex_icon in self.icon_map.items():
+            content = content.replace(emoji, latex_icon)
+        
+        # 然后移除常见的emoji字符，使用更精确的模式
+        # 只移除确定的emoji范围，避免影响中文字符
+        emoji_patterns = [
+            r'[\U0001F600-\U0001F64F]',  # 表情符号
+            r'[\U0001F300-\U0001F5FF]',  # 符号和象形文字
+            r'[\U0001F680-\U0001F6FF]',  # 交通和地图符号
+            r'[\U0001F1E0-\U0001F1FF]',  # 国旗
+            r'[\U0001F700-\U0001F77F]',  # 炼金术符号
+            r'[\U0001F780-\U0001F7FF]',  # 几何形状扩展
+            r'[\U0001F800-\U0001F8FF]',  # 补充箭头-C
+            r'[\U0001F900-\U0001F9FF]',  # 补充符号和象形文字
+            r'[\U0001FA00-\U0001FA6F]',  # 国际象棋符号
+            r'[\U0001FA70-\U0001FAFF]',  # 符号和象形文字扩展-A
+        ]
+        
+        for pattern in emoji_patterns:
+            content = re.sub(pattern, '', content, flags=re.UNICODE)
+        
         return content
     
     def preprocess_markdown(self, input_files: List[str], temp_dir: str) -> List[str]:
@@ -359,8 +367,31 @@ class TemplateEnhancedConverter:
         for input_file in input_files:
             print(f"处理文件：{input_file}")
             
-            with open(input_file, 'r', encoding=self.config['source_encoding']) as f:
-                content = f.read()
+            # 尝试多种编码读取文件
+            content = None
+            encodings_to_try = ['utf-8', 'utf-8-sig', 'gbk', 'gb2312', 'gb18030', 'big5']
+            
+            for encoding in encodings_to_try:
+                try:
+                    with open(input_file, 'r', encoding=encoding) as f:
+                        content = f.read()
+                    print(f"  使用编码 {encoding} 读取成功")
+                    break
+                except (UnicodeDecodeError, UnicodeError):
+                    continue
+            
+            if content is None:
+                print(f"  警告：无法正确解码文件 {input_file}，跳过")
+                continue
+                
+            # 清理可能干扰的字符
+            content = content.replace('\ufeff', '')  # 移除BOM
+            content = content.replace('\r\n', '\n')  # 统一换行符
+            content = content.replace('\r', '\n')
+            
+            # 验证中文内容是否正常
+            chinese_chars = len([c for c in content if '\u4e00' <= c <= '\u9fff'])
+            print(f"  检测到 {chinese_chars} 个中文字符")
             
             # 应用样式模板增强
             if self.config['preprocessing']['apply_template_styles']:
@@ -378,10 +409,16 @@ class TemplateEnhancedConverter:
             if self.config['preprocessing']['optimize_images']:
                 content = self.optimize_image_references(content, input_file)
             
-            # 保存处理后的文件
+            # 保存处理后的文件（强制使用 UTF-8）
             processed_file = os.path.join(temp_dir, os.path.basename(input_file))
-            with open(processed_file, 'w', encoding='utf-8') as f:
+            with open(processed_file, 'w', encoding='utf-8', newline='\n') as f:
                 f.write(content)
+            
+            # 再次验证保存的文件
+            with open(processed_file, 'r', encoding='utf-8') as f:
+                saved_content = f.read()
+            saved_chinese_chars = len([c for c in saved_content if '\u4e00' <= c <= '\u9fff'])
+            print(f"  保存后检测到 {saved_chinese_chars} 个中文字符")
             
             processed_files.append(processed_file)
         
@@ -454,42 +491,22 @@ class TemplateEnhancedConverter:
     def create_template_enhanced_main_latex_file(self, output_file: str, chapter_files: List[str]) -> bool:
         """创建基于模板的增强主LaTeX文件"""
         
-        template_file = os.path.join(self.config['template_dir'], '基础配置模板.tex')
+        # 使用绝对路径
+        template_base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'LaTeX模板')
+        template_file = os.path.join(template_base_dir, '简化配置模板.tex')
+        
+        print(f"尝试加载模板文件: {os.path.abspath(template_file)}")
         
         if self.config['use_custom_template'] and os.path.exists(template_file):
             # 使用自定义模板
-            print("使用自定义LaTeX模板...")
+            print(f"使用简化LaTeX模板: {template_file}")
             
             with open(template_file, 'r', encoding='utf-8') as f:
                 template_content = f.read()
             
-            # 替换文档类为book，并调整配置
-            template_content = re.sub(r'\\documentclass\[.*?\]\{ctexbook\}', 
-                                    r'\\documentclass[12pt,a4paper,twoside,openright]{ctexbook}', 
-                                    template_content)
+            print("✓ 加载简化模板成功")
             
-            # 添加必要的包和命令定义
-            additional_packages = r"""
-% 额外必需包
-\usepackage{calc}
-\usepackage{pdfpages}
-
-% Pandoc兼容性命令
-\providecommand{\tightlist}{%
-  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
-
-% 防止过长行
-\setlength{\emergencystretch}{3em}
-\setcounter{secnumdepth}{5}
-"""
-            
-            # 在文档开始前插入额外包
-            template_content = template_content.replace(
-                '% ========================================\n% 文档开始前的最后配置',
-                additional_packages + '\n% ========================================\n% 文档开始前的最后配置'
-            )
-            
-            # 移除模板中的使用说明注释（从% ========================================开始的最后部分）
+            # 移除模板中的使用说明注释
             comment_start = template_content.rfind('% ========================================\n% 模板使用说明')
             if comment_start != -1:
                 template_content = template_content[:comment_start]
@@ -501,6 +518,7 @@ class TemplateEnhancedConverter:
             template_content += '% 目录\n\\tableofcontents\n\\newpage\n\n'
             
         else:
+            print(f"模板文件不存在: {template_file}")
             # 使用默认模板（原有逻辑的增强版）
             print("使用默认增强LaTeX模板...")
             template_content = self.create_default_enhanced_template()
@@ -628,7 +646,7 @@ class TemplateEnhancedConverter:
     chapter={
         format={\centering\Huge\bfseries},
         name={第,章},
-        number={\chinese{chapter}},
+        number={\arabic{chapter}},  % 使用阿拉伯数字
         beforeskip=20pt,
         afterskip=40pt
     },
@@ -787,7 +805,7 @@ class TemplateEnhancedConverter:
     keywordstyle=\color{codeblue}\bfseries,
     numberstyle=\tiny\color{codegray},
     stringstyle=\color{codered},
-    basicstyle=\ttfamily\footnotesize,
+    basicstyle=\ttfamily\scriptsize,
     breakatwhitespace=false,
     breaklines=true,
     captionpos=b,
@@ -845,11 +863,39 @@ class TemplateEnhancedConverter:
 }
 
 \lstdefinestyle{terminal}{
-    basicstyle=\ttfamily\footnotesize\color{white},
+    basicstyle=\ttfamily\scriptsize\color{white},
     backgroundcolor=\color{black},
     showstringspaces=false,
     numbers=none,
     frame=single
+}
+
+\lstdefinestyle{xml}{
+    language=XML,
+    keywordstyle=\color{codeblue}\bfseries,
+    commentstyle=\color{codegreen}\itshape,
+    stringstyle=\color{codered}
+}
+
+\lstdefinestyle{css}{
+    language=CSS,
+    keywordstyle=\color{codeblue}\bfseries,
+    commentstyle=\color{codegreen}\itshape,
+    stringstyle=\color{codered}
+}
+
+\lstdefinestyle{html}{
+    language=HTML,
+    keywordstyle=\color{codeblue}\bfseries,
+    commentstyle=\color{codegreen}\itshape,
+    stringstyle=\color{codered}
+}
+
+\lstdefinestyle{json}{
+    basicstyle=\ttfamily\scriptsize,
+    keywordstyle=\color{codeblue}\bfseries,
+    commentstyle=\color{codegreen}\itshape,
+    stringstyle=\color{codered}
 }
 
 % ========================================
@@ -943,21 +989,53 @@ class TemplateEnhancedConverter:
     
     def convert_files_to_latex_content_only(self, files: List[str], output_file: str) -> bool:
         """转换文件为纯LaTeX内容"""
+        # 为中文支持添加特殊参数
         cmd = ['pandoc'] + files + ['-o', output_file]
         cmd.extend([
-            '--from=markdown',
+            '--from=markdown+east_asian_line_breaks+raw_html+emoji',  # 中文支持和原始 HTML
             '--to=latex',
-            '--no-highlight'
+            '--no-highlight',
+            '--wrap=none',  # 不自动换行，避免破坏中文
+            '--columns=1000',  # 设置很大的列数
+            '--preserve-tabs',  # 保持制表符
+            '--eol=lf'  # 使用Unix换行符
+            # 移除 --lua-filter=/dev/null 因为Windows不支持
         ])
         
         try:
-            result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+            # 设置环境变量支持中文
+            env = os.environ.copy()
+            env['LANG'] = 'zh_CN.UTF-8'  # 明确设置中文UTF-8环境
+            env['LC_ALL'] = 'zh_CN.UTF-8'
+            env['PYTHONIOENCODING'] = 'utf-8'
+            env['PANDOC_VERSION'] = ''
+            
+            print(f"  正在运行: {' '.join(cmd)}")
+            
+            result = subprocess.run(cmd, capture_output=True, text=True, 
+                                  check=True, encoding='utf-8', env=env)
             print(f"✓ 转换文件成功: {os.path.basename(output_file)}")
+            
+            # 检查转换后的文件是否包含中文
+            with open(output_file, 'r', encoding='utf-8') as f:
+                latex_content = f.read()
+            
+            chinese_chars_in_latex = len([c for c in latex_content if '\u4e00' <= c <= '\u9fff'])
+            print(f"  LaTeX输出中检测到 {chinese_chars_in_latex} 个中文字符")
+            
+            if chinese_chars_in_latex == 0:
+                print(f"  警告：转换后的LaTeX文件不包含中文字符！")
+                # 输出LaTeX文件的前100个字符用于调试
+                print(f"  LaTeX内容预览: {latex_content[:200]}...")
             
             self.cleanup_latex_content_thoroughly(output_file)
             return True
         except subprocess.CalledProcessError as e:
             print(f"✗ 转换文件失败：{files[0]} - {e}")
+            if e.stderr:
+                print(f"  错误信息：{e.stderr}")
+            if e.stdout:
+                print(f"  标准输出：{e.stdout}")
             return False
     
     def cleanup_latex_content_thoroughly(self, latex_file: str):

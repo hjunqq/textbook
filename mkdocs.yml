@@ -39,6 +39,12 @@ theme:
 plugins:
   - search:
       lang: zh
+  - print-site:
+      add_to_navigation: true   # 生成 /print_page
+  - with-pdf:
+      output_path: pdf/textbook.pdf
+      toc_level: 4
+      # enabled_if_env: ENABLE_PDF_EXPORT
 
 # Extensions
 markdown_extensions:
@@ -77,3 +83,4 @@ nav:
   - 第六章: chapters/chapter06/chapter06.md
   - 第七章: chapters/chapter07/chapter07.md
   - 第八章: chapters/chapter08/chapter08.md
+  - 第九章: chapters/chapter09/chapter09.md

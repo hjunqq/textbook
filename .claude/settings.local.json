@@ -22,7 +22,8 @@
       "Bash(find:*)",
       "Bash(chmod:*)",
       "Bash(xelatex:*)",
-      "Bash(sed:*)"
+      "Bash(sed:*)",
+      "Bash(pip install:*)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits"
