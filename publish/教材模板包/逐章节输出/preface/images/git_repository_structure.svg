@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="600" height="400" xmlns="http://www.w3.org/2000/svg">
+  <!-- 背景 -->
+  <rect width="600" height="400" fill="#f9f9f9"/>
+  
+  <!-- 标题 -->
+  <text x="300" y="25" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#333">Git仓库结构</text>
+  
+  <!-- 定义箭头 -->
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L0,8 L8,4 z" fill="#666"/>
+    </marker>
+  </defs>
+  
+  <!-- 工作区 (Working Directory) -->
+  <rect x="50" y="60" width="150" height="120" fill="#E3F2FD" stroke="#2196F3" stroke-width="2" rx="8"/>
+  <text x="125" y="85" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#1976D2">工作区</text>
+  <text x="125" y="105" text-anchor="middle" font-size="11" fill="#1565C0">Working Directory</text>
+  
+  <!-- 工作区文件示例 -->
+  <rect x="70" y="120" width="110" height="45" fill="#BBDEFB" stroke="#2196F3" rx="4"/>
+  <text x="125" y="135" text-anchor="middle" font-size="10" fill="#0D47A1">main.py (modified)</text>
+  <text x="125" y="148" text-anchor="middle" font-size="10" fill="#0D47A1">config.json (new)</text>
+  <text x="125" y="161" text-anchor="middle" font-size="10" fill="#0D47A1">README.md</text>
+  
+  <!-- 暂存区 (Staging Area) -->
+  <rect x="225" y="60" width="150" height="120" fill="#E8F5E8" stroke="#4CAF50" stroke-width="2" rx="8"/>
+  <text x="300" y="85" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#388E3C">暂存区</text>
+  <text x="300" y="105" text-anchor="middle" font-size="11" fill="#2E7D32">Staging Area / Index</text>
+  
+  <!-- 暂存区文件示例 -->
+  <rect x="245" y="120" width="110" height="45" fill="#C8E6C9" stroke="#4CAF50" rx="4"/>
+  <text x="300" y="135" text-anchor="middle" font-size="10" fill="#1B5E20">main.py (staged)</text>
+  <text x="300" y="148" text-anchor="middle" font-size="10" fill="#1B5E20">config.json (staged)</text>
+  <text x="300" y="161" text-anchor="middle" font-size="10" fill="#666">准备提交的文件</text>
+  
+  <!-- 本地仓库 (Local Repository) -->
+  <rect x="400" y="60" width="150" height="120" fill="#FFF3E0" stroke="#FF9800" stroke-width="2" rx="8"/>
+  <text x="475" y="85" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#F57C00">本地仓库</text>
+  <text x="475" y="105" text-anchor="middle" font-size="11" fill="#EF6C00">Local Repository</text>
+  
+  <!-- 本地仓库内容示例 -->
+  <rect x="420" y="120" width="110" height="45" fill="#FFE0B2" stroke="#FF9800" rx="4"/>
+  <text x="475" y="135" text-anchor="middle" font-size="10" fill="#BF360C">Commit History</text>
+  <text x="475" y="148" text-anchor="middle" font-size="10" fill="#BF360C">Branches</text>
+  <text x="475" y="161" text-anchor="middle" font-size="10" fill="#BF360C">HEAD指针</text>
+  
+  <!-- Git命令箭头和标签 -->
+  <!-- git add -->
+  <path d="M 200 120 L 225 120" stroke="#4CAF50" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="212" y="115" text-anchor="middle" font-size="11" font-weight="bold" fill="#2E7D32">git add</text>
+  
+  <!-- git commit -->
+  <path d="M 375 120 L 400 120" stroke="#FF9800" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="387" y="115" text-anchor="middle" font-size="11" font-weight="bold" fill="#EF6C00">git commit</text>
+  
+  <!-- git checkout (反向) -->
+  <path d="M 400 140 L 375 140" stroke="#9C27B0" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="387" y="155" text-anchor="middle" font-size="11" font-weight="bold" fill="#7B1FA2">git checkout</text>
+  
+  <!-- git reset -->
+  <path d="M 225 140 L 200 140" stroke="#F44336" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="212" y="155" text-anchor="middle" font-size="11" font-weight="bold" fill="#D32F2F">git reset</text>
+  
+  <!-- 远程仓库 -->
+  <rect x="225" y="220" width="150" height="100" fill="#FFEBEE" stroke="#F44336" stroke-width="2" rx="8"/>
+  <text x="300" y="245" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#D32F2F">远程仓库</text>
+  <text x="300" y="265" text-anchor="middle" font-size="11" fill="#C62828">Remote Repository</text>
+  <text x="300" y="285" text-anchor="middle" font-size="10" fill="#B71C1C">(GitHub / GitLab)</text>
+  
+  <!-- 远程仓库内容 -->
+  <rect x="245" y="290" width="110" height="20" fill="#FFCDD2" stroke="#F44336" rx="4"/>
+  <text x="300" y="302" text-anchor="middle" font-size="9" fill="#B71C1C">origin/main</text>
+  
+  <!-- git push -->
+  <path d="M 475 180 Q 400 200 325 220" stroke="#F44336" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="400" y="200" text-anchor="middle" font-size="11" font-weight="bold" fill="#D32F2F">git push</text>
+  
+  <!-- git pull/fetch -->
+  <path d="M 325 220 Q 400 200 475 180" stroke="#673AB7" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="400" y="215" text-anchor="middle" font-size="11" font-weight="bold" fill="#512DA8">git pull/fetch</text>
+  
+  <!-- .git目录结构说明 -->
+  <g transform="translate(50, 340)">
+    <text x="0" y="0" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#555">.git目录结构：</text>
+    <text x="150" y="0" font-size="10" fill="#666">objects/ (Git对象存储)</text>
+    <text x="300" y="0" font-size="10" fill="#666">refs/ (分支和标签引用)</text>
+    <text x="450" y="0" font-size="10" fill="#666">HEAD (当前分支指针)</text>
+    <text x="150" y="15" font-size="10" fill="#666">index (暂存区信息)</text>
+    <text x="300" y="15" font-size="10" fill="#666">config (仓库配置)</text>
+    <text x="450" y="15" font-size="10" fill="#666">hooks/ (Git钩子)</text>
+  </g>
+</svg>
