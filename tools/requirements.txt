@@ -1,0 +1,14 @@
+# 智慧水利教材转换器依赖
+# Python 3.7+ required
+
+# 无需额外Python包 - 仅使用标准库
+# 
+# 外部依赖（需手动安装）:
+# - Pandoc (https://pandoc.org/installing.html)
+# - LaTeX发行版 (MiKTeX或TeX Live)
+#   - 需要XeLaTeX引擎
+#   - 需要中文字体支持
+#
+# 推荐安装：
+# - MiKTeX (Windows): https://miktex.org/download
+# - TeX Live (跨平台): https://www.tug.org/texlive/

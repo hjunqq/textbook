@@ -1,0 +1,27 @@
+from: markdown+tex_math_dollars+pipe_tables+table_captions
+metadata:
+  author: 智慧水利教材编写组
+  geometry:
+  - a4paper
+  - margin=25mm
+  lang: zh-CN
+  title: 智慧水利平台架构与开发
+number-sections: true
+pdf-engine: xelatex
+resource-path:
+- .
+- ..
+- docs
+- docs/chapters
+- docs/assets
+table-of-contents: true
+to: pdf
+toc-depth: 3
+variables:
+  CJKmainfont: Microsoft YaHei
+  chapters: true
+  colorlinks: true
+  documentclass: book
+  fontsize: 12pt
+  linkcolor: blue
+  mainfont: Times New Roman

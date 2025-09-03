@@ -1,6 +1,0 @@
-Error producing PDF.
-! Missing $ inserted.
-<inserted text> 
-                $
-l.35686 f\_\{k\}(u\_\{p\},v\_\{p\})(k=1,2,3,\cdots
-
