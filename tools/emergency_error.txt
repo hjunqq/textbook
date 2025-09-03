@@ -1,0 +1,6 @@
+Error producing PDF.
+! Missing $ inserted.
+<inserted text> 
+                $
+l.38239 \sqrt{
+

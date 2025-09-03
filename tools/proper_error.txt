@@ -1,0 +1,6 @@
+Error producing PDF.
+! Missing $ inserted.
+<inserted text> 
+                $
+l.35484 \]d=\Delta \times \frac{c}{2}
+

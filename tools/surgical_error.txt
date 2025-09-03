@@ -1,0 +1,66 @@
+[WARNING] Could not fetch resource ../images/chapter02/image1.png: replacing image with description
+[WARNING] Could not fetch resource ../images/chapter02/image2.png: replacing image with description
+[WARNING] Could not fetch resource ../images/chapter02/image3.png: replacing image with description
+[WARNING] Could not fetch resource ../images/chapter02/image4.png: replacing image with description
+[WARNING] Could not fetch resource ../images/chapter02/image5.png: replacing image with description
+[WARNING] Could not fetch resource ../images/chapter02/image6.png: replacing image with description
+[WARNING] Could not fetch resource ../images/chapter02/image7.png: replacing image with description
+[WARNING] Could not fetch resource ../images/chapter02/image8.png: replacing image with description
+[WARNING] Could not fetch resource ../images/chapter02/image9.png: replacing image with description
+[WARNING] Could not fetch resource ../images/chapter02/image10.png: replacing image with description
+[WARNING] Could not fetch resource ../images/chapter02/image11.png: replacing image with description
+[WARNING] Could not fetch resource ../images/chapter02/image12.png: replacing image with description
+[WARNING] Could not fetch resource ../images/chapter02/image13.png: replacing image with description
+[WARNING] Could not fetch resource ../images/chapter02/image14.png: replacing image with description
+[WARNING] Could not fetch resource ../images/chapter02/image15.png: replacing image with description
+[WARNING] Could not fetch resource ../images/chapter02/image16.png: replacing image with description
+[WARNING] Could not fetch resource ../images/chapter02/image17.png: replacing image with description
+[WARNING] Could not fetch resource ../images/chapter02/image18.png: replacing image with description
+[WARNING] Could not fetch resource ../images/chapter02/image19.png: replacing image with description
+[WARNING] Could not fetch resource ../images/chapter02/image20.png: replacing image with description
+[WARNING] Could not fetch resource ../images/chapter02/image21.png: replacing image with description
+[WARNING] Could not fetch resource ../images/chapter02/image22.png: replacing image with description
+[WARNING] Could not fetch resource ../images/chapter02/image23.png: replacing image with description
+[WARNING] Could not fetch resource ../images/chapter02/image24.png: replacing image with description
+[WARNING] Could not fetch resource ../images/chapter02/image25.png: replacing image with description
+[WARNING] Could not fetch resource ../images/chapter02/image26.png: replacing image with description
+[WARNING] Could not fetch resource ../docs/chapters/images/ch6_image19.png: replacing image with description
+[WARNING] Could not fetch resource ../docs/chapters/images/ch6_image20.png: replacing image with description
+[WARNING] Could not fetch resource ../docs/chapters/images/ch6_image21.png: replacing image with description
+[WARNING] Could not fetch resource ../docs/chapters/images/ch6_image25.png: replacing image with description
+[WARNING] Could not fetch resource ../docs/chapters/images/ch6_image26.png: replacing image with description
+[WARNING] Could not fetch resource ../docs/chapters/images/ch6_image27.png: replacing image with description
+[WARNING] Could not fetch resource ../docs/chapters/images/ch6_image28.png: replacing image with description
+[WARNING] Could not fetch resource ../docs/chapters/images/ch6_image29.png: replacing image with description
+[WARNING] Could not fetch resource ../docs/chapters/images/ch6_image33.png: replacing image with description
+[WARNING] Could not fetch resource ../docs/chapters/images/ch6_image34.png: replacing image with description
+[WARNING] Could not fetch resource ../docs/chapters/images/ch6_image32.png: replacing image with description
+[WARNING] Could not fetch resource ../docs/chapters/images/ch6_image33.png: replacing image with description
+[WARNING] Could not fetch resource ../docs/chapters/images/ch6_image34.png: replacing image with description
+[WARNING] Could not fetch resource ../docs/chapters/images/ch6_image35.png: replacing image with description
+[WARNING] Could not fetch resource ../docs/chapters/images/ch6_image36.png: replacing image with description
+[WARNING] Could not fetch resource ../docs/chapters/images/ch6_image37.png: replacing image with description
+[WARNING] Could not fetch resource ../docs/chapters/images/ch6_image41.png: replacing image with description
+[WARNING] Could not fetch resource ../docs/chapters/images/ch6_image42.png: replacing image with description
+[WARNING] Could not fetch resource ../docs/chapters/images/ch6_image44.png: replacing image with description
+[WARNING] Could not fetch resource ../docs/chapters/images/ch6_image44.png: replacing image with description
+[WARNING] Could not fetch resource ../docs/chapters/images/ch6_image45.png: replacing image with description
+[WARNING] Could not fetch resource ../docs/chapters/images/ch6_image46.png: replacing image with description
+[WARNING] Could not fetch resource ../docs/chapters/images/ch6_image55.png: replacing image with description
+[WARNING] Could not fetch resource ../docs/chapters/images/ch6_image54.png: replacing image with description
+[WARNING] Could not fetch resource ../docs/chapters/images/ch6_image53.png: replacing image with description
+[WARNING] Could not fetch resource ../docs/chapters/images/ch6_image54.png: replacing image with description
+[WARNING] Could not fetch resource ../docs/chapters/images/ch6_image55.png: replacing image with description
+[WARNING] Could not fetch resource ../docs/chapters/images/ch6_image56.jpg: replacing image with description
+[WARNING] Could not fetch resource ../docs/chapters/images/ch6_image57.jpg: replacing image with description
+[WARNING] Could not fetch resource ../docs/chapters/images/ch6_image58.jpg: replacing image with description
+[WARNING] Could not fetch resource ../docs/chapters/images/ch6_image59.png: replacing image with description
+[WARNING] Could not fetch resource ../docs/chapters/images/ch6_image60.png: replacing image with description
+[WARNING] Could not fetch resource ../docs/chapters/images/ch6_image61.png: replacing image with description
+[WARNING] Could not fetch resource ../docs/chapters/images/ch6_image62.png: replacing image with description
+Error producing PDF.
+! Missing $ inserted.
+<inserted text> 
+                $
+l.38100 \sqrt{
+
