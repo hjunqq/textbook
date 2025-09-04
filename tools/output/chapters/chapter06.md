@@ -1,6 +1,6 @@
 \chapter{第六章 三维场景技术基础}
 
-\\section{学习目标}
+\section{学习目标}
 
 通过本章学习，学生应能够：
 
@@ -11,7 +11,7 @@
 5. **具备基础开发能力**：能够使用主流三维开发框架构建简单的水利场景应用
 6. **建立技术认知体系**：为后续章节的深入学习奠定坚实的技术基础
 
-\\section{引言}
+\section{引言}
 
 三维场景技术是智慧水利平台的重要技术基础，它为复杂的水利工程信息提供直观化的可视化表达。本章重点介绍三维场景技术的基础理论和核心技术，包括WebGL技术架构、Three.js开发框架、三维建模方法和基础渲染技术。
 
@@ -19,9 +19,10 @@
 
 本章将从基础概念出发，循序渐进地介绍三维场景技术的核心内容，为后续章节中更复杂的应用场景奠定坚实基础。
 
-\\section{本章小节}
+\section{本章小节}
 
-\\begin{tcolorbox}[colback=cyan!5!white,colframe=cyan!75!black,title=Info 章节结构
+
+\begin{tcolorbox}[colback=cyan!5!white,colframe=cyan!75!black,title=Info 章节结构
     
     \##\# [第一节 三维场景技术概述](section06-01.md)
     - 三维图形学基础
@@ -58,9 +59,9 @@
     - 简单场景构建
     - 交互功能实现
     - 调试与优化方法]
-\\section{核心技术}
+\section{核心技术}
 
-\\end{tcolorbox}
+\end{tcolorbox}
 
 
 | 技术领域 | 关键技术 | 应用价值 |
@@ -71,9 +72,10 @@
 | 渲染技术 | 光照、阴影、材质系统 | 提供真实的视觉效果 |
 | 优化技术 | LOD、剔除、批处理 | 保证流畅的运行性能 |
 
-\\section{技术工具}
+\section{技术工具}
 
-\\begin{tcolorbox}[colback=green!5!white,colframe=green!75!black,title=Tip 推荐工具链
+
+\begin{tcolorbox}[colback=green!5!white,colframe=green!75!black,title=Tip 推荐工具链
     
     === 开发框架
         - **Three.js**：最流行的JavaScript 3D库
@@ -92,12 +94,13 @@
         - **WebStorm**：专业JavaScript IDE
         - **Chrome DevTools**：浏览器调试工具
         - **Webpack**：模块打包工具]
-\\section{基础概念}
+\section{基础概念}
 
-\\end{tcolorbox}
+\end{tcolorbox}
 
 
-\\begin{tcolorbox}[colback=blue!5!white,colframe=blue!75!black,title=Note 核心概念说明
+
+\begin{tcolorbox}[colback=blue!5!white,colframe=blue!75!black,title=Note 核心概念说明
     
     - **WebGL**：Web Graphics Library，基于OpenGL ES的Web图形标准
     - **着色器**：运行在GPU上的小程序，用于处理顶点和像素
@@ -105,33 +108,35 @@
     - **几何体**：定义三维物体形状的数学描述
     - **材质**：定义物体表面光学特性的参数集合
     - **纹理**：应用到三维模型表面的二维图像]
-\\section{实践案例}
+\section{实践案例}
 
-\\end{tcolorbox}
+\end{tcolorbox}
 
 
-\\begin{tcolorbox}[colback=gray!5!white,colframe=gray!75!black,title=Example 基础应用案例
+
+\begin{tcolorbox}[colback=gray!5!white,colframe=gray!75!black,title=Example 基础应用案例
     
     1. **三维场景初体验**：使用Three.js创建简单的三维水体模型
     2. **纹理贴图应用**：为水利设施模型添加真实材质效果
     3. **光照系统设计**：模拟不同时段的光照变化效果
     4. **交互控制实现**：添加鼠标控制和视角切换功能
     5. **性能优化实战**：大规模场景的渲染优化方法]
-\\section{发展趋势}
+\section{发展趋势}
 
-\\end{tcolorbox}
+\end{tcolorbox}
 
 
-\\begin{tcolorbox}[colback=blue!5!white,colframe=blue!75!black,title=Note 技术发展方向
+
+\begin{tcolorbox}[colback=blue!5!white,colframe=blue!75!black,title=Note 技术发展方向
     
     - **WebGPU标准化**：下一代Web图形API，提供更强的GPU控制能力
     - **实时光线追踪**：硬件支持的实时光线追踪技术在Web端的应用
     - **WebAssembly集成**：结合WASM提升复杂计算的性能表现
     - **云渲染服务**：基于云端GPU的远程渲染解决方案
     - **跨平台统一**：一套代码在多平台（Web、移动、桌面）运行]
-\\section{参考文献}
+\section{参考文献}
 
-\\end{tcolorbox}
+\end{tcolorbox}
 
 
 [1] Khronos Group. WebGL 2.0 Specification[S]. Khronos Group Inc, 2017.
@@ -144,7 +149,7 @@
 
 [5] Marschner S, Shirley P. Fundamentals of Computer Graphics[M]. 5th ed. Boca Raton: CRC Press, 2021.
 
-\\section{思考题与练习}
+\section{思考题与练习}
 
 \##\# 基础题
 
@@ -163,11 +168,11 @@
 7. 讨论三维场景技术在智慧水利中的应用前景。
 8. 展望Web端三维技术的发展趋势。
 
-\\section{本章小结}
+\section{本章小结}
 
 本章系统介绍了三维场景技术的基础理论和核心技术。通过学习本章内容，学生应能够理解三维图形学的基本概念，掌握WebGL和Three.js的核心技术，具备基础的三维开发能力，为后续章节的深入学习奠定坚实基础。
 
-\\section{章节概述}
+\section{章节概述}
 
 在信息技术迅速发展的今天，水利工程的管理与决策方式正在经历一场深刻的变革。传统的二维图纸和数据表格，已难以满足日益复杂的水利系统对可视化、综合化和智能化的要求。随着大数据、云计算、人工智能、物联网等新一代信息技术的不断渗透，水利信息化建设正朝着更加智慧化、精细化和高效化的方向迈进。其中，智慧水利三维场景构建作为水利信息化的重要组成部分，正在发挥着日益突出的作用。
 
@@ -177,7 +182,7 @@
 
 值得指出的是，智慧水利三维场景构建并非单一技术的简单叠加，而是集成性强、协同性高的系统工程。在这一过程中，需要将水文学、水利工程学、地理信息科学、计算机图形学等多学科知识进行融合，并以用户需求为导向，实现科学与工程的有效结合。因此，本章在内容设计上，兼顾了理论性与实践性，既注重技术原理的深入阐释，又提供了大量典型应用示例，力求使读者在理解“为什么”的同时，也掌握“怎么做”。总之，随着“数字孪生”、“智慧水利”等理念的持续推进，三维场景构建将在水利行业中扮演越来越重要的角色。我们希望通过本章的学习，读者不仅能够掌握一套可操作的三维场景构建方法体系，更能够从中感受到水利信息化发展的脉动，积极投身于智慧水利建设的时代浪潮之中。
 
-\\section{思考题与练习}
+\section{思考题与练习}
 
 \##\# 基础题
 
@@ -196,11 +201,11 @@
 7. 讨论本节内容与其他相关技术的集成方案，分析可能遇到的挑战。
 8. 展望本节涉及技术的发展趋势，分析其对智慧水利未来发展的影响。
 
-\\section{本节小结}
+\section{本节小结}
 
 本节内容为智慧水利平台的设计和开发提供了重要的理论基础和技术指导。通过学习本节内容，学生应能够理解相关概念的内涵和应用价值，掌握基本的分析方法和设计原则，为后续章节的学习和实际项目的开展奠定坚实基础。
 
-\\section{6.1 三维场景技术概述}
+\section{6.1 三维场景技术概述}
 
 三维场景技术，作为计算机图形学与计算机视觉发展的重要成果，近年来在多个行业中得到了广泛应用。在智慧水利领域，三维场景技术更是成为推进水利信息化和数字化转型的关键支撑手段之一。该技术通过在虚拟环境中模拟现实世界的物体、场景和动态过程，实现对现实水利系统的高度还原与直观表达。借助高精度的地理信息数据与多源水利数据，三维场景不仅能够再现复杂的地形地貌和水系结构，还可以对水利工程的建筑形态、运行机制及其与周边环境的关系进行动态演示和实时交互。
 
@@ -230,7 +235,10 @@
 
 地形模型中最常见的即为数字高程模型（Digital Elevation Model，DEM)，是通过有限的地形高程数据实现对地面地形的数字化模拟（即地形表面形态的数字化表达）。它是用一组有序数值阵列形式表示地面高程的一种实体地面模型，是数字地面模型（Digital Terrain Model，DTM）的一个分支，其它各种地形特征值均可由此派生。数字地面模型（Digital Terrain Model，简称 DTM），是对地球表面裸露地形（即不包括植被、建筑物等覆盖物）的高程信息进行数字化描述的一种模型。DTM 是地理空间建模中重要的基础数据类型，广泛应用于测绘、地理信息系统（GIS）、水利工程、交通规划、环境模拟等多个领域。数字地面模型是地形建模的一种形式，它通过一系列规则或不规则分布的高程点（通常为三维坐标：X、Y、Z）来表达实际地面（“地表”的物理表面）在空间上的连续变化。与数字表面模型（DSM）相比，DTM 是在去除了地物（如树木、房屋、电线塔等）之后所获得的“纯地面”模型，强调的是对自然地貌的真实再现。数字地面模型更通用的定义是描述地球表面形态多种信息空间分布的有序数值阵列，从数学的角度，可以用以下二维函数系列取值的有序集合来概括地表示数字地面模型的丰富内容和多样形式：
 
-\\begin{equation}\\nK_p = f_k(u_p,v_p)(k=1,2,3,\cdots,m;p=1,2,3,\cdots,n)\\n\\end{equation}
+
+\begin{equation}
+K_p = f_k(u_p,v_p)(k=1,2,3,\cdots,m;p=1,2,3,\cdots,n)
+\end{equation}
 
 (6.1.1)
 
@@ -242,7 +250,10 @@
 
 总之，数字高程模型DEM是表示区域*D*上的三维向量有限序列，用函数的形式描述为：
 
-\\begin{equation}\\nV_=(X_i,Y_i,Z_i)(i=1,2,3,\cdots,n)\\n\\end{equation}
+
+\begin{equation}
+V_=(X_i,Y_i,Z_i)(i=1,2,3,\cdots,n)
+\end{equation}
 
  (6.1.2)
 
@@ -396,15 +407,16 @@
 
 激光雷达对测量环境光照条件要求低，且测量误差小，常被应用于空间信息获取系统中。激光雷达分类方式多样，如以内部有无机械旋转部件，分为机械激光雷达、固态激光雷达两类；根据可扫描空间维度分为三维激光雷达和二维激光雷达。三维激光雷达也叫多线激光雷达，如图6.1.1(a)所示，在一帧时间内可以发出多条激光，可直接获得丰富三维数据。每条激光线对应唯一标号，扫描线数量越多，垂直扫描平面方向数据点分布越密集，点云精度越高。近年来三维激光雷达常被应用于建筑体三维重建、农作物检测、城市道路重建等工作，但三维激光雷达购置费用高。相比之下，基于二维激光雷达的系统性价比更高，二维激光雷达仅通过雷达内部的光学部件旋转实现一个平面内的二维扫描，如图6.1.1(b)所示，只有一个收发通道，内部结构主要包括激光发射模块、接收模块，以及驱动模块组成。
 
-\\begin{figure}[htbp]
-\\centering
-\\includegraphics[width=0.8\\textwidth]{images/ch6_image19.png}
-\\caption{图06.1}
-\\end{figure} \\begin{figure}[htbp]
-\\centering
-\\includegraphics[width=0.8\\textwidth]{images/ch6_image20.png}
-\\caption{图06.2}
-\\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{../images/ch6_image19.png}
+\caption{图06.1}
+\end{figure} \begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{../images/ch6_image20.png}
+\caption{图06.2}
+\end{figure}
 
 
 (a) 三维激光雷达 (b) 二维激光雷达
@@ -413,26 +425,30 @@
 
 激光雷达为主动探测型传感器，通过具有良好方向性的激光进行非接触扫描得到距离信息。目前激光雷达测量距离方法主要有三角测距法和时间飞行法两种。 图6.1.2为三角测距法示意图，激光器与 CCD在同一水平线，且已知激光源与 CCD之间角偏移*β*，焦距为*f*的 CCD 接收遇到物体后的反射光，根据三角公式可得距离*d*。由于该方法以相似三角形原理计算，对于近距离测量结果在3\%以内，随着测量距离增大，误差也逐渐增大，所以基于三角测距法的激光雷达不适用于远距离数据获取。
 
-\\begin{figure}[htbp]
-\\centering
-\\includegraphics[width=0.8\\textwidth]{images/ch6_image21.png}
-\\caption{图06.3}
-\\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{../images/ch6_image21.png}
+\caption{图06.3}
+\end{figure}
 
 
 **图6.1.2 激光雷达分类**
 
 时间飞行法（Time Of Flight）是依赖飞行时间，如图6.1.3所示，激光在空气中传播， 当遇到待测目标时，反射光信号被接收器捕获，通过计算激光器从发出光时刻*t*1到接收到物体反射光时刻*t*2的时间间隔，根据时间差来计算激光发出点和被测物体的距离，如式(6.1.3)。由于光速很快，所以该方法需要非常精准的时钟电路，距离测量的精度与时间计时单元相关。该方法测距精度受系统误差及随机误差两种因素影响。其中系统误差主要包括晶振频率漂移、工作环境障碍物等，随机误差指电路的不稳定性等。
 
-\\begin{equation}\\nd=\Delta \times \frac{c}{2} (6.1.3)\\n\\end{equation}
+
+\begin{equation}
+d=\Delta \times \frac{c}{2} (6.1.3)
+\end{equation}
 
 式中：$c$为测量距离；表示光速（300000km/s）。
 
-**\\begin{figure}[htbp]
-\\centering
-\\includegraphics[width=0.8\\textwidth]{images/ch6_image25.png}
-\\caption{图06.4}
-\\end{figure}**
+**\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{../images/ch6_image25.png}
+\caption{图06.4}
+\end{figure}**
 
 **图6.1.3 TOF方法测量示意图**
 
@@ -448,23 +464,24 @@
 
 飞行平台是系统的重要组成部分，它能实时接收欲到达地点和欲到达航高的指令，然后把成像传感器系统直接送到空中沿着设定预设航线飞行。目前常用的UAV飞行平台主要有四大类，即固定翼和多旋翼无人机、无人直升机和无人飞艇。固定翼无人机主要能源为电池，隐蔽性极佳，适用于高清航空摄影测量;多旋翼无人机机身上均匀分布了两个或两个以上螺旋桨，能在很狭小的场地起降，适用于困难测绘;无人直升机不仅操作灵活，能够垂直起降，还可以沿着飞行剖面飞行，在空中自由悬停;无人飞艇载重性能好，空中安全系数高，可进行精细测绘。四类飞行平台及比较分别如图6.1.4和表6.1.1所示。
 
-\\begin{figure}[htbp]
-\\centering
-\\includegraphics[width=0.8\\textwidth]{images/ch6_image26.png}
-\\caption{图06.5}
-\\end{figure} \\begin{figure}[htbp]
-\\centering
-\\includegraphics[width=0.8\\textwidth]{images/ch6_image27.png}
-\\caption{图06.6}
-\\end{figure} \\begin{figure}[htbp]
-\\centering
-\\includegraphics[width=0.8\\textwidth]{images/ch6_image28.png}
-\\caption{图06.7}
-\\end{figure} \\begin{figure}[htbp]
-\\centering
-\\includegraphics[width=0.8\\textwidth]{images/ch6_image29.png}
-\\caption{图06.8}
-\\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{../images/ch6_image26.png}
+\caption{图06.5}
+\end{figure} \begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{../images/ch6_image27.png}
+\caption{图06.6}
+\end{figure} \begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{../images/ch6_image28.png}
+\caption{图06.7}
+\end{figure} \begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{../images/ch6_image29.png}
+\caption{图06.8}
+\end{figure}
 
 
 (a) (b) (c) (d)
@@ -473,31 +490,32 @@
 
 **表6.1.1 无人机飞行平台特点**
 
-**\\begin{figure}[htbp]
-\\centering
-\\includegraphics[width=0.8\\textwidth]{images/ch6_image33.png}
-\\caption{图06.9}
-\\end{figure}**
+**\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{../images/ch6_image33.png}
+\caption{图06.9}
+\end{figure}**
 
 四者相比较各具优劣，固定翼无人机抗风能力强，能同时搭载多种遥感传感器，是目前类型最多、应用最广泛的无人机。旋翼无人机机动性最强，即使场地狭小也能顺利起降，但其抗阻力能力也最差，因此落地损伤的几率较大。无人直升机飞行稳定，可靠性高，安全性好，便于携带，然而其续航能力是硬伤。无人飞艇载重性能较好，安全系数高，但是抗风能力较差，成本较高，转移迁运麻烦。以上四类飞行平台各有优劣，只有在在不断实践中协调采用才能事半功倍。为了保证航空摄影所获取的影像质量满足航测要求，需要综合考虑低空飞行的安全性、抗风能力以及长时间的续航能力，由此引出无人机飞行平台的选型技术要求。
 
 **表6.1.2 无人机平台选型性能指标**
 
-**\\begin{figure}[htbp]
-\\centering
-\\includegraphics[width=0.8\\textwidth]{images/ch6_image34.png}
-\\caption{图06.10}
-\\end{figure}**
+**\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{../images/ch6_image34.png}
+\caption{图06.10}
+\end{figure}**
 
 2、飞控系统
 
 飞行导航与控制系统,简称“飞控系统”，导航系统之于无人机相当于“领航员”之于有人机，而飞行控制系统则充当着无人机航飞作业的“驾驶员”，飞控系统可对飞机进行导航和定位，接收来自地面的航飞路线及临时修改命令，实时掌握飞行姿态和轨迹。科技的发展使得无人机野外作业越来越简单，现今多数航测无人机已经实现了自动驾驶，这其中飞控系统的成熟技术最为关键。图6.1.5所示为飞行控制系统的原理，无人机飞控系统应满足三个指标要求：(1)航路点设置数量一般情况下要大于100个，且系统自身重量应小于2kg；(2)飞行姿态控制稳度参数要求:横滚角、俯仰角和航向角的误差均应同时小于±3°；(3)航迹控制精度应满足偏航距和航高差都小于±20米，同时直线段的航迹弯曲度应小于+5°。
 
-\\begin{figure}[htbp]
-\\centering
-\\includegraphics[width=0.8\\textwidth]{images/ch6_image32.png}
-\\caption{图06.11}
-\\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{../images/ch6_image32.png}
+\caption{图06.11}
+\end{figure}
 
 
 **图6.1.5 无人机飞控系统**
@@ -514,11 +532,12 @@
 
 **表6.1.3 数据传输系统选型性能指标**
 
-\\begin{figure}[htbp]
-\\centering
-\\includegraphics[width=0.8\\textwidth]{images/ch6_image33.png}
-\\caption{图06.12}
-\\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{../images/ch6_image33.png}
+\caption{图06.12}
+\end{figure}
 
 
 3、地面保障系统
@@ -527,11 +546,12 @@
 
 **表6.1.4 地面保障系统选型性能指标表**
 
-\\begin{figure}[htbp]
-\\centering
-\\includegraphics[width=0.8\\textwidth]{images/ch6_image34.png}
-\\caption{图06.13}
-\\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{../images/ch6_image34.png}
+\caption{图06.13}
+\end{figure}
 
 
 三、发生与回收系统
@@ -544,15 +564,16 @@
 
 摄影测量常用的坐标系可以分为两类，一类是用于描述像点的位置，称为像方空间坐标系；另一类是用于描述地面点的位置，称为物方空间坐标系，两类坐标系如图：
 
-\\begin{figure}[htbp]
-\\centering
-\\includegraphics[width=0.8\\textwidth]{images/ch6_image35.png}
-\\caption{图06.14}
-\\end{figure} \\begin{figure}[htbp]
-\\centering
-\\includegraphics[width=0.8\\textwidth]{images/ch6_image36.png}
-\\caption{图06.15}
-\\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{../images/ch6_image35.png}
+\caption{图06.14}
+\end{figure} \begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{../images/ch6_image36.png}
+\caption{图06.15}
+\end{figure}
 
 
 (a) (b)
@@ -567,21 +588,25 @@
 
 内方位元素表示摄影中心S与像片之间相关位置的参数，包含三个元素：摄影中心到像片面的垂距f，f又叫做航摄机主距;像主点O在像平面坐标系中的坐标x0, y0，如图6.1.7所示。
 
-\\begin{figure}[htbp]
-\\centering
-\\includegraphics[width=0.8\\textwidth]{images/ch6_image37.png}
-\\caption{图06.16}
-\\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{../images/ch6_image37.png}
+\caption{图06.16}
+\end{figure}
 
 
 **图6.1.7 内方位元素示意图**
 
 设O点在像平面坐标系中的坐标为$(x_0,y_0)$，在像空间坐标系中的坐标为$(x,y,f)$，则像平面坐标系和像空间坐标系的转换关系为：
 
-\\begin{equation}\\n\left\{ {\begin{array}{*{20}{c}}
+
+\begin{equation}
+\left\{ {\begin{array}{*{20}{c}}
 {x = x' - {x_0}}\\
 {y = y' - {y_0}}
-\end{array}} \right.\\n\\end{equation}
+\end{array}} \right.
+\end{equation}
 
  (6.1.4)
 
@@ -625,11 +650,12 @@
 
 CAD图纸中数据表达分为几何元素信息和文本信息。因此，可以利用 Teigha 工具来提取出图纸中的几何元素数据和文本数据。
 
-\\begin{figure}[htbp]
-\\centering
-\\includegraphics[width=0.8\\textwidth]{images/ch6_image41.png}
-\\caption{图06.17}
-\\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{../images/ch6_image41.png}
+\caption{图06.17}
+\end{figure}
 
 
 **图6.1.8 数据提取流程图**
@@ -660,11 +686,12 @@ CAD 图纸通过被链接到Revit的新项目中。利用Teihga库的功能，CA
 
 (7) 整理文本匹配结果。
 
-\\begin{figure}[htbp]
-\\centering
-\\includegraphics[width=0.8\\textwidth]{images/ch6_image42.png}
-\\caption{图06.18}
-\\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{../images/ch6_image42.png}
+\caption{图06.18}
+\end{figure}
 
 
 **图6.1.9 文本语义匹配流程图**
@@ -675,11 +702,12 @@ BIM 技术自问世以来，总是与CAD相提并论，其发展速度一度受�
 
 **表6.1.5 BIM和CAD的差异**
 
-\\begin{figure}[htbp]
-\\centering
-\\includegraphics[width=0.8\\textwidth]{images/ch6_image44.png}
-\\caption{图06.19}
-\\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{../images/ch6_image44.png}
+\caption{图06.19}
+\end{figure}
 
 
 根据所提供的表格内容，可以观察到BIM技术与CAD在设计方法上存在本质区别。BIM不仅仅是简单地绘制点、线、弧，而是创建了元素之间的连接，这样修改一个元素时，相关联的元素也会自动更新，有效确保了信息的连贯性。BIM 还引入了可参数化的构件和动态的多视角展示，改善了项目过程并提高了组织内部的沟通。在信息管理方面，BIM展现了其多样化和自动化的存储方法，提供了比手工管理更高的信息精度和更简单的信息访问，这无疑提高了工作效率和信息的使用效益。此外，利用BIM的仿真与建模功能，可有效地配合各个专业领域和项目，进而有效降低工程设计失误，保证了工程建设安全与质量。综上所述，BIM 在许多层次上都高于CAD。
@@ -688,11 +716,12 @@ BIM技术展现了在建筑信息管理领域的综合性、有序性和平台�
 
 **表6.1.6 BIM技术特性概述**
 
-\\begin{figure}[htbp]
-\\centering
-\\includegraphics[width=0.8\\textwidth]{images/ch6_image44.png}
-\\caption{图06.20}
-\\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{../images/ch6_image44.png}
+\caption{图06.20}
+\end{figure}
 
 
 BIM的独特优势和特性使其在与CAD的竞争中逐步占据优势，BIM软件也日益成为跨行业专业人士的首选工具。BIM不仅仅是一种技术，它更是一种具有远见和指导意义的理念，明确提出了利用大数据和互联网技术支持下的建筑行业全生命周期信息管理的新思维和新方案。BIM扩展了计算机辅助设计的界限，从传统的二维图形展示发展到三维立体的多角度可视化，并贯穿项目的全周期数据管理，集成了虚拟仿真和算法支持的决策，进而实现了信息化和智能化的全过程管理。
@@ -707,7 +736,8 @@ BIM的独特优势和特性使其在与CAD的竞争中逐步占据优势，BIM�
 
 以地形建模为例，自动化建模通常从高程数据（如数字高程模型DEM或灰度高程图Heightmap）入手，借助计算机图形学算法将二维数据自动转换为具有真实起伏感的三维地形模型。Three.js 作为 WebGL 的高级封装库，广泛应用于基于浏览器的三维可视化项目，其提供了强大的几何体和材质处理能力，使得开发者可以通过几行代码实现地形的自动构建。以下是一个典型的自动化地形建模函数，它基于 highmap（高程图）数据生成三维地形：
 
-\\begin{lstlisting}[language=Javascript]
+
+\begin{lstlisting}[language=Javascript]
 // Three.js示例：从高程数据生成地形
 
 function createTerrainFromHeightmap(heightmapData, width, height, widthSegments, heightSegments) {
@@ -751,7 +781,7 @@ side: THREE.DoubleSide
 return new THREE.Mesh(geometry, material);
 
 }
-\\end{lstlisting}
+\end{lstlisting}
 
 
 该函数的核心思想是将高程数据（heightmapData）与网格顶点进行一一对应，从而通过修改顶点的 Z 值实现对地形高低起伏的模拟。整个过程无需人工参与，一旦提供了标准格式的高程数据，程序便可自动生成精确匹配的地形网格。
@@ -766,7 +796,8 @@ return new THREE.Mesh(geometry, material);
 
 LOD技术的核心思想是：近距离使用高精度模型，远距离使用简化模型。人眼在远距离观察物体时，无法分辨微小细节，因此可使用较少的几何信息降低GPU负担，提升整体帧率。反之，近距离则需要更高的模型分辨率，确保视觉真实感。在Three.js中，THREE.LOD类为开发者提供了便利的LOD管理机制。你可以向一个LOD对象添加多个不同精度的模型，并为每个模型指定距离阈值。Three.js会在渲染时根据相机与对象的实际距离，自动选择最合适的精度级别。实例代码如下：
 
-\\begin{lstlisting}[language=Javascript]
+
+\begin{lstlisting}[language=Javascript]
 // Three.js示例：创建LOD对象
 
 function createLODTerrain(terrainData) {
@@ -824,7 +855,7 @@ lod.addLevel(lowDetailMesh, 1500);
 return lod;
 
 }
-\\end{lstlisting}
+\end{lstlisting}
 
 
 关键技术点如下：
@@ -847,21 +878,22 @@ LOD技术优势如下：
 
 为输出具有色彩感和层次感的高质量画面，需对模型进行实时渲染。实时渲染是指图形数据的实时计算和输出，实时渲染可以依靠OpenGL的可编程渲染管线实现，可编程管线能最大程度地简化渲染管线的逻辑，以提高渲染效率，并能使开发者通过实现特定的算法和逻辑来渲染出固定管线难以渲染的效果，可编程渲染管线流程图如图6.1.10所示，其中灰色框表示管线中可编程阶段。
 
-**\\begin{figure}[htbp]
-\\centering
-\\includegraphics[width=0.8\\textwidth]{images/ch6_image45.png}
-\\caption{图06.21}
-\\end{figure}**
+**\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{../images/ch6_image45.png}
+\caption{图06.21}
+\end{figure}**
 
 **图6.1.10 OpenGL可编程渲染管线流程图**
 
 显示器通过读取存储在帧缓冲中的渲染数据，即几何数据（顶点坐标、纹理坐标等）和纹理经过一系列渲染管道得到的屏幕上所有像素点，并不断刷新显示就可以实现相应的渲染效果。OpenGL允许同时存在多个帧缓冲，通过不断创建帧缓冲，可以实现不同的渲染效果，帧缓冲中包括颜色缓冲区、深度缓冲区、模板缓冲区这三类缓冲区，其中颜色缓冲用于存储每个片元的颜色值，每个颜色包括RGBA4个色彩通道；深度缓冲用于存储每个片元的深度值，是指从片元处到观察点的距离；模板缓冲存储每个片元的模板值，供模板测试使用，允许用户基于一些条件丢弃指定片段，帧缓冲技术的工作流程如图6.1.11所示。
 
-\\begin{figure}[htbp]
-\\centering
-\\includegraphics[width=0.8\\textwidth]{images/ch6_image46.png}
-\\caption{图06.22}
-\\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{../images/ch6_image46.png}
+\caption{图06.22}
+\end{figure}
 
 
 **图6.1.11 帧缓冲技术流程图**
@@ -894,7 +926,8 @@ LOD技术优势如下：
 
 在现代Web端或桌面三维可视化平台中，开发者常结合使用多种光照技术以达到最优平衡。例如：
 
-\\begin{lstlisting}[language=Javascript]
+
+\begin{lstlisting}[language=Javascript]
 const light = new THREE.DirectionalLight(0xffffff, 1);
 
 light.position.set(100, 200, 300);
@@ -914,7 +947,7 @@ metalness: 0.5,
 roughness: 0.3
 
 });
-\\end{lstlisting}
+\end{lstlisting}
 
 
 Three.js 支持标准物理材质（MeshStandardMaterial 和 MeshPhysicalMaterial），可在浏览器端轻松实现光照渲染效果。
@@ -939,7 +972,8 @@ Three.js 支持标准物理材质（MeshStandardMaterial 和 MeshPhysicalMateria
 
 示例代码如下：
 
-\\begin{lstlisting}[language=Javascript]
+
+\begin{lstlisting}[language=Javascript]
 const renderer = new THREE.WebGLRenderer();
 
 renderer.shadowMap.enabled = true;
@@ -959,7 +993,7 @@ const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
 cube.castShadow = true;
 
 scene.add(cube);
-\\end{lstlisting}
+\end{lstlisting}
 
 
 2、阴影体（Shadow Volume）
@@ -1018,7 +1052,8 @@ FFT 或流体模拟（高级方式）：在真实物理模拟中，通过快速�
 
 Three.js 提供了高度封装的 THREE.Water 类（来自 examples/jsm/objects/Water.js），支持实时反射、折射与波动纹理。如下为示例代码：
 
-\\begin{lstlisting}[language=Javascript]
+
+\begin{lstlisting}[language=Javascript]
 function createWaterSurface(width, height) {
 
 const waterGeometry = new THREE.PlaneGeometry(width, height, 32, 32);
@@ -1052,7 +1087,7 @@ water.rotation.x = -Math.PI / 2;
 return water;
 
 }
-\\end{lstlisting}
+\end{lstlisting}
 
 
 说明：
@@ -1087,13 +1122,14 @@ LOD（Level of Detail）波动：近景使用高频动态波，远景使用静�
 
 场景漫游是三维可视化最基础的交互功能，允许用户自由调整视角、缩放、旋转观察三维世界。常见实现方式有：轨道控制器（Orbit Controls）：绕定点旋转视角，适用于静态模型展示。第一人称控制（FirstPerson Controls）：用户像“亲临现场”一样游走，适合建筑漫游或训练模拟。飞行控制（Fly Controls）：结合加速度与惯性模拟飞行操作，常用于GIS或无人机视角浏览。在Three.js中，常使用 OrbitControls 控件实现基础漫游：
 
-\\begin{lstlisting}[language=Javascript]
+
+\begin{lstlisting}[language=Javascript]
 const controls = new THREE.OrbitControls(camera, renderer.domElement);
 
 controls.enableDamping = true; // 开启阻尼效果，使操作更平滑
 
 controls.dampingFactor = 0.05; // 阻尼系数，调整相机响应速度
-\\end{lstlisting}
+\end{lstlisting}
 
 
 二、对象选择与操作（Object Selection \& Manipulation）
@@ -1108,7 +1144,8 @@ controls.dampingFactor = 0.05; // 阻尼系数，调整相机响应速度
 
 以下是典型的对象选择代码：
 
-\\begin{lstlisting}[language=Javascript]
+
+\begin{lstlisting}[language=Javascript]
 window.addEventListener('click', function(event) {
 
 mouse.x = (event.clientX / window.innerWidth) \* 2 - 1;
@@ -1128,7 +1165,7 @@ showObjectInfo(selectedObject); // 用户定义的回调
 }
 
 });
-\\end{lstlisting}
+\end{lstlisting}
 
 
 该逻辑可扩展为多选、框选、编辑、拖拽等功能。
@@ -1143,14 +1180,15 @@ showObjectInfo(selectedObject); // 用户定义的回调
 
 在界面上以弹窗（popup）、信息面板（infobox）或标签（label）形式展示。示例代码片段（假设 object.userData 已绑定属性）：
 
-\\begin{lstlisting}[language=Javascript]
+
+\begin{lstlisting}[language=Javascript]
 function showObjectInfo(object) {
 
 const infoPanel = document.getElementById('infoPanel');
 
 const data = object.userData;
 
-infoPanel.innerHTML = \\texttt{
+infoPanel.innerHTML = \texttt{
 
 <h3>${data.name}</h3>
 
@@ -1165,7 +1203,7 @@ infoPanel.innerHTML = \\texttt{
 infoPanel.style.display = 'block';
 
 }
-\\end{lstlisting}
+\end{lstlisting}
 
 
 四、场景分析（Scene Analysis）
@@ -1174,7 +1212,8 @@ infoPanel.style.display = 'block';
 
 剖面分析：沿选定路径或平面剖开三维模型，查看内部结构；视域分析：分析某一视点的可视范围，用于摄像头布设或指挥调度；填挖方计算：对地形进行体积分析，评估工程建设所需的填挖体积；路径规划与碰撞检测：模拟运动路径的合理性与安全性。虽然上述分析多用于城市、地形、BIM等大型场景，Three.js 也可结合计算逻辑或配合 WebAssembly 实现部分分析功能。例如，简单剖面分析可通过定义切割平面并更新材质或几何体来实现：
 
-\\begin{lstlisting}[language=Javascript]
+
+\begin{lstlisting}[language=Javascript]
 const plane = new THREE.Plane(new THREE.Vector3(0, -1, 0), 0);
 
 scene.overrideMaterial = new THREE.MeshStandardMaterial({
@@ -1186,14 +1225,15 @@ clipShadows: true
 });
 
 renderer.localClippingEnabled = true;
-\\end{lstlisting}
+\end{lstlisting}
 
 
 五、实现场景交互
 
 完整的交互设置如下所示：
 
-\\begin{lstlisting}[language=Javascript]
+
+\begin{lstlisting}[language=Javascript]
 function setupInteraction(scene, camera, renderer) {
 
 const controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -1229,7 +1269,7 @@ showObjectInfo(selectedObject);
 return { controls, raycaster };
 
 }
-\\end{lstlisting}
+\end{lstlisting}
 
 
 实时交互技术是三维可视化系统不可或缺的组成部分，涵盖视角控制、对象操作、信息反馈和数据分析等功能。通过合理配置射线检测、交互控件与事件监听，可在 Three.js 等前端框架中实现丰富的人机交互能力。随着技术的发展，未来还可引入语音识别、手势交互、AR/VR等手段，进一步提升系统的交互智能化水平。
@@ -1244,7 +1284,10 @@ return { controls, raycaster };
 
 （1）连续性方程（质量守恒）：
 
-\\begin{equation}\\n\frac{{\partial h}}{{\partial t}} + \frac{{\partial (uh)}}{{\partial x}} + \frac{{\partial (vh)}}{{\partial y}} = R\\n\\end{equation} (6.1.5)
+
+\begin{equation}
+\frac{{\partial h}}{{\partial t}} + \frac{{\partial (uh)}}{{\partial x}} + \frac{{\partial (vh)}}{{\partial y}} = R
+\end{equation} (6.1.5)
 
 （2）动量方程（动量守恒）：
 
@@ -1258,7 +1301,8 @@ Web环境下通常用简化模型或GPU加速模拟，例如结合WebGL实现2D�
 
 洪水淹没分析是评估洪水对地形影响的重要手段。通过将数字高程模型（DEM）与水位高度进行比对，可快速计算哪些区域会被水覆盖、以及被淹深度。如下伪代码展示了基本的单水位静态淹没分析方法：
 
-\\begin{lstlisting}
+
+\begin{lstlisting}
 function simulateFloodInundation(dem, waterLevel) {
 
 const mask = new Float32Array(dem.length);
@@ -1286,7 +1330,7 @@ waterDepth[i] = 0;
 return { mask, waterDepth };
 
 }
-\\end{lstlisting}
+\end{lstlisting}
 
 在可视化层面，可以将mask映射为颜色图层，叠加在地图或三维地形上展示淹没范围；waterDepth可用于设置透明度、颜色渐变或三维水柱模拟。高级分析中，还可以根据不同时间步的水位数据生成动态淹没动画，结合卫星遥感或历史灾害数据进行模型校准。
 
@@ -1314,7 +1358,8 @@ Web 应用中可采用简化网格流模型或预处理模拟结果，动态调�
 
 示例流程如下：
 
-\\begin{lstlisting}
+
+\begin{lstlisting}
 function simulateReservoirOutflow(inflowSeries, ruleCurve) {
 
 let outflowSeries = [];
@@ -1334,7 +1379,7 @@ outflowSeries.push(outflow);
 return outflowSeries;
 
 }
-\\end{lstlisting}
+\end{lstlisting}
 
 结果可用于联动更新下游水位图、淹没范围、警戒信息等。水文模拟技术将物理模型与可视化技术相结合，为防洪预警、水资源管理、城市规划等提供强有力的决策支持。通过 DEM、水位数据、降雨预报等输入，系统可实现：河道水流的动态模拟；多水位下的淹没范围图生成；降雨-径流全过程分析；水库泄洪对下游的影响预测。
 
@@ -1586,7 +1631,7 @@ BIM 模型注重工程几何结构与构件属性，而 GIS 强调空间关系�
 
 展望未来，随着计算机图形学、人工智能和大数据技术的持续突破，三维场景技术将在智慧水利建设中发挥更加重要的作用，成为支撑数字孪生水利系统建设、推动水利治理现代化的关键技术力量。
 
-\\section{思考题与练习}
+\section{思考题与练习}
 
 \##\# 基础题
 
@@ -1605,11 +1650,11 @@ BIM 模型注重工程几何结构与构件属性，而 GIS 强调空间关系�
 7. 讨论本节内容与其他相关技术的集成方案，分析可能遇到的挑战。
 8. 展望本节涉及技术的发展趋势，分析其对智慧水利未来发展的影响。
 
-\\section{本节小结}
+\section{本节小结}
 
 本节内容为智慧水利平台的设计和开发提供了重要的理论基础和技术指导。通过学习本节内容，学生应能够理解相关概念的内涵和应用价值，掌握基本的分析方法和设计原则，为后续章节的学习和实际项目的开展奠定坚实基础。
 
-\\section{6.2 GIS地图服务应用}
+\section{6.2 GIS地图服务应用}
 
 在智慧水利平台的三维场景构建中，选择合适的开发框架是项目成功的关键因素。目前，主流的三维场景开发框架主要包括基于WebGL的轻量级框架、基于GIS的专业框架以及游戏引擎等类型。本节将介绍这些框架的特点、适用场景和基本用法，帮助读者选择最适合智慧水利平台开发的技术方案。
 
@@ -2381,7 +2426,7 @@ Unity和Unreal Engine还提供了先进的虚拟现实（VR）和增强现实（
 
 在智慧水利平台的三维场景构建中，框架的选择至关重要。每种框架都有其独特的优势和应用场景，开发者需要根据项目的实际需求、团队技能和性能要求来选择最合适的开发框架。通过混合使用不同框架，可以充分发挥各框架的优势，解决不同功能模块的开发难题，最终构建出具有高效能、丰富功能和优秀用户体验的智慧水利平台应用。在未来，随着技术的不断进步和需求的不断变化，智慧水利平台将会更加依赖于多种框架的协同工作，以应对日益复杂的水利管理和决策需求。
 
-\\section{思考题与练习}
+\section{思考题与练习}
 
 \##\# 基础题
 
@@ -2400,30 +2445,32 @@ Unity和Unreal Engine还提供了先进的虚拟现实（VR）和增强现实（
 7. 讨论本节内容与其他相关技术的集成方案，分析可能遇到的挑战。
 8. 展望本节涉及技术的发展趋势，分析其对智慧水利未来发展的影响。
 
-\\section{本节小结}
+\section{本节小结}
 
 本节内容为智慧水利平台的设计和开发提供了重要的理论基础和技术指导。通过学习本节内容，学生应能够理解相关概念的内涵和应用价值，掌握基本的分析方法和设计原则，为后续章节的学习和实际项目的开展奠定坚实基础。
 
-\\section{6.3 水利工程三维模型制作}
+\section{6.3 水利工程三维模型制作}
 
 \##\# 6.3.1 水利工程三维模型组成
 
 随着水利工程管理和决策的复杂性增加，传统的二维图纸和数据难以满足日益多样化的需求。三维模型的引入为水利工程提供了更加直观、精确的可视化手段。三高程点直接三角剖分(简称"直等高线是对高程点的图形化表达，比高程点包含了更多信息，通过等高线可以判读山谷、山脊、坡度等，这些特性是高程点不具备的。等高线直接三角剖分(简称"等高线法")是基于等高线的节点进行三角剖分。与直接剖分法不同，该方法考虑了等高线的内在联系及等高线间的关系，因此从理论上讲，所建地形模型与等高线吻合度更佳。此外，该方法同时支持高程点参加建模，见图6.3。ArcGIS，3DE，Autodesk Civil 3D支持该方案。以Civil 3D为例，建模步骤如下：①建立空曲面；②添加高程点；③添加等高线，同时完成建模设置，包括顶点消除因子、顶点补充因子、最小化平面区域方法等。
 
-\\begin{figure}[htbp]
-\\centering
-\\includegraphics[width=0.8\\textwidth]{images/ch6_image55.png}
-\\caption{图06.3}
-\\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{../images/ch6_image55.png}
+\caption{图06.3}
+\end{figure}
 
 
 **图6.3 等高线法建模原理**)一般是采用Delaunay算法，基于已有高程点创建三角网，原理见图6.2。
 
-\\begin{figure}[htbp]
-\\centering
-\\includegraphics[width=0.8\\textwidth]{images/ch6_image54.png}
-\\caption{图06.2}
-\\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{../images/ch6_image54.png}
+\caption{图06.2}
+\end{figure}
 
 
 **图6.2 直接剖分法建模原理**模型不仅能够展示水利设施的物理空间，还能实现与多种数据的融合，为水利工程的设计、建设、运营、维护和决策提供技术支持。水利工程三维模型的构建通常涉及多个方面的内容，这些内容包括地形模型、水利设施模型、水流模拟模型、数据集成与可视化模型、实时监测模型等。以下详细介绍这些组成部分及其功能。
@@ -2526,11 +2573,12 @@ ${S_2} = \sqrt{\frac{1}{{N - 1}}\sum\limits_{i = 1}^N {{{\left( {{D_i} - {D_0}} 
 
 DSI拟合法由法国Nacy大学J.L.Mallet教授提出，其主要特点是可以通过添加约束来建立目标点与初始网格面之间的联系，通过多次加密与插值，使初始面逐渐与目标点贴合，最终达成理想形态，如图6.1所示。
 
-\\begin{figure}[htbp]
-\\centering
-\\includegraphics[width=0.8\\textwidth]{images/ch6_image53.png}
-\\caption{图06.1}
-\\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{../images/ch6_image53.png}
+\caption{图06.1}
+\end{figure}
 
 
 **图6.1 拟合法建模原理**
@@ -2541,11 +2589,12 @@ DSI拟合法可用于GOCAD、BM\_GeoModeler、CnGIM等地质建模软件，因�
 
 高程点直接三角剖分(简称“直接剖分法”)一般是采用Delaunay算法，基于已有高程点创建三角网，原理见图6.3.2。
 
-\\begin{figure}[htbp]
-\\centering
-\\includegraphics[width=0.8\\textwidth]{images/ch6_image54.png}
-\\caption{图06.2}
-\\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{../images/ch6_image54.png}
+\caption{图06.2}
+\end{figure}
 
 
 **图6.3.2 直接剖分法建模原理**
@@ -2556,11 +2605,12 @@ CATIA、3DEXPIEＲENCE(简称“3DE”)采用该种方式，GOCAD、BM\_GeoModel
 
 等高线是对高程点的图形化表达，比高程点包含了更多信息，通过等高线可以判读山谷、山脊、坡度等，这些特性是高程点不具备的。等高线直接三角剖分(简称“等高线法”)是基于等高线的节点进行三角剖分。与直接剖分法不同，该方法考虑了等高线的内在联系及等高线间的关系，因此从理论上讲，所建地形模型与等高线吻合度更佳。此外，该方法同时支持高程点参加建模，见图6.3.3。ArcGIS，3DE，Autodesk Civil 3D支持该方案。以Civil 3D为例，建模步骤如下：①建立空曲面；②添加高程点；③添加等高线，同时完成建模设置，包括顶点消除因子、顶点补充因子、最小化平面区域方法等。
 
-\\begin{figure}[htbp]
-\\centering
-\\includegraphics[width=0.8\\textwidth]{images/ch6_image55.png}
-\\caption{图06.3}
-\\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{../images/ch6_image55.png}
+\caption{图06.3}
+\end{figure}
 
 
 **图6.3.3 等高线法建模原理**
@@ -2573,19 +2623,19 @@ CATIA、3DEXPIEＲENCE(简称“3DE”)采用该种方式，GOCAD、BM\_GeoModel
 
 水利工程中的坝体、坝基、库盘及周围山体环境等部分可以运用次世代建模技术进行模型构建，建模结果可以具有足够真实度。 收集与整理工程资料与图纸所建立的模型为基本模型，这种模型结构简单、面数少且具备较强的可操作性，能够用于实时渲染。但该模型也存在缺乏细节、精度低的缺陷，使系统展示出的工程场景与实际情况相差较大。因此，需通过增加基本模型的网格数及细节建立更加符合实际的高精度模型。但对于水工建筑物这类庞大的工程建筑而言，高精度模型面数可达数百、甚至上千万个，难以用于实时渲染。为解决该问题，本文引入次世代建模技术，即在建立高精度模型之后，烘焙出高精度模型的贴图，并将这些贴图映射在基本模型上，从而渲染出与高精度模型细节一样丰富、能被用来进行实时渲染且真实感较强的次世代模型。如图6.7所示为大坝右岸边坡模型，其中：图6.7(a)为大坝右岸边坡基本模型，图6.7(b)为大坝右岸边坡高精度模型，图6.7(c)为大坝右岸边坡次世代模型。由图6.7可以看出次世代模型的细节与高精度模型的几乎一致，具有比基本模型更加丰富的细节。
 
-**\\begin{figure}[htbp]
-\\centering
-\\includegraphics[width=0.8\\textwidth]{images/ch6_image56.jpg}
-\\caption{图06.4}
-\\end{figure} \\begin{figure}[htbp]
-\\centering
-\\includegraphics[width=0.8\\textwidth]{images/ch6_image57.jpg}
-\\caption{图06.5}
-\\end{figure} \\begin{figure}[htbp]
-\\centering
-\\includegraphics[width=0.8\\textwidth]{images/ch6_image58.jpg}
-\\caption{图06.6}
-\\end{figure}**
+**\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{../images/ch6_image56.jpg}
+\caption{图06.4}
+\end{figure} \begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{../images/ch6_image57.jpg}
+\caption{图06.5}
+\end{figure} \begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{../images/ch6_image58.jpg}
+\caption{图06.6}
+\end{figure}**
 
 **(a) 基本模型 (b) 高精度模型 (c) 次世代模型**
 
@@ -2593,11 +2643,12 @@ CATIA、3DEXPIEＲENCE(简称“3DE”)采用该种方式，GOCAD、BM\_GeoModel
 
 在依据资料及图纸构建基本工程模型后，运用目前常用于建立次世代模型的商用建模软件——ZBrush，根据图6.3.5所示流程建立次世代模型。
 
-\\begin{figure}[htbp]
-\\centering
-\\includegraphics[width=0.8\\textwidth]{images/ch6_image59.png}
-\\caption{图06.7}
-\\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{../images/ch6_image59.png}
+\caption{图06.7}
+\end{figure}
 
 
 **图6.3.5 次世代模型建模流程**
@@ -2606,11 +2657,11 @@ CATIA、3DEXPIEＲENCE(简称“3DE”)采用该种方式，GOCAD、BM\_GeoModel
 
 在建立高精度模型后，可烘焙出几种常用贴图：纹理贴图、法线贴图及AO贴图。其中，纹理贴图主要用来记录模型表面颜色，表现了物体的外貌；法线贴图是在原物体凹凸表面的每个点上均作法线，通过RGB颜色通道实现对法线方向的标记，由此利用贴图描述像素的法线，在视觉效果方面，若在特定位置上应用光源，能够使细节程度较低的表面生成高细节程度的精确光照方向和反射效果；AO贴图也称环境光遮蔽贴图，可以用来表现物体和物体相交或靠近的时候遮挡周围漫反射光线的效果，解决或改善了漏光和阴影不实等问题，并能够综合改善模型细节尤其是暗部阴影，进一步增强模型的层次感与真实感。图6.3.6为某大坝高精度模型以及由高精度烘焙出的模型纹理贴图、法线贴图和AO贴图。
 
-**\\begin{figure}[htbp]
-\\centering
-\\includegraphics[width=0.8\\textwidth]{images/ch6_image60.png}
-\\caption{图06.8}
-\\end{figure}**
+**\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{../images/ch6_image60.png}
+\caption{图06.8}
+\end{figure}**
 
 **图6.3.6 某大坝高精度模型及其贴图**
 
@@ -2772,7 +2823,7 @@ GIS数据集成首先涉及多源空间数据的采集与标准化，包括遥�
 
 三维水利工程模型的最大优势在于打破了传统二维图纸信息割裂的局限，将工程的空间关系、时间演变、结构关联、运行状态等多维信息进行融合展示。它不仅提升了水利设施的可视化效果，也使得设计与决策更加科学。通过与大数据分析平台的集成，模型可进一步拓展其功能，实现预测模拟、优化调度、智能运维等目标。综合而言，三维水利工程模型在设计阶段可用于空间布局优化与可行性研究，在建设阶段辅助施工组织与进度管控，在运行阶段承担实时监测与故障预警，在管理决策层面提供科学依据与辅助分析。未来，随着人工智能、增强现实、元宇宙等技术的不断融合，水利工程三维模型的应用场景将更加广泛，智能化水平也将不断提高，为水利工程的全生命周期管理提供更加坚实的技术支撑。
 
-\\section{思考题与练习}
+\section{思考题与练习}
 
 \##\# 基础题
 
@@ -2791,11 +2842,11 @@ GIS数据集成首先涉及多源空间数据的采集与标准化，包括遥�
 7. 讨论本节内容与其他相关技术的集成方案，分析可能遇到的挑战。
 8. 展望本节涉及技术的发展趋势，分析其对智慧水利未来发展的影响。
 
-\\section{本节小结}
+\section{本节小结}
 
 本节内容为智慧水利平台的设计和开发提供了重要的理论基础和技术指导。通过学习本节内容，学生应能够理解相关概念的内涵和应用价值，掌握基本的分析方法和设计原则，为后续章节的学习和实际项目的开展奠定坚实基础。
 
-\\section{6.4 倾斜摄影技术应用}
+\section{6.4 倾斜摄影技术应用}
 
 无人机倾斜摄影测量技术包括无人机和倾斜摄影测量技术两部分。其中，无人机起到搭载倾斜摄影测量设备的作用，而摄影测量任务则由倾斜航空相机完成。目前应用较多的是五镜头航空相机，分别从正摄、前视、后视、左视和右视五个方位进行数据采集，配合实时差分定位系统获取地物高精度的位置和姿态信息。
 
@@ -2805,11 +2856,12 @@ GIS数据集成首先涉及多源空间数据的采集与标准化，包括遥�
 
 地面控制器和内业数据处理软件。如图6.5所示。
 
-\\begin{figure}[htbp]
-\\centering
-\\includegraphics[width=0.8\\textwidth]{images/ch6_image61.png}
-\\caption{图06.1}
-\\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{../images/ch6_image61.png}
+\caption{图06.1}
+\end{figure}
 
 
 **图6.5 无人机倾斜摄影测量系统结构图**
@@ -2872,11 +2924,12 @@ GIS数据集成首先涉及多源空间数据的采集与标准化，包括遥�
 
 在影像质量检查阶段和Mosaic 阶段对影像颜色进行调整，改善摄区局部因为天气影响导致的有雾、反差较大等颜色问题，以消除因为雾气、反差等因素的影像。数据预处理的质量控制流程见图6.6。
 
-\\begin{figure}[htbp]
-\\centering
-\\includegraphics[width=0.8\\textwidth]{images/ch6_image62.png}
-\\caption{图06.2}
-\\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{../images/ch6_image62.png}
+\caption{图06.2}
+\end{figure}
 
 
 **图6.6 数据预处理的质量控制流程图**
@@ -2961,7 +3014,7 @@ ${m_x} = \sqrt{\frac{1}{n}\sum\limits_{i = 1}^n {{{\left( {D{X_i}} \right)}^2}} 
 
 总的来看，无人机倾斜摄影技术在三维场景模型构建中的应用已成为现代测绘和数字建模的重要手段。其在水利工程等领域的深入应用，不仅提升了模型的精度与表现力，也显著优化了数据获取、建模效率与后期管理流程，成为数字孪生、水利信息化建设中不可或缺的关键环节。
 
-\\section{思考题与练习}
+\section{思考题与练习}
 
 \##\# 基础题
 
@@ -2980,11 +3033,11 @@ ${m_x} = \sqrt{\frac{1}{n}\sum\limits_{i = 1}^n {{{\left( {D{X_i}} \right)}^2}} 
 7. 讨论本节内容与其他相关技术的集成方案，分析可能遇到的挑战。
 8. 展望本节涉及技术的发展趋势，分析其对智慧水利未来发展的影响。
 
-\\section{本节小结}
+\section{本节小结}
 
 本节内容为智慧水利平台的设计和开发提供了重要的理论基础和技术指导。通过学习本节内容，学生应能够理解相关概念的内涵和应用价值，掌握基本的分析方法和设计原则，为后续章节的学习和实际项目的开展奠定坚实基础。
 
-\\section{6.5 水利场景渲染方法}
+\section{6.5 水利场景渲染方法}
 
 \##\# 6.5.1 基础图形渲染技术
 
@@ -3024,7 +3077,10 @@ PBR渲染技术主要基于三种理论：微平面理论、能量守恒定理�
 
 1）微平面理论认为在达到微观尺度之后任何平面都能够运用被称为微平面的细小镜面来进行描绘，通过计算中间向量方向，可以得到物体镜面反射的效果，中间向量的方向与微平面平均取向方向越一致，镜面反射效果越强，中间向量的计算公式如下：
 
-\\begin{equation}\\nh = \frac{{l + v}}{{\left\| {l + v} \right\|}}\\n\\end{equation}6.5.2)
+
+\begin{equation}
+h = \frac{{l + v}}{{\left\| {l + v} \right\|}}
+\end{equation}6.5.2)
 
 式中：*l*为光线向量；*v*为视线向量。
 
@@ -3040,13 +3096,19 @@ ${f_r} = {k_d}{f_{lambert}} + {k_s}{f_{cook - torrance}}$ (6.5.4)
 
 式中：$k_d$为入射光线中被折射部分的能量所占的比率；$k_s$为被反射部分的比率；$f_{lambert}$为漫反射部分；$f_{cook-torrance}$为BRDF镜面反射部分。$f_{lambert}$用如下公式进行计算：
 
-\\begin{equation}\\nf_{lambert}=\frac{c}{\pi}\\n\\end{equation} (6.5.5)
+
+\begin{equation}
+f_{lambert}=\frac{c}{\pi}
+\end{equation} (6.5.5)
 
 式中：*c*为表面颜色，除以$\pi$是为了对漫反射光进行标准化。
 
 BRDF镜面反射方程形式如下：
 
-\\begin{equation}\\nf_{cook-torrance}=\frac{DFG}{4(w_0\cdot n){w_i \cdot n}}\\n\\end{equation} (6.5.6)
+
+\begin{equation}
+f_{cook-torrance}=\frac{DFG}{4(w_0\cdot n){w_i \cdot n}}
+\end{equation} (6.5.6)
 
 式中：*D*为正态分布函数；*F*为菲涅尔方程；*G*为几何函数。
 
@@ -3072,7 +3134,10 @@ $Lu{m_{ave}} = \exp \left( {\frac{1}{N}\sum\limits_{p = 1}^N {\ln \left( {\delta
 
 对于原始图像中的任一点像素点$Lum(p)$，存在如下的映射关系：
 
-\\begin{equation}\\n{L_{scaled}}\left( p \right) = \frac{{\alpha  \cdot Lum\left( p \right)}}{{Lu{m_{ave}}}}\\n\\end{equation}(6.5.10)
+
+\begin{equation}
+{L_{scaled}}\left( p \right) = \frac{{\alpha  \cdot Lum\left( p \right)}}{{Lu{m_{ave}}}}
+\end{equation}(6.5.10)
 
 式中：$\alpha$为常数，其大小决定了映射后的场景整体明暗程度；$L_{scaled}(P)$为映射后的值，为使其值处于（0,1)上，可以用如下公式进行最终的映射：
 
@@ -3276,7 +3341,7 @@ FLIP：结合粒子与网格方法，既具备粒子的灵活性又保持网格�
 
 综上所述，本节构建了一个从视觉层面到物理层面、从静态渲染到动态交互、从局部优化到系统集成的多层次渲染体系。通过引入先进图形技术与平台支持，水利三维场景可视化实现了从“看得见”到“看得懂”的跃升，助力水利工程管理走向智慧化、数字化、可视化的新时代。这些渲染方法不仅服务于模型展示，更在水利设计、调度、运维、安全监测、公众参与等多方面发挥着不可替代的作用，展示了可视化技术在现代水利建设中的巨大潜力与实际价值。
 
-\\section{思考题与练习}
+\section{思考题与练习}
 
 \##\# 基础题
 
@@ -3295,11 +3360,11 @@ FLIP：结合粒子与网格方法，既具备粒子的灵活性又保持网格�
 7. 讨论本节内容与其他相关技术的集成方案，分析可能遇到的挑战。
 8. 展望本节涉及技术的发展趋势，分析其对智慧水利未来发展的影响。
 
-\\section{本节小结}
+\section{本节小结}
 
 本节内容为智慧水利平台的设计和开发提供了重要的理论基础和技术指导。通过学习本节内容，学生应能够理解相关概念的内涵和应用价值，掌握基本的分析方法和设计原则，为后续章节的学习和实际项目的开展奠定坚实基础。
 
-\\section{6.7 数字孪生技术在智慧水利中的应用}
+\section{6.7 数字孪生技术在智慧水利中的应用}
 
 \##\# 6.7.1 数字孪生概述
 
@@ -3355,7 +3420,8 @@ FLIP：结合粒子与网格方法，既具备粒子的灵活性又保持网格�
 
 \##\## 技术架构设计
 
-\\begin{lstlisting}[language=Python]
+
+\begin{lstlisting}[language=Python]
 class WaterDigitalTwin:
     """水利工程数字孪生系统"""
     
@@ -3423,7 +3489,7 @@ class WaterDigitalTwin:
         )
         
         return future_states
-\\end{lstlisting}
+\end{lstlisting}
 
 
 \##\# 6.7.3 典型应用案例
@@ -3446,7 +3512,8 @@ class WaterDigitalTwin:
 
 **核心功能实现**：
 
-\\begin{lstlisting}[language=Python]
+
+\begin{lstlisting}[language=Python]
 class DamDigitalTwin(WaterDigitalTwin):
     """大坝数字孪生系统"""
     
@@ -3518,7 +3585,7 @@ class DamDigitalTwin(WaterDigitalTwin):
             'confidence_interval': self.calculate_prediction_confidence(),
             'alert_thresholds': self.get_safety_thresholds()
         }
-\\end{lstlisting}
+\end{lstlisting}
 
 
 \##\## 智能调度数字孪生
@@ -3532,7 +3599,8 @@ class DamDigitalTwin(WaterDigitalTwin):
 
 **关键技术**：
 
-\\begin{lstlisting}[language=Python]
+
+\begin{lstlisting}[language=Python]
 class BasinDigitalTwin(WaterDigitalTwin):
     """流域数字孪生系统"""
     
@@ -3573,7 +3641,7 @@ class BasinDigitalTwin(WaterDigitalTwin):
             'alternative_strategies': optimal_strategy['alternatives'],
             'expected_benefits': optimal_strategy['benefits']
         }
-\\end{lstlisting}
+\end{lstlisting}
 
 
 \##\# 6.7.4 关键技术挑战与解决方案
@@ -3654,13 +3722,13 @@ class BasinDigitalTwin(WaterDigitalTwin):
 - 水生态修复效果预测
 - 生态调度决策支持
 
-\\section{小结}
+\section{小结}
 
 数字孪生技术为智慧水利发展注入了新的活力，通过构建高保真的数字模型，实现了物理水利工程与数字世界的深度融合。本节详细介绍了数字孪生的基本概念、技术架构、应用案例和发展趋势，为读者提供了全面的技术视角。
 
 数字孪生技术的成功应用需要多学科知识的深度融合，包括水利工程、计算机科学、数据科学、人工智能等。随着技术的不断进步和应用实践的深入，数字孪生必将成为智慧水利建设的重要技术支撑。
 
-\\section{思考题与练习}
+\section{思考题与练习}
 
 \##\# 基础题
 

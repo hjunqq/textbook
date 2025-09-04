@@ -49,15 +49,19 @@ class ChapterNumberProcessor(BaseProcessor):
             self.log_processing("找到章节标题", len(matches))
             # 章节标题保持一级标题
             for match in matches:
-                old_pattern = f'# {re.escape(match)}'
-                new_pattern = f'\\\\chapter{{{match}}}'
-                content = re.sub(old_pattern, new_pattern, content)
+                old_pattern = f'# {match}'
+                new_pattern = f'\\chapter{{{match}}}'
+                content = content.replace(old_pattern, new_pattern)
         
         # 处理小节标题
-        section_count = 0
-        content = re.sub(r'^## (.*?)$', lambda m: (
-            self._increment_section_count() or f'\\\\section{{{m.group(1)}}}'
-        ), content, flags=re.MULTILINE)
+        section_pattern = r'^## (.*?)$'
+        matches = re.findall(section_pattern, content, re.MULTILINE)
+        section_count = len(matches)
+        
+        for section_title in matches:
+            old_section = f'## {section_title}'
+            new_section = f'\\section{{{section_title}}}'
+            content = content.replace(old_section, new_section)
         
         self.log_processing("处理完成", section_count)
         return content
@@ -93,7 +97,7 @@ class MathProcessor(BaseProcessor):
             self.log_processing("块级公式", len(block_matches))
             for i, formula in enumerate(block_matches):
                 # 使用equation环境替换$$
-                equation_env = f'\\\\begin{{equation}}\\\\n{formula.strip()}\\\\n\\\\end{{equation}}'
+                equation_env = f'\\begin{{equation}}\n{formula.strip()}\n\\end{{equation}}'
                 content = content.replace(f'$${formula}$$', equation_env, 1)
         
         # 移除有问题的LaTeX命令（如果有的话）
@@ -133,15 +137,19 @@ class FigureProcessor(BaseProcessor):
             self.log_processing("找到图片", len(figures))
             
             for alt_text, image_path in figures:
-                # 清理图片路径
+                # 清理图片路径 - 生成相对于输出根目录的路径
                 clean_path = image_path.replace('../docs/chapters/', '').replace('docs/chapters/', '')
                 
+                # 确保图片路径是相对于chapters目录的（LaTeX文件在chapters/子目录中）
+                if not clean_path.startswith('../'):
+                    clean_path = '../' + clean_path
+                
                 # 生成LaTeX图片环境
-                latex_figure = f'''\\\\begin{{figure}}[htbp]
-\\\\centering
-\\\\includegraphics[width=0.8\\\\textwidth]{{{clean_path}}}
-\\\\caption{{{alt_text if alt_text else "图片"}}}
-\\\\end{{figure}}'''
+                latex_figure = f'''\\begin{{figure}}[htbp]
+\\centering
+\\includegraphics[width=0.8\\textwidth]{{{clean_path}}}
+\\caption{{{alt_text if alt_text else "图片"}}}
+\\end{{figure}}'''
                 
                 # 替换原markdown语法
                 old_syntax = f'![{alt_text}]({image_path})'
@@ -170,13 +178,13 @@ class CodeProcessor(BaseProcessor):
             for language, code_content in code_blocks:
                 # 使用listings环境
                 if language:
-                    latex_code = f'''\\\\begin{{lstlisting}}[language={language.title()}]
+                    latex_code = f'''\\begin{{lstlisting}}[language={language.title()}]
 {code_content.strip()}
-\\\\end{{lstlisting}}'''
+\\end{{lstlisting}}'''
                 else:
-                    latex_code = f'''\\\\begin{{lstlisting}}
+                    latex_code = f'''\\begin{{lstlisting}}
 {code_content.strip()}
-\\\\end{{lstlisting}}'''
+\\end{{lstlisting}}'''
                 
                 # 替换原语法
                 if language:
@@ -191,7 +199,7 @@ class CodeProcessor(BaseProcessor):
         
         if inline_codes:
             self.log_processing("行内代码", len(inline_codes))
-            content = re.sub(inline_code_pattern, r'\\\\texttt{\1}', content)
+            content = re.sub(inline_code_pattern, r'\\texttt{\1}', content)
         
         self.log_processing("代码处理完成")
         return content
@@ -231,9 +239,9 @@ class AdmonitionProcessor(BaseProcessor):
                     clean_title = ' ' + clean_title
                 
                 # 生成tcolorbox环境
-                latex_admon = f'''\\\\begin{{tcolorbox}}[colback={color}!5!white,colframe={color}!75!black,title={admon_type.title()}{clean_title}]
+                latex_admon = f'''\\begin{{tcolorbox}}[colback={color}!5!white,colframe={color}!75!black,title={admon_type.title()}{clean_title}]
 {admon_content.strip()}
-\\\\end{{tcolorbox}}'''
+\\end{{tcolorbox}}'''
                 
                 # 替换原语法
                 old_syntax = f'!!! {admon_type}{title}\n\n{admon_content}'

@@ -1,9 +1,10 @@
-This is XeTeX, Version 3.141592653-2.6-0.999996 (TeX Live 2024) (preloaded format=xelatex 2024.9.19)  4 SEP 2025 00:14
+This is XeTeX, Version 3.141592653-2.6-0.999996 (TeX Live 2024) (preloaded format=xelatex 2024.9.19)  4 SEP 2025 10:27
 entering extended mode
  restricted \write18 enabled.
+ file:line:error style messages enabled.
  %&-line parsing enabled.
-**main.tex
-(./main.tex
+**e:/2025/教材/智慧水利平台架构与开发/tools/output/main.tex
+(e:/2025/教材/智慧水利平台架构与开发/tools/output/main.tex
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-02-20>
 (c:/texlive/2024/texmf-dist/tex/latex/base/book.cls
@@ -23,12 +24,9 @@ File: bk12.clo 2023/05/17 v1.4n Standard LaTeX file (size option)
 \abovecaptionskip=\skip48
 \belowcaptionskip=\skip49
 \bibindent=\dimen140
-)
-(c:/texlive/2024/texmf-dist/tex/latex/ctex/ctex.sty
-(c:/texlive/2024/texmf-dist/tex/latex/l3kernel/expl3.sty
+) (c:/texlive/2024/texmf-dist/tex/latex/ctex/ctex.sty (c:/texlive/2024/texmf-dist/tex/latex/l3kernel/expl3.sty
 Package: expl3 2024-02-20 L3 programming layer (loader) 
-
-(c:/texlive/2024/texmf-dist/tex/latex/l3backend/l3backend-xetex.def
+ (c:/texlive/2024/texmf-dist/tex/latex/l3backend/l3backend-xetex.def
 File: l3backend-xetex.def 2024-02-20 L3 backend support: XeTeX
 \g__graphics_track_int=\count193
 \l__pdf_internal_box=\box51
@@ -37,17 +35,13 @@ File: l3backend-xetex.def 2024-02-20 L3 backend support: XeTeX
 \g__pdf_backend_link_int=\count196
 ))
 Package: ctex 2022/07/14 v2.5.10 Chinese adapter in LaTeX (CTEX)
-
-(c:/texlive/2024/texmf-dist/tex/latex/ctex/ctexhook.sty
+ (c:/texlive/2024/texmf-dist/tex/latex/ctex/ctexhook.sty
 Package: ctexhook 2022/07/14 v2.5.10 Document and package hooks (CTEX)
-)
-(c:/texlive/2024/texmf-dist/tex/latex/ctex/ctexpatch.sty
+) (c:/texlive/2024/texmf-dist/tex/latex/ctex/ctexpatch.sty
 Package: ctexpatch 2022/07/14 v2.5.10 Patching commands (CTEX)
-)
-(c:/texlive/2024/texmf-dist/tex/latex/base/fix-cm.sty
+) (c:/texlive/2024/texmf-dist/tex/latex/base/fix-cm.sty
 Package: fix-cm 2020/11/24 v1.1t fixes to LaTeX
-
-(c:/texlive/2024/texmf-dist/tex/latex/base/ts1enc.def
+ (c:/texlive/2024/texmf-dist/tex/latex/base/ts1enc.def
 File: ts1enc.def 2001/06/05 v3.0e (jk/car/fm) Standard LaTeX file
 LaTeX Font Info:    Redeclaring font encoding TS1 on input line 47.
 ))
@@ -56,19 +50,13 @@ LaTeX Font Info:    Redeclaring font encoding TS1 on input line 47.
 \l__ctex_tmp_dim=\dimen141
 \g__ctex_section_depth_int=\count198
 \g__ctex_font_size_int=\count199
-
-(c:/texlive/2024/texmf-dist/tex/latex/ctex/config/ctexopts.cfg
+ (c:/texlive/2024/texmf-dist/tex/latex/ctex/config/ctexopts.cfg
 File: ctexopts.cfg 2022/07/14 v2.5.10 Option configuration file (CTEX)
-)
-(c:/texlive/2024/texmf-dist/tex/latex/ctex/engine/ctex-engine-xetex.def
+) (c:/texlive/2024/texmf-dist/tex/latex/ctex/engine/ctex-engine-xetex.def
 File: ctex-engine-xetex.def 2022/07/14 v2.5.10 XeLaTeX adapter (CTEX)
-
-(c:/texlive/2024/texmf-dist/tex/xelatex/xecjk/xeCJK.sty
+ (c:/texlive/2024/texmf-dist/tex/xelatex/xecjk/xeCJK.sty
 Package: xeCJK 2022/08/05 v3.9.1 Typesetting CJK scripts with XeLaTeX
-
-(c:/texlive/2024/texmf-dist/tex/latex/l3packages/xtemplate/xtemplate.sty
-(c:/texlive/2024/texmf-dist/tex/latex/l3packages/xtemplate/xtemplate-2023-10-10
-.sty
+ (c:/texlive/2024/texmf-dist/tex/latex/l3packages/xtemplate/xtemplate.sty (c:/texlive/2024/texmf-dist/tex/latex/l3packages/xtemplate/xtemplate-2023-10-10.sty
 Package: xtemplate 2023-10-10 L3 Experimental prototype document functions
 \l__xtemplate_tmp_dim=\dimen142
 \l__xtemplate_tmp_int=\count266
@@ -135,15 +123,12 @@ Package xtemplate Info: Declaring object type 'xeCJK/punctuation' taking 0
 \g__xeCJK_fam_allocation_int=\count277
 \l__xeCJK_verb_case_int=\count278
 \l__xeCJK_verb_exspace_skip=\skip57
- (c:/texlive/2024/texmf-dist/tex/latex/fontspec/fontspec.sty
-(c:/texlive/2024/texmf-dist/tex/latex/l3packages/xparse/xparse.sty
+ (c:/texlive/2024/texmf-dist/tex/latex/fontspec/fontspec.sty (c:/texlive/2024/texmf-dist/tex/latex/l3packages/xparse/xparse.sty
 Package: xparse 2024-02-18 L3 Experimental document command parser
 )
 Package: fontspec 2024/02/13 v2.9a Font selection for XeLaTeX and LuaLaTeX
-
-(c:/texlive/2024/texmf-dist/tex/latex/fontspec/fontspec-xetex.sty
-Package: fontspec-xetex 2024/02/13 v2.9a Font selection for XeLaTeX and LuaLaTe
-X
+ (c:/texlive/2024/texmf-dist/tex/latex/fontspec/fontspec-xetex.sty
+Package: fontspec-xetex 2024/02/13 v2.9a Font selection for XeLaTeX and LuaLaTeX
 \l__fontspec_script_int=\count279
 \l__fontspec_language_int=\count280
 \l__fontspec_strnum_int=\count281
@@ -158,40 +143,29 @@ X
 \l__fontspec_tmpa_dim=\dimen170
 \l__fontspec_tmpb_dim=\dimen171
 \l__fontspec_tmpc_dim=\dimen172
-
-(c:/texlive/2024/texmf-dist/tex/latex/base/fontenc.sty
+ (c:/texlive/2024/texmf-dist/tex/latex/base/fontenc.sty
 Package: fontenc 2021/04/29 v2.0v Standard LaTeX package
-)
-(c:/texlive/2024/texmf-dist/tex/latex/fontspec/fontspec.cfg)))
-(c:/texlive/2024/texmf-dist/tex/xelatex/xecjk/xeCJK.cfg
+) (c:/texlive/2024/texmf-dist/tex/latex/fontspec/fontspec.cfg))) (c:/texlive/2024/texmf-dist/tex/xelatex/xecjk/xeCJK.cfg
 File: xeCJK.cfg 2022/08/05 v3.9.1 Configuration file for xeCJK package
 ))
 \ccwd=\dimen173
 \l__ctex_ccglue_skip=\skip58
 )
 \l__ctex_ziju_dim=\dimen174
-
-(c:/texlive/2024/texmf-dist/tex/latex/zhnumber/zhnumber.sty
+ (c:/texlive/2024/texmf-dist/tex/latex/zhnumber/zhnumber.sty
 Package: zhnumber 2022/07/14 v3.0 Typesetting numbers with Chinese glyphs
 \l__zhnum_scale_int=\count290
 \l__zhnum_tmp_int=\count291
-
-(c:/texlive/2024/texmf-dist/tex/latex/zhnumber/zhnumber-utf8.cfg
+ (c:/texlive/2024/texmf-dist/tex/latex/zhnumber/zhnumber-utf8.cfg
 File: zhnumber-utf8.cfg 2022/07/14 v3.0 Chinese numerals with UTF8 encoding
-))
-(c:/texlive/2024/texmf-dist/tex/latex/ctex/scheme/ctex-scheme-chinese.def
-File: ctex-scheme-chinese.def 2022/07/14 v2.5.10 Chinese scheme for generic (CT
-EX)
-
-(c:/texlive/2024/texmf-dist/tex/latex/ctex/config/ctex-name-utf8.cfg
+)) (c:/texlive/2024/texmf-dist/tex/latex/ctex/scheme/ctex-scheme-chinese.def
+File: ctex-scheme-chinese.def 2022/07/14 v2.5.10 Chinese scheme for generic (CTEX)
+ (c:/texlive/2024/texmf-dist/tex/latex/ctex/config/ctex-name-utf8.cfg
 File: ctex-name-utf8.cfg 2022/07/14 v2.5.10 Caption with encoding UTF-8 (CTEX)
-))
-(c:/texlive/2024/texmf-dist/tex/latex/tools/indentfirst.sty
+)) (c:/texlive/2024/texmf-dist/tex/latex/tools/indentfirst.sty
 Package: indentfirst 2023/07/02 v1.03 Indent first paragraph (DPC)
-)
-(c:/texlive/2024/texmf-dist/tex/latex/ctex/fontset/ctex-fontset-windows.def
-File: ctex-fontset-windows.def 2022/07/14 v2.5.10 Windows fonts definition (CTE
-X)
+) (c:/texlive/2024/texmf-dist/tex/latex/ctex/fontset/ctex-fontset-windows.def
+File: ctex-fontset-windows.def 2022/07/14 v2.5.10 Windows fonts definition (CTEX)
 
 Package fontspec Info: Could not resolve font "KaiTi/B" (it probably doesn't
 (fontspec)             exist).
@@ -222,8 +196,7 @@ Package fontspec Info: Font family 'SimSun(0)' created for font 'SimSun' with
 (fontspec)             <->"KaiTi/OT:script=hani;language=dflt;"
 (fontspec)             - 'italic small caps'  (m/scit) with NFSS spec.: 
 
-))
-(c:/texlive/2024/texmf-dist/tex/latex/ctex/config/ctex.cfg
+)) (c:/texlive/2024/texmf-dist/tex/latex/ctex/config/ctex.cfg
 File: ctex.cfg 2022/07/14 v2.5.10 Configuration file (CTEX)
 )
 
@@ -252,15 +225,12 @@ Package fontspec Info: Font family 'MicrosoftYaHei(0)' created for font
 
 (c:/texlive/2024/texmf-dist/tex/latex/geometry/geometry.sty
 Package: geometry 2020/01/02 v5.9 Page Geometry
-
-(c:/texlive/2024/texmf-dist/tex/latex/graphics/keyval.sty
+ (c:/texlive/2024/texmf-dist/tex/latex/graphics/keyval.sty
 Package: keyval 2022/05/29 v1.15 key=value parser (DPC)
 \KV@toks@=\toks17
-)
-(c:/texlive/2024/texmf-dist/tex/generic/iftex/ifvtex.sty
+) (c:/texlive/2024/texmf-dist/tex/generic/iftex/ifvtex.sty
 Package: ifvtex 2019/10/25 v1.7 ifvtex legacy package. Use iftex instead.
-
-(c:/texlive/2024/texmf-dist/tex/generic/iftex/iftex.sty
+ (c:/texlive/2024/texmf-dist/tex/generic/iftex/iftex.sty
 Package: iftex 2022/02/03 v1.0f TeX engine tests
 ))
 \Gm@cnth=\count292
@@ -275,11 +245,9 @@ Package: iftex 2022/02/03 v1.0f TeX engine tests
 \Gm@layouthoffset=\dimen181
 \Gm@layoutvoffset=\dimen182
 \Gm@dimlist=\toks18
-)
-(c:/texlive/2024/texmf-dist/tex/latex/setspace/setspace.sty
+) (c:/texlive/2024/texmf-dist/tex/latex/setspace/setspace.sty
 Package: setspace 2022/12/04 v6.7b set line spacing
-)
-(c:/texlive/2024/texmf-dist/tex/latex/tools/longtable.sty
+) (c:/texlive/2024/texmf-dist/tex/latex/tools/longtable.sty
 Package: longtable 2023-11-01 v4.19 Multi-page Table package (DPC)
 \LTleft=\skip59
 \LTright=\skip60
@@ -297,8 +265,7 @@ Package: longtable 2023-11-01 v4.19 Multi-page Table package (DPC)
 \c@LT@tables=\count298
 \c@LT@chunks=\count299
 \LT@p@ftn=\toks19
-)
-(c:/texlive/2024/texmf-dist/tex/latex/booktabs/booktabs.sty
+) (c:/texlive/2024/texmf-dist/tex/latex/booktabs/booktabs.sty
 Package: booktabs 2020/01/12 v1.61803398 Publication quality tables
 \heavyrulewidth=\dimen184
 \lightrulewidth=\dimen185
@@ -317,8 +284,7 @@ Package: booktabs 2020/01/12 v1.61803398 Publication quality tables
 \@thisruleclass=\count302
 \@lastruleclass=\count303
 \@thisrulewidth=\dimen196
-)
-(c:/texlive/2024/texmf-dist/tex/latex/tools/array.sty
+) (c:/texlive/2024/texmf-dist/tex/latex/tools/array.sty
 Package: array 2023/10/16 v2.5g Tabular extension package (FMi)
 \col@sep=\dimen197
 \ar@mcellbox=\box60
@@ -327,8 +293,7 @@ Package: array 2023/10/16 v2.5g Tabular extension package (FMi)
 \extratabsurround=\skip63
 \backup@length=\skip64
 \ar@cellbox=\box61
-)
-(c:/texlive/2024/texmf-dist/tex/latex/tools/calc.sty
+) (c:/texlive/2024/texmf-dist/tex/latex/tools/calc.sty
 Package: calc 2023/07/08 v4.3 Infix arithmetic (KKT,FJ)
 \calc@Acount=\count304
 \calc@Bcount=\count305
@@ -340,44 +305,33 @@ LaTeX Info: Redefining \setlength on input line 80.
 LaTeX Info: Redefining \addtolength on input line 81.
 \calc@Ccount=\count306
 \calc@Cskip=\skip67
-)
-(c:/texlive/2024/texmf-dist/tex/latex/etoolbox/etoolbox.sty
+) (c:/texlive/2024/texmf-dist/tex/latex/etoolbox/etoolbox.sty
 Package: etoolbox 2020/10/05 v2.5k e-TeX tools for LaTeX (JAW)
 \etb@tempcnta=\count307
-)
-(c:/texlive/2024/texmf-dist/tex/latex/footnotehyper/footnotehyper.sty
+) (c:/texlive/2024/texmf-dist/tex/latex/footnotehyper/footnotehyper.sty
 Package: footnotehyper 2021/08/13 v1.1e hyperref aware footnote.sty (JFB)
 \FNH@notes=\box62
 \FNH@width=\dimen257
 \FNH@toks=\toks21
-)
-(c:/texlive/2024/texmf-dist/tex/latex/graphics/graphicx.sty
+) (c:/texlive/2024/texmf-dist/tex/latex/graphics/graphicx.sty
 Package: graphicx 2021/09/16 v1.2d Enhanced LaTeX Graphics (DPC,SPQR)
-
-(c:/texlive/2024/texmf-dist/tex/latex/graphics/graphics.sty
+ (c:/texlive/2024/texmf-dist/tex/latex/graphics/graphics.sty
 Package: graphics 2022/03/10 v1.4e Standard LaTeX Graphics (DPC,SPQR)
-
-(c:/texlive/2024/texmf-dist/tex/latex/graphics/trig.sty
+ (c:/texlive/2024/texmf-dist/tex/latex/graphics/trig.sty
 Package: trig 2021/08/11 v1.11 sin cos tan (DPC)
-)
-(c:/texlive/2024/texmf-dist/tex/latex/graphics-cfg/graphics.cfg
+) (c:/texlive/2024/texmf-dist/tex/latex/graphics-cfg/graphics.cfg
 File: graphics.cfg 2016/06/04 v1.11 sample graphics configuration
 )
 Package graphics Info: Driver file: xetex.def on input line 107.
-
-(c:/texlive/2024/texmf-dist/tex/latex/graphics-def/xetex.def
+ (c:/texlive/2024/texmf-dist/tex/latex/graphics-def/xetex.def
 File: xetex.def 2022/09/22 v5.0n Graphics/color driver for xetex
 ))
 \Gin@req@height=\dimen258
 \Gin@req@width=\dimen259
-)
-(c:/texlive/2024/texmf-dist/tex/latex/grffile/grffile.sty
-Package: grffile 2019/11/11 v2.1 Extended file name support for graphics (legac
-y)
-Package grffile Info: This package is an empty stub for compatibility on input 
-line 40.
-)
-(c:/texlive/2024/texmf-dist/tex/generic/ulem/ulem.sty
+) (c:/texlive/2024/texmf-dist/tex/latex/grffile/grffile.sty
+Package: grffile 2019/11/11 v2.1 Extended file name support for graphics (legacy)
+Package grffile Info: This package is an empty stub for compatibility on input line 40.
+) (c:/texlive/2024/texmf-dist/tex/generic/ulem/ulem.sty
 \UL@box=\box63
 \UL@hyphenbox=\box64
 \UL@skip=\skip68
@@ -388,25 +342,21 @@ line 40.
 \ULC@box=\box65
 Package: ulem 2019/11/18
 \ULdepth=\dimen262
-)
-(c:/texlive/2024/texmf-dist/tex/latex/amsmath/amsmath.sty
+) (c:/texlive/2024/texmf-dist/tex/latex/amsmath/amsmath.sty
 Package: amsmath 2023/05/13 v2.17o AMS math features
 \@mathmargin=\skip69
 
 For additional information on amsmath, use the `?' option.
 (c:/texlive/2024/texmf-dist/tex/latex/amsmath/amstext.sty
 Package: amstext 2021/08/26 v2.01 AMS text
-
-(c:/texlive/2024/texmf-dist/tex/latex/amsmath/amsgen.sty
+ (c:/texlive/2024/texmf-dist/tex/latex/amsmath/amsgen.sty
 File: amsgen.sty 1999/11/30 v2.0 generic functions
 \@emptytoks=\toks23
 \ex@=\dimen263
-))
-(c:/texlive/2024/texmf-dist/tex/latex/amsmath/amsbsy.sty
+)) (c:/texlive/2024/texmf-dist/tex/latex/amsmath/amsbsy.sty
 Package: amsbsy 1999/11/29 v1.2d Bold Symbols
 \pmbraise@=\dimen264
-)
-(c:/texlive/2024/texmf-dist/tex/latex/amsmath/amsopn.sty
+) (c:/texlive/2024/texmf-dist/tex/latex/amsmath/amsopn.sty
 Package: amsopn 2022/04/08 v2.04 operator names
 )
 \inf@bad=\count309
@@ -456,27 +406,23 @@ LaTeX Info: Redefining \Relbar on input line 971.
 \mathdisplay@stack=\toks27
 LaTeX Info: Redefining \[ on input line 2953.
 LaTeX Info: Redefining \] on input line 2954.
-)
-(c:/texlive/2024/texmf-dist/tex/latex/amsfonts/amsfonts.sty
+) (c:/texlive/2024/texmf-dist/tex/latex/amsfonts/amsfonts.sty
 Package: amsfonts 2013/01/14 v3.01 Basic AMSFonts support
 \symAMSa=\mathgroup4
 \symAMSb=\mathgroup5
 LaTeX Font Info:    Redeclaring math symbol \hbar on input line 98.
 LaTeX Font Info:    Overwriting math alphabet `\mathfrak' in version `bold'
 (Font)                  U/euf/m/n --> U/euf/b/n on input line 106.
-)
-(c:/texlive/2024/texmf-dist/tex/latex/amsfonts/amssymb.sty
+) (c:/texlive/2024/texmf-dist/tex/latex/amsfonts/amssymb.sty
 Package: amssymb 2013/01/14 v3.01 AMS font symbols
-)
-(c:/texlive/2024/texmf-dist/tex/latex/float/float.sty
+) (c:/texlive/2024/texmf-dist/tex/latex/float/float.sty
 Package: float 2001/11/08 v1.3d Float enhancements (AL)
 \c@float@type=\count321
 \float@exts=\toks28
 \float@box=\box68
 \@float@everytoks=\toks29
 \@floatcapt=\box69
-)
-(c:/texlive/2024/texmf-dist/tex/latex/subfigure/subfigure.sty
+) (c:/texlive/2024/texmf-dist/tex/latex/subfigure/subfigure.sty
 Package: subfigure 2002/03/15 v2.1.5 subfigure package
 \subfigtopskip=\skip72
 \subfigcapskip=\skip73
@@ -495,8 +441,7 @@ Package: subfigure 2002/03/15 v2.1.5 subfigure package
 (c:/texlive/2024/texmf-dist/tex/latex/subfigure/subfigure.cfg)
 \subfig@top=\skip76
 \subfig@bottom=\skip77
-)
-(c:/texlive/2024/texmf-dist/tex/latex/listings/listings.sty
+) (c:/texlive/2024/texmf-dist/tex/latex/listings/listings.sty
 \lst@mode=\count326
 \lst@gtempboxa=\box70
 \lst@token=\toks30
@@ -509,35 +454,28 @@ Package: subfigure 2002/03/15 v2.1.5 subfigure package
 \lst@newlines=\count330
 \lst@lineno=\count331
 \lst@maxwidth=\dimen277
-
-(c:/texlive/2024/texmf-dist/tex/latex/listings/lstpatch.sty
+ (c:/texlive/2024/texmf-dist/tex/latex/listings/lstpatch.sty
 File: lstpatch.sty 2024/02/21 1.10 (Carsten Heinz)
-)
-(c:/texlive/2024/texmf-dist/tex/latex/listings/lstmisc.sty
+) (c:/texlive/2024/texmf-dist/tex/latex/listings/lstmisc.sty
 File: lstmisc.sty 2024/02/21 1.10 (Carsten Heinz)
 \c@lstnumber=\count332
 \lst@skipnumbers=\count333
 \lst@framebox=\box71
-)
-(c:/texlive/2024/texmf-dist/tex/latex/listings/listings.cfg
+) (c:/texlive/2024/texmf-dist/tex/latex/listings/listings.cfg
 File: listings.cfg 2024/02/21 1.10 listings configuration
 ))
 Package: listings 2024/02/21 1.10 (Carsten Heinz)
-
-(c:/texlive/2024/texmf-dist/tex/xelatex/xecjk/xeCJK-listings.sty
+ (c:/texlive/2024/texmf-dist/tex/xelatex/xecjk/xeCJK-listings.sty
 Package: xeCJK-listings 2022/08/05 v3.9.1 xeCJK patch file for listings
 \l__xeCJK_listings_max_char_int=\count334
 \l__xeCJK_listings_flag_int=\count335
-)
-(c:/texlive/2024/texmf-dist/tex/latex/xcolor/xcolor.sty
+) (c:/texlive/2024/texmf-dist/tex/latex/xcolor/xcolor.sty
 Package: xcolor 2023/11/15 v3.01 LaTeX color extensions (UK)
-
-(c:/texlive/2024/texmf-dist/tex/latex/graphics-cfg/color.cfg
+ (c:/texlive/2024/texmf-dist/tex/latex/graphics-cfg/color.cfg
 File: color.cfg 2016/01/02 v1.6 sample color configuration
 )
 Package xcolor Info: Driver file: xetex.def on input line 274.
-
-(c:/texlive/2024/texmf-dist/tex/latex/graphics/mathcolor.ltx)
+ (c:/texlive/2024/texmf-dist/tex/latex/graphics/mathcolor.ltx)
 Package xcolor Info: Model `cmy' substituted by `cmy0' on input line 1350.
 Package xcolor Info: Model `RGB' extended on input line 1366.
 Package xcolor Info: Model `HTML' substituted by `rgb' on input line 1368.
@@ -546,37 +484,24 @@ Package xcolor Info: Model `tHsb' substituted by `hsb' on input line 1370.
 Package xcolor Info: Model `HSB' substituted by `hsb' on input line 1371.
 Package xcolor Info: Model `Gray' substituted by `gray' on input line 1372.
 Package xcolor Info: Model `wave' substituted by `hsb' on input line 1373.
-)
-(c:/texlive/2024/texmf-dist/tex/latex/tcolorbox/tcolorbox.sty
+) (c:/texlive/2024/texmf-dist/tex/latex/tcolorbox/tcolorbox.sty
 Package: tcolorbox 2024/01/10 version 6.2.0 text color boxes
-
-(c:/texlive/2024/texmf-dist/tex/latex/pgf/basiclayer/pgf.sty
-(c:/texlive/2024/texmf-dist/tex/latex/pgf/utilities/pgfrcs.sty
-(c:/texlive/2024/texmf-dist/tex/generic/pgf/utilities/pgfutil-common.tex
+ (c:/texlive/2024/texmf-dist/tex/latex/pgf/basiclayer/pgf.sty (c:/texlive/2024/texmf-dist/tex/latex/pgf/utilities/pgfrcs.sty (c:/texlive/2024/texmf-dist/tex/generic/pgf/utilities/pgfutil-common.tex
 \pgfutil@everybye=\toks31
 \pgfutil@tempdima=\dimen278
 \pgfutil@tempdimb=\dimen279
-)
-(c:/texlive/2024/texmf-dist/tex/generic/pgf/utilities/pgfutil-latex.def
+) (c:/texlive/2024/texmf-dist/tex/generic/pgf/utilities/pgfutil-latex.def
 \pgfutil@abb=\box72
-)
-(c:/texlive/2024/texmf-dist/tex/generic/pgf/utilities/pgfrcs.code.tex
-(c:/texlive/2024/texmf-dist/tex/generic/pgf/pgf.revision.tex)
+) (c:/texlive/2024/texmf-dist/tex/generic/pgf/utilities/pgfrcs.code.tex (c:/texlive/2024/texmf-dist/tex/generic/pgf/pgf.revision.tex)
 Package: pgfrcs 2023-01-15 v3.1.10 (3.1.10)
 ))
 Package: pgf 2023-01-15 v3.1.10 (3.1.10)
-
-(c:/texlive/2024/texmf-dist/tex/latex/pgf/basiclayer/pgfcore.sty
-(c:/texlive/2024/texmf-dist/tex/latex/pgf/systemlayer/pgfsys.sty
-(c:/texlive/2024/texmf-dist/tex/generic/pgf/systemlayer/pgfsys.code.tex
+ (c:/texlive/2024/texmf-dist/tex/latex/pgf/basiclayer/pgfcore.sty (c:/texlive/2024/texmf-dist/tex/latex/pgf/systemlayer/pgfsys.sty (c:/texlive/2024/texmf-dist/tex/generic/pgf/systemlayer/pgfsys.code.tex
 Package: pgfsys 2023-01-15 v3.1.10 (3.1.10)
-
-(c:/texlive/2024/texmf-dist/tex/generic/pgf/utilities/pgfkeys.code.tex
+ (c:/texlive/2024/texmf-dist/tex/generic/pgf/utilities/pgfkeys.code.tex
 \pgfkeys@pathtoks=\toks32
 \pgfkeys@temptoks=\toks33
-
-(c:/texlive/2024/texmf-dist/tex/generic/pgf/utilities/pgfkeyslibraryfiltered.co
-de.tex
+ (c:/texlive/2024/texmf-dist/tex/generic/pgf/utilities/pgfkeyslibraryfiltered.code.tex
 \pgfkeys@tmptoks=\toks34
 ))
 \pgf@x=\dimen280
@@ -603,61 +528,32 @@ de.tex
 File: pgf.cfg 2023-01-15 v3.1.10 (3.1.10)
 )
 Driver file for pgf: pgfsys-xetex.def
-
-(c:/texlive/2024/texmf-dist/tex/generic/pgf/systemlayer/pgfsys-xetex.def
+ (c:/texlive/2024/texmf-dist/tex/generic/pgf/systemlayer/pgfsys-xetex.def
 File: pgfsys-xetex.def 2023-01-15 v3.1.10 (3.1.10)
-
-(c:/texlive/2024/texmf-dist/tex/generic/pgf/systemlayer/pgfsys-dvipdfmx.def
+ (c:/texlive/2024/texmf-dist/tex/generic/pgf/systemlayer/pgfsys-dvipdfmx.def
 File: pgfsys-dvipdfmx.def 2023-01-15 v3.1.10 (3.1.10)
-
-(c:/texlive/2024/texmf-dist/tex/generic/pgf/systemlayer/pgfsys-common-pdf.def
+ (c:/texlive/2024/texmf-dist/tex/generic/pgf/systemlayer/pgfsys-common-pdf.def
 File: pgfsys-common-pdf.def 2023-01-15 v3.1.10 (3.1.10)
 )
 \pgfsys@objnum=\count341
-)))
-(c:/texlive/2024/texmf-dist/tex/generic/pgf/systemlayer/pgfsyssoftpath.code.tex
+))) (c:/texlive/2024/texmf-dist/tex/generic/pgf/systemlayer/pgfsyssoftpath.code.tex
 File: pgfsyssoftpath.code.tex 2023-01-15 v3.1.10 (3.1.10)
 \pgfsyssoftpath@smallbuffer@items=\count342
 \pgfsyssoftpath@bigbuffer@items=\count343
-)
-(c:/texlive/2024/texmf-dist/tex/generic/pgf/systemlayer/pgfsysprotocol.code.tex
+) (c:/texlive/2024/texmf-dist/tex/generic/pgf/systemlayer/pgfsysprotocol.code.tex
 File: pgfsysprotocol.code.tex 2023-01-15 v3.1.10 (3.1.10)
 )) (c:/texlive/2024/texmf-dist/tex/generic/pgf/basiclayer/pgfcore.code.tex
 Package: pgfcore 2023-01-15 v3.1.10 (3.1.10)
-
-(c:/texlive/2024/texmf-dist/tex/generic/pgf/math/pgfmath.code.tex
-(c:/texlive/2024/texmf-dist/tex/generic/pgf/math/pgfmathutil.code.tex)
-(c:/texlive/2024/texmf-dist/tex/generic/pgf/math/pgfmathparser.code.tex
+ (c:/texlive/2024/texmf-dist/tex/generic/pgf/math/pgfmath.code.tex (c:/texlive/2024/texmf-dist/tex/generic/pgf/math/pgfmathutil.code.tex) (c:/texlive/2024/texmf-dist/tex/generic/pgf/math/pgfmathparser.code.tex
 \pgfmath@dimen=\dimen290
 \pgfmath@count=\count344
 \pgfmath@box=\box73
 \pgfmath@toks=\toks38
 \pgfmath@stack@operand=\toks39
 \pgfmath@stack@operation=\toks40
-)
-(c:/texlive/2024/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.code.tex)
-(c:/texlive/2024/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.basic.code.te
-x)
-(c:/texlive/2024/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.trigonometric
-.code.tex)
-(c:/texlive/2024/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.random.code.t
-ex)
-(c:/texlive/2024/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.comparison.co
-de.tex)
-(c:/texlive/2024/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.base.code.tex
-)
-(c:/texlive/2024/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.round.code.te
-x)
-(c:/texlive/2024/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.misc.code.tex
-)
-(c:/texlive/2024/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.integerarithm
-etics.code.tex)
-(c:/texlive/2024/texmf-dist/tex/generic/pgf/math/pgfmathcalc.code.tex)
-(c:/texlive/2024/texmf-dist/tex/generic/pgf/math/pgfmathfloat.code.tex
+) (c:/texlive/2024/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.code.tex) (c:/texlive/2024/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.basic.code.tex) (c:/texlive/2024/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.trigonometric.code.tex) (c:/texlive/2024/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.random.code.tex) (c:/texlive/2024/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.comparison.code.tex) (c:/texlive/2024/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.base.code.tex) (c:/texlive/2024/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.round.code.tex) (c:/texlive/2024/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.misc.code.tex) (c:/texlive/2024/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.integerarithmetics.code.tex) (c:/texlive/2024/texmf-dist/tex/generic/pgf/math/pgfmathcalc.code.tex) (c:/texlive/2024/texmf-dist/tex/generic/pgf/math/pgfmathfloat.code.tex
 \c@pgfmathroundto@lastzeros=\count345
-))
-(c:/texlive/2024/texmf-dist/tex/generic/pgf/math/pgfint.code.tex)
-(c:/texlive/2024/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepoints.code.tex
+)) (c:/texlive/2024/texmf-dist/tex/generic/pgf/math/pgfint.code.tex) (c:/texlive/2024/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepoints.code.tex
 File: pgfcorepoints.code.tex 2023-01-15 v3.1.10 (3.1.10)
 \pgf@picminx=\dimen291
 \pgf@picmaxx=\dimen292
@@ -673,102 +569,74 @@ File: pgfcorepoints.code.tex 2023-01-15 v3.1.10 (3.1.10)
 \pgf@yy=\dimen302
 \pgf@zx=\dimen303
 \pgf@zy=\dimen304
-)
-(c:/texlive/2024/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepathconstruct.cod
-e.tex
+) (c:/texlive/2024/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepathconstruct.code.tex
 File: pgfcorepathconstruct.code.tex 2023-01-15 v3.1.10 (3.1.10)
 \pgf@path@lastx=\dimen305
 \pgf@path@lasty=\dimen306
-)
-(c:/texlive/2024/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepathusage.code.te
-x
+) (c:/texlive/2024/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepathusage.code.tex
 File: pgfcorepathusage.code.tex 2023-01-15 v3.1.10 (3.1.10)
 \pgf@shorten@end@additional=\dimen307
 \pgf@shorten@start@additional=\dimen308
-)
-(c:/texlive/2024/texmf-dist/tex/generic/pgf/basiclayer/pgfcorescopes.code.tex
+) (c:/texlive/2024/texmf-dist/tex/generic/pgf/basiclayer/pgfcorescopes.code.tex
 File: pgfcorescopes.code.tex 2023-01-15 v3.1.10 (3.1.10)
 \pgfpic=\box74
 \pgf@hbox=\box75
 \pgf@layerbox@main=\box76
 \pgf@picture@serial@count=\count346
-)
-(c:/texlive/2024/texmf-dist/tex/generic/pgf/basiclayer/pgfcoregraphicstate.code
-.tex
+) (c:/texlive/2024/texmf-dist/tex/generic/pgf/basiclayer/pgfcoregraphicstate.code.tex
 File: pgfcoregraphicstate.code.tex 2023-01-15 v3.1.10 (3.1.10)
 \pgflinewidth=\dimen309
-)
-(c:/texlive/2024/texmf-dist/tex/generic/pgf/basiclayer/pgfcoretransformations.c
-ode.tex
+) (c:/texlive/2024/texmf-dist/tex/generic/pgf/basiclayer/pgfcoretransformations.code.tex
 File: pgfcoretransformations.code.tex 2023-01-15 v3.1.10 (3.1.10)
 \pgf@pt@x=\dimen310
 \pgf@pt@y=\dimen311
 \pgf@pt@temp=\dimen312
-)
-(c:/texlive/2024/texmf-dist/tex/generic/pgf/basiclayer/pgfcorequick.code.tex
+) (c:/texlive/2024/texmf-dist/tex/generic/pgf/basiclayer/pgfcorequick.code.tex
 File: pgfcorequick.code.tex 2023-01-15 v3.1.10 (3.1.10)
-)
-(c:/texlive/2024/texmf-dist/tex/generic/pgf/basiclayer/pgfcoreobjects.code.tex
+) (c:/texlive/2024/texmf-dist/tex/generic/pgf/basiclayer/pgfcoreobjects.code.tex
 File: pgfcoreobjects.code.tex 2023-01-15 v3.1.10 (3.1.10)
-)
-(c:/texlive/2024/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepathprocessing.co
-de.tex
+) (c:/texlive/2024/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepathprocessing.code.tex
 File: pgfcorepathprocessing.code.tex 2023-01-15 v3.1.10 (3.1.10)
-)
-(c:/texlive/2024/texmf-dist/tex/generic/pgf/basiclayer/pgfcorearrows.code.tex
+) (c:/texlive/2024/texmf-dist/tex/generic/pgf/basiclayer/pgfcorearrows.code.tex
 File: pgfcorearrows.code.tex 2023-01-15 v3.1.10 (3.1.10)
 \pgfarrowsep=\dimen313
-)
-(c:/texlive/2024/texmf-dist/tex/generic/pgf/basiclayer/pgfcoreshade.code.tex
+) (c:/texlive/2024/texmf-dist/tex/generic/pgf/basiclayer/pgfcoreshade.code.tex
 File: pgfcoreshade.code.tex 2023-01-15 v3.1.10 (3.1.10)
 \pgf@max=\dimen314
 \pgf@sys@shading@range@num=\count347
 \pgf@shadingcount=\count348
-)
-(c:/texlive/2024/texmf-dist/tex/generic/pgf/basiclayer/pgfcoreimage.code.tex
+) (c:/texlive/2024/texmf-dist/tex/generic/pgf/basiclayer/pgfcoreimage.code.tex
 File: pgfcoreimage.code.tex 2023-01-15 v3.1.10 (3.1.10)
-)
-(c:/texlive/2024/texmf-dist/tex/generic/pgf/basiclayer/pgfcoreexternal.code.tex
+) (c:/texlive/2024/texmf-dist/tex/generic/pgf/basiclayer/pgfcoreexternal.code.tex
 File: pgfcoreexternal.code.tex 2023-01-15 v3.1.10 (3.1.10)
 \pgfexternal@startupbox=\box77
 ) (c:/texlive/2024/texmf-dist/tex/generic/pgf/basiclayer/pgfcorelayers.code.tex
 File: pgfcorelayers.code.tex 2023-01-15 v3.1.10 (3.1.10)
-)
-(c:/texlive/2024/texmf-dist/tex/generic/pgf/basiclayer/pgfcoretransparency.code
-.tex
+) (c:/texlive/2024/texmf-dist/tex/generic/pgf/basiclayer/pgfcoretransparency.code.tex
 File: pgfcoretransparency.code.tex 2023-01-15 v3.1.10 (3.1.10)
-)
-(c:/texlive/2024/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepatterns.code.tex
+) (c:/texlive/2024/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepatterns.code.tex
 File: pgfcorepatterns.code.tex 2023-01-15 v3.1.10 (3.1.10)
 ) (c:/texlive/2024/texmf-dist/tex/generic/pgf/basiclayer/pgfcorerdf.code.tex
 File: pgfcorerdf.code.tex 2023-01-15 v3.1.10 (3.1.10)
-))) (c:/texlive/2024/texmf-dist/tex/generic/pgf/modules/pgfmoduleshapes.code.te
-x
+))) (c:/texlive/2024/texmf-dist/tex/generic/pgf/modules/pgfmoduleshapes.code.tex
 File: pgfmoduleshapes.code.tex 2023-01-15 v3.1.10 (3.1.10)
 \pgfnodeparttextbox=\box78
-)
-(c:/texlive/2024/texmf-dist/tex/generic/pgf/modules/pgfmoduleplot.code.tex
+) (c:/texlive/2024/texmf-dist/tex/generic/pgf/modules/pgfmoduleplot.code.tex
 File: pgfmoduleplot.code.tex 2023-01-15 v3.1.10 (3.1.10)
-)
-(c:/texlive/2024/texmf-dist/tex/latex/pgf/compatibility/pgfcomp-version-0-65.st
-y
+) (c:/texlive/2024/texmf-dist/tex/latex/pgf/compatibility/pgfcomp-version-0-65.sty
 Package: pgfcomp-version-0-65 2023-01-15 v3.1.10 (3.1.10)
 \pgf@nodesepstart=\dimen315
 \pgf@nodesepend=\dimen316
-)
-(c:/texlive/2024/texmf-dist/tex/latex/pgf/compatibility/pgfcomp-version-1-18.st
-y
+) (c:/texlive/2024/texmf-dist/tex/latex/pgf/compatibility/pgfcomp-version-1-18.sty
 Package: pgfcomp-version-1-18 2023-01-15 v3.1.10 (3.1.10)
 )) (c:/texlive/2024/texmf-dist/tex/latex/tools/verbatim.sty
 Package: verbatim 2023-11-06 v1.5v LaTeX2e package for verbatim enhancements
 \every@verbatim=\toks41
 \verbatim@line=\toks42
 \verbatim@in@stream=\read3
-)
-(c:/texlive/2024/texmf-dist/tex/latex/environ/environ.sty
+) (c:/texlive/2024/texmf-dist/tex/latex/environ/environ.sty
 Package: environ 2014/05/04 v0.3 A new way to define environments
-
-(c:/texlive/2024/texmf-dist/tex/latex/trimspaces/trimspaces.sty
+ (c:/texlive/2024/texmf-dist/tex/latex/trimspaces/trimspaces.sty
 Package: trimspaces 2009/09/17 v1.1 Trim spaces around a token list
 ))
 \tcb@titlebox=\box79
@@ -784,16 +652,13 @@ Package: trimspaces 2009/09/17 v1.1 Trim spaces around a token list
 \tcb@temp=\box85
 \tcb@temp=\box86
 \tcb@temp=\box87
-)
-(c:/texlive/2024/texmf-dist/tex/latex/tcolorbox/tcbbreakable.code.tex
+) (c:/texlive/2024/texmf-dist/tex/latex/tcolorbox/tcbbreakable.code.tex
 Library (tcolorbox): 'tcbbreakable.code.tex' version '6.2.0'
 (c:/texlive/2024/texmf-dist/tex/latex/pdfcol/pdfcol.sty
 Package: pdfcol 2022-09-21 v1.7 Handle new color stacks for pdfTeX (HO)
-
-(c:/texlive/2024/texmf-dist/tex/generic/ltxcmds/ltxcmds.sty
+ (c:/texlive/2024/texmf-dist/tex/generic/ltxcmds/ltxcmds.sty
 Package: ltxcmds 2023-12-04 v1.26 LaTeX kernel commands for general use (HO)
-)
-(c:/texlive/2024/texmf-dist/tex/generic/infwarerr/infwarerr.sty
+) (c:/texlive/2024/texmf-dist/tex/generic/infwarerr/infwarerr.sty
 Package: infwarerr 2019/12/03 v1.5 Providing info/warning/error messages (HO)
 )
 Package pdfcol Info: Interface disabled because of missing PDF mode of pdfTeX.
@@ -802,10 +667,8 @@ Package pdfcol Info: pdfTeX's color stacks are not available.
 \tcb@testbox=\box88
 \tcb@totalupperbox=\box89
 \tcb@totallowerbox=\box90
-)
-(c:/texlive/2024/texmf-dist/tex/latex/fancyhdr/fancyhdr.sty
+) (c:/texlive/2024/texmf-dist/tex/latex/fancyhdr/fancyhdr.sty
 Package: fancyhdr 2022/11/09 v4.1 Extensive control of page headers and footers
-
 \f@nch@headwidth=\skip78
 \f@nch@O@elh=\skip79
 \f@nch@O@erh=\skip80
@@ -815,42 +678,30 @@ Package: fancyhdr 2022/11/09 v4.1 Extensive control of page headers and footers
 \f@nch@O@erf=\skip84
 \f@nch@O@olf=\skip85
 \f@nch@O@orf=\skip86
-)
-(c:/texlive/2024/texmf-dist/tex/latex/hyperref/hyperref.sty
+) (c:/texlive/2024/texmf-dist/tex/latex/hyperref/hyperref.sty
 Package: hyperref 2024-01-20 v7.01h Hypertext links for LaTeX
-
-(c:/texlive/2024/texmf-dist/tex/latex/kvsetkeys/kvsetkeys.sty
+ (c:/texlive/2024/texmf-dist/tex/latex/kvsetkeys/kvsetkeys.sty
 Package: kvsetkeys 2022-10-05 v1.19 Key value parser (HO)
-)
-(c:/texlive/2024/texmf-dist/tex/generic/kvdefinekeys/kvdefinekeys.sty
+) (c:/texlive/2024/texmf-dist/tex/generic/kvdefinekeys/kvdefinekeys.sty
 Package: kvdefinekeys 2019-12-19 v1.6 Define keys (HO)
-)
-(c:/texlive/2024/texmf-dist/tex/generic/pdfescape/pdfescape.sty
+) (c:/texlive/2024/texmf-dist/tex/generic/pdfescape/pdfescape.sty
 Package: pdfescape 2019/12/09 v1.15 Implements pdfTeX's escape features (HO)
-
-(c:/texlive/2024/texmf-dist/tex/generic/pdftexcmds/pdftexcmds.sty
-Package: pdftexcmds 2020-06-27 v0.33 Utility functions of pdfTeX for LuaTeX (HO
-)
+ (c:/texlive/2024/texmf-dist/tex/generic/pdftexcmds/pdftexcmds.sty
+Package: pdftexcmds 2020-06-27 v0.33 Utility functions of pdfTeX for LuaTeX (HO)
 Package pdftexcmds Info: \pdf@primitive is available.
 Package pdftexcmds Info: \pdf@ifprimitive is available.
 Package pdftexcmds Info: \pdfdraftmode not found.
-))
-(c:/texlive/2024/texmf-dist/tex/latex/hycolor/hycolor.sty
+)) (c:/texlive/2024/texmf-dist/tex/latex/hycolor/hycolor.sty
 Package: hycolor 2020-01-27 v1.10 Color options for hyperref/bookmark (HO)
-)
-(c:/texlive/2024/texmf-dist/tex/latex/auxhook/auxhook.sty
+) (c:/texlive/2024/texmf-dist/tex/latex/auxhook/auxhook.sty
 Package: auxhook 2019-12-17 v1.6 Hooks for auxiliary files (HO)
-)
-(c:/texlive/2024/texmf-dist/tex/latex/hyperref/nameref.sty
+) (c:/texlive/2024/texmf-dist/tex/latex/hyperref/nameref.sty
 Package: nameref 2023-11-26 v2.56 Cross-referencing by name of section
-
-(c:/texlive/2024/texmf-dist/tex/latex/refcount/refcount.sty
+ (c:/texlive/2024/texmf-dist/tex/latex/refcount/refcount.sty
 Package: refcount 2019/12/15 v3.6 Data extraction from label references (HO)
-)
-(c:/texlive/2024/texmf-dist/tex/generic/gettitlestring/gettitlestring.sty
+) (c:/texlive/2024/texmf-dist/tex/generic/gettitlestring/gettitlestring.sty
 Package: gettitlestring 2019/12/15 v1.6 Cleanup title references (HO)
-
-(c:/texlive/2024/texmf-dist/tex/latex/kvoptions/kvoptions.sty
+ (c:/texlive/2024/texmf-dist/tex/latex/kvoptions/kvoptions.sty
 Package: kvoptions 2022-06-15 v3.15 Key value format for package options (HO)
 ))
 \c@section@level=\count352
@@ -858,16 +709,13 @@ Package: kvoptions 2022-06-15 v3.15 Key value format for package options (HO)
 \@linkdim=\dimen318
 \Hy@linkcounter=\count353
 \Hy@pagecounter=\count354
-
-(c:/texlive/2024/texmf-dist/tex/latex/hyperref/pd1enc.def
+ (c:/texlive/2024/texmf-dist/tex/latex/hyperref/pd1enc.def
 File: pd1enc.def 2024-01-20 v7.01h Hyperref: PDFDocEncoding definition (HO)
-)
-(c:/texlive/2024/texmf-dist/tex/generic/intcalc/intcalc.sty
+) (c:/texlive/2024/texmf-dist/tex/generic/intcalc/intcalc.sty
 Package: intcalc 2019/12/15 v1.3 Expandable calculations with integers (HO)
 )
 \Hy@SavedSpaceFactor=\count355
-
-(c:/texlive/2024/texmf-dist/tex/latex/hyperref/puenc.def
+ (c:/texlive/2024/texmf-dist/tex/latex/hyperref/puenc.def
 File: puenc.def 2024-01-20 v7.01h Hyperref: PDF Unicode definition (HO)
 )
 Package hyperref Info: Option `unicode' set `true' on input line 4062.
@@ -879,20 +727,16 @@ Package hyperref Info: Backreferencing OFF on input line 4199.
 Package hyperref Info: Implicit mode ON; LaTeX internals redefined.
 Package hyperref Info: Bookmarks ON on input line 4446.
 \c@Hy@tempcnt=\count356
-
-(c:/texlive/2024/texmf-dist/tex/latex/url/url.sty
+ (c:/texlive/2024/texmf-dist/tex/latex/url/url.sty
 \Urlmuskip=\muskip18
 Package: url 2013/09/16  ver 3.4  Verb mode for urls, etc.
 )
 LaTeX Info: Redefining \url on input line 4784.
 \XeTeXLinkMargin=\dimen319
-
-(c:/texlive/2024/texmf-dist/tex/generic/bitset/bitset.sty
+ (c:/texlive/2024/texmf-dist/tex/generic/bitset/bitset.sty
 Package: bitset 2019/12/09 v1.3 Handle bit-vector datatype (HO)
-
-(c:/texlive/2024/texmf-dist/tex/generic/bigintcalc/bigintcalc.sty
-Package: bigintcalc 2019/12/15 v1.5 Expandable calculations on big integers (HO
-)
+ (c:/texlive/2024/texmf-dist/tex/generic/bigintcalc/bigintcalc.sty
+Package: bigintcalc 2019/12/15 v1.5 Expandable calculations on big integers (HO)
 ))
 \Fld@menulength=\count357
 \Field@Width=\dimen320
@@ -904,8 +748,7 @@ Package hyperref Info: backreferencing OFF on input line 6078.
 Package hyperref Info: Link coloring OFF on input line 6083.
 Package hyperref Info: Link coloring with OCG OFF on input line 6088.
 Package hyperref Info: PDF/A mode OFF on input line 6093.
-
-(c:/texlive/2024/texmf-dist/tex/latex/base/atbegshi-ltx.sty
+ (c:/texlive/2024/texmf-dist/tex/latex/base/atbegshi-ltx.sty
 Package: atbegshi-ltx 2021/01/10 v1.0c Emulation of the original atbegshi
 package with kernel methods
 )
@@ -914,39 +757,30 @@ package with kernel methods
 \c@Hfootnote=\count360
 )
 Package hyperref Info: Driver (autodetected): hxetex.
-
-(c:/texlive/2024/texmf-dist/tex/latex/hyperref/hxetex.def
+ (c:/texlive/2024/texmf-dist/tex/latex/hyperref/hxetex.def
 File: hxetex.def 2024-01-20 v7.01h Hyperref driver for XeTeX
-
-(c:/texlive/2024/texmf-dist/tex/generic/stringenc/stringenc.sty
-Package: stringenc 2019/11/29 v1.12 Convert strings between diff. encodings (HO
-)
+ (c:/texlive/2024/texmf-dist/tex/generic/stringenc/stringenc.sty
+Package: stringenc 2019/11/29 v1.12 Convert strings between diff. encodings (HO)
 )
 \pdfm@box=\box91
 \c@Hy@AnnotLevel=\count361
 \HyField@AnnotCount=\count362
 \Fld@listcount=\count363
 \c@bookmark@seq@number=\count364
-
-(c:/texlive/2024/texmf-dist/tex/latex/rerunfilecheck/rerunfilecheck.sty
+ (c:/texlive/2024/texmf-dist/tex/latex/rerunfilecheck/rerunfilecheck.sty
 Package: rerunfilecheck 2022-07-10 v1.10 Rerun checks for auxiliary files (HO)
-
-(c:/texlive/2024/texmf-dist/tex/latex/base/atveryend-ltx.sty
-Package: atveryend-ltx 2020/08/19 v1.0a Emulation of the original atveryend pac
-kage
+ (c:/texlive/2024/texmf-dist/tex/latex/base/atveryend-ltx.sty
+Package: atveryend-ltx 2020/08/19 v1.0a Emulation of the original atveryend package
 with kernel methods
-)
-(c:/texlive/2024/texmf-dist/tex/generic/uniquecounter/uniquecounter.sty
+) (c:/texlive/2024/texmf-dist/tex/generic/uniquecounter/uniquecounter.sty
 Package: uniquecounter 2019/12/15 v1.4 Provide unlimited unique counter (HO)
 )
-Package uniquecounter Info: New unique counter `rerunfilecheck' on input line 2
-85.
+Package uniquecounter Info: New unique counter `rerunfilecheck' on input line 285.
 )
 \Hy@SectionHShift=\skip87
 )
 Package hyperref Info: Option `colorlinks' set `true' on input line 58.
-
-(./main.aux)
+ (./main.aux)
 \openout1 = `main.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 75.
@@ -1062,11 +896,13 @@ LaTeX Font Info:    Overwriting math alphabet `\mathtt' in version `bold'
 
 \c@lstlisting=\count365
 Package hyperref Info: Link coloring ON on input line 75.
-(./main.out) (./main.out)
 \@outlinefile=\write4
 \openout4 = `main.out'.
 
- [1
+
+Package hyperref Warning: Rerun to get /PageLabels entry.
+
+[1
 
 
 ]
@@ -1075,253 +911,45 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                Make it at least 14.49998pt, for example:
 (fancyhdr)                \setlength{\headheight}{14.49998pt}.
 (fancyhdr)                You might also make \topmargin smaller to compensate:
-
 (fancyhdr)                \addtolength{\topmargin}{-2.49998pt}.
 
 [2
 
-] (./main.toc
-LaTeX Font Info:    Trying to load font information for U+msa on input line 1.
- (c:/texlive/2024/texmf-dist/tex/latex/amsfonts/umsa.fd
-File: umsa.fd 2013/01/14 v3.01 AMS symbols A
-)
-LaTeX Font Info:    Trying to load font information for U+msb on input line 1.
-
-(c:/texlive/2024/texmf-dist/tex/latex/amsfonts/umsb.fd
-File: umsb.fd 2013/01/14 v3.01 AMS symbols B
-))
+]
+No file main.toc.
 \tf@toc=\write5
 \openout5 = `main.toc'.
 
- [3]
-(./chapters/preface.tex
+[3] (./chapters/preface.tex
+Missing character: There is no 📱 (U+1F4F1) in font [lmroman12-bold]:mapping=tex-text;!
+Missing character: There is no 🔍 (U+1F50D) in font [lmroman12-bold]:mapping=tex-text;!
+Missing character: There is no 📑 (U+1F4D1) in font [lmroman12-bold]:mapping=tex-text;!
 
-! LaTeX Error: Can be used only in preamble.
-
-See the LaTeX manual or LaTeX Companion for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.2 \PassOptionsToPackage
-                         {unicode}{hyperref}
-Your command was ignored.
-Type  I <command> <return>  to replace it with another command,
-or  <return>  to continue without it.
-
-
-! LaTeX Error: Can be used only in preamble.
-
-See the LaTeX manual or LaTeX Companion for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.3 \PassOptionsToPackage
-                         {hyphens}{url}
-Your command was ignored.
-Type  I <command> <return>  to replace it with another command,
-or  <return>  to continue without it.
-
-
-! LaTeX Error: Can be used only in preamble.
-
-See the LaTeX manual or LaTeX Companion for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.5 \documentclass
-                  [
-Your command was ignored.
-Type  I <command> <return>  to replace it with another command,
-or  <return>  to continue without it.
-
-
-! LaTeX Error: Can be used only in preamble.
-
-See the LaTeX manual or LaTeX Companion for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.7 \usepackage
-               {amsmath,amssymb}
-Your command was ignored.
-Type  I <command> <return>  to replace it with another command,
-or  <return>  to continue without it.
-
-
-! LaTeX Error: Can be used only in preamble.
-
-See the LaTeX manual or LaTeX Companion for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.8 \usepackage
-               {iftex}
-Your command was ignored.
-Type  I <command> <return>  to replace it with another command,
-or  <return>  to continue without it.
-
-
-! LaTeX Error: Can be used only in preamble.
-
-See the LaTeX manual or LaTeX Companion for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.14   \usepackage
-                  {unicode-math} % this also loads fontspec
-Your command was ignored.
-Type  I <command> <return>  to replace it with another command,
-or  <return>  to continue without it.
-
-
-! LaTeX Error: Can be used only in preamble.
-
-See the LaTeX manual or LaTeX Companion for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.18 \usepackage
-                {lmodern}
-Your command was ignored.
-Type  I <command> <return>  to replace it with another command,
-or  <return>  to continue without it.
-
-
-! LaTeX Error: Can be used only in preamble.
-
-See the LaTeX manual or LaTeX Companion for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.23 ...xists{upquote.sty}{\usepackage{upquote}}{}
-                                                  
-Your command was ignored.
-Type  I <command> <return>  to replace it with another command,
-or  <return>  to continue without it.
-
-
-! LaTeX Error: Can be used only in preamble.
-
-See the LaTeX manual or LaTeX Companion for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.27 }{}
-        
-Your command was ignored.
-Type  I <command> <return>  to replace it with another command,
-or  <return>  to continue without it.
-
-! Undefined control sequence.
-\reserved@a ...age []{microtype} \UseMicrotypeSet 
-                                                  [protrusion]{basicmath} 
-l.27 }{}
-        
-The control sequence at the end of the top line
-of your error message was never \def'ed. If you have
-misspelled it (e.g., `\hobx'), type `I' and the correct
-spelling (e.g., `I\hbox'). Otherwise just continue,
-and I'll forget about whatever was undefined.
-
-
-! LaTeX Error: Can be used only in preamble.
-
-See the LaTeX manual or LaTeX Companion for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.36   \KOMAoptions{parskip=half}}
-                                  
-Your command was ignored.
-Type  I <command> <return>  to replace it with another command,
-or  <return>  to continue without it.
-
-
-! LaTeX Error: Can be used only in preamble.
-
-See the LaTeX manual or LaTeX Companion for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.38 \usepackage
-                {xcolor}
-Your command was ignored.
-Type  I <command> <return>  to replace it with another command,
-or  <return>  to continue without it.
-
-
-! LaTeX Error: Can be used only in preamble.
-
-See the LaTeX manual or LaTeX Companion for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.46 \usepackage
-                {bookmark}
-Your command was ignored.
-Type  I <command> <return>  to replace it with another command,
-or  <return>  to continue without it.
-
-
-! LaTeX Error: Can be used only in preamble.
-
-See the LaTeX manual or LaTeX Companion for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.47 \IfFileExists{xurl.sty}{\usepackage{xurl}}{}
-                                                  % add URL line breaks if a...
-
-Your command was ignored.
-Type  I <command> <return>  to replace it with another command,
-or  <return>  to continue without it.
-
-
-! LaTeX Error: Can be used only in preamble.
-
-See the LaTeX manual or LaTeX Companion for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.56 \begin{document}
-                     
-Your command was ignored.
-Type  I <command> <return>  to replace it with another command,
-or  <return>  to continue without it.
-
-Missing character: There is no 📱 (U+1F4F1) in font [lmroman12-bold]:mapping=tex
--text;!
-Missing character: There is no 🔍 (U+1F50D) in font [lmroman12-bold]:mapping=tex
--text;!
-Missing character: There is no 📑 (U+1F4D1) in font [lmroman12-bold]:mapping=tex
--text;!
-
-Underfull \hbox (badness 10000) in paragraph at lines 98--100
+Underfull \hbox (badness 10000) in paragraph at lines 42--44
 
  []
 
-Missing character: There is no 💡 (U+1F4A1) in font [lmroman12-bold]:mapping=tex
--text;!
-Missing character: There is no 🧮 (U+1F9EE) in font [lmroman12-bold]:mapping=tex
--text;!
-Missing character: There is no 📊 (U+1F4CA) in font [lmroman12-bold]:mapping=tex
--text;!
-Missing character: There is no 🌓 (U+1F313) in font [lmroman12-bold]:mapping=tex
--text;!
-Missing character: There is no 📖 (U+1F4D6) in font [lmroman12-bold]:mapping=tex
--text;!
+Missing character: There is no 💡 (U+1F4A1) in font [lmroman12-bold]:mapping=tex-text;!
+Missing character: There is no 🧮 (U+1F9EE) in font [lmroman12-bold]:mapping=tex-text;!
+Missing character: There is no 📊 (U+1F4CA) in font [lmroman12-bold]:mapping=tex-text;!
+Missing character: There is no 🌓 (U+1F313) in font [lmroman12-bold]:mapping=tex-text;!
 
 Package fancyhdr Warning: \headheight is too small (12.0pt): 
 (fancyhdr)                Make it at least 14.49998pt, for example:
 (fancyhdr)                \setlength{\headheight}{14.49998pt}.
 (fancyhdr)                You might also make \topmargin smaller to compensate:
-
 (fancyhdr)                \addtolength{\topmargin}{-2.49998pt}.
 
 [4]
+Missing character: There is no 📖 (U+1F4D6) in font [lmroman12-bold]:mapping=tex-text;!
 
-Package fontspec Info: FangSong scale = 0.9764214128715753.
+Package fancyhdr Warning: \headheight is too small (12.0pt): 
+(fancyhdr)                Make it at least 14.49998pt, for example:
+(fancyhdr)                \setlength{\headheight}{14.49998pt}.
+(fancyhdr)                You might also make \topmargin smaller to compensate:
+(fancyhdr)                \addtolength{\topmargin}{-2.49998pt}.
 
+[5]
 
 Package fontspec Info: Could not resolve font "FangSong/BI" (it probably
 (fontspec)             doesn't exist).
@@ -1335,175 +963,127 @@ Package fontspec Info: Could not resolve font "FangSong/I" (it probably
 (fontspec)             doesn't exist).
 
 
-Package fontspec Info: FangSong scale = 0.9764214128715753.
-
-
 Package fontspec Info: Font family 'FangSong(0)' created for font 'FangSong'
-(fontspec)             with options [Scale=MatchLowercase,Script={CJK}].
+(fontspec)             with options [Script={CJK}].
 (fontspec)              
 (fontspec)              This font family consists of the following NFSS
 (fontspec)             series/shapes:
 (fontspec)              
 (fontspec)             - 'normal' (m/n) with NFSS spec.:
-(fontspec)             <->s*[0.9764214128715753]"FangSong/OT:script=hani;langua
-ge=dflt;"
+(fontspec)             <->"FangSong/OT:script=hani;language=dflt;"
 (fontspec)             - 'small caps'  (m/sc) with NFSS spec.: 
 
-LaTeX Font Info:    Font shape `TU/FangSong(0)/m/n' will be
-(Font)              scaled to size 11.7171pt on input line 138.
 
-Overfull \hbox (829.87299pt too wide) in paragraph at lines 139--139
-[]    \TU/lmtt/m/n/12 ** \TU/FangSong(0)/m/n/12 第 二 章   软 件 工 程 基 础 与 需 求 分 析 \
-TU/lmtt/m/n/12 ** \TU/FangSong(0)/m/n/12 ： 深 入 阐 述 软 件 生 命 周 期 、 开 发 模 型 、 需 求 
-工 程 等 软 件 工 程 核 心 概 念 ， 重 点 讲 解 需 求 获 取 、 分 析 、 建 模 的 系 统 方 法 ， 包 括 \TU/lmtt/m/
-n/12 UML \TU/FangSong(0)/m/n/12 建 模 、 结 构 化 分 析 等 技 术 ， 结 合 智 慧 水 利 平 台 的 特 殊 性
- 进 行 案 例 分 析 。 
+Overfull \hbox (972.33423pt too wide) in paragraph at lines 97--97
+[]    \TU/lmtt/m/n/12 ** \TU/FangSong(0)/m/n/12 第 七 章   三 维 场 景 的 观 测 数 据 展 示 \TU/lmtt/m/n/12 ** \TU/FangSong(0)/m/n/12 ： 系 统 讲 解 水 利 监 测 数 据 的 分 类 与 特 征 ， 深 入 探 讨 数 据 图 表 展 示 技 术 ， 重 点 介 绍 三 维 场 景 中 监 测 点 的 绘 制 与 交 互 技 术 ， 包 括 空 间 定 位 、 状 态 可 视 化 、 射 线 检 测 与 对 象 拾 取 等 关 键 技 术 ， 实 现 监 测 数 据 与 三 维 场 景 的 有 机 融 合 。 [] 
  []
 
 
-Overfull \hbox (706.59454pt too wide) in paragraph at lines 141--141
-[]    \TU/lmtt/m/n/12 ** \TU/FangSong(0)/m/n/12 第 三 章   软 件 模 块 详 细 设 计 \TU/lmt
-t/m/n/12 ** \TU/FangSong(0)/m/n/12 ： 系 统 讲 解 软 件 架 构 设 计 原 理 、 架 构 模 式 选 择 、 模 
-块 化 分 解 方 法 ， 包 括 分 层 架 构 、 微 服 务 架 构 、 数 据 库 设 计 等 关 键 技 术 ， 通 过 数 学 模 型 和 理 论
- 分 析 指 导 智 慧 水 利 平 台 的 架 构 设 计 。 \TU/lmtt/m/n/12 ][] 
+Overfull \hbox (947.61426pt too wide) in paragraph at lines 99--99
+[]    \TU/lmtt/m/n/12 ** \TU/FangSong(0)/m/n/12 第 八 章   典 型 应 用 \TU/lmtt/m/n/12 ** \TU/FangSong(0)/m/n/12 ： 通 过 水 利 工 程 安 全 监 测 平 台 的 完 整 开 发 案 例 ， 详 细 展 示 从 场 景 设 置 、 模 型 制 作 到 数 据 处 理 、 展 示 模 块 的 全 过 程 。 涵 盖 监 控 模 型 与 综 合 评 价 模 块 的 设 计 实 现 ， 通 过 功 能 模 块 演 示 和 核 心 代 码 解 析 ， 提 供 企 业 级 应 用 开 发 的 完 整 技 术 方 案 。 [] 
  []
+
+
+Overfull \hbox (861.09436pt too wide) in paragraph at lines 101--101
+[]    \TU/lmtt/m/n/12 ** \TU/FangSong(0)/m/n/12 第 九 章   总 结 与 展 望 \TU/lmtt/m/n/12 ** \TU/FangSong(0)/m/n/12 ： 系 统 总 结 全 书 核 心 技 术 体 系 和 实 现 方 法 ， 回 顾 智 慧 水 利 平 台 开 发 的 关 键 技 术 要 点 ， 深 入 分 析 当 前 技 术 发 展 趋 势 ， 探 讨 人 工 智 能 、 区 块 链 、 边 缘 计 算 等 前 沿 技 术 的 应 用 前 景 ， 为 读 者 的 后 续 学 习 和 职 业 发 展 提 供 指 导 。 [] 
+ []
+
+Runaway argument?
+{bash \# 安装uv包管理器 pip install uv 
+./chapters/preface.tex:127: Paragraph ended before \text@command was complete.
+<to be read again> 
+                   \par 
+l.127     }`\texttt]
+                    
+I suspect you've forgotten a `}', causing me to apply this
+control sequence to too much text. How can we recover?
+My plan is to forget the whole thing and hope for the best.
+
+./chapters/preface.tex:127: Extra }, or forgotten \endgroup.
+<recently read> \egroup 
+                        
+l.127     }`\texttt]
+                    
+I've deleted a group-closing symbol because it seems to be
+spurious, as in `$x}$'. But perhaps the } is legitimate and
+you forgot something else, as in `\hbox{$x}'. In such cases
+the way to recover is to insert both the forgotten and the
+deleted material, e.g., by typing `I$}'.
+
+./chapters/preface.tex:128: You can't use `macro parameter character #' in horizontal mode.
+<recently read> ##
+                  
+l.128 \##
+         \# 学习路径建议
+Sorry, but I'm not programmed to handle this case;
+I'll just pretend that you didn't ask for it.
+If you're in the wrong mode, you might be able to
+return to the right one by typing `I}' or `I$' or `I\par'.
+
+./chapters/preface.tex:160: You can't use `macro parameter character #' in horizontal mode.
+<recently read> ##
+                  
+l.160 \##
+         \# 实践学习方法
+Sorry, but I'm not programmed to handle this case;
+I'll just pretend that you didn't ask for it.
+If you're in the wrong mode, you might be able to
+return to the right one by typing `I}' or `I$' or `I\par'.
 
 
 Package fancyhdr Warning: \headheight is too small (12.0pt): 
 (fancyhdr)                Make it at least 14.49998pt, for example:
 (fancyhdr)                \setlength{\headheight}{14.49998pt}.
 (fancyhdr)                You might also make \topmargin smaller to compensate:
-
-(fancyhdr)                \addtolength{\topmargin}{-2.49998pt}.
-
-[5]
-Overfull \hbox (786.61333pt too wide) in paragraph at lines 147--147
-[]    \TU/lmtt/m/n/12 ** \TU/FangSong(0)/m/n/12 第 五 章   后 端 开 发 技 术 \TU/lmtt/m/
-n/12 ** \TU/FangSong(0)/m/n/12 ： 系 统 阐 述 \TU/lmtt/m/n/12 Java Spring Boot \TU/F
-angSong(0)/m/n/12 、 \TU/lmtt/m/n/12 Python Django/Flask \TU/FangSong(0)/m/n/12 
-等 后 端 开 发 框 架 ， 包 括 \TU/lmtt/m/n/12 RESTful API \TU/FangSong(0)/m/n/12 设 计 、 数 
-据 持 久 化 、 安 全 认 证 、 微 服 务 架 构 等 核 心 技 术 ， 通 过 数 学 推 导 和 算 法 分 析 指 导 高 性 能 后 端 系
- 统 设 计 。 
- []
-
-
-Overfull \hbox (681.87473pt too wide) in paragraph at lines 149--149
-[]    \TU/lmtt/m/n/12 ** \TU/FangSong(0)/m/n/12 第 六 章   智 慧 水 利 三 维 场 景 构 建 \TU
-/lmtt/m/n/12 ** \TU/FangSong(0)/m/n/12 ： 深 入 讲 解 数 字 高 程 模 型 （ \TU/lmtt/m/n/12 
-DEM \TU/FangSong(0)/m/n/12 ） 、 数 字 地 表 模 型 （ \TU/lmtt/m/n/12 DSM \TU/FangSong(0
-)/m/n/12 ） 的 数 学 表 达 和 构 建 算 法 ， 包 括 \TU/lmtt/m/n/12 BIM \TU/FangSong(0)/m/n/12
- 技 术 、 数 字 孪 生 、 虚 拟 现 实 （ \TU/lmtt/m/n/12 VR/AR/MR \TU/FangSong(0)/m/n/12 ） 等 
-前 沿 技 术 在 水 利 工 程 中 的 创 新 应 用 。 [] 
- []
-
-
-Overfull \hbox (972.33423pt too wide) in paragraph at lines 156--156
-[]    \TU/lmtt/m/n/12 ** \TU/FangSong(0)/m/n/12 第 七 章   三 维 场 景 的 观 测 数 据 展 示 \
-TU/lmtt/m/n/12 ** \TU/FangSong(0)/m/n/12 ： 系 统 讲 解 水 利 监 测 数 据 的 分 类 与 特 征 ， 深 
-入 探 讨 数 据 图 表 展 示 技 术 ， 重 点 介 绍 三 维 场 景 中 监 测 点 的 绘 制 与 交 互 技 术 ， 包 括 空 间 定 位 、
- 状 态 可 视 化 、 射 线 检 测 与 对 象 拾 取 等 关 键 技 术 ， 实 现 监 测 数 据 与 三 维 场 景 的 有 机 融 合 。 []
- 
- []
-
-
-Overfull \hbox (947.61426pt too wide) in paragraph at lines 158--158
-[]    \TU/lmtt/m/n/12 ** \TU/FangSong(0)/m/n/12 第 八 章   典 型 应 用 \TU/lmtt/m/n/12
- ** \TU/FangSong(0)/m/n/12 ： 通 过 水 利 工 程 安 全 监 测 平 台 的 完 整 开 发 案 例 ， 详 细 展 示 从 
-场 景 设 置 、 模 型 制 作 到 数 据 处 理 、 展 示 模 块 的 全 过 程 。 涵 盖 监 控 模 型 与 综 合 评 价 模 块 的 设 计
- 实 现 ， 通 过 功 能 模 块 演 示 和 核 心 代 码 解 析 ， 提 供 企 业 级 应 用 开 发 的 完 整 技 术 方 案 。 [] 
- []
-
-
-Overfull \hbox (861.09436pt too wide) in paragraph at lines 160--160
-[]    \TU/lmtt/m/n/12 ** \TU/FangSong(0)/m/n/12 第 九 章   总 结 与 展 望 \TU/lmtt/m/n/
-12 ** \TU/FangSong(0)/m/n/12 ： 系 统 总 结 全 书 核 心 技 术 体 系 和 实 现 方 法 ， 回 顾 智 慧 水 利 
-平 台 开 发 的 关 键 技 术 要 点 ， 深 入 分 析 当 前 技 术 发 展 趋 势 ， 探 讨 人 工 智 能 、 区 块 链 、 边 缘 计 算
- 等 前 沿 技 术 的 应 用 前 景 ， 为 读 者 的 后 续 学 习 和 职 业 发 展 提 供 指 导 。 [] 
- []
-
-
-Package fancyhdr Warning: \headheight is too small (12.0pt): 
-(fancyhdr)                Make it at least 14.49998pt, for example:
-(fancyhdr)                \setlength{\headheight}{14.49998pt}.
-(fancyhdr)                You might also make \topmargin smaller to compensate:
-
 (fancyhdr)                \addtolength{\topmargin}{-2.49998pt}.
 
 [6]
-Missing character: There is no 📚 (U+1F4DA) in font [lmroman12-bold]:mapping=tex
--text;!
-Missing character: There is no 💻 (U+1F4BB) in font [lmroman12-bold]:mapping=tex
--text;!
-Missing character: There is no 🎥 (U+1F3A5) in font [lmroman12-bold]:mapping=tex
--text;!
+Missing character: There is no 📚 (U+1F4DA) in font [lmroman12-bold]:mapping=tex-text;!
+Missing character: There is no 💻 (U+1F4BB) in font [lmroman12-bold]:mapping=tex-text;!
+Missing character: There is no 🎥 (U+1F3A5) in font [lmroman12-bold]:mapping=tex-text;!
 
-Underfull \hbox (badness 10000) in paragraph at lines 249--251
+Underfull \hbox (badness 10000) in paragraph at lines 189--191
 
  []
 
-Missing character: There is no 💬 (U+1F4AC) in font [lmroman12-bold]:mapping=tex
--text;!
-Missing character: There is no 📊 (U+1F4CA) in font [lmroman12-bold]:mapping=tex
--text;!
+Missing character: There is no 💬 (U+1F4AC) in font [lmroman12-bold]:mapping=tex-text;!
+Missing character: There is no 📊 (U+1F4CA) in font [lmroman12-bold]:mapping=tex-text;!
+Missing character: There is no 🐍 (U+1F40D) in font [lmroman12-bold]:mapping=tex-text;!
+Missing character: There is no 📝 (U+1F4DD) in font [lmroman12-bold]:mapping=tex-text;!
+Missing character: There is no 🔧 (U+1F527) in font [lmroman12-bold]:mapping=tex-text;!
+Missing character: There is no 📦 (U+1F4E6) in font [lmroman12-bold]:mapping=tex-text;!
+Missing character: There is no 💻 (U+1F4BB) in font [lmroman12-bold]:mapping=tex-text;!
+Missing character: There is no 📊 (U+1F4CA) in font [lmroman12-bold]:mapping=tex-text;!
+Missing character: There is no 🎨 (U+1F3A8) in font [lmroman12-bold]:mapping=tex-text;!
+Missing character: There is no 🗄 (U+1F5C4) in font [lmroman12-bold]:mapping=tex-text;!
+Missing character: There is no ️ (U+FE0F) in font Microsoft YaHei Negreta/OT:script=hani;language=dflt;!
+Missing character: There is no 📖 (U+1F4D6) in font [lmroman12-bold]:mapping=tex-text;!
+Missing character: There is no 🎥 (U+1F3A5) in font [lmroman12-bold]:mapping=tex-text;!
+Missing character: There is no 📋 (U+1F4CB) in font [lmroman12-bold]:mapping=tex-text;!
+Missing character: There is no 🔗 (U+1F517) in font [lmroman12-bold]:mapping=tex-text;!
+Missing character: There is no 🌐 (U+1F310) in font [lmroman12-bold]:mapping=tex-text;!
+Missing character: There is no 💬 (U+1F4AC) in font [lmroman12-bold]:mapping=tex-text;!
+Missing character: There is no 🚀 (U+1F680) in font [lmroman12-bold]:mapping=tex-text;!
+Missing character: There is no 📧 (U+1F4E7) in font [lmroman12-bold]:mapping=tex-text;!
 
 Package fancyhdr Warning: \headheight is too small (12.0pt): 
 (fancyhdr)                Make it at least 14.49998pt, for example:
 (fancyhdr)                \setlength{\headheight}{14.49998pt}.
 (fancyhdr)                You might also make \topmargin smaller to compensate:
-
 (fancyhdr)                \addtolength{\topmargin}{-2.49998pt}.
 
 [7]
-Missing character: There is no 🐍 (U+1F40D) in font [lmroman12-bold]:mapping=tex
--text;!
-Missing character: There is no 📝 (U+1F4DD) in font [lmroman12-bold]:mapping=tex
--text;!
-Missing character: There is no 🔧 (U+1F527) in font [lmroman12-bold]:mapping=tex
--text;!
-Missing character: There is no 📦 (U+1F4E6) in font [lmroman12-bold]:mapping=tex
--text;!
-Missing character: There is no 💻 (U+1F4BB) in font [lmroman12-bold]:mapping=tex
--text;!
-Missing character: There is no 📊 (U+1F4CA) in font [lmroman12-bold]:mapping=tex
--text;!
-Missing character: There is no 🎨 (U+1F3A8) in font [lmroman12-bold]:mapping=tex
--text;!
-Missing character: There is no 🗄 (U+1F5C4) in font [lmroman12-bold]:mapping=tex
--text;!
-Missing character: There is no ️ (U+FE0F) in font Microsoft YaHei Negreta/OT:sc
-ript=hani;language=dflt;!
-Missing character: There is no 📖 (U+1F4D6) in font [lmroman12-bold]:mapping=tex
--text;!
-Missing character: There is no 🎥 (U+1F3A5) in font [lmroman12-bold]:mapping=tex
--text;!
-Missing character: There is no 📋 (U+1F4CB) in font [lmroman12-bold]:mapping=tex
--text;!
-Missing character: There is no 🔗 (U+1F517) in font [lmroman12-bold]:mapping=tex
--text;!
-Missing character: There is no 🌐 (U+1F310) in font [lmroman12-bold]:mapping=tex
--text;!
-Missing character: There is no 💬 (U+1F4AC) in font [lmroman12-bold]:mapping=tex
--text;!
-Missing character: There is no 🚀 (U+1F680) in font [lmroman12-bold]:mapping=tex
--text;!
-Missing character: There is no 📧 (U+1F4E7) in font [lmroman12-bold]:mapping=tex
--text;!
-Missing character: There is no 📧 (U+1F4E7) in font [lmroman12-bold]:mapping=tex
--text;!
-Missing character: There is no 💻 (U+1F4BB) in font [lmroman12-bold]:mapping=tex
--text;!
-Missing character: There is no 🐛 (U+1F41B) in font [lmroman12-bold]:mapping=tex
--text;!
-Missing character: There is no 💬 (U+1F4AC) in font [lmroman12-bold]:mapping=tex
--text;!
-Missing character: There is no 📚 (U+1F4DA) in font [lmroman12-bold]:mapping=tex
--text;!
+Missing character: There is no 📧 (U+1F4E7) in font [lmroman12-bold]:mapping=tex-text;!
+Missing character: There is no 💻 (U+1F4BB) in font [lmroman12-bold]:mapping=tex-text;!
+Missing character: There is no 🐛 (U+1F41B) in font [lmroman12-bold]:mapping=tex-text;!
+Missing character: There is no 💬 (U+1F4AC) in font [lmroman12-bold]:mapping=tex-text;!
+Missing character: There is no 📚 (U+1F4DA) in font [lmroman12-bold]:mapping=tex-text;!
+)
 
 Package fancyhdr Warning: \headheight is too small (12.0pt): 
 (fancyhdr)                Make it at least 14.49998pt, for example:
 (fancyhdr)                \setlength{\headheight}{14.49998pt}.
 (fancyhdr)                You might also make \topmargin smaller to compensate:
-
 (fancyhdr)                \addtolength{\topmargin}{-2.49998pt}.
 
 [8] (./main.aux)
@@ -1511,20 +1091,26 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2022/08/05>
  ***********
-Package rerunfilecheck Info: File `main.out' has not changed.
-(rerunfilecheck)             Checksum: 05507548F0DD785DFD77F136BC07520A;60.
- ) )
-(\end occurred inside a group at level 1)
 
-### semi simple group (level 1) entered at line 56 (\begingroup)
-### bottom level 
+
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+
+
+Package rerunfilecheck Warning: File `main.out' has changed.
+(rerunfilecheck)                Rerun to get outlines right
+(rerunfilecheck)                or use package `bookmark'.
+
+Package rerunfilecheck Info: Checksums for `main.out':
+(rerunfilecheck)             Before: <no file>
+(rerunfilecheck)             After:  680B541A2B859FFEEE98EF6130802983;898.
+ ) 
 Here is how much of TeX's memory you used:
- 28087 strings out of 474773
- 595897 string characters out of 5761289
- 1950842 words of memory out of 5000000
- 49742 multiletter control sequences out of 15000+600000
- 565118 words of font info for 95 fonts, out of 8000000 for 9000
+ 28065 strings out of 474773
+ 596549 string characters out of 5761289
+ 1946842 words of memory out of 5000000
+ 49749 multiletter control sequences out of 15000+600000
+ 560457 words of font info for 75 fonts, out of 8000000 for 9000
  1348 hyphenation exceptions out of 8191
- 93i,12n,122p,451b,1035s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 93i,11n,97p,487b,479s stack positions out of 10000i,1000n,20000p,200000b,200000s
 
-Output written on main.pdf (8 pages).
+Output written on main.xdv (8 pages, 82056 bytes).

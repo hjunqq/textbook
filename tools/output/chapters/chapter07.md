@@ -1,6 +1,6 @@
 \chapter{第七章 三维场景的观测数据展示}
 
-\\section{学习目标}
+\section{学习目标}
 
 通过本章学习，学生应能够：
 
@@ -9,13 +9,14 @@
 3. 熟练运用Three.js进行监测点的三维空间定位和状态可视化
 4. 掌握三维射线检测技术，实现用户与监测点的交互功能
 
-\\section{引言}
+\section{引言}
 
 三维场景中的观测数据展示是智慧水利平台用户界面的重要组成部分，它将复杂的监测数据以直观的三维形式呈现给用户。通过将传统的二维图表与三维空间场景相结合，用户能够更好地理解监测点的空间分布和数据关联关系。本章将介绍如何使用现代Web技术实现这一功能。
 
-\\section{本章结构}
+\section{本章结构}
 
-\\begin{tcolorbox}[colback=cyan!5!white,colframe=cyan!75!black,title=Info 章节安排
+
+\begin{tcolorbox}[colback=cyan!5!white,colframe=cyan!75!black,title=Info 章节安排
     
     \##\# [第一节 数据类型与展示方式](section07-01.md)
     - Chart.js图表库基础
@@ -36,9 +37,9 @@
     - 鼠标射线检测原理
     - 监测点的点击交互实现
     - 信息面板的动态展示]
-\\section{关键技术概念}
+\section{关键技术概念}
 
-\\end{tcolorbox}
+\end{tcolorbox}
 
 
 \##\# 三维数据可视化的基本原理
@@ -88,7 +89,7 @@ Chart.js使用CPU渲染，Three.js使用GPU渲染，需要合理协调：
 - **状态同步**：三维场景和二维图表的状态保持同步
 - **响应式设计**：适配不同屏幕尺寸和设备类型
 
-\\section{技术实现要点}
+\section{技术实现要点}
 
 \##\# Chart.js与Three.js集成实现
 
@@ -96,7 +97,8 @@ Chart.js使用CPU渲染，Three.js使用GPU渲染，需要合理协调：
 
 将Chart.js图表集成到Three.js三维场景的核心步骤：
 
-\\begin{lstlisting}[language=Javascript]
+
+\begin{lstlisting}[language=Javascript]
 // Canvas纹理桥接实现
 class ChartTextureBridge {
     constructor(width = 512, height = 512) {
@@ -126,7 +128,7 @@ class ChartTextureBridge {
         this.texture.needsUpdate = true;
     }
 }
-\\end{lstlisting}
+\end{lstlisting}
 
 
 **优化配置要点**
@@ -136,7 +138,8 @@ class ChartTextureBridge {
 - **固定尺寸**：确保纹理尺寸稳定
 - **简化交互**：在三维环境中处理用户交互
 
-\\begin{lstlisting}[language=Javascript]
+
+\begin{lstlisting}[language=Javascript]
 const chartConfig = {
     animation: false,
     responsive: false,
@@ -145,7 +148,7 @@ const chartConfig = {
         legend: { display: true }
     }
 };
-\\end{lstlisting}
+\end{lstlisting}
 
 
 \##\# 监测点三维渲染技术
@@ -154,7 +157,8 @@ const chartConfig = {
 
 将监测点的地理坐标转换为三维场景坐标：
 
-\\begin{lstlisting}[language=Javascript]
+
+\begin{lstlisting}[language=Javascript]
 // 地理坐标转换器
 class CoordinateConverter {
     constructor(originLng, originLat) {
@@ -169,14 +173,15 @@ class CoordinateConverter {
         return new THREE.Vector3(x, elevation, z);
     }
 }
-\\end{lstlisting}
+\end{lstlisting}
 
 
 **监测点可视化实现**
 
 为监测点创建三维可视化对象：
 
-\\begin{lstlisting}[language=Javascript]
+
+\begin{lstlisting}[language=Javascript]
 // 监测点渲染器
 class SensorRenderer {
     constructor(scene) {
@@ -209,7 +214,7 @@ class SensorRenderer {
         return colorMap[status] || 0x888888;
     }
 }
-\\end{lstlisting}
+\end{lstlisting}
 
 
 **性能优化技巧**
@@ -225,7 +230,8 @@ class SensorRenderer {
 
 三维场景中的鼠标拾取基于射线检测算法：
 
-\\begin{lstlisting}[language=Javascript]
+
+\begin{lstlisting}[language=Javascript]
 // 射线检测器
 class RaycastController {
     constructor(camera, renderer) {
@@ -251,14 +257,15 @@ class RaycastController {
         return intersects.length > 0 ? intersects[0] : null;
     }
 }
-\\end{lstlisting}
+\end{lstlisting}
 
 
 **交互事件处理**
 
 实现监测点的点击交互功能：
 
-\\begin{lstlisting}[language=Javascript]
+
+\begin{lstlisting}[language=Javascript]
 // 交互控制器
 class InteractionController {
     constructor(sensors, raycastController) {
@@ -290,10 +297,10 @@ class InteractionController {
         sensor.material.emissive.setHex(0x444444);
     }
 }
-\\end{lstlisting}
+\end{lstlisting}
 
 
-\\section{关键概念总结}
+\section{关键概念总结}
 
 | 概念 | 定义 | 在智慧水利中的应用 |
 |------|------|-------------------|
@@ -302,9 +309,10 @@ class InteractionController {
 | 射线检测 | 通过射线与几何体相交检测用户交互 | 监测点的鼠标点击和选择 |
 | 坐标系转换 | 不同坐标系统之间的数学变换 | 地理坐标到三维场景坐标的转换 |
 
-\\section{技术要点回顾}
+\section{技术要点回顾}
 
-\\begin{tcolorbox}[colback=blue!5!white,colframe=blue!75!black,title=Note 核心技术点
+
+\begin{tcolorbox}[colback=blue!5!white,colframe=blue!75!black,title=Note 核心技术点
     
     **Chart.js与Three.js集成**
     - 使用离屏Canvas渲染图表
@@ -320,9 +328,9 @@ class InteractionController {
     - 射线检测算法的基本原理
     - 鼠标事件与三维对象的映射
     - 信息面板的动态显示和隐藏]
-\\section{本章小结}
+\section{本章小结}
 
-\\end{tcolorbox}
+\end{tcolorbox}
 
 
 本章介绍了三维场景中观测数据展示的核心技术，包括Chart.js与Three.js的集成方法、监测点的三维可视化技术，以及用户交互的实现方式。通过学习这些技术，学生能够开发出直观、友好的智慧水利平台用户界面。
@@ -335,9 +343,10 @@ class InteractionController {
 
 这些技术为构建现代化的智慧水利监测界面提供了重要的技术基础。
 
-\\section{实践建议}
+\section{实践建议}
 
-\\begin{tcolorbox}[colback=green!5!white,colframe=green!75!black,title=Tip 开发实践要点
+
+\begin{tcolorbox}[colback=green!5!white,colframe=green!75!black,title=Tip 开发实践要点
     
     **性能优化建议**
     - 合理控制监测点数量，避免同时渲染过多对象
@@ -353,9 +362,9 @@ class InteractionController {
     - 将不同功能模块分离，提高代码可维护性
     - 使用事件驱动的架构处理用户交互
     - 实现配置化的渲染参数，便于调整和优化]
-\\section{思考题与练习}
+\section{思考题与练习}
 
-\\end{tcolorbox}
+\end{tcolorbox}
 
 
 \##\# 基础题
@@ -378,7 +387,7 @@ class InteractionController {
 
 7. **项目实践题**：基于本章所学技术，开发一个完整的智慧水利三维监测界面，包括数据加载、三维渲染、用户交互等功能。
 
-\\section{参考文献}
+\section{参考文献}
 
 [1] Three.js Development Team. Three.js Documentation[EB/OL]. [2024-08-27]. https://threejs.org/docs/.
 
@@ -388,7 +397,7 @@ class InteractionController {
 
 \# 7.1 数据类型与展示方式
 
-\\section{学习目标}
+\section{学习目标}
 
 通过本节学习，学生应能够：
 
@@ -397,7 +406,7 @@ class InteractionController {
 3. **掌握数据质量控制方法**：能够设计和实现完整的数据质量检验与异常处理机制
 4. **具备多源数据融合能力**：理解异构数据标准化处理和多源数据融合的核心技术
 
-\\section{7.1.1 水利监测数据分类体系}
+\section{7.1.1 水利监测数据分类体系}
 
 \##\# 基础概念定义
 
@@ -440,7 +449,8 @@ class InteractionController {
 - **警戒水位**：超过安全阈值，需要采取预防措施
 - **危险水位**：威胁工程安全，需要紧急处置
 
-\\begin{lstlisting}[language=Javascript]
+
+\begin{lstlisting}[language=Javascript]
 // 水位数据处理核心逻辑
 class WaterLevelProcessor {
     processReading(reading) {
@@ -462,7 +472,7 @@ class WaterLevelProcessor {
         };
     }
 }
-\\end{lstlisting}
+\end{lstlisting}
 
 
 **技术实现的关键考量**：
@@ -472,7 +482,7 @@ class WaterLevelProcessor {
 - **时间同步处理**：确保多点数据的时间基准一致
 - **精度保持**：在数据处理过程中保持测量精度不损失
 
-\\section{7.1.2 实时数据与历史数据处理机制}
+\section{7.1.2 实时数据与历史数据处理机制}
 
 \##\# 实时数据流处理架构
 
@@ -505,7 +515,8 @@ class WaterLevelProcessor {
 - **数据格式校验**：确保数据结构完整性
 - **来源标识**：为数据添加可追溯的来源信息
 
-\\begin{lstlisting}[language=Javascript]
+
+\begin{lstlisting}[language=Javascript]
 // 实时流处理核心架构
 class RealTimeDataProcessor {
     async startProcessingStream(dataSourceId, config) {
@@ -534,7 +545,7 @@ class RealTimeDataProcessor {
         await this.getDataQueue(dataSourceId).enqueue(processedData);
     }
 }
-\\end{lstlisting}
+\end{lstlisting}
 
 
 **性能优化策略**：
@@ -553,7 +564,7 @@ class RealTimeDataProcessor {
 - **数据生命周期管理**：实现数据的分层存储和归档清理
 - **高可用性保证**：确保历史数据的安全性和访问连续性
 
-\\section{7.1.3 数据质量检验与异常值处理}
+\section{7.1.3 数据质量检验与异常值处理}
 
 \##\# 数据质量评估体系
 
@@ -590,7 +601,8 @@ class RealTimeDataProcessor {
 - **数值一致性**：相关参数间的数值关系合理
 - **单位一致性**：相同物理量使用统一单位制
 
-\\begin{lstlisting}[language=Javascript]
+
+\begin{lstlisting}[language=Javascript]
 // 数据质量评估引擎
 class DataQualityAssessment {
     async assessDataQuality(dataSet, metadata) {
@@ -611,7 +623,7 @@ class DataQualityAssessment {
         };
     }
 }
-\\end{lstlisting}
+\end{lstlisting}
 
 
 **质量评估结果的应用**：
@@ -621,7 +633,7 @@ class DataQualityAssessment {
 - **自动修复建议**：识别质量问题类型，提供修复建议
 - **设备维护指导**：通过质量趋势分析，预测设备维护需求
 
-\\section{7.1.4 多源异构数据标准化与融合}
+\section{7.1.4 多源异构数据标准化与融合}
 
 \##\# 数据标准化处理
 
@@ -653,7 +665,8 @@ class DataQualityAssessment {
 - 时区处理、夏令时转换、闰秒处理
 - 本地时间与UTC时间的转换
 
-\\begin{lstlisting}[language=Javascript]
+
+\begin{lstlisting}[language=Javascript]
 // 数据标准化核心处理逻辑
 class DataStandardizer {
     async standardizeData(sourceData, sourceType) {
@@ -674,7 +687,7 @@ class DataStandardizer {
         return standardData;
     }
 }
-\\end{lstlisting}
+\end{lstlisting}
 
 
 **标准化质量保证机制**：
@@ -691,7 +704,7 @@ class DataStandardizer {
 - **并行处理**：不同数据源的标准化可并行进行
 - **增量更新**：只处理变更的数据，避免重复计算
 
-\\section{本节小结}
+\section{本节小结}
 
 本节深入介绍了水利监测数据的分类体系、处理机制和质量控制方法。通过学习本节内容，学生应该掌握了：
 
@@ -708,7 +721,7 @@ class DataStandardizer {
 
 \# 7.2 数据图表展示
 
-\\section{学习目标}
+\section{学习目标}
 
 通过本节学习，学生应能够：
 
@@ -717,7 +730,7 @@ class DataStandardizer {
 3. **能够设计交互式数据分析图表**：具备多参数关联分析图表设计和实现能力
 4. **掌握响应式图表与移动端适配技术**：理解跨设备、跨平台的图表展示优化方案
 
-\\section{7.2.1 Chart.js在三维场景中的集成}
+\section{7.2.1 Chart.js在三维场景中的集成}
 
 \##\# Chart.js技术概述
 
@@ -759,7 +772,8 @@ class DataStandardizer {
 - **渲染层同步**：WebGL纹理的及时刷新
 - **交互层同步**：用户操作在两个渲染系统间的传递
 
-\\begin{lstlisting}[language=Javascript]
+
+\begin{lstlisting}[language=Javascript]
 // Chart.js与Three.js集成的核心架构
 class ChartIntegrationManager {
     createChart(chartId, config, position) {
@@ -789,7 +803,7 @@ class ChartIntegrationManager {
         this.refreshTexture(chartId);
     }
 }
-\\end{lstlisting}
+\end{lstlisting}
 
 
 **技术实现的关键优化策略**：
@@ -799,7 +813,7 @@ class ChartIntegrationManager {
 - **内存管理**：及时释放不用的Canvas和纹理资源
 - **交互事件代理**：通过射线检测将三维场景的鼠标事件转换为图表交互
 
-\\section{7.2.2 ECharts高级图表集成}
+\section{7.2.2 ECharts高级图表集成}
 
 \##\# ECharts技术优势
 
@@ -837,7 +851,8 @@ class ChartIntegrationManager {
 - **性能自适应**：根据数据更新频率动态调整渲染策略
 - **异常数据处理**：自动识别和标记异常数据点
 
-\\begin{lstlisting}[language=Javascript]
+
+\begin{lstlisting}[language=Javascript]
 // ECharts水利专业图表核心实现
 class WaterChartsManager {
     createStageDischargeChart(chartId, data) {
@@ -849,7 +864,7 @@ class WaterChartsManager {
             tooltip: {
                 formatter: (params) => {
                     const point = params[0];
-                    return \\texttt{水位: ${point.value[0].toFixed(2)}m<br/>
+                    return \texttt{水位: ${point.value[0].toFixed(2)}m<br/>
                             流量: ${point.value[1].toFixed(2)}m³/s};
                 }
             },
@@ -887,7 +902,7 @@ class WaterChartsManager {
         return chart;
     }
 }
-\\end{lstlisting}
+\end{lstlisting}
 
 
 **ECharts性能优化的关键技术**：
@@ -897,7 +912,7 @@ class WaterChartsManager {
 - **视口裁剪**：只渲染可视区域内的数据，提升渲染性能
 - **Canvas分层**：将静态元素和动态元素分层渲染，减少重绘开销
 
-\\section{7.2.3 时序数据的动态可视化}
+\section{7.2.3 时序数据的动态可视化}
 
 \##\# 时序数据特征分析
 
@@ -937,7 +952,8 @@ class WaterChartsManager {
 - **关键点保留**：确保峰值、谷值等关键特征点不被采样丢失
 - **渐进式加载**：细节数据按需从服务器加载
 
-\\begin{lstlisting}[language=Javascript]
+
+\begin{lstlisting}[language=Javascript]
 // 时序数据可视化核心实现
 class TimeSeriesVisualization {
     constructor(container, config) {
@@ -1028,7 +1044,7 @@ class DataCompressionEngine {
         return [points[0], points[points.length - 1]];
     }
 }
-\\end{lstlisting}
+\end{lstlisting}
 
 
 **性能优化的工程实践经验**：
@@ -1038,7 +1054,7 @@ class DataCompressionEngine {
 - **数据预处理**：在Worker线程中进行数据压缩和采样
 - **缓存机制**：缓存不同缩放级别的预处理数据
 
-\\section{7.2.4 响应式图表与移动端适配}
+\section{7.2.4 响应式图表与移动端适配}
 
 \##\# 响应式设计原则
 
@@ -1076,7 +1092,8 @@ PC端和移动端的交互模式存在根本差异：
 - **懒加载机制**：按需加载图表数据，避免初始加载过慢
 - **离线缓存**：缓存关键数据，支持离线查看
 
-\\begin{lstlisting}[language=Javascript]
+
+\begin{lstlisting}[language=Javascript]
 // 响应式适配的核心实现
 class ResponsiveChartAdapter {
     constructor() {
@@ -1212,7 +1229,7 @@ class MobileOptimizedChartFactory {
         return chart;
     }
 }
-\\end{lstlisting}
+\end{lstlisting}
 
 
 **响应式设计的最佳实践**：
@@ -1223,7 +1240,7 @@ class MobileOptimizedChartFactory {
 - **离线支持**：缓存关键数据，支持网络中断时的基本功能
 - **电池优化**：减少不必要的计算和渲染，延长设备续航时间
 
-\\section{本节小结}
+\section{本节小结}
 
 本节详细介绍了数据图表在三维场景中的展示技术。通过学习本节内容，学生应该掌握了：
 
@@ -1240,7 +1257,7 @@ class MobileOptimizedChartFactory {
 
 \# 7.3 三维场景中的监测点绘制
 
-\\section{学习目标}
+\section{学习目标}
 
 通过本节学习，学生应能够：
 
@@ -1249,7 +1266,7 @@ class MobileOptimizedChartFactory {
 3. **能够设计直观的设备状态可视化方案**：建立完善的颜色编码与图标系统，实现设备状态的直观表达
 4. **掌握监测点聚合与分层显示策略**：理解空间聚合算法，实现多尺度监测点展示效果
 
-\\section{7.3.1 监测点坐标转换与空间定位}
+\section{7.3.1 监测点坐标转换与空间定位}
 
 \##\# 坐标系统基础
 
@@ -1267,7 +1284,8 @@ class MobileOptimizedChartFactory {
 
 \##\# 坐标转换算法实现
 
-\\begin{lstlisting}[language=Javascript]
+
+\begin{lstlisting}[language=Javascript]
 // 监测点坐标转换管理器核心逻辑
 class MonitoringPointPositionManager {
     geoToScenePosition(geoPosition) {
@@ -1286,7 +1304,7 @@ class MonitoringPointPositionManager {
         return new THREE.Vector3(sceneX, sceneZ, -sceneY);
     }
 }
-\\end{lstlisting}
+\end{lstlisting}
 
 
 **坐标转换技术的深度分析**
@@ -1319,7 +1337,7 @@ WGS84坐标系虽然是全球统一标准，但其球面特性给三维渲染带
 - **浮点数精度损失**：JavaScript的双精度浮点数在大数值计算时可能产生精度损失，需要特殊处理
 - **投影变形补偿**：根据监测点的具体位置，对投影变形进行数学补偿
 
-\\section{7.3.2 设备状态颜色编码与图标系统}
+\section{7.3.2 设备状态颜色编码与图标系统}
 
 \##\# 状态可视化设计原则
 
@@ -1327,7 +1345,8 @@ WGS84坐标系虽然是全球统一标准，但其球面特性给三维渲染带
 
 建立标准化的设备状态颜色编码系统，确保用户能够快速识别设备运行状态：
 
-\\begin{lstlisting}[language=Javascript]
+
+\begin{lstlisting}[language=Javascript]
 // 监测设备状态可视化核心实现
 class DeviceStatusVisualizer {
     constructor() {
@@ -1375,7 +1394,7 @@ class DeviceStatusVisualizer {
         return indicator;
     }
 }
-\\end{lstlisting}
+\end{lstlisting}
 
 
 **设备状态可视化系统的设计理念深度分析**
@@ -1436,7 +1455,7 @@ class DeviceStatusVisualizer {
 - **材质缓存**：相同状态的设备共享材质对象
 - **纹理缓存**：图标和标签纹理进行统一管理和复用
 
-\\section{7.3.3 LOD技术在监测点渲染中的应用}
+\section{7.3.3 LOD技术在监测点渲染中的应用}
 
 \##\# 层次细节优化策略
 
@@ -1444,7 +1463,8 @@ class DeviceStatusVisualizer {
 
 针对大规模监测点的渲染需求，建立多级LOD（Level of Detail）模型系统：
 
-\\begin{lstlisting}[language=Javascript]
+
+\begin{lstlisting}[language=Javascript]
 // 监测点LOD渲染管理器核心实现
 class MonitoringPointLODRenderer {
     constructor(config) {
@@ -1497,7 +1517,7 @@ class MonitoringPointLODRenderer {
         }
     }
 }
-\\end{lstlisting}
+\end{lstlisting}
 
 
 **LOD技术在大规模监测点渲染中的深度应用分析**
@@ -1550,12 +1570,13 @@ LOD系统基于人眼视觉特性的数学建模：
 
 **点在视锥体内的判定算法**
 使用Frustum类的containsPoint方法进行快速判定：
-\\begin{lstlisting}
+
+\begin{lstlisting}
 for each plane in frustum_planes:
     if dot(point, plane.normal) + plane.constant > 0:
         return false  // 点在平面外侧
 return true  // 点在视锥体内
-\\end{lstlisting}
+\end{lstlisting}
 
 
 **自适应LOD阈值的智能调整机制**：
@@ -1568,7 +1589,8 @@ LOD系统实时监控渲染性能指标：
 
 **动态阈值调整算法**
 基于性能反馈的自适应算法：
-\\begin{lstlisting}
+
+\begin{lstlisting}
 adjustment_factor = current_fps / target_fps
 if adjustment_factor < 0.8:
     // 性能不足，降低LOD阈值
@@ -1576,7 +1598,7 @@ if adjustment_factor < 0.8:
 elif adjustment_factor > 1.2:
     // 性能充足，提升LOD阈值  
     threshold *= 1.1
-\\end{lstlisting}
+\end{lstlisting}
 
 
 **LOD切换的平滑过渡技术**：
@@ -1603,7 +1625,7 @@ elif adjustment_factor > 1.2:
 
 通过这些深度优化技术，LOD系统能够在包含数千个监测点的大规模水利场景中保持60fps的流畅渲染性能。
 
-\\section{7.3.4 监测点聚合与分层显示策略}
+\section{7.3.4 监测点聚合与分层显示策略}
 
 \##\# 空间聚合算法
 
@@ -1611,7 +1633,8 @@ elif adjustment_factor > 1.2:
 
 对于密集分布的监测点，需要实现智能聚合显示，在不同缩放层级下提供合适的信息密度：
 
-\\begin{lstlisting}[language=Javascript]
+
+\begin{lstlisting}[language=Javascript]
 // 监测点聚合显示管理器核心实现
 class MonitoringPointClusterManager {
     constructor(config) {
@@ -1645,7 +1668,7 @@ class MonitoringPointClusterManager {
         points.forEach(point => {
             const gridX = Math.floor(point.position.x / gridSize);
             const gridY = Math.floor(point.position.y / gridSize);
-            const key = \\texttt{${gridX}_${gridY}};
+            const key = \texttt{${gridX}_${gridY}};
             
             if (!grid.has(key)) grid.set(key, []);
             grid.get(key).push(point);
@@ -1682,7 +1705,7 @@ class MonitoringPointClusterManager {
         return group;
     }
 }
-\\end{lstlisting}
+\end{lstlisting}
 
 
 **监测点聚合与分层显示的空间数据结构深度分析**
@@ -1775,7 +1798,7 @@ class MonitoringPointClusterManager {
 
 通过这些深度优化的聚合算法，系统能够流畅地处理包含数万个监测点的大规模水利场景，为用户提供清晰、直观的多尺度数据展示体验。
 
-\\section{本节小结}
+\section{本节小结}
 
 本节深入介绍了三维场景中监测点的绘制技术。通过学习本节内容，学生应该掌握了：
 
@@ -1792,7 +1815,7 @@ class MonitoringPointClusterManager {
 
 \# 7.4 监测点互动与拾取技术
 
-\\section{学习目标}
+\section{学习目标}
 
 通过本节学习，学生应能够：
 
@@ -1801,7 +1824,7 @@ class MonitoringPointClusterManager {
 3. **能够实现流畅的交互体验**：掌握交互性能优化技术，确保用户操作的实时响应
 4. **掌握触控设备的交互优化**：理解移动端和触控设备的特殊交互需求，实现跨平台的一致体验
 
-\\section{7.4.1 射线投射算法与碰撞检测}
+\section{7.4.1 射线投射算法与碰撞检测}
 
 \##\# 射线投射基本原理
 
@@ -1809,7 +1832,8 @@ class MonitoringPointClusterManager {
 
 射线投射是三维图形学中用于检测用户点击或选择三维对象的核心技术。在水利监测系统中，准确的射线投射算法是实现监测点交互的关键：
 
-\\begin{lstlisting}[language=Javascript]
+
+\begin{lstlisting}[language=Javascript]
 // 高精度射线投射拾取管理器核心实现
 class RaycastPickingManager {
     constructor(camera, scene, renderer) {
@@ -1880,7 +1904,7 @@ class RaycastPickingManager {
         return null;
     }
 }
-\\end{lstlisting}
+\end{lstlisting}
 
 
 **射线投射算法的深度技术原理分析**
@@ -1902,7 +1926,7 @@ class RaycastPickingManager {
 - **视图坐标**：相机坐标系统
 - **世界坐标**：场景的绝对坐标系统
 
-转换公式：\\texttt{NDC_x = (screen_x / width) * 2 - 1}，\\texttt{NDC_y = -(screen_y / height) * 2 + 1}
+转换公式：\texttt{NDC_x = (screen_x / width) * 2 - 1}，\texttt{NDC_y = -(screen_y / height) * 2 + 1}
 
 **Möller-Trumbore算法的数学优势**：
 
@@ -1954,7 +1978,7 @@ Möller-Trumbore算法是射线-三角形求交的经典算法，其数学基础
 - **纹理缓存**：将场景几何体数据存储在GPU纹理中
 - **批量查询**：一次处理多个射线求交查询
 
-\\section{7.4.2 监测点信息面板设计与实现}
+\section{7.4.2 监测点信息面板设计与实现}
 
 \##\# 信息面板架构设计
 
@@ -1962,7 +1986,8 @@ Möller-Trumbore算法是射线-三角形求交的经典算法，其数学基础
 
 设计灵活的信息面板系统，能够根据不同设备类型和数据特征动态调整内容布局：
 
-\\begin{lstlisting}[language=Javascript]
+
+\begin{lstlisting}[language=Javascript]
 // 监测点信息面板管理器核心实现
 class MonitoringPointInfoPanel {
     constructor(container) {
@@ -1981,7 +2006,7 @@ class MonitoringPointInfoPanel {
         this.positionPanel(panel, screenPosition);
         
         this.container.appendChild(panel);
-        this.panels.set(\\texttt{panel_${deviceInfo.id}}, { element: panel, deviceInfo });
+        this.panels.set(\texttt{panel_${deviceInfo.id}}, { element: panel, deviceInfo });
         
         // 显示动画
         requestAnimationFrame(() => {
@@ -1998,7 +2023,7 @@ class MonitoringPointInfoPanel {
         panel.style.cssText = this.getPanelStyles();
         
         // 组装面板内容
-        panel.innerHTML = \\texttt{
+        panel.innerHTML = \texttt{
             <div class="panel-header">${this.createHeaderHTML(deviceInfo, config)}</div>
             <div class="realtime-section">${await this.createRealtimeHTML(deviceInfo, config)}</div>
             <div class="chart-section">${this.createChartHTML()}</div>
@@ -2019,7 +2044,7 @@ class MonitoringPointInfoPanel {
         };
     }
 }
-\\end{lstlisting}
+\end{lstlisting}
 
 
 **监测点信息面板系统的高级设计原理深度解析**
@@ -2040,7 +2065,7 @@ class MonitoringPointInfoPanel {
 
 面板定位算法基于屏幕边界检测和最优位置计算：
 
-- **边界约束方程**：\\texttt{left + panelWidth ≤ screenWidth - margin}
+- **边界约束方程**：\texttt{left + panelWidth ≤ screenWidth - margin}
 - **视觉权重计算**：根据设备状态调整面板在屏幕中的优先级位置
 - **碰撞检测避让**：多个面板同时显示时的自动避让算法
 
@@ -2048,7 +2073,7 @@ class MonitoringPointInfoPanel {
 
 模板缓存机制显著提升面板创建性能：
 - **模板预编译**：将常用设备类型的面板结构预先编译为DOM模板
-- **克隆优化**：使用\\texttt{cloneNode(true)}而非重新创建，性能提升约300\%
+- **克隆优化**：使用\texttt{cloneNode(true)}而非重新创建，性能提升约300\%
 - **差异更新**：只更新变化的数据部分，避免全量DOM操作
 
 **面板内容组织的信息架构原理**：
@@ -2087,7 +2112,7 @@ class MonitoringPointInfoPanel {
 
 **8. 动画缓动函数的科学选择**
 
-面板显示动画使用\\texttt{cubic-bezier(0.25, 0.8, 0.25, 1)}缓动函数，该参数基于：
+面板显示动画使用\texttt{cubic-bezier(0.25, 0.8, 0.25, 1)}缓动函数，该参数基于：
 - **自然运动模拟**：模拟物理世界的加速-减速过程
 - **注意力引导**：适度的弹性效果吸引用户注意但不过度干扰
 - **时间感知优化**：300ms的动画时长位于用户感知的"即时响应"阈值内
@@ -2101,7 +2126,7 @@ class MonitoringPointInfoPanel {
 
 这种分层的动画设计基于紧急程度的视觉编码理论，通过频率差异传达不同级别的系统状态。
 
-\\section{7.4.3 多层级信息展示策略}
+\section{7.4.3 多层级信息展示策略}
 
 \##\# 渐进式信息披露
 
@@ -2109,7 +2134,8 @@ class MonitoringPointInfoPanel {
 
 实现渐进式信息披露，根据用户交互深度逐步展示详细信息：
 
-\\begin{lstlisting}[language=Javascript]
+
+\begin{lstlisting}[language=Javascript]
 // 多层级信息展示管理器核心实现
 class MultiLevelInfoDisplay {
     constructor(scene, camera, renderer) {
@@ -2200,7 +2226,7 @@ class MultiLevelInfoDisplay {
         return { x: screenX, y: screenY };
     }
 }
-\\end{lstlisting}
+\end{lstlisting}
 
 
 **多层级信息展示的用户体验设计原理深度解析**
@@ -2235,9 +2261,10 @@ class MultiLevelInfoDisplay {
 **4. 悬停时间与信息需求的关系模型**
 
 用户悬停时间与信息需求强度存在非线性关系：
-\\begin{lstlisting}
+
+\begin{lstlisting}
 InfoNeed(t) = 1 - e^(-t/τ)
-\\end{lstlisting}
+\end{lstlisting}
 
 其中：
 - t为悬停时间（秒）
@@ -2292,9 +2319,10 @@ InfoNeed(t) = 1 - e^(-t/τ)
 **10. 自适应时间阈值**
 
 系统可以根据用户的历史行为调整时间阈值：
-\\begin{lstlisting}[language=Javascript]
+
+\begin{lstlisting}[language=Javascript]
 adaptiveThreshold = baseThreshold * (1 + userSpeedFactor)
-\\end{lstlisting}
+\end{lstlisting}
 
 - 快速用户：降低阈值，更快显示详细信息
 - 慢速用户：提高阈值，避免过早的信息干扰
@@ -2308,7 +2336,7 @@ adaptiveThreshold = baseThreshold * (1 + userSpeedFactor)
 
 这种多维度的自适应机制使系统能够为不同用户在不同情境下提供最适合的信息展示方式，体现了以人为中心的设计理念。
 
-\\section{7.4.4 触控设备交互优化}
+\section{7.4.4 触控设备交互优化}
 
 \##\# 触控交互设计原则
 
@@ -2316,7 +2344,8 @@ adaptiveThreshold = baseThreshold * (1 + userSpeedFactor)
 
 针对触控设备的特殊需求，设计适合触摸操作的交互模式：
 
-\\begin{lstlisting}[language=Javascript]
+
+\begin{lstlisting}[language=Javascript]
 // 触控设备交互优化管理器核心实现
 class TouchInteractionOptimizer {
     constructor(renderer, scene, camera) {
@@ -2465,7 +2494,7 @@ class TouchInteractionOptimizer {
         navigator.vibrate(pattern);
     }
 }
-\\end{lstlisting}
+\end{lstlisting}
 
 
 **触控设备交互优化的人机工程学原理深度解析**
@@ -2503,9 +2532,10 @@ class TouchInteractionOptimizer {
 **4. 触控区域的几何扩展策略**
 
 针对三维环境中小目标的触控困难，采用自适应区域扩展：
-\\begin{lstlisting}[language=Javascript]
+
+\begin{lstlisting}[language=Javascript]
 effectiveRadius = baseRadius + (depth_distance / max_distance) * expansion_factor
-\\end{lstlisting}
+\end{lstlisting}
 
 其中：
 - baseRadius：基础触控半径（20像素）
@@ -2517,9 +2547,9 @@ effectiveRadius = baseRadius + (depth_distance / max_distance) * expansion_facto
 **5. 多点触控的向量分析**
 
 双指手势识别基于向量几何：
-- **捏合检测**：\\texttt{scale_ratio = current_distance / initial_distance}
-- **旋转检测**：\\texttt{angle_change = atan2(v2.y, v2.x) - atan2(v1.y, v1.x)}
-- **平移检测**：\\texttt{translation = (center_current - center_initial)}
+- **捏合检测**：\texttt{scale_ratio = current_distance / initial_distance}
+- **旋转检测**：\texttt{angle_change = atan2(v2.y, v2.x) - atan2(v1.y, v1.x)}
+- **平移检测**：\texttt{translation = (center_current - center_initial)}
 
 **性能优化的工程策略**：
 
@@ -2542,9 +2572,10 @@ effectiveRadius = baseRadius + (depth_distance / max_distance) * expansion_facto
 **8. 屏幕密度自适应**
 
 不同设备的像素密度差异巨大：
-\\begin{lstlisting}[language=Javascript]
+
+\begin{lstlisting}[language=Javascript]
 adaptedSize = baseSize * (devicePixelRatio / standardDPI * scaleFactor)
-\\end{lstlisting}
+\end{lstlisting}
 
 - iPhone Retina：devicePixelRatio = 2-3
 - Android高端机：devicePixelRatio = 2.5-4
@@ -2584,7 +2615,7 @@ adaptedSize = baseSize * (devicePixelRatio / standardDPI * scaleFactor)
 
 这种多维度的触控优化策略确保智慧水利系统能够在各种设备和使用环境下提供一致、高效的触控体验。
 
-\\section{本节小结}
+\section{本节小结}
 
 本节全面介绍了监测点交互与拾取技术的实现方法。通过学习本节内容，学生应该掌握了：
 

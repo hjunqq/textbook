@@ -1,6 +1,6 @@
 \chapter{第二章 软件工程基础与需求分析}
 
-\\section{学习目标}
+\section{学习目标}
 
 通过本章学习，学生应能够：
 
@@ -10,15 +10,16 @@
 4. 具备运用UML等建模工具进行系统分析和设计的能力，能够绘制用例图、类图、时序图等重要设计文档
 5. 了解软件质量保证方法，包括测试策略、配置管理和风险控制等内容
 
-\\section{引言}
+\section{引言}
 
 软件工程是智慧水利平台开发的理论基础和方法指导，它为复杂软件系统的开发提供了系统化的工程方法。随着智慧水利平台功能的日益复杂和技术要求的不断提高，传统的经验驱动开发模式已无法满足现代水利信息化的需求。科学的软件工程方法不仅能够提高开发效率，确保软件质量，还能有效控制开发成本和项目风险。
 
 需求分析作为软件工程的起点，对于智慧水利平台的成功开发具有决定性意义。水利行业具有专业性强、业务复杂、安全要求高等特点，这使得需求分析面临着独特的挑战。如何准确理解和描述水利业务需求，如何平衡功能性需求与非功能性需求，如何处理需求的变更和演进，这些都是智慧水利平台开发过程中必须解决的关键问题。
 
-\\section{本章小节}
+\section{本章小节}
 
-\\begin{tcolorbox}[colback=cyan!5!white,colframe=cyan!75!black,title=Info 章节结构
+
+\begin{tcolorbox}[colback=cyan!5!white,colframe=cyan!75!black,title=Info 章节结构
     
     \##\# [第一节 软件生命周期](section02-01.md)
     - 软件生命周期的概念与框架
@@ -54,9 +55,9 @@
     - 软件工程基础知识总结
     - 需求分析方法比较
     - 思考题与练习]
-\\section{关键概念}
+\section{关键概念}
 
-\\end{tcolorbox}
+\end{tcolorbox}
 
 
 | 概念 | 定义 | 在智慧水利中的应用 |
@@ -66,9 +67,10 @@
 | 软件架构 | 软件系统的高层结构，包括组件、接口和交互关系 | 智慧水利平台的整体结构设计 |
 | 需求可追踪性 | 需求与设计、实现、测试等活动之间的对应关系 | 确保水利功能完整实现 |
 
-\\section{重点难点}
+\section{重点难点}
 
-\\begin{tcolorbox}[colback=orange!5!white,colframe=orange!75!black,title=Warning 学习重点
+
+\begin{tcolorbox}[colback=orange!5!white,colframe=orange!75!black,title=Warning 学习重点
     - 掌握需求获取和分析的系统方法
     - 理解水利行业需求的特殊性和复杂性
     - 熟练使用UML进行系统建模
@@ -78,10 +80,10 @@
     - 功能需求与非功能需求的平衡
     - 复杂系统的建模抽象
     - 需求变更的有效管理
-\\end{tcolorbox}
+\end{tcolorbox}
 
 
-\\section{2.1 软件生命周期}
+\section{2.1 软件生命周期}
 
 软件生命周期（Software Life Cycle）是贯穿软件从孕育到消亡全过程的系统性框架，其本质在于通过结构化方法将复杂的软件开发"解构"为可管理的模块化任务[1]。根据IEEE Std 1074标准，软件生命周期是指软件产品从概念形成到退役的整个时间周期，涵盖需求分析、设计、实现、测试、部署和维护等关键阶段[2]。与传统工业产品的物理损耗不同，软件的生命终结往往源于技术迭代或功能冗余——如同物种进化中的自然淘汰，而非机械磨损。这一概念的提出，标志着软件工程从无序的“手工艺”模式向标准化工业流程的跃迁，其核心价值在于为开发者提供了一套动态演进的行动指南。
 
@@ -101,7 +103,7 @@
 
 运行和维护时期是软件生命周期的最后一个阶段，也是软件真正发挥价值的阶段。在这一阶段，软件被部署到生产环境中供用户使用。维护工作包括修复软件中的错误、更新功能以适应新的需求，以及优化性能。维护可以分为纠错性维护、适应性维护、完善性维护和预防性维护。纠错性维护是修复软件中的错误；适应性维护是使软件适应新的环境或需求；完善性维护是改进软件的功能和性能；预防性维护是为防止未来可能出现的问题而进行的维护。当软件不再需要时，进行退役处理，包括数据迁移和系统关闭。运行和维护时期的目标是确保软件的持续运行和更新，延长软件的生命周期，最大化其价值。
 
-\\section{思考题与练习}
+\section{思考题与练习}
 
 \##\# 基础题
 
@@ -120,11 +122,11 @@
 7. 讨论本节内容与其他相关技术的集成方案，分析可能遇到的挑战。
 8. 展望本节涉及技术的发展趋势，分析其对智慧水利未来发展的影响。
 
-\\section{本节小结}
+\section{本节小结}
 
 本节内容为智慧水利平台的设计和开发提供了重要的理论基础和技术指导。通过学习本节内容，学生应能够理解相关概念的内涵和应用价值，掌握基本的分析方法和设计原则，为后续章节的学习和实际项目的开展奠定坚实基础。
 
-\\section{2.2 软件生命周期模型}
+\section{2.2 软件生命周期模型}
 
 \##\# 2.2.1 软件生命周期模型的概念
 
@@ -144,11 +146,12 @@
 
 瀑布模型如图2-1所示，该模型说明整个软件开发过程是按图中6个阶段进行的。
 
-\\begin{figure}[htbp]
-\\centering
-\\includegraphics[width=0.8\\textwidth]{../images/chapter02/image1.png}
-\\caption{图02.1}
-\\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{../images/chapter02/image1.png}
+\caption{图02.1}
+\end{figure}
 
 
 图2-1 瀑布模型
@@ -189,11 +192,12 @@
 
 原型模型的核心思想是通过快速构建一个可运行的原型，尽早展示系统的部分功能，以便用户提供反馈。开发团队根据反馈不断改进原型，直到满足用户需求。这种方法强调灵活性和适应性，能够有效应对需求变化。原型模型如图2-2所示。
 
-\\begin{figure}[htbp]
-\\centering
-\\includegraphics[width=0.8\\textwidth]{../images/chapter02/image2.png}
-\\caption{图02.2}
-\\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{../images/chapter02/image2.png}
+\caption{图02.2}
+\end{figure}
 
 
 图2-2 原型模型
@@ -228,20 +232,22 @@
 
 增量模型将软件项目视为一系列可逐步交付的增量构件集合。区别于传统瀑布模型追求一次性完整开发，它倡导分阶段、逐步地构建和交付软件。在每个阶段，开发团队聚焦于完成软件的一个或多个增量部分，这些部分相互关联却又相对独立，最终组合成完整的软件系统。这种方式类似于搭建积木，每一块积木都是整体不可或缺的部分，且可在不同时间单独打造。增量构造模型如图2-3所示，演化提交模型如图2-4所示。
 
-\\begin{figure}[htbp]
-\\centering
-\\includegraphics[width=0.8\\textwidth]{../images/chapter02/image3.png}
-\\caption{图02.3}
-\\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{../images/chapter02/image3.png}
+\caption{图02.3}
+\end{figure}
 
 
 图2-3 增量构造模型
 
-\\begin{figure}[htbp]
-\\centering
-\\includegraphics[width=0.8\\textwidth]{../images/chapter02/image4.png}
-\\caption{图02.4}
-\\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{../images/chapter02/image4.png}
+\caption{图02.4}
+\end{figure}
 
 
 图2-4 演化提交模型
@@ -272,11 +278,12 @@
 
 在软件开发的多元版图中，螺旋模型以其独特的运作模式，成为驾驭复杂项目的有力武器。它打破常规，将软件开发视为一场在风险与机遇间寻求平衡的旅程。螺旋模型如图2-5所示。
 
-\\begin{figure}[htbp]
-\\centering
-\\includegraphics[width=0.8\\textwidth]{../images/chapter02/image5.png}
-\\caption{图02.5}
-\\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{../images/chapter02/image5.png}
+\caption{图02.5}
+\end{figure}
 
 
 图2-5 螺旋模型
@@ -309,11 +316,12 @@
 
 喷泉模型（Fountain Model）是一种典型的面向对象的软件开发模型，由 B.H.Sollers 和 J.M.Edwards 于 1990 年提出。它强调软件开发过程的迭代和无间隙特性，如同喷泉中的水一样，各个开发阶段相互交融、连续推进。喷泉模型如图2-6所示。
 
-\\begin{figure}[htbp]
-\\centering
-\\includegraphics[width=0.8\\textwidth]{../images/chapter02/image6.png}
-\\caption{图02.6}
-\\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{../images/chapter02/image6.png}
+\caption{图02.6}
+\end{figure}
 
 
 图2-6 喷泉模型
@@ -350,11 +358,12 @@
 
 基于知识的模型，是一类在现代科技领域应用广泛且极具价值的模型。它构建的基础在于将特定领域的知识体系融入其中，以此来模拟、分析与解决各类复杂问题。与传统模型不同，其并非单纯依赖数据驱动，而是高度依赖人类积累的专业知识、经验规则以及逻辑推理。基于知识的模型如图2-7所示。
 
-\\begin{figure}[htbp]
-\\centering
-\\includegraphics[width=0.8\\textwidth]{../images/chapter02/image7.png}
-\\caption{图02.7}
-\\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{../images/chapter02/image7.png}
+\caption{图02.7}
+\end{figure}
 
 
 图2-7 基于知识的模型
@@ -369,11 +378,12 @@
 
 变换模型是一种别具一格的软件开发模型，它将软件开发过程视为一系列基于形式化规格说明的变换过程。其核心在于借助数学化、形式化的方法来精准描述软件需求，通过严密的数学推理和转换规则，把初始的形式化规格说明逐步转化为可运行的软件系统。变换模型如图2-8所示。
 
-\\begin{figure}[htbp]
-\\centering
-\\includegraphics[width=0.8\\textwidth]{../images/chapter02/image8.png}
-\\caption{图02.8}
-\\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{../images/chapter02/image8.png}
+\caption{图02.8}
+\end{figure}
 
 
 图2-8 变换模型
@@ -382,7 +392,7 @@
 
 变换模型在对软件可靠性要求极高的场景中优势显著，如航空航天、医疗设备控制等领域。通过严谨的形式化方法，能最大程度减少人为失误和模糊性，提前发现并解决潜在问题，确保软件在复杂且关键的环境下稳定运行。不过，它也存在明显局限。形式化规格说明的撰写需要专业的数学知识和技能，对开发人员要求极高，导致学习成本与人力成本增加。而且，由于过程高度形式化，开发过程灵活性欠佳，一旦需求发生较大变更，调整起来难度较大。
 
-\\section{2.3 需求分析}
+\section{2.3 需求分析}
 
 需求分析是软件开发生命周期中的关键阶段，旨在通过系统化的方法准确捕捉和理解用户需求，为后续设计和开发奠定基础。这一阶段的核心任务是将用户的非正式需求陈述转化为完整、准确的需求定义，明确系统必须完成的功能和性能要求。需求分析不仅涉及功能的界定，还包括系统的性能、可靠性、用户体验等多方面要求。通过功能分解、结构化分析、信息建模和面向对象分析等方法，开发团队可以逐步细化需求，确保系统设计能够满足用户的实际需求。需求分析的结果通常以需求规格说明书、用户手册和测试计划等形式呈现，为后续的开发、测试和维护提供明确的指导。
 
@@ -468,11 +478,12 @@
 
 在明确需求之后，分析人员需通过一致性检查和逐步细化的过程，导出软件的逻辑模型。这一过程涉及将系统的功能需求细化为具体的子功能，并对数据域进行分解，进一步明确系统的结构和组成。在需求分析阶段，通过建立实体关系图（ER图）来导出软件的逻辑模型。例如，图2-9展示了一个银行储蓄系统的ER图，描述了储户、账户、存款单和取款单等实体及其之间的关系。通过这样的逻辑模型，开发团队可以清晰地理解系统的数据结构和业务逻辑，为后续的设计和开发奠定基础。
 
-\\begin{figure}[htbp]
-\\centering
-\\includegraphics[width=0.8\\textwidth]{../images/chapter02/image9.png}
-\\caption{图02.1}
-\\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{../images/chapter02/image9.png}
+\caption{图02.1}
+\end{figure}
 
 
 图2-9 银行储蓄系统ER图
@@ -511,7 +522,7 @@
 
 每种需求分析方法都有其独特的优势和适用场景。在实际开发中，开发团队可以根据系统的特点选择合适的分析方法，或者结合多种方法的优势，构建更加全面和精确的系统模型。需求分析的目标不仅是明确系统的功能需求，更重要的是为后续开发提供一个清晰、可操作的蓝图，确保最终产品能够真正满足用户的需求。
 
-\\section{2.4 需求获取与理解}
+\section{2.4 需求获取与理解}
 
 \##\# 2.4.1 客户需求的获取方法
 
@@ -545,7 +556,7 @@
 
 系统需求则是从技术和功能角度对系统进行的详细描述，通常涉及具体的功能、性能、安全等方面的要求。系统需求由开发人员、系统架构师等技术团队根据用户需求转化而来，通常更加具体和可操作。例如，系统需求可能包括"系统应支持10,000并发用户"或"数据库应支持事务的ACID特性"。系统需求是实现用户需求的实际步骤和技术规范，确保最终交付的系统符合客户期望并具备足够的技术能力。
 
-\\section{2.5 结构化分析}
+\section{2.5 结构化分析}
 
 结构化分析（Structured Analysis，SA）是软件工程中一种传统的需求分析与系统设计方法，兴起于20世纪70年代，主要应用于瀑布模型开发流程。它以数据流为核心，通过分层分解的方式描述系统功能。
 
@@ -591,11 +602,12 @@
 
 在面对复杂系统时，试图同时考虑所有细节往往会导致分析陷入混乱。为了有效管理复杂性，自顶向下逐层分解成为一种关键策略。这种方法通过将复杂问题分解为更小、更易管理的部分，逐步降低问题的复杂性，使其更易于理解和处理。如图2-10所示是对一个问题的逐层分解。
 
-\\begin{figure}[htbp]
-\\centering
-\\includegraphics[width=0.8\\textwidth]{../images/chapter02/image10.png}
-\\caption{图02.1}
-\\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{../images/chapter02/image10.png}
+\caption{图02.1}
+\end{figure}
 
 
 图2-10 对一个问题的逐层分解
@@ -644,71 +656,71 @@
 |  |  |  |
 | --- | --- | --- |
 | 符合 | 名称 | 说明 |
-| \\begin{figure}[htbp]
-\\centering
-\\includegraphics[width=0.8\\textwidth]{../images/chapter02/image11.png}
-\\caption{图02.2}
-\\end{figure} | 处理 | 能改变数据值或位置的加工。例如,程序模块、处理机等都是处理 |
-| \\begin{figure}[htbp]
-\\centering
-\\includegraphics[width=0.8\\textwidth]{../images/chapter02/image12.png}
-\\caption{图02.3 符号}
-\\end{figure} | 输入/输出 | 表示输人或输出，是一个广义的不指明具体设备的符号 |
-| \\begin{figure}[htbp]
-\\centering
-\\includegraphics[width=0.8\\textwidth]{../images/chapter02/image13.png}
-\\caption{图02.4 符号}
-\\end{figure} | 连接 | 指出转到图的另一部分或从图的另一部分转来,通常在同一页 |
-| \\begin{figure}[htbp]
-\\centering
-\\includegraphics[width=0.8\\textwidth]{../images/chapter02/image14.png}
-\\caption{图02.5 符号}
-\\end{figure} | 换页连接 | 指出转到另一页图上或由另一页图转来 |
-| \\begin{figure}[htbp]
-\\centering
-\\includegraphics[width=0.8\\textwidth]{../images/chapter02/image15.png}
-\\caption{图02.6 符号}
-\\end{figure} | 数据流 | 用来连接其他符号，指明数据流动方向 |
-| \\begin{figure}[htbp]
-\\centering
-\\includegraphics[width=0.8\\textwidth]{../images/chapter02/image16.png}
-\\caption{图02.7 符号}
-\\end{figure} | 文档 | 通常表示打印输出,也可表示用打印终端输入数据 |
-| \\begin{figure}[htbp]
-\\centering
-\\includegraphics[width=0.8\\textwidth]{../images/chapter02/image17.png}
-\\caption{图02.8 符号}
-\\end{figure} | 联机存储 | 表示任何种类的联机存储,包括磁盘、软盘和海量存储器件等 |
-| \\begin{figure}[htbp]
-\\centering
-\\includegraphics[width=0.8\\textwidth]{../images/chapter02/image18.png}
-\\caption{图02.9 符号}
-\\end{figure} | 磁盘 | 磁盘输入/输出,也可表示存储在磁盘上的文件或数据库 |
-| \\begin{figure}[htbp]
-\\centering
-\\includegraphics[width=0.8\\textwidth]{../images/chapter02/image19.png}
-\\caption{图02.10 符号}
-\\end{figure} | 显示 | CRT终端或类似的显示部件,可用于输人或输出,也可既输人又输出 |
-| \\begin{figure}[htbp]
-\\centering
-\\includegraphics[width=0.8\\textwidth]{../images/chapter02/image20.png}
-\\caption{图02.11 符号}
-\\end{figure} | 人工输人 | 人工输入数据的脱机处理。例如,填写表格 |
-| \\begin{figure}[htbp]
-\\centering
-\\includegraphics[width=0.8\\textwidth]{../images/chapter02/image21.png}
-\\caption{图02.12 符号}
-\\end{figure} | 人工操作 | 人工完成的处理。例如，会计在工资支票上签名 |
-| \\begin{figure}[htbp]
-\\centering
-\\includegraphics[width=0.8\\textwidth]{../images/chapter02/image22.png}
-\\caption{图02.13 符号}
-\\end{figure} | 辅助操作 | 使用设备进行的脱机操作 |
-| \\begin{figure}[htbp]
-\\centering
-\\includegraphics[width=0.8\\textwidth]{../images/chapter02/image23.png}
-\\caption{图02.14 符号}
-\\end{figure} | 通信链路 | 通过远程通信线路或链路传送数据 |
+| \begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{../images/chapter02/image11.png}
+\caption{图02.2}
+\end{figure} | 处理 | 能改变数据值或位置的加工。例如,程序模块、处理机等都是处理 |
+| \begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{../images/chapter02/image12.png}
+\caption{图02.3 符号}
+\end{figure} | 输入/输出 | 表示输人或输出，是一个广义的不指明具体设备的符号 |
+| \begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{../images/chapter02/image13.png}
+\caption{图02.4 符号}
+\end{figure} | 连接 | 指出转到图的另一部分或从图的另一部分转来,通常在同一页 |
+| \begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{../images/chapter02/image14.png}
+\caption{图02.5 符号}
+\end{figure} | 换页连接 | 指出转到另一页图上或由另一页图转来 |
+| \begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{../images/chapter02/image15.png}
+\caption{图02.6 符号}
+\end{figure} | 数据流 | 用来连接其他符号，指明数据流动方向 |
+| \begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{../images/chapter02/image16.png}
+\caption{图02.7 符号}
+\end{figure} | 文档 | 通常表示打印输出,也可表示用打印终端输入数据 |
+| \begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{../images/chapter02/image17.png}
+\caption{图02.8 符号}
+\end{figure} | 联机存储 | 表示任何种类的联机存储,包括磁盘、软盘和海量存储器件等 |
+| \begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{../images/chapter02/image18.png}
+\caption{图02.9 符号}
+\end{figure} | 磁盘 | 磁盘输入/输出,也可表示存储在磁盘上的文件或数据库 |
+| \begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{../images/chapter02/image19.png}
+\caption{图02.10 符号}
+\end{figure} | 显示 | CRT终端或类似的显示部件,可用于输人或输出,也可既输人又输出 |
+| \begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{../images/chapter02/image20.png}
+\caption{图02.11 符号}
+\end{figure} | 人工输人 | 人工输入数据的脱机处理。例如,填写表格 |
+| \begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{../images/chapter02/image21.png}
+\caption{图02.12 符号}
+\end{figure} | 人工操作 | 人工完成的处理。例如，会计在工资支票上签名 |
+| \begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{../images/chapter02/image22.png}
+\caption{图02.13 符号}
+\end{figure} | 辅助操作 | 使用设备进行的脱机操作 |
+| \begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{../images/chapter02/image23.png}
+\caption{图02.14 符号}
+\end{figure} | 通信链路 | 通过远程通信线路或链路传送数据 |
 
 **3.系统流程图示例**
 
@@ -716,11 +728,12 @@
 
 如果库存充足，系统会将订单信息保存到数据库中，并继续处理订单。这一阶段可能包括支付处理、订单号的生成等。然后，系统会生成订单确认通知，并将其发送给客户，通知客户订单已被接受和处理。客户收到确认通知后，需要确认订单的正确性，一旦客户确认无误，订单最终完成，等待发货。
 
-\\begin{figure}[htbp]
-\\centering
-\\includegraphics[width=0.8\\textwidth]{../images/chapter02/image24.png}
-\\caption{图02.15}
-\\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{../images/chapter02/image24.png}
+\caption{图02.15}
+\end{figure}
 
 
 图2-12 订单处理系统的流程图
@@ -759,11 +772,12 @@
 
 顶层数据流图展示了系统的基本数据流动和处理过程。首先，外部实体（如客户）与系统进行交互，将订单信息传递给过程1，即“订单接收”。该过程负责接收并初步处理订单数据，随后将处理后的订单信息存储到“订单信息”数据存储中。接下来，过程2“订单处理”从“订单信息”数据存储中获取数据，进行进一步的订单处理操作，并将处理结果存储到“处理结果”数据存储中。最后，过程3“通知客户”从“处理结果”数据存储中获取信息，生成通知并发送给客户，完成整个订单处理流程。该数据流图清晰地描述了系统的主要功能和数据流动路径，为后续的详细设计和开发提供了基础。
 
-\\begin{figure}[htbp]
-\\centering
-\\includegraphics[width=0.8\\textwidth]{../images/chapter02/image25.png}
-\\caption{图02.16}
-\\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{../images/chapter02/image25.png}
+\caption{图02.16}
+\end{figure}
 
 
 图2-10 顶层数据流图
@@ -772,11 +786,12 @@
 
 子系统数据流图进一步细化了顶层数据流图中的“订单接收”过程。首先，过程1“订单接收”接收来自外部实体的订单数据。随后，过程1.1“检查订单有效性”对接收到的订单数据进行验证，确保其符合系统的要求，并将验证结果存储到“订单验证结果”数据存储中。如果订单数据有效，过程1.2“存储订单信息”将订单信息保存到“订单信息”数据存储中，以便后续处理。该子系统数据流图详细描述了订单接收过程中的关键步骤和数据流动，帮助开发团队更好地理解和设计系统的具体功能模块。
 
-\\begin{figure}[htbp]
-\\centering
-\\includegraphics[width=0.8\\textwidth]{../images/chapter02/image26.png}
-\\caption{图02.17}
-\\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{../images/chapter02/image26.png}
+\caption{图02.17}
+\end{figure}
 
 
 图2-11 子系统数据流图
@@ -881,6 +896,6 @@
 
 数据字典的实现可以通过手工方式或计算机辅助方式完成。手工方式适用于小型系统，而计算机辅助方式则适用于中大型系统，通常使用数据库或专门的工具软件来管理和维护数据字典。通过数据字典，开发人员可以确保系统中的数据定义一致、完整，并为后续的设计、编码和测试提供可靠的基础。数据字典不仅是需求分析阶段的重要输出，也是整个软件开发过程中不可或缺的文档之一。
 
-\\section{2.6 小结}
+\section{2.6 小结}
 
 本章详细介绍了软件工程的基础知识和需求分析的关键内容。首先，软件生命周期是贯穿软件从孕育到消亡全过程的系统性框架，通过结构化方法将复杂的软件开发解构为可管理的模块化任务。软件生命周期包括设计、开发、运行与维护等阶段，每个阶段都有其独特的使命和任务。接着，本章探讨了多种软件生命周期模型，如瀑布模型、原型模型、增量模型、螺旋模型、喷泉模型、基于知识的模型和变换模型，每种模型都有其适用的场景和优缺点。需求分析是软件开发生命周期中的关键阶段，其任务包括明确系统需求、导出软件的逻辑模型和编写文档。需求分析的方法包括功能分解法、结构化分析法、信息建模法和面向对象分析法。需求获取与理解部分介绍了客户需求的获取方法、需求分类与优先级划分。最后，本章详细介绍了结构化分析的方法和工具，包括自顶向下逐层分解、系统流程图、数据流图和数据字典。通过这些方法和工具，开发团队可以更有效地捕捉和理解用户需求，确保软件项目的高质量交付。

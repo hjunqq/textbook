@@ -66,3 +66,6 @@ site/
 
 # 参考
 参考
+*/output
+*/__pycache__
+

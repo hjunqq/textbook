@@ -8,5 +8,7 @@ dependencies = [
     "mkdocs>=1.6.1",
     "mkdocs-awesome-pages-plugin>=2.10.1",
     "mkdocs-material>=9.6.16",
+    "mkdocs-print-site-plugin>=2.3.4",
+    "mkdocs-with-pdf>=0.9.3",
     "pymdown-extensions>=10.16.1",
 ]

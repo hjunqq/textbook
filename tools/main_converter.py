@@ -5,6 +5,7 @@
 
 import os
 import sys
+import re
 import logging
 import subprocess
 from pathlib import Path
@@ -153,15 +154,17 @@ class ConverterApplication:
                 str(input_path),
                 '-o', str(output_path),
                 '--wrap=none',
-                '--standalone',
                 '--from=markdown-yaml_metadata_block',  # 禁用YAML元数据块解析
                 '--to=latex'
+                # 移除--standalone，生成章节片段而非完整文档
             ]
             
             result = subprocess.run(cmd, capture_output=True, text=True, encoding='utf-8')
             
             if result.returncode == 0:
                 self.logger.debug(f"Pandoc转换成功: {input_path} -> {output_path}")
+                # 后处理生成的LaTeX以修复问题
+                self._post_process_tex(output_path)
                 return True
             else:
                 self.logger.error(f"Pandoc转换失败: {result.stderr}")
@@ -170,6 +173,76 @@ class ConverterApplication:
         except Exception as e:
             self.logger.error(f"Pandoc转换出错: {e}")
             return False
+    
+    def _post_process_tex(self, tex_path: Path) -> None:
+        """后处理LaTeX文件以修复转义和格式问题"""
+        try:
+            with open(tex_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            
+            # 修复过度转义的LaTeX命令
+            fixes = [
+                # 修复章节命令的过度转义
+                (r'\\textbackslash chapter\{', r'\\chapter{'),
+                (r'\\textbackslash section\{', r'\\section{'),
+                (r'\\textbackslash subsection\{', r'\\subsection{'),
+                
+                # 修复数学环境的过度转义  
+                (r'\\textbackslash begin\{equation\}', r'\\begin{equation}'),
+                (r'\\textbackslash end\{equation\}', r'\\end{equation}'),
+                
+                # 修复代码环境的过度转义
+                (r'\\textbackslash begin\{lstlisting\}', r'\\begin{lstlisting}'),
+                (r'\\textbackslash end\{lstlisting\}', r'\\end{lstlisting}'),
+                
+                # 修复tcolorbox的过度转义
+                (r'\\textbackslash begin\{tcolorbox\}', r'\\begin{tcolorbox}'),
+                (r'\\textbackslash end\{tcolorbox\}', r'\\end{tcolorbox}'),
+                
+                # 修复图片环境的过度转义
+                (r'\\textbackslash begin\{figure\}', r'\\begin{figure}'),
+                (r'\\textbackslash end\{figure\}', r'\\end{figure}'),
+                (r'\\textbackslash centering', r'\\centering'),
+                (r'\\textbackslash includegraphics', r'\\includegraphics'),
+                (r'\\textbackslash caption\{', r'\\caption{'),
+                
+                # 修复表格环境过度转义
+                (r'\\textbackslash begin\{table\}', r'\\begin{table}'),
+                (r'\\textbackslash end\{table\}', r'\\end{table}'),
+                (r'\\textbackslash begin\{tabular\}', r'\\begin{tabular}'),
+                (r'\\textbackslash end\{tabular\}', r'\\end{tabular}'),
+                (r'\\textbackslash begin\{longtable\}', r'\\begin{longtable}'),
+                (r'\\textbackslash end\{longtable\}', r'\\end{longtable}'),
+                
+                # 修复其他常见的过度转义
+                (r'\\textbackslash texttt\{', r'\\texttt{'),
+                (r'\\textbackslash textbf\{', r'\\textbf{'),
+                (r'\\textbackslash textit\{', r'\\textit{'),
+                (r'\\textbackslash n', r'\\n'),
+                
+                # 修复通用的textbackslash模式
+                (r'\\textbackslash ([a-zA-Z]+)\{', r'\\\1{'),
+                
+                # 修复表格内的特殊情况
+                (r'\\textbackslash begin\\{figure\\}\\{\\[\\}htbp\\{\\}\\}', r'\\begin{figure}[htbp]'),
+                (r'\\textbackslash end\\{figure\\}', r'\\end{figure}'),
+                (r'\\textbar\\{\\}', r'|'),
+                
+                # 修复双重转义
+                (r'\\\\\\\\', r'\\\\'),
+            ]
+            
+            for pattern, replacement in fixes:
+                content = re.sub(pattern, replacement, content)
+            
+            # 保存修复后的内容
+            with open(tex_path, 'w', encoding='utf-8') as f:
+                f.write(content)
+                
+            self.logger.debug(f"LaTeX后处理完成: {tex_path}")
+            
+        except Exception as e:
+            self.logger.error(f"LaTeX后处理失败 {tex_path}: {e}")
     
     def generate_main_tex(self) -> bool:
         """生成主LaTeX文件"""
@@ -247,9 +320,58 @@ class ConverterApplication:
             os.chdir(original_cwd)
             return False
     
+    def _copy_images(self) -> None:
+        """复制图片文件到输出目录"""
+        self.logger.info("开始复制图片文件")
+        
+        # 确保images目录存在
+        images_dir = Path(self.config.output_dir) / 'images'
+        images_dir.mkdir(exist_ok=True)
+        
+        import shutil
+        
+        # 复制assets中的图片
+        source_images = Path(self.config.source_dir).parent / 'assets' / 'images'
+        if source_images.exists():
+            try:
+                shutil.copytree(source_images, images_dir, dirs_exist_ok=True)
+                self.logger.info(f"Assets图片复制完成: {source_images} -> {images_dir}")
+            except Exception as e:
+                self.logger.warning(f"复制assets图片时出错: {e}")
+        
+        # 复制chapters中的图片
+        chapters_images = Path(self.config.source_dir) / 'images'
+        if chapters_images.exists():
+            try:
+                # 逐个复制章节图片目录
+                for chapter_img_dir in chapters_images.iterdir():
+                    if chapter_img_dir.is_dir():
+                        dest_dir = images_dir / chapter_img_dir.name
+                        shutil.copytree(chapter_img_dir, dest_dir, dirs_exist_ok=True)
+                        self.logger.info(f"章节图片复制完成: {chapter_img_dir} -> {dest_dir}")
+            except Exception as e:
+                self.logger.warning(f"复制章节图片时出错: {e}")
+        
+        # 也检查各个章节目录中的images文件夹
+        source_root = Path(self.config.source_dir)
+        for chapter_dir in source_root.iterdir():
+            if chapter_dir.is_dir() and chapter_dir.name.startswith('chapter'):
+                chapter_images = chapter_dir / 'images'
+                if chapter_images.exists():
+                    try:
+                        dest_dir = images_dir / chapter_dir.name
+                        dest_dir.mkdir(exist_ok=True)
+                        shutil.copytree(chapter_images, dest_dir, dirs_exist_ok=True)
+                        self.logger.info(f"章节专属图片复制完成: {chapter_images} -> {dest_dir}")
+                    except Exception as e:
+                        self.logger.warning(f"复制{chapter_dir.name}图片时出错: {e}")
+
     def convert_all(self) -> bool:
         """转换所有内容"""
         self.logger.info("🚀 开始完整转换流程")
+        
+        # 首先复制图片文件
+        self._copy_images()
         
         # 转换前言
         preface_success = self.convert_preface()
