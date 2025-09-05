@@ -28,7 +28,14 @@
       "Bash(for i in 05 06 07 08)",
       "Bash(do echo \"=== Chapter $i ===\")",
       "Bash(cat:*)",
-      "Bash(xxd:*)"
+      "Bash(xxd:*)",
+      "Bash(pdfinfo:*)",
+      "Bash(lualatex:*)",
+      "Bash(TEXMFVAR=/tmp xelatex -interaction=nonstopmode main.tex)",
+      "Bash(env TEXMFVAR=/tmp xelatex -interaction=nonstopmode main.tex)",
+      "Bash(for i in 01 02 03 04 05 06 07 08 09)",
+      "Bash(do)",
+      "Bash(timeout 60 xelatex:*)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits"

@@ -51,47 +51,41 @@
 !!! info ``章节结构''
 
 \begin{verbatim}
-### [第一节 前端及前端开发工具](section04-01.md)
+
 - Web基础概念与浏览器架构
 - W3C标准与Web技术发展
 - 渲染引擎与JavaScript引擎
 - 现代前端开发工具链
 
-### [第二节 HTML基础与实践](section04-02.md)
 - HTML语义化标签基础
 - HTML5语义化标签与新特性
 - 表单设计与数据验证
 - 水利平台页面结构设计
 - 可访问性与SEO优化
 
-### [第三节 CSS基础与样式设计](section04-03.md)
 - CSS基础
 - CSS3新特性与选择器
 - Flexbox与Grid布局系统
 - 响应式设计与移动端适配
 - 水利平台UI设计规范
 
-### [第四节 JavaScript基础编程](section04-04.md)
 - JavaScript 基础
 - ES6+新特性与现代语法
 - 异步编程与Promise
 - DOM操作与事件处理
 - 模块化开发与调试技巧
 
-### [第五节 Vue基础框架开发](section04-05.md)
 - 前端框架演进与选择
 - Vue.js核心概念与MVVM模式
 - Vue 基础
 - 组件化开发与单页面应用
 - 路由管理与状态管理
 
-### [第六节 前端脚手架与工程化](section04-06.md)
 - Vue CLI脚手架工具
 - Webpack与Vite构建工具
 - 开发环境配置与热重载
 - 代码规范与质量控制
 
-### [第七节 前端部署与发布](section04-07.md)
 - 生产环境构建优化
 - 静态资源部署与CDN
 - 性能监控与用户体验
@@ -568,9 +562,9 @@ HTML5的发展标志着Web技术进入了一个新的阶段。与之前的HTML�
 \CommentTok{\textless{}!{-}{-} 主导航 {-}{-}\textgreater{}}
 \DataTypeTok{\textless{}}\KeywordTok{nav}\OtherTok{ aria{-}label}\OperatorTok{=}\StringTok{"主导航"}\DataTypeTok{\textgreater{}}
     \DataTypeTok{\textless{}}\KeywordTok{ul}\DataTypeTok{\textgreater{}}
-        \DataTypeTok{\textless{}}\KeywordTok{li}\DataTypeTok{\textgreater{}\textless{}}\KeywordTok{a}\OtherTok{ href}\OperatorTok{=}\StringTok{"\#monitor"}\DataTypeTok{\textgreater{}}\NormalTok{实时监测}\DataTypeTok{\textless{}/}\KeywordTok{a}\DataTypeTok{\textgreater{}\textless{}/}\KeywordTok{li}\DataTypeTok{\textgreater{}}
-        \DataTypeTok{\textless{}}\KeywordTok{li}\DataTypeTok{\textgreater{}\textless{}}\KeywordTok{a}\OtherTok{ href}\OperatorTok{=}\StringTok{"\#analysis"}\DataTypeTok{\textgreater{}}\NormalTok{数据分析}\DataTypeTok{\textless{}/}\KeywordTok{a}\DataTypeTok{\textgreater{}\textless{}/}\KeywordTok{li}\DataTypeTok{\textgreater{}}
-        \DataTypeTok{\textless{}}\KeywordTok{li}\DataTypeTok{\textgreater{}\textless{}}\KeywordTok{a}\OtherTok{ href}\OperatorTok{=}\StringTok{"\#warning"}\DataTypeTok{\textgreater{}}\NormalTok{预警系统}\DataTypeTok{\textless{}/}\KeywordTok{a}\DataTypeTok{\textgreater{}\textless{}/}\KeywordTok{li}\DataTypeTok{\textgreater{}}
+        \DataTypeTok{\textless{}}\KeywordTok{li}\DataTypeTok{\textgreater{}\textless{}}\KeywordTok{a}\OtherTok{ href}\OperatorTok{=}\StringTok{"monitor"}\DataTypeTok{\textgreater{}}\NormalTok{实时监测}\DataTypeTok{\textless{}/}\KeywordTok{a}\DataTypeTok{\textgreater{}\textless{}/}\KeywordTok{li}\DataTypeTok{\textgreater{}}
+        \DataTypeTok{\textless{}}\KeywordTok{li}\DataTypeTok{\textgreater{}\textless{}}\KeywordTok{a}\OtherTok{ href}\OperatorTok{=}\StringTok{"analysis"}\DataTypeTok{\textgreater{}}\NormalTok{数据分析}\DataTypeTok{\textless{}/}\KeywordTok{a}\DataTypeTok{\textgreater{}\textless{}/}\KeywordTok{li}\DataTypeTok{\textgreater{}}
+        \DataTypeTok{\textless{}}\KeywordTok{li}\DataTypeTok{\textgreater{}\textless{}}\KeywordTok{a}\OtherTok{ href}\OperatorTok{=}\StringTok{"warning"}\DataTypeTok{\textgreater{}}\NormalTok{预警系统}\DataTypeTok{\textless{}/}\KeywordTok{a}\DataTypeTok{\textgreater{}\textless{}/}\KeywordTok{li}\DataTypeTok{\textgreater{}}
     \DataTypeTok{\textless{}/}\KeywordTok{ul}\DataTypeTok{\textgreater{}}
 \DataTypeTok{\textless{}/}\KeywordTok{nav}\DataTypeTok{\textgreater{}}
 
@@ -664,9 +658,9 @@ HTML5的发展标志着Web技术进入了一个新的阶段。与之前的HTML�
 \DataTypeTok{\textless{}}\KeywordTok{aside}\DataTypeTok{\textgreater{}}
     \DataTypeTok{\textless{}}\KeywordTok{h3}\DataTypeTok{\textgreater{}}\NormalTok{相关链接}\DataTypeTok{\textless{}/}\KeywordTok{h3}\DataTypeTok{\textgreater{}}
     \DataTypeTok{\textless{}}\KeywordTok{ul}\DataTypeTok{\textgreater{}}
-        \DataTypeTok{\textless{}}\KeywordTok{li}\DataTypeTok{\textgreater{}\textless{}}\KeywordTok{a}\OtherTok{ href}\OperatorTok{=}\StringTok{"\#history"}\DataTypeTok{\textgreater{}}\NormalTok{历史数据查询}\DataTypeTok{\textless{}/}\KeywordTok{a}\DataTypeTok{\textgreater{}\textless{}/}\KeywordTok{li}\DataTypeTok{\textgreater{}}
-        \DataTypeTok{\textless{}}\KeywordTok{li}\DataTypeTok{\textgreater{}\textless{}}\KeywordTok{a}\OtherTok{ href}\OperatorTok{=}\StringTok{"\#forecast"}\DataTypeTok{\textgreater{}}\NormalTok{水文预报分析}\DataTypeTok{\textless{}/}\KeywordTok{a}\DataTypeTok{\textgreater{}\textless{}/}\KeywordTok{li}\DataTypeTok{\textgreater{}}
-        \DataTypeTok{\textless{}}\KeywordTok{li}\DataTypeTok{\textgreater{}\textless{}}\KeywordTok{a}\OtherTok{ href}\OperatorTok{=}\StringTok{"\#standards"}\DataTypeTok{\textgreater{}}\NormalTok{监测标准规范}\DataTypeTok{\textless{}/}\KeywordTok{a}\DataTypeTok{\textgreater{}\textless{}/}\KeywordTok{li}\DataTypeTok{\textgreater{}}
+        \DataTypeTok{\textless{}}\KeywordTok{li}\DataTypeTok{\textgreater{}\textless{}}\KeywordTok{a}\OtherTok{ href}\OperatorTok{=}\StringTok{"history"}\DataTypeTok{\textgreater{}}\NormalTok{历史数据查询}\DataTypeTok{\textless{}/}\KeywordTok{a}\DataTypeTok{\textgreater{}\textless{}/}\KeywordTok{li}\DataTypeTok{\textgreater{}}
+        \DataTypeTok{\textless{}}\KeywordTok{li}\DataTypeTok{\textgreater{}\textless{}}\KeywordTok{a}\OtherTok{ href}\OperatorTok{=}\StringTok{"forecast"}\DataTypeTok{\textgreater{}}\NormalTok{水文预报分析}\DataTypeTok{\textless{}/}\KeywordTok{a}\DataTypeTok{\textgreater{}\textless{}/}\KeywordTok{li}\DataTypeTok{\textgreater{}}
+        \DataTypeTok{\textless{}}\KeywordTok{li}\DataTypeTok{\textgreater{}\textless{}}\KeywordTok{a}\OtherTok{ href}\OperatorTok{=}\StringTok{"standards"}\DataTypeTok{\textgreater{}}\NormalTok{监测标准规范}\DataTypeTok{\textless{}/}\KeywordTok{a}\DataTypeTok{\textgreater{}\textless{}/}\KeywordTok{li}\DataTypeTok{\textgreater{}}
     \DataTypeTok{\textless{}/}\KeywordTok{ul}\DataTypeTok{\textgreater{}}
 \DataTypeTok{\textless{}/}\KeywordTok{aside}\DataTypeTok{\textgreater{}}
 
@@ -995,7 +989,7 @@ URL格式验证包括协议部分（如http://、https://、ftp://等）的检�
 
 \paragraph{\texorpdfstring{8. \texttt{color} 类型 - 颜色选择}{8. color 类型 - 颜色选择}}\label{color-ux7c7bux578b---ux989cux8272ux9009ux62e9}
 
-\texttt{color}输入类型提供了颜色选择功能，通常显示为一个颜色按钮，点击后会弹出颜色选择器。用户可以通过可视化的颜色面板选择颜色，也可以直接输入十六进制颜色值。这种输入类型返回的值始终是十六进制格式的颜色代码（如\#4a90e2）。
+\texttt{color}输入类型提供了颜色选择功能，通常显示为一个颜色按钮，点击后会弹出颜色选择器。用户可以通过可视化的颜色面板选择颜色，也可以直接输入十六进制颜色值。这种输入类型返回的值始终是十六进制格式的颜色代码（如4a90e2）。
 
 颜色选择器的具体外观和功能因浏览器而异，但都提供了基本的颜色选择能力。一些浏览器提供更高级的功能，如调色板、取色器、透明度控制等。开发者可以通过CSS和JavaScript来扩展颜色选择的功能。
 
@@ -1007,7 +1001,7 @@ URL格式验证包括协议部分（如http://、https://、ftp://等）的检�
 \DataTypeTok{\textless{}}\KeywordTok{input}\OtherTok{ type}\OperatorTok{=}\StringTok{"color"}\OtherTok{ }
 \OtherTok{       id}\OperatorTok{=}\StringTok{"chartColor"}\OtherTok{ }
 \OtherTok{       name}\OperatorTok{=}\StringTok{"color"}\OtherTok{ }
-\OtherTok{       value}\OperatorTok{=}\StringTok{"\#4a90e2"}
+\OtherTok{       value}\OperatorTok{=}\StringTok{"4a90e2"}
 \OtherTok{       title}\OperatorTok{=}\StringTok{"选择图表颜色"}\DataTypeTok{\textgreater{}}
 \end{Highlighting}
 \end{Shaded}
@@ -1248,7 +1242,7 @@ Canvas API提供了丰富的绘制方法，包括路径绘制、形状填充、�
 \DataTypeTok{\textless{}}\KeywordTok{canvas}\OtherTok{ id}\OperatorTok{=}\StringTok{"waterLevelChart"}\OtherTok{ }
 \OtherTok{        width}\OperatorTok{=}\StringTok{"600"}\OtherTok{ }
 \OtherTok{        height}\OperatorTok{=}\StringTok{"400"}\OtherTok{ }
-\OtherTok{        style}\OperatorTok{=}\StringTok{"border: 1px solid \#ccc;"}\DataTypeTok{\textgreater{}}
+\OtherTok{        style}\OperatorTok{=}\StringTok{"border: 1px solid ccc;"}\DataTypeTok{\textgreater{}}
 \NormalTok{    您的浏览器不支持Canvas功能。请升级浏览器以获得最佳体验。}
 \DataTypeTok{\textless{}/}\KeywordTok{canvas}\DataTypeTok{\textgreater{}}
 
@@ -1258,11 +1252,11 @@ Canvas API提供了丰富的绘制方法，包括路径绘制、形状填充、�
 \KeywordTok{const}\NormalTok{ ctx }\OperatorTok{=}\NormalTok{ canvas}\OperatorTok{.}\FunctionTok{getContext}\NormalTok{(}\StringTok{\textquotesingle{}2d\textquotesingle{}}\NormalTok{)}\OperatorTok{;}
 
 \CommentTok{// 设置背景}
-\NormalTok{ctx}\OperatorTok{.}\AttributeTok{fillStyle} \OperatorTok{=} \StringTok{\textquotesingle{}\#f8f9fa\textquotesingle{}}\OperatorTok{;}
+\NormalTok{ctx}\OperatorTok{.}\AttributeTok{fillStyle} \OperatorTok{=} \StringTok{\textquotesingle{}f8f9fa\textquotesingle{}}\OperatorTok{;}
 \NormalTok{ctx}\OperatorTok{.}\FunctionTok{fillRect}\NormalTok{(}\DecValTok{0}\OperatorTok{,} \DecValTok{0}\OperatorTok{,}\NormalTok{ canvas}\OperatorTok{.}\AttributeTok{width}\OperatorTok{,}\NormalTok{ canvas}\OperatorTok{.}\AttributeTok{height}\NormalTok{)}\OperatorTok{;}
 
 \CommentTok{// 绘制网格线}
-\NormalTok{ctx}\OperatorTok{.}\AttributeTok{strokeStyle} \OperatorTok{=} \StringTok{\textquotesingle{}\#e9ecef\textquotesingle{}}\OperatorTok{;}
+\NormalTok{ctx}\OperatorTok{.}\AttributeTok{strokeStyle} \OperatorTok{=} \StringTok{\textquotesingle{}e9ecef\textquotesingle{}}\OperatorTok{;}
 \NormalTok{ctx}\OperatorTok{.}\AttributeTok{lineWidth} \OperatorTok{=} \DecValTok{1}\OperatorTok{;}
 \ControlFlowTok{for}\NormalTok{ (}\KeywordTok{let}\NormalTok{ i }\OperatorTok{=} \DecValTok{0}\OperatorTok{;}\NormalTok{ i }\OperatorTok{\textless{}=} \DecValTok{10}\OperatorTok{;}\NormalTok{ i}\OperatorTok{++}\NormalTok{) \{}
     \KeywordTok{const}\NormalTok{ x }\OperatorTok{=}\NormalTok{ (canvas}\OperatorTok{.}\AttributeTok{width} \OperatorTok{/} \DecValTok{10}\NormalTok{) }\OperatorTok{*}\NormalTok{ i}\OperatorTok{;}
@@ -1283,7 +1277,7 @@ Canvas API提供了丰富的绘制方法，包括路径绘制、形状填充、�
 
 \CommentTok{// 绘制水位趋势线}
 \KeywordTok{const}\NormalTok{ dataPoints }\OperatorTok{=}\NormalTok{ [}\FloatTok{85.2}\OperatorTok{,} \FloatTok{85.5}\OperatorTok{,} \FloatTok{86.1}\OperatorTok{,} \FloatTok{85.8}\OperatorTok{,} \FloatTok{85.3}\OperatorTok{,} \FloatTok{85.7}\OperatorTok{,} \FloatTok{86.0}\NormalTok{]}\OperatorTok{;}
-\NormalTok{ctx}\OperatorTok{.}\AttributeTok{strokeStyle} \OperatorTok{=} \StringTok{\textquotesingle{}\#0066cc\textquotesingle{}}\OperatorTok{;}
+\NormalTok{ctx}\OperatorTok{.}\AttributeTok{strokeStyle} \OperatorTok{=} \StringTok{\textquotesingle{}0066cc\textquotesingle{}}\OperatorTok{;}
 \NormalTok{ctx}\OperatorTok{.}\AttributeTok{lineWidth} \OperatorTok{=} \DecValTok{3}\OperatorTok{;}
 \NormalTok{ctx}\OperatorTok{.}\FunctionTok{beginPath}\NormalTok{()}\OperatorTok{;}
 \ControlFlowTok{for}\NormalTok{ (}\KeywordTok{let}\NormalTok{ i }\OperatorTok{=} \DecValTok{0}\OperatorTok{;}\NormalTok{ i }\OperatorTok{\textless{}}\NormalTok{ dataPoints}\OperatorTok{.}\AttributeTok{length}\OperatorTok{;}\NormalTok{ i}\OperatorTok{++}\NormalTok{) \{}
@@ -1299,7 +1293,7 @@ Canvas API提供了丰富的绘制方法，包括路径绘制、形状填充、�
 \NormalTok{ctx}\OperatorTok{.}\FunctionTok{stroke}\NormalTok{()}\OperatorTok{;}
 
 \CommentTok{// 添加标题}
-\NormalTok{ctx}\OperatorTok{.}\AttributeTok{fillStyle} \OperatorTok{=} \StringTok{\textquotesingle{}\#333\textquotesingle{}}\OperatorTok{;}
+\NormalTok{ctx}\OperatorTok{.}\AttributeTok{fillStyle} \OperatorTok{=} \StringTok{\textquotesingle{}333\textquotesingle{}}\OperatorTok{;}
 \NormalTok{ctx}\OperatorTok{.}\AttributeTok{font} \OperatorTok{=} \StringTok{\textquotesingle{}16px Arial\textquotesingle{}}\OperatorTok{;}
 \NormalTok{ctx}\OperatorTok{.}\AttributeTok{textAlign} \OperatorTok{=} \StringTok{\textquotesingle{}center\textquotesingle{}}\OperatorTok{;}
 \NormalTok{ctx}\OperatorTok{.}\FunctionTok{fillText}\NormalTok{(}\StringTok{\textquotesingle{}24小时水位变化趋势\textquotesingle{}}\OperatorTok{,}\NormalTok{ canvas}\OperatorTok{.}\AttributeTok{width} \OperatorTok{/} \DecValTok{2}\OperatorTok{,} \DecValTok{30}\NormalTok{)}\OperatorTok{;}
@@ -1318,14 +1312,14 @@ SVG的主要优势包括：无损缩放性能、较小的文件尺寸（对于�
 \begin{Shaded}
 \begin{Highlighting}[]
 \CommentTok{\textless{}!{-}{-} 水位监测指示器 {-}{-}\textgreater{}}
-\DataTypeTok{\textless{}}\KeywordTok{svg}\OtherTok{ width}\OperatorTok{=}\StringTok{"120"}\OtherTok{ height}\OperatorTok{=}\StringTok{"200"}\OtherTok{ viewBox}\OperatorTok{=}\StringTok{"0 0 120 200"}\OtherTok{ style}\OperatorTok{=}\StringTok{"border: 1px solid \#ddd;"}\DataTypeTok{\textgreater{}}
+\DataTypeTok{\textless{}}\KeywordTok{svg}\OtherTok{ width}\OperatorTok{=}\StringTok{"120"}\OtherTok{ height}\OperatorTok{=}\StringTok{"200"}\OtherTok{ viewBox}\OperatorTok{=}\StringTok{"0 0 120 200"}\OtherTok{ style}\OperatorTok{=}\StringTok{"border: 1px solid ddd;"}\DataTypeTok{\textgreater{}}
     \CommentTok{\textless{}!{-}{-} 外容器 {-}{-}\textgreater{}}
     \DataTypeTok{\textless{}}\KeywordTok{rect}\OtherTok{ x}\OperatorTok{=}\StringTok{"30"}\OtherTok{ y}\OperatorTok{=}\StringTok{"20"}\OtherTok{ width}\OperatorTok{=}\StringTok{"60"}\OtherTok{ height}\OperatorTok{=}\StringTok{"160"}\OtherTok{ }
-\OtherTok{          fill}\OperatorTok{=}\StringTok{"none"}\OtherTok{ stroke}\OperatorTok{=}\StringTok{"\#333"}\OtherTok{ stroke{-}width}\OperatorTok{=}\StringTok{"2"}\OtherTok{ rx}\OperatorTok{=}\StringTok{"5"}\DataTypeTok{/\textgreater{}}
+\OtherTok{          fill}\OperatorTok{=}\StringTok{"none"}\OtherTok{ stroke}\OperatorTok{=}\StringTok{"333"}\OtherTok{ stroke{-}width}\OperatorTok{=}\StringTok{"2"}\OtherTok{ rx}\OperatorTok{=}\StringTok{"5"}\DataTypeTok{/\textgreater{}}
     
     \CommentTok{\textless{}!{-}{-} 水位填充（动态高度） {-}{-}\textgreater{}}
     \DataTypeTok{\textless{}}\KeywordTok{rect}\OtherTok{ id}\OperatorTok{=}\StringTok{"waterFill"}\OtherTok{ x}\OperatorTok{=}\StringTok{"32"}\OtherTok{ y}\OperatorTok{=}\StringTok{"120"}\OtherTok{ width}\OperatorTok{=}\StringTok{"56"}\OtherTok{ height}\OperatorTok{=}\StringTok{"58"}\OtherTok{ }
-\OtherTok{          fill}\OperatorTok{=}\StringTok{"url(\#waterGradient)"}\OtherTok{ opacity}\OperatorTok{=}\StringTok{"0.8"}\DataTypeTok{\textgreater{}}
+\OtherTok{          fill}\OperatorTok{=}\StringTok{"url(waterGradient)"}\OtherTok{ opacity}\OperatorTok{=}\StringTok{"0.8"}\DataTypeTok{\textgreater{}}
         \DataTypeTok{\textless{}}\KeywordTok{animate}\OtherTok{ attributeName}\OperatorTok{=}\StringTok{"height"}\OtherTok{ }
 \OtherTok{                 values}\OperatorTok{=}\StringTok{"20;80;60;100;70"}\OtherTok{ }
 \OtherTok{                 dur}\OperatorTok{=}\StringTok{"10s"}\OtherTok{ }
@@ -1339,28 +1333,28 @@ SVG的主要优势包括：无损缩放性能、较小的文件尺寸（对于�
     \CommentTok{\textless{}!{-}{-} 渐变定义 {-}{-}\textgreater{}}
     \DataTypeTok{\textless{}}\KeywordTok{defs}\DataTypeTok{\textgreater{}}
         \DataTypeTok{\textless{}}\KeywordTok{linearGradient}\OtherTok{ id}\OperatorTok{=}\StringTok{"waterGradient"}\OtherTok{ x1}\OperatorTok{=}\StringTok{"0\%"}\OtherTok{ y1}\OperatorTok{=}\StringTok{"0\%"}\OtherTok{ x2}\OperatorTok{=}\StringTok{"0\%"}\OtherTok{ y2}\OperatorTok{=}\StringTok{"100\%"}\DataTypeTok{\textgreater{}}
-            \DataTypeTok{\textless{}}\KeywordTok{stop}\OtherTok{ offset}\OperatorTok{=}\StringTok{"0\%"}\OtherTok{ style}\OperatorTok{=}\StringTok{"stop{-}color:\#87CEEB;stop{-}opacity:1"}\OtherTok{ }\DataTypeTok{/\textgreater{}}
-            \DataTypeTok{\textless{}}\KeywordTok{stop}\OtherTok{ offset}\OperatorTok{=}\StringTok{"100\%"}\OtherTok{ style}\OperatorTok{=}\StringTok{"stop{-}color:\#4169E1;stop{-}opacity:1"}\OtherTok{ }\DataTypeTok{/\textgreater{}}
+            \DataTypeTok{\textless{}}\KeywordTok{stop}\OtherTok{ offset}\OperatorTok{=}\StringTok{"0\%"}\OtherTok{ style}\OperatorTok{=}\StringTok{"stop{-}color:87CEEB;stop{-}opacity:1"}\OtherTok{ }\DataTypeTok{/\textgreater{}}
+            \DataTypeTok{\textless{}}\KeywordTok{stop}\OtherTok{ offset}\OperatorTok{=}\StringTok{"100\%"}\OtherTok{ style}\OperatorTok{=}\StringTok{"stop{-}color:4169E1;stop{-}opacity:1"}\OtherTok{ }\DataTypeTok{/\textgreater{}}
         \DataTypeTok{\textless{}/}\KeywordTok{linearGradient}\DataTypeTok{\textgreater{}}
     \DataTypeTok{\textless{}/}\KeywordTok{defs}\DataTypeTok{\textgreater{}}
     
     \CommentTok{\textless{}!{-}{-} 刻度线和标签 {-}{-}\textgreater{}}
-    \DataTypeTok{\textless{}}\KeywordTok{g}\OtherTok{ stroke}\OperatorTok{=}\StringTok{"\#666"}\OtherTok{ stroke{-}width}\OperatorTok{=}\StringTok{"1"}\DataTypeTok{\textgreater{}}
+    \DataTypeTok{\textless{}}\KeywordTok{g}\OtherTok{ stroke}\OperatorTok{=}\StringTok{"666"}\OtherTok{ stroke{-}width}\OperatorTok{=}\StringTok{"1"}\DataTypeTok{\textgreater{}}
         \DataTypeTok{\textless{}}\KeywordTok{line}\OtherTok{ x1}\OperatorTok{=}\StringTok{"90"}\OtherTok{ y1}\OperatorTok{=}\StringTok{"60"}\OtherTok{ x2}\OperatorTok{=}\StringTok{"100"}\OtherTok{ y2}\OperatorTok{=}\StringTok{"60"}\DataTypeTok{/\textgreater{}}
-        \DataTypeTok{\textless{}}\KeywordTok{text}\OtherTok{ x}\OperatorTok{=}\StringTok{"105"}\OtherTok{ y}\OperatorTok{=}\StringTok{"65"}\OtherTok{ font{-}size}\OperatorTok{=}\StringTok{"12"}\OtherTok{ fill}\OperatorTok{=}\StringTok{"\#666"}\DataTypeTok{\textgreater{}}\NormalTok{90m}\DataTypeTok{\textless{}/}\KeywordTok{text}\DataTypeTok{\textgreater{}}
+        \DataTypeTok{\textless{}}\KeywordTok{text}\OtherTok{ x}\OperatorTok{=}\StringTok{"105"}\OtherTok{ y}\OperatorTok{=}\StringTok{"65"}\OtherTok{ font{-}size}\OperatorTok{=}\StringTok{"12"}\OtherTok{ fill}\OperatorTok{=}\StringTok{"666"}\DataTypeTok{\textgreater{}}\NormalTok{90m}\DataTypeTok{\textless{}/}\KeywordTok{text}\DataTypeTok{\textgreater{}}
         
         \DataTypeTok{\textless{}}\KeywordTok{line}\OtherTok{ x1}\OperatorTok{=}\StringTok{"90"}\OtherTok{ y1}\OperatorTok{=}\StringTok{"100"}\OtherTok{ x2}\OperatorTok{=}\StringTok{"100"}\OtherTok{ y2}\OperatorTok{=}\StringTok{"100"}\DataTypeTok{/\textgreater{}}
-        \DataTypeTok{\textless{}}\KeywordTok{text}\OtherTok{ x}\OperatorTok{=}\StringTok{"105"}\OtherTok{ y}\OperatorTok{=}\StringTok{"105"}\OtherTok{ font{-}size}\OperatorTok{=}\StringTok{"12"}\OtherTok{ fill}\OperatorTok{=}\StringTok{"\#666"}\DataTypeTok{\textgreater{}}\NormalTok{80m}\DataTypeTok{\textless{}/}\KeywordTok{text}\DataTypeTok{\textgreater{}}
+        \DataTypeTok{\textless{}}\KeywordTok{text}\OtherTok{ x}\OperatorTok{=}\StringTok{"105"}\OtherTok{ y}\OperatorTok{=}\StringTok{"105"}\OtherTok{ font{-}size}\OperatorTok{=}\StringTok{"12"}\OtherTok{ fill}\OperatorTok{=}\StringTok{"666"}\DataTypeTok{\textgreater{}}\NormalTok{80m}\DataTypeTok{\textless{}/}\KeywordTok{text}\DataTypeTok{\textgreater{}}
         
         \DataTypeTok{\textless{}}\KeywordTok{line}\OtherTok{ x1}\OperatorTok{=}\StringTok{"90"}\OtherTok{ y1}\OperatorTok{=}\StringTok{"140"}\OtherTok{ x2}\OperatorTok{=}\StringTok{"100"}\OtherTok{ y2}\OperatorTok{=}\StringTok{"140"}\DataTypeTok{/\textgreater{}}
-        \DataTypeTok{\textless{}}\KeywordTok{text}\OtherTok{ x}\OperatorTok{=}\StringTok{"105"}\OtherTok{ y}\OperatorTok{=}\StringTok{"145"}\OtherTok{ font{-}size}\OperatorTok{=}\StringTok{"12"}\OtherTok{ fill}\OperatorTok{=}\StringTok{"\#666"}\DataTypeTok{\textgreater{}}\NormalTok{70m}\DataTypeTok{\textless{}/}\KeywordTok{text}\DataTypeTok{\textgreater{}}
+        \DataTypeTok{\textless{}}\KeywordTok{text}\OtherTok{ x}\OperatorTok{=}\StringTok{"105"}\OtherTok{ y}\OperatorTok{=}\StringTok{"145"}\OtherTok{ font{-}size}\OperatorTok{=}\StringTok{"12"}\OtherTok{ fill}\OperatorTok{=}\StringTok{"666"}\DataTypeTok{\textgreater{}}\NormalTok{70m}\DataTypeTok{\textless{}/}\KeywordTok{text}\DataTypeTok{\textgreater{}}
         
         \DataTypeTok{\textless{}}\KeywordTok{line}\OtherTok{ x1}\OperatorTok{=}\StringTok{"90"}\OtherTok{ y1}\OperatorTok{=}\StringTok{"180"}\OtherTok{ x2}\OperatorTok{=}\StringTok{"100"}\OtherTok{ y2}\OperatorTok{=}\StringTok{"180"}\DataTypeTok{/\textgreater{}}
-        \DataTypeTok{\textless{}}\KeywordTok{text}\OtherTok{ x}\OperatorTok{=}\StringTok{"105"}\OtherTok{ y}\OperatorTok{=}\StringTok{"185"}\OtherTok{ font{-}size}\OperatorTok{=}\StringTok{"12"}\OtherTok{ fill}\OperatorTok{=}\StringTok{"\#666"}\DataTypeTok{\textgreater{}}\NormalTok{60m}\DataTypeTok{\textless{}/}\KeywordTok{text}\DataTypeTok{\textgreater{}}
+        \DataTypeTok{\textless{}}\KeywordTok{text}\OtherTok{ x}\OperatorTok{=}\StringTok{"105"}\OtherTok{ y}\OperatorTok{=}\StringTok{"185"}\OtherTok{ font{-}size}\OperatorTok{=}\StringTok{"12"}\OtherTok{ fill}\OperatorTok{=}\StringTok{"666"}\DataTypeTok{\textgreater{}}\NormalTok{60m}\DataTypeTok{\textless{}/}\KeywordTok{text}\DataTypeTok{\textgreater{}}
     \DataTypeTok{\textless{}/}\KeywordTok{g}\DataTypeTok{\textgreater{}}
     
     \CommentTok{\textless{}!{-}{-} 标题 {-}{-}\textgreater{}}
-    \DataTypeTok{\textless{}}\KeywordTok{text}\OtherTok{ x}\OperatorTok{=}\StringTok{"60"}\OtherTok{ y}\OperatorTok{=}\StringTok{"15"}\OtherTok{ text{-}anchor}\OperatorTok{=}\StringTok{"middle"}\OtherTok{ font{-}size}\OperatorTok{=}\StringTok{"14"}\OtherTok{ font{-}weight}\OperatorTok{=}\StringTok{"bold"}\OtherTok{ fill}\OperatorTok{=}\StringTok{"\#333"}\DataTypeTok{\textgreater{}}
+    \DataTypeTok{\textless{}}\KeywordTok{text}\OtherTok{ x}\OperatorTok{=}\StringTok{"60"}\OtherTok{ y}\OperatorTok{=}\StringTok{"15"}\OtherTok{ text{-}anchor}\OperatorTok{=}\StringTok{"middle"}\OtherTok{ font{-}size}\OperatorTok{=}\StringTok{"14"}\OtherTok{ font{-}weight}\OperatorTok{=}\StringTok{"bold"}\OtherTok{ fill}\OperatorTok{=}\StringTok{"333"}\DataTypeTok{\textgreater{}}
 \NormalTok{        水位实时显示}
     \DataTypeTok{\textless{}/}\KeywordTok{text}\DataTypeTok{\textgreater{}}
 \DataTypeTok{\textless{}/}\KeywordTok{svg}\DataTypeTok{\textgreater{}}
@@ -1368,15 +1362,15 @@ SVG的主要优势包括：无损缩放性能、较小的文件尺寸（对于�
 \CommentTok{\textless{}!{-}{-} 监测站点状态图标 {-}{-}\textgreater{}}
 \DataTypeTok{\textless{}}\KeywordTok{svg}\OtherTok{ width}\OperatorTok{=}\StringTok{"32"}\OtherTok{ height}\OperatorTok{=}\StringTok{"32"}\OtherTok{ viewBox}\OperatorTok{=}\StringTok{"0 0 32 32"}\OtherTok{ class}\OperatorTok{=}\StringTok{"station{-}icon"}\DataTypeTok{\textgreater{}}
     \CommentTok{\textless{}!{-}{-} 外圈 {-}{-}\textgreater{}}
-    \DataTypeTok{\textless{}}\KeywordTok{circle}\OtherTok{ cx}\OperatorTok{=}\StringTok{"16"}\OtherTok{ cy}\OperatorTok{=}\StringTok{"16"}\OtherTok{ r}\OperatorTok{=}\StringTok{"14"}\OtherTok{ fill}\OperatorTok{=}\StringTok{"\#28a745"}\OtherTok{ stroke}\OperatorTok{=}\StringTok{"\#1e7e34"}\OtherTok{ stroke{-}width}\OperatorTok{=}\StringTok{"2"}\DataTypeTok{/\textgreater{}}
+    \DataTypeTok{\textless{}}\KeywordTok{circle}\OtherTok{ cx}\OperatorTok{=}\StringTok{"16"}\OtherTok{ cy}\OperatorTok{=}\StringTok{"16"}\OtherTok{ r}\OperatorTok{=}\StringTok{"14"}\OtherTok{ fill}\OperatorTok{=}\StringTok{"28a745"}\OtherTok{ stroke}\OperatorTok{=}\StringTok{"1e7e34"}\OtherTok{ stroke{-}width}\OperatorTok{=}\StringTok{"2"}\DataTypeTok{/\textgreater{}}
     \CommentTok{\textless{}!{-}{-} 内部图标 {-}{-}\textgreater{}}
-    \DataTypeTok{\textless{}}\KeywordTok{circle}\OtherTok{ cx}\OperatorTok{=}\StringTok{"16"}\OtherTok{ cy}\OperatorTok{=}\StringTok{"16"}\OtherTok{ r}\OperatorTok{=}\StringTok{"8"}\OtherTok{ fill}\OperatorTok{=}\StringTok{"\#ffffff"}\OtherTok{ opacity}\OperatorTok{=}\StringTok{"0.3"}\DataTypeTok{/\textgreater{}}
+    \DataTypeTok{\textless{}}\KeywordTok{circle}\OtherTok{ cx}\OperatorTok{=}\StringTok{"16"}\OtherTok{ cy}\OperatorTok{=}\StringTok{"16"}\OtherTok{ r}\OperatorTok{=}\StringTok{"8"}\OtherTok{ fill}\OperatorTok{=}\StringTok{"ffffff"}\OtherTok{ opacity}\OperatorTok{=}\StringTok{"0.3"}\DataTypeTok{/\textgreater{}}
     \CommentTok{\textless{}!{-}{-} 状态文字 {-}{-}\textgreater{}}
     \DataTypeTok{\textless{}}\KeywordTok{text}\OtherTok{ x}\OperatorTok{=}\StringTok{"16"}\OtherTok{ y}\OperatorTok{=}\StringTok{"20"}\OtherTok{ text{-}anchor}\OperatorTok{=}\StringTok{"middle"}\OtherTok{ font{-}size}\OperatorTok{=}\StringTok{"10"}\OtherTok{ font{-}weight}\OperatorTok{=}\StringTok{"bold"}\OtherTok{ fill}\OperatorTok{=}\StringTok{"white"}\DataTypeTok{\textgreater{}}
 \NormalTok{        正常}
     \DataTypeTok{\textless{}/}\KeywordTok{text}\DataTypeTok{\textgreater{}}
     \CommentTok{\textless{}!{-}{-} 信号波纹效果 {-}{-}\textgreater{}}
-    \DataTypeTok{\textless{}}\KeywordTok{circle}\OtherTok{ cx}\OperatorTok{=}\StringTok{"16"}\OtherTok{ cy}\OperatorTok{=}\StringTok{"16"}\OtherTok{ r}\OperatorTok{=}\StringTok{"10"}\OtherTok{ fill}\OperatorTok{=}\StringTok{"none"}\OtherTok{ stroke}\OperatorTok{=}\StringTok{"\#ffffff"}\OtherTok{ stroke{-}width}\OperatorTok{=}\StringTok{"1"}\OtherTok{ opacity}\OperatorTok{=}\StringTok{"0.6"}\DataTypeTok{\textgreater{}}
+    \DataTypeTok{\textless{}}\KeywordTok{circle}\OtherTok{ cx}\OperatorTok{=}\StringTok{"16"}\OtherTok{ cy}\OperatorTok{=}\StringTok{"16"}\OtherTok{ r}\OperatorTok{=}\StringTok{"10"}\OtherTok{ fill}\OperatorTok{=}\StringTok{"none"}\OtherTok{ stroke}\OperatorTok{=}\StringTok{"ffffff"}\OtherTok{ stroke{-}width}\OperatorTok{=}\StringTok{"1"}\OtherTok{ opacity}\OperatorTok{=}\StringTok{"0.6"}\DataTypeTok{\textgreater{}}
         \DataTypeTok{\textless{}}\KeywordTok{animate}\OtherTok{ attributeName}\OperatorTok{=}\StringTok{"r"}\OtherTok{ values}\OperatorTok{=}\StringTok{"8;16;8"}\OtherTok{ dur}\OperatorTok{=}\StringTok{"2s"}\OtherTok{ repeatCount}\OperatorTok{=}\StringTok{"indefinite"}\DataTypeTok{/\textgreater{}}
         \DataTypeTok{\textless{}}\KeywordTok{animate}\OtherTok{ attributeName}\OperatorTok{=}\StringTok{"opacity"}\OtherTok{ values}\OperatorTok{=}\StringTok{"0.8;0;0.8"}\OtherTok{ dur}\OperatorTok{=}\StringTok{"2s"}\OtherTok{ repeatCount}\OperatorTok{=}\StringTok{"indefinite"}\DataTypeTok{/\textgreater{}}
     \DataTypeTok{\textless{}/}\KeywordTok{circle}\DataTypeTok{\textgreater{}}
@@ -3292,11 +3286,9 @@ continue语句跳过当前迭代的剩余代码，直接进入下一次循环：
 
 \begin{verbatim}
 
-### 函数深入详解
 
 函数是JavaScript的一等公民，理解函数的各种形式和特性是掌握JavaScript的关键。
 
-#### 1. 函数声明和表达式
 
 ```javascript
 // 函数声明（提升特性）
@@ -4176,14 +4168,14 @@ console对象是JavaScript调试的最基本工具，它提供了多种方法来
 \VerbatimStringTok{            width: 300px;}
 \VerbatimStringTok{            max{-}height: 400px;}
 \VerbatimStringTok{            background: rgba(0, 0, 0, 0.9);}
-\VerbatimStringTok{            color: \#00ff00;}
+\VerbatimStringTok{            color: 00ff00;}
 \VerbatimStringTok{            font{-}family: monospace;}
 \VerbatimStringTok{            font{-}size: 12px;}
 \VerbatimStringTok{            padding: 10px;}
 \VerbatimStringTok{            border{-}radius: 5px;}
 \VerbatimStringTok{            overflow{-}y: auto;}
 \VerbatimStringTok{            z{-}index: 10000;}
-\VerbatimStringTok{            border: 1px solid \#333;}
+\VerbatimStringTok{            border: 1px solid 333;}
 \VerbatimStringTok{        \textasciigrave{}}\OperatorTok{;}
         
 \NormalTok{        panel}\OperatorTok{.}\AttributeTok{innerHTML} \OperatorTok{=} \VerbatimStringTok{\textasciigrave{}}
@@ -4619,22 +4611,22 @@ console对象是JavaScript调试的最基本工具，它提供了多种方法来
 \NormalTok{    \}}
     
     \CommentTok{// 2. 更新聊天窗口标题栏的状态}
-    \KeywordTok{const}\NormalTok{ chatTitle }\OperatorTok{=} \BuiltInTok{document}\OperatorTok{.}\FunctionTok{querySelector}\NormalTok{(}\VerbatimStringTok{\textasciigrave{}\#chat{-}[数学公式]\{userId\}"]\textasciigrave{}}\NormalTok{)}\OperatorTok{;}
+    \KeywordTok{const}\NormalTok{ chatTitle }\OperatorTok{=} \BuiltInTok{document}\OperatorTok{.}\FunctionTok{querySelector}\NormalTok{(}\VerbatimStringTok{\textasciigrave{}chat{-}[数学公式]\{userId\}"]\textasciigrave{}}\NormalTok{)}\OperatorTok{;}
 \NormalTok{    groupMembers}\OperatorTok{.}\FunctionTok{forEach}\NormalTok{(member }\KeywordTok{=\textgreater{}}\NormalTok{ \{}
 \NormalTok{      member}\OperatorTok{.}\FunctionTok{setAttribute}\NormalTok{(}\StringTok{\textquotesingle{}data{-}status\textquotesingle{}}\OperatorTok{,}\NormalTok{ isOnline }\OperatorTok{?} \StringTok{\textquotesingle{}online\textquotesingle{}} \OperatorTok{:} \StringTok{\textquotesingle{}offline\textquotesingle{}}\NormalTok{)}\OperatorTok{;}
 \NormalTok{    \})}\OperatorTok{;}
     
     \CommentTok{// 4. 更新顶部在线人数统计}
-    \KeywordTok{const}\NormalTok{ onlineCount }\OperatorTok{=} \BuiltInTok{document}\OperatorTok{.}\FunctionTok{querySelector}\NormalTok{(}\StringTok{\textquotesingle{}\#online{-}count\textquotesingle{}}\NormalTok{)}\OperatorTok{;}
+    \KeywordTok{const}\NormalTok{ onlineCount }\OperatorTok{=} \BuiltInTok{document}\OperatorTok{.}\FunctionTok{querySelector}\NormalTok{(}\StringTok{\textquotesingle{}online{-}count\textquotesingle{}}\NormalTok{)}\OperatorTok{;}
     \ControlFlowTok{if}\NormalTok{ (onlineCount) \{}
       \KeywordTok{const}\NormalTok{ current }\OperatorTok{=} \PreprocessorTok{parseInt}\NormalTok{(onlineCount}\OperatorTok{.}\AttributeTok{textContent}\NormalTok{)}\OperatorTok{;}
 \NormalTok{      onlineCount}\OperatorTok{.}\AttributeTok{textContent} \OperatorTok{=}\NormalTok{ isOnline }\OperatorTok{?}\NormalTok{ current }\OperatorTok{+} \DecValTok{1} \OperatorTok{:}\NormalTok{ current }\OperatorTok{{-}} \DecValTok{1}\OperatorTok{;}
 \NormalTok{    \}}
     
     \CommentTok{// 5. 更新个人资料页面的状态}
-    \KeywordTok{const}\NormalTok{ profileStatus }\OperatorTok{=} \BuiltInTok{document}\OperatorTok{.}\FunctionTok{querySelector}\NormalTok{(}\VerbatimStringTok{\textasciigrave{}\#profile{-}[数学公式](\textquotesingle{}\#chart{-}\textquotesingle{} + stationId).updateChart(newLevel);}
+    \KeywordTok{const}\NormalTok{ profileStatus }\OperatorTok{=} \BuiltInTok{document}\OperatorTok{.}\FunctionTok{querySelector}\NormalTok{(}\VerbatimStringTok{\textasciigrave{}profile{-}[数学公式](\textquotesingle{}chart{-}\textquotesingle{} + stationId).updateChart(newLevel);}
 \VerbatimStringTok{    // 更新表格}
-\VerbatimStringTok{    [数学公式](\textquotesingle{}\#warning{-}\textquotesingle{} + stationId).addClass(\textquotesingle{}alert{-}danger\textquotesingle{}).text(\textquotesingle{}高水位警告\textquotesingle{});}
+\VerbatimStringTok{    [数学公式](\textquotesingle{}warning{-}\textquotesingle{} + stationId).addClass(\textquotesingle{}alert{-}danger\textquotesingle{}).text(\textquotesingle{}高水位警告\textquotesingle{});}
 \VerbatimStringTok{    \}}
 \VerbatimStringTok{    // 更新统计数据}
 \VerbatimStringTok{    [数学公式]\{newLevel.toFixed(2)\}米，接近最高水位\textasciigrave{}}\NormalTok{)}
@@ -4915,13 +4907,13 @@ console对象是JavaScript调试的最基本工具，它提供了多种方法来
   \DataTypeTok{display}\OperatorTok{:}\NormalTok{ block}\OperatorTok{;}
 \NormalTok{  margin}\OperatorTok{{-}}\DataTypeTok{bottom}\OperatorTok{:} \DecValTok{8}\ErrorTok{px}\OperatorTok{;}
 \NormalTok{  font}\OperatorTok{{-}}\DataTypeTok{weight}\OperatorTok{:} \DecValTok{500}\OperatorTok{;}
-  \DataTypeTok{color}\OperatorTok{:}\NormalTok{ \#}\DecValTok{2}\ErrorTok{c3e50}\OperatorTok{;}
+  \DataTypeTok{color}\OperatorTok{:}\NormalTok{ }\DecValTok{2}\ErrorTok{c3e50}\OperatorTok{;}
 \NormalTok{\}}
 
 \OperatorTok{.}\AttributeTok{level}\OperatorTok{{-}}\NormalTok{input}\OperatorTok{,} \OperatorTok{.}\AttributeTok{station}\OperatorTok{{-}}\NormalTok{select}\OperatorTok{,} \OperatorTok{.}\AttributeTok{notes}\OperatorTok{{-}}\NormalTok{textarea \{}
   \DataTypeTok{width}\OperatorTok{:} \DecValTok{100}\OperatorTok{\%;}
   \DataTypeTok{padding}\OperatorTok{:} \DecValTok{12}\ErrorTok{px}\OperatorTok{;}
-  \DataTypeTok{border}\OperatorTok{:} \DecValTok{1}\ErrorTok{px}\NormalTok{ solid \#ddd}\OperatorTok{;}
+  \DataTypeTok{border}\OperatorTok{:} \DecValTok{1}\ErrorTok{px}\NormalTok{ solid ddd}\OperatorTok{;}
 \NormalTok{  border}\OperatorTok{{-}}\DataTypeTok{radius}\OperatorTok{:} \DecValTok{4}\ErrorTok{px}\OperatorTok{;}
 \NormalTok{  font}\OperatorTok{{-}}\DataTypeTok{size}\OperatorTok{:} \DecValTok{14}\ErrorTok{px}\OperatorTok{;}
   \DataTypeTok{transition}\OperatorTok{:}\NormalTok{ border}\OperatorTok{{-}}\NormalTok{color }\FloatTok{0.3}\NormalTok{s}\OperatorTok{;}
@@ -4929,7 +4921,7 @@ console对象是JavaScript调试的最基本工具，它提供了多种方法来
 
 \OperatorTok{.}\AttributeTok{level}\OperatorTok{{-}}\DataTypeTok{input}\OperatorTok{:}\NormalTok{focus}\OperatorTok{,} \OperatorTok{.}\AttributeTok{station}\OperatorTok{{-}}\DataTypeTok{select}\OperatorTok{:}\NormalTok{focus}\OperatorTok{,} \OperatorTok{.}\AttributeTok{notes}\OperatorTok{{-}}\DataTypeTok{textarea}\OperatorTok{:}\NormalTok{focus \{}
   \DataTypeTok{outline}\OperatorTok{:}\NormalTok{ none}\OperatorTok{;}
-\NormalTok{  border}\OperatorTok{{-}}\DataTypeTok{color}\OperatorTok{:}\NormalTok{ \#}\DecValTok{1890}\ErrorTok{ff}\OperatorTok{;}
+\NormalTok{  border}\OperatorTok{{-}}\DataTypeTok{color}\OperatorTok{:}\NormalTok{ }\DecValTok{1890}\ErrorTok{ff}\OperatorTok{;}
 \NormalTok{  box}\OperatorTok{{-}}\DataTypeTok{shadow}\OperatorTok{:} \DecValTok{0} \DecValTok{0} \DecValTok{0} \DecValTok{2}\ErrorTok{px} \FunctionTok{rgba}\NormalTok{(}\DecValTok{24}\OperatorTok{,} \DecValTok{144}\OperatorTok{,} \DecValTok{255}\OperatorTok{,} \FloatTok{0.2}\NormalTok{)}\OperatorTok{;}
 \NormalTok{\}}
 
@@ -4947,10 +4939,10 @@ console对象是JavaScript调试的最基本工具，它提供了多种方法来
 \NormalTok{\}}
 
 \OperatorTok{.}\AttributeTok{preview}\OperatorTok{{-}}\NormalTok{card \{}
-  \DataTypeTok{background}\OperatorTok{:}\NormalTok{ \#f8f9fa}\OperatorTok{;}
+  \DataTypeTok{background}\OperatorTok{:}\NormalTok{ f8f9fa}\OperatorTok{;}
   \DataTypeTok{padding}\OperatorTok{:} \DecValTok{20}\ErrorTok{px}\OperatorTok{;}
 \NormalTok{  border}\OperatorTok{{-}}\DataTypeTok{radius}\OperatorTok{:} \DecValTok{6}\ErrorTok{px}\OperatorTok{;}
-\NormalTok{  border}\OperatorTok{{-}}\DataTypeTok{left}\OperatorTok{:} \DecValTok{4}\ErrorTok{px}\NormalTok{ solid \#}\DecValTok{1890}\ErrorTok{ff}\OperatorTok{;}
+\NormalTok{  border}\OperatorTok{{-}}\DataTypeTok{left}\OperatorTok{:} \DecValTok{4}\ErrorTok{px}\NormalTok{ solid }\DecValTok{1890}\ErrorTok{ff}\OperatorTok{;}
 \NormalTok{\}}
 
 \OperatorTok{.}\AttributeTok{preview}\OperatorTok{{-}}\NormalTok{item \{}
@@ -4958,27 +4950,27 @@ console对象是JavaScript调试的最基本工具，它提供了多种方法来
 \NormalTok{  line}\OperatorTok{{-}}\DataTypeTok{height}\OperatorTok{:} \FloatTok{1.6}\OperatorTok{;}
 \NormalTok{\}}
 
-\OperatorTok{.}\AttributeTok{level}\OperatorTok{{-}}\NormalTok{normal \{ }\DataTypeTok{color}\OperatorTok{:}\NormalTok{ \#}\DecValTok{52}\ErrorTok{c41a}\OperatorTok{;}\NormalTok{ \}}
-\OperatorTok{.}\AttributeTok{level}\OperatorTok{{-}}\NormalTok{warning \{ }\DataTypeTok{color}\OperatorTok{:}\NormalTok{ \#fa8c16}\OperatorTok{;}\NormalTok{ \}}
-\OperatorTok{.}\AttributeTok{level}\OperatorTok{{-}}\NormalTok{danger \{ }\DataTypeTok{color}\OperatorTok{:}\NormalTok{ \#ff4757}\OperatorTok{;}\NormalTok{ \}}
+\OperatorTok{.}\AttributeTok{level}\OperatorTok{{-}}\NormalTok{normal \{ }\DataTypeTok{color}\OperatorTok{:}\NormalTok{ }\DecValTok{52}\ErrorTok{c41a}\OperatorTok{;}\NormalTok{ \}}
+\OperatorTok{.}\AttributeTok{level}\OperatorTok{{-}}\NormalTok{warning \{ }\DataTypeTok{color}\OperatorTok{:}\NormalTok{ fa8c16}\OperatorTok{;}\NormalTok{ \}}
+\OperatorTok{.}\AttributeTok{level}\OperatorTok{{-}}\NormalTok{danger \{ }\DataTypeTok{color}\OperatorTok{:}\NormalTok{ ff4757}\OperatorTok{;}\NormalTok{ \}}
 
 \OperatorTok{.}\AttributeTok{warning}\OperatorTok{{-}}\NormalTok{normal \{ }
-  \DataTypeTok{background}\OperatorTok{:}\NormalTok{ \#f6ffed}\OperatorTok{;} 
-  \DataTypeTok{color}\OperatorTok{:}\NormalTok{ \#}\DecValTok{52}\ErrorTok{c41a}\OperatorTok{;} 
+  \DataTypeTok{background}\OperatorTok{:}\NormalTok{ f6ffed}\OperatorTok{;} 
+  \DataTypeTok{color}\OperatorTok{:}\NormalTok{ }\DecValTok{52}\ErrorTok{c41a}\OperatorTok{;} 
   \DataTypeTok{padding}\OperatorTok{:} \DecValTok{2}\ErrorTok{px} \DecValTok{8}\ErrorTok{px}\OperatorTok{;}
 \NormalTok{  border}\OperatorTok{{-}}\DataTypeTok{radius}\OperatorTok{:} \DecValTok{4}\ErrorTok{px}\OperatorTok{;}
 \NormalTok{  font}\OperatorTok{{-}}\DataTypeTok{size}\OperatorTok{:} \DecValTok{12}\ErrorTok{px}\OperatorTok{;}
 \NormalTok{\}}
 \OperatorTok{.}\AttributeTok{warning}\OperatorTok{{-}}\NormalTok{warning \{ }
-  \DataTypeTok{background}\OperatorTok{:}\NormalTok{ \#fff7e6}\OperatorTok{;} 
-  \DataTypeTok{color}\OperatorTok{:}\NormalTok{ \#fa8c16}\OperatorTok{;} 
+  \DataTypeTok{background}\OperatorTok{:}\NormalTok{ fff7e6}\OperatorTok{;} 
+  \DataTypeTok{color}\OperatorTok{:}\NormalTok{ fa8c16}\OperatorTok{;} 
   \DataTypeTok{padding}\OperatorTok{:} \DecValTok{2}\ErrorTok{px} \DecValTok{8}\ErrorTok{px}\OperatorTok{;}
 \NormalTok{  border}\OperatorTok{{-}}\DataTypeTok{radius}\OperatorTok{:} \DecValTok{4}\ErrorTok{px}\OperatorTok{;}
 \NormalTok{  font}\OperatorTok{{-}}\DataTypeTok{size}\OperatorTok{:} \DecValTok{12}\ErrorTok{px}\OperatorTok{;}
 \NormalTok{\}}
 \OperatorTok{.}\AttributeTok{warning}\OperatorTok{{-}}\NormalTok{danger \{ }
-  \DataTypeTok{background}\OperatorTok{:}\NormalTok{ \#ffe6e6}\OperatorTok{;} 
-  \DataTypeTok{color}\OperatorTok{:}\NormalTok{ \#ff4757}\OperatorTok{;} 
+  \DataTypeTok{background}\OperatorTok{:}\NormalTok{ ffe6e6}\OperatorTok{;} 
+  \DataTypeTok{color}\OperatorTok{:}\NormalTok{ ff4757}\OperatorTok{;} 
   \DataTypeTok{padding}\OperatorTok{:} \DecValTok{2}\ErrorTok{px} \DecValTok{8}\ErrorTok{px}\OperatorTok{;}
 \NormalTok{  border}\OperatorTok{{-}}\DataTypeTok{radius}\OperatorTok{:} \DecValTok{4}\ErrorTok{px}\OperatorTok{;}
 \NormalTok{  font}\OperatorTok{{-}}\DataTypeTok{size}\OperatorTok{:} \DecValTok{12}\ErrorTok{px}\OperatorTok{;}
@@ -5006,8 +4998,8 @@ console对象是JavaScript调试的最基本工具，它提供了多种方法来
 \OperatorTok{.}\AttributeTok{level}\OperatorTok{{-}}\NormalTok{gauge \{}
   \DataTypeTok{width}\OperatorTok{:} \DecValTok{100}\ErrorTok{px}\OperatorTok{;}
   \DataTypeTok{height}\OperatorTok{:} \DecValTok{200}\ErrorTok{px}\OperatorTok{;}
-  \DataTypeTok{background}\OperatorTok{:}\NormalTok{ \#f0f0f0}\OperatorTok{;}
-  \DataTypeTok{border}\OperatorTok{:} \DecValTok{2}\ErrorTok{px}\NormalTok{ solid \#ddd}\OperatorTok{;}
+  \DataTypeTok{background}\OperatorTok{:}\NormalTok{ f0f0f0}\OperatorTok{;}
+  \DataTypeTok{border}\OperatorTok{:} \DecValTok{2}\ErrorTok{px}\NormalTok{ solid ddd}\OperatorTok{;}
 \NormalTok{  border}\OperatorTok{{-}}\DataTypeTok{radius}\OperatorTok{:} \DecValTok{8}\ErrorTok{px}\OperatorTok{;}
   \DataTypeTok{position}\OperatorTok{:}\NormalTok{ relative}\OperatorTok{;}
   \DataTypeTok{overflow}\OperatorTok{:}\NormalTok{ hidden}\OperatorTok{;}
@@ -5017,7 +5009,7 @@ console对象是JavaScript调试的最基本工具，它提供了多种方法来
   \DataTypeTok{position}\OperatorTok{:}\NormalTok{ absolute}\OperatorTok{;}
   \DataTypeTok{bottom}\OperatorTok{:} \DecValTok{0}\OperatorTok{;}
   \DataTypeTok{width}\OperatorTok{:} \DecValTok{100}\OperatorTok{\%;}
-  \DataTypeTok{background}\OperatorTok{:}\NormalTok{ linear}\OperatorTok{{-}}\FunctionTok{gradient}\NormalTok{(to top}\OperatorTok{,}\NormalTok{ \#}\DecValTok{2}\ErrorTok{ed573}\OperatorTok{,}\NormalTok{ \#}\DecValTok{1890}\ErrorTok{ff}\OperatorTok{,}\NormalTok{ \#fa8c16}\OperatorTok{,}\NormalTok{ \#ff4757)}\OperatorTok{;}
+  \DataTypeTok{background}\OperatorTok{:}\NormalTok{ linear}\OperatorTok{{-}}\FunctionTok{gradient}\NormalTok{(to top}\OperatorTok{,}\NormalTok{ }\DecValTok{2}\ErrorTok{ed573}\OperatorTok{,}\NormalTok{ }\DecValTok{1890}\ErrorTok{ff}\OperatorTok{,}\NormalTok{ fa8c16}\OperatorTok{,}\NormalTok{ ff4757)}\OperatorTok{;}
   \DataTypeTok{transition}\OperatorTok{:}\NormalTok{ height }\FloatTok{0.3}\NormalTok{s ease}\OperatorTok{;}
 \NormalTok{\}}
 
@@ -5027,7 +5019,7 @@ console对象是JavaScript调试的最基本工具，它提供了多种方法来
   \DataTypeTok{left}\OperatorTok{:} \DecValTok{50}\OperatorTok{\%;}
   \DataTypeTok{transform}\OperatorTok{:} \FunctionTok{translate}\NormalTok{(}\OperatorTok{{-}}\DecValTok{50}\OperatorTok{\%,} \OperatorTok{{-}}\DecValTok{50}\OperatorTok{\%}\NormalTok{)}\OperatorTok{;}
 \NormalTok{  font}\OperatorTok{{-}}\DataTypeTok{weight}\OperatorTok{:}\NormalTok{ bold}\OperatorTok{;}
-  \DataTypeTok{color}\OperatorTok{:}\NormalTok{ \#}\DecValTok{2}\ErrorTok{c3e50}\OperatorTok{;}
+  \DataTypeTok{color}\OperatorTok{:}\NormalTok{ }\DecValTok{2}\ErrorTok{c3e50}\OperatorTok{;}
   \DataTypeTok{background}\OperatorTok{:} \FunctionTok{rgba}\NormalTok{(}\DecValTok{255}\OperatorTok{,}\DecValTok{255}\OperatorTok{,}\DecValTok{255}\OperatorTok{,}\FloatTok{0.9}\NormalTok{)}\OperatorTok{;}
   \DataTypeTok{padding}\OperatorTok{:} \DecValTok{5}\ErrorTok{px} \DecValTok{10}\ErrorTok{px}\OperatorTok{;}
 \NormalTok{  border}\OperatorTok{{-}}\DataTypeTok{radius}\OperatorTok{:} \DecValTok{4}\ErrorTok{px}\OperatorTok{;}
@@ -5037,7 +5029,7 @@ console对象是JavaScript调试的最基本工具，它提供了多种方法来
 \OperatorTok{.}\AttributeTok{gauge}\OperatorTok{{-}}\NormalTok{label}\OperatorTok{,} \OperatorTok{.}\AttributeTok{chart}\OperatorTok{{-}}\NormalTok{label \{}
 \NormalTok{  margin}\OperatorTok{{-}}\DataTypeTok{top}\OperatorTok{:} \DecValTok{10}\ErrorTok{px}\OperatorTok{;}
 \NormalTok{  font}\OperatorTok{{-}}\DataTypeTok{size}\OperatorTok{:} \DecValTok{14}\ErrorTok{px}\OperatorTok{;}
-  \DataTypeTok{color}\OperatorTok{:}\NormalTok{ \#}\DecValTok{7}\ErrorTok{f8c8d}\OperatorTok{;}
+  \DataTypeTok{color}\OperatorTok{:}\NormalTok{ }\DecValTok{7}\ErrorTok{f8c8d}\OperatorTok{;}
 \NormalTok{  font}\OperatorTok{{-}}\DataTypeTok{weight}\OperatorTok{:} \DecValTok{500}\OperatorTok{;}
 \NormalTok{\}}
 
@@ -5048,7 +5040,7 @@ console对象是JavaScript调试的最基本工具，它提供了多种方法来
   \DataTypeTok{height}\OperatorTok{:} \DecValTok{200}\ErrorTok{px}\OperatorTok{;}
   \DataTypeTok{width}\OperatorTok{:} \DecValTok{200}\ErrorTok{px}\OperatorTok{;}
   \DataTypeTok{padding}\OperatorTok{:} \DecValTok{10}\ErrorTok{px}\OperatorTok{;}
-  \DataTypeTok{background}\OperatorTok{:}\NormalTok{ \#f8f9fa}\OperatorTok{;}
+  \DataTypeTok{background}\OperatorTok{:}\NormalTok{ f8f9fa}\OperatorTok{;}
 \NormalTok{  border}\OperatorTok{{-}}\DataTypeTok{radius}\OperatorTok{:} \DecValTok{8}\ErrorTok{px}\OperatorTok{;}
 \NormalTok{\}}
 
@@ -5182,7 +5174,7 @@ console对象是JavaScript调试的最基本工具，它提供了多种方法来
 \NormalTok{        \}}
         
         \FunctionTok{.console{-}header}\NormalTok{ \{}
-            \KeywordTok{background}\CharTok{:} \FunctionTok{linear{-}gradient(}\DecValTok{135}\DataTypeTok{deg}\OperatorTok{,} \ConstantTok{\#667eea} \DecValTok{0}\DataTypeTok{\%}\OperatorTok{,} \ConstantTok{\#764ba2} \DecValTok{100}\DataTypeTok{\%}\FunctionTok{)}\OperatorTok{;}
+            \KeywordTok{background}\CharTok{:} \FunctionTok{linear{-}gradient(}\DecValTok{135}\DataTypeTok{deg}\OperatorTok{,} \ConstantTok{667eea} \DecValTok{0}\DataTypeTok{\%}\OperatorTok{,} \ConstantTok{764ba2} \DecValTok{100}\DataTypeTok{\%}\FunctionTok{)}\OperatorTok{;}
             \KeywordTok{color}\CharTok{:} \ConstantTok{white}\OperatorTok{;}
             \KeywordTok{padding}\CharTok{:} \DecValTok{20}\DataTypeTok{px}\OperatorTok{;}
             \KeywordTok{border{-}radius}\CharTok{:} \DecValTok{8}\DataTypeTok{px}\OperatorTok{;}
@@ -5201,22 +5193,22 @@ console对象是JavaScript调试的最基本工具，它提供了多种方法来
             \KeywordTok{border{-}radius}\CharTok{:} \DecValTok{8}\DataTypeTok{px}\OperatorTok{;}
             \KeywordTok{padding}\CharTok{:} \DecValTok{20}\DataTypeTok{px}\OperatorTok{;}
             \KeywordTok{box{-}shadow}\CharTok{:} \DecValTok{0} \DecValTok{2}\DataTypeTok{px} \DecValTok{10}\DataTypeTok{px} \FunctionTok{rgba(}\DecValTok{0}\OperatorTok{,}\DecValTok{0}\OperatorTok{,}\DecValTok{0}\OperatorTok{,}\DecValTok{0.1}\FunctionTok{)}\OperatorTok{;}
-            \KeywordTok{border{-}left}\CharTok{:} \DecValTok{4}\DataTypeTok{px} \DecValTok{solid} \ConstantTok{\#1890ff}\OperatorTok{;}
+            \KeywordTok{border{-}left}\CharTok{:} \DecValTok{4}\DataTypeTok{px} \DecValTok{solid} \ConstantTok{1890ff}\OperatorTok{;}
 \NormalTok{        \}}
         
-        \FunctionTok{.error}\NormalTok{ \{ }\KeywordTok{border{-}left{-}color}\CharTok{:} \ConstantTok{\#ff4757}\OperatorTok{;}\NormalTok{ \}}
-        \FunctionTok{.warning}\NormalTok{ \{ }\KeywordTok{border{-}left{-}color}\CharTok{:} \ConstantTok{\#ffa502}\OperatorTok{;}\NormalTok{ \}}
-        \FunctionTok{.success}\NormalTok{ \{ }\KeywordTok{border{-}left{-}color}\CharTok{:} \ConstantTok{\#2ed573}\OperatorTok{;}\NormalTok{ \}}
+        \FunctionTok{.error}\NormalTok{ \{ }\KeywordTok{border{-}left{-}color}\CharTok{:} \ConstantTok{ff4757}\OperatorTok{;}\NormalTok{ \}}
+        \FunctionTok{.warning}\NormalTok{ \{ }\KeywordTok{border{-}left{-}color}\CharTok{:} \ConstantTok{ffa502}\OperatorTok{;}\NormalTok{ \}}
+        \FunctionTok{.success}\NormalTok{ \{ }\KeywordTok{border{-}left{-}color}\CharTok{:} \ConstantTok{2ed573}\OperatorTok{;}\NormalTok{ \}}
         
         \FunctionTok{.metric{-}value}\NormalTok{ \{}
             \KeywordTok{font{-}size}\CharTok{:} \DecValTok{2}\DataTypeTok{em}\OperatorTok{;}
             \KeywordTok{font{-}weight}\CharTok{:} \DecValTok{bold}\OperatorTok{;}
-            \KeywordTok{color}\CharTok{:} \ConstantTok{\#2c3e50}\OperatorTok{;}
+            \KeywordTok{color}\CharTok{:} \ConstantTok{2c3e50}\OperatorTok{;}
             \KeywordTok{margin}\CharTok{:} \DecValTok{10}\DataTypeTok{px} \DecValTok{0}\OperatorTok{;}
 \NormalTok{        \}}
         
         \FunctionTok{.metric{-}label}\NormalTok{ \{}
-            \KeywordTok{color}\CharTok{:} \ConstantTok{\#7f8c8d}\OperatorTok{;}
+            \KeywordTok{color}\CharTok{:} \ConstantTok{7f8c8d}\OperatorTok{;}
             \KeywordTok{font{-}size}\CharTok{:} \DecValTok{0.9}\DataTypeTok{em}\OperatorTok{;}
 \NormalTok{        \}}
         
@@ -5242,18 +5234,18 @@ console对象是JavaScript调试的最基本工具，它提供了多种方法来
             \KeywordTok{transition}\CharTok{:} \DecValTok{all} \DecValTok{0.3}\DataTypeTok{s}\OperatorTok{;}
 \NormalTok{        \}}
         
-        \FunctionTok{.btn{-}primary}\NormalTok{ \{ }\KeywordTok{background}\CharTok{:} \ConstantTok{\#1890ff}\OperatorTok{;} \KeywordTok{color}\CharTok{:} \ConstantTok{white}\OperatorTok{;}\NormalTok{ \}}
-        \FunctionTok{.btn{-}success}\NormalTok{ \{ }\KeywordTok{background}\CharTok{:} \ConstantTok{\#2ed573}\OperatorTok{;} \KeywordTok{color}\CharTok{:} \ConstantTok{white}\OperatorTok{;}\NormalTok{ \}}
-        \FunctionTok{.btn{-}warning}\NormalTok{ \{ }\KeywordTok{background}\CharTok{:} \ConstantTok{\#ffa502}\OperatorTok{;} \KeywordTok{color}\CharTok{:} \ConstantTok{white}\OperatorTok{;}\NormalTok{ \}}
-        \FunctionTok{.btn{-}danger}\NormalTok{ \{ }\KeywordTok{background}\CharTok{:} \ConstantTok{\#ff4757}\OperatorTok{;} \KeywordTok{color}\CharTok{:} \ConstantTok{white}\OperatorTok{;}\NormalTok{ \}}
+        \FunctionTok{.btn{-}primary}\NormalTok{ \{ }\KeywordTok{background}\CharTok{:} \ConstantTok{1890ff}\OperatorTok{;} \KeywordTok{color}\CharTok{:} \ConstantTok{white}\OperatorTok{;}\NormalTok{ \}}
+        \FunctionTok{.btn{-}success}\NormalTok{ \{ }\KeywordTok{background}\CharTok{:} \ConstantTok{2ed573}\OperatorTok{;} \KeywordTok{color}\CharTok{:} \ConstantTok{white}\OperatorTok{;}\NormalTok{ \}}
+        \FunctionTok{.btn{-}warning}\NormalTok{ \{ }\KeywordTok{background}\CharTok{:} \ConstantTok{ffa502}\OperatorTok{;} \KeywordTok{color}\CharTok{:} \ConstantTok{white}\OperatorTok{;}\NormalTok{ \}}
+        \FunctionTok{.btn{-}danger}\NormalTok{ \{ }\KeywordTok{background}\CharTok{:} \ConstantTok{ff4757}\OperatorTok{;} \KeywordTok{color}\CharTok{:} \ConstantTok{white}\OperatorTok{;}\NormalTok{ \}}
         
         \FunctionTok{.btn}\InformationTok{:hover}\NormalTok{ \{ }\KeywordTok{opacity}\CharTok{:} \DecValTok{0.8}\OperatorTok{;} \KeywordTok{transform}\CharTok{:} \FunctionTok{translateY(}\DecValTok{{-}1}\DataTypeTok{px}\FunctionTok{)}\OperatorTok{;}\NormalTok{ \}}
         \FunctionTok{.btn}\InformationTok{:disabled}\NormalTok{ \{ }\KeywordTok{opacity}\CharTok{:} \DecValTok{0.5}\OperatorTok{;} \KeywordTok{cursor}\CharTok{:} \DecValTok{not{-}allowed}\OperatorTok{;}\NormalTok{ \}}
         
         \FunctionTok{.log{-}section}\NormalTok{ \{}
             \KeywordTok{margin{-}top}\CharTok{:} \DecValTok{30}\DataTypeTok{px}\OperatorTok{;}
-            \KeywordTok{background}\CharTok{:} \ConstantTok{\#2c3e50}\OperatorTok{;}
-            \KeywordTok{color}\CharTok{:} \ConstantTok{\#ecf0f1}\OperatorTok{;}
+            \KeywordTok{background}\CharTok{:} \ConstantTok{2c3e50}\OperatorTok{;}
+            \KeywordTok{color}\CharTok{:} \ConstantTok{ecf0f1}\OperatorTok{;}
             \KeywordTok{padding}\CharTok{:} \DecValTok{20}\DataTypeTok{px}\OperatorTok{;}
             \KeywordTok{border{-}radius}\CharTok{:} \DecValTok{8}\DataTypeTok{px}\OperatorTok{;}
             \KeywordTok{height}\CharTok{:} \DecValTok{200}\DataTypeTok{px}\OperatorTok{;}
@@ -5266,11 +5258,11 @@ console对象是JavaScript调试的最基本工具，它提供了多种方法来
             \KeywordTok{font{-}size}\CharTok{:} \DecValTok{0.85}\DataTypeTok{em}\OperatorTok{;}
 \NormalTok{        \}}
         
-        \FunctionTok{.log{-}timestamp}\NormalTok{ \{ }\KeywordTok{color}\CharTok{:} \ConstantTok{\#95a5a6}\OperatorTok{;}\NormalTok{ \}}
-        \FunctionTok{.log{-}info}\NormalTok{ \{ }\KeywordTok{color}\CharTok{:} \ConstantTok{\#3498db}\OperatorTok{;}\NormalTok{ \}}
-        \FunctionTok{.log{-}warning}\NormalTok{ \{ }\KeywordTok{color}\CharTok{:} \ConstantTok{\#f39c12}\OperatorTok{;}\NormalTok{ \}}
-        \FunctionTok{.log{-}error}\NormalTok{ \{ }\KeywordTok{color}\CharTok{:} \ConstantTok{\#e74c3c}\OperatorTok{;}\NormalTok{ \}}
-        \FunctionTok{.log{-}success}\NormalTok{ \{ }\KeywordTok{color}\CharTok{:} \ConstantTok{\#27ae60}\OperatorTok{;}\NormalTok{ \}}
+        \FunctionTok{.log{-}timestamp}\NormalTok{ \{ }\KeywordTok{color}\CharTok{:} \ConstantTok{95a5a6}\OperatorTok{;}\NormalTok{ \}}
+        \FunctionTok{.log{-}info}\NormalTok{ \{ }\KeywordTok{color}\CharTok{:} \ConstantTok{3498db}\OperatorTok{;}\NormalTok{ \}}
+        \FunctionTok{.log{-}warning}\NormalTok{ \{ }\KeywordTok{color}\CharTok{:} \ConstantTok{f39c12}\OperatorTok{;}\NormalTok{ \}}
+        \FunctionTok{.log{-}error}\NormalTok{ \{ }\KeywordTok{color}\CharTok{:} \ConstantTok{e74c3c}\OperatorTok{;}\NormalTok{ \}}
+        \FunctionTok{.log{-}success}\NormalTok{ \{ }\KeywordTok{color}\CharTok{:} \ConstantTok{27ae60}\OperatorTok{;}\NormalTok{ \}}
     \DataTypeTok{\textless{}/}\KeywordTok{style}\DataTypeTok{\textgreater{}}
 \DataTypeTok{\textless{}/}\KeywordTok{head}\DataTypeTok{\textgreater{}}
 \DataTypeTok{\textless{}}\KeywordTok{body}\DataTypeTok{\textgreater{}}
@@ -5412,7 +5404,7 @@ console对象是JavaScript调试的最基本工具，它提供了多种方法来
                         \DataTypeTok{id}\OperatorTok{:} \DecValTok{2}\OperatorTok{,}
                         \DataTypeTok{timestamp}\OperatorTok{:} \KeywordTok{new} \BuiltInTok{Date}\NormalTok{(}\BuiltInTok{Date}\OperatorTok{.}\FunctionTok{now}\NormalTok{() }\OperatorTok{{-}} \DecValTok{30000}\NormalTok{)}\OperatorTok{,}
                         \DataTypeTok{level}\OperatorTok{:} \StringTok{\textquotesingle{}warning\textquotesingle{}}\OperatorTok{,}
-                        \DataTypeTok{message}\OperatorTok{:} \StringTok{\textquotesingle{}监测站 \#045 数据传输延迟\textquotesingle{}}
+                        \DataTypeTok{message}\OperatorTok{:} \StringTok{\textquotesingle{}监测站 045 数据传输延迟\textquotesingle{}}
 \NormalTok{                    \}}\OperatorTok{,}
 \NormalTok{                    \{}
                         \DataTypeTok{id}\OperatorTok{:} \DecValTok{3}\OperatorTok{,}
@@ -5543,7 +5535,7 @@ console对象是JavaScript调试的最基本工具，它提供了多种方法来
 \VerbatimStringTok{        \}}
 \VerbatimStringTok{        }
 \VerbatimStringTok{        // 挂载应用到DOM}
-\VerbatimStringTok{        app.mount(\textquotesingle{}\#water{-}monitoring{-}console\textquotesingle{})}
+\VerbatimStringTok{        app.mount(\textquotesingle{}water{-}monitoring{-}console\textquotesingle{})}
 \VerbatimStringTok{    \textless{}/script\textgreater{}}
 \VerbatimStringTok{\textless{}/body\textgreater{}}
 \VerbatimStringTok{\textless{}/html\textgreater{}}
@@ -5938,15 +5930,15 @@ Vue 3的Composition API为响应式数据管理提供了更灵活和强大的方
 \NormalTok{\}}
 
 \NormalTok{.sensor{-}card \{}
-\NormalTok{  border: 1px solid \#e8e8e8;}
+\NormalTok{  border: 1px solid e8e8e8;}
 \NormalTok{  border{-}radius: 6px;}
 \NormalTok{  padding: 20px;}
-\NormalTok{  background: \#fafafa;}
+\NormalTok{  background: fafafa;}
 \NormalTok{\}}
 
 \NormalTok{.sensor{-}card h4 \{}
 \NormalTok{  margin: 0 0 15px 0;}
-\NormalTok{  color: \#2c3e50;}
+\NormalTok{  color: 2c3e50;}
 \NormalTok{\}}
 
 \NormalTok{.sensor{-}value \{}
@@ -5956,12 +5948,12 @@ Vue 3的Composition API为响应式数据管理提供了更灵活和强大的方
 \NormalTok{\}}
 
 \NormalTok{.sensor{-}value .value \{}
-\NormalTok{  color: \#1890ff;}
+\NormalTok{  color: 1890ff;}
 \NormalTok{\}}
 
 \NormalTok{.sensor{-}value .unit \{}
 \NormalTok{  font{-}size: 16px;}
-\NormalTok{  color: \#7f8c8d;}
+\NormalTok{  color: 7f8c8d;}
 \NormalTok{  margin{-}left: 5px;}
 \NormalTok{\}}
 
@@ -5974,14 +5966,14 @@ Vue 3的Composition API为响应式数据管理提供了更灵活和强大的方
 \NormalTok{  margin: 10px 0;}
 \NormalTok{\}}
 
-\NormalTok{.status{-}normal \{ background: \#f6ffed; color: \#52c41a; \}}
-\NormalTok{.status{-}warning \{ background: \#fff7e6; color: \#fa8c16; \}}
-\NormalTok{.status{-}error \{ background: \#ffe6e6; color: \#ff4757; \}}
-\NormalTok{.status{-}offline \{ background: \#f0f0f0; color: \#999; \}}
+\NormalTok{.status{-}normal \{ background: f6ffed; color: 52c41a; \}}
+\NormalTok{.status{-}warning \{ background: fff7e6; color: fa8c16; \}}
+\NormalTok{.status{-}error \{ background: ffe6e6; color: ff4757; \}}
+\NormalTok{.status{-}offline \{ background: f0f0f0; color: 999; \}}
 
 \NormalTok{.last{-}update \{}
 \NormalTok{  font{-}size: 12px;}
-\NormalTok{  color: \#999;}
+\NormalTok{  color: 999;}
 \NormalTok{\}}
 
 \NormalTok{.config{-}group \{}
@@ -5992,13 +5984,13 @@ Vue 3的Composition API为响应式数据管理提供了更灵活和强大的方
 \NormalTok{  display: block;}
 \NormalTok{  margin{-}bottom: 8px;}
 \NormalTok{  font{-}weight: 500;}
-\NormalTok{  color: \#2c3e50;}
+\NormalTok{  color: 2c3e50;}
 \NormalTok{\}}
 
 \NormalTok{.config{-}input, .threshold{-}input \{}
 \NormalTok{  width: 120px;}
 \NormalTok{  padding: 8px 12px;}
-\NormalTok{  border: 1px solid \#ddd;}
+\NormalTok{  border: 1px solid ddd;}
 \NormalTok{  border{-}radius: 4px;}
 \NormalTok{  font{-}size: 14px;}
 \NormalTok{\}}
@@ -6032,21 +6024,21 @@ Vue 3的Composition API为响应式数据管理提供了更灵活和强大的方
 \NormalTok{.stat{-}card \{}
 \NormalTok{  text{-}align: center;}
 \NormalTok{  padding: 20px;}
-\NormalTok{  border: 1px solid \#e8e8e8;}
+\NormalTok{  border: 1px solid e8e8e8;}
 \NormalTok{  border{-}radius: 6px;}
-\NormalTok{  background: \#fafafa;}
+\NormalTok{  background: fafafa;}
 \NormalTok{\}}
 
 \NormalTok{.stat{-}label \{}
 \NormalTok{  font{-}size: 14px;}
-\NormalTok{  color: \#7f8c8d;}
+\NormalTok{  color: 7f8c8d;}
 \NormalTok{  margin{-}bottom: 10px;}
 \NormalTok{\}}
 
 \NormalTok{.stat{-}value \{}
 \NormalTok{  font{-}size: 28px;}
 \NormalTok{  font{-}weight: bold;}
-\NormalTok{  color: \#2c3e50;}
+\NormalTok{  color: 2c3e50;}
 \NormalTok{\}}
 
 \NormalTok{.btn \{}
@@ -6059,12 +6051,12 @@ Vue 3的Composition API为响应式数据管理提供了更灵活和强大的方
 \NormalTok{\}}
 
 \NormalTok{.btn{-}primary \{}
-\NormalTok{  background: \#1890ff;}
+\NormalTok{  background: 1890ff;}
 \NormalTok{  color: white;}
 \NormalTok{\}}
 
 \NormalTok{.btn{-}primary:hover:not(:disabled) \{}
-\NormalTok{  background: \#40a9ff;}
+\NormalTok{  background: 40a9ff;}
 \NormalTok{\}}
 
 \NormalTok{.btn:disabled \{}
@@ -6129,7 +6121,7 @@ Vue.js的模板语法基于HTML，但扩展了强大的数据绑定功能。对�
 \NormalTok{        class="status{-}indicator" }
 \NormalTok{        :class="systemStatusClass"}
 \NormalTok{        :title="systemStatusTooltip"}
-\NormalTok{      \textgreater{}}
+NormalTok{      \textgreater{}}
 \NormalTok{        \textless{}!{-}{-} v{-}if/v{-}else{-}if/v{-}else 条件渲染 {-}{-}\textgreater{}}
 \NormalTok{        \textless{}span v{-}if="systemStatus === \textquotesingle{}healthy\textquotesingle{}" class="status{-}icon"\textgreater{}\textless{}/span\textgreater{}}
 \NormalTok{        \textless{}span v{-}else{-}if="systemStatus === \textquotesingle{}warning\textquotesingle{}" class="status{-}icon"\textgreater{}\textless{}/span\textgreater{}}
@@ -6165,9 +6157,9 @@ Vue.js的模板语法基于HTML，但扩展了强大的数据绑定功能。对�
 \NormalTok{            \textless{}h3\textgreater{}\{\{ station.name \}\}\textless{}/h3\textgreater{}}
 \NormalTok{            \textless{}span }
 \NormalTok{              class="station{-}id"}
-\NormalTok{              :style="\{ color: station.status === \textquotesingle{}online\textquotesingle{} ? \textquotesingle{}\#52c41a\textquotesingle{} : \textquotesingle{}\#ff4757\textquotesingle{} \}"}
+\NormalTok{              :style="\{ color: station.status === \textquotesingle{}online\textquotesingle{} ? \textquotesingle{}52c41a\textquotesingle{} : \textquotesingle{}ff4757\textquotesingle{} \}"}
 \NormalTok{            \textgreater{}}
-\NormalTok{              \#\{\{ station.id \}\}}
+\NormalTok{              {\{ station.id \}\}}
 \NormalTok{            \textless{}/span\textgreater{}}
 \NormalTok{          \textless{}/div\textgreater{}}
           
@@ -6182,7 +6174,7 @@ Vue.js的模板语法基于HTML，但扩展了强大的数据绑定功能。对�
 \NormalTok{              \textless{}span }
 \NormalTok{                class="data{-}value" }
 \NormalTok{                :class="getValueStatusClass(key, value)"}
-\NormalTok{                :title="\textasciigrave{}正常范围: [数学公式]\{alert.level\}\textasciigrave{}"}
+\NormalTok{                :title="textasciigrave{}正常范围: [数学公式]\{alert.level\}\textasciigrave{}"}
 \NormalTok{            \textgreater{}}
 \NormalTok{              \textless{}span class="alert{-}icon"\textgreater{}\{\{ getAlertIcon(alert.level) \}\}\textless{}/span\textgreater{}}
 \NormalTok{              \textless{}span class="alert{-}message"\textgreater{}\{\{ alert.message \}\}\textless{}/span\textgreater{}}
@@ -7246,10 +7238,10 @@ Prettier采用''opinionated''（固执己见）的设计理念，即为大多数
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\CommentTok{\#\# 安装必要的包}
+\CommentTok{ 安装必要的包}
 \ExtensionTok{npm}\NormalTok{ install }\AttributeTok{{-}{-}save{-}dev}\NormalTok{ prettier eslint{-}config{-}prettier eslint{-}plugin{-}prettier}
 
-\CommentTok{\#\# Vue项目还需要}
+\CommentTok{ Vue项目还需要}
 \ExtensionTok{npm}\NormalTok{ install }\AttributeTok{{-}{-}save{-}dev}\NormalTok{ @vue/eslint{-}config{-}prettier}
 \end{Highlighting}
 \end{Shaded}
@@ -7308,13 +7300,13 @@ Husky是一个流行的Git Hooks管理工具，它简化了Git Hooks的配置和
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\CommentTok{\#\# 安装Husky}
+\CommentTok{ 安装Husky}
 \ExtensionTok{npm}\NormalTok{ install }\AttributeTok{{-}{-}save{-}dev}\NormalTok{ husky}
 
-\CommentTok{\#\# 启用Git Hooks}
+\CommentTok{ 启用Git Hooks}
 \ExtensionTok{npx}\NormalTok{ husky install}
 
-\CommentTok{\#\# 添加到package.json}
+\CommentTok{ 添加到package.json}
 \ExtensionTok{npm}\NormalTok{ set{-}script prepare }\StringTok{"husky install"}
 \end{Highlighting}
 \end{Shaded}
@@ -7346,28 +7338,28 @@ Husky是一个流行的Git Hooks管理工具，它简化了Git Hooks的配置和
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\CommentTok{\#\# 添加pre{-}commit钩子}
+\CommentTok{ 添加pre{-}commit钩子}
 \ExtensionTok{npx}\NormalTok{ husky add .husky/pre{-}commit }\StringTok{"npx lint{-}staged"}
 \end{Highlighting}
 \end{Shaded}
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\CommentTok{\#!/bin/sh}
-\CommentTok{\#\# .husky/pre{-}commit}
+\CommentTok{!/bin/sh}
+\CommentTok{ .husky/pre{-}commit}
 
 \BuiltInTok{.} \StringTok{"[数学公式]0"}\ErrorTok{)}\ExtensionTok{/\_/husky.sh}\StringTok{"}
 
 \StringTok{echo "}\NormalTok{ Running pre{-}commit checks...}\StringTok{"}
 
-\StringTok{\#\# 运行lint{-}staged}
+\StringTok{ 运行lint{-}staged}
 \StringTok{npx lint{-}staged}
 
-\StringTok{\#\# 检查TypeScript类型}
+\StringTok{ 检查TypeScript类型}
 \StringTok{echo "}\NormalTok{ Checking TypeScript types...}\StringTok{"}
 \StringTok{npx vue{-}tsc {-}{-}noEmit}
 
-\StringTok{\#\# 运行单元测试}
+\StringTok{ 运行单元测试}
 \StringTok{echo "}\NormalTok{🧪 Running unit tests...}\StringTok{"}
 \StringTok{npm run test:unit}
 
@@ -7381,10 +7373,10 @@ Husky是一个流行的Git Hooks管理工具，它简化了Git Hooks的配置和
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\CommentTok{\#\# 安装commitlint}
+\CommentTok{ 安装commitlint}
 \ExtensionTok{npm}\NormalTok{ install }\AttributeTok{{-}{-}save{-}dev}\NormalTok{ @commitlint/cli @commitlint/config{-}conventional}
 
-\CommentTok{\#\# 添加commit{-}msg钩子}
+\CommentTok{ 添加commit{-}msg钩子}
 \ExtensionTok{npx}\NormalTok{ husky add .husky/commit{-}msg }\StringTok{"npx {-}{-}no{-}install commitlint {-}{-}edit [数学公式]\{new Date(point.data[0]).toLocaleString()\}\textless{}/div\textgreater{}}
 \StringTok{            \textless{}div\textgreater{}水位: [数学公式]\{props.stationId\}/water{-}level}\KeywordTok{\textasciigrave{}}\ExtensionTok{,}\NormalTok{ \{}
       \ExtensionTok{method:} \StringTok{\textquotesingle{}POST\textquotesingle{}}\NormalTok{,}
@@ -7542,19 +7534,19 @@ Husky是一个流行的Git Hooks管理工具，它简化了Git Hooks的配置和
 \NormalTok{    listen 443 ssl http2;}
 \NormalTok{    server\_name watermonitor.gov.cn;}
     
-\NormalTok{    \# SSL配置}
+\NormalTok{     SSL配置}
 \NormalTok{    ssl\_certificate /path/to/cert.pem;}
 \NormalTok{    ssl\_certificate\_key /path/to/key.pem;}
     
-\NormalTok{    \# 根目录设置}
+\NormalTok{     根目录设置}
 \NormalTok{    root /var/www/water{-}monitor/dist;}
 \NormalTok{    index index.html;}
     
-\NormalTok{    \# Gzip压缩}
+\NormalTok{     Gzip压缩}
 \NormalTok{    gzip on;}
 \NormalTok{    gzip\_types text/css application/javascript image/svg+xml;}
     
-\NormalTok{    \# 静态资源缓存}
+\NormalTok{     静态资源缓存}
 \NormalTok{    location \textasciitilde{}* \textbackslash{}.(js|css|png|jpg|svg)[数学公式]uri $uri/ /index.html;}
 \NormalTok{    \}}
 \NormalTok{\}}
@@ -7837,7 +7829,7 @@ Google提出的Core Web Vitals是衡量用户体验的标准化指标：
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\CommentTok{\#\# 简化的CI流程示例}
+\CommentTok{ 简化的CI流程示例}
 \FunctionTok{name}\KeywordTok{:}\AttributeTok{ 水利平台CI/CD}
 \FunctionTok{on}\KeywordTok{:}\AttributeTok{ }\KeywordTok{[}\AttributeTok{push}\KeywordTok{,}\AttributeTok{ pull\_request}\KeywordTok{]}
 \FunctionTok{jobs}\KeywordTok{:}

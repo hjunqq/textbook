@@ -1,0 +1,322 @@
+2025-09-04 14:03:25,220 - TextbookConverter - INFO - info:119 - 🚀 开始教材转换流程
+2025-09-04 14:03:25,221 - TextbookConverter - INFO - info:119 - 🔍 检查系统环境...
+2025-09-04 14:03:25,239 - TextbookConverter - INFO - success:134 - SUCCESS: Pandoc document converter 已安装
+2025-09-04 14:03:25,250 - TextbookConverter - INFO - success:134 - SUCCESS: XeLaTeX PDF engine 已安装
+2025-09-04 14:03:25,250 - TextbookConverter - DEBUG - debug:140 - Python包 pathlib 可用
+2025-09-04 14:03:25,250 - TextbookConverter - DEBUG - debug:140 - Python包 dataclasses 可用
+2025-09-04 14:03:25,251 - TextbookConverter - DEBUG - debug:140 - Python包 enum 可用
+2025-09-04 14:03:25,251 - TextbookConverter - INFO - info:119 - 🔍 验证输入目录结构...
+2025-09-04 14:03:25,270 - TextbookConverter - INFO - info:119 - 发现 9 个章节目录
+2025-09-04 14:03:25,358 - TextbookConverter - INFO - info:119 - 发现 58 个源文件
+2025-09-04 14:03:25,359 - TextbookConverter - DEBUG - debug:140 - 处理 preface: 前言.md
+2025-09-04 14:03:25,359 - TextbookConverter - DEBUG - debug:140 - 处理文件: ../../docs/前言.md
+2025-09-04 14:03:25,361 - TextbookConverter - DEBUG - debug:140 - 使用编码 utf-8 成功读取: ../../docs/前言.md
+2025-09-04 14:03:25,362 - TextbookConverter - DEBUG - debug:140 - 处理 chapter: chapter01.md
+2025-09-04 14:03:25,362 - TextbookConverter - DEBUG - debug:140 - 处理文件: ../../docs/chapters/chapter01/chapter01.md
+2025-09-04 14:03:25,365 - TextbookConverter - DEBUG - debug:140 - 使用编码 utf-8 成功读取: ../../docs/chapters/chapter01/chapter01.md
+2025-09-04 14:03:25,366 - TextbookConverter - DEBUG - debug:140 - 保持原有中文章节标题: # 第一章 智慧水利概述与平台架构基础
+2025-09-04 14:03:25,366 - TextbookConverter - DEBUG - debug:140 - 处理 section: section01-01.md
+2025-09-04 14:03:25,366 - TextbookConverter - DEBUG - debug:140 - 处理文件: ../../docs/chapters/chapter01/section01-01.md
+2025-09-04 14:03:25,370 - TextbookConverter - DEBUG - debug:140 - 使用编码 utf-8 成功读取: ../../docs/chapters/chapter01/section01-01.md
+2025-09-04 14:03:25,370 - TextbookConverter - DEBUG - debug:140 - 保持原有节标题: ## 1.1 软件概述
+2025-09-04 14:03:25,371 - TextbookConverter - DEBUG - debug:140 - 处理 section: section01-02.md
+2025-09-04 14:03:25,371 - TextbookConverter - DEBUG - debug:140 - 处理文件: ../../docs/chapters/chapter01/section01-02.md
+2025-09-04 14:03:25,374 - TextbookConverter - DEBUG - debug:140 - 使用编码 utf-8 成功读取: ../../docs/chapters/chapter01/section01-02.md
+2025-09-04 14:03:25,374 - TextbookConverter - DEBUG - debug:140 - 保持原有节标题: ## 1.2 软件工程概述
+2025-09-04 14:03:25,375 - TextbookConverter - DEBUG - debug:140 - 处理 section: section01-03.md
+2025-09-04 14:03:25,376 - TextbookConverter - DEBUG - debug:140 - 处理文件: ../../docs/chapters/chapter01/section01-03.md
+2025-09-04 14:03:25,379 - TextbookConverter - DEBUG - debug:140 - 使用编码 utf-8 成功读取: ../../docs/chapters/chapter01/section01-03.md
+2025-09-04 14:03:25,380 - TextbookConverter - DEBUG - debug:140 - 保持原有节标题: ## 1.3 小结
+2025-09-04 14:03:25,380 - TextbookConverter - DEBUG - debug:140 - 处理 chapter: chapter02.md
+2025-09-04 14:03:25,380 - TextbookConverter - DEBUG - debug:140 - 处理文件: ../../docs/chapters/chapter02/chapter02.md
+2025-09-04 14:03:25,383 - TextbookConverter - DEBUG - debug:140 - 使用编码 utf-8 成功读取: ../../docs/chapters/chapter02/chapter02.md
+2025-09-04 14:03:25,383 - TextbookConverter - DEBUG - debug:140 - 保持原有中文章节标题: # 第二章 软件工程基础与需求分析
+2025-09-04 14:03:25,383 - TextbookConverter - DEBUG - debug:140 - 处理 section: section02-01.md
+2025-09-04 14:03:25,384 - TextbookConverter - DEBUG - debug:140 - 处理文件: ../../docs/chapters/chapter02/section02-01.md
+2025-09-04 14:03:25,388 - TextbookConverter - DEBUG - debug:140 - 使用编码 utf-8 成功读取: ../../docs/chapters/chapter02/section02-01.md
+2025-09-04 14:03:25,388 - TextbookConverter - DEBUG - debug:140 - 保持原有节标题: ## 2.1 软件生命周期
+2025-09-04 14:03:25,389 - TextbookConverter - DEBUG - debug:140 - 处理 section: section02-02.md
+2025-09-04 14:03:25,389 - TextbookConverter - DEBUG - debug:140 - 处理文件: ../../docs/chapters/chapter02/section02-02.md
+2025-09-04 14:03:25,393 - TextbookConverter - DEBUG - debug:140 - 使用编码 utf-8 成功读取: ../../docs/chapters/chapter02/section02-02.md
+2025-09-04 14:03:25,393 - TextbookConverter - DEBUG - debug:140 - 保持原有节标题: ## 2.2 软件生命周期模型
+2025-09-04 14:03:25,424 - TextbookConverter - DEBUG - debug:140 - 复制图片: ../../docs/chapters/chapter02/../images/chapter02/image1.png -> test_output/images/img_001.png
+2025-09-04 14:03:25,454 - TextbookConverter - DEBUG - debug:140 - 复制图片: ../../docs/chapters/chapter02/../images/chapter02/image2.png -> test_output/images/img_002.png
+2025-09-04 14:03:25,483 - TextbookConverter - DEBUG - debug:140 - 复制图片: ../../docs/chapters/chapter02/../images/chapter02/image3.png -> test_output/images/img_003.png
+2025-09-04 14:03:25,519 - TextbookConverter - DEBUG - debug:140 - 复制图片: ../../docs/chapters/chapter02/../images/chapter02/image4.png -> test_output/images/img_004.png
+2025-09-04 14:03:25,550 - TextbookConverter - DEBUG - debug:140 - 复制图片: ../../docs/chapters/chapter02/../images/chapter02/image5.png -> test_output/images/img_005.png
+2025-09-04 14:03:25,582 - TextbookConverter - DEBUG - debug:140 - 复制图片: ../../docs/chapters/chapter02/../images/chapter02/image6.png -> test_output/images/img_006.png
+2025-09-04 14:03:25,613 - TextbookConverter - DEBUG - debug:140 - 复制图片: ../../docs/chapters/chapter02/../images/chapter02/image7.png -> test_output/images/img_007.png
+2025-09-04 14:03:25,647 - TextbookConverter - DEBUG - debug:140 - 复制图片: ../../docs/chapters/chapter02/../images/chapter02/image8.png -> test_output/images/img_008.png
+2025-09-04 14:03:25,647 - TextbookConverter - DEBUG - debug:140 - 处理 section: section02-03.md
+2025-09-04 14:03:25,647 - TextbookConverter - DEBUG - debug:140 - 处理文件: ../../docs/chapters/chapter02/section02-03.md
+2025-09-04 14:03:25,650 - TextbookConverter - DEBUG - debug:140 - 使用编码 utf-8 成功读取: ../../docs/chapters/chapter02/section02-03.md
+2025-09-04 14:03:25,650 - TextbookConverter - DEBUG - debug:140 - 保持原有节标题: ## 2.3 需求分析
+2025-09-04 14:03:25,680 - TextbookConverter - DEBUG - debug:140 - 复制图片: ../../docs/chapters/chapter02/../images/chapter02/image9.png -> test_output/images/img_009.png
+2025-09-04 14:03:25,681 - TextbookConverter - DEBUG - debug:140 - 处理 section: section02-04.md
+2025-09-04 14:03:25,681 - TextbookConverter - DEBUG - debug:140 - 处理文件: ../../docs/chapters/chapter02/section02-04.md
+2025-09-04 14:03:25,684 - TextbookConverter - DEBUG - debug:140 - 使用编码 utf-8 成功读取: ../../docs/chapters/chapter02/section02-04.md
+2025-09-04 14:03:25,684 - TextbookConverter - DEBUG - debug:140 - 保持原有节标题: ## 2.4 需求获取与理解
+2025-09-04 14:03:25,684 - TextbookConverter - DEBUG - debug:140 - 处理 section: section02-05.md
+2025-09-04 14:03:25,684 - TextbookConverter - DEBUG - debug:140 - 处理文件: ../../docs/chapters/chapter02/section02-05.md
+2025-09-04 14:03:25,688 - TextbookConverter - DEBUG - debug:140 - 使用编码 utf-8 成功读取: ../../docs/chapters/chapter02/section02-05.md
+2025-09-04 14:03:25,688 - TextbookConverter - DEBUG - debug:140 - 保持原有节标题: ## 2.5 结构化分析
+2025-09-04 14:03:25,719 - TextbookConverter - DEBUG - debug:140 - 复制图片: ../../docs/chapters/chapter02/../images/chapter02/image10.png -> test_output/images/img_010.png
+2025-09-04 14:03:25,749 - TextbookConverter - DEBUG - debug:140 - 复制图片: ../../docs/chapters/chapter02/../images/chapter02/image11.png -> test_output/images/img_011.png
+2025-09-04 14:03:25,780 - TextbookConverter - DEBUG - debug:140 - 复制图片: ../../docs/chapters/chapter02/../images/chapter02/image12.png -> test_output/images/img_012.png
+2025-09-04 14:03:25,807 - TextbookConverter - DEBUG - debug:140 - 复制图片: ../../docs/chapters/chapter02/../images/chapter02/image13.png -> test_output/images/img_013.png
+2025-09-04 14:03:25,836 - TextbookConverter - DEBUG - debug:140 - 复制图片: ../../docs/chapters/chapter02/../images/chapter02/image14.png -> test_output/images/img_014.png
+2025-09-04 14:03:25,864 - TextbookConverter - DEBUG - debug:140 - 复制图片: ../../docs/chapters/chapter02/../images/chapter02/image15.png -> test_output/images/img_015.png
+2025-09-04 14:03:25,890 - TextbookConverter - DEBUG - debug:140 - 复制图片: ../../docs/chapters/chapter02/../images/chapter02/image16.png -> test_output/images/img_016.png
+2025-09-04 14:03:25,918 - TextbookConverter - DEBUG - debug:140 - 复制图片: ../../docs/chapters/chapter02/../images/chapter02/image17.png -> test_output/images/img_017.png
+2025-09-04 14:03:25,945 - TextbookConverter - DEBUG - debug:140 - 复制图片: ../../docs/chapters/chapter02/../images/chapter02/image18.png -> test_output/images/img_018.png
+2025-09-04 14:03:25,977 - TextbookConverter - DEBUG - debug:140 - 复制图片: ../../docs/chapters/chapter02/../images/chapter02/image19.png -> test_output/images/img_019.png
+2025-09-04 14:03:26,004 - TextbookConverter - DEBUG - debug:140 - 复制图片: ../../docs/chapters/chapter02/../images/chapter02/image20.png -> test_output/images/img_020.png
+2025-09-04 14:03:26,031 - TextbookConverter - DEBUG - debug:140 - 复制图片: ../../docs/chapters/chapter02/../images/chapter02/image21.png -> test_output/images/img_021.png
+2025-09-04 14:03:26,062 - TextbookConverter - DEBUG - debug:140 - 复制图片: ../../docs/chapters/chapter02/../images/chapter02/image22.png -> test_output/images/img_022.png
+2025-09-04 14:03:26,089 - TextbookConverter - DEBUG - debug:140 - 复制图片: ../../docs/chapters/chapter02/../images/chapter02/image23.png -> test_output/images/img_023.png
+2025-09-04 14:03:26,116 - TextbookConverter - DEBUG - debug:140 - 复制图片: ../../docs/chapters/chapter02/../images/chapter02/image24.png -> test_output/images/img_024.png
+2025-09-04 14:03:26,145 - TextbookConverter - DEBUG - debug:140 - 复制图片: ../../docs/chapters/chapter02/../images/chapter02/image25.png -> test_output/images/img_025.png
+2025-09-04 14:03:26,171 - TextbookConverter - DEBUG - debug:140 - 复制图片: ../../docs/chapters/chapter02/../images/chapter02/image26.png -> test_output/images/img_026.png
+2025-09-04 14:03:26,172 - TextbookConverter - DEBUG - debug:140 - 处理 section: section02-06.md
+2025-09-04 14:03:26,172 - TextbookConverter - DEBUG - debug:140 - 处理文件: ../../docs/chapters/chapter02/section02-06.md
+2025-09-04 14:03:26,178 - TextbookConverter - DEBUG - debug:140 - 使用编码 utf-8 成功读取: ../../docs/chapters/chapter02/section02-06.md
+2025-09-04 14:03:26,179 - TextbookConverter - DEBUG - debug:140 - 保持原有节标题: ## 2.6 小结
+2025-09-04 14:03:26,179 - TextbookConverter - DEBUG - debug:140 - 处理 chapter: chapter03.md
+2025-09-04 14:03:26,179 - TextbookConverter - DEBUG - debug:140 - 处理文件: ../../docs/chapters/chapter03/chapter03.md
+2025-09-04 14:03:26,183 - TextbookConverter - DEBUG - debug:140 - 使用编码 utf-8 成功读取: ../../docs/chapters/chapter03/chapter03.md
+2025-09-04 14:03:26,183 - TextbookConverter - DEBUG - debug:140 - 保持原有中文章节标题: # 第三章 软件模块详细设计
+2025-09-04 14:03:26,183 - TextbookConverter - DEBUG - debug:140 - 处理 section: section03-01.md
+2025-09-04 14:03:26,184 - TextbookConverter - DEBUG - debug:140 - 处理文件: ../../docs/chapters/chapter03/section03-01.md
+2025-09-04 14:03:26,187 - TextbookConverter - DEBUG - debug:140 - 使用编码 utf-8 成功读取: ../../docs/chapters/chapter03/section03-01.md
+2025-09-04 14:03:26,187 - TextbookConverter - DEBUG - debug:140 - 保持原有节标题: ## 3.1 软件架构概述
+2025-09-04 14:03:26,187 - TextbookConverter - DEBUG - debug:140 - 处理 section: section03-02.md
+2025-09-04 14:03:26,188 - TextbookConverter - DEBUG - debug:140 - 处理文件: ../../docs/chapters/chapter03/section03-02.md
+2025-09-04 14:03:26,192 - TextbookConverter - DEBUG - debug:140 - 使用编码 utf-8 成功读取: ../../docs/chapters/chapter03/section03-02.md
+2025-09-04 14:03:26,193 - TextbookConverter - DEBUG - debug:140 - 保持原有节标题: ## 3.2 架构设计原则
+2025-09-04 14:03:26,193 - TextbookConverter - DEBUG - debug:140 - 处理 section: section03-03.md
+2025-09-04 14:03:26,193 - TextbookConverter - DEBUG - debug:140 - 处理文件: ../../docs/chapters/chapter03/section03-03.md
+2025-09-04 14:03:26,196 - TextbookConverter - DEBUG - debug:140 - 使用编码 utf-8 成功读取: ../../docs/chapters/chapter03/section03-03.md
+2025-09-04 14:03:26,196 - TextbookConverter - DEBUG - debug:140 - 保持原有节标题: ## 3.3 架构类型与常见模式
+2025-09-04 14:03:26,197 - TextbookConverter - DEBUG - debug:140 - 处理 section: section03-04.md
+2025-09-04 14:03:26,197 - TextbookConverter - DEBUG - debug:140 - 处理文件: ../../docs/chapters/chapter03/section03-04.md
+2025-09-04 14:03:26,200 - TextbookConverter - DEBUG - debug:140 - 使用编码 utf-8 成功读取: ../../docs/chapters/chapter03/section03-04.md
+2025-09-04 14:03:26,200 - TextbookConverter - DEBUG - debug:140 - 保持原有节标题: ## 3.4 架构设计过程
+2025-09-04 14:03:26,200 - TextbookConverter - DEBUG - debug:140 - 处理 section: section03-05.md
+2025-09-04 14:03:26,201 - TextbookConverter - DEBUG - debug:140 - 处理文件: ../../docs/chapters/chapter03/section03-05.md
+2025-09-04 14:03:26,204 - TextbookConverter - DEBUG - debug:140 - 使用编码 utf-8 成功读取: ../../docs/chapters/chapter03/section03-05.md
+2025-09-04 14:03:26,204 - TextbookConverter - DEBUG - debug:140 - 保持原有节标题: ## 3.5 架构评估与验证
+2025-09-04 14:03:26,205 - TextbookConverter - DEBUG - debug:140 - 处理 section: section03-06.md
+2025-09-04 14:03:26,205 - TextbookConverter - DEBUG - debug:140 - 处理文件: ../../docs/chapters/chapter03/section03-06.md
+2025-09-04 14:03:26,209 - TextbookConverter - DEBUG - debug:140 - 使用编码 utf-8 成功读取: ../../docs/chapters/chapter03/section03-06.md
+2025-09-04 14:03:26,210 - TextbookConverter - DEBUG - debug:140 - 保持原有节标题: ## 3.6 Web 应用架构设计
+2025-09-04 14:03:26,210 - TextbookConverter - DEBUG - debug:140 - 处理 section: section03-07.md
+2025-09-04 14:03:26,210 - TextbookConverter - DEBUG - debug:140 - 处理文件: ../../docs/chapters/chapter03/section03-07.md
+2025-09-04 14:03:26,214 - TextbookConverter - DEBUG - debug:140 - 使用编码 utf-8 成功读取: ../../docs/chapters/chapter03/section03-07.md
+2025-09-04 14:03:26,214 - TextbookConverter - DEBUG - debug:140 - 保持原有节标题: ## 3.7 案例研究：SafeHome 系统架构
+2025-09-04 14:03:26,214 - TextbookConverter - DEBUG - debug:140 - 处理 chapter: chapter04.md
+2025-09-04 14:03:26,215 - TextbookConverter - DEBUG - debug:140 - 处理文件: ../../docs/chapters/chapter04/chapter04.md
+2025-09-04 14:03:26,218 - TextbookConverter - DEBUG - debug:140 - 使用编码 utf-8 成功读取: ../../docs/chapters/chapter04/chapter04.md
+2025-09-04 14:03:26,218 - TextbookConverter - DEBUG - debug:140 - 保持原有中文章节标题: # 第四章 前端开发技术
+2025-09-04 14:03:26,219 - TextbookConverter - DEBUG - debug:140 - 处理 section: section04-01.md
+2025-09-04 14:03:26,219 - TextbookConverter - DEBUG - debug:140 - 处理文件: ../../docs/chapters/chapter04/section04-01.md
+2025-09-04 14:03:26,223 - TextbookConverter - DEBUG - debug:140 - 使用编码 utf-8 成功读取: ../../docs/chapters/chapter04/section04-01.md
+2025-09-04 14:03:26,224 - TextbookConverter - DEBUG - debug:140 - 处理 section: section04-02.md
+2025-09-04 14:03:26,224 - TextbookConverter - DEBUG - debug:140 - 处理文件: ../../docs/chapters/chapter04/section04-02.md
+2025-09-04 14:03:26,228 - TextbookConverter - DEBUG - debug:140 - 使用编码 utf-8 成功读取: ../../docs/chapters/chapter04/section04-02.md
+2025-09-04 14:03:26,230 - TextbookConverter - DEBUG - debug:140 - 处理 section: section04-03.md
+2025-09-04 14:03:26,231 - TextbookConverter - DEBUG - debug:140 - 处理文件: ../../docs/chapters/chapter04/section04-03.md
+2025-09-04 14:03:26,234 - TextbookConverter - DEBUG - debug:140 - 使用编码 utf-8 成功读取: ../../docs/chapters/chapter04/section04-03.md
+2025-09-04 14:03:26,236 - TextbookConverter - DEBUG - debug:140 - 处理 section: section04-04.md
+2025-09-04 14:03:26,236 - TextbookConverter - DEBUG - debug:140 - 处理文件: ../../docs/chapters/chapter04/section04-04.md
+2025-09-04 14:03:26,242 - TextbookConverter - DEBUG - debug:140 - 使用编码 utf-8 成功读取: ../../docs/chapters/chapter04/section04-04.md
+2025-09-04 14:03:26,251 - TextbookConverter - DEBUG - debug:140 - 处理 section: section04-05.md
+2025-09-04 14:03:26,251 - TextbookConverter - DEBUG - debug:140 - 处理文件: ../../docs/chapters/chapter04/section04-05.md
+2025-09-04 14:03:26,256 - TextbookConverter - DEBUG - debug:140 - 使用编码 utf-8 成功读取: ../../docs/chapters/chapter04/section04-05.md
+2025-09-04 14:03:26,262 - TextbookConverter - DEBUG - debug:140 - 处理 section: section04-06.md
+2025-09-04 14:03:26,262 - TextbookConverter - DEBUG - debug:140 - 处理文件: ../../docs/chapters/chapter04/section04-06.md
+2025-09-04 14:03:26,267 - TextbookConverter - DEBUG - debug:140 - 使用编码 utf-8 成功读取: ../../docs/chapters/chapter04/section04-06.md
+2025-09-04 14:03:26,270 - TextbookConverter - DEBUG - debug:140 - 处理 section: section04-07.md
+2025-09-04 14:03:26,271 - TextbookConverter - DEBUG - debug:140 - 处理文件: ../../docs/chapters/chapter04/section04-07.md
+2025-09-04 14:03:26,275 - TextbookConverter - DEBUG - debug:140 - 使用编码 utf-8 成功读取: ../../docs/chapters/chapter04/section04-07.md
+2025-09-04 14:03:26,275 - TextbookConverter - DEBUG - debug:140 - 处理 chapter: chapter05.md
+2025-09-04 14:03:26,276 - TextbookConverter - DEBUG - debug:140 - 处理文件: ../../docs/chapters/chapter05/chapter05.md
+2025-09-04 14:03:26,279 - TextbookConverter - DEBUG - debug:140 - 使用编码 utf-8 成功读取: ../../docs/chapters/chapter05/chapter05.md
+2025-09-04 14:03:26,279 - TextbookConverter - DEBUG - debug:140 - 保持原有中文章节标题: # 第五章 后端开发技术
+2025-09-04 14:03:26,279 - TextbookConverter - DEBUG - debug:140 - 处理 section: section05-01.md
+2025-09-04 14:03:26,280 - TextbookConverter - DEBUG - debug:140 - 处理文件: ../../docs/chapters/chapter05/section05-01.md
+2025-09-04 14:03:26,284 - TextbookConverter - DEBUG - debug:140 - 使用编码 utf-8 成功读取: ../../docs/chapters/chapter05/section05-01.md
+2025-09-04 14:03:26,288 - TextbookConverter - DEBUG - debug:140 - 处理 section: section05-02.md
+2025-09-04 14:03:26,289 - TextbookConverter - DEBUG - debug:140 - 处理文件: ../../docs/chapters/chapter05/section05-02.md
+2025-09-04 14:03:26,293 - TextbookConverter - DEBUG - debug:140 - 使用编码 utf-8 成功读取: ../../docs/chapters/chapter05/section05-02.md
+2025-09-04 14:03:26,296 - TextbookConverter - DEBUG - debug:140 - 处理 section: section05-03.md
+2025-09-04 14:03:26,297 - TextbookConverter - DEBUG - debug:140 - 处理文件: ../../docs/chapters/chapter05/section05-03.md
+2025-09-04 14:03:26,301 - TextbookConverter - DEBUG - debug:140 - 使用编码 utf-8 成功读取: ../../docs/chapters/chapter05/section05-03.md
+2025-09-04 14:03:26,303 - TextbookConverter - DEBUG - debug:140 - 处理 section: section05-04.md
+2025-09-04 14:03:26,303 - TextbookConverter - DEBUG - debug:140 - 处理文件: ../../docs/chapters/chapter05/section05-04.md
+2025-09-04 14:03:26,307 - TextbookConverter - DEBUG - debug:140 - 使用编码 utf-8 成功读取: ../../docs/chapters/chapter05/section05-04.md
+2025-09-04 14:03:26,309 - TextbookConverter - DEBUG - debug:140 - 处理 section: section05-05.md
+2025-09-04 14:03:26,309 - TextbookConverter - DEBUG - debug:140 - 处理文件: ../../docs/chapters/chapter05/section05-05.md
+2025-09-04 14:03:26,313 - TextbookConverter - DEBUG - debug:140 - 使用编码 utf-8 成功读取: ../../docs/chapters/chapter05/section05-05.md
+2025-09-04 14:03:26,316 - TextbookConverter - DEBUG - debug:140 - 处理 section: section05-06.md
+2025-09-04 14:03:26,316 - TextbookConverter - DEBUG - debug:140 - 处理文件: ../../docs/chapters/chapter05/section05-06.md
+2025-09-04 14:03:26,319 - TextbookConverter - DEBUG - debug:140 - 使用编码 utf-8 成功读取: ../../docs/chapters/chapter05/section05-06.md
+2025-09-04 14:03:26,322 - TextbookConverter - DEBUG - debug:140 - 处理 chapter: chapter06.md
+2025-09-04 14:03:26,322 - TextbookConverter - DEBUG - debug:140 - 处理文件: ../../docs/chapters/chapter06/chapter06.md
+2025-09-04 14:03:26,325 - TextbookConverter - DEBUG - debug:140 - 使用编码 utf-8 成功读取: ../../docs/chapters/chapter06/chapter06.md
+2025-09-04 14:03:26,326 - TextbookConverter - DEBUG - debug:140 - 保持原有中文章节标题: # 第六章 三维场景技术基础
+2025-09-04 14:03:26,326 - TextbookConverter - DEBUG - debug:140 - 处理 section: section06-01.md
+2025-09-04 14:03:26,326 - TextbookConverter - DEBUG - debug:140 - 处理文件: ../../docs/chapters/chapter06/section06-01.md
+2025-09-04 14:03:26,330 - TextbookConverter - DEBUG - debug:140 - 使用编码 utf-8 成功读取: ../../docs/chapters/chapter06/section06-01.md
+2025-09-04 14:03:26,330 - TextbookConverter - DEBUG - debug:140 - 添加节标题编号: ## 6.1 章节概述
+2025-09-04 14:03:26,330 - TextbookConverter - DEBUG - debug:140 - 处理 section: section06-02.md
+2025-09-04 14:03:26,331 - TextbookConverter - DEBUG - debug:140 - 处理文件: ../../docs/chapters/chapter06/section06-02.md
+2025-09-04 14:03:26,334 - TextbookConverter - DEBUG - debug:140 - 使用编码 utf-8 成功读取: ../../docs/chapters/chapter06/section06-02.md
+2025-09-04 14:03:26,334 - TextbookConverter - DEBUG - debug:140 - 保持原有节标题: ## 6.1 三维场景技术概述
+2025-09-04 14:03:26,365 - TextbookConverter - DEBUG - debug:140 - 复制图片: ../../docs/chapters/chapter06/images/ch6_image19.png -> test_output/images/img_027.png
+2025-09-04 14:03:26,392 - TextbookConverter - DEBUG - debug:140 - 复制图片: ../../docs/chapters/chapter06/images/ch6_image20.png -> test_output/images/img_028.png
+2025-09-04 14:03:26,418 - TextbookConverter - DEBUG - debug:140 - 复制图片: ../../docs/chapters/chapter06/images/ch6_image21.png -> test_output/images/img_029.png
+2025-09-04 14:03:26,443 - TextbookConverter - DEBUG - debug:140 - 复制图片: ../../docs/chapters/chapter06/images/ch6_image25.png -> test_output/images/img_030.png
+2025-09-04 14:03:26,468 - TextbookConverter - DEBUG - debug:140 - 复制图片: ../../docs/chapters/chapter06/images/ch6_image26.png -> test_output/images/img_031.png
+2025-09-04 14:03:26,494 - TextbookConverter - DEBUG - debug:140 - 复制图片: ../../docs/chapters/chapter06/images/ch6_image27.png -> test_output/images/img_032.png
+2025-09-04 14:03:26,523 - TextbookConverter - DEBUG - debug:140 - 复制图片: ../../docs/chapters/chapter06/images/ch6_image28.png -> test_output/images/img_033.png
+2025-09-04 14:03:26,548 - TextbookConverter - DEBUG - debug:140 - 复制图片: ../../docs/chapters/chapter06/images/ch6_image29.png -> test_output/images/img_034.png
+2025-09-04 14:03:26,572 - TextbookConverter - DEBUG - debug:140 - 复制图片: ../../docs/chapters/chapter06/images/ch6_image33.png -> test_output/images/img_035.png
+2025-09-04 14:03:26,596 - TextbookConverter - DEBUG - debug:140 - 复制图片: ../../docs/chapters/chapter06/images/ch6_image34.png -> test_output/images/img_036.png
+2025-09-04 14:03:26,623 - TextbookConverter - DEBUG - debug:140 - 复制图片: ../../docs/chapters/chapter06/images/ch6_image32.png -> test_output/images/img_037.png
+2025-09-04 14:03:26,646 - TextbookConverter - DEBUG - debug:140 - 复制图片: ../../docs/chapters/chapter06/images/ch6_image35.png -> test_output/images/img_038.png
+2025-09-04 14:03:26,673 - TextbookConverter - DEBUG - debug:140 - 复制图片: ../../docs/chapters/chapter06/images/ch6_image36.png -> test_output/images/img_039.png
+2025-09-04 14:03:26,698 - TextbookConverter - DEBUG - debug:140 - 复制图片: ../../docs/chapters/chapter06/images/ch6_image37.png -> test_output/images/img_040.png
+2025-09-04 14:03:26,724 - TextbookConverter - DEBUG - debug:140 - 复制图片: ../../docs/chapters/chapter06/images/ch6_image41.png -> test_output/images/img_041.png
+2025-09-04 14:03:26,752 - TextbookConverter - DEBUG - debug:140 - 复制图片: ../../docs/chapters/chapter06/images/ch6_image42.png -> test_output/images/img_042.png
+2025-09-04 14:03:26,780 - TextbookConverter - DEBUG - debug:140 - 复制图片: ../../docs/chapters/chapter06/images/ch6_image44.png -> test_output/images/img_043.png
+2025-09-04 14:03:26,804 - TextbookConverter - DEBUG - debug:140 - 复制图片: ../../docs/chapters/chapter06/images/ch6_image45.png -> test_output/images/img_044.png
+2025-09-04 14:03:26,828 - TextbookConverter - DEBUG - debug:140 - 复制图片: ../../docs/chapters/chapter06/images/ch6_image46.png -> test_output/images/img_045.png
+2025-09-04 14:03:26,829 - TextbookConverter - DEBUG - debug:140 - 处理 section: section06-03.md
+2025-09-04 14:03:26,830 - TextbookConverter - DEBUG - debug:140 - 处理文件: ../../docs/chapters/chapter06/section06-03.md
+2025-09-04 14:03:26,833 - TextbookConverter - DEBUG - debug:140 - 使用编码 utf-8 成功读取: ../../docs/chapters/chapter06/section06-03.md
+2025-09-04 14:03:26,833 - TextbookConverter - DEBUG - debug:140 - 保持原有节标题: ## 6.2 GIS地图服务应用
+2025-09-04 14:03:26,834 - TextbookConverter - DEBUG - debug:140 - 处理 section: section06-04.md
+2025-09-04 14:03:26,834 - TextbookConverter - DEBUG - debug:140 - 处理文件: ../../docs/chapters/chapter06/section06-04.md
+2025-09-04 14:03:26,838 - TextbookConverter - DEBUG - debug:140 - 使用编码 utf-8 成功读取: ../../docs/chapters/chapter06/section06-04.md
+2025-09-04 14:03:26,838 - TextbookConverter - DEBUG - debug:140 - 保持原有节标题: ## 6.3 水利工程三维模型制作
+2025-09-04 14:03:26,863 - TextbookConverter - DEBUG - debug:140 - 复制图片: ../../docs/chapters/chapter06/images/ch6_image55.png -> test_output/images/img_046.png
+2025-09-04 14:03:26,890 - TextbookConverter - DEBUG - debug:140 - 复制图片: ../../docs/chapters/chapter06/images/ch6_image54.png -> test_output/images/img_047.png
+2025-09-04 14:03:26,917 - TextbookConverter - DEBUG - debug:140 - 复制图片: ../../docs/chapters/chapter06/images/ch6_image53.png -> test_output/images/img_048.png
+2025-09-04 14:03:26,941 - TextbookConverter - DEBUG - debug:140 - 复制图片: ../../docs/chapters/chapter06/images/ch6_image56.jpg -> test_output/images/img_049.jpg
+2025-09-04 14:03:26,975 - TextbookConverter - DEBUG - debug:140 - 复制图片: ../../docs/chapters/chapter06/images/ch6_image57.jpg -> test_output/images/img_050.jpg
+2025-09-04 14:03:27,004 - TextbookConverter - DEBUG - debug:140 - 复制图片: ../../docs/chapters/chapter06/images/ch6_image58.jpg -> test_output/images/img_051.jpg
+2025-09-04 14:03:27,036 - TextbookConverter - DEBUG - debug:140 - 复制图片: ../../docs/chapters/chapter06/images/ch6_image59.png -> test_output/images/img_052.png
+2025-09-04 14:03:27,068 - TextbookConverter - DEBUG - debug:140 - 复制图片: ../../docs/chapters/chapter06/images/ch6_image60.png -> test_output/images/img_053.png
+2025-09-04 14:03:27,069 - TextbookConverter - DEBUG - debug:140 - 处理 section: section06-05.md
+2025-09-04 14:03:27,069 - TextbookConverter - DEBUG - debug:140 - 处理文件: ../../docs/chapters/chapter06/section06-05.md
+2025-09-04 14:03:27,072 - TextbookConverter - DEBUG - debug:140 - 使用编码 utf-8 成功读取: ../../docs/chapters/chapter06/section06-05.md
+2025-09-04 14:03:27,073 - TextbookConverter - DEBUG - debug:140 - 保持原有节标题: ## 6.4 倾斜摄影技术应用
+2025-09-04 14:03:27,100 - TextbookConverter - DEBUG - debug:140 - 复制图片: ../../docs/chapters/chapter06/images/ch6_image61.png -> test_output/images/img_054.png
+2025-09-04 14:03:27,124 - TextbookConverter - DEBUG - debug:140 - 复制图片: ../../docs/chapters/chapter06/images/ch6_image62.png -> test_output/images/img_055.png
+2025-09-04 14:03:27,125 - TextbookConverter - DEBUG - debug:140 - 处理 section: section06-06.md
+2025-09-04 14:03:27,125 - TextbookConverter - DEBUG - debug:140 - 处理文件: ../../docs/chapters/chapter06/section06-06.md
+2025-09-04 14:03:27,128 - TextbookConverter - DEBUG - debug:140 - 使用编码 utf-8 成功读取: ../../docs/chapters/chapter06/section06-06.md
+2025-09-04 14:03:27,129 - TextbookConverter - DEBUG - debug:140 - 保持原有节标题: ## 6.5 水利场景渲染方法
+2025-09-04 14:03:27,130 - TextbookConverter - DEBUG - debug:140 - 处理 section: section06-07.md
+2025-09-04 14:03:27,130 - TextbookConverter - DEBUG - debug:140 - 处理文件: ../../docs/chapters/chapter06/section06-07.md
+2025-09-04 14:03:27,133 - TextbookConverter - DEBUG - debug:140 - 使用编码 utf-8 成功读取: ../../docs/chapters/chapter06/section06-07.md
+2025-09-04 14:03:27,133 - TextbookConverter - DEBUG - debug:140 - 保持原有节标题: ## 6.7 数字孪生技术在智慧水利中的应用
+2025-09-04 14:03:27,134 - TextbookConverter - DEBUG - debug:140 - 处理 chapter: chapter07.md
+2025-09-04 14:03:27,134 - TextbookConverter - DEBUG - debug:140 - 处理文件: ../../docs/chapters/chapter07/chapter07.md
+2025-09-04 14:03:27,137 - TextbookConverter - DEBUG - debug:140 - 使用编码 utf-8 成功读取: ../../docs/chapters/chapter07/chapter07.md
+2025-09-04 14:03:27,137 - TextbookConverter - DEBUG - debug:140 - 保持原有中文章节标题: # 第七章 三维场景的观测数据展示
+2025-09-04 14:03:27,137 - TextbookConverter - DEBUG - debug:140 - 处理 section: section07-01.md
+2025-09-04 14:03:27,138 - TextbookConverter - DEBUG - debug:140 - 处理文件: ../../docs/chapters/chapter07/section07-01.md
+2025-09-04 14:03:27,140 - TextbookConverter - DEBUG - debug:140 - 使用编码 utf-8 成功读取: ../../docs/chapters/chapter07/section07-01.md
+2025-09-04 14:03:27,141 - TextbookConverter - DEBUG - debug:140 - 处理 section: section07-02.md
+2025-09-04 14:03:27,142 - TextbookConverter - DEBUG - debug:140 - 处理文件: ../../docs/chapters/chapter07/section07-02.md
+2025-09-04 14:03:27,146 - TextbookConverter - DEBUG - debug:140 - 使用编码 utf-8 成功读取: ../../docs/chapters/chapter07/section07-02.md
+2025-09-04 14:03:27,147 - TextbookConverter - DEBUG - debug:140 - 处理 section: section07-03.md
+2025-09-04 14:03:27,147 - TextbookConverter - DEBUG - debug:140 - 处理文件: ../../docs/chapters/chapter07/section07-03.md
+2025-09-04 14:03:27,150 - TextbookConverter - DEBUG - debug:140 - 使用编码 utf-8 成功读取: ../../docs/chapters/chapter07/section07-03.md
+2025-09-04 14:03:27,151 - TextbookConverter - DEBUG - debug:140 - 处理 section: section07-04.md
+2025-09-04 14:03:27,151 - TextbookConverter - DEBUG - debug:140 - 处理文件: ../../docs/chapters/chapter07/section07-04.md
+2025-09-04 14:03:27,154 - TextbookConverter - DEBUG - debug:140 - 使用编码 utf-8 成功读取: ../../docs/chapters/chapter07/section07-04.md
+2025-09-04 14:03:27,155 - TextbookConverter - DEBUG - debug:140 - 处理 chapter: chapter08.md
+2025-09-04 14:03:27,155 - TextbookConverter - DEBUG - debug:140 - 处理文件: ../../docs/chapters/chapter08/chapter08.md
+2025-09-04 14:03:27,159 - TextbookConverter - DEBUG - debug:140 - 使用编码 utf-8 成功读取: ../../docs/chapters/chapter08/chapter08.md
+2025-09-04 14:03:27,160 - TextbookConverter - DEBUG - debug:140 - 保持原有中文章节标题: # 第八章 典型应用
+2025-09-04 14:03:27,160 - TextbookConverter - DEBUG - debug:140 - 处理 section: section08-01.md
+2025-09-04 14:03:27,160 - TextbookConverter - DEBUG - debug:140 - 处理文件: ../../docs/chapters/chapter08/section08-01.md
+2025-09-04 14:03:27,163 - TextbookConverter - DEBUG - debug:140 - 使用编码 utf-8 成功读取: ../../docs/chapters/chapter08/section08-01.md
+2025-09-04 14:03:27,164 - TextbookConverter - DEBUG - debug:140 - 处理 section: section08-02.md
+2025-09-04 14:03:27,165 - TextbookConverter - DEBUG - debug:140 - 处理文件: ../../docs/chapters/chapter08/section08-02.md
+2025-09-04 14:03:27,167 - TextbookConverter - DEBUG - debug:140 - 使用编码 utf-8 成功读取: ../../docs/chapters/chapter08/section08-02.md
+2025-09-04 14:03:27,168 - TextbookConverter - DEBUG - debug:140 - 添加节标题编号: ## 8.2 第二节 水利工程三维场景设计
+2025-09-04 14:03:27,169 - TextbookConverter - DEBUG - debug:140 - 处理 section: section08-03.md
+2025-09-04 14:03:27,169 - TextbookConverter - DEBUG - debug:140 - 处理文件: ../../docs/chapters/chapter08/section08-03.md
+2025-09-04 14:03:27,173 - TextbookConverter - DEBUG - debug:140 - 使用编码 utf-8 成功读取: ../../docs/chapters/chapter08/section08-03.md
+2025-09-04 14:03:27,174 - TextbookConverter - DEBUG - debug:140 - 添加节标题编号: ## 8.3 第三节 监测数据处理与展示模块
+2025-09-04 14:03:27,174 - TextbookConverter - DEBUG - debug:140 - 处理 section: section08-04.md
+2025-09-04 14:03:27,175 - TextbookConverter - DEBUG - debug:140 - 处理文件: ../../docs/chapters/chapter08/section08-04.md
+2025-09-04 14:03:27,179 - TextbookConverter - DEBUG - debug:140 - 使用编码 utf-8 成功读取: ../../docs/chapters/chapter08/section08-04.md
+2025-09-04 14:03:27,179 - TextbookConverter - DEBUG - debug:140 - 添加节标题编号: ## 8.4 第四节 监控模型与综合评价模块
+2025-09-04 14:03:27,180 - TextbookConverter - DEBUG - debug:140 - 处理 section: section08-05.md
+2025-09-04 14:03:27,180 - TextbookConverter - DEBUG - debug:140 - 处理文件: ../../docs/chapters/chapter08/section08-05.md
+2025-09-04 14:03:27,183 - TextbookConverter - DEBUG - debug:140 - 使用编码 utf-8 成功读取: ../../docs/chapters/chapter08/section08-05.md
+2025-09-04 14:03:27,184 - TextbookConverter - DEBUG - debug:140 - 添加节标题编号: ## 8.5 第五节 系统集成与运维管理
+2025-09-04 14:03:27,184 - TextbookConverter - DEBUG - debug:140 - 处理 chapter: chapter09.md
+2025-09-04 14:03:27,185 - TextbookConverter - DEBUG - debug:140 - 处理文件: ../../docs/chapters/chapter09/chapter09.md
+2025-09-04 14:03:27,189 - TextbookConverter - DEBUG - debug:140 - 使用编码 utf-8 成功读取: ../../docs/chapters/chapter09/chapter09.md
+2025-09-04 14:03:27,190 - TextbookConverter - DEBUG - debug:140 - 处理 appendix: appendixA.md
+2025-09-04 14:03:27,190 - TextbookConverter - DEBUG - debug:140 - 处理文件: ../../appendix/appendixA.md
+2025-09-04 14:03:27,192 - TextbookConverter - DEBUG - debug:140 - 使用编码 utf-8 成功读取: ../../appendix/appendixA.md
+2025-09-04 14:03:27,193 - TextbookConverter - DEBUG - debug:140 - 处理 appendix: appendixB.md
+2025-09-04 14:03:27,193 - TextbookConverter - DEBUG - debug:140 - 处理文件: ../../appendix/appendixB.md
+2025-09-04 14:03:27,195 - TextbookConverter - DEBUG - debug:140 - 使用编码 utf-8 成功读取: ../../appendix/appendixB.md
+2025-09-04 14:03:27,196 - TextbookConverter - DEBUG - debug:140 - 处理 appendix: appendixC.md
+2025-09-04 14:03:27,196 - TextbookConverter - DEBUG - debug:140 - 处理文件: ../../appendix/appendixC.md
+2025-09-04 14:03:27,198 - TextbookConverter - DEBUG - debug:140 - 使用编码 utf-8 成功读取: ../../appendix/appendixC.md
+2025-09-04 14:03:27,261 - TextbookConverter - INFO - info:119 - 处理统计: {'files_processed': 58, 'images_processed': 55, 'code_blocks_found': 575, 'warnings': 0}
+2025-09-04 14:03:27,276 - TextbookConverter - INFO - success:134 - SUCCESS: 合并文件已保存: test_output/textbook_merged.md (2,013,808 bytes)
+2025-09-04 14:03:27,276 - TextbookConverter - INFO - info:119 - 执行转换命令: pandoc test_output/textbook_merged.md -o test_output/textbook.tex --from=markdown --to=latex --standalone --template=chinese --toc --number-sections
+2025-09-04 14:03:27,276 - TextbookConverter - DEBUG - debug:140 - 工作目录: test_output
+2025-09-04 14:03:27,290 - TextbookConverter - ERROR - error:129 - Pandoc转换失败 (返回码: 97)
+2025-09-04 14:03:27,291 - TextbookConverter - ERROR - error:129 - 错误信息: Could not find data file /usr/share/pandoc/data/templates/chinese.latex
+
+2025-09-04 14:04:07,903 - TextbookConverter - INFO - info:119 - 🚀 开始教材转换流程
+2025-09-04 14:04:07,904 - TextbookConverter - INFO - info:119 - 🔍 检查系统环境...
+2025-09-04 14:04:07,917 - TextbookConverter - INFO - success:134 - SUCCESS: Pandoc document converter 已安装
+2025-09-04 14:04:07,919 - TextbookConverter - INFO - success:134 - SUCCESS: XeLaTeX PDF engine 已安装
+2025-09-04 14:04:07,920 - TextbookConverter - INFO - info:119 - 🔍 验证输入目录结构...
+2025-09-04 14:04:07,942 - TextbookConverter - INFO - info:119 - 发现 9 个章节目录
+2025-09-04 14:04:08,030 - TextbookConverter - INFO - info:119 - 发现 58 个源文件
+2025-09-04 14:04:10,175 - TextbookConverter - INFO - info:119 - 处理统计: {'files_processed': 58, 'images_processed': 55, 'code_blocks_found': 575, 'warnings': 0}
+2025-09-04 14:04:10,190 - TextbookConverter - INFO - success:134 - SUCCESS: 合并文件已保存: test_output/textbook_merged.md (2,013,808 bytes)
+2025-09-04 14:04:10,190 - TextbookConverter - INFO - info:119 - 执行转换命令: pandoc test_output/textbook_merged.md -o test_output/textbook.tex --from=markdown --to=latex --standalone --template=chinese --toc --number-sections
+2025-09-04 14:04:10,204 - TextbookConverter - ERROR - error:129 - Pandoc转换失败 (返回码: 97)
+2025-09-04 14:04:10,204 - TextbookConverter - ERROR - error:129 - 错误信息: Could not find data file /usr/share/pandoc/data/templates/chinese.latex
+
+2025-09-04 14:04:54,162 - TextbookConverter - INFO - info:119 - 🚀 开始教材转换流程
+2025-09-04 14:04:54,162 - TextbookConverter - INFO - info:119 - 🔍 检查系统环境...
+2025-09-04 14:04:54,176 - TextbookConverter - INFO - success:134 - SUCCESS: Pandoc document converter 已安装
+2025-09-04 14:04:54,178 - TextbookConverter - INFO - success:134 - SUCCESS: XeLaTeX PDF engine 已安装
+2025-09-04 14:04:54,179 - TextbookConverter - INFO - info:119 - 🔍 验证输入目录结构...
+2025-09-04 14:04:54,206 - TextbookConverter - INFO - info:119 - 发现 9 个章节目录
+2025-09-04 14:04:54,304 - TextbookConverter - INFO - info:119 - 发现 58 个源文件
+2025-09-04 14:04:56,470 - TextbookConverter - INFO - info:119 - 处理统计: {'files_processed': 58, 'images_processed': 55, 'code_blocks_found': 575, 'warnings': 0}
+2025-09-04 14:04:56,485 - TextbookConverter - INFO - success:134 - SUCCESS: 合并文件已保存: test_output/textbook_merged.md (2,013,808 bytes)
+2025-09-04 14:04:56,487 - TextbookConverter - INFO - info:119 - 使用自定义模板: /mnt/e/2025/教材/智慧水利平台架构与开发/publish/clean_converter/templates/chinese.latex
+2025-09-04 14:04:56,487 - TextbookConverter - INFO - info:119 - 执行转换命令: pandoc test_output/textbook_merged.md -o test_output/textbook.tex --from=markdown --to=latex --standalone --template=/mnt/e/2025/教材/智慧水利平台架构与开发/publish/clean_converter/templates/chinese.latex --toc --number-sections
+2025-09-04 14:04:56,511 - TextbookConverter - ERROR - error:129 - Pandoc转换失败 (返回码: 1)
+2025-09-04 14:04:56,512 - TextbookConverter - ERROR - error:129 - 错误信息: pandoc: test_output/textbook_merged.md: withBinaryFile: does not exist (No such file or directory)
+
+2025-09-04 14:06:00,994 - TextbookConverter - INFO - info:119 - 🚀 开始教材转换流程
+2025-09-04 14:06:00,994 - TextbookConverter - INFO - info:119 - 🔍 检查系统环境...
+2025-09-04 14:06:01,007 - TextbookConverter - INFO - success:134 - SUCCESS: Pandoc document converter 已安装
+2025-09-04 14:06:01,010 - TextbookConverter - INFO - success:134 - SUCCESS: XeLaTeX PDF engine 已安装
+2025-09-04 14:06:01,010 - TextbookConverter - INFO - info:119 - 🔍 验证输入目录结构...
+2025-09-04 14:06:01,035 - TextbookConverter - INFO - info:119 - 发现 9 个章节目录
+2025-09-04 14:06:01,131 - TextbookConverter - INFO - info:119 - 发现 58 个源文件
+2025-09-04 14:06:03,558 - TextbookConverter - INFO - info:119 - 处理统计: {'files_processed': 58, 'images_processed': 55, 'code_blocks_found': 575, 'warnings': 0}
+2025-09-04 14:06:03,578 - TextbookConverter - INFO - success:134 - SUCCESS: 合并文件已保存: test_output/textbook_merged.md (2,013,808 bytes)
+2025-09-04 14:06:03,579 - TextbookConverter - INFO - info:119 - 使用自定义模板: /mnt/e/2025/教材/智慧水利平台架构与开发/publish/clean_converter/templates/chinese.latex
+2025-09-04 14:06:03,580 - TextbookConverter - INFO - info:119 - 执行转换命令: pandoc test_output/textbook_merged.md -o test_output/textbook.tex --from=markdown --to=latex --standalone --template=/mnt/e/2025/教材/智慧水利平台架构与开发/publish/clean_converter/templates/chinese.latex --toc --number-sections
+2025-09-04 14:06:03,604 - TextbookConverter - ERROR - error:129 - Pandoc转换失败 (返回码: 1)
+2025-09-04 14:06:03,604 - TextbookConverter - ERROR - error:129 - 错误信息: pandoc: /mnt/e/2025/教材/智慧水利平台架构与开发/publish/clean_converter/test_output/test_output/textbook_merged.md: withBinaryFile: does not exist (No such file or directory)
+

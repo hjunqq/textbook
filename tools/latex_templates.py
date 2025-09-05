@@ -73,20 +73,41 @@ class LaTeXTemplateGenerator:
     pdfborder={{0 0 0}}
 }}
 
-% 代码样式配置
+% 代码样式配置优化
+\\definecolor{{codegreen}}{{rgb}}{{0,0.6,0}}
+\\definecolor{{codegray}}{{rgb}}{{0.5,0.5,0.5}}
+\\definecolor{{codepurple}}{{rgb}}{{0.58,0,0.82}}
+\\definecolor{{backcolour}}{{rgb}}{{0.98,0.98,0.98}}
+
 \\lstset{{
-    basicstyle=\\ttfamily\\small,
-    backgroundcolor=\\color{{gray!10}},
-    frame=single,
-    breaklines=true,
-    numbers=left,
-    numberstyle=\\tiny\\color{{gray}},
-    keywordstyle=\\color{{blue}},
-    commentstyle=\\color{{green!60!black}},
-    stringstyle=\\color{{red}},
+    basicstyle=\\scriptsize\\ttfamily,    % 更小字体
+    lineskip=-1pt,                        % 减少行间距
+    backgroundcolor=\\color{{backcolour}},
+    commentstyle=\\color{{codegreen}},
+    keywordstyle=\\color{{blue}}\\bfseries,
+    numberstyle=\\tiny\\color{{codegray}},
+    stringstyle=\\color{{codepurple}},
+    basicstyle=\\footnotesize\\ttfamily,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
     showstringspaces=false,
-    tabsize=2
+    showtabs=false,                  
+    tabsize=2,
+    frame=single,
+    rulecolor=\\color{{gray!30}},
+    aboveskip=\\smallskipamount,
+    belowskip=\\smallskipamount,
+    xleftmargin=8pt,
+    xrightmargin=8pt
 }}
+
+% 行内代码优化
+\\newcommand{{\\code}}[1]{{\\lstinline[basicstyle=\\small\\ttfamily]|#1|}}
 
 \\begin{{document}}
 

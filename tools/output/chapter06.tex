@@ -34,37 +34,32 @@
 !!! info ``章节结构''
 
 \begin{verbatim}
-### [第一节 三维场景技术概述](section06-01.md)
+
 - 三维图形学基础
 - 三维场景技术发展历程
 - 智慧水利中的应用价值
 - 技术体系框架
 
-### [第二节 WebGL技术基础](section06-02.md) 
 - WebGL技术原理与架构
 - 图形渲染管线
 - 着色器编程基础
 - WebGL开发环境
 
-### [第三节 Three.js开发框架](section06-03.md)
 - Three.js核心概念
 - 场景、相机、渲染器
 - 几何体与材质系统
 - 动画与交互控制
 
-### [第四节 三维建模技术](section06-04.md)
 - 几何建模方法
 - 纹理贴图技术
 - 材质与光照系统
 - 模型优化与LOD
 
-### [第五节 基础渲染技术](section06-05.md)
 - 光照模型与阴影
 - 渲染管线优化
 - 特效系统基础
 - 性能优化策略
 
-### [第六节 开发实践与案例](section06-06.md)
 - 开发环境搭建
 - 简单场景构建
 - 交互功能实现
@@ -1986,7 +1981,7 @@ Unity Asset Store 提供大量现成资源与插件，包括：地形建模工�
 
 6、可视化开发与多平台发布
 
-Unity提供完整的所见即所得的可视化开发环境，具备：实时预览；场景和资源层级管理；脚本与场景交互绑定；支持 C\# 编程与第三方 DLL 集成。开发完成的应用可通过 WebGL 发布为网页端系统，也可构建为移动端 App 或 XR 应用（支持 Oculus、HTC Vive、HoloLens 等设备）。
+Unity提供完整的所见即所得的可视化开发环境，具备：实时预览；场景和资源层级管理；脚本与场景交互绑定；支持 C 编程与第三方 DLL 集成。开发完成的应用可通过 WebGL 发布为网页端系统，也可构建为移动端 App 或 XR 应用（支持 Oculus、HTC Vive、HoloLens 等设备）。
 
 三、在智慧水利平台中的典型应用场景
 
@@ -3487,38 +3482,38 @@ FLIP：结合粒子与网格方法，既具备粒子的灵活性又保持网格�
         
     \KeywordTok{def}\NormalTok{ initialize\_twin(}\VariableTok{self}\NormalTok{):}
         \CommentTok{"""初始化数字孪生系统"""}
-        \CommentTok{\# 1. 构建数字模型}
+        \CommentTok{ 1. 构建数字模型}
         \VariableTok{self}\NormalTok{.digital\_model.build\_geometric\_model()}
         \VariableTok{self}\NormalTok{.digital\_model.build\_physical\_model()}
         \VariableTok{self}\NormalTok{.digital\_model.build\_data\_model()}
         
-        \CommentTok{\# 2. 建立数据连接}
+        \CommentTok{ 2. 建立数据连接}
         \VariableTok{self}\NormalTok{.data\_connector.establish\_sensor\_connections()}
         \VariableTok{self}\NormalTok{.data\_connector.setup\_communication\_protocols()}
         
-        \CommentTok{\# 3. 启动服务层}
+        \CommentTok{ 3. 启动服务层}
         \VariableTok{self}\NormalTok{.service\_layer.start\_monitoring\_service()}
         \VariableTok{self}\NormalTok{.service\_layer.start\_simulation\_service()}
         \VariableTok{self}\NormalTok{.service\_layer.start\_analysis\_service()}
         
-        \CommentTok{\# 4. 初始化数据处理}
+        \CommentTok{ 4. 初始化数据处理}
         \VariableTok{self}\NormalTok{.data\_processor.setup\_data\_pipelines()}
         
     \KeywordTok{def}\NormalTok{ sync\_with\_physical(}\VariableTok{self}\NormalTok{):}
         \CommentTok{"""与物理实体同步"""}
-        \CommentTok{\# 获取实时数据}
+        \CommentTok{ 获取实时数据}
 \NormalTok{        sensor\_data }\OperatorTok{=} \VariableTok{self}\NormalTok{.data\_connector.collect\_sensor\_data()}
         
-        \CommentTok{\# 数据处理}
+        \CommentTok{ 数据处理}
 \NormalTok{        processed\_data }\OperatorTok{=} \VariableTok{self}\NormalTok{.data\_processor.process\_real\_time\_data(sensor\_data)}
         
-        \CommentTok{\# 更新数字模型}
+        \CommentTok{ 更新数字模型}
         \VariableTok{self}\NormalTok{.digital\_model.update\_model\_state(processed\_data)}
         
-        \CommentTok{\# 执行仿真分析}
+        \CommentTok{ 执行仿真分析}
 \NormalTok{        simulation\_results }\OperatorTok{=} \VariableTok{self}\NormalTok{.digital\_model.run\_simulation()}
         
-        \CommentTok{\# 生成控制指令}
+        \CommentTok{ 生成控制指令}
 \NormalTok{        control\_commands }\OperatorTok{=} \VariableTok{self}\NormalTok{.service\_layer.generate\_control\_commands(simulation\_results)}
         
         \ControlFlowTok{return}\NormalTok{ \{}
@@ -3532,7 +3527,7 @@ FLIP：结合粒子与网格方法，既具备粒子的灵活性又保持网格�
 \NormalTok{        current\_state }\OperatorTok{=} \VariableTok{self}\NormalTok{.digital\_model.get\_current\_state()}
 \NormalTok{        historical\_data }\OperatorTok{=} \VariableTok{self}\NormalTok{.data\_processor.get\_historical\_data()}
         
-        \CommentTok{\# 运行预测模型}
+        \CommentTok{ 运行预测模型}
 \NormalTok{        prediction\_model }\OperatorTok{=} \VariableTok{self}\NormalTok{.service\_layer.get\_prediction\_model()}
 \NormalTok{        future\_states }\OperatorTok{=}\NormalTok{ prediction\_model.predict(}
 \NormalTok{            current\_state, }
@@ -3582,25 +3577,25 @@ FLIP：结合粒子与网格方法，既具备粒子的灵活性又保持网格�
         
     \KeywordTok{def}\NormalTok{ analyze\_dam\_safety(}\VariableTok{self}\NormalTok{):}
         \CommentTok{"""大坝安全分析"""}
-        \CommentTok{\# 获取实时监测数据}
+        \CommentTok{ 获取实时监测数据}
 \NormalTok{        displacement\_data }\OperatorTok{=} \VariableTok{self}\NormalTok{.get\_displacement\_monitoring\_data()}
 \NormalTok{        seepage\_data }\OperatorTok{=} \VariableTok{self}\NormalTok{.get\_seepage\_monitoring\_data()}
 \NormalTok{        stress\_data }\OperatorTok{=} \VariableTok{self}\NormalTok{.get\_stress\_monitoring\_data()}
         
-        \CommentTok{\# 结构分析}
+        \CommentTok{ 结构分析}
 \NormalTok{        structural\_response }\OperatorTok{=} \VariableTok{self}\NormalTok{.dam\_model.analyze\_structural\_response(}
 \NormalTok{            displacement\_data, stress\_data}
 \NormalTok{        )}
         
-        \CommentTok{\# 渗流分析}
+        \CommentTok{ 渗流分析}
 \NormalTok{        seepage\_state }\OperatorTok{=} \VariableTok{self}\NormalTok{.seepage\_model.analyze\_seepage\_condition(}
 \NormalTok{            seepage\_data}
 \NormalTok{        )}
         
-        \CommentTok{\# 温度效应分析}
+        \CommentTok{ 温度效应分析}
 \NormalTok{        thermal\_effect }\OperatorTok{=} \VariableTok{self}\NormalTok{.temperature\_model.analyze\_thermal\_effect()}
         
-        \CommentTok{\# 综合安全评价}
+        \CommentTok{ 综合安全评价}
 \NormalTok{        safety\_assessment }\OperatorTok{=} \VariableTok{self}\NormalTok{.evaluate\_dam\_safety(}
 \NormalTok{            structural\_response, seepage\_state, thermal\_effect}
 \NormalTok{        )}
@@ -3616,21 +3611,21 @@ FLIP：结合粒子与网格方法，既具备粒子的灵活性又保持网格�
         
     \KeywordTok{def}\NormalTok{ predict\_dam\_behavior(}\VariableTok{self}\NormalTok{, forecast\_period):}
         \CommentTok{"""预测大坝行为"""}
-        \CommentTok{\# 基于历史数据训练预测模型}
+        \CommentTok{ 基于历史数据训练预测模型}
 \NormalTok{        historical\_data }\OperatorTok{=} \VariableTok{self}\NormalTok{.get\_historical\_monitoring\_data()}
         
-        \CommentTok{\# 机器学习预测模型}
+        \CommentTok{ 机器学习预测模型}
 \NormalTok{        displacement\_predictor }\OperatorTok{=}\NormalTok{ DisplacementPredictor()}
 \NormalTok{        displacement\_predictor.train(historical\_data[}\StringTok{\textquotesingle{}displacement\textquotesingle{}}\NormalTok{])}
         
 \NormalTok{        seepage\_predictor }\OperatorTok{=}\NormalTok{ SeepagePredictor()}
 \NormalTok{        seepage\_predictor.train(historical\_data[}\StringTok{\textquotesingle{}seepage\textquotesingle{}}\NormalTok{])}
         
-        \CommentTok{\# 执行预测}
+        \CommentTok{ 执行预测}
 \NormalTok{        future\_displacement }\OperatorTok{=}\NormalTok{ displacement\_predictor.predict(forecast\_period)}
 \NormalTok{        future\_seepage }\OperatorTok{=}\NormalTok{ seepage\_predictor.predict(forecast\_period)}
         
-        \CommentTok{\# 数值仿真验证}
+        \CommentTok{ 数值仿真验证}
 \NormalTok{        numerical\_results }\OperatorTok{=} \VariableTok{self}\NormalTok{.dam\_model.simulate\_future\_behavior(}
 \NormalTok{            future\_displacement, future\_seepage, forecast\_period}
 \NormalTok{        )}
@@ -3666,27 +3661,27 @@ FLIP：结合粒子与网格方法，既具备粒子的灵活性又保持网格�
         
     \KeywordTok{def}\NormalTok{ real\_time\_dispatch(}\VariableTok{self}\NormalTok{):}
         \CommentTok{"""实时调度决策"""}
-        \CommentTok{\# 获取实时水情信息}
+        \CommentTok{ 获取实时水情信息}
 \NormalTok{        water\_levels }\OperatorTok{=} \VariableTok{self}\NormalTok{.get\_real\_time\_water\_levels()}
 \NormalTok{        inflows }\OperatorTok{=} \VariableTok{self}\NormalTok{.get\_real\_time\_inflows()}
 \NormalTok{        weather\_forecast }\OperatorTok{=} \VariableTok{self}\NormalTok{.get\_weather\_forecast()}
         
-        \CommentTok{\# 水文预报}
+        \CommentTok{ 水文预报}
 \NormalTok{        flow\_forecast }\OperatorTok{=} \VariableTok{self}\NormalTok{.hydrological\_model.forecast\_flow(}
 \NormalTok{            inflows, weather\_forecast}
 \NormalTok{        )}
         
-        \CommentTok{\# 水力计算}
+        \CommentTok{ 水力计算}
 \NormalTok{        hydraulic\_state }\OperatorTok{=} \VariableTok{self}\NormalTok{.hydraulic\_model.calculate\_hydraulic\_state(}
 \NormalTok{            water\_levels, flow\_forecast}
 \NormalTok{        )}
         
-        \CommentTok{\# 调度优化}
+        \CommentTok{ 调度优化}
 \NormalTok{        optimal\_strategy }\OperatorTok{=} \VariableTok{self}\NormalTok{.optimization\_model.optimize\_dispatch(}
 \NormalTok{            hydraulic\_state, flow\_forecast}
 \NormalTok{        )}
         
-        \CommentTok{\# 风险评估}
+        \CommentTok{ 风险评估}
 \NormalTok{        risk\_assessment }\OperatorTok{=} \VariableTok{self}\NormalTok{.assess\_dispatch\_risk(optimal\_strategy)}
         
         \ControlFlowTok{return}\NormalTok{ \{}

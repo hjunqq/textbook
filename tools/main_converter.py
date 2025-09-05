@@ -14,6 +14,8 @@ from typing import Optional, List
 from converter_config import ConverterConfig, PathManager, DEFAULT_CONFIG
 from content_processors import ContentProcessor
 from latex_templates import LaTeXTemplateGenerator, LaTeXPostProcessor
+from latex_validator import LaTeXValidator
+from simple_enhancer import SimpleContentEnhancer
 
 class ConverterApplication:
     """转换器主应用程序"""
@@ -22,8 +24,10 @@ class ConverterApplication:
         self.config = config or DEFAULT_CONFIG
         self.path_manager = PathManager(self.config)
         self.content_processor = ContentProcessor()
+        self.enhancer = SimpleContentEnhancer()
         self.template_generator = LaTeXTemplateGenerator(self.config)
         self.post_processor = LaTeXPostProcessor()
+        self.latex_validator = LaTeXValidator()
         
         # 配置日志
         self._setup_logging()
@@ -238,11 +242,43 @@ class ConverterApplication:
             # 保存修复后的内容
             with open(tex_path, 'w', encoding='utf-8') as f:
                 f.write(content)
+            
+            # 执行增强内容处理
+            with open(tex_path, 'r', encoding='utf-8') as f:
+                tex_content = f.read()
                 
-            self.logger.debug(f"LaTeX后处理完成: {tex_path}")
+            # 提取章节号
+            chapter_num = self._extract_chapter_number(tex_path)
+            
+            # 应用增强处理
+            if chapter_num:
+                enhanced_content = self.enhancer.enhance_chapter(tex_content, chapter_num)
+            else:
+                enhanced_content = tex_content  # 前言不需要特殊处理
+            
+            # 保存增强处理后的内容
+            with open(tex_path, 'w', encoding='utf-8') as f:
+                f.write(enhanced_content)
+            
+            # 执行LaTeX语法验证和进一步修复
+            self.latex_validator.validate_file(tex_path)
+                
+            self.logger.debug(f"LaTeX后处理、增强处理和语法验证完成: {tex_path}")
             
         except Exception as e:
             self.logger.error(f"LaTeX后处理失败 {tex_path}: {e}")
+    
+    def _extract_chapter_number(self, tex_path: Path) -> Optional[int]:
+        """从文件路径提取章节号"""
+        try:
+            filename = tex_path.stem
+            if filename.startswith('chapter'):
+                chapter_str = filename.replace('chapter', '').lstrip('0')
+                if chapter_str:
+                    return int(chapter_str)
+            return None
+        except (ValueError, AttributeError):
+            return None
     
     def generate_main_tex(self) -> bool:
         """生成主LaTeX文件"""
@@ -394,6 +430,12 @@ class ConverterApplication:
         
         # 生成主LaTeX文件
         main_tex_success = self.generate_main_tex()
+        
+        # 执行最终的LaTeX语法验证
+        self.logger.info("执行最终LaTeX语法验证")
+        output_dir = Path(self.config.output_dir)
+        validation_results = self.latex_validator.validate_directory(output_dir)
+        self.logger.info(f"语法验证完成: 检查了{validation_results['validated']}个文件，修复了{validation_results['fixed']}个文件")
         
         # 编译PDF
         if main_tex_success:

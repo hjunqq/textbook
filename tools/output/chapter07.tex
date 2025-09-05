@@ -26,22 +26,19 @@
 !!! info ``章节安排''
 
 \begin{verbatim}
-### [第一节 数据类型与展示方式](section07-01.md)
+
 - Chart.js图表库基础
 - Three.js三维图形库介绍
 - 二三维数据展示的结合方法
 
-### [第二节 数据图表展示](section07-02.md)
 - 时序数据图表的创建
 - 图表样式和交互设计
 - 动态数据更新机制
 
-### [第三节 三维场景中的监测点绘制](section07-03.md)
 - 监测点的三维坐标定位
 - 监测点状态的视觉化表示
 - 监测点的批量渲染优化
 
-### [第四节 监测点互动与拾取技术](section07-04.md)
 - 鼠标射线检测原理
 - 监测点的点击交互实现
 - 信息面板的动态展示
@@ -1476,10 +1473,10 @@ Canvas纹理映射 & 将2D Canvas作为3D对象的纹理使用 & 在三维场景
     \FunctionTok{constructor}\NormalTok{() \{}
         \CommentTok{// 标准状态颜色定义（遵循工业界通用标准）}
         \KeywordTok{this}\OperatorTok{.}\AttributeTok{statusColors} \OperatorTok{=}\NormalTok{ \{}
-            \DataTypeTok{NORMAL}\OperatorTok{:}\NormalTok{ \{ }\DataTypeTok{primary}\OperatorTok{:} \StringTok{\textquotesingle{}\#4CAF50\textquotesingle{}}\OperatorTok{,} \DataTypeTok{glow}\OperatorTok{:} \StringTok{\textquotesingle{}\#A5D6A7\textquotesingle{}}\NormalTok{ \}}\OperatorTok{,}    \CommentTok{// 绿色系}
-            \DataTypeTok{WARNING}\OperatorTok{:}\NormalTok{ \{ }\DataTypeTok{primary}\OperatorTok{:} \StringTok{\textquotesingle{}\#FF9800\textquotesingle{}}\OperatorTok{,} \DataTypeTok{glow}\OperatorTok{:} \StringTok{\textquotesingle{}\#FFCC02\textquotesingle{}}\NormalTok{ \}}\OperatorTok{,}   \CommentTok{// 橙色系  }
-            \DataTypeTok{ALERT}\OperatorTok{:}\NormalTok{ \{ }\DataTypeTok{primary}\OperatorTok{:} \StringTok{\textquotesingle{}\#F44336\textquotesingle{}}\OperatorTok{,} \DataTypeTok{glow}\OperatorTok{:} \StringTok{\textquotesingle{}\#FF8A80\textquotesingle{}}\NormalTok{ \}}\OperatorTok{,}     \CommentTok{// 红色系}
-            \DataTypeTok{OFFLINE}\OperatorTok{:}\NormalTok{ \{ }\DataTypeTok{primary}\OperatorTok{:} \StringTok{\textquotesingle{}\#9E9E9E\textquotesingle{}}\OperatorTok{,} \DataTypeTok{glow}\OperatorTok{:} \StringTok{\textquotesingle{}\#E0E0E0\textquotesingle{}}\NormalTok{ \}    }\CommentTok{// 灰色系}
+            \DataTypeTok{NORMAL}\OperatorTok{:}\NormalTok{ \{ }\DataTypeTok{primary}\OperatorTok{:} \StringTok{\textquotesingle{}4CAF50\textquotesingle{}}\OperatorTok{,} \DataTypeTok{glow}\OperatorTok{:} \StringTok{\textquotesingle{}A5D6A7\textquotesingle{}}\NormalTok{ \}}\OperatorTok{,}    \CommentTok{// 绿色系}
+            \DataTypeTok{WARNING}\OperatorTok{:}\NormalTok{ \{ }\DataTypeTok{primary}\OperatorTok{:} \StringTok{\textquotesingle{}FF9800\textquotesingle{}}\OperatorTok{,} \DataTypeTok{glow}\OperatorTok{:} \StringTok{\textquotesingle{}FFCC02\textquotesingle{}}\NormalTok{ \}}\OperatorTok{,}   \CommentTok{// 橙色系  }
+            \DataTypeTok{ALERT}\OperatorTok{:}\NormalTok{ \{ }\DataTypeTok{primary}\OperatorTok{:} \StringTok{\textquotesingle{}F44336\textquotesingle{}}\OperatorTok{,} \DataTypeTok{glow}\OperatorTok{:} \StringTok{\textquotesingle{}FF8A80\textquotesingle{}}\NormalTok{ \}}\OperatorTok{,}     \CommentTok{// 红色系}
+            \DataTypeTok{OFFLINE}\OperatorTok{:}\NormalTok{ \{ }\DataTypeTok{primary}\OperatorTok{:} \StringTok{\textquotesingle{}9E9E9E\textquotesingle{}}\OperatorTok{,} \DataTypeTok{glow}\OperatorTok{:} \StringTok{\textquotesingle{}E0E0E0\textquotesingle{}}\NormalTok{ \}    }\CommentTok{// 灰色系}
 \NormalTok{        \}}\OperatorTok{;}
 \NormalTok{    \}}
     

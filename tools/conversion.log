@@ -1,0 +1,123 @@
+2025-09-05 18:50:04,881 - TextbookConverter - INFO - 转换器初始化完成
+2025-09-05 18:50:04,883 - TextbookConverter - INFO - 项目根目录: .
+2025-09-05 18:50:04,883 - TextbookConverter - INFO - 文档目录: docs
+2025-09-05 18:50:04,884 - TextbookConverter - INFO - LaTeX输出目录: publish/latex
+2025-09-05 18:50:04,884 - TextbookConverter - INFO - ============================================================
+2025-09-05 18:50:04,884 - TextbookConverter - INFO - 智慧水利教材转换器 - 改进版
+2025-09-05 18:50:04,884 - TextbookConverter - INFO - ============================================================
+2025-09-05 18:50:04,885 - TextbookConverter - INFO - 🚀 开始教材转换流程
+2025-09-05 18:50:04,908 - TextbookConverter - INFO - 发现 1 个章节目录
+2025-09-05 18:50:04,909 - TextbookConverter - INFO - 转换第6章: chapter06
+2025-09-05 18:50:04,920 - TextbookConverter - INFO - ✅ 第6章转换完成
+2025-09-05 18:50:04,921 - TextbookConverter - INFO - 处理图片文件...
+2025-09-05 18:50:06,670 - TextbookConverter - INFO - 复制了 34 张图片
+2025-09-05 18:50:06,671 - TextbookConverter - INFO - ✅ 所有章节转换完成
+2025-09-05 18:50:06,671 - TextbookConverter - INFO - 🔨 开始构建LaTeX文档...
+2025-09-05 18:50:06,672 - TextbookConverter - INFO - 执行命令: xelatex main.tex
+2025-09-05 18:50:07,104 - TextbookConverter - ERROR - LaTeX构建失败: 
+2025-09-05 18:50:07,105 - TextbookConverter - ERROR - LaTeX构建失败
+2025-09-05 18:53:21,083 - TextbookConverter - INFO - 转换器初始化完成
+2025-09-05 18:53:21,084 - TextbookConverter - INFO - 项目根目录: .
+2025-09-05 18:53:21,084 - TextbookConverter - INFO - 文档目录: docs
+2025-09-05 18:53:21,084 - TextbookConverter - INFO - LaTeX输出目录: publish/latex
+2025-09-05 18:53:21,085 - TextbookConverter - INFO - ============================================================
+2025-09-05 18:53:21,085 - TextbookConverter - INFO - 智慧水利教材转换器 - 改进版
+2025-09-05 18:53:21,085 - TextbookConverter - INFO - ============================================================
+2025-09-05 18:53:21,086 - TextbookConverter - INFO - 🚀 开始教材转换流程
+2025-09-05 18:53:21,127 - TextbookConverter - INFO - 发现 1 个章节目录
+2025-09-05 18:53:21,128 - TextbookConverter - INFO - 转换第6章: chapter06
+2025-09-05 18:53:21,148 - TextbookConverter - INFO - ✅ 第6章转换完成
+2025-09-05 18:53:21,149 - TextbookConverter - INFO - 处理图片文件...
+2025-09-05 18:53:22,268 - TextbookConverter - INFO - 复制了 34 张图片
+2025-09-05 18:53:22,268 - TextbookConverter - INFO - ✅ 所有章节转换完成
+2025-09-05 18:53:22,269 - TextbookConverter - INFO - 🔨 开始构建LaTeX文档...
+2025-09-05 18:53:22,269 - TextbookConverter - INFO - 执行命令: xelatex main.tex
+2025-09-05 18:53:22,645 - TextbookConverter - ERROR - LaTeX构建失败: 
+2025-09-05 18:53:22,646 - TextbookConverter - ERROR - LaTeX构建失败
+2025-09-05 21:37:17,010 - TextbookConverter - INFO - 转换器初始化完成
+2025-09-05 21:37:17,010 - TextbookConverter - INFO - 项目根目录: .
+2025-09-05 21:37:17,011 - TextbookConverter - INFO - 文档目录: docs
+2025-09-05 21:37:17,011 - TextbookConverter - INFO - LaTeX输出目录: publish/latex
+2025-09-05 21:37:17,011 - TextbookConverter - INFO - ============================================================
+2025-09-05 21:37:17,011 - TextbookConverter - INFO - 智慧水利教材转换器 - 改进版
+2025-09-05 21:37:17,012 - TextbookConverter - INFO - ============================================================
+2025-09-05 21:37:17,012 - TextbookConverter - INFO - 🚀 开始教材转换流程
+2025-09-05 21:37:17,037 - TextbookConverter - INFO - 发现 1 个章节目录
+2025-09-05 21:37:17,039 - TextbookConverter - INFO - 转换第6章: chapter06
+2025-09-05 21:37:17,049 - TextbookConverter - INFO - ✅ 第6章转换完成
+2025-09-05 21:37:17,050 - TextbookConverter - INFO - 处理图片文件...
+2025-09-05 21:37:19,163 - TextbookConverter - INFO - 复制了 34 张图片
+2025-09-05 21:37:19,164 - TextbookConverter - INFO - ✅ 所有章节转换完成
+2025-09-05 21:37:19,164 - TextbookConverter - INFO - 🔨 开始构建LaTeX文档...
+2025-09-05 21:37:19,165 - TextbookConverter - INFO - 执行命令: xelatex main.tex
+2025-09-05 21:37:19,496 - TextbookConverter - ERROR - LaTeX构建失败: 
+2025-09-05 21:37:19,497 - TextbookConverter - ERROR - LaTeX构建失败
+2025-09-05 21:38:59,602 - TextbookConverter - INFO - 转换器初始化完成
+2025-09-05 21:38:59,602 - TextbookConverter - INFO - 项目根目录: .
+2025-09-05 21:38:59,603 - TextbookConverter - INFO - 文档目录: docs
+2025-09-05 21:38:59,603 - TextbookConverter - INFO - LaTeX输出目录: output
+2025-09-05 21:38:59,603 - TextbookConverter - INFO - ============================================================
+2025-09-05 21:38:59,603 - TextbookConverter - INFO - 智慧水利教材转换器 - 改进版
+2025-09-05 21:38:59,603 - TextbookConverter - INFO - ============================================================
+2025-09-05 21:38:59,604 - TextbookConverter - INFO - 🚀 开始教材转换流程
+2025-09-05 21:38:59,628 - TextbookConverter - INFO - 发现 1 个章节目录
+2025-09-05 21:38:59,630 - TextbookConverter - INFO - 转换第6章: chapter06
+2025-09-05 21:38:59,659 - TextbookConverter - INFO - ✅ 第6章转换完成
+2025-09-05 21:38:59,660 - TextbookConverter - INFO - 处理图片文件...
+2025-09-05 21:39:00,949 - TextbookConverter - INFO - 复制了 34 张图片
+2025-09-05 21:39:00,950 - TextbookConverter - INFO - ✅ 所有章节转换完成
+2025-09-05 21:39:00,950 - TextbookConverter - INFO - 🔨 开始构建LaTeX文档...
+2025-09-05 21:39:00,950 - TextbookConverter - INFO - 执行命令: xelatex main.tex
+2025-09-05 21:39:03,211 - TextbookConverter - INFO - LaTeX命令执行成功
+2025-09-05 21:39:03,212 - TextbookConverter - INFO - 执行命令: xelatex main.tex
+2025-09-05 21:39:05,777 - TextbookConverter - INFO - LaTeX命令执行成功
+2025-09-05 21:39:05,778 - TextbookConverter - ERROR - PDF文件未生成
+2025-09-05 21:39:05,778 - TextbookConverter - ERROR - LaTeX构建失败
+2025-09-05 21:48:32,516 - TextbookConverter - INFO - 转换器初始化完成
+2025-09-05 21:48:32,516 - TextbookConverter - INFO - 项目根目录: .
+2025-09-05 21:48:32,517 - TextbookConverter - INFO - 文档目录: docs
+2025-09-05 21:48:32,517 - TextbookConverter - INFO - LaTeX输出目录: output
+2025-09-05 21:48:32,517 - TextbookConverter - INFO - ============================================================
+2025-09-05 21:48:32,517 - TextbookConverter - INFO - 智慧水利教材转换器 - 改进版
+2025-09-05 21:48:32,517 - TextbookConverter - INFO - ============================================================
+2025-09-05 21:48:32,518 - TextbookConverter - INFO - 🚀 开始教材转换流程
+2025-09-05 21:48:32,551 - TextbookConverter - INFO - 发现 1 个章节目录
+2025-09-05 21:48:32,552 - TextbookConverter - INFO - 转换第6章: chapter06
+2025-09-05 21:48:32,564 - TextbookConverter - INFO - ✅ 第6章转换完成
+2025-09-05 21:48:32,564 - TextbookConverter - INFO - 处理图片文件...
+2025-09-05 21:48:33,760 - TextbookConverter - INFO - 复制了 34 张图片
+2025-09-05 21:48:33,760 - TextbookConverter - INFO - ✅ 所有章节转换完成
+2025-09-05 21:48:33,761 - TextbookConverter - INFO - 🔨 开始构建LaTeX文档...
+2025-09-05 21:48:33,761 - TextbookConverter - INFO - 执行命令: xelatex main.tex
+2025-09-05 21:48:36,214 - TextbookConverter - INFO - LaTeX命令执行成功
+2025-09-05 21:48:36,214 - TextbookConverter - INFO - 执行命令: xelatex main.tex
+2025-09-05 21:48:38,551 - TextbookConverter - INFO - LaTeX命令执行成功
+2025-09-05 21:48:38,551 - TextbookConverter - INFO - 检查PDF路径: output/main.pdf
+2025-09-05 21:48:38,552 - TextbookConverter - INFO - 绝对路径: /mnt/e/2025/教材/智慧水利平台架构与开发/tools/output/output/main.pdf
+2025-09-05 21:48:38,553 - TextbookConverter - INFO - 文件是否存在: False
+2025-09-05 21:48:38,553 - TextbookConverter - ERROR - PDF文件未生成
+2025-09-05 21:48:38,554 - TextbookConverter - ERROR - LaTeX构建失败
+2025-09-05 21:50:15,487 - TextbookConverter - INFO - 转换器初始化完成
+2025-09-05 21:50:15,487 - TextbookConverter - INFO - 项目根目录: .
+2025-09-05 21:50:15,488 - TextbookConverter - INFO - 文档目录: docs
+2025-09-05 21:50:15,488 - TextbookConverter - INFO - LaTeX输出目录: output
+2025-09-05 21:50:15,488 - TextbookConverter - INFO - ============================================================
+2025-09-05 21:50:15,488 - TextbookConverter - INFO - 智慧水利教材转换器 - 改进版
+2025-09-05 21:50:15,489 - TextbookConverter - INFO - ============================================================
+2025-09-05 21:50:15,489 - TextbookConverter - INFO - 🚀 开始教材转换流程
+2025-09-05 21:50:15,516 - TextbookConverter - INFO - 发现 1 个章节目录
+2025-09-05 21:50:15,517 - TextbookConverter - INFO - 转换第6章: chapter06
+2025-09-05 21:50:15,529 - TextbookConverter - INFO - ✅ 第6章转换完成
+2025-09-05 21:50:15,530 - TextbookConverter - INFO - 处理图片文件...
+2025-09-05 21:50:16,574 - TextbookConverter - INFO - 复制了 34 张图片
+2025-09-05 21:50:16,575 - TextbookConverter - INFO - ✅ 所有章节转换完成
+2025-09-05 21:50:16,575 - TextbookConverter - INFO - 🔨 开始构建LaTeX文档...
+2025-09-05 21:50:16,576 - TextbookConverter - INFO - 执行命令: xelatex main.tex
+2025-09-05 21:50:19,388 - TextbookConverter - INFO - LaTeX命令执行成功
+2025-09-05 21:50:19,389 - TextbookConverter - INFO - 执行命令: xelatex main.tex
+2025-09-05 21:50:22,135 - TextbookConverter - INFO - LaTeX命令执行成功
+2025-09-05 21:50:22,137 - TextbookConverter - INFO - 检查PDF路径: main.pdf
+2025-09-05 21:50:22,138 - TextbookConverter - INFO - 绝对路径: /mnt/e/2025/教材/智慧水利平台架构与开发/tools/output/main.pdf
+2025-09-05 21:50:22,140 - TextbookConverter - INFO - 文件是否存在: True
+2025-09-05 21:50:22,141 - TextbookConverter - INFO - ✅ PDF构建成功: main.pdf (392,628 bytes)
+2025-09-05 21:50:22,142 - TextbookConverter - INFO - 🎉 完整转换流程完成！

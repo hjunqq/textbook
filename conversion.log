@@ -1,0 +1,1115 @@
+2025-09-04 14:32:36,711 - TextbookConverter - INFO - 转换器初始化完成
+2025-09-04 14:32:36,712 - TextbookConverter - INFO - 项目根目录: .
+2025-09-04 14:32:36,712 - TextbookConverter - INFO - 文档目录: docs
+2025-09-04 14:32:36,713 - TextbookConverter - INFO - LaTeX输出目录: publish/latex
+2025-09-04 14:32:36,713 - TextbookConverter - INFO - 🚀 开始教材转换流程
+2025-09-04 14:32:36,788 - TextbookConverter - INFO - 发现 9 个章节目录
+2025-09-04 14:32:36,790 - TextbookConverter - INFO - 转换前言...
+2025-09-04 14:32:36,821 - TextbookConverter - INFO - 转换第1章: chapter01
+2025-09-04 14:32:36,831 - TextbookConverter - INFO -   处理主文件: chapter01.md
+2025-09-04 14:32:36,837 - TextbookConverter - INFO -   处理节文件: section01-01.md
+2025-09-04 14:32:36,842 - TextbookConverter - INFO -   处理节文件: section01-02.md
+2025-09-04 14:32:36,848 - TextbookConverter - INFO -   处理节文件: section01-03.md
+2025-09-04 14:32:36,887 - TextbookConverter - INFO - ✅ 第1章转换完成
+2025-09-04 14:32:36,888 - TextbookConverter - INFO - 转换第2章: chapter02
+2025-09-04 14:32:36,900 - TextbookConverter - INFO -   处理主文件: chapter02.md
+2025-09-04 14:32:36,906 - TextbookConverter - INFO -   处理节文件: section02-01.md
+2025-09-04 14:32:36,912 - TextbookConverter - INFO -   处理节文件: section02-02.md
+2025-09-04 14:32:36,918 - TextbookConverter - INFO -   处理节文件: section02-03.md
+2025-09-04 14:32:36,922 - TextbookConverter - INFO -   处理节文件: section02-04.md
+2025-09-04 14:32:36,926 - TextbookConverter - INFO -   处理节文件: section02-05.md
+2025-09-04 14:32:36,930 - TextbookConverter - INFO -   处理节文件: section02-06.md
+2025-09-04 14:32:36,942 - TextbookConverter - INFO - ✅ 第2章转换完成
+2025-09-04 14:32:36,942 - TextbookConverter - INFO - 转换第3章: chapter03
+2025-09-04 14:32:36,950 - TextbookConverter - INFO -   处理主文件: chapter03.md
+2025-09-04 14:32:36,955 - TextbookConverter - INFO -   处理节文件: section03-01.md
+2025-09-04 14:32:36,960 - TextbookConverter - INFO -   处理节文件: section03-02.md
+2025-09-04 14:32:36,964 - TextbookConverter - INFO -   处理节文件: section03-03.md
+2025-09-04 14:32:36,968 - TextbookConverter - INFO -   处理节文件: section03-04.md
+2025-09-04 14:32:36,972 - TextbookConverter - INFO -   处理节文件: section03-05.md
+2025-09-04 14:32:36,976 - TextbookConverter - INFO -   处理节文件: section03-06.md
+2025-09-04 14:32:36,979 - TextbookConverter - INFO -   处理节文件: section03-07.md
+2025-09-04 14:32:36,993 - TextbookConverter - INFO - ✅ 第3章转换完成
+2025-09-04 14:32:36,993 - TextbookConverter - INFO - 转换第4章: chapter04
+2025-09-04 14:32:37,000 - TextbookConverter - INFO -   处理主文件: chapter04.md
+2025-09-04 14:32:37,006 - TextbookConverter - INFO -   处理节文件: section04-01.md
+2025-09-04 14:32:37,011 - TextbookConverter - INFO -   处理节文件: section04-02.md
+2025-09-04 14:32:37,016 - TextbookConverter - INFO -   处理节文件: section04-03.md
+2025-09-04 14:32:37,022 - TextbookConverter - INFO -   处理节文件: section04-04.md
+2025-09-04 14:32:37,029 - TextbookConverter - INFO -   处理节文件: section04-05.md
+2025-09-04 14:32:37,037 - TextbookConverter - INFO -   处理节文件: section04-06.md
+2025-09-04 14:32:37,042 - TextbookConverter - INFO -   处理节文件: section04-07.md
+2025-09-04 14:32:37,087 - TextbookConverter - INFO - ✅ 第4章转换完成
+2025-09-04 14:32:37,087 - TextbookConverter - INFO - 转换第5章: chapter05
+2025-09-04 14:32:37,092 - TextbookConverter - INFO -   处理主文件: chapter05.md
+2025-09-04 14:32:37,097 - TextbookConverter - INFO -   处理节文件: section05-01.md
+2025-09-04 14:32:37,102 - TextbookConverter - INFO -   处理节文件: section05-02.md
+2025-09-04 14:32:37,106 - TextbookConverter - INFO -   处理节文件: section05-03.md
+2025-09-04 14:32:37,113 - TextbookConverter - INFO -   处理节文件: section05-04.md
+2025-09-04 14:32:37,119 - TextbookConverter - INFO -   处理节文件: section05-05.md
+2025-09-04 14:32:37,125 - TextbookConverter - INFO -   处理节文件: section05-06.md
+2025-09-04 14:32:37,149 - TextbookConverter - INFO - ✅ 第5章转换完成
+2025-09-04 14:32:37,149 - TextbookConverter - INFO - 转换第6章: chapter06
+2025-09-04 14:32:37,154 - TextbookConverter - INFO -   处理主文件: chapter06.md
+2025-09-04 14:32:37,159 - TextbookConverter - INFO -   处理节文件: section06-01.md
+2025-09-04 14:32:37,164 - TextbookConverter - INFO -   处理节文件: section06-02.md
+2025-09-04 14:32:37,169 - TextbookConverter - INFO -   处理节文件: section06-03.md
+2025-09-04 14:32:37,173 - TextbookConverter - INFO -   处理节文件: section06-04.md
+2025-09-04 14:32:37,177 - TextbookConverter - INFO -   处理节文件: section06-05.md
+2025-09-04 14:32:37,181 - TextbookConverter - INFO -   处理节文件: section06-06.md
+2025-09-04 14:32:37,185 - TextbookConverter - INFO -   处理节文件: section06-07.md
+2025-09-04 14:32:37,199 - TextbookConverter - INFO - ✅ 第6章转换完成
+2025-09-04 14:32:37,199 - TextbookConverter - INFO - 转换第7章: chapter07
+2025-09-04 14:32:37,205 - TextbookConverter - INFO -   处理主文件: chapter07.md
+2025-09-04 14:32:37,209 - TextbookConverter - INFO -   处理节文件: section07-01.md
+2025-09-04 14:32:37,214 - TextbookConverter - INFO -   处理节文件: section07-02.md
+2025-09-04 14:32:37,218 - TextbookConverter - INFO -   处理节文件: section07-03.md
+2025-09-04 14:32:37,221 - TextbookConverter - INFO -   处理节文件: section07-04.md
+2025-09-04 14:32:37,235 - TextbookConverter - INFO - ✅ 第7章转换完成
+2025-09-04 14:32:37,235 - TextbookConverter - INFO - 转换第8章: chapter08
+2025-09-04 14:32:37,240 - TextbookConverter - INFO -   处理主文件: chapter08.md
+2025-09-04 14:32:37,244 - TextbookConverter - INFO -   处理节文件: section08-01.md
+2025-09-04 14:32:37,248 - TextbookConverter - INFO -   处理节文件: section08-02.md
+2025-09-04 14:32:37,252 - TextbookConverter - INFO -   处理节文件: section08-03.md
+2025-09-04 14:32:37,255 - TextbookConverter - INFO -   处理节文件: section08-04.md
+2025-09-04 14:32:37,259 - TextbookConverter - INFO -   处理节文件: section08-05.md
+2025-09-04 14:32:37,274 - TextbookConverter - INFO - ✅ 第8章转换完成
+2025-09-04 14:32:37,274 - TextbookConverter - INFO - 转换第9章: chapter09
+2025-09-04 14:32:37,279 - TextbookConverter - INFO -   处理主文件: chapter09.md
+2025-09-04 14:32:37,292 - TextbookConverter - INFO - ✅ 第9章转换完成
+2025-09-04 14:32:37,295 - TextbookConverter - INFO - 转换附录: appendixA.md
+2025-09-04 14:32:37,308 - TextbookConverter - INFO - 转换附录: appendixB.md
+2025-09-04 14:32:37,321 - TextbookConverter - INFO - 转换附录: appendixC.md
+2025-09-04 14:32:37,330 - TextbookConverter - INFO - 处理图片文件...
+2025-09-04 14:32:40,229 - TextbookConverter - INFO - 复制了 83 张图片
+2025-09-04 14:32:40,229 - TextbookConverter - INFO - ✅ 所有章节转换完成
+2025-09-04 14:34:38,111 - TextbookConverter - INFO - 转换器初始化完成
+2025-09-04 14:34:38,111 - TextbookConverter - INFO - 项目根目录: .
+2025-09-04 14:34:38,112 - TextbookConverter - INFO - 文档目录: docs
+2025-09-04 14:34:38,112 - TextbookConverter - INFO - LaTeX输出目录: publish/latex
+2025-09-04 14:34:38,113 - TextbookConverter - INFO - 🔨 开始构建LaTeX文档...
+2025-09-04 14:34:38,114 - TextbookConverter - INFO - 执行命令: xelatex main.tex
+2025-09-04 14:34:44,732 - TextbookConverter - ERROR - LaTeX构建失败: 
+kpathsea: Running mktextfm SimSun/OT
+/usr/local/texlive/2025/texmf-dist/web2c/mktexnam: Could not map source abbreviation O for OT.
+/usr/local/texlive/2025/texmf-dist/web2c/mktexnam: Need to update /usr/local/texlive/2025/texmf-dist/fonts/map/fontname/special.map?
+mktextfm: Running mf-nowin -progname=mf \mode:=ljfour; mag:=1; ; nonstopmode; input OT
+This is METAFONT, Version 2.71828182 (TeX Live 2025) (preloaded base=mf)
+
+kpathsea: Running mktexmf OT
+
+! I can't find file `OT'.
+<*> \mode:=ljfour; mag:=1; ; nonstopmode; input OT
+                                                  
+Please type another input file name
+! Emergency stop.
+<*> \mode:=ljfour; mag:=1; ; nonstopmode; input OT
+                                                  
+Transcript written on mfput.log.
+grep: OT.log: No such file or directory
+mktextfm: `mf-nowin -progname=mf \mode:=ljfour; mag:=1; ; nonstopmode; input OT' failed to make OT.tfm.
+kpathsea: Appending font creation commands to missfont.log.
+
+2025-09-04 14:38:16,166 - TextbookConverter - INFO - 转换器初始化完成
+2025-09-04 14:38:16,166 - TextbookConverter - INFO - 项目根目录: .
+2025-09-04 14:38:16,166 - TextbookConverter - INFO - 文档目录: docs
+2025-09-04 14:38:16,167 - TextbookConverter - INFO - LaTeX输出目录: publish/latex
+2025-09-04 14:38:16,167 - TextbookConverter - INFO - 🚀 开始教材转换流程
+2025-09-04 14:38:16,223 - TextbookConverter - INFO - 发现 9 个章节目录
+2025-09-04 14:38:16,224 - TextbookConverter - INFO - 转换前言...
+2025-09-04 14:38:16,229 - TextbookConverter - INFO - 转换第1章: chapter01
+2025-09-04 14:38:16,234 - TextbookConverter - INFO -   处理主文件: chapter01.md
+2025-09-04 14:38:16,239 - TextbookConverter - INFO -   处理节文件: section01-01.md
+2025-09-04 14:38:16,243 - TextbookConverter - INFO -   处理节文件: section01-02.md
+2025-09-04 14:38:16,246 - TextbookConverter - INFO -   处理节文件: section01-03.md
+2025-09-04 14:38:16,258 - TextbookConverter - INFO - ✅ 第1章转换完成
+2025-09-04 14:38:16,259 - TextbookConverter - INFO - 转换第2章: chapter02
+2025-09-04 14:38:16,267 - TextbookConverter - INFO -   处理主文件: chapter02.md
+2025-09-04 14:38:16,273 - TextbookConverter - INFO -   处理节文件: section02-01.md
+2025-09-04 14:38:16,277 - TextbookConverter - INFO -   处理节文件: section02-02.md
+2025-09-04 14:38:16,280 - TextbookConverter - INFO -   处理节文件: section02-03.md
+2025-09-04 14:38:16,285 - TextbookConverter - INFO -   处理节文件: section02-04.md
+2025-09-04 14:38:16,289 - TextbookConverter - INFO -   处理节文件: section02-05.md
+2025-09-04 14:38:16,293 - TextbookConverter - INFO -   处理节文件: section02-06.md
+2025-09-04 14:38:16,302 - TextbookConverter - INFO - ✅ 第2章转换完成
+2025-09-04 14:38:16,303 - TextbookConverter - INFO - 转换第3章: chapter03
+2025-09-04 14:38:16,308 - TextbookConverter - INFO -   处理主文件: chapter03.md
+2025-09-04 14:38:16,311 - TextbookConverter - INFO -   处理节文件: section03-01.md
+2025-09-04 14:38:16,314 - TextbookConverter - INFO -   处理节文件: section03-02.md
+2025-09-04 14:38:16,317 - TextbookConverter - INFO -   处理节文件: section03-03.md
+2025-09-04 14:38:16,321 - TextbookConverter - INFO -   处理节文件: section03-04.md
+2025-09-04 14:38:16,325 - TextbookConverter - INFO -   处理节文件: section03-05.md
+2025-09-04 14:38:16,328 - TextbookConverter - INFO -   处理节文件: section03-06.md
+2025-09-04 14:38:16,331 - TextbookConverter - INFO -   处理节文件: section03-07.md
+2025-09-04 14:38:16,344 - TextbookConverter - INFO - ✅ 第3章转换完成
+2025-09-04 14:38:16,344 - TextbookConverter - INFO - 转换第4章: chapter04
+2025-09-04 14:38:16,351 - TextbookConverter - INFO -   处理主文件: chapter04.md
+2025-09-04 14:38:16,354 - TextbookConverter - INFO -   处理节文件: section04-01.md
+2025-09-04 14:38:16,359 - TextbookConverter - INFO -   处理节文件: section04-02.md
+2025-09-04 14:38:16,362 - TextbookConverter - INFO -   处理节文件: section04-03.md
+2025-09-04 14:38:16,366 - TextbookConverter - INFO -   处理节文件: section04-04.md
+2025-09-04 14:38:16,372 - TextbookConverter - INFO -   处理节文件: section04-05.md
+2025-09-04 14:38:16,378 - TextbookConverter - INFO -   处理节文件: section04-06.md
+2025-09-04 14:38:16,382 - TextbookConverter - INFO -   处理节文件: section04-07.md
+2025-09-04 14:38:16,412 - TextbookConverter - INFO - ✅ 第4章转换完成
+2025-09-04 14:38:16,413 - TextbookConverter - INFO - 转换第5章: chapter05
+2025-09-04 14:38:16,423 - TextbookConverter - INFO -   处理主文件: chapter05.md
+2025-09-04 14:38:16,430 - TextbookConverter - INFO -   处理节文件: section05-01.md
+2025-09-04 14:38:16,436 - TextbookConverter - INFO -   处理节文件: section05-02.md
+2025-09-04 14:38:16,443 - TextbookConverter - INFO -   处理节文件: section05-03.md
+2025-09-04 14:38:16,448 - TextbookConverter - INFO -   处理节文件: section05-04.md
+2025-09-04 14:38:16,455 - TextbookConverter - INFO -   处理节文件: section05-05.md
+2025-09-04 14:38:16,461 - TextbookConverter - INFO -   处理节文件: section05-06.md
+2025-09-04 14:38:16,491 - TextbookConverter - INFO - ✅ 第5章转换完成
+2025-09-04 14:38:16,492 - TextbookConverter - INFO - 转换第6章: chapter06
+2025-09-04 14:38:16,501 - TextbookConverter - INFO -   处理主文件: chapter06.md
+2025-09-04 14:38:16,507 - TextbookConverter - INFO -   处理节文件: section06-01.md
+2025-09-04 14:38:16,513 - TextbookConverter - INFO -   处理节文件: section06-02.md
+2025-09-04 14:38:16,519 - TextbookConverter - INFO -   处理节文件: section06-03.md
+2025-09-04 14:38:16,524 - TextbookConverter - INFO -   处理节文件: section06-04.md
+2025-09-04 14:38:16,530 - TextbookConverter - INFO -   处理节文件: section06-05.md
+2025-09-04 14:38:16,536 - TextbookConverter - INFO -   处理节文件: section06-06.md
+2025-09-04 14:38:16,542 - TextbookConverter - INFO -   处理节文件: section06-07.md
+2025-09-04 14:38:16,568 - TextbookConverter - INFO - ✅ 第6章转换完成
+2025-09-04 14:38:16,568 - TextbookConverter - INFO - 转换第7章: chapter07
+2025-09-04 14:38:16,579 - TextbookConverter - INFO -   处理主文件: chapter07.md
+2025-09-04 14:38:16,585 - TextbookConverter - INFO -   处理节文件: section07-01.md
+2025-09-04 14:38:16,590 - TextbookConverter - INFO -   处理节文件: section07-02.md
+2025-09-04 14:38:16,595 - TextbookConverter - INFO -   处理节文件: section07-03.md
+2025-09-04 14:38:16,599 - TextbookConverter - INFO -   处理节文件: section07-04.md
+2025-09-04 14:38:16,617 - TextbookConverter - INFO - ✅ 第7章转换完成
+2025-09-04 14:38:16,617 - TextbookConverter - INFO - 转换第8章: chapter08
+2025-09-04 14:38:16,628 - TextbookConverter - INFO -   处理主文件: chapter08.md
+2025-09-04 14:38:16,631 - TextbookConverter - INFO -   处理节文件: section08-01.md
+2025-09-04 14:38:16,635 - TextbookConverter - INFO -   处理节文件: section08-02.md
+2025-09-04 14:38:16,640 - TextbookConverter - INFO -   处理节文件: section08-03.md
+2025-09-04 14:38:16,647 - TextbookConverter - INFO -   处理节文件: section08-04.md
+2025-09-04 14:38:16,652 - TextbookConverter - INFO -   处理节文件: section08-05.md
+2025-09-04 14:38:16,671 - TextbookConverter - INFO - ✅ 第8章转换完成
+2025-09-04 14:38:16,672 - TextbookConverter - INFO - 转换第9章: chapter09
+2025-09-04 14:38:16,683 - TextbookConverter - INFO -   处理主文件: chapter09.md
+2025-09-04 14:38:16,699 - TextbookConverter - INFO - ✅ 第9章转换完成
+2025-09-04 14:38:16,700 - TextbookConverter - INFO - 转换附录: appendixA.md
+2025-09-04 14:38:16,709 - TextbookConverter - INFO - 转换附录: appendixB.md
+2025-09-04 14:38:16,716 - TextbookConverter - INFO - 转换附录: appendixC.md
+2025-09-04 14:38:16,726 - TextbookConverter - INFO - 处理图片文件...
+2025-09-04 14:38:20,313 - TextbookConverter - INFO - 复制了 83 张图片
+2025-09-04 14:38:20,313 - TextbookConverter - INFO - ✅ 所有章节转换完成
+2025-09-04 14:44:35,190 - TextbookConverter - INFO - 转换器初始化完成
+2025-09-04 14:44:35,190 - TextbookConverter - INFO - 项目根目录: .
+2025-09-04 14:44:35,191 - TextbookConverter - INFO - 文档目录: docs
+2025-09-04 14:44:35,191 - TextbookConverter - INFO - LaTeX输出目录: publish/latex
+2025-09-04 14:44:35,191 - TextbookConverter - INFO - 🚀 开始教材转换流程
+2025-09-04 14:44:35,260 - TextbookConverter - INFO - 发现 9 个章节目录
+2025-09-04 14:44:35,261 - TextbookConverter - INFO - 转换前言...
+2025-09-04 14:44:35,267 - TextbookConverter - INFO - 转换第1章: chapter01
+2025-09-04 14:44:35,276 - TextbookConverter - INFO -   处理主文件: chapter01.md
+2025-09-04 14:44:35,281 - TextbookConverter - INFO -   处理节文件: section01-01.md
+2025-09-04 14:44:35,285 - TextbookConverter - INFO -   处理节文件: section01-02.md
+2025-09-04 14:44:35,290 - TextbookConverter - INFO -   处理节文件: section01-03.md
+2025-09-04 14:44:35,302 - TextbookConverter - INFO - ✅ 第1章转换完成
+2025-09-04 14:44:35,303 - TextbookConverter - INFO - 转换第2章: chapter02
+2025-09-04 14:44:35,310 - TextbookConverter - INFO -   处理主文件: chapter02.md
+2025-09-04 14:44:35,313 - TextbookConverter - INFO -   处理节文件: section02-01.md
+2025-09-04 14:44:35,317 - TextbookConverter - INFO -   处理节文件: section02-02.md
+2025-09-04 14:44:35,320 - TextbookConverter - INFO -   处理节文件: section02-03.md
+2025-09-04 14:44:35,323 - TextbookConverter - INFO -   处理节文件: section02-04.md
+2025-09-04 14:44:35,327 - TextbookConverter - INFO -   处理节文件: section02-05.md
+2025-09-04 14:44:35,331 - TextbookConverter - INFO -   处理节文件: section02-06.md
+2025-09-04 14:44:35,345 - TextbookConverter - INFO - ✅ 第2章转换完成
+2025-09-04 14:44:35,346 - TextbookConverter - INFO - 转换第3章: chapter03
+2025-09-04 14:44:35,357 - TextbookConverter - INFO -   处理主文件: chapter03.md
+2025-09-04 14:44:35,363 - TextbookConverter - INFO -   处理节文件: section03-01.md
+2025-09-04 14:44:35,368 - TextbookConverter - INFO -   处理节文件: section03-02.md
+2025-09-04 14:44:35,373 - TextbookConverter - INFO -   处理节文件: section03-03.md
+2025-09-04 14:44:35,378 - TextbookConverter - INFO -   处理节文件: section03-04.md
+2025-09-04 14:44:35,383 - TextbookConverter - INFO -   处理节文件: section03-05.md
+2025-09-04 14:44:35,388 - TextbookConverter - INFO -   处理节文件: section03-06.md
+2025-09-04 14:44:35,394 - TextbookConverter - INFO -   处理节文件: section03-07.md
+2025-09-04 14:44:35,412 - TextbookConverter - INFO - ✅ 第3章转换完成
+2025-09-04 14:44:35,412 - TextbookConverter - INFO - 转换第4章: chapter04
+2025-09-04 14:44:35,424 - TextbookConverter - INFO -   处理主文件: chapter04.md
+2025-09-04 14:44:35,428 - TextbookConverter - INFO -   处理节文件: section04-01.md
+2025-09-04 14:44:35,432 - TextbookConverter - INFO -   处理节文件: section04-02.md
+2025-09-04 14:44:35,437 - TextbookConverter - INFO -   处理节文件: section04-03.md
+2025-09-04 14:44:35,443 - TextbookConverter - INFO -   处理节文件: section04-04.md
+2025-09-04 14:44:35,453 - TextbookConverter - INFO -   处理节文件: section04-05.md
+2025-09-04 14:44:35,464 - TextbookConverter - INFO -   处理节文件: section04-06.md
+2025-09-04 14:44:35,471 - TextbookConverter - INFO -   处理节文件: section04-07.md
+2025-09-04 14:44:35,515 - TextbookConverter - INFO - ✅ 第4章转换完成
+2025-09-04 14:44:35,515 - TextbookConverter - INFO - 转换第5章: chapter05
+2025-09-04 14:44:35,526 - TextbookConverter - INFO -   处理主文件: chapter05.md
+2025-09-04 14:44:35,531 - TextbookConverter - INFO -   处理节文件: section05-01.md
+2025-09-04 14:44:35,540 - TextbookConverter - INFO -   处理节文件: section05-02.md
+2025-09-04 14:44:35,546 - TextbookConverter - INFO -   处理节文件: section05-03.md
+2025-09-04 14:44:35,552 - TextbookConverter - INFO -   处理节文件: section05-04.md
+2025-09-04 14:44:35,558 - TextbookConverter - INFO -   处理节文件: section05-05.md
+2025-09-04 14:44:35,564 - TextbookConverter - INFO -   处理节文件: section05-06.md
+2025-09-04 14:44:35,602 - TextbookConverter - INFO - ✅ 第5章转换完成
+2025-09-04 14:44:35,602 - TextbookConverter - INFO - 转换第6章: chapter06
+2025-09-04 14:44:35,610 - TextbookConverter - INFO -   处理主文件: chapter06.md
+2025-09-04 14:44:35,613 - TextbookConverter - INFO -   处理节文件: section06-01.md
+2025-09-04 14:44:35,617 - TextbookConverter - INFO -   处理节文件: section06-02.md
+2025-09-04 14:44:35,623 - TextbookConverter - INFO -   处理节文件: section06-03.md
+2025-09-04 14:44:35,628 - TextbookConverter - INFO -   处理节文件: section06-04.md
+2025-09-04 14:44:35,632 - TextbookConverter - INFO -   处理节文件: section06-05.md
+2025-09-04 14:44:35,638 - TextbookConverter - INFO -   处理节文件: section06-06.md
+2025-09-04 14:44:35,643 - TextbookConverter - INFO -   处理节文件: section06-07.md
+2025-09-04 14:44:35,671 - TextbookConverter - INFO - ✅ 第6章转换完成
+2025-09-04 14:44:35,671 - TextbookConverter - INFO - 转换第7章: chapter07
+2025-09-04 14:44:35,679 - TextbookConverter - INFO -   处理主文件: chapter07.md
+2025-09-04 14:44:35,684 - TextbookConverter - INFO -   处理节文件: section07-01.md
+2025-09-04 14:44:35,689 - TextbookConverter - INFO -   处理节文件: section07-02.md
+2025-09-04 14:44:35,693 - TextbookConverter - INFO -   处理节文件: section07-03.md
+2025-09-04 14:44:35,697 - TextbookConverter - INFO -   处理节文件: section07-04.md
+2025-09-04 14:44:35,712 - TextbookConverter - INFO - ✅ 第7章转换完成
+2025-09-04 14:44:35,712 - TextbookConverter - INFO - 转换第8章: chapter08
+2025-09-04 14:44:35,721 - TextbookConverter - INFO -   处理主文件: chapter08.md
+2025-09-04 14:44:35,728 - TextbookConverter - INFO -   处理节文件: section08-01.md
+2025-09-04 14:44:35,734 - TextbookConverter - INFO -   处理节文件: section08-02.md
+2025-09-04 14:44:35,744 - TextbookConverter - INFO -   处理节文件: section08-03.md
+2025-09-04 14:44:35,749 - TextbookConverter - INFO -   处理节文件: section08-04.md
+2025-09-04 14:44:35,756 - TextbookConverter - INFO -   处理节文件: section08-05.md
+2025-09-04 14:44:35,778 - TextbookConverter - INFO - ✅ 第8章转换完成
+2025-09-04 14:44:35,779 - TextbookConverter - INFO - 转换第9章: chapter09
+2025-09-04 14:44:35,787 - TextbookConverter - INFO -   处理主文件: chapter09.md
+2025-09-04 14:44:35,804 - TextbookConverter - INFO - ✅ 第9章转换完成
+2025-09-04 14:44:35,807 - TextbookConverter - INFO - 转换附录: appendixA.md
+2025-09-04 14:44:35,816 - TextbookConverter - INFO - 转换附录: appendixB.md
+2025-09-04 14:44:35,824 - TextbookConverter - INFO - 转换附录: appendixC.md
+2025-09-04 14:44:35,831 - TextbookConverter - INFO - 处理图片文件...
+2025-09-04 14:44:38,708 - TextbookConverter - INFO - 复制了 83 张图片
+2025-09-04 14:44:38,709 - TextbookConverter - INFO - ✅ 所有章节转换完成
+2025-09-04 14:45:41,686 - TextbookConverter - INFO - 转换器初始化完成
+2025-09-04 14:45:41,686 - TextbookConverter - INFO - 项目根目录: .
+2025-09-04 14:45:41,687 - TextbookConverter - INFO - 文档目录: docs
+2025-09-04 14:45:41,687 - TextbookConverter - INFO - LaTeX输出目录: publish/latex
+2025-09-04 14:45:41,687 - TextbookConverter - INFO - 🔨 开始构建LaTeX文档...
+2025-09-04 14:45:41,688 - TextbookConverter - INFO - 执行命令: xelatex main.tex
+2025-09-04 14:45:48,257 - TextbookConverter - ERROR - LaTeX构建失败: 
+kpathsea: Running mktextfm SimSun/OT
+/usr/local/texlive/2025/texmf-dist/web2c/mktexnam: Could not map source abbreviation O for OT.
+/usr/local/texlive/2025/texmf-dist/web2c/mktexnam: Need to update /usr/local/texlive/2025/texmf-dist/fonts/map/fontname/special.map?
+mktextfm: Running mf-nowin -progname=mf \mode:=ljfour; mag:=1; ; nonstopmode; input OT
+This is METAFONT, Version 2.71828182 (TeX Live 2025) (preloaded base=mf)
+
+kpathsea: Running mktexmf OT
+
+! I can't find file `OT'.
+<*> \mode:=ljfour; mag:=1; ; nonstopmode; input OT
+                                                  
+Please type another input file name
+! Emergency stop.
+<*> \mode:=ljfour; mag:=1; ; nonstopmode; input OT
+                                                  
+Transcript written on mfput.log.
+grep: OT.log: No such file or directory
+mktextfm: `mf-nowin -progname=mf \mode:=ljfour; mag:=1; ; nonstopmode; input OT' failed to make OT.tfm.
+kpathsea: Appending font creation commands to missfont.log.
+
+2025-09-04 14:49:11,160 - TextbookConverter - INFO - 转换器初始化完成
+2025-09-04 14:49:11,161 - TextbookConverter - INFO - 项目根目录: .
+2025-09-04 14:49:11,161 - TextbookConverter - INFO - 文档目录: docs
+2025-09-04 14:49:11,162 - TextbookConverter - INFO - LaTeX输出目录: publish/latex
+2025-09-04 14:49:11,162 - TextbookConverter - INFO - ============================================================
+2025-09-04 14:49:11,162 - TextbookConverter - INFO - 智慧水利教材转换器 - 改进版
+2025-09-04 14:49:11,163 - TextbookConverter - INFO - ============================================================
+2025-09-04 14:49:11,163 - TextbookConverter - INFO - 🚀 开始教材转换流程
+2025-09-04 14:49:11,315 - TextbookConverter - INFO - 发现 9 个章节目录
+2025-09-04 14:49:11,317 - TextbookConverter - INFO - 转换前言...
+2025-09-04 14:49:11,325 - TextbookConverter - INFO - 转换第1章: chapter01
+2025-09-04 14:49:11,331 - TextbookConverter - INFO -   处理主文件: chapter01.md
+2025-09-04 14:49:11,335 - TextbookConverter - INFO -   处理节文件: section01-01.md
+2025-09-04 14:49:11,339 - TextbookConverter - INFO -   处理节文件: section01-02.md
+2025-09-04 14:49:11,345 - TextbookConverter - INFO -   处理节文件: section01-03.md
+2025-09-04 14:49:11,357 - TextbookConverter - INFO - ✅ 第1章转换完成
+2025-09-04 14:49:11,358 - TextbookConverter - INFO - 转换第2章: chapter02
+2025-09-04 14:49:11,365 - TextbookConverter - INFO -   处理主文件: chapter02.md
+2025-09-04 14:49:11,368 - TextbookConverter - INFO -   处理节文件: section02-01.md
+2025-09-04 14:49:11,371 - TextbookConverter - INFO -   处理节文件: section02-02.md
+2025-09-04 14:49:11,375 - TextbookConverter - INFO -   处理节文件: section02-03.md
+2025-09-04 14:49:11,379 - TextbookConverter - INFO -   处理节文件: section02-04.md
+2025-09-04 14:49:11,382 - TextbookConverter - INFO -   处理节文件: section02-05.md
+2025-09-04 14:49:11,387 - TextbookConverter - INFO -   处理节文件: section02-06.md
+2025-09-04 14:49:11,401 - TextbookConverter - INFO - ✅ 第2章转换完成
+2025-09-04 14:49:11,401 - TextbookConverter - INFO - 转换第3章: chapter03
+2025-09-04 14:49:11,407 - TextbookConverter - INFO -   处理主文件: chapter03.md
+2025-09-04 14:49:11,412 - TextbookConverter - INFO -   处理节文件: section03-01.md
+2025-09-04 14:49:11,416 - TextbookConverter - INFO -   处理节文件: section03-02.md
+2025-09-04 14:49:11,420 - TextbookConverter - INFO -   处理节文件: section03-03.md
+2025-09-04 14:49:11,424 - TextbookConverter - INFO -   处理节文件: section03-04.md
+2025-09-04 14:49:11,430 - TextbookConverter - INFO -   处理节文件: section03-05.md
+2025-09-04 14:49:11,434 - TextbookConverter - INFO -   处理节文件: section03-06.md
+2025-09-04 14:49:11,437 - TextbookConverter - INFO -   处理节文件: section03-07.md
+2025-09-04 14:49:11,451 - TextbookConverter - INFO - ✅ 第3章转换完成
+2025-09-04 14:49:11,452 - TextbookConverter - INFO - 转换第4章: chapter04
+2025-09-04 14:49:11,459 - TextbookConverter - INFO -   处理主文件: chapter04.md
+2025-09-04 14:49:11,463 - TextbookConverter - INFO -   处理节文件: section04-01.md
+2025-09-04 14:49:11,467 - TextbookConverter - INFO -   处理节文件: section04-02.md
+2025-09-04 14:49:11,473 - TextbookConverter - INFO -   处理节文件: section04-03.md
+2025-09-04 14:49:11,479 - TextbookConverter - INFO -   处理节文件: section04-04.md
+2025-09-04 14:49:11,488 - TextbookConverter - INFO -   处理节文件: section04-05.md
+2025-09-04 14:49:11,496 - TextbookConverter - INFO -   处理节文件: section04-06.md
+2025-09-04 14:49:11,502 - TextbookConverter - INFO -   处理节文件: section04-07.md
+2025-09-04 14:49:11,541 - TextbookConverter - INFO - ✅ 第4章转换完成
+2025-09-04 14:49:11,542 - TextbookConverter - INFO - 转换第5章: chapter05
+2025-09-04 14:49:11,548 - TextbookConverter - INFO -   处理主文件: chapter05.md
+2025-09-04 14:49:11,553 - TextbookConverter - INFO -   处理节文件: section05-01.md
+2025-09-04 14:49:11,560 - TextbookConverter - INFO -   处理节文件: section05-02.md
+2025-09-04 14:49:11,565 - TextbookConverter - INFO -   处理节文件: section05-03.md
+2025-09-04 14:49:11,570 - TextbookConverter - INFO -   处理节文件: section05-04.md
+2025-09-04 14:49:11,575 - TextbookConverter - INFO -   处理节文件: section05-05.md
+2025-09-04 14:49:11,581 - TextbookConverter - INFO -   处理节文件: section05-06.md
+2025-09-04 14:49:11,616 - TextbookConverter - INFO - ✅ 第5章转换完成
+2025-09-04 14:49:11,616 - TextbookConverter - INFO - 转换第6章: chapter06
+2025-09-04 14:49:11,628 - TextbookConverter - INFO -   处理主文件: chapter06.md
+2025-09-04 14:49:11,632 - TextbookConverter - INFO -   处理节文件: section06-01.md
+2025-09-04 14:49:11,636 - TextbookConverter - INFO -   处理节文件: section06-02.md
+2025-09-04 14:49:11,642 - TextbookConverter - INFO -   处理节文件: section06-03.md
+2025-09-04 14:49:11,647 - TextbookConverter - INFO -   处理节文件: section06-04.md
+2025-09-04 14:49:11,651 - TextbookConverter - INFO -   处理节文件: section06-05.md
+2025-09-04 14:49:11,654 - TextbookConverter - INFO -   处理节文件: section06-06.md
+2025-09-04 14:49:11,659 - TextbookConverter - INFO -   处理节文件: section06-07.md
+2025-09-04 14:49:11,680 - TextbookConverter - INFO - ✅ 第6章转换完成
+2025-09-04 14:49:11,680 - TextbookConverter - INFO - 转换第7章: chapter07
+2025-09-04 14:49:11,688 - TextbookConverter - INFO -   处理主文件: chapter07.md
+2025-09-04 14:49:11,694 - TextbookConverter - INFO -   处理节文件: section07-01.md
+2025-09-04 14:49:11,700 - TextbookConverter - INFO -   处理节文件: section07-02.md
+2025-09-04 14:49:11,706 - TextbookConverter - INFO -   处理节文件: section07-03.md
+2025-09-04 14:49:11,712 - TextbookConverter - INFO -   处理节文件: section07-04.md
+2025-09-04 14:49:11,730 - TextbookConverter - INFO - ✅ 第7章转换完成
+2025-09-04 14:49:11,730 - TextbookConverter - INFO - 转换第8章: chapter08
+2025-09-04 14:49:11,737 - TextbookConverter - INFO -   处理主文件: chapter08.md
+2025-09-04 14:49:11,741 - TextbookConverter - INFO -   处理节文件: section08-01.md
+2025-09-04 14:49:11,746 - TextbookConverter - INFO -   处理节文件: section08-02.md
+2025-09-04 14:49:11,751 - TextbookConverter - INFO -   处理节文件: section08-03.md
+2025-09-04 14:49:11,756 - TextbookConverter - INFO -   处理节文件: section08-04.md
+2025-09-04 14:49:11,762 - TextbookConverter - INFO -   处理节文件: section08-05.md
+2025-09-04 14:49:11,783 - TextbookConverter - INFO - ✅ 第8章转换完成
+2025-09-04 14:49:11,783 - TextbookConverter - INFO - 转换第9章: chapter09
+2025-09-04 14:49:11,790 - TextbookConverter - INFO -   处理主文件: chapter09.md
+2025-09-04 14:49:11,802 - TextbookConverter - INFO - ✅ 第9章转换完成
+2025-09-04 14:49:11,804 - TextbookConverter - INFO - 转换附录: appendixA.md
+2025-09-04 14:49:11,812 - TextbookConverter - INFO - 转换附录: appendixB.md
+2025-09-04 14:49:11,821 - TextbookConverter - INFO - 转换附录: appendixC.md
+2025-09-04 14:49:11,829 - TextbookConverter - INFO - 处理图片文件...
+2025-09-04 14:49:14,514 - TextbookConverter - INFO - 复制了 83 张图片
+2025-09-04 14:49:14,515 - TextbookConverter - INFO - ✅ 所有章节转换完成
+2025-09-04 14:49:14,515 - TextbookConverter - INFO - 🔨 开始构建LaTeX文档...
+2025-09-04 14:49:14,516 - TextbookConverter - INFO - 执行命令: xelatex main.tex
+2025-09-04 15:03:13,343 - TextbookConverter - INFO - 用户中断转换
+2025-09-04 15:03:48,291 - TextbookConverter - INFO - 转换器初始化完成
+2025-09-04 15:03:48,291 - TextbookConverter - INFO - 项目根目录: E:\2025\教材\智慧水利平台架构与开发
+2025-09-04 15:03:48,291 - TextbookConverter - INFO - 文档目录: E:\2025\教材\智慧水利平台架构与开发\docs
+2025-09-04 15:03:48,291 - TextbookConverter - INFO - LaTeX输出目录: E:\2025\教材\智慧水利平台架构与开发\publish\latex
+2025-09-04 15:03:48,292 - TextbookConverter - INFO - ============================================================
+2025-09-04 15:03:48,292 - TextbookConverter - INFO - 智慧水利教材转换器 - 改进版
+2025-09-04 15:03:48,292 - TextbookConverter - INFO - ============================================================
+2025-09-04 15:03:48,292 - TextbookConverter - INFO - 🚀 开始教材转换流程
+2025-09-04 15:03:48,294 - TextbookConverter - INFO - 发现 9 个章节目录
+2025-09-04 15:03:48,294 - TextbookConverter - INFO - 转换前言...
+2025-09-04 15:03:48,295 - TextbookConverter - INFO - 转换第1章: chapter01
+2025-09-04 15:03:48,296 - TextbookConverter - INFO -   处理主文件: chapter01.md
+2025-09-04 15:03:48,297 - TextbookConverter - INFO -   处理节文件: section01-01.md
+2025-09-04 15:03:48,297 - TextbookConverter - INFO -   处理节文件: section01-02.md
+2025-09-04 15:03:48,298 - TextbookConverter - INFO -   处理节文件: section01-03.md
+2025-09-04 15:03:48,299 - TextbookConverter - INFO - ✅ 第1章转换完成
+2025-09-04 15:03:48,300 - TextbookConverter - INFO - 转换第2章: chapter02
+2025-09-04 15:03:48,300 - TextbookConverter - INFO -   处理主文件: chapter02.md
+2025-09-04 15:03:48,301 - TextbookConverter - INFO -   处理节文件: section02-01.md
+2025-09-04 15:03:48,301 - TextbookConverter - INFO -   处理节文件: section02-02.md
+2025-09-04 15:03:48,301 - TextbookConverter - INFO -   处理节文件: section02-03.md
+2025-09-04 15:03:48,302 - TextbookConverter - INFO -   处理节文件: section02-04.md
+2025-09-04 15:03:48,302 - TextbookConverter - INFO -   处理节文件: section02-05.md
+2025-09-04 15:03:48,302 - TextbookConverter - INFO -   处理节文件: section02-06.md
+2025-09-04 15:03:48,304 - TextbookConverter - INFO - ✅ 第2章转换完成
+2025-09-04 15:03:48,305 - TextbookConverter - INFO - 转换第3章: chapter03
+2025-09-04 15:03:48,305 - TextbookConverter - INFO -   处理主文件: chapter03.md
+2025-09-04 15:03:48,305 - TextbookConverter - INFO -   处理节文件: section03-01.md
+2025-09-04 15:03:48,306 - TextbookConverter - INFO -   处理节文件: section03-02.md
+2025-09-04 15:03:48,306 - TextbookConverter - INFO -   处理节文件: section03-03.md
+2025-09-04 15:03:48,307 - TextbookConverter - INFO -   处理节文件: section03-04.md
+2025-09-04 15:03:48,307 - TextbookConverter - INFO -   处理节文件: section03-05.md
+2025-09-04 15:03:48,308 - TextbookConverter - INFO -   处理节文件: section03-06.md
+2025-09-04 15:03:48,308 - TextbookConverter - INFO -   处理节文件: section03-07.md
+2025-09-04 15:03:48,311 - TextbookConverter - INFO - ✅ 第3章转换完成
+2025-09-04 15:03:48,311 - TextbookConverter - INFO - 转换第4章: chapter04
+2025-09-04 15:03:48,312 - TextbookConverter - INFO -   处理主文件: chapter04.md
+2025-09-04 15:03:48,312 - TextbookConverter - INFO -   处理节文件: section04-01.md
+2025-09-04 15:03:48,313 - TextbookConverter - INFO -   处理节文件: section04-02.md
+2025-09-04 15:03:48,315 - TextbookConverter - INFO -   处理节文件: section04-03.md
+2025-09-04 15:03:48,317 - TextbookConverter - INFO -   处理节文件: section04-04.md
+2025-09-04 15:03:48,322 - TextbookConverter - INFO -   处理节文件: section04-05.md
+2025-09-04 15:03:48,327 - TextbookConverter - INFO -   处理节文件: section04-06.md
+2025-09-04 15:03:48,329 - TextbookConverter - INFO -   处理节文件: section04-07.md
+2025-09-04 15:03:48,351 - TextbookConverter - INFO - ✅ 第4章转换完成
+2025-09-04 15:03:48,351 - TextbookConverter - INFO - 转换第5章: chapter05
+2025-09-04 15:03:48,352 - TextbookConverter - INFO -   处理主文件: chapter05.md
+2025-09-04 15:03:48,353 - TextbookConverter - INFO -   处理节文件: section05-01.md
+2025-09-04 15:03:48,355 - TextbookConverter - INFO -   处理节文件: section05-02.md
+2025-09-04 15:03:48,358 - TextbookConverter - INFO -   处理节文件: section05-03.md
+2025-09-04 15:03:48,360 - TextbookConverter - INFO -   处理节文件: section05-04.md
+2025-09-04 15:03:48,362 - TextbookConverter - INFO -   处理节文件: section05-05.md
+2025-09-04 15:03:48,364 - TextbookConverter - INFO -   处理节文件: section05-06.md
+2025-09-04 15:03:48,381 - TextbookConverter - INFO - ✅ 第5章转换完成
+2025-09-04 15:03:48,381 - TextbookConverter - INFO - 转换第6章: chapter06
+2025-09-04 15:03:48,381 - TextbookConverter - INFO -   处理主文件: chapter06.md
+2025-09-04 15:03:48,382 - TextbookConverter - INFO -   处理节文件: section06-01.md
+2025-09-04 15:03:48,382 - TextbookConverter - INFO -   处理节文件: section06-02.md
+2025-09-04 15:03:48,384 - TextbookConverter - INFO -   处理节文件: section06-03.md
+2025-09-04 15:03:48,385 - TextbookConverter - INFO -   处理节文件: section06-04.md
+2025-09-04 15:03:48,385 - TextbookConverter - INFO -   处理节文件: section06-05.md
+2025-09-04 15:03:48,386 - TextbookConverter - INFO -   处理节文件: section06-06.md
+2025-09-04 15:03:48,387 - TextbookConverter - INFO -   处理节文件: section06-07.md
+2025-09-04 15:03:48,393 - TextbookConverter - INFO - ✅ 第6章转换完成
+2025-09-04 15:03:48,394 - TextbookConverter - INFO - 转换第7章: chapter07
+2025-09-04 15:03:48,394 - TextbookConverter - INFO -   处理主文件: chapter07.md
+2025-09-04 15:03:48,395 - TextbookConverter - INFO -   处理节文件: section07-01.md
+2025-09-04 15:03:48,395 - TextbookConverter - INFO -   处理节文件: section07-02.md
+2025-09-04 15:03:48,396 - TextbookConverter - INFO -   处理节文件: section07-03.md
+2025-09-04 15:03:48,396 - TextbookConverter - INFO -   处理节文件: section07-04.md
+2025-09-04 15:03:48,401 - TextbookConverter - INFO - ✅ 第7章转换完成
+2025-09-04 15:03:48,401 - TextbookConverter - INFO - 转换第8章: chapter08
+2025-09-04 15:03:48,401 - TextbookConverter - INFO -   处理主文件: chapter08.md
+2025-09-04 15:03:48,402 - TextbookConverter - INFO -   处理节文件: section08-01.md
+2025-09-04 15:03:48,403 - TextbookConverter - INFO -   处理节文件: section08-02.md
+2025-09-04 15:03:48,404 - TextbookConverter - INFO -   处理节文件: section08-03.md
+2025-09-04 15:03:48,405 - TextbookConverter - INFO -   处理节文件: section08-04.md
+2025-09-04 15:03:48,406 - TextbookConverter - INFO -   处理节文件: section08-05.md
+2025-09-04 15:03:48,411 - TextbookConverter - INFO - ✅ 第8章转换完成
+2025-09-04 15:03:48,411 - TextbookConverter - INFO - 转换第9章: chapter09
+2025-09-04 15:03:48,412 - TextbookConverter - INFO -   处理主文件: chapter09.md
+2025-09-04 15:03:48,413 - TextbookConverter - INFO - ✅ 第9章转换完成
+2025-09-04 15:03:48,413 - TextbookConverter - INFO - 转换附录: appendixA.md
+2025-09-04 15:03:48,414 - TextbookConverter - INFO - 转换附录: appendixB.md
+2025-09-04 15:03:48,415 - TextbookConverter - INFO - 转换附录: appendixC.md
+2025-09-04 15:03:48,416 - TextbookConverter - INFO - 处理图片文件...
+2025-09-04 15:03:48,470 - TextbookConverter - INFO - 复制了 83 张图片
+2025-09-04 15:03:48,471 - TextbookConverter - INFO - ✅ 所有章节转换完成
+2025-09-04 15:03:48,471 - TextbookConverter - INFO - 🔨 开始构建LaTeX文档...
+2025-09-04 15:03:48,471 - TextbookConverter - INFO - 执行命令: xelatex main.tex
+2025-09-04 15:20:13,981 - TextbookConverter - INFO - 转换器初始化完成
+2025-09-04 15:20:13,981 - TextbookConverter - INFO - 项目根目录: .
+2025-09-04 15:20:13,981 - TextbookConverter - INFO - 文档目录: docs
+2025-09-04 15:20:13,982 - TextbookConverter - INFO - LaTeX输出目录: publish/latex
+2025-09-04 15:20:13,982 - TextbookConverter - INFO - 🚀 开始教材转换流程
+2025-09-04 15:20:14,054 - TextbookConverter - INFO - 发现 9 个章节目录
+2025-09-04 15:20:14,056 - TextbookConverter - INFO - 转换前言...
+2025-09-04 15:20:14,064 - TextbookConverter - INFO - 转换第1章: chapter01
+2025-09-04 15:20:14,071 - TextbookConverter - INFO -   处理主文件: chapter01.md
+2025-09-04 15:20:14,078 - TextbookConverter - INFO -   处理节文件: section01-01.md
+2025-09-04 15:20:14,083 - TextbookConverter - INFO -   处理节文件: section01-02.md
+2025-09-04 15:20:14,088 - TextbookConverter - INFO -   处理节文件: section01-03.md
+2025-09-04 15:20:14,118 - TextbookConverter - INFO - ✅ 第1章转换完成
+2025-09-04 15:20:14,118 - TextbookConverter - INFO - 转换第2章: chapter02
+2025-09-04 15:20:14,128 - TextbookConverter - INFO -   处理主文件: chapter02.md
+2025-09-04 15:20:14,133 - TextbookConverter - INFO -   处理节文件: section02-01.md
+2025-09-04 15:20:14,138 - TextbookConverter - INFO -   处理节文件: section02-02.md
+2025-09-04 15:20:14,141 - TextbookConverter - INFO -   处理节文件: section02-03.md
+2025-09-04 15:20:14,144 - TextbookConverter - INFO -   处理节文件: section02-04.md
+2025-09-04 15:20:14,146 - TextbookConverter - INFO -   处理节文件: section02-05.md
+2025-09-04 15:20:14,149 - TextbookConverter - INFO -   处理节文件: section02-06.md
+2025-09-04 15:20:14,176 - TextbookConverter - INFO - ✅ 第2章转换完成
+2025-09-04 15:20:14,176 - TextbookConverter - INFO - 转换第3章: chapter03
+2025-09-04 15:20:14,183 - TextbookConverter - INFO -   处理主文件: chapter03.md
+2025-09-04 15:20:14,187 - TextbookConverter - INFO -   处理节文件: section03-01.md
+2025-09-04 15:20:14,190 - TextbookConverter - INFO -   处理节文件: section03-02.md
+2025-09-04 15:20:14,193 - TextbookConverter - INFO -   处理节文件: section03-03.md
+2025-09-04 15:20:14,197 - TextbookConverter - INFO -   处理节文件: section03-04.md
+2025-09-04 15:20:14,201 - TextbookConverter - INFO -   处理节文件: section03-05.md
+2025-09-04 15:20:14,205 - TextbookConverter - INFO -   处理节文件: section03-06.md
+2025-09-04 15:20:14,207 - TextbookConverter - INFO -   处理节文件: section03-07.md
+2025-09-04 15:20:14,236 - TextbookConverter - INFO - ✅ 第3章转换完成
+2025-09-04 15:20:14,237 - TextbookConverter - INFO - 转换第4章: chapter04
+2025-09-04 15:20:14,244 - TextbookConverter - INFO -   处理主文件: chapter04.md
+2025-09-04 15:20:14,249 - TextbookConverter - INFO -   处理节文件: section04-01.md
+2025-09-04 15:20:14,254 - TextbookConverter - INFO -   处理节文件: section04-02.md
+2025-09-04 15:20:14,258 - TextbookConverter - INFO -   处理节文件: section04-03.md
+2025-09-04 15:20:14,263 - TextbookConverter - INFO -   处理节文件: section04-04.md
+2025-09-04 15:20:14,272 - TextbookConverter - INFO -   处理节文件: section04-05.md
+2025-09-04 15:20:14,280 - TextbookConverter - INFO -   处理节文件: section04-06.md
+2025-09-04 15:20:14,287 - TextbookConverter - INFO -   处理节文件: section04-07.md
+2025-09-04 15:20:14,330 - TextbookConverter - INFO - ✅ 第4章转换完成
+2025-09-04 15:20:14,331 - TextbookConverter - INFO - 转换第5章: chapter05
+2025-09-04 15:20:14,339 - TextbookConverter - INFO -   处理主文件: chapter05.md
+2025-09-04 15:20:14,343 - TextbookConverter - INFO -   处理节文件: section05-01.md
+2025-09-04 15:20:14,348 - TextbookConverter - INFO -   处理节文件: section05-02.md
+2025-09-04 15:20:14,354 - TextbookConverter - INFO -   处理节文件: section05-03.md
+2025-09-04 15:20:14,360 - TextbookConverter - INFO -   处理节文件: section05-04.md
+2025-09-04 15:20:14,366 - TextbookConverter - INFO -   处理节文件: section05-05.md
+2025-09-04 15:20:14,372 - TextbookConverter - INFO -   处理节文件: section05-06.md
+2025-09-04 15:20:14,414 - TextbookConverter - INFO - ✅ 第5章转换完成
+2025-09-04 15:20:14,414 - TextbookConverter - INFO - 转换第6章: chapter06
+2025-09-04 15:20:14,422 - TextbookConverter - INFO -   处理主文件: chapter06.md
+2025-09-04 15:20:14,426 - TextbookConverter - INFO -   处理节文件: section06-01.md
+2025-09-04 15:20:14,430 - TextbookConverter - INFO -   处理节文件: section06-02.md
+2025-09-04 15:20:14,434 - TextbookConverter - INFO -   处理节文件: section06-03.md
+2025-09-04 15:20:14,439 - TextbookConverter - INFO -   处理节文件: section06-04.md
+2025-09-04 15:20:14,443 - TextbookConverter - INFO -   处理节文件: section06-05.md
+2025-09-04 15:20:14,447 - TextbookConverter - INFO -   处理节文件: section06-06.md
+2025-09-04 15:20:14,451 - TextbookConverter - INFO -   处理节文件: section06-07.md
+2025-09-04 15:20:14,485 - TextbookConverter - INFO - ✅ 第6章转换完成
+2025-09-04 15:20:14,486 - TextbookConverter - INFO - 转换第7章: chapter07
+2025-09-04 15:20:14,492 - TextbookConverter - INFO -   处理主文件: chapter07.md
+2025-09-04 15:20:14,496 - TextbookConverter - INFO -   处理节文件: section07-01.md
+2025-09-04 15:20:14,499 - TextbookConverter - INFO -   处理节文件: section07-02.md
+2025-09-04 15:20:14,503 - TextbookConverter - INFO -   处理节文件: section07-03.md
+2025-09-04 15:20:14,507 - TextbookConverter - INFO -   处理节文件: section07-04.md
+2025-09-04 15:20:14,533 - TextbookConverter - INFO - ✅ 第7章转换完成
+2025-09-04 15:20:14,533 - TextbookConverter - INFO - 转换第8章: chapter08
+2025-09-04 15:20:14,541 - TextbookConverter - INFO -   处理主文件: chapter08.md
+2025-09-04 15:20:14,545 - TextbookConverter - INFO -   处理节文件: section08-01.md
+2025-09-04 15:20:14,549 - TextbookConverter - INFO -   处理节文件: section08-02.md
+2025-09-04 15:20:14,556 - TextbookConverter - INFO -   处理节文件: section08-03.md
+2025-09-04 15:20:14,561 - TextbookConverter - INFO -   处理节文件: section08-04.md
+2025-09-04 15:20:14,565 - TextbookConverter - INFO -   处理节文件: section08-05.md
+2025-09-04 15:20:14,596 - TextbookConverter - INFO - ✅ 第8章转换完成
+2025-09-04 15:20:14,596 - TextbookConverter - INFO - 转换第9章: chapter09
+2025-09-04 15:20:14,603 - TextbookConverter - INFO -   处理主文件: chapter09.md
+2025-09-04 15:20:14,616 - TextbookConverter - INFO - ✅ 第9章转换完成
+2025-09-04 15:20:14,620 - TextbookConverter - INFO - 转换附录: appendixA.md
+2025-09-04 15:20:14,636 - TextbookConverter - INFO - 转换附录: appendixB.md
+2025-09-04 15:20:14,652 - TextbookConverter - INFO - 转换附录: appendixC.md
+2025-09-04 15:20:14,665 - TextbookConverter - INFO - 处理图片文件...
+2025-09-04 15:20:18,166 - TextbookConverter - INFO - 复制了 83 张图片
+2025-09-04 15:20:18,166 - TextbookConverter - INFO - ✅ 所有章节转换完成
+2025-09-04 15:30:27,100 - TextbookConverter - INFO - 转换器初始化完成
+2025-09-04 15:30:27,100 - TextbookConverter - INFO - 项目根目录: .
+2025-09-04 15:30:27,101 - TextbookConverter - INFO - 文档目录: docs
+2025-09-04 15:30:27,101 - TextbookConverter - INFO - LaTeX输出目录: publish/latex
+2025-09-04 15:30:27,101 - TextbookConverter - INFO - 🚀 开始教材转换流程
+2025-09-04 15:30:27,163 - TextbookConverter - INFO - 发现 9 个章节目录
+2025-09-04 15:30:27,165 - TextbookConverter - INFO - 转换前言...
+2025-09-04 15:30:27,177 - TextbookConverter - INFO - 转换第1章: chapter01
+2025-09-04 15:30:27,187 - TextbookConverter - INFO -   处理主文件: chapter01.md
+2025-09-04 15:30:27,192 - TextbookConverter - INFO -   处理节文件: section01-01.md
+2025-09-04 15:30:27,197 - TextbookConverter - INFO -   处理节文件: section01-02.md
+2025-09-04 15:30:27,205 - TextbookConverter - INFO -   处理节文件: section01-03.md
+2025-09-04 15:30:27,220 - TextbookConverter - INFO - ✅ 第1章转换完成
+2025-09-04 15:30:27,220 - TextbookConverter - INFO - 转换第2章: chapter02
+2025-09-04 15:30:27,228 - TextbookConverter - INFO -   处理主文件: chapter02.md
+2025-09-04 15:30:27,233 - TextbookConverter - INFO -   处理节文件: section02-01.md
+2025-09-04 15:30:27,238 - TextbookConverter - INFO -   处理节文件: section02-02.md
+2025-09-04 15:30:27,243 - TextbookConverter - INFO -   处理节文件: section02-03.md
+2025-09-04 15:30:27,248 - TextbookConverter - INFO -   处理节文件: section02-04.md
+2025-09-04 15:30:27,252 - TextbookConverter - INFO -   处理节文件: section02-05.md
+2025-09-04 15:30:27,258 - TextbookConverter - INFO -   处理节文件: section02-06.md
+2025-09-04 15:30:27,271 - TextbookConverter - INFO - ✅ 第2章转换完成
+2025-09-04 15:30:27,272 - TextbookConverter - INFO - 转换第3章: chapter03
+2025-09-04 15:30:27,279 - TextbookConverter - INFO -   处理主文件: chapter03.md
+2025-09-04 15:30:27,284 - TextbookConverter - INFO -   处理节文件: section03-01.md
+2025-09-04 15:30:27,290 - TextbookConverter - INFO -   处理节文件: section03-02.md
+2025-09-04 15:30:27,296 - TextbookConverter - INFO -   处理节文件: section03-03.md
+2025-09-04 15:30:27,302 - TextbookConverter - INFO -   处理节文件: section03-04.md
+2025-09-04 15:30:27,307 - TextbookConverter - INFO -   处理节文件: section03-05.md
+2025-09-04 15:30:27,312 - TextbookConverter - INFO -   处理节文件: section03-06.md
+2025-09-04 15:30:27,316 - TextbookConverter - INFO -   处理节文件: section03-07.md
+2025-09-04 15:30:27,329 - TextbookConverter - INFO - ✅ 第3章转换完成
+2025-09-04 15:30:27,329 - TextbookConverter - INFO - 转换第4章: chapter04
+2025-09-04 15:30:27,335 - TextbookConverter - INFO -   处理主文件: chapter04.md
+2025-09-04 15:30:27,340 - TextbookConverter - INFO -   处理节文件: section04-01.md
+2025-09-04 15:30:27,345 - TextbookConverter - INFO -   处理节文件: section04-02.md
+2025-09-04 15:30:27,354 - TextbookConverter - INFO -   处理节文件: section04-03.md
+2025-09-04 15:30:27,362 - TextbookConverter - INFO -   处理节文件: section04-04.md
+2025-09-04 15:30:27,386 - TextbookConverter - INFO -   处理节文件: section04-05.md
+2025-09-04 15:30:27,405 - TextbookConverter - INFO -   处理节文件: section04-06.md
+2025-09-04 15:30:27,422 - TextbookConverter - INFO -   处理节文件: section04-07.md
+2025-09-04 15:30:27,459 - TextbookConverter - INFO - ✅ 第4章转换完成
+2025-09-04 15:30:27,459 - TextbookConverter - INFO - 转换第5章: chapter05
+2025-09-04 15:30:27,467 - TextbookConverter - INFO -   处理主文件: chapter05.md
+2025-09-04 15:30:27,474 - TextbookConverter - INFO -   处理节文件: section05-01.md
+2025-09-04 15:30:27,488 - TextbookConverter - INFO -   处理节文件: section05-02.md
+2025-09-04 15:30:27,503 - TextbookConverter - INFO -   处理节文件: section05-03.md
+2025-09-04 15:30:27,514 - TextbookConverter - INFO -   处理节文件: section05-04.md
+2025-09-04 15:30:27,525 - TextbookConverter - INFO -   处理节文件: section05-05.md
+2025-09-04 15:30:27,535 - TextbookConverter - INFO -   处理节文件: section05-06.md
+2025-09-04 15:30:27,567 - TextbookConverter - INFO - ✅ 第5章转换完成
+2025-09-04 15:30:27,567 - TextbookConverter - INFO - 转换第6章: chapter06
+2025-09-04 15:30:27,576 - TextbookConverter - INFO -   处理主文件: chapter06.md
+2025-09-04 15:30:27,582 - TextbookConverter - INFO -   处理节文件: section06-01.md
+2025-09-04 15:30:27,587 - TextbookConverter - INFO -   处理节文件: section06-02.md
+2025-09-04 15:30:27,603 - TextbookConverter - INFO -   处理节文件: section06-03.md
+2025-09-04 15:30:27,618 - TextbookConverter - INFO -   处理节文件: section06-04.md
+2025-09-04 15:30:27,704 - TextbookConverter - INFO -   处理节文件: section06-05.md
+2025-09-04 15:30:27,743 - TextbookConverter - INFO -   处理节文件: section06-06.md
+2025-09-04 15:30:27,757 - TextbookConverter - INFO -   处理节文件: section06-07.md
+2025-09-04 15:30:27,777 - TextbookConverter - INFO - ✅ 第6章转换完成
+2025-09-04 15:30:27,778 - TextbookConverter - INFO - 转换第7章: chapter07
+2025-09-04 15:30:27,789 - TextbookConverter - INFO -   处理主文件: chapter07.md
+2025-09-04 15:30:27,795 - TextbookConverter - INFO -   处理节文件: section07-01.md
+2025-09-04 15:30:27,803 - TextbookConverter - INFO -   处理节文件: section07-02.md
+2025-09-04 15:30:27,808 - TextbookConverter - INFO -   处理节文件: section07-03.md
+2025-09-04 15:30:27,814 - TextbookConverter - INFO -   处理节文件: section07-04.md
+2025-09-04 15:30:27,831 - TextbookConverter - INFO - ✅ 第7章转换完成
+2025-09-04 15:30:27,831 - TextbookConverter - INFO - 转换第8章: chapter08
+2025-09-04 15:30:27,837 - TextbookConverter - INFO -   处理主文件: chapter08.md
+2025-09-04 15:30:27,841 - TextbookConverter - INFO -   处理节文件: section08-01.md
+2025-09-04 15:30:27,851 - TextbookConverter - INFO -   处理节文件: section08-02.md
+2025-09-04 15:30:27,858 - TextbookConverter - INFO -   处理节文件: section08-03.md
+2025-09-04 15:30:27,864 - TextbookConverter - INFO -   处理节文件: section08-04.md
+2025-09-04 15:30:27,871 - TextbookConverter - INFO -   处理节文件: section08-05.md
+2025-09-04 15:30:27,884 - TextbookConverter - INFO - ✅ 第8章转换完成
+2025-09-04 15:30:27,885 - TextbookConverter - INFO - 转换第9章: chapter09
+2025-09-04 15:30:27,890 - TextbookConverter - INFO -   处理主文件: chapter09.md
+2025-09-04 15:30:27,901 - TextbookConverter - INFO - ✅ 第9章转换完成
+2025-09-04 15:30:27,903 - TextbookConverter - INFO - 转换附录: appendixA.md
+2025-09-04 15:30:27,912 - TextbookConverter - INFO - 转换附录: appendixB.md
+2025-09-04 15:30:27,919 - TextbookConverter - INFO - 转换附录: appendixC.md
+2025-09-04 15:30:27,926 - TextbookConverter - INFO - 处理图片文件...
+2025-09-04 15:30:31,599 - TextbookConverter - INFO - 复制了 83 张图片
+2025-09-04 15:30:31,599 - TextbookConverter - INFO - ✅ 所有章节转换完成
+2025-09-04 15:32:22,340 - TextbookConverter - INFO - 转换器初始化完成
+2025-09-04 15:32:22,340 - TextbookConverter - INFO - 项目根目录: .
+2025-09-04 15:32:22,340 - TextbookConverter - INFO - 文档目录: docs
+2025-09-04 15:32:22,341 - TextbookConverter - INFO - LaTeX输出目录: publish/latex
+2025-09-04 15:32:22,341 - TextbookConverter - INFO - 🚀 开始教材转换流程
+2025-09-04 15:32:22,452 - TextbookConverter - INFO - 发现 9 个章节目录
+2025-09-04 15:32:22,453 - TextbookConverter - INFO - 转换前言...
+2025-09-04 15:32:22,853 - TextbookConverter - INFO - 转换第1章: chapter01
+2025-09-04 15:32:22,862 - TextbookConverter - INFO -   处理主文件: chapter01.md
+2025-09-04 15:32:22,891 - TextbookConverter - INFO -   处理节文件: section01-01.md
+2025-09-04 15:32:22,950 - TextbookConverter - INFO -   处理节文件: section01-02.md
+2025-09-04 15:32:23,021 - TextbookConverter - INFO -   处理节文件: section01-03.md
+2025-09-04 15:32:23,276 - TextbookConverter - INFO - ✅ 第1章转换完成
+2025-09-04 15:32:23,276 - TextbookConverter - INFO - 转换第2章: chapter02
+2025-09-04 15:32:23,284 - TextbookConverter - INFO -   处理主文件: chapter02.md
+2025-09-04 15:32:23,302 - TextbookConverter - INFO -   处理节文件: section02-01.md
+2025-09-04 15:32:23,320 - TextbookConverter - INFO -   处理节文件: section02-02.md
+2025-09-04 15:32:23,371 - TextbookConverter - INFO -   处理节文件: section02-03.md
+2025-09-04 15:32:23,422 - TextbookConverter - INFO -   处理节文件: section02-04.md
+2025-09-04 15:32:23,440 - TextbookConverter - INFO -   处理节文件: section02-05.md
+2025-09-04 15:32:23,500 - TextbookConverter - INFO -   处理节文件: section02-06.md
+2025-09-04 15:32:23,527 - TextbookConverter - INFO - ✅ 第2章转换完成
+2025-09-04 15:32:23,528 - TextbookConverter - INFO - 转换第3章: chapter03
+2025-09-04 15:32:23,533 - TextbookConverter - INFO -   处理主文件: chapter03.md
+2025-09-04 15:32:23,551 - TextbookConverter - INFO -   处理节文件: section03-01.md
+2025-09-04 15:32:23,601 - TextbookConverter - INFO -   处理节文件: section03-02.md
+2025-09-04 15:32:23,651 - TextbookConverter - INFO -   处理节文件: section03-03.md
+2025-09-04 15:32:23,702 - TextbookConverter - INFO -   处理节文件: section03-04.md
+2025-09-04 15:32:23,751 - TextbookConverter - INFO -   处理节文件: section03-05.md
+2025-09-04 15:32:23,779 - TextbookConverter - INFO -   处理节文件: section03-06.md
+2025-09-04 15:32:23,827 - TextbookConverter - INFO -   处理节文件: section03-07.md
+2025-09-04 15:32:23,891 - TextbookConverter - INFO - ✅ 第3章转换完成
+2025-09-04 15:32:23,892 - TextbookConverter - INFO - 转换第4章: chapter04
+2025-09-04 15:32:23,900 - TextbookConverter - INFO -   处理主文件: chapter04.md
+2025-09-04 15:32:23,951 - TextbookConverter - INFO -   处理节文件: section04-01.md
+2025-09-04 15:32:23,980 - TextbookConverter - INFO -   处理节文件: section04-02.md
+2025-09-04 15:32:24,041 - TextbookConverter - INFO -   处理节文件: section04-03.md
+2025-09-04 15:32:24,120 - TextbookConverter - INFO -   处理节文件: section04-04.md
+2025-09-04 15:32:24,239 - TextbookConverter - INFO -   处理节文件: section04-05.md
+2025-09-04 15:32:24,324 - TextbookConverter - INFO -   处理节文件: section04-06.md
+2025-09-04 15:32:24,516 - TextbookConverter - INFO -   处理节文件: section04-07.md
+2025-09-04 15:32:24,618 - TextbookConverter - INFO - ✅ 第4章转换完成
+2025-09-04 15:32:24,619 - TextbookConverter - INFO - 转换第5章: chapter05
+2025-09-04 15:32:24,625 - TextbookConverter - INFO -   处理主文件: chapter05.md
+2025-09-04 15:32:24,684 - TextbookConverter - INFO -   处理节文件: section05-01.md
+2025-09-04 15:32:24,779 - TextbookConverter - INFO -   处理节文件: section05-02.md
+2025-09-04 15:32:24,832 - TextbookConverter - INFO -   处理节文件: section05-03.md
+2025-09-04 15:32:24,894 - TextbookConverter - INFO -   处理节文件: section05-04.md
+2025-09-04 15:32:24,947 - TextbookConverter - INFO -   处理节文件: section05-05.md
+2025-09-04 15:32:25,010 - TextbookConverter - INFO -   处理节文件: section05-06.md
+2025-09-04 15:32:25,164 - TextbookConverter - INFO - ✅ 第5章转换完成
+2025-09-04 15:32:25,164 - TextbookConverter - INFO - 转换第6章: chapter06
+2025-09-04 15:32:25,185 - TextbookConverter - INFO -   处理主文件: chapter06.md
+2025-09-04 15:32:25,246 - TextbookConverter - INFO -   处理节文件: section06-01.md
+2025-09-04 15:32:25,265 - TextbookConverter - INFO -   处理节文件: section06-02.md
+2025-09-04 15:32:25,396 - TextbookConverter - INFO -   处理节文件: section06-03.md
+2025-09-04 15:32:26,229 - TextbookConverter - INFO -   处理节文件: section06-04.md
+2025-09-04 15:32:26,300 - TextbookConverter - INFO -   处理节文件: section06-05.md
+2025-09-04 15:32:26,350 - TextbookConverter - INFO -   处理节文件: section06-06.md
+2025-09-04 15:32:26,410 - TextbookConverter - INFO -   处理节文件: section06-07.md
+2025-09-04 15:32:26,483 - TextbookConverter - INFO - ✅ 第6章转换完成
+2025-09-04 15:32:26,484 - TextbookConverter - INFO - 转换第7章: chapter07
+2025-09-04 15:32:26,493 - TextbookConverter - INFO -   处理主文件: chapter07.md
+2025-09-04 15:32:26,543 - TextbookConverter - INFO -   处理节文件: section07-01.md
+2025-09-04 15:32:26,604 - TextbookConverter - INFO -   处理节文件: section07-02.md
+2025-09-04 15:32:26,665 - TextbookConverter - INFO -   处理节文件: section07-03.md
+2025-09-04 15:32:26,725 - TextbookConverter - INFO -   处理节文件: section07-04.md
+2025-09-04 15:32:26,817 - TextbookConverter - INFO - ✅ 第7章转换完成
+2025-09-04 15:32:26,818 - TextbookConverter - INFO - 转换第8章: chapter08
+2025-09-04 15:32:26,831 - TextbookConverter - INFO -   处理主文件: chapter08.md
+2025-09-04 15:32:26,895 - TextbookConverter - INFO -   处理节文件: section08-01.md
+2025-09-04 15:32:26,995 - TextbookConverter - INFO -   处理节文件: section08-02.md
+2025-09-04 15:32:27,085 - TextbookConverter - INFO -   处理节文件: section08-03.md
+2025-09-04 15:32:27,179 - TextbookConverter - INFO -   处理节文件: section08-04.md
+2025-09-04 15:32:27,290 - TextbookConverter - INFO -   处理节文件: section08-05.md
+2025-09-04 15:32:27,364 - TextbookConverter - INFO - ✅ 第8章转换完成
+2025-09-04 15:32:27,364 - TextbookConverter - INFO - 转换第9章: chapter09
+2025-09-04 15:32:27,371 - TextbookConverter - INFO -   处理主文件: chapter09.md
+2025-09-04 15:32:27,396 - TextbookConverter - INFO - ✅ 第9章转换完成
+2025-09-04 15:32:27,398 - TextbookConverter - INFO - 转换附录: appendixA.md
+2025-09-04 15:32:27,450 - TextbookConverter - INFO - 转换附录: appendixB.md
+2025-09-04 15:32:27,472 - TextbookConverter - INFO - 转换附录: appendixC.md
+2025-09-04 15:32:27,528 - TextbookConverter - INFO - 处理图片文件...
+2025-09-04 15:32:30,269 - TextbookConverter - INFO - 复制了 83 张图片
+2025-09-04 15:32:30,269 - TextbookConverter - INFO - ✅ 所有章节转换完成
+2025-09-05 13:27:29,239 - TextbookConverter - INFO - 转换器初始化完成
+2025-09-05 13:27:29,240 - TextbookConverter - INFO - 项目根目录: .
+2025-09-05 13:27:29,240 - TextbookConverter - INFO - 文档目录: docs
+2025-09-05 13:27:29,240 - TextbookConverter - INFO - LaTeX输出目录: publish/latex
+2025-09-05 13:27:29,241 - TextbookConverter - INFO - 🚀 开始教材转换流程
+2025-09-05 13:27:29,319 - TextbookConverter - INFO - 发现 9 个章节目录
+2025-09-05 13:27:29,321 - TextbookConverter - INFO - 转换前言...
+2025-09-05 13:27:29,835 - TextbookConverter - INFO - 转换第1章: chapter01
+2025-09-05 13:27:29,847 - TextbookConverter - INFO -   处理主文件: chapter01.md
+2025-09-05 13:27:29,870 - TextbookConverter - INFO -   处理节文件: section01-01.md
+2025-09-05 13:27:29,925 - TextbookConverter - INFO -   处理节文件: section01-02.md
+2025-09-05 13:27:29,988 - TextbookConverter - INFO -   处理节文件: section01-03.md
+2025-09-05 13:27:30,034 - TextbookConverter - INFO - ✅ 第1章转换完成
+2025-09-05 13:27:30,035 - TextbookConverter - INFO - 转换第2章: chapter02
+2025-09-05 13:27:30,046 - TextbookConverter - INFO -   处理主文件: chapter02.md
+2025-09-05 13:27:30,065 - TextbookConverter - INFO -   处理节文件: section02-01.md
+2025-09-05 13:27:30,087 - TextbookConverter - INFO -   处理节文件: section02-02.md
+2025-09-05 13:27:30,137 - TextbookConverter - INFO -   处理节文件: section02-03.md
+2025-09-05 13:27:30,191 - TextbookConverter - INFO -   处理节文件: section02-04.md
+2025-09-05 13:27:30,211 - TextbookConverter - INFO -   处理节文件: section02-05.md
+2025-09-05 13:27:30,274 - TextbookConverter - INFO -   处理节文件: section02-06.md
+2025-09-05 13:27:30,314 - TextbookConverter - INFO - ✅ 第2章转换完成
+2025-09-05 13:27:30,314 - TextbookConverter - INFO - 转换第3章: chapter03
+2025-09-05 13:27:30,320 - TextbookConverter - INFO -   处理主文件: chapter03.md
+2025-09-05 13:27:30,339 - TextbookConverter - INFO -   处理节文件: section03-01.md
+2025-09-05 13:27:30,403 - TextbookConverter - INFO -   处理节文件: section03-02.md
+2025-09-05 13:27:30,456 - TextbookConverter - INFO -   处理节文件: section03-03.md
+2025-09-05 13:27:30,509 - TextbookConverter - INFO -   处理节文件: section03-04.md
+2025-09-05 13:27:30,561 - TextbookConverter - INFO -   处理节文件: section03-05.md
+2025-09-05 13:27:30,590 - TextbookConverter - INFO -   处理节文件: section03-06.md
+2025-09-05 13:27:30,633 - TextbookConverter - INFO -   处理节文件: section03-07.md
+2025-09-05 13:27:30,745 - TextbookConverter - INFO - ✅ 第3章转换完成
+2025-09-05 13:27:30,745 - TextbookConverter - INFO - 转换第4章: chapter04
+2025-09-05 13:27:30,753 - TextbookConverter - INFO -   处理主文件: chapter04.md
+2025-09-05 13:27:30,802 - TextbookConverter - INFO -   处理节文件: section04-01.md
+2025-09-05 13:27:30,831 - TextbookConverter - INFO -   处理节文件: section04-02.md
+2025-09-05 13:27:30,883 - TextbookConverter - INFO -   处理节文件: section04-03.md
+2025-09-05 13:27:30,935 - TextbookConverter - INFO -   处理节文件: section04-04.md
+2025-09-05 13:27:31,019 - TextbookConverter - INFO -   处理节文件: section04-05.md
+2025-09-05 13:27:31,092 - TextbookConverter - INFO -   处理节文件: section04-06.md
+2025-09-05 13:27:31,269 - TextbookConverter - INFO -   处理节文件: section04-07.md
+2025-09-05 13:27:31,405 - TextbookConverter - INFO - ✅ 第4章转换完成
+2025-09-05 13:27:31,405 - TextbookConverter - INFO - 转换第5章: chapter05
+2025-09-05 13:27:31,415 - TextbookConverter - INFO -   处理主文件: chapter05.md
+2025-09-05 13:27:31,466 - TextbookConverter - INFO -   处理节文件: section05-01.md
+2025-09-05 13:27:31,555 - TextbookConverter - INFO -   处理节文件: section05-02.md
+2025-09-05 13:27:31,623 - TextbookConverter - INFO -   处理节文件: section05-03.md
+2025-09-05 13:27:31,689 - TextbookConverter - INFO -   处理节文件: section05-04.md
+2025-09-05 13:27:31,746 - TextbookConverter - INFO -   处理节文件: section05-05.md
+2025-09-05 13:27:31,802 - TextbookConverter - INFO -   处理节文件: section05-06.md
+2025-09-05 13:27:31,928 - TextbookConverter - INFO - ✅ 第5章转换完成
+2025-09-05 13:27:31,928 - TextbookConverter - INFO - 转换第6章: chapter06
+2025-09-05 13:27:31,934 - TextbookConverter - INFO -   处理主文件: chapter06.md
+2025-09-05 13:27:31,985 - TextbookConverter - INFO -   处理节文件: section06-01.md
+2025-09-05 13:27:32,006 - TextbookConverter - INFO -   处理节文件: section06-02.md
+2025-09-05 13:27:32,123 - TextbookConverter - INFO -   处理节文件: section06-03.md
+2025-09-05 13:27:32,789 - TextbookConverter - INFO -   处理节文件: section06-04.md
+2025-09-05 13:27:32,852 - TextbookConverter - INFO -   处理节文件: section06-05.md
+2025-09-05 13:27:32,905 - TextbookConverter - INFO -   处理节文件: section06-06.md
+2025-09-05 13:27:32,969 - TextbookConverter - INFO -   处理节文件: section06-07.md
+2025-09-05 13:27:33,088 - TextbookConverter - INFO - ✅ 第6章转换完成
+2025-09-05 13:27:33,088 - TextbookConverter - INFO - 转换第7章: chapter07
+2025-09-05 13:27:33,098 - TextbookConverter - INFO -   处理主文件: chapter07.md
+2025-09-05 13:27:33,150 - TextbookConverter - INFO -   处理节文件: section07-01.md
+2025-09-05 13:27:33,213 - TextbookConverter - INFO -   处理节文件: section07-02.md
+2025-09-05 13:27:33,267 - TextbookConverter - INFO -   处理节文件: section07-03.md
+2025-09-05 13:27:33,321 - TextbookConverter - INFO -   处理节文件: section07-04.md
+2025-09-05 13:27:33,424 - TextbookConverter - INFO - ✅ 第7章转换完成
+2025-09-05 13:27:33,425 - TextbookConverter - INFO - 转换第8章: chapter08
+2025-09-05 13:27:33,435 - TextbookConverter - INFO -   处理主文件: chapter08.md
+2025-09-05 13:27:33,486 - TextbookConverter - INFO -   处理节文件: section08-01.md
+2025-09-05 13:27:33,580 - TextbookConverter - INFO -   处理节文件: section08-02.md
+2025-09-05 13:27:33,664 - TextbookConverter - INFO -   处理节文件: section08-03.md
+2025-09-05 13:27:33,728 - TextbookConverter - INFO -   处理节文件: section08-04.md
+2025-09-05 13:27:33,782 - TextbookConverter - INFO -   处理节文件: section08-05.md
+2025-09-05 13:27:33,875 - TextbookConverter - INFO - ✅ 第8章转换完成
+2025-09-05 13:27:33,876 - TextbookConverter - INFO - 转换第9章: chapter09
+2025-09-05 13:27:33,886 - TextbookConverter - INFO -   处理主文件: chapter09.md
+2025-09-05 13:27:33,930 - TextbookConverter - INFO - ✅ 第9章转换完成
+2025-09-05 13:27:33,933 - TextbookConverter - INFO - 转换附录: appendixA.md
+2025-09-05 13:27:34,000 - TextbookConverter - INFO - 转换附录: appendixB.md
+2025-09-05 13:27:34,057 - TextbookConverter - INFO - 转换附录: appendixC.md
+2025-09-05 13:27:34,131 - TextbookConverter - INFO - 处理图片文件...
+2025-09-05 13:27:37,136 - TextbookConverter - INFO - 复制了 83 张图片
+2025-09-05 13:27:37,136 - TextbookConverter - INFO - ✅ 所有章节转换完成
+2025-09-05 13:28:06,550 - TextbookConverter - INFO - 转换器初始化完成
+2025-09-05 13:28:06,551 - TextbookConverter - INFO - 项目根目录: .
+2025-09-05 13:28:06,551 - TextbookConverter - INFO - 文档目录: docs
+2025-09-05 13:28:06,552 - TextbookConverter - INFO - LaTeX输出目录: publish/latex
+2025-09-05 13:28:06,552 - TextbookConverter - INFO - 🚀 开始教材转换流程
+2025-09-05 13:28:06,650 - TextbookConverter - INFO - 发现 9 个章节目录
+2025-09-05 13:28:06,652 - TextbookConverter - INFO - 转换前言...
+2025-09-05 13:28:06,726 - TextbookConverter - INFO - 转换第1章: chapter01
+2025-09-05 13:28:06,735 - TextbookConverter - INFO -   处理主文件: chapter01.md
+2025-09-05 13:28:06,758 - TextbookConverter - INFO -   处理节文件: section01-01.md
+2025-09-05 13:28:06,811 - TextbookConverter - INFO -   处理节文件: section01-02.md
+2025-09-05 13:28:06,876 - TextbookConverter - INFO -   处理节文件: section01-03.md
+2025-09-05 13:28:06,911 - TextbookConverter - INFO - ✅ 第1章转换完成
+2025-09-05 13:28:06,911 - TextbookConverter - INFO - 转换第2章: chapter02
+2025-09-05 13:28:06,918 - TextbookConverter - INFO -   处理主文件: chapter02.md
+2025-09-05 13:28:06,947 - TextbookConverter - INFO -   处理节文件: section02-01.md
+2025-09-05 13:28:06,969 - TextbookConverter - INFO -   处理节文件: section02-02.md
+2025-09-05 13:28:07,022 - TextbookConverter - INFO -   处理节文件: section02-03.md
+2025-09-05 13:28:07,075 - TextbookConverter - INFO -   处理节文件: section02-04.md
+2025-09-05 13:28:07,095 - TextbookConverter - INFO -   处理节文件: section02-05.md
+2025-09-05 13:28:07,158 - TextbookConverter - INFO -   处理节文件: section02-06.md
+2025-09-05 13:28:07,194 - TextbookConverter - INFO - ✅ 第2章转换完成
+2025-09-05 13:28:07,195 - TextbookConverter - INFO - 转换第3章: chapter03
+2025-09-05 13:28:07,202 - TextbookConverter - INFO -   处理主文件: chapter03.md
+2025-09-05 13:28:07,222 - TextbookConverter - INFO -   处理节文件: section03-01.md
+2025-09-05 13:28:07,275 - TextbookConverter - INFO -   处理节文件: section03-02.md
+2025-09-05 13:28:07,329 - TextbookConverter - INFO -   处理节文件: section03-03.md
+2025-09-05 13:28:07,383 - TextbookConverter - INFO -   处理节文件: section03-04.md
+2025-09-05 13:28:07,434 - TextbookConverter - INFO -   处理节文件: section03-05.md
+2025-09-05 13:28:07,462 - TextbookConverter - INFO -   处理节文件: section03-06.md
+2025-09-05 13:28:07,514 - TextbookConverter - INFO -   处理节文件: section03-07.md
+2025-09-05 13:28:07,583 - TextbookConverter - INFO - ✅ 第3章转换完成
+2025-09-05 13:28:07,584 - TextbookConverter - INFO - 转换第4章: chapter04
+2025-09-05 13:28:07,597 - TextbookConverter - INFO -   处理主文件: chapter04.md
+2025-09-05 13:28:07,656 - TextbookConverter - INFO -   处理节文件: section04-01.md
+2025-09-05 13:28:07,684 - TextbookConverter - INFO -   处理节文件: section04-02.md
+2025-09-05 13:28:07,736 - TextbookConverter - INFO -   处理节文件: section04-03.md
+2025-09-05 13:28:07,789 - TextbookConverter - INFO -   处理节文件: section04-04.md
+2025-09-05 13:28:07,876 - TextbookConverter - INFO -   处理节文件: section04-05.md
+2025-09-05 13:28:07,951 - TextbookConverter - INFO -   处理节文件: section04-06.md
+2025-09-05 13:28:08,131 - TextbookConverter - INFO -   处理节文件: section04-07.md
+2025-09-05 13:28:08,257 - TextbookConverter - INFO - ✅ 第4章转换完成
+2025-09-05 13:28:08,258 - TextbookConverter - INFO - 转换第5章: chapter05
+2025-09-05 13:28:08,271 - TextbookConverter - INFO -   处理主文件: chapter05.md
+2025-09-05 13:28:08,324 - TextbookConverter - INFO -   处理节文件: section05-01.md
+2025-09-05 13:28:08,420 - TextbookConverter - INFO -   处理节文件: section05-02.md
+2025-09-05 13:28:08,475 - TextbookConverter - INFO -   处理节文件: section05-03.md
+2025-09-05 13:28:08,542 - TextbookConverter - INFO -   处理节文件: section05-04.md
+2025-09-05 13:28:08,609 - TextbookConverter - INFO -   处理节文件: section05-05.md
+2025-09-05 13:28:08,663 - TextbookConverter - INFO -   处理节文件: section05-06.md
+2025-09-05 13:28:08,758 - TextbookConverter - INFO - ✅ 第5章转换完成
+2025-09-05 13:28:08,759 - TextbookConverter - INFO - 转换第6章: chapter06
+2025-09-05 13:28:08,766 - TextbookConverter - INFO -   处理主文件: chapter06.md
+2025-09-05 13:28:08,836 - TextbookConverter - INFO -   处理节文件: section06-01.md
+2025-09-05 13:28:08,870 - TextbookConverter - INFO -   处理节文件: section06-02.md
+2025-09-05 13:28:08,997 - TextbookConverter - INFO -   处理节文件: section06-03.md
+2025-09-05 13:28:09,632 - TextbookConverter - INFO -   处理节文件: section06-04.md
+2025-09-05 13:28:09,703 - TextbookConverter - INFO -   处理节文件: section06-05.md
+2025-09-05 13:28:09,754 - TextbookConverter - INFO -   处理节文件: section06-06.md
+2025-09-05 13:28:09,814 - TextbookConverter - INFO -   处理节文件: section06-07.md
+2025-09-05 13:28:09,885 - TextbookConverter - INFO - ✅ 第6章转换完成
+2025-09-05 13:28:09,885 - TextbookConverter - INFO - 转换第7章: chapter07
+2025-09-05 13:28:09,893 - TextbookConverter - INFO -   处理主文件: chapter07.md
+2025-09-05 13:28:09,945 - TextbookConverter - INFO -   处理节文件: section07-01.md
+2025-09-05 13:28:10,008 - TextbookConverter - INFO -   处理节文件: section07-02.md
+2025-09-05 13:28:10,063 - TextbookConverter - INFO -   处理节文件: section07-03.md
+2025-09-05 13:28:10,115 - TextbookConverter - INFO -   处理节文件: section07-04.md
+2025-09-05 13:28:10,195 - TextbookConverter - INFO - ✅ 第7章转换完成
+2025-09-05 13:28:10,196 - TextbookConverter - INFO - 转换第8章: chapter08
+2025-09-05 13:28:10,203 - TextbookConverter - INFO -   处理主文件: chapter08.md
+2025-09-05 13:28:10,253 - TextbookConverter - INFO -   处理节文件: section08-01.md
+2025-09-05 13:28:10,359 - TextbookConverter - INFO -   处理节文件: section08-02.md
+2025-09-05 13:28:10,442 - TextbookConverter - INFO -   处理节文件: section08-03.md
+2025-09-05 13:28:10,506 - TextbookConverter - INFO -   处理节文件: section08-04.md
+2025-09-05 13:28:10,559 - TextbookConverter - INFO -   处理节文件: section08-05.md
+2025-09-05 13:28:10,637 - TextbookConverter - INFO - ✅ 第8章转换完成
+2025-09-05 13:28:10,638 - TextbookConverter - INFO - 转换第9章: chapter09
+2025-09-05 13:28:10,647 - TextbookConverter - INFO -   处理主文件: chapter09.md
+2025-09-05 13:28:10,676 - TextbookConverter - INFO - ✅ 第9章转换完成
+2025-09-05 13:28:10,678 - TextbookConverter - INFO - 转换附录: appendixA.md
+2025-09-05 13:28:10,735 - TextbookConverter - INFO - 转换附录: appendixB.md
+2025-09-05 13:28:10,762 - TextbookConverter - INFO - 转换附录: appendixC.md
+2025-09-05 13:28:10,837 - TextbookConverter - INFO - 处理图片文件...
+2025-09-05 13:28:13,564 - TextbookConverter - INFO - 复制了 83 张图片
+2025-09-05 13:28:13,564 - TextbookConverter - INFO - ✅ 所有章节转换完成
+2025-09-05 13:37:06,272 - TextbookConverter - INFO - 转换器初始化完成
+2025-09-05 13:37:06,272 - TextbookConverter - INFO - 项目根目录: E:\2025\教材\智慧水利平台架构与开发
+2025-09-05 13:37:06,273 - TextbookConverter - INFO - 文档目录: E:\2025\教材\智慧水利平台架构与开发\docs
+2025-09-05 13:37:06,273 - TextbookConverter - INFO - LaTeX输出目录: E:\2025\教材\智慧水利平台架构与开发\publish\latex
+2025-09-05 13:37:06,273 - TextbookConverter - INFO - 🚀 开始教材转换流程
+2025-09-05 13:37:06,276 - TextbookConverter - INFO - 发现 9 个章节目录
+2025-09-05 13:37:06,276 - TextbookConverter - INFO - 转换前言...
+2025-09-05 13:37:06,455 - TextbookConverter - INFO - 转换第1章: chapter01
+2025-09-05 13:37:06,455 - TextbookConverter - INFO -   处理主文件: chapter01.md
+2025-09-05 13:37:06,491 - TextbookConverter - INFO -   处理节文件: section01-01.md
+2025-09-05 13:37:06,564 - TextbookConverter - INFO -   处理节文件: section01-02.md
+2025-09-05 13:37:06,650 - TextbookConverter - INFO -   处理节文件: section01-03.md
+2025-09-05 13:37:06,686 - TextbookConverter - INFO - ✅ 第1章转换完成
+2025-09-05 13:37:06,686 - TextbookConverter - INFO - 转换第2章: chapter02
+2025-09-05 13:37:06,686 - TextbookConverter - INFO -   处理主文件: chapter02.md
+2025-09-05 13:37:06,722 - TextbookConverter - INFO -   处理节文件: section02-01.md
+2025-09-05 13:37:06,761 - TextbookConverter - INFO -   处理节文件: section02-02.md
+2025-09-05 13:37:06,832 - TextbookConverter - INFO -   处理节文件: section02-03.md
+2025-09-05 13:37:06,892 - TextbookConverter - INFO -   处理节文件: section02-04.md
+2025-09-05 13:37:06,923 - TextbookConverter - INFO -   处理节文件: section02-05.md
+2025-09-05 13:37:06,997 - TextbookConverter - INFO -   处理节文件: section02-06.md
+2025-09-05 13:37:07,025 - TextbookConverter - INFO - ✅ 第2章转换完成
+2025-09-05 13:37:07,025 - TextbookConverter - INFO - 转换第3章: chapter03
+2025-09-05 13:37:07,026 - TextbookConverter - INFO -   处理主文件: chapter03.md
+2025-09-05 13:37:07,059 - TextbookConverter - INFO -   处理节文件: section03-01.md
+2025-09-05 13:37:07,129 - TextbookConverter - INFO -   处理节文件: section03-02.md
+2025-09-05 13:37:07,200 - TextbookConverter - INFO -   处理节文件: section03-03.md
+2025-09-05 13:37:07,269 - TextbookConverter - INFO -   处理节文件: section03-04.md
+2025-09-05 13:37:07,334 - TextbookConverter - INFO -   处理节文件: section03-05.md
+2025-09-05 13:37:07,375 - TextbookConverter - INFO -   处理节文件: section03-06.md
+2025-09-05 13:37:07,441 - TextbookConverter - INFO -   处理节文件: section03-07.md
+2025-09-05 13:37:07,508 - TextbookConverter - INFO - ✅ 第3章转换完成
+2025-09-05 13:37:07,508 - TextbookConverter - INFO - 转换第4章: chapter04
+2025-09-05 13:37:07,508 - TextbookConverter - INFO -   处理主文件: chapter04.md
+2025-09-05 13:37:07,577 - TextbookConverter - INFO -   处理节文件: section04-01.md
+2025-09-05 13:37:07,616 - TextbookConverter - INFO -   处理节文件: section04-02.md
+2025-09-05 13:37:07,734 - TextbookConverter - INFO -   处理节文件: section04-03.md
+2025-09-05 13:37:07,812 - TextbookConverter - INFO -   处理节文件: section04-04.md
+2025-09-05 13:37:07,931 - TextbookConverter - INFO -   处理节文件: section04-05.md
+2025-09-05 13:37:08,038 - TextbookConverter - INFO -   处理节文件: section04-06.md
+2025-09-05 13:37:08,274 - TextbookConverter - INFO -   处理节文件: section04-07.md
+2025-09-05 13:37:08,388 - TextbookConverter - INFO - ✅ 第4章转换完成
+2025-09-05 13:37:08,389 - TextbookConverter - INFO - 转换第5章: chapter05
+2025-09-05 13:37:08,389 - TextbookConverter - INFO -   处理主文件: chapter05.md
+2025-09-05 13:37:08,460 - TextbookConverter - INFO -   处理节文件: section05-01.md
+2025-09-05 13:37:08,591 - TextbookConverter - INFO -   处理节文件: section05-02.md
+2025-09-05 13:37:08,674 - TextbookConverter - INFO -   处理节文件: section05-03.md
+2025-09-05 13:37:08,755 - TextbookConverter - INFO -   处理节文件: section05-04.md
+2025-09-05 13:37:08,830 - TextbookConverter - INFO -   处理节文件: section05-05.md
+2025-09-05 13:37:08,900 - TextbookConverter - INFO -   处理节文件: section05-06.md
+2025-09-05 13:37:08,992 - TextbookConverter - INFO - ✅ 第5章转换完成
+2025-09-05 13:37:08,992 - TextbookConverter - INFO - 转换第6章: chapter06
+2025-09-05 13:37:08,993 - TextbookConverter - INFO -   处理主文件: chapter06.md
+2025-09-05 13:37:09,059 - TextbookConverter - INFO -   处理节文件: section06-01.md
+2025-09-05 13:37:09,093 - TextbookConverter - INFO -   处理节文件: section06-02.md
+2025-09-05 13:37:09,233 - TextbookConverter - INFO -   处理节文件: section06-03.md
+2025-09-05 13:37:09,979 - TextbookConverter - INFO -   处理节文件: section06-04.md
+2025-09-05 13:37:10,063 - TextbookConverter - INFO -   处理节文件: section06-05.md
+2025-09-05 13:37:10,141 - TextbookConverter - INFO -   处理节文件: section06-06.md
+2025-09-05 13:37:10,226 - TextbookConverter - INFO -   处理节文件: section06-07.md
+2025-09-05 13:37:10,297 - TextbookConverter - INFO - ✅ 第6章转换完成
+2025-09-05 13:37:10,297 - TextbookConverter - INFO - 转换第7章: chapter07
+2025-09-05 13:37:10,298 - TextbookConverter - INFO -   处理主文件: chapter07.md
+2025-09-05 13:37:10,369 - TextbookConverter - INFO -   处理节文件: section07-01.md
+2025-09-05 13:37:10,448 - TextbookConverter - INFO -   处理节文件: section07-02.md
+2025-09-05 13:37:10,524 - TextbookConverter - INFO -   处理节文件: section07-03.md
+2025-09-05 13:37:10,600 - TextbookConverter - INFO -   处理节文件: section07-04.md
+2025-09-05 13:37:10,686 - TextbookConverter - INFO - ✅ 第7章转换完成
+2025-09-05 13:37:10,686 - TextbookConverter - INFO - 转换第8章: chapter08
+2025-09-05 13:37:10,687 - TextbookConverter - INFO -   处理主文件: chapter08.md
+2025-09-05 13:37:10,763 - TextbookConverter - INFO -   处理节文件: section08-01.md
+2025-09-05 13:37:10,875 - TextbookConverter - INFO -   处理节文件: section08-02.md
+2025-09-05 13:37:10,978 - TextbookConverter - INFO -   处理节文件: section08-03.md
+2025-09-05 13:37:11,056 - TextbookConverter - INFO -   处理节文件: section08-04.md
+2025-09-05 13:37:11,131 - TextbookConverter - INFO -   处理节文件: section08-05.md
+2025-09-05 13:37:11,212 - TextbookConverter - INFO - ✅ 第8章转换完成
+2025-09-05 13:37:11,212 - TextbookConverter - INFO - 转换第9章: chapter09
+2025-09-05 13:37:11,213 - TextbookConverter - INFO -   处理主文件: chapter09.md
+2025-09-05 13:37:11,249 - TextbookConverter - INFO - ✅ 第9章转换完成
+2025-09-05 13:37:11,249 - TextbookConverter - INFO - 转换附录: appendixA.md
+2025-09-05 13:37:11,324 - TextbookConverter - INFO - 转换附录: appendixB.md
+2025-09-05 13:37:11,360 - TextbookConverter - INFO - 转换附录: appendixC.md
+2025-09-05 13:37:11,433 - TextbookConverter - INFO - 处理图片文件...
+2025-09-05 13:37:11,476 - TextbookConverter - INFO - 复制了 83 张图片
+2025-09-05 13:37:11,476 - TextbookConverter - INFO - ✅ 所有章节转换完成
+2025-09-05 13:37:22,692 - TextbookConverter - INFO - 转换器初始化完成
+2025-09-05 13:37:22,692 - TextbookConverter - INFO - 项目根目录: E:\2025\教材\智慧水利平台架构与开发
+2025-09-05 13:37:22,693 - TextbookConverter - INFO - 文档目录: E:\2025\教材\智慧水利平台架构与开发\docs
+2025-09-05 13:37:22,693 - TextbookConverter - INFO - LaTeX输出目录: E:\2025\教材\智慧水利平台架构与开发\publish\latex
+2025-09-05 13:37:22,693 - TextbookConverter - INFO - ============================================================
+2025-09-05 13:37:22,693 - TextbookConverter - INFO - 智慧水利教材转换器 - 改进版
+2025-09-05 13:37:22,693 - TextbookConverter - INFO - ============================================================
+2025-09-05 13:37:22,694 - TextbookConverter - INFO - 🚀 开始教材转换流程
+2025-09-05 13:37:22,696 - TextbookConverter - INFO - 发现 9 个章节目录
+2025-09-05 13:37:22,696 - TextbookConverter - INFO - 转换前言...
+2025-09-05 13:37:22,780 - TextbookConverter - INFO - 转换第1章: chapter01
+2025-09-05 13:37:22,780 - TextbookConverter - INFO -   处理主文件: chapter01.md
+2025-09-05 13:37:22,818 - TextbookConverter - INFO -   处理节文件: section01-01.md
+2025-09-05 13:37:22,896 - TextbookConverter - INFO -   处理节文件: section01-02.md
+2025-09-05 13:37:22,981 - TextbookConverter - INFO -   处理节文件: section01-03.md
+2025-09-05 13:37:23,016 - TextbookConverter - INFO - ✅ 第1章转换完成
+2025-09-05 13:37:23,016 - TextbookConverter - INFO - 转换第2章: chapter02
+2025-09-05 13:37:23,017 - TextbookConverter - INFO -   处理主文件: chapter02.md
+2025-09-05 13:37:23,058 - TextbookConverter - INFO -   处理节文件: section02-01.md
+2025-09-05 13:37:23,097 - TextbookConverter - INFO -   处理节文件: section02-02.md
+2025-09-05 13:37:23,180 - TextbookConverter - INFO -   处理节文件: section02-03.md
+2025-09-05 13:37:23,251 - TextbookConverter - INFO -   处理节文件: section02-04.md
+2025-09-05 13:37:23,284 - TextbookConverter - INFO -   处理节文件: section02-05.md
+2025-09-05 13:37:23,363 - TextbookConverter - INFO -   处理节文件: section02-06.md
+2025-09-05 13:37:23,393 - TextbookConverter - INFO - ✅ 第2章转换完成
+2025-09-05 13:37:23,393 - TextbookConverter - INFO - 转换第3章: chapter03
+2025-09-05 13:37:23,394 - TextbookConverter - INFO -   处理主文件: chapter03.md
+2025-09-05 13:37:23,426 - TextbookConverter - INFO -   处理节文件: section03-01.md
+2025-09-05 13:37:23,495 - TextbookConverter - INFO -   处理节文件: section03-02.md
+2025-09-05 13:37:23,567 - TextbookConverter - INFO -   处理节文件: section03-03.md
+2025-09-05 13:37:23,637 - TextbookConverter - INFO -   处理节文件: section03-04.md
+2025-09-05 13:37:23,706 - TextbookConverter - INFO -   处理节文件: section03-05.md
+2025-09-05 13:37:23,742 - TextbookConverter - INFO -   处理节文件: section03-06.md
+2025-09-05 13:37:23,807 - TextbookConverter - INFO -   处理节文件: section03-07.md
+2025-09-05 13:37:23,877 - TextbookConverter - INFO - ✅ 第3章转换完成
+2025-09-05 13:37:23,877 - TextbookConverter - INFO - 转换第4章: chapter04
+2025-09-05 13:37:23,877 - TextbookConverter - INFO -   处理主文件: chapter04.md
+2025-09-05 13:37:23,946 - TextbookConverter - INFO -   处理节文件: section04-01.md
+2025-09-05 13:37:23,983 - TextbookConverter - INFO -   处理节文件: section04-02.md
+2025-09-05 13:37:24,059 - TextbookConverter - INFO -   处理节文件: section04-03.md
+2025-09-05 13:37:24,128 - TextbookConverter - INFO -   处理节文件: section04-04.md
+2025-09-05 13:37:24,243 - TextbookConverter - INFO -   处理节文件: section04-05.md
+2025-09-05 13:37:24,340 - TextbookConverter - INFO -   处理节文件: section04-06.md
+2025-09-05 13:37:24,570 - TextbookConverter - INFO -   处理节文件: section04-07.md
+2025-09-05 13:37:24,681 - TextbookConverter - INFO - ✅ 第4章转换完成
+2025-09-05 13:37:24,682 - TextbookConverter - INFO - 转换第5章: chapter05
+2025-09-05 13:37:24,682 - TextbookConverter - INFO -   处理主文件: chapter05.md
+2025-09-05 13:37:24,753 - TextbookConverter - INFO -   处理节文件: section05-01.md
+2025-09-05 13:37:24,889 - TextbookConverter - INFO -   处理节文件: section05-02.md
+2025-09-05 13:37:24,971 - TextbookConverter - INFO -   处理节文件: section05-03.md
+2025-09-05 13:37:25,052 - TextbookConverter - INFO -   处理节文件: section05-04.md
+2025-09-05 13:37:25,132 - TextbookConverter - INFO -   处理节文件: section05-05.md
+2025-09-05 13:37:25,217 - TextbookConverter - INFO -   处理节文件: section05-06.md
+2025-09-05 13:37:25,323 - TextbookConverter - INFO - ✅ 第5章转换完成
+2025-09-05 13:37:25,324 - TextbookConverter - INFO - 转换第6章: chapter06
+2025-09-05 13:37:25,324 - TextbookConverter - INFO -   处理主文件: chapter06.md
+2025-09-05 13:37:25,397 - TextbookConverter - INFO -   处理节文件: section06-01.md
+2025-09-05 13:37:25,432 - TextbookConverter - INFO -   处理节文件: section06-02.md
+2025-09-05 13:37:25,633 - TextbookConverter - INFO -   处理节文件: section06-03.md
+2025-09-05 13:37:26,287 - TextbookConverter - INFO -   处理节文件: section06-04.md
+2025-09-05 13:37:26,372 - TextbookConverter - INFO -   处理节文件: section06-05.md
+2025-09-05 13:37:26,446 - TextbookConverter - INFO -   处理节文件: section06-06.md
+2025-09-05 13:37:26,535 - TextbookConverter - INFO -   处理节文件: section06-07.md
+2025-09-05 13:37:26,607 - TextbookConverter - INFO - ✅ 第6章转换完成
+2025-09-05 13:37:26,607 - TextbookConverter - INFO - 转换第7章: chapter07
+2025-09-05 13:37:26,607 - TextbookConverter - INFO -   处理主文件: chapter07.md
+2025-09-05 13:37:26,675 - TextbookConverter - INFO -   处理节文件: section07-01.md
+2025-09-05 13:37:26,801 - TextbookConverter - INFO -   处理节文件: section07-02.md
+2025-09-05 13:37:26,889 - TextbookConverter - INFO -   处理节文件: section07-03.md
+2025-09-05 13:37:26,964 - TextbookConverter - INFO -   处理节文件: section07-04.md
+2025-09-05 13:37:27,045 - TextbookConverter - INFO - ✅ 第7章转换完成
+2025-09-05 13:37:27,045 - TextbookConverter - INFO - 转换第8章: chapter08
+2025-09-05 13:37:27,046 - TextbookConverter - INFO -   处理主文件: chapter08.md
+2025-09-05 13:37:27,124 - TextbookConverter - INFO -   处理节文件: section08-01.md
+2025-09-05 13:37:27,240 - TextbookConverter - INFO -   处理节文件: section08-02.md
+2025-09-05 13:37:27,346 - TextbookConverter - INFO -   处理节文件: section08-03.md
+2025-09-05 13:37:27,424 - TextbookConverter - INFO -   处理节文件: section08-04.md
+2025-09-05 13:37:27,500 - TextbookConverter - INFO -   处理节文件: section08-05.md
+2025-09-05 13:37:27,578 - TextbookConverter - INFO - ✅ 第8章转换完成
+2025-09-05 13:37:27,578 - TextbookConverter - INFO - 转换第9章: chapter09
+2025-09-05 13:37:27,578 - TextbookConverter - INFO -   处理主文件: chapter09.md
+2025-09-05 13:37:27,614 - TextbookConverter - INFO - ✅ 第9章转换完成
+2025-09-05 13:37:27,614 - TextbookConverter - INFO - 转换附录: appendixA.md
+2025-09-05 13:37:27,686 - TextbookConverter - INFO - 转换附录: appendixB.md
+2025-09-05 13:37:27,721 - TextbookConverter - INFO - 转换附录: appendixC.md
+2025-09-05 13:37:27,794 - TextbookConverter - INFO - 处理图片文件...
+2025-09-05 13:37:27,839 - TextbookConverter - INFO - 复制了 83 张图片
+2025-09-05 13:37:27,840 - TextbookConverter - INFO - ✅ 所有章节转换完成
+2025-09-05 13:37:27,840 - TextbookConverter - INFO - 🔨 开始构建LaTeX文档...
+2025-09-05 13:37:27,840 - TextbookConverter - INFO - 执行命令: xelatex main.tex
+2025-09-05 13:38:35,589 - TextbookConverter - INFO - 用户中断转换
+2025-09-05 21:46:22,042 - TextbookConverter - INFO - 转换器初始化完成
+2025-09-05 21:46:22,056 - TextbookConverter - INFO - 项目根目录: E:\2025\教材\智慧水利平台架构与开发
+2025-09-05 21:46:22,056 - TextbookConverter - INFO - 文档目录: docs
+2025-09-05 21:46:22,057 - TextbookConverter - INFO - LaTeX输出目录: output
+2025-09-05 21:46:22,057 - TextbookConverter - INFO - ============================================================
+2025-09-05 21:46:22,057 - TextbookConverter - INFO - 智慧水利教材转换器 - 改进版
+2025-09-05 21:46:22,057 - TextbookConverter - INFO - ============================================================
+2025-09-05 21:46:22,057 - TextbookConverter - INFO - 🚀 开始教材转换流程
+2025-09-05 21:46:22,059 - TextbookConverter - INFO - 发现 1 个章节目录
+2025-09-05 21:46:22,059 - TextbookConverter - INFO - 转换第6章: chapter06
+2025-09-05 21:46:22,060 - TextbookConverter - INFO - ✅ 第6章转换完成
+2025-09-05 21:46:22,061 - TextbookConverter - INFO - 转换附录: appendixA.md
+2025-09-05 21:46:22,285 - TextbookConverter - INFO - 转换附录: appendixB.md
+2025-09-05 21:46:22,333 - TextbookConverter - INFO - 转换附录: appendixC.md
+2025-09-05 21:46:22,424 - TextbookConverter - INFO - 处理图片文件...
+2025-09-05 21:46:22,449 - TextbookConverter - INFO - 复制了 34 张图片
+2025-09-05 21:46:22,449 - TextbookConverter - INFO - ✅ 所有章节转换完成
+2025-09-05 21:46:22,450 - TextbookConverter - INFO - 🔨 开始构建LaTeX文档...
+2025-09-05 21:46:22,450 - TextbookConverter - INFO - 执行命令: xelatex main.tex
+2025-09-05 21:46:29,288 - TextbookConverter - INFO - LaTeX命令执行成功
+2025-09-05 21:46:29,288 - TextbookConverter - INFO - 执行命令: xelatex main.tex
+2025-09-05 21:46:32,464 - TextbookConverter - INFO - LaTeX命令执行成功
+2025-09-05 21:46:32,464 - TextbookConverter - ERROR - PDF文件未生成
+2025-09-05 21:46:32,464 - TextbookConverter - ERROR - LaTeX构建失败

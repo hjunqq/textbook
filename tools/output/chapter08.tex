@@ -26,27 +26,23 @@
 !!! info ``章节安排''
 
 \begin{verbatim}
-### [第一节 水利工程安全监测平台概述](section08-01.md)
+
 - 平台整体架构设计
 - 技术选型与系统集成
 - 业务流程与数据流设计
 
-### [第二节 场景设置与模型制作](section08-02.md)
 - 水利工程三维建模流程
 - CAD数据处理与转换
 - 模型优化与LOD分级
 
-### [第三节 数据处理与展示模块](section08-03.md)
 - 实时数据采集系统
 - 数据质量控制算法
 - 多维数据可视化实现
 
-### [第四节 监控模型与综合评价模块](section08-04.md)
 - 安全评价指标体系
 - 多参数融合预警算法
 - 风险等级评估与决策支持
 
-### [第五节 系统集成与运维管理](section08-05.md)
 - 微服务架构设计
 - 自动化运维与监控
 - 故障处理与恢复机制
@@ -334,7 +330,7 @@ Score(Node) = ∑wi × fi(Node, Pod)
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\CommentTok{\#\# 容器化部署配置（简化版）}
+\CommentTok{ 容器化部署配置（简化版）}
 \FunctionTok{version}\KeywordTok{:}\AttributeTok{ }\StringTok{\textquotesingle{}3.8\textquotesingle{}}
 \FunctionTok{services}\KeywordTok{:}
 \AttributeTok{  }\FunctionTok{data{-}collection}\KeywordTok{:}
@@ -369,7 +365,7 @@ Score(Node) = ∑wi × fi(Node, Pod)
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\CommentTok{\#\# 自动故障恢复系统核心实现}
+\CommentTok{ 自动故障恢复系统核心实现}
 \KeywordTok{class}\NormalTok{ AutoRecoverySystem:}
     \KeywordTok{def} \FunctionTok{\_\_init\_\_}\NormalTok{(}\VariableTok{self}\NormalTok{, config):}
         \VariableTok{self}\NormalTok{.config }\OperatorTok{=}\NormalTok{ config}

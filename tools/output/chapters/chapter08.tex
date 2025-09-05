@@ -25,27 +25,27 @@
 
 \begin{tcolorbox}[colback=cyan!5!white,colframe=cyan!75!black,title=Info 章节安排
     
-    \##\# [第一节 水利工程安全监测平台概述](section08-01.md)
+     [第一节 水利工程安全监测平台概述](section08-01.md)
     - 平台整体架构设计
     - 技术选型与系统集成
     - 业务流程与数据流设计
     
-    \##\# [第二节 场景设置与模型制作](section08-02.md)
+     [第二节 场景设置与模型制作](section08-02.md)
     - 水利工程三维建模流程
     - CAD数据处理与转换
     - 模型优化与LOD分级
     
-    \##\# [第三节 数据处理与展示模块](section08-03.md)
+     [第三节 数据处理与展示模块](section08-03.md)
     - 实时数据采集系统
     - 数据质量控制算法
     - 多维数据可视化实现
     
-    \##\# [第四节 监控模型与综合评价模块](section08-04.md)
+     [第四节 监控模型与综合评价模块](section08-04.md)
     - 安全评价指标体系
     - 多参数融合预警算法
     - 风险等级评估与决策支持
     
-    \##\# [第五节 系统集成与运维管理](section08-05.md)
+     [第五节 系统集成与运维管理](section08-05.md)
     - 微服务架构设计
     - 自动化运维与监控
     - 故障处理与恢复机制]
@@ -53,7 +53,7 @@
 
 \end{tcolorbox}
 
-\#\#\# 分层架构设计
+ 分层架构设计
 
 智慧水利安全监测平台采用分层架构，包括：
 
@@ -63,7 +63,7 @@
 
 \textbf{表示层}：提供用户界面和数据展示，包括三维场景、数据图表和管理界面。支持多种访问方式，包括Web端和移动端。
 
-\#\#\# 技术选型考虑
+ 技术选型考虑
 
 基于水利行业的特点和需求，平台的技术选型遵循以下原则：
 
@@ -79,7 +79,7 @@
   \textbf{标准兼容}：遵循水利行业标准和相关规范
 \end{itemize}
 
-\#\#\# 数据处理流水线
+ 数据处理流水线
 
 平台采用流式数据处理架构，实现从数据采集到分析结果输出的全流程处理：
 
@@ -128,7 +128,7 @@ class DataProcessingPipeline {
   \section{核心功能模块}
 \end{itemize}
 
-\#\#\# 数据采集与预处理模块
+ 数据采集与预处理模块
 
 该模块负责从各类传感器和监测设备中采集原始数据，并进行初步的预处理工作。主要功能包括：
 
@@ -144,7 +144,7 @@ class DataProcessingPipeline {
   \textbf{实时传输}：将处理后的数据实时传输到上层业务系统
 \end{itemize}
 
-\#\#\# 安全评价与预警模块
+ 安全评价与预警模块
 
 该模块是系统的核心智能模块，负责对监测数据进行深度分析。主要功能包括：
 
@@ -160,7 +160,7 @@ class DataProcessingPipeline {
   \textbf{决策支持}：为管理人员提供处理建议和操作指导
 \end{itemize}
 
-\#\#\# 三维可视化模块
+ 三维可视化模块
 
 该模块提供直观的三维场景展示，将抽象的数据以立体形式呈现。主要功能包括：
 
@@ -176,7 +176,7 @@ class DataProcessingPipeline {
   \textbf{交互操作}：支持视角旋转、缩放和对象选中
 \end{itemize}
 
-\#\#\# 系统管理模块
+ 系统管理模块
 
 该模块提供系统管理和维护功能，确保平台稳定运行。主要功能包括：
 
@@ -211,7 +211,7 @@ class DataProcessingPipeline {
     **系统性能指标**
     - 支持1000+监测点的实时数据处理
     - 数据处理延迟控制在秒级以内
-    - 系统可用性达到99.9\%以上
+    - 系统可用性达到99.9%以上
     - 支持100+并发用户访问
     
     **业务应用效果**
@@ -290,7 +290,7 @@ class DataProcessingPipeline {
 \end{tcolorbox}
 
 
-\##\# 基础题
+ 基础题
 
 1. **系统架构题**：分析智慧水利平台的分层架构设计，说明每一层的主要职责和相互关系。
 
@@ -298,7 +298,7 @@ class DataProcessingPipeline {
 
 3. **监测点题**：说明如何在三维场景中定位和展示水利工程的监测点信息。
 
-\##\# 提高题
+ 提高题
 
 4. **集成设计题**：设计一个支持50个水库监测站点的集成平台，考虑性能优化和可靠性设计。
 
@@ -306,7 +306,7 @@ class DataProcessingPipeline {
 
 6. **性能优化题**：针对大量实时数据的处理和展示，提出具体的性能优化方案。
 
-\##\# 综合题
+ 综合题
 
 7. **项目实践题**：基于本章所学知识，设计并实现一个完整的中小型水库安全监测平台原型。
 
@@ -326,7 +326,7 @@ class DataProcessingPipeline {
 
 [6] Apache Software Foundation. Apache Kafka Documentation[EB/OL]. [2024-08-27]. https://kafka.apache.org/documentation/.
 
-\# 8.1 水利工程安全监测平台概述
+ 8.1 水利工程安全监测平台概述
 
 \section{学习目标}
 
@@ -339,7 +339,7 @@ class DataProcessingPipeline {
 
 \section{8.1.1 水利工程安全监测的重要性与技术挑战}
 
-\##\# 水利工程安全监测的核心价值
+ 水利工程安全监测的核心价值
 
 **生命财产安全保障**
 
@@ -472,7 +472,7 @@ javascript decision\_confidence = base\_confidence × data\_quality\_factor × m
 - **模型参数调整**：基于评估结果使用机器学习算法调整模型参数
 - **权重系数优化**：根据不同季节和工程状态调整各效益目标的权重
 
-\##\# 技术挑战与解决方案
+ 技术挑战与解决方案
 
 **多源异构数据集成挑战**
 
@@ -759,7 +759,6 @@ P(X=k) = (λᵗe^(-λt))/k!
 
 通过这种深入的理论分析，学生可以理解实时性与准确性平衡不仅是工程实践问题，更是建立在坚实数学基础上的系统工程问题。这种理论指导有助于设计更加智能和自适应的水利监测系统。
 
-\#
 
 \section{核心功能模块}
 
@@ -1029,7 +1028,7 @@ class SafetyEvaluationEngine {
 
 \section{8.1.3 用户角色与权限管理设计}
 
-\#\#\# 基于角色的访问控制（RBAC）架构
+ 基于角色的访问控制（RBAC）架构
 
 在水利工程安全监测系统中，用户角色和权限管理是确保系统安全和数据保护的关键环节。系统需要支持多层级、多角色的用户管理：
 
@@ -1104,7 +1103,7 @@ class UserPermissionManager {
 
 \section{8.1.4 数据流与业务流的整体设计}
 
-\#\#\# 端到端数据流架构
+ 端到端数据流架构
 
 水利工程安全监测系统的数据流设计需要考虑从传感器采集到决策输出的完整链路：
 
@@ -1194,7 +1193,7 @@ class DataFlowOrchestrator {
 
 本节详细介绍了水利工程安全监测平台的概述内容，涵盖了安全监测的重要性、技术挑战、功能模块设计、权限管理和数据流设计等核心内容。通过工程化的代码示例和详细的技术解释，为学生提供了完整的平台架构理解基础。
 
-\# 第二节 水利工程三维场景设计
+ 第二节 水利工程三维场景设计
 
 \section{引言}
 
@@ -1204,11 +1203,11 @@ class DataFlowOrchestrator {
 
 \section{8.2.1 项目需求分析与设计}
 
-\#\#\# 典型项目案例：某大型水库三维可视化系统
+ 典型项目案例：某大型水库三维可视化系统
 
-\#\#\#\# 项目背景 某大型水库位于重要河流上游，承担防洪、供水、发电等多重功能。水库建设包括主坝、副坝、溢洪道、发电厂房等复杂工程结构，管理单位需要一个综合性的三维可视化平台来支持日常运行管理和安全监测。
+ 项目背景 某大型水库位于重要河流上游，承担防洪、供水、发电等多重功能。水库建设包括主坝、副坝、溢洪道、发电厂房等复杂工程结构，管理单位需要一个综合性的三维可视化平台来支持日常运行管理和安全监测。
 
-\#\#\#\# 业务需求分析
+ 业务需求分析
 
 \begin{lstlisting}[language=Javascript]
 // 业务需求结构化分析核心实现
@@ -1233,7 +1232,7 @@ const businessRequirements = {
 };
 \end{lstlisting}
 
-\#\#\#\# 技术架构设计
+ 技术架构设计
 
 \begin{lstlisting}[language=Javascript]
 // 水库可视化系统架构设计
@@ -1317,7 +1316,7 @@ subject to: Frame_Rate ≥ 30fps, Loading_Time ≤ 10s
 
 1000ms的切换时长基于人类注意力转移的最佳时间窗口。
 
-\#\#\#\# 空间层次结构
+ 空间层次结构
 
 \begin{lstlisting}[language=Javascript]
 // 四层次场景设计架构
@@ -1350,12 +1349,12 @@ class SceneHierarchy {
 
 \section{8.2.2 地形与环境建模}
 
-\#\#\# 地形数据处理
+ 地形数据处理
 
-\#\#\#\# DEM数据处理流程
+ DEM数据处理流程
 
 \begin{lstlisting}[language=Python]
-\# 地形数据处理核心算法
+ 地形数据处理核心算法
 class TerrainProcessor:
     def __init__(self, dem_path, output_dir):
         self.dem_path = dem_path
@@ -1365,14 +1364,14 @@ class TerrainProcessor:
         
     def process_dem_data(self):
         """DEM数据处理完整流程"""
-        \# 1. 读取和清理数据
+         1. 读取和清理数据
         with rasterio.open(self.dem_path) as src:
             elevation_data = src.read(1)
             transform, crs = src.transform, src.crs
             
         cleaned_data = self.clean_elevation_data(elevation_data)
         
-        \# 2. 生成多级LOD和切片
+         2. 生成多级LOD和切片
         lod_levels = self.generate_lod_levels(cleaned_data)
         tiles = self.create_terrain_tiles(lod_levels, transform, crs)
         metadata = self.generate_metadata(tiles, transform, crs)
@@ -1381,10 +1380,10 @@ class TerrainProcessor:
     
     def clean_elevation_data(self, data):
         """数据清理和质量控制"""
-        \# 异常值处理和缺失值插值
+         异常值处理和缺失值插值
         data = np.where((data < -1000) | (data > 10000), np.nan, data)
         
-        \# 距离加权插值修复
+         距离加权插值修复
         mask = np.isnan(data)
         if np.any(mask):
             from scipy.spatial.distance import cdist
@@ -1521,9 +1520,9 @@ class TerrainMeshGenerator {
 }
 \end{lstlisting}
 
-\#\#\# 水体建模与动画
+ 水体建模与动画
 
-\#\#\#\# 水体几何建模
+ 水体几何建模
 
 \begin{lstlisting}[language=Javascript]
 // 水体建模与动画核心系统
@@ -1661,9 +1660,9 @@ f(t) = t < 0.5 ? 2t² : 1 - 2(1-t)²
 
 \section{8.2.3 工程结构建模}
 
-\#\#\# 大坝建模
+ 大坝建模
 
-\#\#\#\# 参数化大坝生成
+ 参数化大坝生成
 
 \begin{lstlisting}[language=Javascript]
 // 大坝参数化建模系统
@@ -1824,7 +1823,7 @@ S(θ,h) = [R(h)·sin(θ), h, R(h)·cos(θ)]
 
 这种系统化的大坝建模方法不仅能够产生高质量的三维模型，更重要的是为水利工程师提供了科学准确的工程结构表达，支持更好的工程设计和安全评估。
 
-\#\#\# 水电厂房建模
+ 水电厂房建模
 
 \begin{lstlisting}[language=Javascript]
 // 水电厂房参数化建模系统
@@ -2163,7 +2162,7 @@ Reliability = 1 - ∏(1 - Ri)
 
 \section{思考题与练习}
 
-\#\#\# 基础题
+ 基础题
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
@@ -2176,7 +2175,7 @@ Reliability = 1 - ∏(1 - Ri)
   结合智慧水利的实际需求，解释本节内容如何应用于实际项目中。
 \end{enumerate}
 
-\#\#\# 提高题
+ 提高题
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
@@ -2190,7 +2189,7 @@ Reliability = 1 - ∏(1 - Ri)
   设计一个简单的案例，说明如何将本节理论应用于智慧水利系统设计。
 \end{enumerate}
 
-\#\#\# 讨论题
+ 讨论题
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
@@ -2206,7 +2205,7 @@ Reliability = 1 - ∏(1 - Ri)
 
 本节内容为智慧水利平台的设计和开发提供了重要的理论基础和技术指导。通过学习本节内容，学生应能够理解相关概念的内涵和应用价值，掌握基本的分析方法和设计原则，为后续章节的学习和实际项目的开展奠定坚实基础。
 
-\# 第三节 监测数据处理与展示模块
+ 第三节 监测数据处理与展示模块
 
 \section{引言}
 
@@ -2216,7 +2215,7 @@ Reliability = 1 - ∏(1 - Ri)
 
 \section{8.3.1 数据采集与预处理}
 
-\#\#\# 多源数据接入架构
+ 多源数据接入架构
 
 \begin{lstlisting}[language=Javascript]
 // 多源数据接入平台核心实现
@@ -2298,10 +2297,10 @@ ESB的核心价值在于将复杂的点对点集成转换为星型架构，系�
 
 这种标准化基于信息论中的编码理论，确保信息在转换过程中的完整性和一致性。
 
-\#\#\# 数据质量控制
+ 数据质量控制
 
 \begin{lstlisting}[language=Python]
-\# 数据质量控制器核心实现
+ 数据质量控制器核心实现
 class DataQualityController:
     def __init__(self, config):
         self.config = config
@@ -2311,7 +2310,7 @@ class DataQualityController:
     def process_data_batch(self, data_batch):
         results = []
         for record in data_batch:
-            \# 多维度质量检查
+             多维度质量检查
             if self.basic_validation(record):
                 range_result = self.range_validation(record)
                 temporal_result = self.temporal_consistency_check(record)
@@ -2325,7 +2324,7 @@ class DataQualityController:
     
     def calculate_quality_level(self, record):
         score = 100
-        \# 根据各种质量指标计算综合评分
+         根据各种质量指标计算综合评分
         if 'correction_flag' in record: score -= 10
         if 'quality_flag' in record: score -= 15
         
@@ -2386,7 +2385,7 @@ Grubbs检验：G = max|xi - x̄|/s，适用于正态分布数据
 
 通过历史数据建立参数间的相关模型，检测当前数据的合理性。
 
-\#\#\# 实时数据处理流水线
+ 实时数据处理流水线
 
 \begin{lstlisting}[language=Javascript]
 // 实时数据处理流水线核心实现
@@ -2491,10 +2490,10 @@ class RealTimeProcessingPipeline {
 
 \section{8.3.2 数据存储与管理}
 
-\#\#\# 时序数据库设计
+ 时序数据库设计
 
 \begin{lstlisting}[language=Python]
-\# 时序数据管理器核心实现
+ 时序数据管理器核心实现
 class TimeSeriesDataManager:
     def __init__(self, config):
         self.config = config
@@ -2505,7 +2504,7 @@ class TimeSeriesDataManager:
         self.query_api = self.influx_client.query_api()
         self.bucket = config['bucket']
         
-        \# 数据保留策略
+         数据保留策略
         self.retention_policies = {
             'raw_data': '90d', 'minute_avg': '1y', 
             'hour_avg': '5y', 'day_avg': '20y'
@@ -2603,7 +2602,7 @@ Gorilla算法的压缩比可达90\%以上，基于IEEE 754浮点数的位表示�
   \textbf{冷数据}：对象存储，分钟级访问
 \end{itemize}
 
-\#\#\# 数据缓存策略
+ 数据缓存策略
 
 \begin{lstlisting}[language=Javascript]
 // 数据缓存管理器核心实现
@@ -2815,7 +2814,7 @@ P(access|time, context) = sigmoid(w·φ(time, context))
 
 \section{思考题与练习}
 
-\#\#\# 基础题
+ 基础题
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
@@ -2828,7 +2827,7 @@ P(access|time, context) = sigmoid(w·φ(time, context))
   结合智慧水利的实际需求，解释本节内容如何应用于实际项目中。
 \end{enumerate}
 
-\#\#\# 提高题
+ 提高题
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
@@ -2842,7 +2841,7 @@ P(access|time, context) = sigmoid(w·φ(time, context))
   设计一个简单的案例，说明如何将本节理论应用于智慧水利系统设计。
 \end{enumerate}
 
-\#\#\# 讨论题
+ 讨论题
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
@@ -2858,7 +2857,7 @@ P(access|time, context) = sigmoid(w·φ(time, context))
 
 本节内容为智慧水利平台的设计和开发提供了重要的理论基础和技术指导。通过学习本节内容，学生应能够理解相关概念的内涵和应用价值，掌握基本的分析方法和设计原则，为后续章节的学习和实际项目的开展奠定坚实基础。
 
-\# 第四节 监控模型与综合评价模块
+ 第四节 监控模型与综合评价模块
 
 \section{引言}
 
@@ -2868,7 +2867,7 @@ P(access|time, context) = sigmoid(w·φ(time, context))
 
 \section{8.4.1 多级安全评价体系}
 
-\#\#\# 风险评估模型
+ 风险评估模型
 
 \begin{lstlisting}[language=Javascript]
 // 多级安全评价体系核心实现
@@ -3007,10 +3006,10 @@ U(x) = Σ wi × ui(xi)
   \textbf{振动监测}：反映结构动力响应特性
 \end{itemize}
 
-\#\#\# 智能预警算法
+ 智能预警算法
 
 \begin{lstlisting}[language=Python]
-\# 智能预警算法核心实现
+ 智能预警算法核心实现
 class IntelligentWarningSystem:
     def __init__(self, config):
         self.config = config
@@ -3022,35 +3021,35 @@ class IntelligentWarningSystem:
         """多算法融合预测"""
         predictions = {}
         
-        \# LSTM时序预测
+         LSTM时序预测
         lstm_pred = self.lstm_prediction(monitoring_data)
         predictions['lstm'] = lstm_pred
         
-        \# ARIMA统计预测
+         ARIMA统计预测
         arima_pred = self.arima_prediction(monitoring_data)
         predictions['arima'] = arima_pred
         
-        \# 支持向量回归预测
+         支持向量回归预测
         svr_pred = self.svr_prediction(monitoring_data)
         predictions['svr'] = svr_pred
         
-        \# 集成学习融合
+         集成学习融合
         fused_prediction = self.ensemble_fusion(predictions)
         
         return fused_prediction
     
     def anomaly_detection(self, current_data, historical_data):
         """异常检测算法"""
-        \# 孤立森林检测
+         孤立森林检测
         iso_forest_score = self.isolation_forest_detect(current_data, historical_data)
         
-        \# 统计控制图检测  
+         统计控制图检测  
         spc_score = self.statistical_process_control(current_data, historical_data)
         
-        \# 基于深度学习的异常检测
+         基于深度学习的异常检测
         autoencoder_score = self.autoencoder_anomaly_detect(current_data)
         
-        \# 综合异常评分
+         综合异常评分
         anomaly_score = (iso_forest_score + spc_score + autoencoder_score) / 3
         
         return {
@@ -3064,17 +3063,17 @@ class IntelligentWarningSystem:
         warning_level = 0
         evidence = []
         
-        \# 基于当前状态的预警
+         基于当前状态的预警
         if evaluation_result['safetyLevel']['level'] >= 4:
             warning_level = max(warning_level, 3)
             evidence.append('当前安全状态达到危险级别')
             
-        \# 基于预测结果的预警  
+         基于预测结果的预警  
         if prediction_result.get('trend_risk', 0) > 0.7:
             warning_level = max(warning_level, 2)
             evidence.append('未来趋势显示风险上升')
             
-        \# 基于异常检测的预警
+         基于异常检测的预警
         if anomaly_result['is_anomaly']:
             warning_level = max(warning_level, 1)
             evidence.append(f'检测到异常模式，置信度{anomaly_result["confidence"]:.2f}')
@@ -3150,7 +3149,7 @@ LCL = μ - 3σ  // 下控制限
 
 \section{8.4.2 应急响应决策系统}
 
-\#\#\# 应急预案管理
+ 应急预案管理
 
 ``\textbackslash texttt\{javascript\\
 // 应急响应决策系统核心实现 class EmergencyResponseSystem \{ constructor(config) \{ this.config = config; this.emergencyPlans = this.loadEmergencyPlans(); this.decisionTree = this.buildDecisionTree(); this.responseHistory = {[}{]}; \}
@@ -3285,26 +3284,26 @@ async executeEmergencyPlan(responseInstance) {
 
 时间窗口模型：}T_total = T_detection + T_decision + T_action\texttt{
 
-\##\# 智能决策支持
+ 智能决策支持
 \end{lstlisting}
 
-python \# 智能决策支持系统核心实现\\
+python  智能决策支持系统核心实现\\
 class IntelligentDecisionSupport: def \textbf{init}(self, config): self.config = config self.knowledge\_base = self.load\_knowledge\_base() self.decision\_models = self.initialize\_decision\_models() self.optimization\_engine = OptimizationEngine()
 
 \begin{verbatim}
 def multi_objective_optimization(self, decision_variables, constraints):
     """多目标优化决策"""
-    \# 定义目标函数
+     定义目标函数
     objectives = {
         'safety': lambda x: self.calculate_safety_objective(x),
         'cost': lambda x: self.calculate_cost_objective(x),  
         'time': lambda x: self.calculate_time_objective(x)
     }
     
-    \# NSGA-II多目标优化
+     NSGA-II多目标优化
     pareto_solutions = self.nsga2_optimization(objectives, constraints, decision_variables)
     
-    \# 解的评价和推荐
+     解的评价和推荐
     recommended_solution = self.select_preferred_solution(pareto_solutions)
     
     return {
@@ -3317,19 +3316,19 @@ def generate_decision_recommendations(self, situation_analysis, available_resour
     """生成决策建议"""
     recommendations = []
     
-    \# 基于规则的推理
+     基于规则的推理
     rule_recommendations = self.rule_based_reasoning(situation_analysis)
     recommendations.extend(rule_recommendations)
     
-    \# 基于案例的推理
+     基于案例的推理
     case_recommendations = self.case_based_reasoning(situation_analysis)
     recommendations.extend(case_recommendations)
     
-    \# 基于模型的推理  
+     基于模型的推理  
     model_recommendations = self.model_based_reasoning(situation_analysis, available_resources)
     recommendations.extend(model_recommendations)
     
-    \# 推荐排序和筛选
+     推荐排序和筛选
     filtered_recommendations = self.filter_and_rank_recommendations(
         recommendations, available_resources
     )
@@ -3340,15 +3339,15 @@ def scenario_simulation(self, decision_scenario, time_horizon):
     """情景模拟分析"""
     simulation_results = {}
     
-    \# 蒙特卡洛模拟
+     蒙特卡洛模拟
     mc_results = self.monte_carlo_simulation(decision_scenario, time_horizon, n_samples=1000)
     simulation_results['monte_carlo'] = mc_results
     
-    \# 敏感性分析
+     敏感性分析
     sensitivity_results = self.sensitivity_analysis(decision_scenario)
     simulation_results['sensitivity'] = sensitivity_results
     
-    \# 鲁棒性分析
+     鲁棒性分析
     robustness_results = self.robustness_analysis(decision_scenario)
     simulation_results['robustness'] = robustness_results
     
@@ -3446,19 +3445,19 @@ min max f(x,ξ) s.t. g(x,ξ) ≤ 0, ∀ξ ∈ Ξ x ξ
 
 \section{思考题与练习}
 
-\##\# 基础题
+ 基础题
 
 1. 请简述本节的核心概念，并说明其在智慧水利平台开发中的重要性。
 2. 总结本节介绍的主要技术方法，并分析各方法的适用场景。
 3. 结合智慧水利的实际需求，解释本节内容如何应用于实际项目中。
 
-\##\# 提高题
+ 提高题
 
 4. 分析本节涉及的技术难点，并提出可能的解决方案。
 5. 比较本节介绍的不同方法的优缺点，并给出选择建议。
 6. 设计一个简单的案例，说明如何将本节理论应用于智慧水利系统设计。
 
-\##\# 讨论题
+ 讨论题
 
 7. 讨论本节内容与其他相关技术的集成方案，分析可能遇到的挑战。
 8. 展望本节涉及技术的发展趋势，分析其对智慧水利未来发展的影响。
@@ -3467,7 +3466,7 @@ min max f(x,ξ) s.t. g(x,ξ) ≤ 0, ∀ξ ∈ Ξ x ξ
 
 本节内容为智慧水利平台的设计和开发提供了重要的理论基础和技术指导。通过学习本节内容，学生应能够理解相关概念的内涵和应用价值，掌握基本的分析方法和设计原则，为后续章节的学习和实际项目的开展奠定坚实基础。
 
-\# 第五节 系统集成与运维管理
+ 第五节 系统集成与运维管理
 
 \section{引言}
 
@@ -3483,7 +3482,7 @@ min max f(x,ξ) s.t. g(x,ξ) ≤ 0, ∀ξ ∈ Ξ x ξ
 
 \section{8.5.1 系统架构优化}
 
-\##\# 微服务架构设计
+ 微服务架构设计
 \end{lstlisting}
 
 javascript // 微服务注册中心核心实现 class ServiceRegistry \{ constructor(config) \{ this.services = new Map(); this.healthChecks = new Map(); this.loadBalancers = new Map(); this.config = config; \}
@@ -3653,10 +3652,10 @@ RequestCount(Window) = ∑Requests(t-Window, t) Allow = RequestCount \textless{}
 \begin{lstlisting}
 \section{8.5.2 运维监控体系}
 
-\##\# 系统监控框架
+ 系统监控框架
 \end{lstlisting}
 
-python \# 运维监控体系核心实现 class SystemMonitor: def \textbf{init}(self, config): self.config = config self.metrics\_buffer = {[}{]} self.alert\_rules = self.load\_alert\_rules() self.collectors = self.initialize\_collectors()
+python  运维监控体系核心实现 class SystemMonitor: def \textbf{init}(self, config): self.config = config self.metrics\_buffer = {[}{]} self.alert\_rules = self.load\_alert\_rules() self.collectors = self.initialize\_collectors()
 
 \begin{verbatim}
 def initialize_collectors(self):
@@ -3857,7 +3856,7 @@ Score(Node) = ∑wi × fi(Node, Pod)
 其中fi为评分函数，包括资源使用率、亲和性、反亲和性等因素。
 \end{lstlisting}
 
-yaml \# 容器化部署配置（简化版） version: `3.8' services: data-collection: image: smart-water/data-collection:latest ports: {[}``8080:8080''{]} environment: - SPRING\_PROFILES\_ACTIVE=production - DATABASE\_URL=jdbc:postgresql://postgres:5432/smart\_water depends\_on: {[}postgres, redis{]} deploy: resources: limits: \{cpus: `1.0', memory: 1G\} reservations: \{cpus: `0.5', memory: 512M\} healthcheck: test: {[}``CMD'', ``curl'', ``-f'', ``http://localhost:8080/health''{]} interval: 30s timeout: 10s retries: 3
+yaml  容器化部署配置（简化版） version: `3.8' services: data-collection: image: smart-water/data-collection:latest ports: {[}``8080:8080''{]} environment: - SPRING\_PROFILES\_ACTIVE=production - DATABASE\_URL=jdbc:postgresql://postgres:5432/smart\_water depends\_on: {[}postgres, redis{]} deploy: resources: limits: \{cpus: `1.0', memory: 1G\} reservations: \{cpus: `0.5', memory: 512M\} healthcheck: test: {[}``CMD'', ``curl'', ``-f'', ``http://localhost:8080/health''{]} interval: 30s timeout: 10s retries: 3
 
 postgres: image: postgis/postgis:13-3.1 environment: - POSTGRES\_DB=smart\_water - POSTGRES\_PASSWORD=\$\{POSTGRES\_PASSWORD\} volumes: {[}``postgres\_data:/var/lib/postgresql/data''{]}
 
@@ -3903,7 +3902,7 @@ Availability = (Total\_Time - Downtime) / Total\_Time
 零停机部署的理论可用性接近100\%。
 \end{lstlisting}
 
-yaml \# CI/CD流水线配置（简化版） stages: {[}validate, test, build, deploy-staging, deploy-production{]}
+yaml  CI/CD流水线配置（简化版） stages: {[}validate, test, build, deploy-staging, deploy-production{]}
 
 variables: DOCKER\_REGISTRY: registry.smart-water.com
 
@@ -3920,7 +3919,7 @@ deploy-production: stage: deploy-production script: - helm upgrade --install sma
 
 \end{lstlisting}
 
-python \# 自动故障恢复系统核心实现 class AutoRecoverySystem: def \textbf{init}(self, config): self.config = config self.recovery\_strategies = self.load\_recovery\_strategies() self.circuit\_breakers = \{\}
+python  自动故障恢复系统核心实现 class AutoRecoverySystem: def \textbf{init}(self, config): self.config = config self.recovery\_strategies = self.load\_recovery\_strategies() self.circuit\_breakers = \{\}
 
 \begin{verbatim}
 def load_recovery_strategies(self):
@@ -4101,7 +4100,7 @@ R\_system = 1 - ∏(1 - Ri) \}`` 其中Ri为第i个组件的可靠性。
 
 \section{思考题与练习}
 
-\#\#\# 基础题
+ 基础题
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
@@ -4114,7 +4113,7 @@ R\_system = 1 - ∏(1 - Ri) \}`` 其中Ri为第i个组件的可靠性。
   \textbf{自动化运维实践}：说明容器化部署的优势，解释CI/CD流水线各阶段的作用。
 \end{enumerate}
 
-\#\#\# 提高题
+ 提高题
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
@@ -4128,7 +4127,7 @@ R\_system = 1 - ∏(1 - Ri) \}`` 其中Ri为第i个组件的可靠性。
   \textbf{性能优化分析}：基于CAP理论分析智慧水利系统的一致性策略选择。
 \end{enumerate}
 
-\#\#\# 讨论题
+ 讨论题
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
