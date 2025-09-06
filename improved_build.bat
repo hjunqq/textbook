@@ -7,8 +7,8 @@ echo   Improved Textbook Converter Build Script
 echo ===============================================
 echo.
 
-set "PROJECT_ROOT=%~dp0.."
-set "CONVERTER_SCRIPT=%PROJECT_ROOT%\tools\improved_main_converter.py"
+set "PROJECT_ROOT=%~dp0"
+set "CONVERTER_SCRIPT=%PROJECT_ROOT%tools\improved_main_converter.py"
 
 REM 检查Python是否可用
 python --version >nul 2>&1
@@ -84,7 +84,7 @@ goto end_operation
 echo.
 echo 🧹 清理构建文件...
 echo.
-cd /d "%PROJECT_ROOT%\publish\latex"
+cd /d "%PROJECT_ROOT%\output"
 
 echo 清理 LaTeX 临时文件...
 del /q *.aux *.log *.out *.toc *.fdb_latexmk *.fls *.synctex.gz 2>nul
@@ -128,10 +128,10 @@ goto menu
 echo.
 echo 👋 感谢使用智慧水利教材转换器！
 echo.
-if exist "%PROJECT_ROOT%\publish\latex\main.pdf" (
-    echo ✅ 当前 PDF 文件: %PROJECT_ROOT%\publish\latex\main.pdf
+if exist "%PROJECT_ROOT%\output\main.pdf" (
+    echo ✅ 当前 PDF 文件: %PROJECT_ROOT%\output\main.pdf
     set "PDF_SIZE="
-    for %%i in ("%PROJECT_ROOT%\publish\latex\main.pdf") do set "PDF_SIZE=%%~zi"
+    for %%i in ("%PROJECT_ROOT%\output\main.pdf") do set "PDF_SIZE=%%~zi"
     if defined PDF_SIZE echo    文件大小: !PDF_SIZE! bytes
 )
 echo.
