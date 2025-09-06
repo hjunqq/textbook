@@ -1,0 +1,4 @@
+2025-09-06 08:28:54 - TestTemplate - ERROR - 模板引擎测试失败: Single '}' encountered in format string
+2025-09-06 08:44:46 - Main - ERROR - ❌ PDF编译超时
+2025-09-06 08:44:46 - Main - ERROR - 错误详情:
+2025-09-06 08:44:46 - Main - ERROR -   - 编译过程超时（5分钟）

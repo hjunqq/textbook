@@ -1,124 +1,166 @@
+% 智慧水利平台架构与开发教材
+% 使用XeLaTeX编译
+
 \documentclass[12pt,a4paper]{book}
 
-% 基础包配置
+% 中文支持
 \usepackage[UTF8]{ctex}
-\usepackage{xeCJK}
-% \setCJKmainfont{Microsoft YaHei}  % 注释掉，使用默认中文字体
+\setCJKmainfont{Microsoft YaHei}
 
 % 页面设置
-\usepackage[a4paper,margin=2.5cm]{geometry}
-\usepackage{setspace}
-\onehalfspacing
+\usepackage{geometry}
+\geometry{
+    a4paper,
+    left=2.5cm,
+    right=2.0cm,
+    top=2.5cm,
+    bottom=2.0cm
+}
 
-% Pandoc兼容性包
-\usepackage{longtable,booktabs,array}
-\usepackage{calc}
-\usepackage{etoolbox}
-\usepackage{footnotehyper}
+% 数学支持
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{mathtools}
+
+% 图片支持
 \usepackage{graphicx}
-\usepackage{grffile}
-\usepackage[normalem]{ulem}
+\graphicspath{{../docs/assets/images/}}
 
-% 数学包
-\usepackage{amsmath}
-\usepackage{amsfonts}
-\usepackage{amssymb}
-
-% 图片包
-\usepackage{float}
-\usepackage{subfigure}
-
-% 代码高亮包
+% 代码高亮
 \usepackage{listings}
 \usepackage{xcolor}
 
-% 告警框包
-\usepackage{tcolorbox}
-\tcbuselibrary{breakable}
+% 代码样式配置
+\lstset{
+    basicstyle=\ttfamily\small,
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    stepnumber=1,
+    numbersep=5pt,
+    backgroundcolor=\color{gray!10},
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    frame=single,
+    rulecolor=\color{black},
+    tabsize=4,
+    captionpos=b,
+    breaklines=true,
+    breakatwhitespace=false,
+    keywordstyle=\color{blue},
+    commentstyle=\color{green!60!black},
+    stringstyle=\color{red},
+    escapeinside={(*@}{@*)},
+    morekeywords={*,...}
+}
 
-% 定义Pandoc需要的命令
-\providecommand{\tightlist}{%
-  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+% 告警框支持
+\usepackage{tcolorbox}
+\tcbuselibrary{skins,breakable}
+
+% 定义告警框样式
+\newtcolorbox{noteBox}[1][]{
+    colback=blue!5!white,
+    colframe=blue!75!black,
+    fonttitle=\bfseries,
+    title=注意,
+    #1
+}
+
+\newtcolorbox{tipBox}[1][]{
+    colback=green!5!white,
+    colframe=green!75!black,
+    fonttitle=\bfseries,
+    title=提示,
+    #1
+}
+
+\newtcolorbox{warningBox}[1][]{
+    colback=orange!5!white,
+    colframe=orange!75!black,
+    fonttitle=\bfseries,
+    title=警告,
+    #1
+}
+
+% 表格支持
+\usepackage{array,booktabs,longtable}
+\usepackage{multirow,multicol}
+
+% 链接支持
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    filecolor=magenta,      
+    urlcolor=cyan,
+    citecolor=green,
+    pdftitle={智慧水利平台架构与开发},
+    pdfauthor={智慧水利教材编写组},
+    pdfsubject={智慧水利平台架构与开发},
+    pdfkeywords={智慧水利,平台架构,软件开发}
+}
+
+% 目录设置
+\usepackage{titletoc}
 
 % 页眉页脚
 \usepackage{fancyhdr}
 \pagestyle{fancy}
 \fancyhf{}
-\fancyhead[C]{智慧水利平台架构与开发}
-\fancyfoot[C]{\thepage}
+\fancyhead[LE,RO]{\thepage}
+\fancyhead[LO]{\rightmark}
+\fancyhead[RE]{\leftmark}
 
-% 超链接
-\usepackage{hyperref}
-\hypersetup{
-    colorlinks=true,
-    linkcolor=black,
-    citecolor=black, 
-    urlcolor=blue,
-    pdfborder={0 0 0}
-}
+% 章节样式
+\usepackage{titlesec}
 
-% 代码样式配置优化
-\definecolor{codegreen}{rgb}{0,0.6,0}
-\definecolor{codegray}{rgb}{0.5,0.5,0.5}
-\definecolor{codepurple}{rgb}{0.58,0,0.82}
-\definecolor{backcolour}{rgb}{0.98,0.98,0.98}
+% 浮动体设置
+\usepackage{float}
+\restylefloat{table}
+\restylefloat{figure}
 
-\lstset{
-    basicstyle=\scriptsize\ttfamily,    % 更小字体
-    lineskip=-1pt,                        % 减少行间距
-    backgroundcolor=\color{backcolour},
-    commentstyle=\color{codegreen},
-    keywordstyle=\color{blue}\bfseries,
-    numberstyle=\tiny\color{codegray},
-    stringstyle=\color{codepurple},
-    basicstyle=\footnotesize\ttfamily,
-    breakatwhitespace=false,         
-    breaklines=true,                 
-    captionpos=b,                    
-    keepspaces=true,                 
-    numbers=left,                    
-    numbersep=5pt,                  
-    showspaces=false,                
-    showstringspaces=false,
-    showtabs=false,                  
-    tabsize=2,
-    frame=single,
-    rulecolor=\color{gray!30},
-    aboveskip=\smallskipamount,
-    belowskip=\smallskipamount,
-    xleftmargin=8pt,
-    xrightmargin=8pt
-}
+% 避免孤立行
+\widowpenalty=1000
+\clubpenalty=1000
 
-% 行内代码优化
-\newcommand{\code}[1]{\lstinline[basicstyle=\small\ttfamily]|#1|}
+% Pandoc兼容性
+\providecommand{\tightlist}{\setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
 
 \begin{document}
 
-% 封面
+% 标题页
 \begin{titlepage}
 \centering
-\vspace*{2cm}
-{\Huge\bfseries 智慧水利平台架构与开发}\\[2cm]
-{\Large 教材}\\[4cm]
+{\Huge \textbf{智慧水利平台架构与开发}}
+\vspace{2cm}
+
+{\Large 教材编写组}
+\vspace{1cm}
+
 {\large \today}
 \end{titlepage}
 
 % 目录
+\frontmatter
 \tableofcontents
-\newpage
+\listoffigures
+\listoftables
 
-% 前言
-\input{chapters/preface.tex}
+% 正文
+\mainmatter
 
-% \input{chapters/chapter01.tex}
-% \input{chapters/chapter02.tex}
-% \input{chapters/chapter03.tex}
-% \input{chapters/chapter04.tex}
-% \input{chapters/chapter05.tex}
-% \input{chapters/chapter06.tex}
-% \input{chapters/chapter07.tex}
-% \input{chapters/chapter08.tex}
-% \input{chapters/chapter09.tex}
+\input{chapters/preface}
+\input{chapters/chapter01}
+\input{chapters/chapter02}
+\input{chapters/chapter03}
+\input{chapters/chapter04}
+\input{chapters/chapter05}
+\input{chapters/chapter06}
+\input{chapters/chapter07}
+\input{chapters/chapter08}
+\input{chapters/chapter09}
+
+% 后记
+\backmatter
 
 \end{document}
