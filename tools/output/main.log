@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.141592653-2.6-0.999996 (TeX Live 2024) (preloaded format=xelatex 2024.9.19)  6 SEP 2025 12:56
+This is XeTeX, Version 3.141592653-2.6-0.999996 (TeX Live 2024) (preloaded format=xelatex 2024.9.19)  7 SEP 2025 16:16
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -1052,4 +1052,78 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 ]
 No file main.lof.
 \tf@lof=\write6
-\openo
+\openout6 = `main.lof'.
+
+[3]
+
+Package fancyhdr Warning: \headheight is too small (12.0pt): 
+(fancyhdr)                Make it at least 14.49998pt, for example:
+(fancyhdr)                \setlength{\headheight}{14.49998pt}.
+(fancyhdr)                You might also make \topmargin smaller to compensate:
+(fancyhdr)                \addtolength{\topmargin}{-2.49998pt}.
+
+[4
+
+]
+No file main.lot.
+\tf@lot=\write7
+\openout7 = `main.lot'.
+
+[5]
+
+Package fancyhdr Warning: \headheight is too small (12.0pt): 
+(fancyhdr)                Make it at least 14.49998pt, for example:
+(fancyhdr)                \setlength{\headheight}{14.49998pt}.
+(fancyhdr)                You might also make \topmargin smaller to compensate:
+(fancyhdr)                \addtolength{\topmargin}{-2.49998pt}.
+
+[6
+
+] (./chapters/preface.tex
+
+./chapters/preface.tex:4: LaTeX Error: There's no line here to end.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.4 \\t
+       extit{}\\textit{}\\textit{t}\\textit{}\\textit{e}\\textit{}\\textit{x...
+Your command was ignored.
+Type  I <command> <return>  to replace it with another command,
+or  <return>  to continue without it.
+
+./chapters/preface.tex:4: You can't use `macro parameter character #' in horizontal mode.
+l.4 ...f}\\textit{}\\textit{{}\\textit{}\\textit{#
+                                                  }\\textit{}\\textit{}}\\te...
+Sorry, but I'm not programmed to handle this case;
+I'll just pretend that you didn't ask for it.
+If you're in the wrong mode, you might be able to
+return to the right one by typing `I}' or `I$' or `I\par'.
+
+Missing character: There is no 📱 (U+1F4F1) in font [lmroman12-regular]:mapping=tex-text;!
+Missing character: There is no 🔍 (U+1F50D) in font [lmroman12-regular]:mapping=tex-text;!
+Missing character: There is no 📑 (U+1F4D1) in font [lmroman12-regular]:mapping=tex-text;!
+Missing character: There is no 💡 (U+1F4A1) in font [lmroman12-regular]:mapping=tex-text;!
+Missing character: There is no 🧮 (U+1F9EE) in font [lmroman12-regular]:mapping=tex-text;!
+Missing character: There is no 📊 (U+1F4CA) in font [lmroman12-regular]:mapping=tex-text;!
+Missing character: There is no 🌓 (U+1F313) in font [lmroman12-regular]:mapping=tex-text;!
+Missing character: There is no 📖 (U+1F4D6) in font [lmroman12-regular]:mapping=tex-text;!
+./chapters/preface.tex:103: TeX capacity exceeded, sorry [main memory size=5000000].
+<XeTeXinterchartoks> 
+                     \int_gset_eq:NN \g__xeCJK_space_factor_int \tex_spacefa...
+l.103 ...}\\textit{}\\textit{x}\\textit{}\\textit{
+                                                  t}\\textit{}\\textit{b}\\t...
+If you really absolutely need more capacity,
+you can ask a wizard to enlarge me.
+
+ 
+Here is how much of TeX's memory you used:
+ 32347 strings out of 474773
+ 700221 string characters out of 5761289
+ 5000000 words of memory out of 5000000
+ 53999 multiletter control sequences out of 15000+600000
+ 560279 words of font info for 65 fonts, out of 8000000 for 9000
+ 1348 hyphenation exceptions out of 8191
+ 93i,11n,97p,47454b,382s stack positions out of 10000i,1000n,20000p,200000b,200000s
+Output written on main.xdv (8 pages, 5552 bytes).
