@@ -1,0 +1,8 @@
+2025-09-06 13:14:04 - Main - ERROR - 程序执行失败: 配置验证失败: ['源目录不存在: ../docs/chapters']
+2025-09-06 13:14:04 - Main - ERROR - 详细错误信息:
+Traceback (most recent call last):
+  File "/mnt/d/Projects/教材/智慧水利平台架构与开发/tools/md2latex_converter.py", line 102, in main
+    app = ConverterApplication(args.config)
+  File "/mnt/d/Projects/教材/智慧水利平台架构与开发/tools/src/core/converter.py", line 48, in __init__
+    raise ValueError(f"配置验证失败: {config_errors}")
+ValueError: 配置验证失败: ['源目录不存在: ../docs/chapters']

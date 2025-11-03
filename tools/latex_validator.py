@@ -28,6 +28,7 @@ class LaTeXValidator:
         content = self._fix_bare_hash_symbols(content)
         content = self._fix_malformed_tcolorbox(content)
         content = self._fix_stray_backslashes(content)
+        content = self._fix_math_escaped_dollars(content)
         content = self._fix_math_syntax(content)
         content = self._fix_listing_syntax(content)
         content = self._fix_excessive_symbols(content)
@@ -36,6 +37,45 @@ class LaTeXValidator:
         
         self.logger.info(f"LaTeX语法修复完成，共修复 {self.fixes_applied} 处错误")
         return content
+
+    def _fix_math_escaped_dollars(self, content: str) -> str:
+        """将被转义的 \$...\$ 恢复为数学模式 $...$，并解开下划线/大括号等转义。
+
+        仅在 lstlisting 之外处理。
+        """
+        def unescape_math(s: str) -> str:
+            return (s.replace('\\_', '_')
+                     .replace('\\{', '{')
+                     .replace('\\}', '}'))
+
+        def fix_segment(seg: str) -> str:
+            import re
+            def repl(m):
+                inner = unescape_math(m.group(1))
+                return f'${inner}$'
+            return re.sub(r'\\\$(.+?)\\\$', repl, seg)
+
+        out = []
+        i = 0
+        begin = '\\begin{lstlisting}'
+        end = '\\end{lstlisting}'
+        n = len(content)
+        while i < n:
+            b = content.find(begin, i)
+            if b == -1:
+                out.append(fix_segment(content[i:]))
+                break
+            out.append(fix_segment(content[i:b]))
+            e = content.find(end, b)
+            if e == -1:
+                out.append(content[b:])
+                break
+            out.append(content[b:e+len(end)])
+            i = e + len(end)
+        fixed = ''.join(out)
+        if fixed != content:
+            self.fixes_applied += 1
+        return fixed
     
     def _fix_malformed_headers(self, content: str) -> str:
         """修复错误的标题格式"""

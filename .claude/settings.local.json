@@ -36,7 +36,10 @@
       "Bash(for i in 01 02 03 04 05 06 07 08 09)",
       "Bash(do)",
       "Bash(timeout 60 xelatex:*)",
-      "Bash(timeout:*)"
+      "Bash(timeout:*)",
+      "Bash(rg:*)",
+      "Read(/tmp/**)",
+      "Bash(TEXMFVAR=/tmp timeout 60 xelatex -interaction=nonstopmode main.tex)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits"

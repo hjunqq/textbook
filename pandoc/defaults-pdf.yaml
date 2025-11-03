@@ -13,9 +13,80 @@ metadata:
   link-citations: false
   geometry: [a4paper, margin=25mm]
   header-includes: |
+    % --- CJK fonts (prefer serif for print; graceful fallbacks) ---
     \usepackage{xeCJK}
-    \setCJKmainfont{Microsoft YaHei}
+    \usepackage{fontspec}
+    \IfFontExistsTF{Source Han Serif SC}{%
+      \setCJKmainfont{Source Han Serif SC}% 思源宋体（优先）
+    }{\IfFontExistsTF{Noto Serif CJK SC}{%
+      \setCJKmainfont{Noto Serif CJK SC}% Noto Serif CJK（同源）
+    }{\IfFontExistsTF{SimSun}{%
+      \setCJKmainfont{SimSun}% 宋体（Windows 常见）
+    }{%
+      \setCJKmainfont{Microsoft YaHei}% 退化为雅黑以保证可用
+    }}}
+
+    % --- Core packages ---
     \usepackage{booktabs,longtable,tcolorbox,caption,hyperref}
+    \usepackage{xcolor}
+
+    % --- Chapter/section styling (titlesec) ---
+    \usepackage{titlesec}
+    \definecolor{ChapterGray}{gray}{0.6}
+    \titleformat{\chapter}[hang]
+      {\huge\bfseries}
+      {\color{ChapterGray}\thechapter}
+      {1em}
+      {}
+      [\vspace{0.4ex}\titlerule]
+    \titlespacing*{\chapter}{0pt}{*3}{*1.4}
+    \titleformat{\section}{\Large\bfseries}{\thesection}{0.75em}{}
+    \titlespacing*{\section}{0pt}{*2}{*0.8}
+    \titleformat{\subsection}{\large\bfseries}{\thesubsection}{0.6em}{}
+    \titlespacing*{\subsection}{0pt}{*1.6}{*0.6}
+
+    % --- TOC polishing (titletoc) ---
+    \usepackage{titletoc}
+    \titlecontents{chapter}
+      [0em]
+      {\bfseries}
+      {\contentslabel{2.5em}}
+      {}
+      {\hfill\contentspage}
+      [\vspace{0.25em}]
+    \titlecontents{section}
+      [2.5em]
+      {}
+      {\contentslabel{3.0em}}
+      {}
+      {\titlerule*[0.5pc]{.}\contentspage}
+    \titlecontents{subsection}
+      [5.5em]
+      {}
+      {\contentslabel{3.5em}}
+      {}
+      {\titlerule*[0.5pc]{.}\contentspage}
+
+    % --- Code listings: print-friendly high contrast ---
+    \usepackage{listings}
+    \lstdefinestyle{printfriendly}{%
+      basicstyle=\ttfamily\small,
+      keywordstyle=\bfseries, % 避免过度用色，提升印刷可读性
+      commentstyle=\itshape\color{gray},
+      stringstyle=\color{black},
+      numbers=left,
+      numberstyle=\tiny\color{gray},
+      stepnumber=1,
+      numbersep=8pt,
+      breaklines=true,
+      showstringspaces=false,
+      columns=fullflexible,
+      keepspaces=true,
+      frame=single,
+      rulecolor=\color{black!20},
+      tabsize=2
+    }
+    \lstset{style=printfriendly}
 variables:
   documentclass: scrbook
   fontsize: 12pt
@@ -23,3 +94,4 @@ variables:
   monofont: Consolas
   colorlinks: true
   linkcolor: blue
+  listings: true

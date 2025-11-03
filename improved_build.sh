@@ -81,7 +81,7 @@ clean_build() {
     echo -e "${YELLOW}🧹 清理构建文件...${NC}"
     echo
     
-    LATEX_DIR="$PROJECT_ROOT/publish/latex"
+LATEX_DIR="$PROJECT_ROOT/output"
     if [ -d "$LATEX_DIR" ]; then
         cd "$LATEX_DIR"
         echo "清理 LaTeX 临时文件..."
@@ -138,7 +138,7 @@ while true; do
             echo
             echo -e "${GREEN}👋 感谢使用智慧水利教材转换器！${NC}"
             echo
-            PDF_FILE="$PROJECT_ROOT/publish/latex/main.pdf"
+            PDF_FILE="$PROJECT_ROOT/output/main.pdf"
             if [ -f "$PDF_FILE" ]; then
                 PDF_SIZE=$(stat -f%z "$PDF_FILE" 2>/dev/null || stat -c%s "$PDF_FILE" 2>/dev/null)
                 echo -e "${GREEN}✅ 当前 PDF 文件: $PDF_FILE${NC}"

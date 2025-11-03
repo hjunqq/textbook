@@ -13,8 +13,9 @@ class ConverterConfig:
     """转换器配置类"""
     
     # 输入输出路径
-    source_dir: str = "../docs/chapters"
-    preface_file: str = "../docs/前言.md"
+    # 使用仓库根相对路径，支持从仓库根或 tools 目录运行
+    source_dir: str = "docs/chapters"
+    preface_file: str = "docs/前言.md"
     output_dir: str = "output"
     temp_dir: str = "temp"
     
