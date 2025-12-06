@@ -23,9 +23,7 @@ def extract_pdf_content():
     
     # 定义PDF文件路径
     pdf_files = [
-        r"d:\Projects\教材\智慧水利平台架构与开发\reference\Ch04.1.pdf",
-        r"d:\Projects\教材\智慧水利平台架构与开发\reference\Ch04.4-4.7.pdf", 
-        r"d:\Projects\教材\智慧水利平台架构与开发\reference\Ch05.pdf"
+        r"e:\2025\教材\智慧水利平台架构与开发\参考\智慧水利平台架构与开发 4 软件开发项目管理.pdf"
     ]
     
     for pdf_file in pdf_files:
@@ -46,9 +44,9 @@ def extract_pdf_content():
                             full_text.append(f"第{page_num}页:\n{text}\n")
                         
                         # 限制输出页数避免过长
-                        if page_num >= 10:
-                            print(f"\n[文件共{len(pdf.pages)}页，已显示前10页]")
-                            break
+                        # if page_num >= 10:
+                        #     print(f"\n[文件共{len(pdf.pages)}页，已显示前10页]")
+                        #     break
                 
                 # 保存提取的文本到文件
                 output_file = pdf_file.replace('.pdf', '_extracted.txt')
@@ -66,7 +64,7 @@ def extract_pdf_content():
                         pdf_reader = PyPDF2.PdfReader(file)
                         text_content = []
                         
-                        for page_num in range(min(10, len(pdf_reader.pages))):
+                        for page_num in range(len(pdf_reader.pages)):
                             page = pdf_reader.pages[page_num]
                             text = page.extract_text()
                             if text:
