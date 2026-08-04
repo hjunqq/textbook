@@ -60,8 +60,12 @@ python3 tools/improved_main_converter.py --convert-only
 # 2. 构建PDF  
 cd publish/latex
 xelatex main.tex
-xelatex main.tex  # 运行两次确保交叉引用正确
+biber main
+xelatex main.tex
+xelatex main.tex
 ```
+
+当前稿件使用 `biblatex + biber`，不能只跑两遍 `xelatex`。标准流程是 `XeLaTeX -> Biber -> XeLaTeX -> XeLaTeX`。
 
 ## 📊 验证结果
 

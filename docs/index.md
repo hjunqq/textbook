@@ -216,7 +216,7 @@ CI/CD + Jenkins
     - **系统集成**：传感器数据接入与预警系统
     - **部署运维**：Docker容器化部署与性能优化
 
-### � 技术应用场景
+### 🌊 技术应用场景
 
 **数据处理与分析**：
 - 实时监测数据的采集、清洗、存储
@@ -278,7 +278,7 @@ code --install-extension bradlc.vscode-tailwindcss
 ### 📖 学习资源获取
 
 **完整源码与项目模板**：
-- �️ 所有章节的完整源代码
+- 🗂️ 所有章节的完整源代码
 - 📋 项目模板和脚手架工具
 - 🎨 UI组件库和样式指南
 - 📊 真实的水利监测数据集
@@ -351,7 +351,7 @@ git push origin feature/your-improvement
 - 🎨 改进界面设计和用户体验
 - 📚 翻译和本地化支持
 
-## � 版权与许可
+## 📄 版权与许可
 
 **开源协议**：本教材采用 **MIT License** 开源协议发布
 
@@ -380,7 +380,7 @@ git push origin feature/your-improvement
     **学习路径**：
     
     1. 📖 阅读[前言](前言.md)了解教材全貌
-    2. � 查看[第一章](chapters/chapter01/chapter01.md)开始系统学习
+    2. 📖 查看[第一章](chapters/chapter01/chapter01.md)开始系统学习
     3. 💻 配置开发环境进行动手实践
     4. 🚀 完成综合项目获得实战经验
 

@@ -1,0 +1,1216 @@
+% $ biblatex auxiliary file $
+% $ biblatex bbl format version 3.2 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated by
+% biber as required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+
+\refsection{0}
+  \datalist[entry]{nyt/global//global/global}
+    \entry{agile2001}{misc}{}
+      \true{moreauthor}
+      \true{morelabelname}
+      \name{author}{3}{}{%
+        {{hash=c5dcbe71f60a8d55caa11fe1493614d0}{%
+           family={Beck},
+           familyi={B\bibinitperiod},
+           given={Kent},
+           giveni={K\bibinitperiod}}}%
+        {{hash=b081a82bcbc247aeb2a2ca9ae72f9566}{%
+           family={Beedle},
+           familyi={B\bibinitperiod},
+           given={Mike},
+           giveni={M\bibinitperiod}}}%
+        {{hash=a3d49db7c8b6de036095a80d96ee1461}{%
+           family={Bennekum},
+           familyi={B\bibinitperiod},
+           given={Arie},
+           giveni={A\bibinitperiod},
+           prefix={van},
+           prefixi={v\bibinitperiod}}}%
+      }
+      \strng{namehash}{313c39d432f5bfc7cc4b41bada35a724}
+      \strng{fullhash}{313c39d432f5bfc7cc4b41bada35a724}
+      \strng{bibnamehash}{313c39d432f5bfc7cc4b41bada35a724}
+      \strng{authorbibnamehash}{313c39d432f5bfc7cc4b41bada35a724}
+      \strng{authornamehash}{313c39d432f5bfc7cc4b41bada35a724}
+      \strng{authorfullhash}{313c39d432f5bfc7cc4b41bada35a724}
+      \field{sortinit}{B}
+      \field{sortinithash}{d7095fff47cda75ca2589920aae98399}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Manifesto for Agile Software Development}
+      \field{year}{2001}
+      \verb{urlraw}
+      \verb https://agilemanifesto.org/
+      \endverb
+      \verb{url}
+      \verb https://agilemanifesto.org/
+      \endverb
+    \endentry
+    \entry{beck2000}{book}{}
+      \name{author}{2}{}{%
+        {{hash=c5dcbe71f60a8d55caa11fe1493614d0}{%
+           family={Beck},
+           familyi={B\bibinitperiod},
+           given={Kent},
+           giveni={K\bibinitperiod}}}%
+        {{hash=312ac886938a9b2be4f8eb607567fe4c}{%
+           family={Fowler},
+           familyi={F\bibinitperiod},
+           given={Martin},
+           giveni={M\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {Boston}%
+      }
+      \list{publisher}{1}{%
+        {Addison-Wesley}%
+      }
+      \strng{namehash}{9d00a7b09aa48d4198dee89111ee33c4}
+      \strng{fullhash}{9d00a7b09aa48d4198dee89111ee33c4}
+      \strng{bibnamehash}{9d00a7b09aa48d4198dee89111ee33c4}
+      \strng{authorbibnamehash}{9d00a7b09aa48d4198dee89111ee33c4}
+      \strng{authornamehash}{9d00a7b09aa48d4198dee89111ee33c4}
+      \strng{authorfullhash}{9d00a7b09aa48d4198dee89111ee33c4}
+      \field{sortinit}{B}
+      \field{sortinithash}{d7095fff47cda75ca2589920aae98399}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Planning Extreme Programming}
+      \field{year}{2000}
+    \endentry
+    \entry{bennett2000}{inproceedings}{}
+      \name{author}{2}{}{%
+        {{hash=4fb2f866d7ede598cc3f8e164ddf7b9d}{%
+           family={Bennett},
+           familyi={B\bibinitperiod},
+           given={Keith\bibnamedelima H.},
+           giveni={K\bibinitperiod\bibinitdelim H\bibinitperiod}}}%
+        {{hash=3827089f99b1c13a3ccd30b247c7e969}{%
+           family={Rajlich},
+           familyi={R\bibinitperiod},
+           given={Václav\bibnamedelima T.},
+           giveni={V\bibinitperiod\bibinitdelim T\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {New York}%
+      }
+      \list{publisher}{1}{%
+        {ACM}%
+      }
+      \strng{namehash}{b139dfcc269e40dc7fc08d21ff4cfc42}
+      \strng{fullhash}{b139dfcc269e40dc7fc08d21ff4cfc42}
+      \strng{bibnamehash}{b139dfcc269e40dc7fc08d21ff4cfc42}
+      \strng{authorbibnamehash}{b139dfcc269e40dc7fc08d21ff4cfc42}
+      \strng{authornamehash}{b139dfcc269e40dc7fc08d21ff4cfc42}
+      \strng{authorfullhash}{b139dfcc269e40dc7fc08d21ff4cfc42}
+      \field{sortinit}{B}
+      \field{sortinithash}{d7095fff47cda75ca2589920aae98399}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{Proceedings of the Conference on the Future of Software Engineering}
+      \field{title}{Software Maintenance and Evolution: A Roadmap}
+      \field{year}{2000}
+      \field{pages}{73\bibrangedash 87}
+      \range{pages}{15}
+    \endentry
+    \entry{black2009}{book}{}
+      \name{author}{1}{}{%
+        {{hash=4ff72b6cfb718d4f98cf5726f94526a9}{%
+           family={Black},
+           familyi={B\bibinitperiod},
+           given={Rex},
+           giveni={R\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {Indianapolis}%
+      }
+      \list{publisher}{1}{%
+        {Wiley}%
+      }
+      \strng{namehash}{4ff72b6cfb718d4f98cf5726f94526a9}
+      \strng{fullhash}{4ff72b6cfb718d4f98cf5726f94526a9}
+      \strng{bibnamehash}{4ff72b6cfb718d4f98cf5726f94526a9}
+      \strng{authorbibnamehash}{4ff72b6cfb718d4f98cf5726f94526a9}
+      \strng{authornamehash}{4ff72b6cfb718d4f98cf5726f94526a9}
+      \strng{authorfullhash}{4ff72b6cfb718d4f98cf5726f94526a9}
+      \field{sortinit}{B}
+      \field{sortinithash}{d7095fff47cda75ca2589920aae98399}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{edition}{3rd}
+      \field{title}{Managing the Testing Process: Practical Tools and Techniques for Managing Hardware and Software Testing}
+      \field{year}{2009}
+    \endentry
+    \entry{boehm2000}{book}{}
+      \name{author}{1}{}{%
+        {{hash=30901c504c4e9f9f386b59986264609c}{%
+           family={Boehm},
+           familyi={B\bibinitperiod},
+           given={Barry\bibnamedelima W.},
+           giveni={B\bibinitperiod\bibinitdelim W\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {Upper Saddle River}%
+      }
+      \list{publisher}{1}{%
+        {Prentice Hall}%
+      }
+      \strng{namehash}{30901c504c4e9f9f386b59986264609c}
+      \strng{fullhash}{30901c504c4e9f9f386b59986264609c}
+      \strng{bibnamehash}{30901c504c4e9f9f386b59986264609c}
+      \strng{authorbibnamehash}{30901c504c4e9f9f386b59986264609c}
+      \strng{authornamehash}{30901c504c4e9f9f386b59986264609c}
+      \strng{authorfullhash}{30901c504c4e9f9f386b59986264609c}
+      \field{sortinit}{B}
+      \field{sortinithash}{d7095fff47cda75ca2589920aae98399}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Software Cost Estimation with COCOMO II}
+      \field{year}{2000}
+    \endentry
+    \entry{bourque2014}{book}{}
+      \name{author}{2}{}{%
+        {{hash=1047e5656cf5bda8cb1e42372563996c}{%
+           family={Bourque},
+           familyi={B\bibinitperiod},
+           given={Pierre},
+           giveni={P\bibinitperiod}}}%
+        {{hash=4cd5eb7e4be50be00bf48c63b4651b03}{%
+           family={Fairley},
+           familyi={F\bibinitperiod},
+           given={Richard\bibnamedelima E.},
+           giveni={R\bibinitperiod\bibinitdelim E\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {Los Alamitos}%
+      }
+      \list{publisher}{1}{%
+        {IEEE Computer Society}%
+      }
+      \strng{namehash}{3be2fb2ff6aca16103ee94324ed03e5f}
+      \strng{fullhash}{3be2fb2ff6aca16103ee94324ed03e5f}
+      \strng{bibnamehash}{3be2fb2ff6aca16103ee94324ed03e5f}
+      \strng{authorbibnamehash}{3be2fb2ff6aca16103ee94324ed03e5f}
+      \strng{authornamehash}{3be2fb2ff6aca16103ee94324ed03e5f}
+      \strng{authorfullhash}{3be2fb2ff6aca16103ee94324ed03e5f}
+      \field{sortinit}{B}
+      \field{sortinithash}{d7095fff47cda75ca2589920aae98399}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{edition}{3rd}
+      \field{title}{Guide to the Software Engineering Body of Knowledge (SWEBOK Guide)}
+      \field{year}{2014}
+    \endentry
+    \entry{brooks1987}{article}{}
+      \name{author}{1}{}{%
+        {{hash=83bbe329834df8b64e36082d14e13e45}{%
+           family={Brooks},
+           familyi={B\bibinitperiod},
+           given={Frederick\bibnamedelima P.},
+           giveni={F\bibinitperiod\bibinitdelim P\bibinitperiod},
+           suffix={Jr.},
+           suffixi={J\bibinitperiod}}}%
+      }
+      \strng{namehash}{83bbe329834df8b64e36082d14e13e45}
+      \strng{fullhash}{83bbe329834df8b64e36082d14e13e45}
+      \strng{bibnamehash}{83bbe329834df8b64e36082d14e13e45}
+      \strng{authorbibnamehash}{83bbe329834df8b64e36082d14e13e45}
+      \strng{authornamehash}{83bbe329834df8b64e36082d14e13e45}
+      \strng{authorfullhash}{83bbe329834df8b64e36082d14e13e45}
+      \field{sortinit}{B}
+      \field{sortinithash}{d7095fff47cda75ca2589920aae98399}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Computer}
+      \field{number}{4}
+      \field{title}{No Silver Bullet: Essence and Accidents of Software Engineering}
+      \field{volume}{20}
+      \field{year}{1987}
+      \field{pages}{10\bibrangedash 19}
+      \range{pages}{10}
+    \endentry
+    \entry{clements2010}{book}{}
+      \true{moreauthor}
+      \true{morelabelname}
+      \name{author}{3}{}{%
+        {{hash=806866eee4e5b55ba7360bfe43f4f397}{%
+           family={Clements},
+           familyi={C\bibinitperiod},
+           given={Paul},
+           giveni={P\bibinitperiod}}}%
+        {{hash=b1cd17315cbad2bde9966d6a34ef0b97}{%
+           family={Bachmann},
+           familyi={B\bibinitperiod},
+           given={Felix},
+           giveni={F\bibinitperiod}}}%
+        {{hash=97196c0aaced1368c3042b9299a9b34b}{%
+           family={Bass},
+           familyi={B\bibinitperiod},
+           given={Len},
+           giveni={L\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {Boston}%
+      }
+      \list{publisher}{1}{%
+        {Addison-Wesley}%
+      }
+      \strng{namehash}{0f9987d3b8e344902e830d9d77dff0de}
+      \strng{fullhash}{0f9987d3b8e344902e830d9d77dff0de}
+      \strng{bibnamehash}{0f9987d3b8e344902e830d9d77dff0de}
+      \strng{authorbibnamehash}{0f9987d3b8e344902e830d9d77dff0de}
+      \strng{authornamehash}{0f9987d3b8e344902e830d9d77dff0de}
+      \strng{authorfullhash}{0f9987d3b8e344902e830d9d77dff0de}
+      \field{sortinit}{C}
+      \field{sortinithash}{4d103a86280481745c9c897c925753c0}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{edition}{2nd}
+      \field{title}{Documenting Software Architectures: Views and Beyond}
+      \field{year}{2010}
+    \endentry
+    \entry{cmmi2010}{book}{}
+      \name{author}{1}{}{%
+        {{hash=2d59efdea107e16cff401207d2bd0cff}{%
+           family={{CMMI Product Team}},
+           familyi={C\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {Pittsburgh}%
+      }
+      \list{publisher}{1}{%
+        {Carnegie Mellon University}%
+      }
+      \strng{namehash}{2d59efdea107e16cff401207d2bd0cff}
+      \strng{fullhash}{2d59efdea107e16cff401207d2bd0cff}
+      \strng{bibnamehash}{2d59efdea107e16cff401207d2bd0cff}
+      \strng{authorbibnamehash}{2d59efdea107e16cff401207d2bd0cff}
+      \strng{authornamehash}{2d59efdea107e16cff401207d2bd0cff}
+      \strng{authorfullhash}{2d59efdea107e16cff401207d2bd0cff}
+      \field{sortinit}{C}
+      \field{sortinithash}{4d103a86280481745c9c897c925753c0}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{CMMI for Development, Version 1.3}
+      \field{year}{2010}
+    \endentry
+    \entry{cohn2009}{book}{}
+      \name{author}{1}{}{%
+        {{hash=d33712bcde2d63bad054a832b61d01e8}{%
+           family={Cohn},
+           familyi={C\bibinitperiod},
+           given={Mike},
+           giveni={M\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {Boston}%
+      }
+      \list{publisher}{1}{%
+        {Addison-Wesley}%
+      }
+      \strng{namehash}{d33712bcde2d63bad054a832b61d01e8}
+      \strng{fullhash}{d33712bcde2d63bad054a832b61d01e8}
+      \strng{bibnamehash}{d33712bcde2d63bad054a832b61d01e8}
+      \strng{authorbibnamehash}{d33712bcde2d63bad054a832b61d01e8}
+      \strng{authornamehash}{d33712bcde2d63bad054a832b61d01e8}
+      \strng{authorfullhash}{d33712bcde2d63bad054a832b61d01e8}
+      \field{sortinit}{C}
+      \field{sortinithash}{4d103a86280481745c9c897c925753c0}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Succeeding with Agile: Software Development Using Scrum}
+      \field{year}{2009}
+    \endentry
+    \entry{fowler2002}{book}{}
+      \name{author}{1}{}{%
+        {{hash=312ac886938a9b2be4f8eb607567fe4c}{%
+           family={Fowler},
+           familyi={F\bibinitperiod},
+           given={Martin},
+           giveni={M\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {Boston}%
+      }
+      \list{publisher}{1}{%
+        {Addison-Wesley}%
+      }
+      \strng{namehash}{312ac886938a9b2be4f8eb607567fe4c}
+      \strng{fullhash}{312ac886938a9b2be4f8eb607567fe4c}
+      \strng{bibnamehash}{312ac886938a9b2be4f8eb607567fe4c}
+      \strng{authorbibnamehash}{312ac886938a9b2be4f8eb607567fe4c}
+      \strng{authornamehash}{312ac886938a9b2be4f8eb607567fe4c}
+      \strng{authorfullhash}{312ac886938a9b2be4f8eb607567fe4c}
+      \field{sortinit}{F}
+      \field{sortinithash}{2638baaa20439f1b5a8f80c6c08a13b4}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Patterns of Enterprise Application Architecture}
+      \field{year}{2002}
+    \endentry
+    \entry{gamma1994}{book}{}
+      \name{author}{4}{}{%
+        {{hash=abd927bf30d6566be0ac66a66e893fdd}{%
+           family={Gamma},
+           familyi={G\bibinitperiod},
+           given={Erich},
+           giveni={E\bibinitperiod}}}%
+        {{hash=233f891813bda0f3920985f97a4a7554}{%
+           family={Helm},
+           familyi={H\bibinitperiod},
+           given={Richard},
+           giveni={R\bibinitperiod}}}%
+        {{hash=fd79e5e249b219ff553fc2d811104d78}{%
+           family={Johnson},
+           familyi={J\bibinitperiod},
+           given={Ralph},
+           giveni={R\bibinitperiod}}}%
+        {{hash=e032589f0b9a38804483ab7cf5ccad7f}{%
+           family={Vlissides},
+           familyi={V\bibinitperiod},
+           given={John},
+           giveni={J\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {Boston}%
+      }
+      \list{publisher}{1}{%
+        {Addison-Wesley}%
+      }
+      \strng{namehash}{4d2492409a24d4ed208ae6670cb91945}
+      \strng{fullhash}{5cb4a6d7baf30d11bae6682eca698b4f}
+      \strng{bibnamehash}{4d2492409a24d4ed208ae6670cb91945}
+      \strng{authorbibnamehash}{4d2492409a24d4ed208ae6670cb91945}
+      \strng{authornamehash}{4d2492409a24d4ed208ae6670cb91945}
+      \strng{authorfullhash}{5cb4a6d7baf30d11bae6682eca698b4f}
+      \field{sortinit}{G}
+      \field{sortinithash}{32d67eca0634bf53703493fb1090a2e8}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Design Patterns: Elements of Reusable Object-Oriented Software}
+      \field{year}{1994}
+    \endentry
+    \entry{glaessgen2012}{report}{}
+      \name{author}{2}{}{%
+        {{hash=3175de934fd8122d24b260837daac583}{%
+           family={Glaessgen},
+           familyi={G\bibinitperiod},
+           given={Edward\bibnamedelima H.},
+           giveni={E\bibinitperiod\bibinitdelim H\bibinitperiod}}}%
+        {{hash=fa77a6b4a59d7a40ac85bbad09583daf}{%
+           family={Stargel},
+           familyi={S\bibinitperiod},
+           given={David\bibnamedelima S.},
+           giveni={D\bibinitperiod\bibinitdelim S\bibinitperiod}}}%
+      }
+      \list{institution}{1}{%
+        {AIAA}%
+      }
+      \strng{namehash}{c869ebeea515ef79fe7c8bfed64b51c2}
+      \strng{fullhash}{c869ebeea515ef79fe7c8bfed64b51c2}
+      \strng{bibnamehash}{c869ebeea515ef79fe7c8bfed64b51c2}
+      \strng{authorbibnamehash}{c869ebeea515ef79fe7c8bfed64b51c2}
+      \strng{authornamehash}{c869ebeea515ef79fe7c8bfed64b51c2}
+      \strng{authorfullhash}{c869ebeea515ef79fe7c8bfed64b51c2}
+      \field{sortinit}{G}
+      \field{sortinithash}{32d67eca0634bf53703493fb1090a2e8}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{The Digital Twin Paradigm for Future NASA and U.S. Air Force Vehicles}
+      \field{type}{techreport}
+      \field{year}{2012}
+    \endentry
+    \entry{humble2010}{book}{}
+      \name{author}{2}{}{%
+        {{hash=9e89d796d06f74d6551850b1c3bff900}{%
+           family={Humble},
+           familyi={H\bibinitperiod},
+           given={Jez},
+           giveni={J\bibinitperiod}}}%
+        {{hash=e88f486e16133b897ffb346a75f56d96}{%
+           family={Farley},
+           familyi={F\bibinitperiod},
+           given={David},
+           giveni={D\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {Boston}%
+      }
+      \list{publisher}{1}{%
+        {Addison-Wesley}%
+      }
+      \strng{namehash}{06b8a2e32b3cda03592e143a7f761e36}
+      \strng{fullhash}{06b8a2e32b3cda03592e143a7f761e36}
+      \strng{bibnamehash}{06b8a2e32b3cda03592e143a7f761e36}
+      \strng{authorbibnamehash}{06b8a2e32b3cda03592e143a7f761e36}
+      \strng{authornamehash}{06b8a2e32b3cda03592e143a7f761e36}
+      \strng{authorfullhash}{06b8a2e32b3cda03592e143a7f761e36}
+      \field{sortinit}{H}
+      \field{sortinithash}{23a3aa7c24e56cfa16945d55545109b5}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Continuous Delivery: Reliable Software Releases through Build, Test, and Deployment Automation}
+      \field{year}{2010}
+    \endentry
+    \entry{hunt2019}{book}{}
+      \name{author}{2}{}{%
+        {{hash=10383d05f32f2a21518b493a3c546e5c}{%
+           family={Hunt},
+           familyi={H\bibinitperiod},
+           given={Andrew},
+           giveni={A\bibinitperiod}}}%
+        {{hash=b5eb4ac16368112932ff36772cb0b0b5}{%
+           family={Thomas},
+           familyi={T\bibinitperiod},
+           given={David},
+           giveni={D\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {Boston}%
+      }
+      \list{publisher}{1}{%
+        {Addison-Wesley}%
+      }
+      \strng{namehash}{6551e2d8a523620fdffb6fe4053ca3d5}
+      \strng{fullhash}{6551e2d8a523620fdffb6fe4053ca3d5}
+      \strng{bibnamehash}{6551e2d8a523620fdffb6fe4053ca3d5}
+      \strng{authorbibnamehash}{6551e2d8a523620fdffb6fe4053ca3d5}
+      \strng{authornamehash}{6551e2d8a523620fdffb6fe4053ca3d5}
+      \strng{authorfullhash}{6551e2d8a523620fdffb6fe4053ca3d5}
+      \field{sortinit}{H}
+      \field{sortinithash}{23a3aa7c24e56cfa16945d55545109b5}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{edition}{20th Anniversary}
+      \field{title}{The Pragmatic Programmer: From Journeyman to Master}
+      \field{year}{2019}
+    \endentry
+    \entry{IEEE1074}{misc}{}
+      \list{location}{1}{%
+        {New York}%
+      }
+      \list{publisher}{1}{%
+        {IEEE}%
+      }
+      \field{sortinit}{I}
+      \field{sortinithash}{8d291c51ee89b6cd86bf5379f0b151d8}
+      \field{labeltitlesource}{title}
+      \field{number}{IEEE Std 1074-2006}
+      \field{title}{IEEE Standard for Developing a Software Project Life Cycle Process}
+      \field{year}{2006}
+    \endentry
+    \entry{jones2009}{book}{}
+      \name{author}{1}{}{%
+        {{hash=17da3c033a8a79e93bc0f2d2a354a516}{%
+           family={Jones},
+           familyi={J\bibinitperiod},
+           given={Capers},
+           giveni={C\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {New York}%
+      }
+      \list{publisher}{1}{%
+        {McGraw-Hill}%
+      }
+      \strng{namehash}{17da3c033a8a79e93bc0f2d2a354a516}
+      \strng{fullhash}{17da3c033a8a79e93bc0f2d2a354a516}
+      \strng{bibnamehash}{17da3c033a8a79e93bc0f2d2a354a516}
+      \strng{authorbibnamehash}{17da3c033a8a79e93bc0f2d2a354a516}
+      \strng{authornamehash}{17da3c033a8a79e93bc0f2d2a354a516}
+      \strng{authorfullhash}{17da3c033a8a79e93bc0f2d2a354a516}
+      \field{sortinit}{J}
+      \field{sortinithash}{b2f54a9081ace9966a7cb9413811edb4}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Software Engineering Best Practices: Lessons from Successful Projects in the Top Companies}
+      \field{year}{2009}
+    \endentry
+    \entry{kan2002}{book}{}
+      \name{author}{1}{}{%
+        {{hash=fe03bccbd1af8586e875d10e5c65bbd1}{%
+           family={Kan},
+           familyi={K\bibinitperiod},
+           given={Stephen\bibnamedelima H.},
+           giveni={S\bibinitperiod\bibinitdelim H\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {Boston}%
+      }
+      \list{publisher}{1}{%
+        {Addison-Wesley}%
+      }
+      \strng{namehash}{fe03bccbd1af8586e875d10e5c65bbd1}
+      \strng{fullhash}{fe03bccbd1af8586e875d10e5c65bbd1}
+      \strng{bibnamehash}{fe03bccbd1af8586e875d10e5c65bbd1}
+      \strng{authorbibnamehash}{fe03bccbd1af8586e875d10e5c65bbd1}
+      \strng{authornamehash}{fe03bccbd1af8586e875d10e5c65bbd1}
+      \strng{authorfullhash}{fe03bccbd1af8586e875d10e5c65bbd1}
+      \field{sortinit}{K}
+      \field{sortinithash}{c02bf6bff1c488450c352b40f5d853ab}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{edition}{2nd}
+      \field{title}{Metrics and Models in Software Quality Engineering}
+      \field{year}{2002}
+    \endentry
+    \entry{kerzner2017}{book}{}
+      \name{author}{1}{}{%
+        {{hash=bdcf816744d0edb39c5b7b2a299e6985}{%
+           family={Kerzner},
+           familyi={K\bibinitperiod},
+           given={Harold},
+           giveni={H\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {Hoboken}%
+      }
+      \list{publisher}{1}{%
+        {John Wiley \& Sons}%
+      }
+      \strng{namehash}{bdcf816744d0edb39c5b7b2a299e6985}
+      \strng{fullhash}{bdcf816744d0edb39c5b7b2a299e6985}
+      \strng{bibnamehash}{bdcf816744d0edb39c5b7b2a299e6985}
+      \strng{authorbibnamehash}{bdcf816744d0edb39c5b7b2a299e6985}
+      \strng{authornamehash}{bdcf816744d0edb39c5b7b2a299e6985}
+      \strng{authorfullhash}{bdcf816744d0edb39c5b7b2a299e6985}
+      \field{sortinit}{K}
+      \field{sortinithash}{c02bf6bff1c488450c352b40f5d853ab}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{edition}{12th}
+      \field{title}{Project Management: A Systems Approach to Planning, Scheduling, and Controlling}
+      \field{year}{2017}
+    \endentry
+    \entry{martin2017}{book}{}
+      \name{author}{1}{}{%
+        {{hash=6f41df64eb0dc4855be70172368604c2}{%
+           family={Martin},
+           familyi={M\bibinitperiod},
+           given={Robert\bibnamedelima C.},
+           giveni={R\bibinitperiod\bibinitdelim C\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {Boston}%
+      }
+      \list{publisher}{1}{%
+        {Prentice Hall}%
+      }
+      \strng{namehash}{6f41df64eb0dc4855be70172368604c2}
+      \strng{fullhash}{6f41df64eb0dc4855be70172368604c2}
+      \strng{bibnamehash}{6f41df64eb0dc4855be70172368604c2}
+      \strng{authorbibnamehash}{6f41df64eb0dc4855be70172368604c2}
+      \strng{authornamehash}{6f41df64eb0dc4855be70172368604c2}
+      \strng{authorfullhash}{6f41df64eb0dc4855be70172368604c2}
+      \field{sortinit}{M}
+      \field{sortinithash}{4625c616857f13d17ce56f7d4f97d451}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Clean Architecture: A Craftsman's Guide to Software Structure and Design}
+      \field{year}{2017}
+    \endentry
+    \entry{mccabe1976}{article}{}
+      \name{author}{1}{}{%
+        {{hash=1912bf1e08bac67e7e08b9625ce0d94c}{%
+           family={McCabe},
+           familyi={M\bibinitperiod},
+           given={Thomas\bibnamedelima J.},
+           giveni={T\bibinitperiod\bibinitdelim J\bibinitperiod}}}%
+      }
+      \strng{namehash}{1912bf1e08bac67e7e08b9625ce0d94c}
+      \strng{fullhash}{1912bf1e08bac67e7e08b9625ce0d94c}
+      \strng{bibnamehash}{1912bf1e08bac67e7e08b9625ce0d94c}
+      \strng{authorbibnamehash}{1912bf1e08bac67e7e08b9625ce0d94c}
+      \strng{authornamehash}{1912bf1e08bac67e7e08b9625ce0d94c}
+      \strng{authorfullhash}{1912bf1e08bac67e7e08b9625ce0d94c}
+      \field{sortinit}{M}
+      \field{sortinithash}{4625c616857f13d17ce56f7d4f97d451}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{IEEE Transactions on Software Engineering}
+      \field{number}{4}
+      \field{title}{A Complexity Measure}
+      \field{volume}{2}
+      \field{year}{1976}
+      \field{pages}{308\bibrangedash 320}
+      \range{pages}{13}
+    \endentry
+    \entry{mcconnell2004}{book}{}
+      \name{author}{1}{}{%
+        {{hash=0a24dd755989d4a28eedb62395b1a514}{%
+           family={McConnell},
+           familyi={M\bibinitperiod},
+           given={Steve},
+           giveni={S\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {Redmond}%
+      }
+      \list{publisher}{1}{%
+        {Microsoft Press}%
+      }
+      \strng{namehash}{0a24dd755989d4a28eedb62395b1a514}
+      \strng{fullhash}{0a24dd755989d4a28eedb62395b1a514}
+      \strng{bibnamehash}{0a24dd755989d4a28eedb62395b1a514}
+      \strng{authorbibnamehash}{0a24dd755989d4a28eedb62395b1a514}
+      \strng{authornamehash}{0a24dd755989d4a28eedb62395b1a514}
+      \strng{authorfullhash}{0a24dd755989d4a28eedb62395b1a514}
+      \field{sortinit}{M}
+      \field{sortinithash}{4625c616857f13d17ce56f7d4f97d451}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{edition}{2nd}
+      \field{title}{Code Complete}
+      \field{year}{2004}
+    \endentry
+    \entry{myers2011}{book}{}
+      \name{author}{3}{}{%
+        {{hash=156343f4cbccb0e4838a03e1aa379f1c}{%
+           family={Myers},
+           familyi={M\bibinitperiod},
+           given={Glenford\bibnamedelima J.},
+           giveni={G\bibinitperiod\bibinitdelim J\bibinitperiod}}}%
+        {{hash=6bedbc386e093a07f6c0696fa075b157}{%
+           family={Sandler},
+           familyi={S\bibinitperiod},
+           given={Corey},
+           giveni={C\bibinitperiod}}}%
+        {{hash=14b5444d5651db3fbde7bcd5553fd0ec}{%
+           family={Badgett},
+           familyi={B\bibinitperiod},
+           given={Tom},
+           giveni={T\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {Hoboken}%
+      }
+      \list{publisher}{1}{%
+        {John Wiley \& Sons}%
+      }
+      \strng{namehash}{de4835ca5e0529d5a2f5f52e5e9cc011}
+      \strng{fullhash}{de4835ca5e0529d5a2f5f52e5e9cc011}
+      \strng{bibnamehash}{de4835ca5e0529d5a2f5f52e5e9cc011}
+      \strng{authorbibnamehash}{de4835ca5e0529d5a2f5f52e5e9cc011}
+      \strng{authornamehash}{de4835ca5e0529d5a2f5f52e5e9cc011}
+      \strng{authorfullhash}{de4835ca5e0529d5a2f5f52e5e9cc011}
+      \field{sortinit}{M}
+      \field{sortinithash}{4625c616857f13d17ce56f7d4f97d451}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{edition}{3rd}
+      \field{title}{The Art of Software Testing}
+      \field{year}{2011}
+    \endentry
+    \entry{newman2021}{book}{}
+      \name{author}{1}{}{%
+        {{hash=b6be43602c2787d279f8522a7d9713db}{%
+           family={Newman},
+           familyi={N\bibinitperiod},
+           given={Sam},
+           giveni={S\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {Sebastopol}%
+      }
+      \list{publisher}{1}{%
+        {O'Reilly Media}%
+      }
+      \strng{namehash}{b6be43602c2787d279f8522a7d9713db}
+      \strng{fullhash}{b6be43602c2787d279f8522a7d9713db}
+      \strng{bibnamehash}{b6be43602c2787d279f8522a7d9713db}
+      \strng{authorbibnamehash}{b6be43602c2787d279f8522a7d9713db}
+      \strng{authornamehash}{b6be43602c2787d279f8522a7d9713db}
+      \strng{authorfullhash}{b6be43602c2787d279f8522a7d9713db}
+      \field{sortinit}{N}
+      \field{sortinithash}{22369a73d5f88983a108b63f07f37084}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{edition}{2nd}
+      \field{title}{Building Microservices: Designing Fine-Grained Systems}
+      \field{year}{2021}
+    \endentry
+    \entry{norman2013}{book}{}
+      \name{author}{1}{}{%
+        {{hash=6c785cec3b28d28af91696b6a6db5b78}{%
+           family={Norman},
+           familyi={N\bibinitperiod},
+           given={Donald\bibnamedelima A.},
+           giveni={D\bibinitperiod\bibinitdelim A\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {New York}%
+      }
+      \list{publisher}{1}{%
+        {Basic Books}%
+      }
+      \strng{namehash}{6c785cec3b28d28af91696b6a6db5b78}
+      \strng{fullhash}{6c785cec3b28d28af91696b6a6db5b78}
+      \strng{bibnamehash}{6c785cec3b28d28af91696b6a6db5b78}
+      \strng{authorbibnamehash}{6c785cec3b28d28af91696b6a6db5b78}
+      \strng{authornamehash}{6c785cec3b28d28af91696b6a6db5b78}
+      \strng{authorfullhash}{6c785cec3b28d28af91696b6a6db5b78}
+      \field{sortinit}{N}
+      \field{sortinithash}{22369a73d5f88983a108b63f07f37084}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{edition}{Revised and Expanded}
+      \field{title}{The Design of Everyday Things}
+      \field{year}{2013}
+    \endentry
+    \entry{parnas1972}{article}{}
+      \name{author}{1}{}{%
+        {{hash=4125dab477eb52a2cfd72abc04be3e73}{%
+           family={Parnas},
+           familyi={P\bibinitperiod},
+           given={David\bibnamedelima L.},
+           giveni={D\bibinitperiod\bibinitdelim L\bibinitperiod}}}%
+      }
+      \strng{namehash}{4125dab477eb52a2cfd72abc04be3e73}
+      \strng{fullhash}{4125dab477eb52a2cfd72abc04be3e73}
+      \strng{bibnamehash}{4125dab477eb52a2cfd72abc04be3e73}
+      \strng{authorbibnamehash}{4125dab477eb52a2cfd72abc04be3e73}
+      \strng{authornamehash}{4125dab477eb52a2cfd72abc04be3e73}
+      \strng{authorfullhash}{4125dab477eb52a2cfd72abc04be3e73}
+      \field{sortinit}{P}
+      \field{sortinithash}{ff3bcf24f47321b42cb156c2cc8a8422}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Communications of the ACM}
+      \field{number}{12}
+      \field{title}{On the Criteria to be Used in Decomposing Systems into Modules}
+      \field{volume}{15}
+      \field{year}{1972}
+      \field{pages}{1053\bibrangedash 1058}
+      \range{pages}{6}
+    \endentry
+    \entry{paulk1995}{book}{}
+      \name{author}{4}{}{%
+        {{hash=6126e37ff1bd65cfeabcb699217960a9}{%
+           family={Paulk},
+           familyi={P\bibinitperiod},
+           given={Mark\bibnamedelima C.},
+           giveni={M\bibinitperiod\bibinitdelim C\bibinitperiod}}}%
+        {{hash=706e64a8de0ef6989f40faf185daeef7}{%
+           family={Weber},
+           familyi={W\bibinitperiod},
+           given={Charles\bibnamedelima V.},
+           giveni={C\bibinitperiod\bibinitdelim V\bibinitperiod}}}%
+        {{hash=337c3d2c35ad83a175b2e62a08be4753}{%
+           family={Curtis},
+           familyi={C\bibinitperiod},
+           given={Bill},
+           giveni={B\bibinitperiod}}}%
+        {{hash=9ed08525cd9f842a4e776524daed5859}{%
+           family={Chrissis},
+           familyi={C\bibinitperiod},
+           given={Mary\bibnamedelima Beth},
+           giveni={M\bibinitperiod\bibinitdelim B\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {Boston}%
+      }
+      \list{publisher}{1}{%
+        {Addison-Wesley}%
+      }
+      \strng{namehash}{da11fbb7676e7830c7e83cdf16132482}
+      \strng{fullhash}{81ed433bc7f8be3185d0e515d56e0de0}
+      \strng{bibnamehash}{da11fbb7676e7830c7e83cdf16132482}
+      \strng{authorbibnamehash}{da11fbb7676e7830c7e83cdf16132482}
+      \strng{authornamehash}{da11fbb7676e7830c7e83cdf16132482}
+      \strng{authorfullhash}{81ed433bc7f8be3185d0e515d56e0de0}
+      \field{sortinit}{P}
+      \field{sortinithash}{ff3bcf24f47321b42cb156c2cc8a8422}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{The Capability Maturity Model: Guidelines for Improving the Software Process}
+      \field{year}{1995}
+    \endentry
+    \entry{pigoski1996}{book}{}
+      \name{author}{1}{}{%
+        {{hash=5e42799735cc74faa1fb42051ea496a3}{%
+           family={Pigoski},
+           familyi={P\bibinitperiod},
+           given={Thomas\bibnamedelima M.},
+           giveni={T\bibinitperiod\bibinitdelim M\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {New York}%
+      }
+      \list{publisher}{1}{%
+        {John Wiley \& Sons}%
+      }
+      \strng{namehash}{5e42799735cc74faa1fb42051ea496a3}
+      \strng{fullhash}{5e42799735cc74faa1fb42051ea496a3}
+      \strng{bibnamehash}{5e42799735cc74faa1fb42051ea496a3}
+      \strng{authorbibnamehash}{5e42799735cc74faa1fb42051ea496a3}
+      \strng{authornamehash}{5e42799735cc74faa1fb42051ea496a3}
+      \strng{authorfullhash}{5e42799735cc74faa1fb42051ea496a3}
+      \field{sortinit}{P}
+      \field{sortinithash}{ff3bcf24f47321b42cb156c2cc8a8422}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Practical Software Maintenance: Best Practices for Managing Your Software Investment}
+      \field{year}{1996}
+    \endentry
+    \entry{pressman2014}{book}{}
+      \name{author}{2}{}{%
+        {{hash=4d3f81788d99cf425c4b6e0a454baab0}{%
+           family={Pressman},
+           familyi={P\bibinitperiod},
+           given={Roger\bibnamedelima S.},
+           giveni={R\bibinitperiod\bibinitdelim S\bibinitperiod}}}%
+        {{hash=13b3d71ce7fd3614b4e2e9ce804597f3}{%
+           family={Maxim},
+           familyi={M\bibinitperiod},
+           given={Bruce\bibnamedelima R.},
+           giveni={B\bibinitperiod\bibinitdelim R\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {New York}%
+      }
+      \list{publisher}{1}{%
+        {McGraw-Hill Education}%
+      }
+      \strng{namehash}{da6ec91488daec8c3c9eddf18c78dad8}
+      \strng{fullhash}{da6ec91488daec8c3c9eddf18c78dad8}
+      \strng{bibnamehash}{da6ec91488daec8c3c9eddf18c78dad8}
+      \strng{authorbibnamehash}{da6ec91488daec8c3c9eddf18c78dad8}
+      \strng{authornamehash}{da6ec91488daec8c3c9eddf18c78dad8}
+      \strng{authorfullhash}{da6ec91488daec8c3c9eddf18c78dad8}
+      \field{sortinit}{P}
+      \field{sortinithash}{ff3bcf24f47321b42cb156c2cc8a8422}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{edition}{8th}
+      \field{title}{Software Engineering: A Practitioner's Approach}
+      \field{year}{2014}
+    \endentry
+    \entry{richards2020}{book}{}
+      \name{author}{2}{}{%
+        {{hash=8e3c0b09130cc7c13c7cda6ef28a7d48}{%
+           family={Richards},
+           familyi={R\bibinitperiod},
+           given={Mark},
+           giveni={M\bibinitperiod}}}%
+        {{hash=5ffeeeb533dfcb3c39bada5fdcf44fc0}{%
+           family={Ford},
+           familyi={F\bibinitperiod},
+           given={Neal},
+           giveni={N\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {Sebastopol}%
+      }
+      \list{publisher}{1}{%
+        {O'Reilly Media}%
+      }
+      \strng{namehash}{755202f5a26937dce6816860584aac24}
+      \strng{fullhash}{755202f5a26937dce6816860584aac24}
+      \strng{bibnamehash}{755202f5a26937dce6816860584aac24}
+      \strng{authorbibnamehash}{755202f5a26937dce6816860584aac24}
+      \strng{authornamehash}{755202f5a26937dce6816860584aac24}
+      \strng{authorfullhash}{755202f5a26937dce6816860584aac24}
+      \field{sortinit}{R}
+      \field{sortinithash}{5e1c39a9d46ffb6bebd8f801023a9486}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Fundamentals of Software Architecture: An Engineering Approach}
+      \field{year}{2020}
+    \endentry
+    \entry{robertson2012}{book}{}
+      \name{author}{2}{}{%
+        {{hash=9e372dc6af25dd1c129af85bd01e2587}{%
+           family={Robertson},
+           familyi={R\bibinitperiod},
+           given={Suzanne},
+           giveni={S\bibinitperiod}}}%
+        {{hash=aa4748dada251e4eb77bc6bccd85524a}{%
+           family={Robertson},
+           familyi={R\bibinitperiod},
+           given={James},
+           giveni={J\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {Upper Saddle River}%
+      }
+      \list{publisher}{1}{%
+        {Addison-Wesley}%
+      }
+      \strng{namehash}{f59ae93b6b02b66c39576785d33c3050}
+      \strng{fullhash}{f59ae93b6b02b66c39576785d33c3050}
+      \strng{bibnamehash}{f59ae93b6b02b66c39576785d33c3050}
+      \strng{authorbibnamehash}{f59ae93b6b02b66c39576785d33c3050}
+      \strng{authornamehash}{f59ae93b6b02b66c39576785d33c3050}
+      \strng{authorfullhash}{f59ae93b6b02b66c39576785d33c3050}
+      \field{sortinit}{R}
+      \field{sortinithash}{5e1c39a9d46ffb6bebd8f801023a9486}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{edition}{3rd}
+      \field{title}{Mastering the Requirements Process: Getting Requirements Right}
+      \field{year}{2012}
+    \endentry
+    \entry{shaw1996}{book}{}
+      \name{author}{2}{}{%
+        {{hash=a71c8aa98b158fa0b3a629457cda1498}{%
+           family={Shaw},
+           familyi={S\bibinitperiod},
+           given={Mary},
+           giveni={M\bibinitperiod}}}%
+        {{hash=5e93a0537dc9db010915acd5407760d4}{%
+           family={Garlan},
+           familyi={G\bibinitperiod},
+           given={David},
+           giveni={D\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {Upper Saddle River}%
+      }
+      \list{publisher}{1}{%
+        {Prentice Hall}%
+      }
+      \strng{namehash}{2f1c1b8d56655474bf41bee1ed639169}
+      \strng{fullhash}{2f1c1b8d56655474bf41bee1ed639169}
+      \strng{bibnamehash}{2f1c1b8d56655474bf41bee1ed639169}
+      \strng{authorbibnamehash}{2f1c1b8d56655474bf41bee1ed639169}
+      \strng{authornamehash}{2f1c1b8d56655474bf41bee1ed639169}
+      \strng{authorfullhash}{2f1c1b8d56655474bf41bee1ed639169}
+      \field{sortinit}{S}
+      \field{sortinithash}{b164b07b29984b41daf1e85279fbc5ab}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Software Architecture: Perspectives on an Emerging Discipline}
+      \field{year}{1996}
+    \endentry
+    \entry{sommerville2015}{book}{}
+      \name{author}{1}{}{%
+        {{hash=70341b3bfcce7026902f4eb1e4111b58}{%
+           family={Sommerville},
+           familyi={S\bibinitperiod},
+           given={Ian},
+           giveni={I\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {Boston}%
+      }
+      \list{publisher}{1}{%
+        {Pearson}%
+      }
+      \strng{namehash}{70341b3bfcce7026902f4eb1e4111b58}
+      \strng{fullhash}{70341b3bfcce7026902f4eb1e4111b58}
+      \strng{bibnamehash}{70341b3bfcce7026902f4eb1e4111b58}
+      \strng{authorbibnamehash}{70341b3bfcce7026902f4eb1e4111b58}
+      \strng{authornamehash}{70341b3bfcce7026902f4eb1e4111b58}
+      \strng{authorfullhash}{70341b3bfcce7026902f4eb1e4111b58}
+      \field{sortinit}{S}
+      \field{sortinithash}{b164b07b29984b41daf1e85279fbc5ab}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{edition}{10th}
+      \field{title}{Software Engineering}
+      \field{year}{2015}
+    \endentry
+    \entry{ISO42010}{misc}{}
+      \list{location}{1}{%
+        {Geneva}%
+      }
+      \list{publisher}{1}{%
+        {ISO}%
+      }
+      \field{sortinit}{S}
+      \field{sortinithash}{b164b07b29984b41daf1e85279fbc5ab}
+      \field{labeltitlesource}{title}
+      \field{number}{ISO/IEC/IEEE 42010:2011}
+      \field{title}{Systems and software engineering --- Architecture description}
+      \field{year}{2011}
+    \endentry
+    \entry{ISO12207}{misc}{}
+      \list{location}{1}{%
+        {Geneva}%
+      }
+      \list{publisher}{1}{%
+        {ISO}%
+      }
+      \field{sortinit}{S}
+      \field{sortinithash}{b164b07b29984b41daf1e85279fbc5ab}
+      \field{labeltitlesource}{title}
+      \field{number}{ISO/IEC/IEEE 12207:2017}
+      \field{title}{Systems and software engineering --- Software life cycle processes}
+      \field{year}{2017}
+    \endentry
+    \entry{ISO25010}{misc}{}
+      \list{location}{1}{%
+        {Geneva}%
+      }
+      \list{organization}{1}{%
+        {ISO/IEC}%
+      }
+      \field{sortinit}{S}
+      \field{sortinithash}{b164b07b29984b41daf1e85279fbc5ab}
+      \field{labeltitlesource}{title}
+      \field{number}{ISO/IEC 25010:2011}
+      \field{title}{Systems and software engineering --- Systems and software Quality Requirements and Evaluation (SQuaRE) --- System and software quality models}
+      \field{year}{2011}
+    \endentry
+    \entry{tichy1994}{book}{}
+      \name{author}{1}{}{%
+        {{hash=75f814d38e49366fd7e1cdbdb8553281}{%
+           family={Tichy},
+           familyi={T\bibinitperiod},
+           given={Walter\bibnamedelima F.},
+           giveni={W\bibinitperiod\bibinitdelim F\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {Chichester}%
+      }
+      \list{publisher}{1}{%
+        {John Wiley \& Sons}%
+      }
+      \strng{namehash}{75f814d38e49366fd7e1cdbdb8553281}
+      \strng{fullhash}{75f814d38e49366fd7e1cdbdb8553281}
+      \strng{bibnamehash}{75f814d38e49366fd7e1cdbdb8553281}
+      \strng{authorbibnamehash}{75f814d38e49366fd7e1cdbdb8553281}
+      \strng{authornamehash}{75f814d38e49366fd7e1cdbdb8553281}
+      \strng{authorfullhash}{75f814d38e49366fd7e1cdbdb8553281}
+      \field{sortinit}{T}
+      \field{sortinithash}{9af77f0292593c26bde9a56e688eaee9}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Configuration Management}
+      \field{year}{1994}
+    \endentry
+    \entry{vliet2008}{book}{}
+      \name{author}{1}{}{%
+        {{hash=e09d7b792fa1cc8b058030bfc8fabbff}{%
+           family={Vliet},
+           familyi={V\bibinitperiod},
+           given={Hans},
+           giveni={H\bibinitperiod},
+           prefix={van},
+           prefixi={v\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {Chichester}%
+      }
+      \list{publisher}{1}{%
+        {John Wiley \& Sons}%
+      }
+      \strng{namehash}{e09d7b792fa1cc8b058030bfc8fabbff}
+      \strng{fullhash}{e09d7b792fa1cc8b058030bfc8fabbff}
+      \strng{bibnamehash}{e09d7b792fa1cc8b058030bfc8fabbff}
+      \strng{authorbibnamehash}{e09d7b792fa1cc8b058030bfc8fabbff}
+      \strng{authornamehash}{e09d7b792fa1cc8b058030bfc8fabbff}
+      \strng{authorfullhash}{e09d7b792fa1cc8b058030bfc8fabbff}
+      \field{sortinit}{V}
+      \field{sortinithash}{afb52128e5b4dc4b843768c0113d673b}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{edition}{3rd}
+      \field{title}{Software Engineering: Principles and Practice}
+      \field{year}{2008}
+    \endentry
+    \entry{wiegers2013}{book}{}
+      \name{author}{2}{}{%
+        {{hash=c9a5f449a4bf4835507e684e957ed400}{%
+           family={Wiegers},
+           familyi={W\bibinitperiod},
+           given={Karl},
+           giveni={K\bibinitperiod}}}%
+        {{hash=6e9bf730dff65f7d0a80b17e1e86137a}{%
+           family={Beatty},
+           familyi={B\bibinitperiod},
+           given={Joy},
+           giveni={J\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {Redmond}%
+      }
+      \list{publisher}{1}{%
+        {Microsoft Press}%
+      }
+      \strng{namehash}{8f70e5b5e9247bf084cf4db4848e225e}
+      \strng{fullhash}{8f70e5b5e9247bf084cf4db4848e225e}
+      \strng{bibnamehash}{8f70e5b5e9247bf084cf4db4848e225e}
+      \strng{authorbibnamehash}{8f70e5b5e9247bf084cf4db4848e225e}
+      \strng{authornamehash}{8f70e5b5e9247bf084cf4db4848e225e}
+      \strng{authorfullhash}{8f70e5b5e9247bf084cf4db4848e225e}
+      \field{sortinit}{W}
+      \field{sortinithash}{4315d78024d0cea9b57a0c6f0e35ed0d}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{edition}{3rd}
+      \field{title}{Software Requirements}
+      \field{year}{2013}
+    \endentry
+    \entry{GB2006}{misc}{}
+      \name{author}{1}{}{%
+        {{hash=85085c7bb9e8f3cacef590037d07f10b}{%
+           family={国家质量技术监督局},
+           familyi={国\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {北京}%
+      }
+      \list{publisher}{1}{%
+        {中国标准出版社}%
+      }
+      \strng{namehash}{85085c7bb9e8f3cacef590037d07f10b}
+      \strng{fullhash}{85085c7bb9e8f3cacef590037d07f10b}
+      \strng{bibnamehash}{85085c7bb9e8f3cacef590037d07f10b}
+      \strng{authorbibnamehash}{85085c7bb9e8f3cacef590037d07f10b}
+      \strng{authornamehash}{85085c7bb9e8f3cacef590037d07f10b}
+      \strng{authorfullhash}{85085c7bb9e8f3cacef590037d07f10b}
+      \field{sortinit}{国}
+      \field{sortinithash}{be9f491a44f3f108a82391c21f4de404}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{GB/T 16260.1-2006 软件工程 产品质量 第1部分：质量模型}
+      \field{year}{2006}
+    \endentry
+    \entry{zhang2013}{book}{}
+      \name{author}{2}{}{%
+        {{hash=94ff8d8ccc1554a7aca7605a398cf6bd}{%
+           family={张海藩},
+           familyi={张\bibinitperiod}}}%
+        {{hash=8429e327810271114f3ab0c120022ce9}{%
+           family={牟永敏},
+           familyi={牟\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {北京}%
+      }
+      \list{publisher}{1}{%
+        {清华大学出版社}%
+      }
+      \strng{namehash}{f487071f1a715a03b7fcb12fc9fdce6c}
+      \strng{fullhash}{f487071f1a715a03b7fcb12fc9fdce6c}
+      \strng{bibnamehash}{f487071f1a715a03b7fcb12fc9fdce6c}
+      \strng{authorbibnamehash}{f487071f1a715a03b7fcb12fc9fdce6c}
+      \strng{authornamehash}{f487071f1a715a03b7fcb12fc9fdce6c}
+      \strng{authorfullhash}{f487071f1a715a03b7fcb12fc9fdce6c}
+      \field{sortinit}{张}
+      \field{sortinithash}{5224dd6ea8d67d595848333a2165db73}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{edition}{6}
+      \field{title}{软件工程导论}
+      \field{year}{2013}
+    \endentry
+  \enddatalist
+\endrefsection
+\endinput
+

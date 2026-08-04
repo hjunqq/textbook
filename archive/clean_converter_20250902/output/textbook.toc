@@ -1,0 +1,1044 @@
+\contentsline {section}{\numberline {0.1}前言}{11}{section.0.1}%
+\contentsline {subsection}{\numberline {0.1.1}编写背景}{11}{subsection.0.1.1}%
+\contentsline {subsection}{\numberline {0.1.2}编写目标}{11}{subsection.0.1.2}%
+\contentsline {subsection}{\numberline {0.1.3}适用对象}{11}{subsection.0.1.3}%
+\contentsline {subsection}{\numberline {0.1.4}主要特色}{11}{subsection.0.1.4}%
+\contentsline {subsubsection}{学术严谨性}{11}{section*.2}%
+\contentsline {subsubsection}{体系完整性}{12}{section*.3}%
+\contentsline {subsubsection}{创新前沿性}{12}{section*.4}%
+\contentsline {subsection}{\numberline {0.1.5}内容结构}{12}{subsection.0.1.5}%
+\contentsline {subsection}{\numberline {0.1.6}使用建议}{13}{subsection.0.1.6}%
+\contentsline {subsection}{\numberline {0.1.7}配套资源}{13}{subsection.0.1.7}%
+\contentsline {subsection}{\numberline {0.1.8}致谢}{13}{subsection.0.1.8}%
+\contentsline {section}{\numberline {0.2}第一章 智慧水利概述与平台架构基础}{14}{section.0.2}%
+\contentsline {subsection}{\numberline {0.2.1}学习目标}{14}{subsection.0.2.1}%
+\contentsline {subsection}{\numberline {0.2.2}引言}{14}{subsection.0.2.2}%
+\contentsline {subsection}{\numberline {0.2.3}本章小节}{14}{subsection.0.2.3}%
+\contentsline {subsubsection}{\href {section01-01.md}{第一节 软件概述}}{14}{section*.5}%
+\contentsline {subsubsection}{\href {section01-02.md}{第二节 智慧水利平台概述}}{14}{section*.6}%
+\contentsline {subsubsection}{\href {section01-03.md}{第三节 本章小结}}{15}{section*.7}%
+\contentsline {subsection}{\numberline {0.2.4}关键概念}{15}{subsection.0.2.4}%
+\contentsline {subsection}{\numberline {0.2.5}1.1 1.1 软件概述}{18}{subsection.0.2.5}%
+\contentsline {subsubsection}{1.1.1 定义软件}{18}{section*.8}%
+\contentsline {subsubsection}{1.1.2 软件的特点}{19}{section*.9}%
+\contentsline {subsubsection}{1.1.3软件的分类}{20}{section*.10}%
+\contentsline {subsubsection}{1.1.4 软件的发展}{21}{section*.11}%
+\contentsline {subsubsection}{1.1.5 软件危机}{21}{section*.12}%
+\contentsline {subsubsection}{基础题}{24}{section*.13}%
+\contentsline {subsubsection}{提高题}{24}{section*.14}%
+\contentsline {subsubsection}{讨论题}{24}{section*.15}%
+\contentsline {subsection}{\numberline {0.2.6}1.2 1.2 软件工程概述}{26}{subsection.0.2.6}%
+\contentsline {subsubsection}{1.2.1 软件工程的目标}{26}{section*.16}%
+\contentsline {subsubsection}{1.2.2 软件工程的基本原理}{27}{section*.17}%
+\contentsline {subsubsection}{1.2.3 软件工程的内容}{28}{section*.18}%
+\contentsline {subsubsection}{1.2.4 软件工程的原则}{29}{section*.19}%
+\contentsline {subsubsection}{1.2.5 软件工程面临的问题}{29}{section*.20}%
+\contentsline {subsubsection}{基础题}{30}{section*.21}%
+\contentsline {subsubsection}{提高题}{30}{section*.22}%
+\contentsline {subsubsection}{讨论题}{31}{section*.23}%
+\contentsline {subsection}{\numberline {0.2.7}1.3 1.3 小结}{34}{subsection.0.2.7}%
+\contentsline {subsubsection}{基础题}{35}{section*.24}%
+\contentsline {subsubsection}{提高题}{35}{section*.25}%
+\contentsline {subsubsection}{讨论题}{35}{section*.26}%
+\contentsline {section}{\numberline {0.3}第二章 软件工程基础与需求分析}{36}{section.0.3}%
+\contentsline {subsection}{\numberline {0.3.1}学习目标}{36}{subsection.0.3.1}%
+\contentsline {subsection}{\numberline {0.3.2}引言}{36}{subsection.0.3.2}%
+\contentsline {subsection}{\numberline {0.3.3}本章小节}{36}{subsection.0.3.3}%
+\contentsline {subsubsection}{\href {section02-01.md}{第一节 软件生命周期}}{36}{section*.27}%
+\contentsline {subsubsection}{\href {section02-02.md}{第二节 软件生命周期模型}}{36}{section*.28}%
+\contentsline {subsubsection}{\href {section02-03.md}{第三节 需求分析}}{37}{section*.29}%
+\contentsline {subsubsection}{\href {section02-04.md}{第四节 需求获取与理解}}{37}{section*.30}%
+\contentsline {subsubsection}{\href {section02-05.md}{第五节 结构化分析}}{37}{section*.31}%
+\contentsline {subsubsection}{\href {section02-06.md}{第六节 本章小结}}{37}{section*.32}%
+\contentsline {subsection}{\numberline {0.3.4}关键概念}{37}{subsection.0.3.4}%
+\contentsline {subsection}{\numberline {0.3.5}2.1 2.1 软件生命周期}{42}{subsection.0.3.5}%
+\contentsline {subsubsection}{2.1.1 软件设计时期}{42}{section*.33}%
+\contentsline {subsubsection}{2.1.2 软件开发时期}{43}{section*.34}%
+\contentsline {subsubsection}{2.1.3 运行与维护时期}{43}{section*.35}%
+\contentsline {subsubsection}{基础题}{43}{section*.36}%
+\contentsline {subsubsection}{提高题}{43}{section*.37}%
+\contentsline {subsubsection}{讨论题}{44}{section*.38}%
+\contentsline {subsection}{\numberline {0.3.6}2.2 2.2 软件生命周期模型}{45}{subsection.0.3.6}%
+\contentsline {subsubsection}{2.2.1 软件生命周期模型的概念}{45}{section*.39}%
+\contentsline {subsubsection}{2.2.2 瀑布模型}{45}{section*.40}%
+\contentsline {subsubsection}{2.2.3 原型模型}{47}{section*.41}%
+\contentsline {subsubsection}{2.2.4 增量模型}{47}{section*.42}%
+\contentsline {subsubsection}{2.2.5 螺旋模型}{49}{section*.43}%
+\contentsline {subsubsection}{2.2.6 喷泉模型}{50}{section*.44}%
+\contentsline {subsubsection}{2.2.7 基于知识的模型}{52}{section*.45}%
+\contentsline {subsubsection}{2.2.8 变换模型}{53}{section*.46}%
+\contentsline {subsection}{\numberline {0.3.7}2.3 2.3 需求分析}{54}{subsection.0.3.7}%
+\contentsline {subsubsection}{2.3.1 需求分析的特点}{54}{section*.47}%
+\contentsline {subsubsection}{2.3.2 需求分析的原则}{55}{section*.48}%
+\contentsline {subsubsection}{2.3.3 需求分析的重要性}{56}{section*.49}%
+\contentsline {subsubsection}{2.3.4 需求分析的任务}{56}{section*.50}%
+\contentsline {subsubsection}{2.3.5 需求分析的方法}{57}{section*.51}%
+\contentsline {subsection}{\numberline {0.3.8}2.4 2.4 需求获取与理解}{59}{subsection.0.3.8}%
+\contentsline {subsubsection}{2.4.1 客户需求的获取方法}{59}{section*.52}%
+\contentsline {subsubsection}{2.4.2 需求分类与优先级划分}{59}{section*.53}%
+\contentsline {subsection}{\numberline {0.3.9}2.5 2.5 结构化分析}{61}{subsection.0.3.9}%
+\contentsline {subsubsection}{2.5.1 自顶向下逐层分解}{61}{section*.54}%
+\contentsline {subsubsection}{2.5.2 结构化分析步骤}{63}{section*.55}%
+\contentsline {subsubsection}{2.5.3 系统流程图}{63}{section*.56}%
+\contentsline {subsubsection}{2.5.4 数据流图}{76}{section*.57}%
+\contentsline {subsubsection}{2.5.5 数据字典}{79}{section*.58}%
+\contentsline {subsection}{\numberline {0.3.10}2.6 2.6 小结}{82}{subsection.0.3.10}%
+\contentsline {section}{\numberline {0.4}第三章 版本控制系统Git}{83}{section.0.4}%
+\contentsline {subsection}{\numberline {0.4.1}学习目标}{83}{subsection.0.4.1}%
+\contentsline {subsection}{\numberline {0.4.2}引言}{83}{subsection.0.4.2}%
+\contentsline {subsection}{\numberline {0.4.3}本章小节}{83}{subsection.0.4.3}%
+\contentsline {subsubsection}{\href {section03-01.md}{第一节 软件架构概述}}{83}{section*.59}%
+\contentsline {subsubsection}{\href {section03-02.md}{第二节 架构设计原则}}{83}{section*.60}%
+\contentsline {subsubsection}{\href {section03-03.md}{第三节 架构类型与常见模式}}{84}{section*.61}%
+\contentsline {subsubsection}{\href {section03-04.md}{第四节 架构设计过程}}{84}{section*.62}%
+\contentsline {subsubsection}{\href {section03-05.md}{第五节 架构评估与验证}}{84}{section*.63}%
+\contentsline {subsubsection}{\href {section03-06.md}{第六节 Web应用架构设计}}{84}{section*.64}%
+\contentsline {subsubsection}{\href {section03-07.md}{第七节 案例研究：SafeHome系统架构}}{84}{section*.65}%
+\contentsline {subsection}{\numberline {0.4.4}关键概念}{84}{subsection.0.4.4}%
+\contentsline {subsection}{\numberline {0.4.5}设计原则}{86}{subsection.0.4.5}%
+\contentsline {subsection}{\numberline {0.4.6}实践指南}{86}{subsection.0.4.6}%
+\contentsline {subsection}{\numberline {0.4.7}3.1 3.1 软件架构概述}{87}{subsection.0.4.7}%
+\contentsline {subsubsection}{3.1.1 软件架构的定义与重要性}{87}{section*.66}%
+\contentsline {subsubsection}{3.1.1 软件架构的定义与重要性}{87}{section*.67}%
+\contentsline {subsubsection}{3.1.2 架构描述方法}{89}{section*.68}%
+\contentsline {paragraph}{1 UML视图}{89}{section*.69}%
+\contentsline {paragraph}{2 架构决策的核心要素}{92}{section*.70}%
+\contentsline {subsubsection}{基础题}{93}{section*.71}%
+\contentsline {subsubsection}{提高题}{93}{section*.72}%
+\contentsline {subsubsection}{讨论题}{93}{section*.73}%
+\contentsline {subsection}{\numberline {0.4.8}3.2 3.2 架构设计原则}{95}{subsection.0.4.8}%
+\contentsline {subsubsection}{3.2.1 模块化与关注点分离原则}{95}{section*.74}%
+\contentsline {paragraph}{1 模块化的定义与目标}{95}{section*.75}%
+\contentsline {paragraph}{2 关注点分离（Separation of Concerns）}{95}{section*.76}%
+\contentsline {paragraph}{3 内聚性（Cohesion）}{96}{section*.77}%
+\contentsline {paragraph}{4 耦合性（Coupling）}{96}{section*.78}%
+\contentsline {paragraph}{5 平衡内聚与耦合}{97}{section*.79}%
+\contentsline {paragraph}{6 实践步骤}{97}{section*.80}%
+\contentsline {subsubsection}{3.2.2 抽象与信息隐藏原则}{98}{section*.81}%
+\contentsline {paragraph}{1 抽象的定义与作用}{98}{section*.82}%
+\contentsline {paragraph}{2 层次化抽象}{98}{section*.83}%
+\contentsline {paragraph}{3 信息隐藏（Information Hiding）}{99}{section*.84}%
+\contentsline {paragraph}{4 接口封装的实践方法}{99}{section*.85}%
+\contentsline {paragraph}{5 案例分析：SafeHome 系统的抽象与封装}{100}{section*.86}%
+\contentsline {paragraph}{6 实践步骤}{100}{section*.87}%
+\contentsline {subsubsection}{3.2.3 功能独立性与复用性原则}{101}{section*.88}%
+\contentsline {paragraph}{1 基于构件的设计原则}{101}{section*.89}%
+\contentsline {subsubsection}{2 案例分析：SafeHome 的传感器模块}{102}{section*.90}%
+\contentsline {subsection}{\numberline {0.4.9}3.3 3.3 架构类型与常见模式}{104}{subsection.0.4.9}%
+\contentsline {subsubsection}{3.3.1 常见架构类型}{104}{section*.91}%
+\contentsline {paragraph}{1 分层架构（Layered Architecture）}{104}{section*.92}%
+\contentsline {paragraph}{2 客户/服务器架构（Client-Server Architecture）}{104}{section*.93}%
+\contentsline {paragraph}{3 分布式架构（Distributed Architecture）}{105}{section*.94}%
+\contentsline {subsubsection}{3.3.2 架构风格}{106}{section*.95}%
+\contentsline {subsubsection}{1 MVC架构模式}{106}{section*.96}%
+\contentsline {subsubsection}{2 微服务（Microservices）}{107}{section*.97}%
+\contentsline {subsubsection}{3 事件驱动（Event - Driven）}{108}{section*.98}%
+\contentsline {subsubsection}{4 架构风格与模式的选择}{108}{section*.99}%
+\contentsline {subsubsection}{3.3.3 组织与求精}{109}{section*.100}%
+\contentsline {paragraph}{1 高层设计的关键要素}{109}{section*.101}%
+\contentsline {paragraph}{2 逐步求精的过程}{109}{section*.102}%
+\contentsline {paragraph}{3 构件的细化与设计}{110}{section*.103}%
+\contentsline {subsection}{\numberline {0.4.10}3.4 3.4 架构设计过程}{111}{subsection.0.4.10}%
+\contentsline {subsubsection}{3.4.1 系统环境表示}{111}{section*.104}%
+\contentsline {paragraph}{1 外部接口的识别与分类}{111}{section*.105}%
+\contentsline {paragraph}{2 约束条件的梳理与分析}{112}{section*.106}%
+\contentsline {subsubsection}{3.4.2 原型定义与细化}{113}{section*.107}%
+\contentsline {subsubsection}{3.4.3 构件级设计}{115}{section*.108}%
+\contentsline {subsection}{\numberline {0.4.11}3.5 3.5 架构评估与验证}{118}{subsection.0.4.11}%
+\contentsline {subsubsection}{3.5.1 评估方法}{118}{section*.109}%
+\contentsline {subsubsection}{3.5.2 复杂度与风险分析}{119}{section*.110}%
+\contentsline {subsubsection}{基础题}{120}{section*.111}%
+\contentsline {subsubsection}{提高题}{120}{section*.112}%
+\contentsline {subsubsection}{讨论题}{120}{section*.113}%
+\contentsline {subsection}{\numberline {0.4.12}3.6 3.6 Web 应用架构设计}{122}{subsection.0.4.12}%
+\contentsline {subsubsection}{3.6.1 特殊考虑}{122}{section*.114}%
+\contentsline {subsubsection}{3.6.2 导航与内容管理}{123}{section*.115}%
+\contentsline {subsubsection}{基础题}{125}{section*.116}%
+\contentsline {subsubsection}{提高题}{125}{section*.117}%
+\contentsline {subsubsection}{讨论题}{125}{section*.118}%
+\contentsline {subsection}{\numberline {0.4.13}3.7 3.7 案例研究：SafeHome 系统架构}{126}{subsection.0.4.13}%
+\contentsline {subsubsection}{3.7.1 需求分析和用例建模}{126}{section*.119}%
+\contentsline {subsubsection}{3.7.2 构件协作与接口设计}{127}{section*.120}%
+\contentsline {subsection}{\numberline {0.4.14}3.8 小结}{129}{subsection.0.4.14}%
+\contentsline {subsubsection}{基础题}{129}{section*.121}%
+\contentsline {subsubsection}{提高题}{129}{section*.122}%
+\contentsline {subsubsection}{讨论题}{130}{section*.123}%
+\contentsline {section}{\numberline {0.5}第四章 前端开发技术栈}{131}{section.0.5}%
+\contentsline {subsection}{\numberline {0.5.1}学习目标}{131}{subsection.0.5.1}%
+\contentsline {subsection}{\numberline {0.5.2}引言}{131}{subsection.0.5.2}%
+\contentsline {subsection}{\numberline {0.5.3}重要提示}{131}{subsection.0.5.3}%
+\contentsline {subsection}{\numberline {0.5.4}本章小节}{132}{subsection.0.5.4}%
+\contentsline {subsubsection}{\href {section04-01.md}{第一节 前端及前端开发工具}}{132}{section*.124}%
+\contentsline {subsubsection}{\href {section04-02.md}{第二节 HTML基础与实践}}{132}{section*.125}%
+\contentsline {subsubsection}{\href {section04-03.md}{第三节 CSS基础与样式设计}}{132}{section*.126}%
+\contentsline {subsubsection}{\href {section04-04.md}{第四节 JavaScript基础编程}}{132}{section*.127}%
+\contentsline {subsubsection}{\href {section04-05.md}{第五节 Vue基础框架开发}}{132}{section*.128}%
+\contentsline {subsubsection}{\href {section04-06.md}{第六节 前端脚手架与工程化}}{133}{section*.129}%
+\contentsline {subsubsection}{\href {section04-07.md}{第七节 前端部署与发布}}{133}{section*.130}%
+\contentsline {subsection}{\numberline {0.5.5}关键概念}{133}{subsection.0.5.5}%
+\contentsline {subsection}{\numberline {0.5.6}技术栈概览}{138}{subsection.0.5.6}%
+\contentsline {subsection}{\numberline {0.5.7}智慧水利前端特色需求}{138}{subsection.0.5.7}%
+\contentsline {subsection}{\numberline {0.5.8}学习路径建议}{139}{subsection.0.5.8}%
+\contentsline {subsection}{\numberline {0.5.9}实践项目驱动}{139}{subsection.0.5.9}%
+\contentsline {subsection}{\numberline {0.5.10}思考题}{139}{subsection.0.5.10}%
+\contentsline {section}{\numberline {0.6}4.1.1 Web基础概念与浏览器架构}{141}{section.0.6}%
+\contentsline {subsection}{\numberline {0.6.1}4.1 Web前端的定义与特点}{141}{subsection.0.6.1}%
+\contentsline {subsection}{\numberline {0.6.2}万维网与Web技术体系}{141}{subsection.0.6.2}%
+\contentsline {subsection}{\numberline {0.6.3}浏览器的组成架构}{142}{subsection.0.6.3}%
+\contentsline {subsection}{\numberline {0.6.4}渲染引擎的工作原理}{142}{subsection.0.6.4}%
+\contentsline {subsection}{\numberline {0.6.5}JavaScript引擎与脚本执行}{143}{subsection.0.6.5}%
+\contentsline {subsection}{\numberline {0.6.6}浏览器兼容性与标准化}{144}{subsection.0.6.6}%
+\contentsline {subsection}{\numberline {0.6.7}网络通信与数据交换}{144}{subsection.0.6.7}%
+\contentsline {section}{\numberline {0.7}4.2 HTML基础与实践}{146}{section.0.7}%
+\contentsline {subsection}{\numberline {0.7.1}4.2 HTML核心概念与基础语法}{146}{subsection.0.7.1}%
+\contentsline {subsubsection}{什么是HTML}{146}{section*.131}%
+\contentsline {subsubsection}{HTML文档的基本结构}{146}{section*.132}%
+\contentsline {subsubsection}{HTML元素和标签}{147}{section*.133}%
+\contentsline {subsubsection}{HTML属性}{148}{section*.134}%
+\contentsline {subsubsection}{HTML语法规则}{148}{section*.135}%
+\contentsline {subsection}{\numberline {0.7.2}4.2.1 HTML5语言基础与语义化}{149}{subsection.0.7.2}%
+\contentsline {subsubsection}{语义化标签详细讲解}{154}{section*.136}%
+\contentsline {paragraph}{1. \texttt {\textless {}header\textgreater {}} 标签 - 头部区域}{155}{section*.137}%
+\contentsline {paragraph}{2. \texttt {\textless {}nav\textgreater {}} 标签 - 导航区域}{155}{section*.138}%
+\contentsline {paragraph}{3. \texttt {\textless {}main\textgreater {}} 标签 - 主要内容}{156}{section*.139}%
+\contentsline {paragraph}{4. \texttt {\textless {}section\textgreater {}} 标签 - 内容段落}{156}{section*.140}%
+\contentsline {paragraph}{5. \texttt {\textless {}article\textgreater {}} 标签 - 独立文章}{157}{section*.141}%
+\contentsline {paragraph}{6. \texttt {\textless {}aside\textgreater {}} 标签 - 侧边信息}{158}{section*.142}%
+\contentsline {paragraph}{7. \texttt {\textless {}footer\textgreater {}} 标签 - 底部信息}{158}{section*.143}%
+\contentsline {paragraph}{8. \texttt {\textless {}figure\textgreater {}} 和 \texttt {\textless {}figcaption\textgreater {}} 标签 - 图表内容}{159}{section*.144}%
+\contentsline {paragraph}{9. \texttt {\textless {}time\textgreater {}} 标签 - 时间标记}{160}{section*.145}%
+\contentsline {paragraph}{10. \texttt {\textless {}mark\textgreater {}} 标签 - 高亮文本}{161}{section*.146}%
+\contentsline {subsection}{\numberline {0.7.3}4.2.2 HTML5表单增强与数据验证}{161}{subsection.0.7.3}%
+\contentsline {subsubsection}{HTML5表单输入类型详细讲解}{163}{section*.147}%
+\contentsline {paragraph}{1. \texttt {email} 类型 - 邮箱输入}{163}{section*.148}%
+\contentsline {paragraph}{2. \texttt {url} 类型 - 网址输入}{164}{section*.149}%
+\contentsline {paragraph}{3. \texttt {number} 类型 - 数值输入}{164}{section*.150}%
+\contentsline {paragraph}{4. \texttt {range} 类型 - 滑动条选择}{165}{section*.151}%
+\contentsline {paragraph}{5. \texttt {date} 类型 - 日期选择}{166}{section*.152}%
+\contentsline {paragraph}{6. \texttt {time} 类型 - 时间选择}{166}{section*.153}%
+\contentsline {paragraph}{7. \texttt {datetime-local} 类型 - 本地日期时间}{167}{section*.154}%
+\contentsline {paragraph}{8. \texttt {color} 类型 - 颜色选择}{167}{section*.155}%
+\contentsline {paragraph}{9. \texttt {search} 类型 - 搜索框}{167}{section*.156}%
+\contentsline {subsubsection}{表单分组和验证示例}{168}{section*.157}%
+\contentsline {paragraph}{表单分组 - \texttt {fieldset} 和 \texttt {legend}}{168}{section*.158}%
+\contentsline {paragraph}{表单验证属性}{168}{section*.159}%
+\contentsline {paragraph}{自定义验证消息}{169}{section*.160}%
+\contentsline {subsection}{\numberline {0.7.4}4.2.3 HTML5多媒体与图形支持}{170}{subsection.0.7.4}%
+\contentsline {subsubsection}{HTML5多媒体标签详解}{170}{section*.161}%
+\contentsline {subsubsection}{HTML5多媒体标签详细讲解}{171}{section*.162}%
+\contentsline {paragraph}{1. \texttt {\textless {}video\textgreater {}} 标签 - 视频播放}{171}{section*.163}%
+\contentsline {paragraph}{2. \texttt {\textless {}audio\textgreater {}} 标签 - 音频播放}{172}{section*.164}%
+\contentsline {paragraph}{3. \texttt {\textless {}source\textgreater {}} 标签 - 媒体源}{173}{section*.165}%
+\contentsline {paragraph}{4. \texttt {\textless {}track\textgreater {}} 标签 - 字幕轨道}{173}{section*.166}%
+\contentsline {paragraph}{5. \texttt {\textless {}canvas\textgreater {}} 标签 - 画布绘图}{174}{section*.167}%
+\contentsline {paragraph}{6. \texttt {\textless {}svg\textgreater {}} 标签 - 矢量图形}{176}{section*.168}%
+\contentsline {subsubsection}{多媒体控制脚本示例}{178}{section*.169}%
+\contentsline {paragraph}{视频播放控制}{178}{section*.170}%
+\contentsline {paragraph}{音频预警系统}{180}{section*.171}%
+\contentsline {subsection}{\numberline {0.7.5}4.2.4 水利平台HTML结构设计}{183}{subsection.0.7.5}%
+\contentsline {section}{\numberline {0.8}4.3 CSS基础与样式设计}{186}{section.0.8}%
+\contentsline {subsection}{\numberline {0.8.1}4.3 CSS核心概念与基础语法}{186}{subsection.0.8.1}%
+\contentsline {subsubsection}{什么是CSS}{186}{section*.172}%
+\contentsline {subsubsection}{CSS的工作原理}{186}{section*.173}%
+\contentsline {subsubsection}{CSS基本语法结构}{186}{section*.174}%
+\contentsline {subsubsection}{CSS应用方式}{187}{section*.175}%
+\contentsline {subsubsection}{CSS层叠和继承}{188}{section*.176}%
+\contentsline {subsubsection}{CSS注释}{188}{section*.177}%
+\contentsline {subsection}{\numberline {0.8.2}4.3.1 CSS3选择器与新特性}{188}{subsection.0.8.2}%
+\contentsline {subsubsection}{CSS基础选择器详解}{189}{section*.178}%
+\contentsline {paragraph}{1. 元素选择器 - HTML标签直接样式化}{189}{section*.179}%
+\contentsline {paragraph}{2. 类选择器 - 可复用的样式组件}{189}{section*.180}%
+\contentsline {paragraph}{3. ID选择器 - 唯一元素的特定样式}{190}{section*.181}%
+\contentsline {paragraph}{4. 属性选择器 - 基于HTML属性的精确选择}{190}{section*.182}%
+\contentsline {subsubsection}{CSS3高级选择器详解}{191}{section*.183}%
+\contentsline {paragraph}{1. 关系选择器 - 基于元素关系的选择}{191}{section*.184}%
+\contentsline {paragraph}{2. 伪类选择器 - 基于元素状态的动态选择}{191}{section*.185}%
+\contentsline {paragraph}{3. 伪元素选择器 - 创建虚拟元素增强设计}{192}{section*.186}%
+\contentsline {subsubsection}{CSS3新增属性特性}{192}{section*.187}%
+\contentsline {paragraph}{1. 边框和背景增强}{192}{section*.188}%
+\contentsline {paragraph}{2. 文本效果增强}{193}{section*.189}%
+\contentsline {subsection}{\numberline {0.8.3}4.3.2 CSS3布局系统}{193}{subsection.0.8.3}%
+\contentsline {subsubsection}{Flexbox弹性布局详解}{193}{section*.190}%
+\contentsline {paragraph}{1. Flex容器属性详解}{194}{section*.191}%
+\contentsline {paragraph}{2. Flex项目属性详解}{194}{section*.192}%
+\contentsline {paragraph}{3. 实用的Flex布局模式}{194}{section*.193}%
+\contentsline {subsubsection}{Grid网格布局深度解析}{195}{section*.194}%
+\contentsline {paragraph}{1. Grid容器基础概念与属性详解}{195}{section*.195}%
+\contentsline {paragraph}{2. Grid项目定位与区域分配详解}{195}{section*.196}%
+\contentsline {paragraph}{3. 响应式Grid布局设计策略}{200}{section*.197}%
+\contentsline {subsubsection}{响应式设计技术全面解析}{200}{section*.198}%
+\contentsline {paragraph}{1. 媒体查询深度应用与断点策略}{201}{section*.199}%
+\contentsline {paragraph}{2. 移动端交互优化与触控体验}{211}{section*.200}%
+\contentsline {subsection}{\numberline {0.8.4}4.3.4 CSS3动画与过渡效果深度应用}{212}{subsection.0.8.4}%
+\contentsline {subsubsection}{CSS3过渡效果精细化控制}{212}{section*.201}%
+\contentsline {paragraph}{1. 过渡属性深度解析与实际应用}{212}{section*.202}%
+\contentsline {paragraph}{2. 表单输入框过渡效果}{221}{section*.203}%
+\contentsline {subsubsection}{CSS3关键帧动画}{221}{section*.204}%
+\contentsline {paragraph}{1. 数据加载动画}{221}{section*.205}%
+\contentsline {paragraph}{2. 数据更新提示动画}{222}{section*.206}%
+\contentsline {paragraph}{3. 进度条动画}{222}{section*.207}%
+\contentsline {subsection}{\numberline {0.8.5}4.3.4 水利平台UI设计规范}{223}{subsection.0.8.5}%
+\contentsline {subsubsection}{水利主题色彩系统}{223}{section*.208}%
+\contentsline {paragraph}{1. 主色调定义}{223}{section*.209}%
+\contentsline {paragraph}{2. 渐变色方案}{223}{section*.210}%
+\contentsline {subsubsection}{组件化设计规范}{224}{section*.211}%
+\contentsline {paragraph}{1. 按钮组件规范}{224}{section*.212}%
+\contentsline {paragraph}{2. 卡片组件规范}{224}{section*.213}%
+\contentsline {paragraph}{3. 表格组件规范}{225}{section*.214}%
+\contentsline {subsubsection}{响应式设计适配}{225}{section*.215}%
+\contentsline {paragraph}{1. 移动端适配策略}{225}{section*.216}%
+\contentsline {section}{\numberline {0.9}4.4 JavaScript基础编程}{227}{section.0.9}%
+\contentsline {subsection}{\numberline {0.9.1}4.4 JavaScript核心概念与基础语法}{227}{subsection.0.9.1}%
+\contentsline {subsubsection}{什么是JavaScript}{227}{section*.217}%
+\contentsline {subsubsection}{JavaScript在Web开发中的作用}{227}{section*.218}%
+\contentsline {subsubsection}{JavaScript基本语法}{228}{section*.219}%
+\contentsline {paragraph}{1. 变量声明}{228}{section*.220}%
+\contentsline {paragraph}{2. 数据类型}{228}{section*.221}%
+\contentsline {paragraph}{3. 操作符}{229}{section*.222}%
+\contentsline {paragraph}{4. 控制结构}{230}{section*.223}%
+\contentsline {paragraph}{5. 函数基础}{231}{section*.224}%
+\contentsline {subsubsection}{JavaScript执行环境}{231}{section*.225}%
+\contentsline {subsection}{\numberline {0.9.2}JavaScript基础语法深入详解}{232}{subsection.0.9.2}%
+\contentsline {subsubsection}{数据类型深入学习}{232}{section*.226}%
+\contentsline {paragraph}{1. Number 数字类型详解}{232}{section*.227}%
+\contentsline {paragraph}{2. String 字符串类型详解}{233}{section*.228}%
+\contentsline {subparagraph}{字符串的创建方式}{233}{section*.229}%
+\contentsline {subparagraph}{模板字符串的强大功能}{234}{section*.230}%
+\contentsline {subparagraph}{字符串长度和字符访问}{234}{section*.231}%
+\contentsline {subparagraph}{字符串查找和检测方法}{234}{section*.232}%
+\contentsline {subparagraph}{字符串提取和截取}{235}{section*.233}%
+\contentsline {subparagraph}{字符串转换操作}{235}{section*.234}%
+\contentsline {subparagraph}{字符串分割和连接}{236}{section*.235}%
+\contentsline {subparagraph}{字符串替换操作}{236}{section*.236}%
+\contentsline {subparagraph}{水利监测系统中的字符串处理实例}{236}{section*.237}%
+\contentsline {paragraph}{3. Boolean 布尔类型和逻辑运算详解}{239}{section*.238}%
+\contentsline {subparagraph}{基本布尔值和逻辑运算符}{239}{section*.239}%
+\contentsline {subparagraph}{AND运算符 (\&\&) - 逻辑与操作}{239}{section*.240}%
+\contentsline {subparagraph}{OR运算符 (\textbar \textbar ) - 逻辑或操作}{240}{section*.241}%
+\contentsline {subparagraph}{NOT运算符 (!) - 逻辑非操作}{240}{section*.242}%
+\contentsline {subparagraph}{空值合并运算符 (??) - ES2020新特性}{241}{section*.243}%
+\contentsline {subparagraph}{布尔值的隐式转换规则}{241}{section*.244}%
+\contentsline {subparagraph}{智慧水利系统中的逻辑运算应用}{242}{section*.245}%
+\contentsline {paragraph}{4. 类型转换详解}{246}{section*.246}%
+\contentsline {subparagraph}{显式类型转换}{246}{section*.247}%
+\contentsline {subparagraph}{隐式类型转换（自动转换）}{248}{section*.248}%
+\contentsline {subparagraph}{智慧水利数据处理中的类型转换应用}{249}{section*.249}%
+\contentsline {subsubsection}{运算符深入详解}{254}{section*.250}%
+\contentsline {paragraph}{1. 算术运算符详解}{254}{section*.251}%
+\contentsline {subparagraph}{基本算术运算}{254}{section*.252}%
+\contentsline {subparagraph}{递增递减运算符}{255}{section*.253}%
+\contentsline {subparagraph}{一元算术运算符}{256}{section*.254}%
+\contentsline {subparagraph}{水利工程计算中的算术运算应用}{256}{section*.255}%
+\contentsline {paragraph}{2. 比较运算符深入分析}{261}{section*.256}%
+\contentsline {subparagraph}{数值大小比较}{261}{section*.257}%
+\contentsline {subparagraph}{相等性比较的重要区别}{261}{section*.258}%
+\contentsline {subparagraph}{特殊值的比较规则}{262}{section*.259}%
+\contentsline {subparagraph}{对象引用的比较}{262}{section*.260}%
+\contentsline {subparagraph}{智慧水利监测中的比较运算应用}{263}{section*.261}%
+\contentsline {subsubsection}{控制流程详解}{270}{section*.262}%
+\contentsline {paragraph}{1. 条件语句详解}{270}{section*.263}%
+\contentsline {subparagraph}{if\dots else 条件判断}{270}{section*.264}%
+\contentsline {subparagraph}{三元运算符（条件运算符）}{271}{section*.265}%
+\contentsline {subparagraph}{switch语句}{271}{section*.266}%
+\contentsline {subparagraph}{现代替代方案 - 对象映射}{272}{section*.267}%
+\contentsline {subparagraph}{水利系统中的条件判断应用}{273}{section*.268}%
+\contentsline {paragraph}{2. 循环结构详解}{280}{section*.269}%
+\contentsline {subparagraph}{for循环 - 最通用的循环结构}{280}{section*.270}%
+\contentsline {subparagraph}{while循环 - 条件驱动的循环}{280}{section*.271}%
+\contentsline {subparagraph}{do\dots while循环 - 至少执行一次的循环}{282}{section*.272}%
+\contentsline {subparagraph}{for\dots in循环 - 遍历对象属性}{284}{section*.273}%
+\contentsline {subparagraph}{for\dots of循环 - 遍历可迭代对象}{286}{section*.274}%
+\contentsline {subparagraph}{循环控制语句}{288}{section*.275}%
+\contentsline {paragraph}{3. 错误处理详解}{296}{section*.276}%
+\contentsline {subparagraph}{try\dots catch\dots finally语句}{296}{section*.277}%
+\contentsline {subparagraph}{抛出自定义错误}{300}{section*.278}%
+\contentsline {subsubsection}{函数深入详解}{306}{section*.279}%
+\contentsline {paragraph}{1. 函数声明和表达式}{306}{section*.280}%
+\contentsline {paragraph}{2. 参数处理}{307}{section*.281}%
+\contentsline {paragraph}{3. 作用域和闭包}{308}{section*.282}%
+\contentsline {subsubsection}{五、对象与数组 - 数据结构的核心}{310}{section*.283}%
+\contentsline {paragraph}{1. 对象基础 - 属性与方法的容器}{311}{section*.284}%
+\contentsline {paragraph}{2. 对象的高级操作}{313}{section*.285}%
+\contentsline {paragraph}{3. 数组基础 - 有序数据的管理}{315}{section*.286}%
+\contentsline {paragraph}{4. 数组的高级方法 - 函数式编程的基础}{317}{section*.287}%
+\contentsline {paragraph}{5. 数组与对象的综合应用}{320}{section*.288}%
+\contentsline {subsubsection}{六、错误处理与调试 - 系统稳定性保障}{322}{section*.289}%
+\contentsline {paragraph}{1. JavaScript错误类型与处理机制}{322}{section*.290}%
+\contentsline {paragraph}{2. try-catch-finally语句详解}{324}{section*.291}%
+\contentsline {paragraph}{3. 异步错误处理与Promise}{328}{section*.292}%
+\contentsline {paragraph}{4. 调试技巧与工具}{332}{section*.293}%
+\contentsline {subsubsection}{七、代码质量与编程规范 - 可维护代码的基石}{342}{section*.294}%
+\contentsline {paragraph}{1. 命名规范与代码风格}{342}{section*.295}%
+\contentsline {paragraph}{2. 代码组织与模块化}{347}{section*.296}%
+\contentsline {paragraph}{3. 性能优化与最佳实践}{357}{section*.297}%
+\contentsline {subsection}{\numberline {0.9.3}4.4.1 ES6+新特性与现代语法}{367}{subsection.0.9.3}%
+\contentsline {subsubsection}{变量声明与作用域管理}{367}{section*.298}%
+\contentsline {subsubsection}{模板字符串与字符串处理增强}{367}{section*.299}%
+\contentsline {subsubsection}{解构赋值与数据提取优化}{368}{section*.300}%
+\contentsline {subsubsection}{箭头函数与函数式编程}{368}{section*.301}%
+\contentsline {subsection}{\numberline {0.9.4}4.4.2 异步编程与Promise}{369}{subsection.0.9.4}%
+\contentsline {subsubsection}{Promise基础概念与状态管理}{369}{section*.302}%
+\contentsline {subsubsection}{async/await语法与现代异步编程}{370}{section*.303}%
+\contentsline {subsubsection}{错误处理与异常管理}{370}{section*.304}%
+\contentsline {subsubsection}{Promise高级应用模式}{371}{section*.305}%
+\contentsline {subsection}{\numberline {0.9.5}4.4.3 DOM操作与事件处理}{371}{subsection.0.9.5}%
+\contentsline {subsubsection}{现代DOM查询与元素选择}{371}{section*.306}%
+\contentsline {subsubsection}{现代事件处理机制}{372}{section*.307}%
+\contentsline {subsection}{\numberline {0.9.6}4.4.4 模块化开发与调试技巧}{372}{subsection.0.9.6}%
+\contentsline {subsubsection}{ES6模块系统与项目架构}{373}{section*.308}%
+\contentsline {subsubsection}{现代调试技术与性能优化}{374}{section*.309}%
+\contentsline {subsection}{\numberline {0.9.7}本节总结}{375}{subsection.0.9.7}%
+\contentsline {subsubsection}{重点内容回顾}{375}{section*.310}%
+\contentsline {subsubsection}{实践要点}{378}{section*.311}%
+\contentsline {subsubsection}{向下一节的过渡}{379}{section*.312}%
+\contentsline {subsubsection}{现代前端框架的优势}{387}{section*.320}%
+\contentsline {subsubsection}{主流前端框架对比分析}{388}{section*.321}%
+\contentsline {subsubsection}{Vue.js的选择优势}{388}{section*.322}%
+\contentsline {subsection}{\numberline {0.9.8}4.5.2 Vue.js核心概念与MVVM模式}{393}{subsection.0.9.8}%
+\contentsline {subsubsection}{Vue.js框架概述}{393}{section*.323}%
+\contentsline {subsubsection}{Vue.js的核心特性详解}{398}{section*.324}%
+\contentsline {subsubsection}{MVVM架构模式深入理解}{409}{section*.325}%
+\contentsline {subsubsection}{数据双向绑定原理}{429}{section*.326}%
+\contentsline {subsubsection}{虚拟DOM概念与性能优化}{440}{section*.327}%
+\contentsline {subsection}{\numberline {0.9.9}4.5.3 Vue基础语法与开发实践}{442}{subsection.0.9.9}%
+\contentsline {subsubsection}{Vue实例创建与基础配置}{442}{section*.328}%
+\contentsline {subsubsection}{响应式数据声明与管理}{455}{section*.329}%
+\contentsline {subsubsection}{模板语法与数据绑定}{471}{section*.330}%
+\contentsline {subsection}{\numberline {0.9.10}4.5.4 组件化开发与单页面应用}{511}{subsection.0.9.10}%
+\contentsline {subsubsection}{Vue组件系统概述}{511}{section*.331}%
+\contentsline {subsection}{\numberline {0.9.11}4.5.5 路由管理与状态管理}{511}{subsection.0.9.11}%
+\contentsline {subsubsection}{Vue Router路由系统}{511}{section*.332}%
+\contentsline {paragraph}{路由配置基础}{511}{section*.333}%
+\contentsline {paragraph}{路由守卫与权限控制}{513}{section*.334}%
+\contentsline {paragraph}{组件中使用路由}{513}{section*.335}%
+\contentsline {subsubsection}{Pinia状态管理}{514}{section*.336}%
+\contentsline {paragraph}{为什么需要状态管理？}{514}{section*.337}%
+\contentsline {paragraph}{创建Store}{515}{section*.338}%
+\contentsline {paragraph}{在组件中使用Store}{516}{section*.339}%
+\contentsline {paragraph}{监测站数据管理Store}{517}{section*.340}%
+\contentsline {subsubsection}{Vue.js开发最佳实践}{520}{section*.341}%
+\contentsline {paragraph}{组件设计原则}{520}{section*.342}%
+\contentsline {paragraph}{状态管理策略}{521}{section*.343}%
+\contentsline {paragraph}{性能优化策略}{521}{section*.344}%
+\contentsline {subsubsection}{章节总结}{522}{section*.345}%
+\contentsline {subsubsection}{前端工程化的价值}{529}{section*.346}%
+\contentsline {subsection}{\numberline {0.9.12}4.6.2 Vue CLI脚手架工具}{529}{subsection.0.9.12}%
+\contentsline {subsubsection}{Vue CLI简介与安装}{529}{section*.347}%
+\contentsline {subsubsection}{Vue CLI安装和基本使用}{530}{section*.348}%
+\contentsline {subsubsection}{项目结构解析}{533}{section*.349}%
+\contentsline {subsubsection}{Vue CLI命令详解}{535}{section*.350}%
+\contentsline {subsubsection}{Vue CLI插件系统}{537}{section*.351}%
+\contentsline {subsubsection}{环境配置与自定义}{538}{section*.352}%
+\contentsline {subsection}{\numberline {0.9.13}4.6.3 构建工具对比：Webpack与Vite}{541}{subsection.0.9.13}%
+\contentsline {subsubsection}{构建工具的作用与重要性}{541}{section*.353}%
+\contentsline {subsubsection}{Webpack：经典构建工具}{542}{section*.354}%
+\contentsline {subsubsection}{Vite：新一代构建工具}{546}{section*.355}%
+\contentsline {subsubsection}{Webpack vs Vite 详细对比}{548}{section*.356}%
+\contentsline {subsection}{\numberline {0.9.14}4.6.4 开发环境配置与热重载}{549}{subsection.0.9.14}%
+\contentsline {subsubsection}{开发环境的重要性}{549}{section*.357}%
+\contentsline {subsubsection}{开发服务器配置}{550}{section*.358}%
+\contentsline {subsubsection}{热重载技术详解}{553}{section*.359}%
+\contentsline {subsubsection}{环境变量管理}{555}{section*.360}%
+\contentsline {subsection}{\numberline {0.9.15}4.6.5 代码规范与质量控制}{562}{subsection.0.9.15}%
+\contentsline {subsubsection}{代码规范的重要性}{562}{section*.361}%
+\contentsline {subsubsection}{ESLint配置与使用}{566}{section*.362}%
+\contentsline {subsubsection}{Prettier代码格式化}{571}{section*.363}%
+\contentsline {subsubsection}{Git Hooks与自动化}{573}{section*.364}%
+\contentsline {subsubsection}{TypeScript集成}{577}{section*.365}%
+\contentsline {subsection}{\numberline {0.9.16}4.6.6 章节总结}{586}{subsection.0.9.16}%
+\contentsline {subsubsection}{技术要点回顾}{586}{section*.366}%
+\contentsline {subsubsection}{水利行业应用特点}{586}{section*.367}%
+\contentsline {subsubsection}{发展趋势与展望}{587}{section*.368}%
+\contentsline {subsubsection}{学习建议}{587}{section*.369}%
+\contentsline {section}{\numberline {0.10}4.7 前端部署与发布}{588}{section.0.10}%
+\contentsline {subsection}{\numberline {0.10.1}4.7 4.7.1 生产环境构建优化}{588}{subsection.0.10.1}%
+\contentsline {subsubsection}{构建优化的重要性}{588}{section*.370}%
+\contentsline {subsubsection}{构建优化核心策略}{588}{section*.371}%
+\contentsline {paragraph}{代码分割与模块优化}{589}{section*.372}%
+\contentsline {paragraph}{资源优化与压缩}{589}{section*.373}%
+\contentsline {paragraph}{构建配置示例}{589}{section*.374}%
+\contentsline {subsubsection}{高级构建优化策略}{590}{section*.375}%
+\contentsline {paragraph}{Tree Shaking优化原理}{590}{section*.376}%
+\contentsline {paragraph}{环境变量与多环境构建}{590}{section*.377}%
+\contentsline {paragraph}{构建性能监控}{591}{section*.378}%
+\contentsline {subsection}{\numberline {0.10.2}4.7.2 静态资源部署与CDN}{591}{subsection.0.10.2}%
+\contentsline {subsubsection}{CDN技术原理与优势}{591}{section*.379}%
+\contentsline {paragraph}{CDN的核心机制}{591}{section*.380}%
+\contentsline {paragraph}{对水利监测系统的价值}{591}{section*.381}%
+\contentsline {subsubsection}{静态资源分类与缓存策略}{591}{section*.382}%
+\contentsline {subsubsection}{Nginx服务器配置要点}{592}{section*.383}%
+\contentsline {subsubsection}{CDN集成与管理}{593}{section*.384}%
+\contentsline {paragraph}{阿里云CDN配置要点}{593}{section*.385}%
+\contentsline {paragraph}{多CDN容灾策略}{593}{section*.386}%
+\contentsline {subsection}{\numberline {0.10.3}4.7.3 性能监控与用户体验}{594}{subsection.0.10.3}%
+\contentsline {subsubsection}{前端性能监控理论基础}{594}{section*.387}%
+\contentsline {paragraph}{性能指标体系}{594}{section*.388}%
+\contentsline {paragraph}{Core Web Vitals核心指标}{594}{section*.389}%
+\contentsline {subsubsection}{水利系统特色监控需求}{594}{section*.390}%
+\contentsline {paragraph}{实时数据更新性能}{594}{section*.391}%
+\contentsline {paragraph}{业务流程完成率监控}{594}{section*.392}%
+\contentsline {paragraph}{移动端性能监控}{595}{section*.393}%
+\contentsline {subsubsection}{监控数据可视化与决策支持}{595}{section*.394}%
+\contentsline {paragraph}{监控面板设计理论}{595}{section*.395}%
+\contentsline {paragraph}{智能监控告警机制}{595}{section*.396}%
+\contentsline {subsection}{\numberline {0.10.4}4.7.4 版本控制与发布策略}{596}{subsection.0.10.4}%
+\contentsline {subsubsection}{版本控制理论基础}{596}{section*.397}%
+\contentsline {paragraph}{版本控制的核心价值}{596}{section*.398}%
+\contentsline {paragraph}{现代版本控制发展趋势}{596}{section*.399}%
+\contentsline {subsubsection}{语义化版本控制实践}{597}{section*.400}%
+\contentsline {paragraph}{语义化版本号设计原理}{597}{section*.401}%
+\contentsline {paragraph}{版本发布频率策略}{597}{section*.402}%
+\contentsline {subsubsection}{Git工作流程与团队协作}{597}{section*.403}%
+\contentsline {paragraph}{分支管理策略理论}{597}{section*.404}%
+\contentsline {paragraph}{代码合并与冲突解决}{598}{section*.405}%
+\contentsline {subsubsection}{持续集成与自动化发布}{598}{section*.406}%
+\contentsline {paragraph}{CI/CD理论基础}{598}{section*.407}%
+\contentsline {paragraph}{水利系统的特殊考虑}{598}{section*.408}%
+\contentsline {subsubsection}{发布策略与风险控制}{599}{section*.409}%
+\contentsline {paragraph}{渐进式发布理论}{599}{section*.410}%
+\contentsline {paragraph}{风险评估与应急预案}{599}{section*.411}%
+\contentsline {subsection}{\numberline {0.10.5}4.7.5 章节总结与最佳实践}{599}{subsection.0.10.5}%
+\contentsline {subsubsection}{核心技术要点回顾}{599}{section*.412}%
+\contentsline {subsubsection}{水利行业特色实践}{600}{section*.413}%
+\contentsline {subsubsection}{技术发展趋势}{601}{section*.414}%
+\contentsline {subsubsection}{实施建议}{601}{section*.415}%
+\contentsline {subsubsection}{结语}{601}{section*.416}%
+\contentsline {subsection}{\numberline {0.10.6}4.7.5 章节总结与最佳实践}{602}{subsection.0.10.6}%
+\contentsline {subsubsection}{核心技术理念回顾}{602}{section*.417}%
+\contentsline {subsubsection}{智慧水利平台特色实践}{603}{section*.418}%
+\contentsline {subsubsection}{技术发展趋势与展望}{603}{section*.419}%
+\contentsline {subsubsection}{实施建议与最佳实践}{604}{section*.420}%
+\contentsline {subsubsection}{结语}{605}{section*.421}%
+\contentsline {section}{\numberline {0.11}第五章 后端开发框架}{606}{section.0.11}%
+\contentsline {subsection}{\numberline {0.11.1}学习目标}{606}{subsection.0.11.1}%
+\contentsline {subsection}{\numberline {0.11.2}引言}{606}{subsection.0.11.2}%
+\contentsline {subsection}{\numberline {0.11.3}重要提示}{606}{subsection.0.11.3}%
+\contentsline {subsection}{\numberline {0.11.4}本章小节}{607}{subsection.0.11.4}%
+\contentsline {subsubsection}{\href {section05-01.md}{第一节 后端服务概述}}{607}{section*.422}%
+\contentsline {subsubsection}{\href {section05-02.md}{第二节 Spring Boot入门与实践}}{607}{section*.423}%
+\contentsline {subsubsection}{\href {section05-03.md}{第三节 依赖注入和控制反转}}{607}{section*.424}%
+\contentsline {subsubsection}{\href {section05-04.md}{第四节 数据库持久化技术}}{607}{section*.425}%
+\contentsline {subsubsection}{\href {section05-05.md}{第五节 后台服务设计}}{607}{section*.426}%
+\contentsline {subsubsection}{\href {section05-06.md}{第六节 Django/Flask框架（Python选修内容）}}{608}{section*.427}%
+\contentsline {subsection}{\numberline {0.11.5}关键概念}{608}{subsection.0.11.5}%
+\contentsline {subsection}{\numberline {0.11.6}技术栈概览}{613}{subsection.0.11.6}%
+\contentsline {subsection}{\numberline {0.11.7}智慧水利后端特色架构}{613}{subsection.0.11.7}%
+\contentsline {subsection}{\numberline {0.11.8}学习路径建议}{614}{subsection.0.11.8}%
+\contentsline {subsection}{\numberline {0.11.9}实践项目驱动}{614}{subsection.0.11.9}%
+\contentsline {subsection}{\numberline {0.11.10}技术架构图}{614}{subsection.0.11.10}%
+\contentsline {subsection}{\numberline {0.11.11}开发规范与最佳实践}{615}{subsection.0.11.11}%
+\contentsline {subsubsection}{代码规范}{615}{section*.428}%
+\contentsline {subsubsection}{安全最佳实践}{616}{section*.429}%
+\contentsline {subsection}{\numberline {0.11.12}思考题}{616}{subsection.0.11.12}%
+\contentsline {section}{\numberline {0.12}5.1 后端服务概述}{617}{section.0.12}%
+\contentsline {subsection}{\numberline {0.12.1}5.1 学习目标}{617}{subsection.0.12.1}%
+\contentsline {subsection}{\numberline {0.12.2}引言}{617}{subsection.0.12.2}%
+\contentsline {subsubsection}{水利系统中后端服务的特殊价值}{617}{section*.430}%
+\contentsline {subsection}{\numberline {0.12.3}5.1.1 后端服务体系结构}{617}{subsection.0.12.3}%
+\contentsline {subsubsection}{后端服务的本质理解}{617}{section*.431}%
+\contentsline {subsubsection}{分层架构的设计哲学}{620}{section*.432}%
+\contentsline {subsubsection}{架构演进的历史脉络}{627}{section*.433}%
+\contentsline {paragraph}{高级层次：企业级架构}{628}{section*.434}%
+\contentsline {subsubsection}{分层架构设计原理}{629}{section*.435}%
+\contentsline {subsubsection}{软件架构的演进历程}{629}{section*.436}%
+\contentsline {paragraph}{单体架构时代的兴起与局限}{630}{section*.437}%
+\contentsline {paragraph}{微服务架构的兴起与价值}{630}{section*.438}%
+\contentsline {subsection}{\numberline {0.12.4}5.1.3 Web框架选择与技术对比}{635}{subsection.0.12.4}%
+\contentsline {subsubsection}{Web框架在现代应用开发中的作用}{635}{section*.439}%
+\contentsline {subsubsection}{主流技术栈的特点与适用场景}{635}{section*.440}%
+\contentsline {paragraph}{Java技术生态的企业级优势}{635}{section*.441}%
+\contentsline {paragraph}{Python技术栈的敏捷优势}{636}{section*.442}%
+\contentsline {subsubsection}{技术选型的决策考量}{638}{section*.443}%
+\contentsline {subsubsection}{混合技术架构的实践价值}{639}{section*.444}%
+\contentsline {subsection}{\numberline {0.12.5}5.1.4 HTTP协议在Web开发中的应用}{640}{subsection.0.12.5}%
+\contentsline {subsubsection}{HTTP协议的基础概念与重要性}{640}{section*.445}%
+\contentsline {subsubsection}{HTTP方法在水利系统中的实际应用}{641}{section*.446}%
+\contentsline {subsubsection}{循序渐进的HTTP实践}{641}{section*.447}%
+\contentsline {paragraph}{基础层次：简单的数据获取}{641}{section*.448}%
+\contentsline {paragraph}{进阶层次：数据提交和验证}{643}{section*.449}%
+\contentsline {paragraph}{高级层次：复杂业务处理}{644}{section*.450}%
+\contentsline {subsubsection}{HTTP协议的基本原理}{645}{section*.451}%
+\contentsline {subsubsection}{HTTP消息格式规范}{646}{section*.452}%
+\contentsline {subsubsection}{HTTP方法语义与应用}{648}{section*.453}%
+\contentsline {subsection}{\numberline {0.12.6}5.1.3 静态网站与动态网站架构}{653}{subsection.0.12.6}%
+\contentsline {subsubsection}{静态网站的技术特点与应用场景}{653}{section*.454}%
+\contentsline {subsubsection}{动态网站的实现机制与技术架构}{656}{section*.455}%
+\contentsline {subsubsection}{混合架构的现代实践}{663}{section*.456}%
+\contentsline {subsection}{\numberline {0.12.7}5.1.4 Web应用框架选择}{663}{subsection.0.12.7}%
+\contentsline {subsubsection}{框架的价值与作用机制}{663}{section*.457}%
+\contentsline {subsubsection}{Spring Boot框架深度解析}{664}{section*.458}%
+\contentsline {subsubsection}{Servlet技术基础与现代演进}{672}{section*.459}%
+\contentsline {subsection}{\numberline {0.12.8}本节总结}{684}{subsection.0.12.8}%
+\contentsline {subsubsection}{核心知识点回顾}{684}{section*.460}%
+\contentsline {subsubsection}{学习路径建议}{684}{section*.461}%
+\contentsline {subsubsection}{实践练习建议}{684}{section*.462}%
+\contentsline {subsubsection}{常见问题与解决方案}{685}{section*.463}%
+\contentsline {subsubsection}{下节预告}{685}{section*.464}%
+\contentsline {section}{\numberline {0.13}5.2 Spring Boot企业级开发框架}{686}{section.0.13}%
+\contentsline {section}{\numberline {0.14}5.2 Spring Boot企业级开发框架}{686}{section.0.14}%
+\contentsline {subsection}{\numberline {0.14.1}5.2 学习目标}{686}{subsection.0.14.1}%
+\contentsline {subsection}{\numberline {0.14.2}引言}{686}{subsection.0.14.2}%
+\contentsline {subsubsection}{Spring Boot在水利系统中的价值}{686}{section*.465}%
+\contentsline {subsection}{\numberline {0.14.3}5.2.1 Spring Boot核心特性}{686}{subsection.0.14.3}%
+\contentsline {subsubsection}{``约定优于配置''设计理念}{686}{section*.466}%
+\contentsline {subsubsection}{循序渐进的学习路径}{687}{section*.467}%
+\contentsline {paragraph}{基础层次：最简单的Spring Boot应用}{687}{section*.468}%
+\contentsline {paragraph}{进阶层次：配置和数据处理}{689}{section*.469}%
+\contentsline {paragraph}{高级层次：企业级特性}{691}{section*.470}%
+\contentsline {subsection}{\numberline {0.14.4}5.2.2 自动配置机制深度解析}{694}{subsection.0.14.4}%
+\contentsline {subsubsection}{自动配置的工作原理}{694}{section*.471}%
+\contentsline {subsubsection}{条件化配置示例}{694}{section*.472}%
+\contentsline {subsubsection}{自定义自动配置}{697}{section*.473}%
+\contentsline {subsection}{\numberline {0.14.5}5.2.3 项目创建与环境搭建}{699}{subsection.0.14.5}%
+\contentsline {subsubsection}{使用Spring Initializr创建项目}{699}{section*.474}%
+\contentsline {subsubsection}{项目结构详解}{699}{section*.475}%
+\contentsline {subsubsection}{开发环境配置}{700}{section*.476}%
+\contentsline {subsubsection}{环境配置文件}{702}{section*.477}%
+\contentsline {subsubsection}{生产就绪特性}{705}{section*.478}%
+\contentsline {subsection}{\numberline {0.14.6}5.2.2 项目创建与结构组织}{705}{subsection.0.14.6}%
+\contentsline {subsubsection}{Spring Initializr项目生成工具}{705}{section*.479}%
+\contentsline {subsubsection}{标准项目结构与包组织}{707}{section*.480}%
+\contentsline {subsubsection}{配置文件管理策略}{709}{section*.481}%
+\contentsline {subsection}{\numberline {0.14.7}5.2.3 自动配置机制深度解析}{711}{subsection.0.14.7}%
+\contentsline {subsubsection}{条件化配置的实现原理}{711}{section*.482}%
+\contentsline {subsubsection}{自动配置类的加载机制}{714}{section*.483}%
+\contentsline {subsubsection}{配置属性绑定机制}{717}{section*.484}%
+\contentsline {subsection}{\numberline {0.14.8}5.2.4 起步依赖管理体系}{722}{subsection.0.14.8}%
+\contentsline {subsubsection}{起步依赖的设计理念}{722}{section*.485}%
+\contentsline {subsubsection}{核心起步依赖详解}{723}{section*.486}%
+\contentsline {subsubsection}{自定义起步依赖开发}{724}{section*.487}%
+\contentsline {subsection}{\numberline {0.14.9}5.2.5 企业级配置管理实践}{730}{subsection.0.14.9}%
+\contentsline {subsubsection}{外部化配置的最佳实践}{730}{section*.488}%
+\contentsline {subsubsection}{配置加密与安全管理}{732}{section*.489}%
+\contentsline {subsubsection}{配置热更新与动态调整}{734}{section*.490}%
+\contentsline {subsection}{\numberline {0.14.10}5.2.6 Spring Boot企业级应用开发总结与最佳实践}{742}{subsection.0.14.10}%
+\contentsline {subsubsection}{开发效率提升的关键要素}{742}{section*.491}%
+\contentsline {subsubsection}{企业级特性的实践价值}{742}{section*.492}%
+\contentsline {subsubsection}{技术选型与架构设计指导}{742}{section*.493}%
+\contentsline {subsubsection}{性能优化与运维监控策略}{743}{section*.494}%
+\contentsline {subsubsection}{安全性与合规性考虑}{743}{section*.495}%
+\contentsline {subsubsection}{未来发展趋势与技术展望}{743}{section*.496}%
+\contentsline {subsubsection}{实践建议与注意事项}{743}{section*.497}%
+\contentsline {subsection}{\numberline {0.14.11}本节总结}{744}{subsection.0.14.11}%
+\contentsline {subsubsection}{核心知识点回顾}{744}{section*.498}%
+\contentsline {subsubsection}{学习路径总结}{744}{section*.499}%
+\contentsline {subsubsection}{学习路径与时间安排}{744}{section*.500}%
+\contentsline {subsubsection}{实践练习建议}{745}{section*.501}%
+\contentsline {subsubsection}{技术选型建议}{746}{section*.502}%
+\contentsline {subsubsection}{常见问题解答}{746}{section*.503}%
+\contentsline {subsubsection}{下节预告}{746}{section*.504}%
+\contentsline {section}{\numberline {0.15}5.3 依赖注入与控制反转}{748}{section.0.15}%
+\contentsline {section}{\numberline {0.16}5.3 依赖注入与控制反转}{748}{section.0.16}%
+\contentsline {subsection}{\numberline {0.16.1}5.3 学习目标}{748}{subsection.0.16.1}%
+\contentsline {subsection}{\numberline {0.16.2}引言}{748}{subsection.0.16.2}%
+\contentsline {subsubsection}{IoC在水利系统中的应用价值}{748}{section*.505}%
+\contentsline {subsection}{\numberline {0.16.3}5.3.1 控制反转核心概念}{748}{subsection.0.16.3}%
+\contentsline {subsubsection}{传统依赖管理的问题}{748}{section*.506}%
+\contentsline {subsubsection}{IoC的解决方案}{749}{section*.507}%
+\contentsline {subsection}{\numberline {0.16.4}5.3.2 循序渐进的依赖注入实践}{751}{subsection.0.16.4}%
+\contentsline {subsubsection}{基础层次：理解依赖注入概念}{751}{section*.508}%
+\contentsline {subsubsection}{进阶层次：构造器注入最佳实践}{751}{section*.509}%
+\contentsline {subsubsection}{高级层次：复杂依赖关系管理}{753}{section*.510}%
+\contentsline {subsection}{\numberline {0.16.5}5.3.3 Bean管理和生命周期}{755}{subsection.0.16.5}%
+\contentsline {subsubsection}{Bean的作用域}{755}{section*.511}%
+\contentsline {subsubsection}{Bean生命周期回调}{757}{section*.512}%
+\contentsline {subsubsection}{控制反转的设计思想与理论内涵}{759}{section*.513}%
+\contentsline {subsubsection}{IoC容器的架构设计与实现机制}{760}{section*.514}%
+\contentsline {subsection}{\numberline {0.16.6}5.3.2 Spring IoC容器深度解析}{761}{subsection.0.16.6}%
+\contentsline {subsubsection}{容器初始化的完整生命周期}{761}{section*.515}%
+\contentsline {subsubsection}{Bean定义的元数据管理机制}{762}{section*.516}%
+\contentsline {subsubsection}{Bean作用域的深层机制与应用策略}{763}{section*.517}%
+\contentsline {subsection}{\numberline {0.16.7}5.3.3 依赖注入的实现方式与最佳实践}{765}{subsection.0.16.7}%
+\contentsline {subsubsection}{构造器注入的设计优势与应用模式}{765}{section*.518}%
+\contentsline {subsubsection}{Setter注入的灵活性与适用场景}{768}{section*.519}%
+\contentsline {subsubsection}{字段注入的便利性与潜在问题}{773}{section*.520}%
+\contentsline {subsection}{\numberline {0.16.8}5.3.4 注解驱动开发的实现机制}{777}{subsection.0.16.8}%
+\contentsline {subsubsection}{Spring注解体系的设计架构}{777}{section*.521}%
+\contentsline {subsubsection}{自动装配的工作机制与高级特性}{777}{section*.522}%
+\contentsline {subsubsection}{组件扫描与过滤机制}{779}{section*.523}%
+\contentsline {subsection}{\numberline {0.16.9}5.3.5 Bean生命周期管理与资源控制}{780}{subsection.0.16.9}%
+\contentsline {subsubsection}{Bean生命周期的完整阶段分析}{780}{section*.524}%
+\contentsline {subsubsection}{作用域代理与线程安全管理}{782}{section*.525}%
+\contentsline {subsubsection}{资源管理与性能优化策略}{784}{section*.526}%
+\contentsline {subsection}{\numberline {0.16.10}5.3.4 实际应用场景}{785}{subsection.0.16.10}%
+\contentsline {subsubsection}{水利监测系统的依赖注入实践}{785}{section*.527}%
+\contentsline {subsubsection}{测试中的依赖注入}{787}{section*.528}%
+\contentsline {subsection}{\numberline {0.16.11}本节总结}{789}{subsection.0.16.11}%
+\contentsline {subsubsection}{核心知识点回顾}{789}{section*.529}%
+\contentsline {subsubsection}{技术选型的综合考量}{789}{section*.530}%
+\contentsline {subsubsection}{实践指导与经验总结}{790}{section*.531}%
+\contentsline {subsubsection}{实践练习建议}{791}{section*.532}%
+\contentsline {subsubsection}{常见问题解答}{791}{section*.533}%
+\contentsline {subsubsection}{下节预告}{792}{section*.534}%
+\contentsline {section}{\numberline {0.17}5.4 数据库持久化技术}{793}{section.0.17}%
+\contentsline {subsection}{\numberline {0.17.1}5.4 5.4.1 数据访问层架构设计与技术演进}{793}{subsection.0.17.1}%
+\contentsline {subsubsection}{传统JDBC编程模式的局限性分析}{793}{section*.535}%
+\contentsline {subsubsection}{ORM技术的设计理念与核心价值}{798}{section*.536}%
+\contentsline {subsubsection}{Repository模式的架构意义与实现策略}{798}{section*.537}%
+\contentsline {subsection}{\numberline {0.17.2}5.4.2 Spring Data JPA核心机制深度解析}{806}{subsection.0.17.2}%
+\contentsline {subsubsection}{实体映射机制的设计原理与高级特性}{806}{section*.538}%
+\contentsline {subsubsection}{查询构建机制与性能优化策略}{816}{section*.539}%
+\contentsline {subsubsection}{实体生命周期管理与回调机制}{817}{section*.540}%
+\contentsline {subsection}{\numberline {0.17.3}5.4.3 事务管理机制与数据一致性保障}{820}{subsection.0.17.3}%
+\contentsline {subsubsection}{声明式事务管理的实现原理与配置策略}{820}{section*.541}%
+\contentsline {subsubsection}{事务传播行为的深度理解与应用场景}{823}{section*.542}%
+\contentsline {subsubsection}{分布式事务处理与数据一致性策略}{825}{section*.543}%
+\contentsline {subsection}{\numberline {0.17.4}5.4.4 企业级数据建模实践与优化策略}{828}{subsection.0.17.4}%
+\contentsline {subsubsection}{领域驱动的实体设计原则}{828}{section*.544}%
+\contentsline {subsubsection}{复杂关联关系的设计与优化}{831}{section*.545}%
+\contentsline {subsubsection}{数据一致性与性能优化的平衡策略}{835}{section*.546}%
+\contentsline {section}{\numberline {0.18}5.5 后台服务设计}{841}{section.0.18}%
+\contentsline {subsection}{\numberline {0.18.1}5.5 RESTful API设计原则与实践}{841}{subsection.0.18.1}%
+\contentsline {subsubsection}{REST架构风格的核心理念}{841}{section*.547}%
+\contentsline {subsubsection}{版本管理和向后兼容}{851}{section*.548}%
+\contentsline {subsection}{\numberline {0.18.2}服务层架构设计最佳实践}{852}{subsection.0.18.2}%
+\contentsline {subsubsection}{分层架构模式}{852}{section*.549}%
+\contentsline {subsubsection}{领域驱动设计的应用}{856}{section*.550}%
+\contentsline {subsubsection}{微服务架构考虑}{859}{section*.551}%
+\contentsline {subsection}{\numberline {0.18.3}Spring Security安全认证与授权}{862}{subsection.0.18.3}%
+\contentsline {subsubsection}{身份认证机制}{862}{section*.552}%
+\contentsline {subsubsection}{细粒度权限控制}{867}{section*.553}%
+\contentsline {subsection}{\numberline {0.18.4}异常处理与日志记录策略}{871}{subsection.0.18.4}%
+\contentsline {subsubsection}{统一异常处理机制}{871}{section*.554}%
+\contentsline {subsubsection}{结构化日志记录}{875}{section*.555}%
+\contentsline {section}{\numberline {0.19}5.6 Python企业级Web开发框架}{880}{section.0.19}%
+\contentsline {subsection}{\numberline {0.19.1}5.6 5.6.1 Python Web框架技术特色与企业应用价值}{880}{subsection.0.19.1}%
+\contentsline {subsubsection}{Python语言在企业级开发中的独特优势}{880}{section*.556}%
+\contentsline {subsubsection}{科学计算生态系统的企业应用价值}{882}{section*.557}%
+\contentsline {subsubsection}{Python Web框架的技术生态优势}{886}{section*.558}%
+\contentsline {subsection}{\numberline {0.19.2}5.6.2 Flask微框架设计理念与架构实现}{886}{subsection.0.19.2}%
+\contentsline {subsubsection}{微框架设计哲学的深度解析}{886}{section*.559}%
+\contentsline {subsubsection}{Flask核心组件的技术架构}{891}{section*.560}%
+\contentsline {subsubsection}{Flask扩展生态系统与企业级功能实现}{899}{section*.561}%
+\contentsline {subsection}{\numberline {0.19.3}5.6.3 Django企业级全栈框架架构与实现机制}{911}{subsection.0.19.3}%
+\contentsline {subsubsection}{Django设计哲学与MTV架构模式}{911}{section*.562}%
+\contentsline {subsubsection}{Django ORM系统的企业级数据建模能力}{912}{section*.563}%
+\contentsline {subsubsection}{Django认证授权系统的企业级安全机制}{913}{section*.564}%
+\contentsline {subsubsection}{Django管理后台的企业级内容管理能力}{914}{section*.565}%
+\contentsline {subsection}{\numberline {0.19.4}5.6.4 Flask与Django企业级应用对比分析}{916}{subsection.0.19.4}%
+\contentsline {subsubsection}{技术架构对比与适用场景分析}{916}{section*.566}%
+\contentsline {subsubsection}{性能特性深度对比}{917}{section*.567}%
+\contentsline {subsubsection}{企业级特性对比分析}{917}{section*.568}%
+\contentsline {subsection}{\numberline {0.19.5}5.6.5 Python Web框架企业级应用最佳实践}{918}{subsection.0.19.5}%
+\contentsline {subsubsection}{Flask企业级应用开发模式}{918}{section*.569}%
+\contentsline {subsubsection}{Django企业级应用开发模式}{920}{section*.570}%
+\contentsline {subsubsection}{Python Web框架的DevOps最佳实践}{922}{section*.571}%
+\contentsline {subsection}{\numberline {0.19.6}5.6.6 Python Web框架技术选型指导与发展趋势}{924}{subsection.0.19.6}%
+\contentsline {subsubsection}{技术选型决策框架}{924}{section*.572}%
+\contentsline {subsubsection}{混合架构策略}{924}{section*.573}%
+\contentsline {subsubsection}{Python Web框架发展趋势}{927}{section*.574}%
+\contentsline {subsection}{\numberline {0.19.7}总结与实践指导}{927}{subsection.0.19.7}%
+\contentsline {section}{\numberline {0.20}第六章 数据处理与算法实现}{929}{section.0.20}%
+\contentsline {subsection}{\numberline {0.20.1}学习目标}{929}{subsection.0.20.1}%
+\contentsline {subsection}{\numberline {0.20.2}引言}{929}{subsection.0.20.2}%
+\contentsline {subsection}{\numberline {0.20.3}本章小节}{929}{subsection.0.20.3}%
+\contentsline {subsubsection}{\href {section06-01.md}{第一节 三维场景技术概述}}{929}{section*.575}%
+\contentsline {subsubsection}{\href {section06-02.md}{第二节 WebGL技术基础}}{929}{section*.576}%
+\contentsline {subsubsection}{\href {section06-03.md}{第三节 Three.js开发框架}}{930}{section*.577}%
+\contentsline {subsubsection}{\href {section06-04.md}{第四节 三维建模技术}}{930}{section*.578}%
+\contentsline {subsubsection}{\href {section06-05.md}{第五节 基础渲染技术}}{930}{section*.579}%
+\contentsline {subsubsection}{\href {section06-06.md}{第六节 开发实践与案例}}{930}{section*.580}%
+\contentsline {subsection}{\numberline {0.20.4}核心技术}{930}{subsection.0.20.4}%
+\contentsline {subsection}{\numberline {0.20.5}技术工具}{931}{subsection.0.20.5}%
+\contentsline {subsection}{\numberline {0.20.6}基础概念}{931}{subsection.0.20.6}%
+\contentsline {subsection}{\numberline {0.20.7}实践案例}{931}{subsection.0.20.7}%
+\contentsline {subsection}{\numberline {0.20.8}发展趋势}{931}{subsection.0.20.8}%
+\contentsline {subsubsection}{基础题}{932}{section*.581}%
+\contentsline {subsubsection}{提高题}{932}{section*.582}%
+\contentsline {subsubsection}{讨论题}{932}{section*.583}%
+\contentsline {subsection}{\numberline {0.20.9}6.1 章节概述}{933}{subsection.0.20.9}%
+\contentsline {subsubsection}{基础题}{934}{section*.584}%
+\contentsline {subsubsection}{提高题}{934}{section*.585}%
+\contentsline {subsubsection}{讨论题}{934}{section*.586}%
+\contentsline {subsection}{\numberline {0.20.10}6.2 6.1 三维场景技术概述}{935}{subsection.0.20.10}%
+\contentsline {subsubsection}{6.1.1 三维场景的组成要素}{935}{section*.587}%
+\contentsline {paragraph}{6.1.1.1 三维模型}{936}{section*.588}%
+\contentsline {paragraph}{6.1.1.2 模型纹理与材质}{941}{section*.589}%
+\contentsline {paragraph}{6.1.1.3 模型光照与阴影}{942}{section*.590}%
+\contentsline {paragraph}{6.1.1.4 特效模拟}{943}{section*.591}%
+\contentsline {paragraph}{6.1.1.5 交互系统}{944}{section*.592}%
+\contentsline {subsubsection}{6.1.2 三维数据来源}{946}{section*.593}%
+\contentsline {paragraph}{6.1.2.1 激光雷达(LiDAR)扫描}{946}{section*.594}%
+\contentsline {paragraph}{6.1.2.2 无人机航拍测量技术}{948}{section*.595}%
+\contentsline {paragraph}{6.1.2.3 实地测量数据}{954}{section*.596}%
+\contentsline {paragraph}{6.1.2.4 卫星遥感数据}{955}{section*.597}%
+\contentsline {paragraph}{6.1.2.5 CAD/BIM数据转换}{956}{section*.598}%
+\contentsline {subsubsection}{6.1.3 关键技术}{960}{section*.599}%
+\contentsline {paragraph}{6.1.3.1 三维建模技术}{960}{section*.600}%
+\contentsline {paragraph}{6.1.3.2 三维渲染技术}{965}{section*.601}%
+\contentsline {paragraph}{6.1.3.3 实时交互技术}{974}{section*.602}%
+\contentsline {paragraph}{6.1.3.4 水文模拟技术}{977}{section*.603}%
+\contentsline {subsubsection}{6.1.4 应用场景}{980}{section*.604}%
+\contentsline {paragraph}{6.1.4.1 水利工程规划与设计}{980}{section*.605}%
+\contentsline {paragraph}{6.1.4.2 工程建设与运行管理}{981}{section*.606}%
+\contentsline {paragraph}{6.1.4.3 防洪抗旱决策支持}{984}{section*.607}%
+\contentsline {paragraph}{6.1.4.4 水资源管理与生态保护}{985}{section*.608}%
+\contentsline {subsubsection}{6.1.5 智慧水利平台三维场景框架}{986}{section*.609}%
+\contentsline {paragraph}{6.1.5.1 基础支撑层}{987}{section*.610}%
+\contentsline {paragraph}{6.1.5.2 数据整合层}{987}{section*.611}%
+\contentsline {paragraph}{6.1.5.3 功能层}{987}{section*.612}%
+\contentsline {paragraph}{6.1.5.4 应用层}{988}{section*.613}%
+\contentsline {subsubsection}{6.1.6 挑战与发展趋势}{989}{section*.614}%
+\contentsline {paragraph}{6.1.6.1 当前挑战}{989}{section*.615}%
+\contentsline {paragraph}{6.1.6.2 发展趋势}{989}{section*.616}%
+\contentsline {subsubsection}{6.1.7 小结}{990}{section*.617}%
+\contentsline {subsubsection}{基础题}{991}{section*.618}%
+\contentsline {subsubsection}{提高题}{991}{section*.619}%
+\contentsline {subsubsection}{讨论题}{991}{section*.620}%
+\contentsline {subsection}{\numberline {0.20.11}6.3 6.2 GIS地图服务应用}{992}{subsection.0.20.11}%
+\contentsline {subsubsection}{6.2.1 WebGL及基于WebGL的轻量级框架}{992}{section*.621}%
+\contentsline {paragraph}{6.2.1.1 WeGL技术基础}{992}{section*.622}%
+\contentsline {paragraph}{6.2.1.2 Three.js介绍}{993}{section*.623}%
+\contentsline {paragraph}{6.2.1.3 Babylon.js介绍}{995}{section*.624}%
+\contentsline {subsubsection}{6.2.2 地理信息系统（GIS）框架}{997}{section*.625}%
+\contentsline {paragraph}{6.2.2.1 Cesium介绍}{997}{section*.626}%
+\contentsline {paragraph}{6.2.2.2 SuperMap iClient3D介绍}{999}{section*.627}%
+\contentsline {subsubsection}{6.2.3 游戏引擎}{1000}{section*.628}%
+\contentsline {paragraph}{6.2.3.1 Unity介绍}{1000}{section*.629}%
+\contentsline {paragraph}{6.2.3.2 Unreal Engine介绍}{1002}{section*.630}%
+\contentsline {subsubsection}{6.2.4 框架选择建议}{1004}{section*.631}%
+\contentsline {paragraph}{6.2.4.1 框架特性对比}{1004}{section*.632}%
+\contentsline {paragraph}{6.2.4.2 智慧水利平台框架选择策略}{1007}{section*.633}%
+\contentsline {subsubsection}{6.2.5 框架混合开发策略}{1014}{section*.634}%
+\contentsline {paragraph}{6.2.5.1 Web前端+GIS框架}{1014}{section*.635}%
+\contentsline {paragraph}{6.2.5.2 GIS框架+游戏引擎}{1017}{section*.636}%
+\contentsline {paragraph}{6.2.5.3 微服务架构}{1019}{section*.637}%
+\contentsline {subsubsection}{6.2.6 小结}{1021}{section*.638}%
+\contentsline {subsubsection}{基础题}{1022}{section*.639}%
+\contentsline {subsubsection}{提高题}{1022}{section*.640}%
+\contentsline {subsubsection}{讨论题}{1022}{section*.641}%
+\contentsline {subsection}{\numberline {0.20.12}6.4 6.3 水利工程三维模型制作}{1023}{subsection.0.20.12}%
+\contentsline {subsubsection}{6.3.1 水利工程三维模型组成}{1023}{section*.642}%
+\contentsline {paragraph}{6.3.1.1 地形模型}{1023}{section*.643}%
+\contentsline {paragraph}{6.3.1.2 水利设施模型}{1024}{section*.644}%
+\contentsline {paragraph}{6.3.1.3 水流模拟模型}{1025}{section*.645}%
+\contentsline {paragraph}{6.3.1.4 数据集成与可视化模型}{1025}{section*.646}%
+\contentsline {paragraph}{6.3.1.5 实时监测与动态模型}{1026}{section*.647}%
+\contentsline {subsubsection}{6.3.2 地形三维模型制作方法}{1026}{section*.648}%
+\contentsline {paragraph}{6.3.2.1 地形模型格式及精度评价指标}{1026}{section*.649}%
+\contentsline {paragraph}{6.3.2.2 常用的地形建模方法简介}{1027}{section*.650}%
+\contentsline {subsubsection}{6.3.3 水利设施三维模型构建方法}{1029}{section*.651}%
+\contentsline {paragraph}{6.3.3.1 基于ZBrush的次世代建模技术}{1029}{section*.652}%
+\contentsline {paragraph}{6.3.3.2 基于MAYA及3DS Max的建模技术}{1031}{section*.653}%
+\contentsline {paragraph}{6.3.3.3 基于BIM的建模技术}{1031}{section*.654}%
+\contentsline {paragraph}{6.3.3.4 基于无人机倾斜摄影测量的建模技术}{1032}{section*.655}%
+\contentsline {subsubsection}{6.3.4 水流模拟三维模型构建方法}{1033}{section*.656}%
+\contentsline {paragraph}{6.3.4.1 水动力学模拟模型构建方法}{1033}{section*.657}%
+\contentsline {paragraph}{6.3.4.2 水流与地形相互作用模型构建方法}{1033}{section*.658}%
+\contentsline {paragraph}{6.3.4.3 实时水流监测模型构建方法}{1034}{section*.659}%
+\contentsline {subsubsection}{6.3.5 数据集成与可视化模型构建方法}{1035}{section*.660}%
+\contentsline {paragraph}{6.3.5.1 GIS数据集成方法}{1035}{section*.661}%
+\contentsline {paragraph}{6.3.5.2 实时监测方法}{1035}{section*.662}%
+\contentsline {paragraph}{6.3.5.3 历史数据显示方法}{1036}{section*.663}%
+\contentsline {paragraph}{6.3.5.4 大数据分析与可视化方法}{1036}{section*.664}%
+\contentsline {paragraph}{6.3.5.5 数据集成与可视化模型构建方法}{1037}{section*.665}%
+\contentsline {subsubsection}{6.3.6 实时监测与动态模型构建方法}{1038}{section*.666}%
+\contentsline {paragraph}{6.3.6.1 洪水预警模型构建方法}{1038}{section*.667}%
+\contentsline {paragraph}{6.3.6.2 水利设施安全监控模型构建方法}{1038}{section*.668}%
+\contentsline {paragraph}{6.3.6.3 动态调整与水资源优化模型构建方法}{1038}{section*.669}%
+\contentsline {subsubsection}{6.3.7 小结}{1039}{section*.670}%
+\contentsline {subsubsection}{基础题}{1040}{section*.671}%
+\contentsline {subsubsection}{提高题}{1040}{section*.672}%
+\contentsline {subsubsection}{讨论题}{1040}{section*.673}%
+\contentsline {subsection}{\numberline {0.20.13}6.5 6.4 倾斜摄影技术应用}{1042}{subsection.0.20.13}%
+\contentsline {subsubsection}{6.4.1 无人机倾斜摄影测量系统构成}{1042}{section*.674}%
+\contentsline {subsubsection}{6.4.2 无人机倾斜摄影测量特点与应用}{1043}{section*.675}%
+\contentsline {subsubsection}{6.4.3三维模型具体构建流程}{1044}{section*.676}%
+\contentsline {paragraph}{6.4.3.1 无人机倾斜摄影测量模型数据预处理}{1044}{section*.677}%
+\contentsline {paragraph}{6.4.3.2 ContextCapture平台}{1045}{section*.678}%
+\contentsline {subsubsection}{6.4.4工程三维模型构建流程}{1046}{section*.679}%
+\contentsline {subsubsection}{6.4.5 模型成果分析}{1047}{section*.680}%
+\contentsline {paragraph}{6.4.5.1 模型复杂度分析}{1047}{section*.681}%
+\contentsline {paragraph}{6.4.5.2 模型几何精度分析}{1048}{section*.682}%
+\contentsline {subsubsection}{6.4.5 小结}{1048}{section*.683}%
+\contentsline {subsubsection}{基础题}{1049}{section*.684}%
+\contentsline {subsubsection}{提高题}{1049}{section*.685}%
+\contentsline {subsubsection}{讨论题}{1049}{section*.686}%
+\contentsline {subsection}{\numberline {0.20.14}6.6 6.5 水利场景渲染方法}{1050}{subsection.0.20.14}%
+\contentsline {subsubsection}{6.5.1 基础图形渲染技术}{1050}{section*.687}%
+\contentsline {paragraph}{6.5.1.1 纹理贴图（Texture Mapping）}{1050}{section*.688}%
+\contentsline {paragraph}{6.5.1.2 光照渲染（Lighting \& Shading）}{1050}{section*.689}%
+\contentsline {paragraph}{6.5.1.3 阴影渲染（Shadow Mapping）}{1051}{section*.690}%
+\contentsline {subsubsection}{6.5.2 真实感渲染技术}{1051}{section*.691}%
+\contentsline {subsubsection}{6.5.3 水体渲染技术}{1054}{section*.692}%
+\contentsline {paragraph}{6.5.3.1 动态水面模拟}{1054}{section*.693}%
+\contentsline {paragraph}{6.5.3.2 反射与折射（Reflection \& Refraction）}{1054}{section*.694}%
+\contentsline {paragraph}{6.5.3.3 透明度与深度混合（Alpha Blending \& Depth Sorting）}{1055}{section*.695}%
+\contentsline {paragraph}{6.5.3.4 粒子系统模拟水花与雨滴}{1055}{section*.696}%
+\contentsline {subsubsection}{6.5.4 大气与环境渲染技术}{1056}{section*.697}%
+\contentsline {paragraph}{6.5.4.1 雾效（Fog Effect）}{1056}{section*.698}%
+\contentsline {paragraph}{6.5.4.2 天空盒（Skybox）与HDR环境贴图}{1056}{section*.699}%
+\contentsline {paragraph}{6.5.4.3 天气系统模拟}{1056}{section*.700}%
+\contentsline {subsubsection}{6.5.5 三维引擎支撑的高级渲染方案}{1057}{section*.701}%
+\contentsline {paragraph}{6.5.5.1 实时渲染（Real-time Rendering）}{1057}{section*.702}%
+\contentsline {paragraph}{6.5.5.2 体积渲染（Volumetric Rendering）}{1057}{section*.703}%
+\contentsline {paragraph}{6.5.5.3 LOD（Level of Detail）技术}{1058}{section*.704}%
+\contentsline {paragraph}{6.5.5.4 GPU加速的水流模拟与渲染}{1058}{section*.705}%
+\contentsline {subsubsection}{6.5.6 可视化增强与交互}{1058}{section*.706}%
+\contentsline {paragraph}{6.5.6.1 热力图与流向箭头叠加}{1058}{section*.707}%
+\contentsline {paragraph}{6.5.6.2 时间轴动画渲染}{1059}{section*.708}%
+\contentsline {paragraph}{6.5.6.3 多视图切换与剖切功能}{1059}{section*.709}%
+\contentsline {subsubsection}{6.5.7 小结}{1060}{section*.710}%
+\contentsline {subsubsection}{基础题}{1061}{section*.711}%
+\contentsline {subsubsection}{提高题}{1061}{section*.712}%
+\contentsline {subsubsection}{讨论题}{1061}{section*.713}%
+\contentsline {subsection}{\numberline {0.20.15}6.7 6.7 数字孪生技术在智慧水利中的应用}{1062}{subsection.0.20.15}%
+\contentsline {subsubsection}{6.7.1 数字孪生概述}{1062}{section*.714}%
+\contentsline {paragraph}{数字孪生的核心特征}{1062}{section*.715}%
+\contentsline {subsubsection}{6.7.2 水利工程数字孪生架构}{1062}{section*.716}%
+\contentsline {paragraph}{数字孪生五维模型}{1062}{section*.717}%
+\contentsline {paragraph}{技术架构设计}{1062}{section*.718}%
+\contentsline {subsubsection}{6.7.3 典型应用案例}{1064}{section*.719}%
+\contentsline {paragraph}{大坝安全监测数字孪生}{1064}{section*.720}%
+\contentsline {paragraph}{智能调度数字孪生}{1067}{section*.721}%
+\contentsline {subsubsection}{6.7.4 关键技术挑战与解决方案}{1068}{section*.722}%
+\contentsline {paragraph}{技术挑战}{1068}{section*.723}%
+\contentsline {subsubsection}{6.7.5 发展趋势与展望}{1068}{section*.724}%
+\contentsline {paragraph}{技术发展趋势}{1068}{section*.725}%
+\contentsline {paragraph}{应用前景展望}{1069}{section*.726}%
+\contentsline {subsection}{\numberline {0.20.16}小结}{1069}{subsection.0.20.16}%
+\contentsline {subsubsection}{基础题}{1069}{section*.727}%
+\contentsline {subsubsection}{提高题}{1069}{section*.728}%
+\contentsline {subsubsection}{讨论题}{1069}{section*.729}%
+\contentsline {section}{\numberline {0.21}第七章 系统集成与部署}{1070}{section.0.21}%
+\contentsline {subsection}{\numberline {0.21.1}学习目标}{1070}{subsection.0.21.1}%
+\contentsline {subsection}{\numberline {0.21.2}引言}{1070}{subsection.0.21.2}%
+\contentsline {subsection}{\numberline {0.21.3}本章结构}{1070}{subsection.0.21.3}%
+\contentsline {subsubsection}{\href {section07-01.md}{第一节 数据类型与展示方式}}{1070}{section*.730}%
+\contentsline {subsubsection}{\href {section07-02.md}{第二节 数据图表展示}}{1070}{section*.731}%
+\contentsline {subsubsection}{\href {section07-03.md}{第三节 三维场景中的监测点绘制}}{1070}{section*.732}%
+\contentsline {subsubsection}{\href {section07-04.md}{第四节 监测点互动与拾取技术}}{1071}{section*.733}%
+\contentsline {subsection}{\numberline {0.21.4}关键技术概念}{1071}{subsection.0.21.4}%
+\contentsline {subsubsection}{三维数据可视化的基本原理}{1071}{section*.734}%
+\contentsline {subsubsection}{Chart.js与Three.js集成技术}{1071}{section*.735}%
+\contentsline {subsection}{\numberline {0.21.5}技术实现要点}{1072}{subsection.0.21.5}%
+\contentsline {subsubsection}{Chart.js与Three.js集成实现}{1072}{section*.736}%
+\contentsline {subsubsection}{监测点三维渲染技术}{1073}{section*.737}%
+\contentsline {subsubsection}{射线检测与交互实现}{1074}{section*.738}%
+\contentsline {subsection}{\numberline {0.21.6}关键概念总结}{1076}{subsection.0.21.6}%
+\contentsline {subsection}{\numberline {0.21.7}技术要点回顾}{1080}{subsection.0.21.7}%
+\contentsline {subsection}{\numberline {0.21.8}实践建议}{1081}{subsection.0.21.8}%
+\contentsline {subsubsection}{基础题}{1081}{section*.739}%
+\contentsline {subsubsection}{提高题}{1081}{section*.740}%
+\contentsline {subsubsection}{综合题}{1081}{section*.741}%
+\contentsline {section}{\numberline {0.22}7.1 数据类型与展示方式}{1082}{section.0.22}%
+\contentsline {subsection}{\numberline {0.22.1}7.1 学习目标}{1082}{subsection.0.22.1}%
+\contentsline {subsection}{\numberline {0.22.2}7.1.1 水利监测数据分类体系}{1082}{subsection.0.22.2}%
+\contentsline {subsubsection}{基础概念定义}{1082}{section*.742}%
+\contentsline {subsubsection}{监测数据分类框架}{1082}{section*.743}%
+\contentsline {paragraph}{水位监测数据特征分析}{1083}{section*.744}%
+\contentsline {subsection}{\numberline {0.22.3}7.1.2 实时数据与历史数据处理机制}{1085}{subsection.0.22.3}%
+\contentsline {subsubsection}{实时数据流处理架构}{1085}{section*.745}%
+\contentsline {subsubsection}{历史数据管理架构}{1086}{section*.746}%
+\contentsline {subsection}{\numberline {0.22.4}7.1.3 数据质量检验与异常值处理}{1087}{subsection.0.22.4}%
+\contentsline {subsubsection}{数据质量评估体系}{1087}{section*.747}%
+\contentsline {subsection}{\numberline {0.22.5}7.1.4 多源异构数据标准化与融合}{1090}{subsection.0.22.5}%
+\contentsline {subsubsection}{数据标准化处理}{1090}{section*.748}%
+\contentsline {section}{\numberline {0.23}7.2 数据图表展示}{1093}{section.0.23}%
+\contentsline {subsection}{\numberline {0.23.1}7.2 学习目标}{1093}{subsection.0.23.1}%
+\contentsline {subsection}{\numberline {0.23.2}7.2.1 Chart.js在三维场景中的集成}{1093}{subsection.0.23.2}%
+\contentsline {subsubsection}{Chart.js技术概述}{1093}{section*.749}%
+\contentsline {paragraph}{Chart.js核心特性分析}{1093}{section*.750}%
+\contentsline {subsubsection}{Chart.js与Three.js集成架构}{1096}{section*.751}%
+\contentsline {subsection}{\numberline {0.23.3}7.2.2 ECharts高级图表集成}{1098}{subsection.0.23.3}%
+\contentsline {subsubsection}{ECharts技术优势}{1098}{section*.752}%
+\contentsline {paragraph}{ECharts在水利系统中的应用特点}{1098}{section*.753}%
+\contentsline {subsection}{\numberline {0.23.4}7.2.3 时序数据的动态可视化}{1100}{subsection.0.23.4}%
+\contentsline {subsubsection}{时序数据特征分析}{1100}{section*.754}%
+\contentsline {paragraph}{时序数据处理策略}{1100}{section*.755}%
+\contentsline {subsection}{\numberline {0.23.5}7.2.4 响应式图表与移动端适配}{1105}{subsection.0.23.5}%
+\contentsline {subsubsection}{响应式设计原则}{1105}{section*.756}%
+\contentsline {paragraph}{响应式设计关键要素}{1105}{section*.757}%
+\contentsline {section}{\numberline {0.24}7.3 三维场景中的监测点绘制}{1111}{section.0.24}%
+\contentsline {subsection}{\numberline {0.24.1}7.3 学习目标}{1111}{subsection.0.24.1}%
+\contentsline {subsection}{\numberline {0.24.2}7.3.1 监测点坐标转换与空间定位}{1111}{subsection.0.24.2}%
+\contentsline {subsubsection}{坐标系统基础}{1111}{section*.758}%
+\contentsline {subsubsection}{坐标转换算法实现}{1112}{section*.759}%
+\contentsline {subsection}{\numberline {0.24.3}7.3.2 设备状态颜色编码与图标系统}{1113}{subsection.0.24.3}%
+\contentsline {subsubsection}{状态可视化设计原则}{1113}{section*.760}%
+\contentsline {subsection}{\numberline {0.24.4}7.3.3 LOD技术在监测点渲染中的应用}{1116}{subsection.0.24.4}%
+\contentsline {subsubsection}{层次细节优化策略}{1116}{section*.761}%
+\contentsline {subsection}{\numberline {0.24.5}7.3.4 监测点聚合与分层显示策略}{1119}{subsection.0.24.5}%
+\contentsline {subsubsection}{空间聚合算法}{1119}{section*.762}%
+\contentsline {section}{\numberline {0.25}7.4 监测点互动与拾取技术}{1124}{section.0.25}%
+\contentsline {subsection}{\numberline {0.25.1}7.4 学习目标}{1124}{subsection.0.25.1}%
+\contentsline {subsection}{\numberline {0.25.2}7.4.1 射线投射算法与碰撞检测}{1124}{subsection.0.25.2}%
+\contentsline {subsubsection}{射线投射基本原理}{1124}{section*.763}%
+\contentsline {subsection}{\numberline {0.25.3}7.4.2 监测点信息面板设计与实现}{1127}{subsection.0.25.3}%
+\contentsline {subsubsection}{信息面板架构设计}{1127}{section*.764}%
+\contentsline {subsection}{\numberline {0.25.4}7.4.3 多层级信息展示策略}{1130}{subsection.0.25.4}%
+\contentsline {subsubsection}{渐进式信息披露}{1130}{section*.765}%
+\contentsline {subsection}{\numberline {0.25.5}7.4.4 触控设备交互优化}{1134}{subsection.0.25.5}%
+\contentsline {subsubsection}{触控交互设计原则}{1134}{section*.766}%
+\contentsline {section}{\numberline {0.26}第八章 性能优化与监控}{1142}{section.0.26}%
+\contentsline {subsection}{\numberline {0.26.1}学习目标}{1142}{subsection.0.26.1}%
+\contentsline {subsection}{\numberline {0.26.2}引言}{1142}{subsection.0.26.2}%
+\contentsline {subsection}{\numberline {0.26.3}本章结构}{1142}{subsection.0.26.3}%
+\contentsline {subsubsection}{\href {section08-01.md}{第一节 水利工程安全监测平台概述}}{1142}{section*.767}%
+\contentsline {subsubsection}{\href {section08-02.md}{第二节 场景设置与模型制作}}{1142}{section*.768}%
+\contentsline {subsubsection}{\href {section08-03.md}{第三节 数据处理与展示模块}}{1142}{section*.769}%
+\contentsline {subsubsection}{\href {section08-04.md}{第四节 监控模型与综合评价模块}}{1143}{section*.770}%
+\contentsline {subsubsection}{\href {section08-05.md}{第五节 系统集成与运维管理}}{1143}{section*.771}%
+\contentsline {subsection}{\numberline {0.26.4}架构设计原理}{1143}{subsection.0.26.4}%
+\contentsline {subsubsection}{分层架构设计}{1143}{section*.772}%
+\contentsline {subsubsection}{技术选型考虑}{1143}{section*.773}%
+\contentsline {subsubsection}{数据处理流水线}{1143}{section*.774}%
+\contentsline {subsubsection}{数据采集与预处理模块}{1144}{section*.775}%
+\contentsline {subsubsection}{安全评价与预警模块}{1145}{section*.776}%
+\contentsline {subsubsection}{三维可视化模块}{1145}{section*.777}%
+\contentsline {subsubsection}{系统管理模块}{1145}{section*.778}%
+\contentsline {subsubsection}{技术挑战与解决方案}{1152}{section*.779}%
+\contentsline {paragraph}{技术架构设计}{1170}{section*.780}%
+\contentsline {paragraph}{空间层次结构}{1172}{section*.781}%
+\contentsline {subsection}{\numberline {0.26.5}8.2.2 地形与环境建模}{1173}{subsection.0.26.5}%
+\contentsline {subsubsection}{地形数据处理}{1173}{section*.782}%
+\contentsline {paragraph}{DEM数据处理流程}{1173}{section*.783}%
+\contentsline {subsubsection}{水体建模与动画}{1177}{section*.784}%
+\contentsline {paragraph}{水体几何建模}{1177}{section*.785}%
+\contentsline {subsection}{\numberline {0.26.6}8.2.3 工程结构建模}{1180}{subsection.0.26.6}%
+\contentsline {subsubsection}{大坝建模}{1180}{section*.786}%
+\contentsline {paragraph}{参数化大坝生成}{1180}{section*.787}%
+\contentsline {subsubsection}{水电厂房建模}{1184}{section*.788}%
+\contentsline {subsubsection}{基础题}{1190}{section*.789}%
+\contentsline {subsubsection}{提高题}{1190}{section*.790}%
+\contentsline {subsubsection}{讨论题}{1190}{section*.791}%
+\contentsline {section}{\numberline {0.27}第三节 监测数据处理与展示模块}{1191}{section.0.27}%
+\contentsline {subsection}{\numberline {0.27.1}8.3 引言}{1191}{subsection.0.27.1}%
+\contentsline {subsection}{\numberline {0.27.2}8.3.1 数据采集与预处理}{1191}{subsection.0.27.2}%
+\contentsline {subsubsection}{多源数据接入架构}{1191}{section*.792}%
+\contentsline {subsubsection}{数据质量控制}{1193}{section*.793}%
+\contentsline {subsubsection}{实时数据处理流水线}{1194}{section*.794}%
+\contentsline {subsection}{\numberline {0.27.3}8.3.2 数据存储与管理}{1196}{subsection.0.27.3}%
+\contentsline {subsubsection}{时序数据库设计}{1196}{section*.795}%
+\contentsline {subsubsection}{数据缓存策略}{1198}{section*.796}%
+\contentsline {subsection}{\numberline {0.27.4}小结}{1201}{subsection.0.27.4}%
+\contentsline {subsubsection}{基础题}{1202}{section*.797}%
+\contentsline {subsubsection}{提高题}{1202}{section*.798}%
+\contentsline {subsubsection}{讨论题}{1202}{section*.799}%
+\contentsline {section}{\numberline {0.28}第四节 监控模型与综合评价模块}{1203}{section.0.28}%
+\contentsline {subsection}{\numberline {0.28.1}8.4 引言}{1203}{subsection.0.28.1}%
+\contentsline {subsection}{\numberline {0.28.2}8.4.1 多级安全评价体系}{1203}{subsection.0.28.2}%
+\contentsline {subsubsection}{风险评估模型}{1203}{section*.800}%
+\contentsline {subsubsection}{智能预警算法}{1206}{section*.801}%
+\contentsline {subsection}{\numberline {0.28.3}8.4.2 应急响应决策系统}{1209}{subsection.0.28.3}%
+\contentsline {subsubsection}{应急预案管理}{1209}{section*.802}%
+\contentsline {subsubsection}{智能决策支持}{1212}{section*.803}%
+\contentsline {subsection}{\numberline {0.28.4}小结}{1215}{subsection.0.28.4}%
+\contentsline {subsubsection}{基础题}{1216}{section*.804}%
+\contentsline {subsubsection}{提高题}{1216}{section*.805}%
+\contentsline {subsubsection}{讨论题}{1216}{section*.806}%
+\contentsline {section}{\numberline {0.29}第五节 系统集成与运维管理}{1217}{section.0.29}%
+\contentsline {subsection}{\numberline {0.29.1}8.5 引言}{1217}{subsection.0.29.1}%
+\contentsline {subsection}{\numberline {0.29.2}学习目标}{1217}{subsection.0.29.2}%
+\contentsline {subsection}{\numberline {0.29.3}8.5.1 系统架构优化}{1217}{subsection.0.29.3}%
+\contentsline {subsubsection}{微服务架构设计}{1217}{section*.807}%
+\contentsline {subsection}{\numberline {0.29.4}8.5.2 运维监控体系}{1221}{subsection.0.29.4}%
+\contentsline {subsubsection}{系统监控框架}{1221}{section*.808}%
+\contentsline {subsection}{\numberline {0.29.5}8.5.3 自动化运维}{1225}{subsection.0.29.5}%
+\contentsline {subsection}{\numberline {0.29.6}8.5.4 故障处理与恢复}{1228}{subsection.0.29.6}%
+\contentsline {subsection}{\numberline {0.29.7}小结}{1230}{subsection.0.29.7}%
+\contentsline {subsubsection}{基础题}{1231}{section*.809}%
+\contentsline {subsubsection}{提高题}{1231}{section*.810}%
+\contentsline {subsubsection}{讨论题}{1232}{section*.811}%
+\contentsline {section}{\numberline {0.30}第九章 项目管理与团队协作}{1233}{section.0.30}%
+\contentsfinish 

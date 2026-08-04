@@ -1,0 +1,112 @@
+2025-09-06 13:14:04 - System - INFO - 全局调试模式已启用
+2025-09-06 13:14:04 - Main - INFO - MD2LaTeX转换器 v2.0 启动
+2025-09-06 13:14:04 - Main - ERROR - 程序执行失败: 配置验证失败: ['源目录不存在: ../docs/chapters']
+2025-09-06 13:14:04 - Main - ERROR - 详细错误信息:
+Traceback (most recent call last):
+  File "/mnt/d/Projects/教材/智慧水利平台架构与开发/tools/md2latex_converter.py", line 102, in main
+    app = ConverterApplication(args.config)
+  File "/mnt/d/Projects/教材/智慧水利平台架构与开发/tools/src/core/converter.py", line 48, in __init__
+    raise ValueError(f"配置验证失败: {config_errors}")
+ValueError: 配置验证失败: ['源目录不存在: ../docs/chapters']
+2025-09-06 13:15:27 - System - INFO - 全局调试模式已启用
+2025-09-06 13:15:27 - Main - INFO - MD2LaTeX转换器 v2.0 启动
+2025-09-06 13:15:27 - ContentProcessor - INFO - 初始化了 7 个处理器
+2025-09-06 13:15:27 - TemplateEngine - INFO - 模板引擎初始化完成
+2025-09-06 13:15:27 - Main - INFO - 开始转换前言...
+2025-09-06 13:15:27 - ConverterApplication - INFO - 开始转换前言...
+2025-09-06 13:15:27 - FileManager - INFO - 读取文件成功: docs/前言.md (5726 字符)
+2025-09-06 13:15:27 - ContentProcessor - INFO - 开始处理前言内容
+2025-09-06 13:15:27 - Processor.ChapterNumber - INFO - 开始处理章节编号
+2025-09-06 13:15:27 - Processor.Math - INFO - 开始处理数学公式
+2025-09-06 13:15:27 - Processor.CodeBlock - INFO - 开始处理代码块
+2025-09-06 13:15:27 - Processor.CodeBlock - INFO - 处理代码块: 1 项
+2025-09-06 13:15:27 - Processor.Image - INFO - 开始处理图片
+2025-09-06 13:15:27 - Processor.Admonition - INFO - 开始处理告警框
+2025-09-06 13:15:27 - Processor.Table - INFO - 开始处理表格
+2025-09-06 13:15:27 - Processor.Table - INFO - 处理表格: 2398 项
+2025-09-06 13:15:27 - Processor.Cleanup - INFO - 开始清理内容
+2025-09-06 13:15:27 - Processor.Cleanup - INFO - 内容清理完成
+2025-09-06 13:15:27 - ContentProcessor - INFO - 前言内容处理完成
+2025-09-06 13:15:27 - TemplateEngine - INFO - 渲染前言模板
+2025-09-06 13:15:27 - TemplateEngine - INFO - 前言模板渲染完成
+2025-09-06 13:15:27 - FileManager - INFO - 写入文件成功: output/chapters/preface.tex (6272 字符)
+2025-09-06 13:15:27 - ConverterApplication - INFO - 前言转换完成，耗时: 0.04秒
+2025-09-06 13:15:27 - Main - INFO - ✅ 前言转换成功
+2025-09-06 13:15:27 - Main - INFO - 输出文件:
+2025-09-06 13:15:27 - Main - INFO -   - output/chapters/preface.tex
+2025-09-06 13:15:27 - Main - INFO - 耗时: 0.04秒
+2025-09-06 13:20:44 - System - INFO - 全局调试模式已启用
+2025-09-06 13:20:44 - Main - INFO - MD2LaTeX转换器 v2.0 启动
+2025-09-06 13:20:45 - ContentProcessor - INFO - 初始化了 7 个处理器
+2025-09-06 13:20:45 - TemplateEngine - INFO - 模板引擎初始化完成
+2025-09-06 13:20:45 - Main - INFO - 开始转换前言...
+2025-09-06 13:20:45 - ConverterApplication - INFO - 开始转换前言...
+2025-09-06 13:20:45 - FileManager - INFO - 读取文件成功: docs/前言.md (5726 字符)
+2025-09-06 13:20:45 - ContentProcessor - INFO - 开始处理前言内容
+2025-09-06 13:20:45 - Processor.ChapterNumber - INFO - 开始处理章节编号
+2025-09-06 13:20:45 - Processor.Math - INFO - 开始处理数学公式
+2025-09-06 13:20:45 - Processor.CodeBlock - INFO - 开始处理代码块
+2025-09-06 13:20:45 - Processor.CodeBlock - INFO - 处理代码块: 1 项
+2025-09-06 13:20:45 - Processor.Image - INFO - 开始处理图片
+2025-09-06 13:20:45 - Processor.Admonition - INFO - 开始处理告警框
+2025-09-06 13:20:45 - Processor.Cleanup - INFO - 开始清理内容
+2025-09-06 13:20:45 - Processor.Cleanup - INFO - 内容清理完成
+2025-09-06 13:20:45 - ContentProcessor - INFO - 前言内容处理完成
+2025-09-06 13:20:45 - TemplateEngine - INFO - 渲染前言模板
+2025-09-06 13:20:45 - TemplateEngine - INFO - 前言模板渲染完成
+2025-09-06 13:20:45 - FileManager - INFO - 写入文件成功: output/chapters/preface.tex (6192 字符)
+2025-09-06 13:20:45 - ConverterApplication - INFO - 前言转换完成，耗时: 0.02秒
+2025-09-06 13:20:45 - Main - INFO - ✅ 前言转换成功
+2025-09-06 13:20:45 - Main - INFO - 输出文件:
+2025-09-06 13:20:45 - Main - INFO -   - output/chapters/preface.tex
+2025-09-06 13:20:45 - Main - INFO - 耗时: 0.02秒
+2025-09-06 13:21:30 - System - INFO - 全局调试模式已启用
+2025-09-06 13:21:30 - Main - INFO - MD2LaTeX转换器 v2.0 启动
+2025-09-06 13:21:30 - ContentProcessor - INFO - 初始化了 7 个处理器
+2025-09-06 13:21:30 - TemplateEngine - INFO - 模板引擎初始化完成
+2025-09-06 13:21:30 - Main - INFO - 开始转换前言...
+2025-09-06 13:21:30 - ConverterApplication - INFO - 开始转换前言...
+2025-09-06 13:21:30 - FileManager - INFO - 读取文件成功: docs/前言.md (5726 字符)
+2025-09-06 13:21:30 - ContentProcessor - INFO - 开始处理前言内容
+2025-09-06 13:21:30 - Processor.ChapterNumber - INFO - 开始处理章节编号
+2025-09-06 13:21:30 - Processor.Math - INFO - 开始处理数学公式
+2025-09-06 13:21:30 - Processor.CodeBlock - INFO - 开始处理代码块
+2025-09-06 13:21:30 - Processor.CodeBlock - INFO - 处理代码块: 1 项
+2025-09-06 13:21:30 - Processor.Image - INFO - 开始处理图片
+2025-09-06 13:21:30 - Processor.Admonition - INFO - 开始处理告警框
+2025-09-06 13:21:30 - Processor.Cleanup - INFO - 开始清理内容
+2025-09-06 13:21:30 - Processor.Cleanup - INFO - 内容清理完成
+2025-09-06 13:21:30 - ContentProcessor - INFO - 前言内容处理完成
+2025-09-06 13:21:30 - TemplateEngine - INFO - 渲染前言模板
+2025-09-06 13:21:30 - TemplateEngine - INFO - 前言模板渲染完成
+2025-09-06 13:21:30 - FileManager - INFO - 写入文件成功: output/chapters/preface.tex (6272 字符)
+2025-09-06 13:21:30 - ConverterApplication - INFO - 前言转换完成，耗时: 0.02秒
+2025-09-06 13:21:30 - Main - INFO - ✅ 前言转换成功
+2025-09-06 13:21:30 - Main - INFO - 输出文件:
+2025-09-06 13:21:30 - Main - INFO -   - output/chapters/preface.tex
+2025-09-06 13:21:30 - Main - INFO - 耗时: 0.02秒
+2025-09-06 13:22:11 - System - INFO - 全局调试模式已启用
+2025-09-06 13:22:11 - Main - INFO - MD2LaTeX转换器 v2.0 启动
+2025-09-06 13:22:11 - ContentProcessor - INFO - 初始化了 7 个处理器
+2025-09-06 13:22:11 - TemplateEngine - INFO - 模板引擎初始化完成
+2025-09-06 13:22:11 - Main - INFO - 开始转换前言...
+2025-09-06 13:22:11 - ConverterApplication - INFO - 开始转换前言...
+2025-09-06 13:22:11 - FileManager - INFO - 读取文件成功: docs/前言.md (5726 字符)
+2025-09-06 13:22:11 - ContentProcessor - INFO - 开始处理前言内容
+2025-09-06 13:22:11 - Processor.ChapterNumber - INFO - 开始处理章节编号
+2025-09-06 13:22:11 - Processor.Math - INFO - 开始处理数学公式
+2025-09-06 13:22:11 - Processor.CodeBlock - INFO - 开始处理代码块
+2025-09-06 13:22:11 - Processor.CodeBlock - INFO - 处理代码块: 1 项
+2025-09-06 13:22:11 - Processor.Image - INFO - 开始处理图片
+2025-09-06 13:22:11 - Processor.Admonition - INFO - 开始处理告警框
+2025-09-06 13:22:11 - Processor.Cleanup - INFO - 开始清理内容
+2025-09-06 13:22:11 - Processor.Cleanup - INFO - 内容清理完成
+2025-09-06 13:22:11 - ContentProcessor - INFO - 前言内容处理完成
+2025-09-06 13:22:11 - TemplateEngine - INFO - 渲染前言模板
+2025-09-06 13:22:11 - TemplateEngine - INFO - 前言模板渲染完成
+2025-09-06 13:22:11 - FileManager - INFO - 写入文件成功: output/chapters/preface.tex (5872 字符)
+2025-09-06 13:22:11 - ConverterApplication - INFO - 前言转换完成，耗时: 0.02秒
+2025-09-06 13:22:11 - Main - INFO - ✅ 前言转换成功
+2025-09-06 13:22:11 - Main - INFO - 输出文件:
+2025-09-06 13:22:11 - Main - INFO -   - output/chapters/preface.tex
+2025-09-06 13:22:11 - Main - INFO - 耗时: 0.02秒

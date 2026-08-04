@@ -1,0 +1,375 @@
+% ========================================
+% 代码高亮配置模板 (增强版)
+% 适用于多种编程语言的教材
+% 版本: v2.0
+% 更新: 2025年8月7日
+% ========================================
+
+\usepackage{listings}
+\usepackage{xcolor}
+
+% ========================================
+% 颜色定义
+% ========================================
+
+% 代码配色方案
+\definecolor{codeblue}{RGB}{40, 90, 200}
+\definecolor{codegreen}{RGB}{0, 150, 0}
+\definecolor{codered}{RGB}{200, 0, 0}
+\definecolor{codepurple}{RGB}{150, 0, 150}
+\definecolor{codegray}{RGB}{128, 128, 128}
+\definecolor{codeorange}{RGB}{255, 140, 0}
+\definecolor{backcolour}{RGB}{248, 248, 248}
+\definecolor{framecolor}{RGB}{220, 220, 220}
+
+% ========================================
+% 全局 listings 配置
+% ========================================
+
+\lstset{
+    backgroundcolor=\color{backcolour},   % 背景色
+    commentstyle=\color{codegreen}\itshape, % 注释样式
+    keywordstyle=\color{codeblue}\bfseries, % 关键字样式
+    numberstyle=\tiny\color{codegray},    % 行号样式
+    stringstyle=\color{codered},          % 字符串样式
+    basicstyle=\ttfamily\scriptsize,     % 基本字体(更小)
+    breakatwhitespace=false,              % 只在空白处换行
+    breaklines=true,                      % 自动换行
+    captionpos=b,                         % 标题位置
+    keepspaces=true,                      % 保持空格
+    numbers=left,                         % 行号位置
+    numbersep=8pt,                        % 行号与代码间距
+    showspaces=false,                     % 不显示空格
+    showstringspaces=false,               % 不显示字符串中的空格
+    showtabs=false,                       % 不显示tab
+    tabsize=4,                            % tab大小
+    frame=single,                         % 边框样式
+    rulecolor=\color{framecolor},         % 边框颜色
+    framexleftmargin=8pt,                 % 左边距
+    framexrightmargin=8pt,                % 右边距
+    framextopmargin=8pt,                  % 上边距
+    framexbottommargin=8pt,               % 下边距
+    xleftmargin=15pt,                     % 整体左边距
+    xrightmargin=15pt,                    % 整体右边距
+    escapeinside={\%*}{*\)},              % 转义字符
+    extendedchars=true,                   % 支持扩展字符
+    literate={·}{{\textperiodcentered}}1  % 中文标点支持
+}
+
+% ========================================
+% C# 语言配置
+% ========================================
+
+\lstdefinestyle{csharp}{
+    language=[Sharp]C,
+    morekeywords={
+        var, async, await, yield, partial, get, set, value,
+        public, private, protected, internal, static, virtual,
+        override, abstract, sealed, readonly, const, extern,
+        unsafe, volatile, implicit, explicit, operator,
+        namespace, using, class, struct, interface, enum,
+        delegate, event, this, base, new, typeof, sizeof,
+        is, as, null, true, false, if, else, switch, case,
+        default, for, foreach, while, do, break, continue,
+        return, throw, try, catch, finally, checked, unchecked,
+        lock, in, out, ref, params, stackalloc
+    },
+    morecomment=[l]{//},
+    morecomment=[s]{/*}{*/},
+    morecomment=[s]{///}{},
+    morestring=[b]",
+    morestring=[b]',
+    showstringspaces=false,
+    keywordstyle=\color{codeblue}\bfseries,
+    commentstyle=\color{codegreen}\itshape,
+    stringstyle=\color{codered},
+    identifierstyle=\color{black},
+    emphstyle=\color{codepurple}\bfseries,
+    emph={Console, WriteLine, ReadLine, String, Int32, Double, Bool, List, Dictionary, Array},
+    title=\lstname
+}
+
+% ========================================
+% JavaScript/TypeScript 配置
+% ========================================
+
+\lstdefinestyle{javascript}{
+    language=JavaScript,
+    morekeywords={
+        let, const, var, function, return, if, else, for, while,
+        do, break, continue, switch, case, default, try, catch,
+        finally, throw, new, this, typeof, instanceof, in, of,
+        class, extends, super, static, get, set, async, await,
+        import, export, from, default, as, yield, delete,
+        undefined, null, true, false, NaN, Infinity
+    },
+    morecomment=[l]{//},
+    morecomment=[s]{/*}{*/},
+    morestring=[b]",
+    morestring=[b]',
+    morestring=[b]`,
+    showstringspaces=false,
+    keywordstyle=\color{codeblue}\bfseries,
+    commentstyle=\color{codegreen}\itshape,
+    stringstyle=\color{codered},
+    identifierstyle=\color{black},
+    emphstyle=\color{codepurple}\bfseries,
+    emph={console, log, document, window, addEventListener, querySelector, Promise, Array, Object, JSON},
+    title=\lstname
+}
+
+% ========================================
+% Python 配置
+% ========================================
+
+\lstdefinestyle{python}{
+    language=Python,
+    morekeywords={
+        and, as, assert, break, class, continue, def, del, elif,
+        else, except, exec, finally, for, from, global, if,
+        import, in, is, lambda, not, or, pass, print, raise,
+        return, try, while, with, yield, True, False, None,
+        async, await, nonlocal
+    },
+    morecomment=[l]{\#},
+    morestring=[b]",
+    morestring=[b]',
+    morestring=[s]{"""}{"""},
+    morestring=[s]{'''}{'''},
+    showstringspaces=false,
+    keywordstyle=\color{codeblue}\bfseries,
+    commentstyle=\color{codegreen}\itshape,
+    stringstyle=\color{codered},
+    identifierstyle=\color{black},
+    emphstyle=\color{codepurple}\bfseries,
+    emph={self, cls, len, str, int, float, list, dict, tuple, set, range, enumerate, zip},
+    title=\lstname
+}
+
+% ========================================
+% Java 配置
+% ========================================
+
+\lstdefinestyle{java}{
+    language=Java,
+    morekeywords={
+        abstract, assert, boolean, break, byte, case, catch,
+        char, class, const, continue, default, do, double,
+        else, enum, extends, final, finally, float, for,
+        goto, if, implements, import, instanceof, int,
+        interface, long, native, new, package, private,
+        protected, public, return, short, static, strictfp,
+        super, switch, synchronized, this, throw, throws,
+        transient, try, void, volatile, while, true, false, null
+    },
+    morecomment=[l]{//},
+    morecomment=[s]{/*}{*/},
+    morestring=[b]",
+    morestring=[b]',
+    showstringspaces=false,
+    keywordstyle=\color{codeblue}\bfseries,
+    commentstyle=\color{codegreen}\itshape,
+    stringstyle=\color{codered},
+    identifierstyle=\color{black},
+    emphstyle=\color{codepurple}\bfseries,
+    emph={System, out, println, String, Integer, Double, Boolean, ArrayList, HashMap},
+    title=\lstname
+}
+
+% ========================================
+% SQL 配置
+% ========================================
+
+\lstdefinestyle{sql}{
+    language=SQL,
+    morekeywords={
+        SELECT, FROM, WHERE, INSERT, UPDATE, DELETE, CREATE,
+        DROP, ALTER, TABLE, DATABASE, INDEX, VIEW, PROCEDURE,
+        FUNCTION, TRIGGER, JOIN, INNER, LEFT, RIGHT, OUTER,
+        ON, GROUP, BY, ORDER, HAVING, UNION, DISTINCT, AS,
+        AND, OR, NOT, IN, EXISTS, BETWEEN, LIKE, IS, NULL,
+        TRUE, FALSE, PRIMARY, FOREIGN, KEY, CONSTRAINT,
+        REFERENCES, AUTO_INCREMENT, DEFAULT, CHECK
+    },
+    morecomment=[l]{--},
+    morecomment=[s]{/*}{*/},
+    morestring=[b]',
+    morestring=[b]",
+    showstringspaces=false,
+    keywordstyle=\color{codeblue}\bfseries,
+    commentstyle=\color{codegreen}\itshape,
+    stringstyle=\color{codered},
+    identifierstyle=\color{black},
+    basicstyle=\ttfamily\scriptsize,
+    title=\lstname
+}
+
+% ========================================
+% XML/HTML 配置
+% ========================================
+
+\lstdefinestyle{xml}{
+    language=XML,
+    morestring=[b]",
+    morestring=[b]',
+    morecomment=[s]{<?}{?>},
+    morecomment=[s]{<!--}{-->},
+    commentstyle=\color{codegreen}\itshape,
+    stringstyle=\color{codered},
+    identifierstyle=\color{black},
+    keywordstyle=\color{codeblue}\bfseries,
+    showstringspaces=false,
+    basicstyle=\ttfamily\scriptsize,
+    title=\lstname
+}
+
+% ========================================
+% CSS 配置
+% ========================================
+
+\lstdefinestyle{css}{
+    language=CSS,
+    morestring=[b]",
+    morestring=[b]',
+    morecomment=[s]{/*}{*/},
+    morekeywords={
+        color, background, font, margin, padding, border,
+        width, height, display, position, float, clear,
+        text-align, font-size, font-family, font-weight,
+        line-height, vertical-align, overflow, visibility,
+        z-index, top, right, bottom, left, absolute, relative,
+        fixed, static, block, inline, none, auto, inherit
+    },
+    keywordstyle=\color{codeblue}\bfseries,
+    commentstyle=\color{codegreen}\itshape,
+    stringstyle=\color{codered},
+    identifierstyle=\color{black},
+    showstringspaces=false,
+    basicstyle=\ttfamily\scriptsize,
+    title=\lstname
+}
+
+% ========================================
+% 配置文件样式 (JSON, YAML, INI)
+% ========================================
+
+\lstdefinestyle{json}{
+    basicstyle=\ttfamily\scriptsize,
+    showstringspaces=false,
+    morestring=[b]",
+    stringstyle=\color{codered},
+    keywordstyle=\color{codeblue}\bfseries,
+    numberstyle=\color{codegray},
+    commentstyle=\color{codegreen}\itshape,
+    frame=single,
+    rulecolor=\color{framecolor},
+    backgroundcolor=\color{backcolour},
+    title=\lstname
+}
+
+% ========================================
+% 命令行/终端样式
+% ========================================
+
+\lstdefinestyle{terminal}{
+    basicstyle=\ttfamily\footnotesize\color{white},
+    backgroundcolor=\color{black},
+    showstringspaces=false,
+    numbers=none,
+    frame=single,
+    rulecolor=\color{codegray},
+    xleftmargin=15pt,
+    xrightmargin=15pt,
+    title=\lstname
+}
+
+% ========================================
+% 伪代码样式
+% ========================================
+
+\lstdefinestyle{pseudocode}{
+    basicstyle=\ttfamily\scriptsize,
+    showstringspaces=false,
+    keywordstyle=\color{codeblue}\bfseries,
+    commentstyle=\color{codegreen}\itshape,
+    morekeywords={
+        algorithm, begin, end, if, then, else, endif, while,
+        do, endwhile, for, to, endfor, repeat, until, return,
+        input, output, function, procedure, call
+    },
+    morecomment=[l]{//},
+    frame=single,
+    rulecolor=\color{framecolor},
+    backgroundcolor=\color{backcolour},
+    title=\lstname
+}
+
+% ========================================
+% 便捷命令定义
+% ========================================
+
+% 快速代码环境
+\newcommand{\cscode}[1]{\lstinline[style=csharp]!#1!}
+\newcommand{\jscode}[1]{\lstinline[style=javascript]!#1!}
+\newcommand{\pycode}[1]{\lstinline[style=python]!#1!}
+\newcommand{\javacode}[1]{\lstinline[style=java]!#1!}
+\newcommand{\sqlcode}[1]{\lstinline[style=sql]!#1!}
+
+% 代码块环境
+\lstnewenvironment{csharpcode}[1][]
+{\lstset{style=csharp, #1}}
+{}
+
+\lstnewenvironment{javascriptcode}[1][]
+{\lstset{style=javascript, #1}}
+{}
+
+\lstnewenvironment{pythoncode}[1][]
+{\lstset{style=python, #1}}
+{}
+
+\lstnewenvironment{javacode}[1][]
+{\lstset{style=java, #1}}
+{}
+
+\lstnewenvironment{sqlcode}[1][]
+{\lstset{style=sql, #1}}
+{}
+
+\lstnewenvironment{xmlcode}[1][]
+{\lstset{style=xml, #1}}
+{}
+
+\lstnewenvironment{terminalcode}[1][]
+{\lstset{style=terminal, #1}}
+{}
+
+% ========================================
+% 使用说明
+% ========================================
+
+% 在文档中使用代码的方法：
+% 
+% 1. 行内代码：
+%    \cscode{var x = 10;}
+%    \jscode{let x = 10;}
+%    \pycode{x = 10}
+%
+% 2. 代码块：
+%    \begin{csharpcode}[caption=C\# 示例]
+%    using System;
+%    class Program {
+%        static void Main() {
+%            Console.WriteLine("Hello World!");
+%        }
+%    }
+%    \end{csharpcode}
+%
+% 3. 直接使用 lstlisting：
+%    \begin{lstlisting}[style=python, caption=Python示例]
+%    def hello():
+%        print("Hello World!")
+%    \end{lstlisting}
+%
+% 4. 从文件导入代码：
+%    \lstinputlisting[style=java, caption=Java示例]{example.java}

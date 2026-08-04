@@ -1,0 +1,90 @@
+\documentclass[12pt,a4paper]{book}
+
+% 基础包配置 - LuaLaTeX优化版本
+\usepackage[UTF8,scheme=chinese]{ctex}
+\usepackage{luatexja}
+
+% 页面设置
+\usepackage[a4paper,margin=2.5cm]{geometry}
+\usepackage{setspace}
+\onehalfspacing
+
+% Pandoc兼容性包
+\usepackage{longtable,booktabs,array}
+\usepackage{calc}
+\usepackage{etoolbox}
+\usepackage{graphicx}
+\usepackage[normalem]{ulem}
+
+% 数学包
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+
+% 图片包
+\usepackage{float}
+
+% 代码高亮包 - 简化版本
+\usepackage{listings}
+\usepackage{xcolor}
+
+% 告警框包
+\usepackage{tcolorbox}
+\tcbuselibrary{breakable}
+
+% fancyhdr页眉页脚
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{\thepage}
+\lhead{智慧水利平台架构与开发}
+\setlength{\headheight}{15pt}
+
+% hyperref包（应该最后加载）
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+    pdftitle={智慧水利平台架构与开发},
+    pdfauthor={教材作者},
+    bookmarks=true,
+    bookmarksopen=true
+}
+
+% Pandoc兼容性命令
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+% 文档信息
+\title{智慧水利平台架构与开发}
+\author{教材编写组}
+\date{\today}
+
+\begin{document}
+
+\frontmatter
+\maketitle
+
+% 目录
+\tableofcontents
+\newpage
+
+\mainmatter
+
+% 前言
+\input{chapters/preface.tex}
+
+% 所有章节
+\input{chapters/chapter01.tex}
+\input{chapters/chapter02.tex}
+\input{chapters/chapter03.tex}
+\input{chapters/chapter04.tex}
+\input{chapters/chapter05.tex}
+\input{chapters/chapter06.tex}
+\input{chapters/chapter07.tex}
+\input{chapters/chapter08.tex}
+\input{chapters/chapter09.tex}
+
+\end{document}

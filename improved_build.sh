@@ -71,7 +71,7 @@ build_only() {
     echo
     echo -e "${BLUE}🔨 仅构建 PDF 文档...${NC}"
     echo
-    echo "正在使用 XeLaTeX 构建 PDF..."
+    echo "正在使用 XeLaTeX + Biber 构建 PDF..."
     echo
     python3 "$CONVERTER_SCRIPT" --project-root "$PROJECT_ROOT" --build-only
 }
@@ -85,7 +85,7 @@ LATEX_DIR="$PROJECT_ROOT/output"
     if [ -d "$LATEX_DIR" ]; then
         cd "$LATEX_DIR"
         echo "清理 LaTeX 临时文件..."
-        rm -f *.aux *.log *.out *.toc *.fdb_latexmk *.fls *.synctex.gz
+        rm -f *.aux *.log *.out *.toc *.bbl *.bcf *.blg *.run.xml *.fdb_latexmk *.fls *.synctex.gz
     fi
     
     echo "清理转换日志..."

@@ -1,22 +1,64 @@
 
-\documentclass[12pt,a4paper]{book}
+\documentclass[11pt,a4paper,openright]{book}
 
+% ══════════════════════════════════════════
 % 基础与中文支持
-\usepackage[UTF8]{ctex}
-\usepackage{xeCJK}
+% ══════════════════════════════════════════
+\usepackage[UTF8,heading=true]{ctex}
 \usepackage{fontspec}
-% 拉丁字体（优雅且常见）
-\setmainfont{TeX Gyre Pagella}
-\setsansfont{TeX Gyre Heros}
-% 等宽体：若系统有 Inconsolata 则优先
-\IfFontExistsTF{Inconsolata}{\setmonofont{Inconsolata}}{\setmonofont{TeX Gyre Cursor}}
-% 中文主字体（可自动回退）
-\setCJKmainfont{Microsoft YaHei}
 
-% 页面与排版质量
-\usepackage[a4paper,margin=2.5cm]{geometry}
+% 拉丁字体
+\setmainfont{TeX Gyre Pagella}[Ligatures=TeX]
+\setsansfont{TeX Gyre Heros}[Scale=0.95]
+\IfFontExistsTF{Inconsolata}{%
+  \setmonofont{Inconsolata}[Scale=0.85]}{%
+  \setmonofont{TeX Gyre Cursor}[Scale=0.85]}
+
+% 中文正文字体：宋体族（衬线）用于正文阅读
+\IfFontExistsTF{Source Han Serif SC}{%
+  \setCJKmainfont{Source Han Serif SC}[
+    BoldFont=Source Han Serif SC Bold,
+    ItalicFont=Source Han Serif SC,
+    ItalicFeatures={FakeSlant=0.15}
+  ]}{%
+  \IfFontExistsTF{SimSun}{%
+    \setCJKmainfont{SimSun}[AutoFakeBold=2.5,AutoFakeSlant=0.15]}{%
+    \IfFontExistsTF{Microsoft YaHei}{%
+      \setCJKmainfont{Microsoft YaHei}}{}}}
+
+% 中文无衬线字体：黑体族，用于标题
+\IfFontExistsTF{Source Han Sans SC}{%
+  \setCJKsansfont{Source Han Sans SC}[BoldFont=Source Han Sans SC Bold]}{%
+  \IfFontExistsTF{SimHei}{%
+    \setCJKsansfont{SimHei}[AutoFakeBold=2.5]}{%
+    \IfFontExistsTF{Microsoft YaHei}{%
+      \setCJKsansfont{Microsoft YaHei}}{}}}
+
+% 中文等宽字体（代码块）
+\IfFontExistsTF{Source Han Mono SC}{%
+  \setCJKmonofont{Source Han Mono SC}}{%
+  \IfFontExistsTF{Noto Sans Mono CJK SC}{%
+    \setCJKmonofont{Noto Sans Mono CJK SC}}{%
+    \IfFontExistsTF{Microsoft YaHei}{%
+      \setCJKmonofont{Microsoft YaHei}}{}}}
+
+% ══════════════════════════════════════════
+% 页面布局
+% ══════════════════════════════════════════
+\usepackage[
+  a4paper,
+  inner=2.8cm, outer=2.2cm,
+  top=2.5cm, bottom=2.5cm,
+  headheight=22pt,
+  headsep=0.8cm,
+  footskip=1.2cm
+]{geometry}
+
+% 行间距：中文教材推荐1.5倍
 \usepackage{setspace}
-\onehalfspacing
+\setstretch{1.45}
+
+% 排版微调
 \usepackage{microtype}
 
 % Pandoc 兼容
@@ -24,6 +66,8 @@
 \usepackage{calc}
 \usepackage{etoolbox}
 \usepackage{graphicx}
+\usepackage{pdfpages}
+\graphicspath{{images/}{../docs/chapters/images/}{../docs/assets/images/}}
 \usepackage[normalem]{ulem}
 
 % 数学环境
@@ -31,95 +75,275 @@
 
 % 图片与浮动
 \usepackage{float}
+\usepackage{subcaption}
+\usepackage[chapter]{algorithm}
+\usepackage{algpseudocode}
 
-% 颜色与代码（listings）
+% ══════════════════════════════════════════
+% 颜色体系（水利蓝主题）
+% ══════════════════════════════════════════
 \usepackage{xcolor}
-\definecolor{Primary}{HTML}{1F4E79}
-\definecolor{Accent}{HTML}{E67E22}
-\definecolor{CodeBg}{rgb}{0.98,0.98,0.98}
+\definecolor{Primary}{HTML}{1565C0}       % 主色：深水蓝
+\definecolor{PrimaryLight}{HTML}{E3F2FD}  % 浅蓝背景
+\definecolor{PrimaryDark}{HTML}{0D47A1}   % 深蓝强调
+\definecolor{Accent}{HTML}{FF6F00}        % 点缀橙
+\definecolor{TextGray}{HTML}{424242}      % 正文灰
+\definecolor{ChapterBg}{HTML}{F5F9FF}     % 章标题背景
+\definecolor{CodeBg}{HTML}{FAFBFC}
 \definecolor{CodeNum}{rgb}{0.5,0.5,0.5}
-\definecolor{CodeKey}{rgb}{0.1,0.2,0.6}
-\definecolor{CodeStr}{rgb}{0.58,0,0.82}
-\definecolor{CodeCmt}{rgb}{0,0.5,0}
+\definecolor{CodeKey}{HTML}{0D47A1}
+\definecolor{CodeStr}{HTML}{6A1B9A}
+\definecolor{CodeCmt}{HTML}{2E7D32}
 \usepackage{listings}
+
+% ── 自定义语言（listings 不内置这些）──
+\lstdefinelanguage{JavaScript}{
+  morekeywords={async,await,break,case,catch,class,const,continue,debugger,
+    default,delete,do,else,export,extends,finally,for,from,function,
+    get,if,import,in,instanceof,let,new,of,return,set,static,super,
+    switch,this,throw,try,typeof,var,void,while,with,yield},
+  morecomment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  morestring=[b]',
+  morestring=[b]",
+  morestring=[b]`,
+  sensitive=true
+}
+\lstalias{javascript}{JavaScript}
+
+\lstdefinelanguage{Vue}{
+  morekeywords={template,script,style,v-if,v-else,v-for,v-bind,v-on,v-model,
+    v-show,v-slot,ref,reactive,computed,watch,onMounted,defineProps,
+    defineEmits,setup,components,data,methods,created,mounted},
+  morecomment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  morecomment=[s]{<!--}{-->},
+  morestring=[b]',
+  morestring=[b]",
+  sensitive=true
+}
+\lstalias{vue}{Vue}
+
+\lstdefinelanguage{YAML}{
+  morekeywords={true,false,null,yes,no,on,off},
+  morecomment=[l]{\#},
+  morestring=[b]',
+  morestring=[b]",
+  sensitive=false
+}
+\lstalias{yaml}{YAML}
+\lstalias{yml}{YAML}
+
+\lstdefinelanguage{JSON}{
+  morestring=[b]",
+  morestring=[b]',
+  literate=
+    *{:}{{{\color{CodeKey}:}}}1
+     {,}{{{\color{CodeKey},}}}1
+     {\{}{{{\color{CodeKey}\{}}}1
+     {\}}{{{\color{CodeKey}\}}}}1
+     {[}{{{\color{CodeKey}[}}}1
+     {]}{{{\color{CodeKey}]}}}1
+}
+\lstalias{json}{JSON}
+
+\lstdefinelanguage{HTTP}{
+  morekeywords={GET,POST,PUT,DELETE,PATCH,HEAD,OPTIONS,HTTP},
+  morecomment=[l]{\#},
+  morestring=[b]",
+  sensitive=true
+}
+\lstalias{http}{HTTP}
+
+\lstdefinelanguage{Nginx}{
+  morekeywords={server,location,listen,root,index,proxy_pass,upstream,
+    server_name,worker_processes,events,http,include,error_log,
+    access_log,ssl_certificate,ssl_certificate_key,return,rewrite},
+  morecomment=[l]{\#},
+  morestring=[b]',
+  morestring=[b]",
+  sensitive=true
+}
+\lstalias{nginx}{Nginx}
+
+\definecolor{CodeBorder}{HTML}{90CAF9}
+
 \lstset{
-  basicstyle=\small\ttfamily,
+  basicstyle=\small\ttfamily\linespread{1.1}\selectfont,
   backgroundcolor=\color{CodeBg},
   numbers=left,
   numberstyle=\tiny\color{CodeNum},
-  stepnumber=1,
-  numbersep=6pt,
-  frame=single,
-  rulecolor=\color{gray!30},
-  xleftmargin=8pt,
-  xrightmargin=8pt,
-  aboveskip=\smallskipamount,
-  belowskip=\smallskipamount,
+  numbersep=8pt,
+  frame=leftline,
+  framerule=2.5pt,
+  rulecolor=\color{CodeBorder},
+  xleftmargin=18pt,
+  xrightmargin=4pt,
+  aboveskip=0.8\baselineskip,
+  belowskip=0.6\baselineskip,
   breaklines=true,
+  breakatwhitespace=true,
   showstringspaces=false,
   keywordstyle=\color{CodeKey}\bfseries,
   commentstyle=\color{CodeCmt},
   stringstyle=\color{CodeStr},
   tabsize=2,
   keepspaces=true,
-  % HTML 符号安全显示
-  literate={<}{\textless}1 {>}{\textgreater}1
+  extendedchars=true,
+  % 制表符替代（保留 box 绘制符，移除 < > 映射）
+  literate={─}{{\text{─}}}1 {│}{{\text{│}}}1
+    {├}{{\text{├}}}1 {└}{{\text{└}}}1
+    {┌}{{\text{┌}}}1 {┐}{{\text{┐}}}1
+    {┘}{{\text{┘}}}1 {┤}{{\text{┤}}}1
+    {┬}{{\text{┬}}}1 {┴}{{\text{┴}}}1
+    {┼}{{\text{┼}}}1 {━}{{\text{━}}}1
+    {║}{{\text{║}}}1 {╔}{{\text{╔}}}1
+    {╗}{{\text{╗}}}1 {╚}{{\text{╚}}}1
+    {╝}{{\text{╝}}}1 {╠}{{\text{╠}}}1
+    {╣}{{\text{╣}}}1 {╦}{{\text{╦}}}1
+    {╩}{{\text{╩}}}1 {╬}{{\text{╬}}}1
 }
 
-% 告警框（更现代外观）
+% ══════════════════════════════════════════
+% 提示框（现代教材风格）
+% ══════════════════════════════════════════
 \usepackage{tcolorbox}
 \tcbuselibrary{breakable,skins}
-\tcbset{textbook/.style={enhanced, breakable, colback=Primary!3!white, colframe=Primary!60!black, arc=1mm, boxrule=0.5pt, left=6pt, right=6pt, top=6pt, bottom=6pt}}
+\definecolor{NoteColor}{HTML}{1976D2}
+\definecolor{TipColor}{HTML}{388E3C}
+\definecolor{WarningColor}{HTML}{F57C00}
+\definecolor{ImportantColor}{HTML}{D32F2F}
 
-% 标题与目录样式（更高级视觉）
+% 通用提示框基础样式
+\tcbset{
+  admonition/.style={
+    enhanced,
+    breakable,
+    left=10pt, right=10pt, top=8pt, bottom=8pt,
+    boxrule=0pt,
+    leftrule=3.5pt,
+    arc=3pt,
+    outer arc=3pt,
+    fontupper=\small,
+  }
+}
+
+\newtcolorbox{notebox}{
+  admonition,
+  colback=NoteColor!6!white,
+  colframe=NoteColor,
+  borderline west={3.5pt}{0pt}{NoteColor},
+  title={\textcolor{NoteColor}{\bfseries \raisebox{-0.2ex}{$\triangleright$}~提示}},
+  coltitle=NoteColor,
+  colbacktitle=NoteColor!6!white,
+  attach boxed title to top left={yshift=-2mm,xshift=6mm},
+  boxed title style={boxrule=0pt,colback=NoteColor!6!white},
+}
+
+\newtcolorbox{tipbox}{
+  admonition,
+  colback=TipColor!6!white,
+  colframe=TipColor,
+  borderline west={3.5pt}{0pt}{TipColor},
+}
+
+\newtcolorbox{warningbox}{
+  admonition,
+  colback=WarningColor!6!white,
+  colframe=WarningColor,
+  borderline west={3.5pt}{0pt}{WarningColor},
+}
+
+\newtcolorbox{importantbox}{
+  admonition,
+  colback=ImportantColor!6!white,
+  colframe=ImportantColor,
+  borderline west={3.5pt}{0pt}{ImportantColor},
+}
+
+% ══════════════════════════════════════════
+% 标题与目录样式
+% ══════════════════════════════════════════
 \usepackage{titlesec}
 \usepackage{tocloft}
 \usepackage{enumitem}
 \usepackage[labelfont=bf,font=small]{caption}
 \setcounter{tocdepth}{2}
-% 章节标题（彩色分隔线风格）
+
+% 中文数字映射
+\def\chinesechapter#1{%
+  \ifcase#1\or 一\or 二\or 三\or 四\or 五\or 六\or 七\or 八\or 九\or 十\or
+  十一\or 十二\or 十三\or 十四\or 十五\or 十六\or 十七\or 十八\or 十九\or 二十\fi
+}
+
+% ── 章标题：大号蓝色编号 + 装饰线 ──
 \titleformat{\chapter}[display]
-  {\bfseries\Huge}
-  {\color{Primary} 第\chinese{chapter}章}
-  {1ex}
-  {\titlerule[1pt]\vspace{1ex}}
-  [\vspace{-0.5ex}\titlerule]
-\titlespacing*{\chapter}{0pt}{*2}{*1.5}
-% 小节标题着色
-\titleformat{\section}{\bfseries\Large\color{Primary}}{\thesection}{0.6em}{}
-\titleformat{\subsection}{\bfseries\large\color{Primary}}{\thesubsection}{0.6em}{}
+  {\normalfont\sffamily}
+  {%
+    \begin{flushright}
+    \textcolor{PrimaryLight}{\rule{0.3\textwidth}{1.2pt}}\\[0.3ex]
+    {\fontsize{14pt}{16pt}\selectfont\textcolor{Primary}{第\chinesechapter{\value{chapter}}章}}
+    \end{flushright}
+  }
+  {0pt}
+  {\Huge\bfseries\sffamily\color{PrimaryDark}}
+  [\vspace{0.5ex}{\color{Primary}\rule{\textwidth}{1.5pt}}]
+\titlespacing*{\chapter}{0pt}{-10pt}{30pt}
 
-% 目录优化：字距与点引导线
-\renewcommand{\cftdotsep}{1}
-\setlength{\cftbeforechapskip}{8pt}
-\setlength{\cftbeforesecskip}{2pt}
-\renewcommand{\cftchapfont}{\bfseries}
-\renewcommand{\cftchappagefont}{\bfseries}
+% ── 节标题：编号色块 + 标题 ──
+\titleformat{\section}
+  {\bfseries\Large\sffamily\color{PrimaryDark}}
+  {\colorbox{PrimaryLight}{\makebox[2.2em][c]{\color{Primary}\thesection}}}
+  {0.7em}{}
+\titlespacing*{\section}{0pt}{2.5ex plus 1ex minus .2ex}{1.2ex plus .2ex}
 
-% 列表与段落间距
+% ── 小节标题 ──
+\titleformat{\subsection}
+  {\bfseries\large\sffamily\color{Primary}}
+  {\thesubsection}{0.6em}{}
+\titlespacing*{\subsection}{0pt}{2ex plus 0.8ex minus .2ex}{0.8ex plus .2ex}
+
+\titleformat{\subsubsection}{\bfseries\normalsize\sffamily}{\thesubsubsection}{0.5em}{}
+
+% ── paragraph：用于不编号的小标题 ──
+\titleformat{\paragraph}[hang]{\bfseries\normalsize\sffamily\color{TextGray}}{}{0em}{}
+\titlespacing*{\paragraph}{0pt}{1.8ex plus 0.5ex minus .2ex}{0.5em}
+
+% ── 目录美化 ──
+\renewcommand{\cftdotsep}{2}
+\setlength{\cftbeforechapskip}{10pt}
+\setlength{\cftbeforesecskip}{3pt}
+\renewcommand{\cftchapfont}{\bfseries\sffamily\color{PrimaryDark}}
+\renewcommand{\cftchappagefont}{\bfseries\color{PrimaryDark}}
+\renewcommand{\cftsecfont}{\sffamily}
+\renewcommand{\cftsubsecfont}{\small}
+\renewcommand{\cftsecpagefont}{}
+\renewcommand{\cftsubsecpagefont}{\small}
+\renewcommand{\cfttoctitlefont}{\Huge\bfseries\sffamily\color{PrimaryDark}}
+
+% ── 列表与段落 ──
 \setlength{\parindent}{2em}
-\setlength{\parskip}{0.5em}
-\setlist{nosep}
-\setlist[itemize]{leftmargin=2em}
+\setlength{\parskip}{0.4ex plus 0.2ex minus 0.1ex}
+\setlist{nosep, topsep=0.3ex, itemsep=0.2ex}
+\setlist[itemize]{leftmargin=2em, label=\textcolor{Primary}{\textbullet}}
 \setlist[enumerate]{leftmargin=2em}
 
 % Pandoc 生成的紧凑列表支持
 \providecommand{\tightlist}{\setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+% Pandoc 行内代码透传命令
+\providecommand{\passthrough}[1]{#1}
 
-% 页眉页脚：显示章/节题名
+% ══════════════════════════════════════════
+% 页眉页脚
+% ══════════════════════════════════════════
 \usepackage{fancyhdr}
 \pagestyle{fancy}
 \fancyhf{}
-\fancyhead[LE]{\small \leftmark}
-\fancyhead[RO]{\small \rightmark}
-\fancyfoot[C]{\thepage}
+\fancyhead[LE]{\small\sffamily\textcolor{Primary}{\leftmark}}
+\fancyhead[RO]{\small\sffamily\textcolor{TextGray}{\rightmark}}
+\fancyfoot[C]{\sffamily\textcolor{Primary}{\textbf{·}~\thepage~\textbf{·}}}
 \renewcommand{\headrulewidth}{0.4pt}
-\setlength{\headheight}{14.5pt}
-
-% 超链接与书签
-\usepackage{xurl}
-\usepackage{hyperref}
-\hypersetup{colorlinks=true, linkcolor=black, citecolor=black, urlcolor=Accent, pdfborder={0 0 0}}
+\renewcommand{\headrule}{\hbox to\headwidth{\color{PrimaryLight}\leaders\hrule height \headrulewidth\hfill}}
 
 % 溢出容错
 \tolerance=1000
@@ -131,18 +355,71 @@
 % HTML 标签展示（避免依赖额外宏包）
 \newcommand{\htmltag}[1]{\texttt{\textless{}#1\textgreater{}}}
 
+% TikZ 图形库
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, shapes.misc, shapes.symbols, arrows.meta, positioning, calc, decorations.pathreplacing, decorations.markings, decorations.pathmorphing, fit, backgrounds}
+
+% 参考文献管理
+\usepackage[
+  backend=biber,
+  style=numeric-comp,
+  sorting=nyt,
+  natbib=true
+]{biblatex}
+\addbibresource{references.bib}
+
+% 引用格式：上标数字
+\DeclareCiteCommand{\cite}[\mkbibsuperscript]
+  {\usebibmacro{cite:init}%
+   \let\multicitedelim=\supercitedelim}
+  {\usebibmacro{citeindex}%
+   \usebibmacro{cite:comp}}
+  {}
+  {\usebibmacro{cite:dump}}
+
+% 超链接与书签（必须放在最后）
+\usepackage{xurl}
+\usepackage{hyperref}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=PrimaryDark,
+  citecolor=PrimaryDark,
+  urlcolor=Accent,
+  pdfborder={0 0 0},
+  pdftitle={智慧水利平台架构与开发},
+  pdfauthor={编者},
+  pdfsubject={水利工程专业教材},
+}
+
 \begin{document}
 
-% 前置部分
-\frontmatter
-% 前言置于目录之前（不编号）
-\input{chapters/preface.tex}
-\newpage
-\tableofcontents
-\newpage
+% ══════════════════════════════════════════
+% TikZ 图表定义库
+% ══════════════════════════════════════════
+\input{tikz-diagrams.tex}
 
+% ══════════════════════════════════════════
+% 前置部分
+% ══════════════════════════════════════════
+\frontmatter
+\pagestyle{plain}
+
+% 前言
+\input{chapters/preface.tex}
+\cleardoublepage
+
+% 目录
+{
+\pagestyle{plain}
+\tableofcontents
+}
+\cleardoublepage
+
+% ══════════════════════════════════════════
 % 正文
+% ══════════════════════════════════════════
 \mainmatter
+\pagestyle{fancy}
 \input{chapters/chapter01.tex}
 \input{chapters/chapter02.tex}
 \input{chapters/chapter03.tex}
@@ -152,5 +429,12 @@
 \input{chapters/chapter07.tex}
 \input{chapters/chapter08.tex}
 \input{chapters/chapter09.tex}
+
+% ══════════════════════════════════════════
+% 参考文献
+% ══════════════════════════════════════════
+\backmatter
+\cleardoublepage
+\printbibliography[heading=bibintoc,title={参考文献}]
 
 \end{document}

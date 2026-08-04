@@ -1,0 +1,514 @@
+% ════════════════════════════════════════════════════════════════
+% TikZ 图表定义库 — 精确还原+配色美化
+% 配色：Primary(#1565C0) PrimaryLight(#E3F2FD) PrimaryDark(#0D47A1) Accent(#FF6F00)
+% ════════════════════════════════════════════════════════════════
+
+% ──────────────────────────────────────
+% 2-1 瀑布模型 — 阶梯式，左阶段+右文档
+% ──────────────────────────────────────
+\newcommand{\waterfallModel}{%
+\begin{tikzpicture}[>=Stealth, 
+  stage/.style={draw=Primary, fill=PrimaryLight, rounded corners=2pt,
+    minimum width=2.6cm, minimum height=0.72cm, font=\small\bfseries, text=PrimaryDark},
+  doc/.style={draw=Primary!50, fill=white, rounded corners=2pt,
+    minimum width=2.4cm, minimum height=0.65cm, font=\small, text=Primary},
+  sarr/.style={->, thick, Primary},
+  darr/.style={->, densely dashed, Primary!60},
+]
+  % 左侧阶段
+  \node[stage] (s1) at (0,   0)    {系统需求分析};
+  \node[stage] (s2) at (0.9, -1.15){软件需求分析};
+  \node[stage] (s3) at (1.8, -2.3) {系统设计};
+  \node[stage] (s4) at (2.7, -3.45){软件编码};
+  \node[stage] (s5) at (3.6, -4.6) {系统测试};
+  \node[stage] (s6) at (4.5, -5.75){软件维护};
+  % 右侧文档
+  \node[doc] (d1) at (5.8, -0.55) {需求说明书};
+  \node[doc] (d2) at (6.7, -1.7)  {设计说明书};
+  \node[doc] (d3) at (7.6, -2.85) {程序清单};
+  \node[doc] (d4) at (8.5, -4.0)  {测试报告};
+  \node[doc] (d5) at (9.4, -5.15) {软件维护报告};
+  % 阶段连线
+  \draw[sarr] (s1.south) -- (s2.north);
+  \draw[sarr] (s2.south) -- (s3.north);
+  \draw[sarr] (s3.south) -- (s4.north);
+  \draw[sarr] (s4.south) -- (s5.north);
+  \draw[sarr] (s5.south) -- (s6.north);
+  % 阶段→文档
+  \draw[darr] (s2.east) -- (d1.west);
+  \draw[darr] (s3.east) -- (d2.west);
+  \draw[darr] (s4.east) -- (d3.west);
+  \draw[darr] (s5.east) -- (d4.west);
+  \draw[darr] (s6.east) -- (d5.west);
+\end{tikzpicture}%
+}
+
+% ──────────────────────────────────────
+% 2-2 原型模型 — 阶梯+左侧多条反馈回路
+% ──────────────────────────────────────
+\newcommand{\prototypeModel}{%
+\begin{tikzpicture}[>=Stealth,
+  box/.style={draw=Primary, fill=PrimaryLight, rounded corners=2pt,
+    minimum width=2.4cm, minimum height=0.7cm, font=\small\bfseries, text=PrimaryDark},
+  arr/.style={->, thick, Primary},
+  back/.style={->, thick, Accent},
+]
+  % 上方：需求分析
+  \node[box] (a) at (3, 0)      {需求分析};
+  % 右侧：快速设计
+  \node[box] (b) at (6.5, -1.5) {快速设计};
+  % 右下：建立原型
+  \node[box] (c) at (6.5, -3.5) {建立原型};
+  % 下方：用户评价原型
+  \node[box] (d) at (3, -5)     {用户评价原型};
+  % 左下：修改原型
+  \node[box] (e) at (-0.5,-3.5) {修改原型};
+  % 左侧：出口
+  \node[box, fill=Accent!15, draw=Accent] (f) at (-0.5,-1.5) {生产产品};
+  % 正向箭头（顺时针迭代环）
+  \draw[arr] (a.east) -- (b.north west);
+  \draw[arr] (b.south) -- (c.north);
+  \draw[arr] (c.south west) -- (d.east);
+  \draw[arr] (d.west) -- (e.south east);
+  % 回溯箭头（从"修改原型"回到"快速设计"继续迭代）
+  \draw[back, thick] (e.north) -- (a.south west)
+    node[midway, left, font=\scriptsize, text=Accent] {需求调整};
+  % 满意后退出：从"用户评价原型"到"生产产品"
+  \draw[arr, densely dashed] (d.north west) -- (f.south)
+    node[midway, left, font=\scriptsize, text=PrimaryDark] {用户满意};
+  % 迭代标注
+  \node[font=\scriptsize, text=Accent, align=center] at (3, -2.5) {迭代\\循环};
+\end{tikzpicture}%
+}
+
+% ──────────────────────────────────────
+% 2-3 增量构造模型 — 椭圆树形
+% ──────────────────────────────────────
+\newcommand{\incrementalModel}{%
+\begin{tikzpicture}[>=Stealth, 
+  ell/.style={draw=Primary, fill=PrimaryLight, ellipse,
+    minimum width=1.9cm, minimum height=0.85cm, font=\small\bfseries, text=PrimaryDark},
+  arr/.style={->, thick, Primary},
+  harr/.style={->, thick, Accent, densely dashed},
+]
+  \node[ell] (req) at (2, 0) {需求分析};
+  \node[ell] (des) at (2, -1.8) {设计};
+  \node[ell] (c1) at (-0.5, -3.8) {编码1};
+  \node[ell] (c2) at (2,   -3.8) {编码2};
+  \node[ell] (c3) at (4.5, -3.8) {编码3};
+  \node[ell] (t1) at (-0.5, -5.6) {测试1};
+  \node[ell] (t2) at (2,   -5.6) {测试2};
+  \node[ell] (t3) at (4.5, -5.6) {测试3};
+  \draw[arr] (req) -- (des);
+  \draw[arr] (des) -- (c1);
+  \draw[arr] (des) -- (c2);
+  \draw[arr] (des) -- (c3);
+  \draw[arr] (c1) -- (t1);
+  \draw[arr] (c2) -- (t2);
+  \draw[arr] (c3) -- (t3);
+  \draw[harr] (c1.east) -- (c2.west);
+  \draw[harr] (c2.east) -- (c3.west);
+\end{tikzpicture}%
+}
+
+% ──────────────────────────────────────
+% 2-4 演化提交模型 — 数字方块阶梯
+% ──────────────────────────────────────
+\newcommand{\evolutionaryModel}{%
+\begin{tikzpicture}[>=Stealth, 
+  blk/.style={draw=Primary, fill=PrimaryLight, minimum size=0.72cm,
+    font=\small\bfseries, text=PrimaryDark},
+  arr/.style={->, thick, Primary},
+  lbl/.style={font=\small\bfseries, text=Accent},
+]
+  \node[blk](b1) at(0,0){1}; \node[blk](b2) at(1.1,0){2};
+  \node[blk](b3) at(2.2,-0.9){3}; \node[blk](b4) at(3.3,-0.9){4};
+  \node[blk](b5) at(0,-1.8){5}; \node[blk](b6) at(1.1,-1.8){6};
+  \node[blk](b7) at(2.2,-2.7){7}; \node[blk](b8) at(3.3,-2.7){8};
+  \node[blk](b9) at(0,-3.6){9}; \node[blk](b10) at(1.1,-3.6){10};
+  \node[blk](b11) at(2.2,-4.5){11}; \node[blk](b12) at(3.3,-4.5){12};
+  % 横向
+  \draw[arr](b1)--(b2); \draw[arr](b3)--(b4);
+  \draw[arr](b5)--(b6); \draw[arr](b7)--(b8);
+  \draw[arr](b9)--(b10); \draw[arr](b11)--(b12);
+  \draw[arr](b2)--(b3); \draw[arr](b6)--(b7); \draw[arr](b10)--(b11);
+  % 纵向
+  \draw[arr](b1)--(b5); \draw[arr](b5)--(b9);
+  % 标注
+  \node[lbl, left=3pt of b9] {需求分析};
+  \node[lbl] at(1.1,-5.2) {设计};
+  \node[lbl] at(2.2,-5.2) {编码};
+  \node[lbl] at(3.3,-5.2) {测试};
+\end{tikzpicture}%
+}
+
+% ──────────────────────────────────────
+% 2-5 螺旋模型 — 四象限+同心弧线
+% ──────────────────────────────────────
+\newcommand{\spiralModel}{%
+\begin{tikzpicture}[>=Stealth, scale=0.72, every node/.style={font=\footnotesize}]
+  % 坐标轴
+  \draw[thick, Primary!40] (-5.8,0) -- (5.8,0);
+  \draw[thick, Primary!40] (0,-5.5) -- (0,5.5);
+  % 象限标注（四角）
+  \node[font=\small\bfseries, text=PrimaryDark] at (-3.2, 5.3) {计划};
+  \node[font=\small\bfseries, text=PrimaryDark] at (3.2,  5.3) {风险分析};
+  \node[font=\small\bfseries, text=PrimaryDark] at (-3.2,-5.3) {用户评价};
+  \node[font=\small\bfseries, text=PrimaryDark] at (3.2, -5.3) {工程};
+  % 同心螺旋弧（四段半圆拼接，每圈半径递增）
+  \foreach \r/\R in {1.0/1.5, 2.0/2.5, 3.0/3.5, 4.0/4.5} {
+    \draw[thick, Primary, ->]
+      (0,\r) arc[start angle=90, end angle=0, radius=\r]
+      arc[start angle=360, end angle=270, radius={(\r+\R)/2}]
+      arc[start angle=270, end angle=180, radius=\R]
+      arc[start angle=180, end angle=90, radius=\R];
+  }
+  % 文字标注（放置在螺旋外侧避免重叠）
+  \node[text=PrimaryDark, align=center, font=\tiny] at (-2.2, 1.6) {初始需求分析\\与项目计划};
+  \node[text=PrimaryDark, align=center, font=\tiny] at (2.2, 1.6)  {基于初始需求\\的风险分析};
+  \node[text=PrimaryDark, align=center, font=\tiny] at (-4.5, 3.8) {基于用户说明\\的计划};
+  \node[text=PrimaryDark, align=center, font=\tiny] at (4.5, 3.8)  {基于反馈\\的风险分析};
+  \node[text=PrimaryDark, font=\tiny] at (1.8, -1.8) {初始原型};
+  \node[text=PrimaryDark, font=\tiny] at (-1.8,-1.8) {用户评价};
+  \node[text=PrimaryDark, font=\tiny] at (4.2, -4.2) {工作系统};
+  \node[text=PrimaryDark, font=\tiny] at (-4.2,-4.2) {用户评价};
+  \node[text=Accent, font=\tiny\bfseries] at (4.8, -5.0) {决策继续与否};
+\end{tikzpicture}%
+}
+
+% ──────────────────────────────────────
+% 2-6 喷泉模型 — 3D碟盘层叠+环绕箭头
+% ──────────────────────────────────────
+\newcommand{\fountainModel}{%
+\begin{tikzpicture}[>=Stealth, scale=0.95]
+  % 绘制一个3D碟盘：参数 #1=y坐标, #2=标签, #3=填充色
+  % 碟盘由上椭圆弧+下椭圆弧+侧面构成
+  \foreach \yy/\lbl/\fc in {
+    0/分析/PrimaryLight,
+    1.8/设计/PrimaryLight,
+    3.6/编程/PrimaryLight,
+    5.4/测试/PrimaryLight,
+    7.2/集成/PrimaryLight,
+    9.0/演化/Accent!15%
+  }{
+    % 碟盘底部椭圆弧
+    \fill[\fc, draw=Primary, thick]
+      (-1.4, \yy) arc[start angle=180, end angle=360, x radius=1.4, y radius=0.35]
+      -- (1.4, \yy+0.45)
+      arc[start angle=0, end angle=180, x radius=1.4, y radius=0.35]
+      -- cycle;
+    % 碟盘顶部椭圆弧（前半部分覆盖）
+    \draw[Primary, thick]
+      (-1.4, \yy+0.45) arc[start angle=180, end angle=360, x radius=1.4, y radius=0.35];
+    % 标签文字
+    \node[font=\small\bfseries, text=PrimaryDark] at (0, \yy+0.25) {\lbl};
+    % 两侧环绕箭头
+    \draw[->, Accent, thick]
+      (1.6, \yy+0.55) arc[start angle=30, end angle=-210, x radius=0.3, y radius=0.22];
+    \draw[<-, Accent, thick]
+      (-1.6, \yy+0.55) arc[start angle=150, end angle=390, x radius=0.3, y radius=0.22];
+  }
+  % 底部入口箭头
+  \draw[->, thick, Primary] (0, -0.8) -- (0, -0.05);
+  % 顶部出口箭头
+  \draw[->, thick, Primary] (0, 9.8) -- (0, 10.4);
+  % 层间连接（隐含的上升流）
+  \foreach \ya/\yb in {0.8/1.8, 2.6/3.6, 4.4/5.4, 6.2/7.2, 8.0/9.0} {
+    \draw[->, thick, Primary] (0, \ya) -- (0, \yb);
+  }
+\end{tikzpicture}%
+}
+
+% ──────────────────────────────────────
+% 2-7 基于知识的模型 — 阶梯+左侧专家系统
+% ──────────────────────────────────────
+\newcommand{\knowledgeBasedModel}{%
+\begin{tikzpicture}[>=Stealth, 
+  box/.style={draw=Primary, fill=PrimaryLight, rounded corners=2pt,
+    minimum width=2.2cm, minimum height=0.7cm, font=\small\bfseries, text=PrimaryDark},
+  expert/.style={draw=Accent, fill=Accent!10, rounded corners=2pt,
+    minimum width=2.4cm, minimum height=0.7cm, font=\small, text=Accent!80!black,
+    align=center},
+  arr/.style={->, thick, Primary},
+  earr/.style={->, thick, Accent},
+]
+  % 右侧主流程
+  \node[box] (uc) at (4, 0)       {用户概念};
+  \node[box] (ra) at (4.8, -1.3)  {需求分析};
+  \node[box] (gd) at (5.6, -2.6)  {概要设计};
+  \node[box] (dd) at (6.4, -3.9)  {详细设计};
+  \node[box] (co) at (7.2, -5.2)  {编码};
+  \node[box] (te) at (8.0, -6.5)  {测试};
+  \node[box] (ma) at (8.8, -7.8)  {维护};
+  % 左侧专家系统
+  \node[expert] (e1) at (0.5, -0.65) {支持需求分析\\专家系统};
+  \node[expert] (e2) at (1.3, -3.25) {支持设计\\专家系统};
+  \node[expert] (e3) at (2.1, -5.85) {支持测试\\专家系统};
+  \node[expert] (e4) at (2.9, -7.8)  {支持维护\\专家系统};
+  % 主流程箭头
+  \draw[arr] (uc)--(ra); \draw[arr] (ra)--(gd); \draw[arr] (gd)--(dd);
+  \draw[arr] (dd)--(co); \draw[arr] (co)--(te); \draw[arr] (te)--(ma);
+  % 专家系统连接
+  \draw[earr] (e1.east) -- (ra.west);
+  \draw[earr] (e2.east) -- (dd.west);
+  \draw[earr] (e3.east) -- (te.west);
+  \draw[earr] (e4.east) -- (ma.west);
+\end{tikzpicture}%
+}
+
+% ──────────────────────────────────────
+% 2-8 变换模型 — M₀→M₁→…→Mₙ
+% ──────────────────────────────────────
+\newcommand{\transformationModel}{%
+\begin{tikzpicture}[>=Stealth, 
+  box/.style={draw=Primary, fill=PrimaryLight, rounded corners=2pt,
+    minimum width=2.6cm, minimum height=0.85cm, font=\small, text=PrimaryDark, align=center},
+  sbox/.style={draw=Primary, fill=PrimaryLight, rounded corners=2pt,
+    minimum width=1.3cm, minimum height=0.85cm, font=\small, text=PrimaryDark},
+  chk/.style={draw=Accent, fill=Accent!10, rounded corners=2pt,
+    minimum width=2cm, minimum height=0.7cm, font=\small\bfseries, text=Accent!80!black},
+  arr/.style={->, thick, Primary},
+  tlbl/.style={font=\scriptsize, text=Accent},
+]
+  \node[chk] (check) at (-1.5, 1.4)  {模型检查};
+  \node[box] (m0) at (0, 0) {软件需求形式\\化说明($M_0$)};
+  \node[box] (m1) at (4, 0)  {软件设计形式\\化说明($M_1$)};
+  \node[sbox] (m2) at (7.2, 0) {$M_2$};
+  \node[font=\Large, text=Primary] at (8.6, 0) {$\cdots$};
+  \node[sbox] (mn) at (10, 0) {程序($M_n$)};
+  \draw[arr] (check.south) -- ([yshift=2pt]m0.north);
+  \draw[arr] (m0) -- (m1);
+  \draw[arr] (m1) -- (m2);
+  \draw[arr] (m2) -- (8.1, 0);
+  \draw[arr] (9.1, 0) -- (mn);
+  % 变换标注
+  \node[tlbl] at (2,   -0.7) {变换};
+  \node[tlbl] at (5.6, -0.7) {变换};
+  \node[tlbl] at (8.6, -0.7) {变换};
+\end{tikzpicture}%
+}
+
+% ──────────────────────────────────────
+% 2-9 水文监测数据模型 ER 图
+% ──────────────────────────────────────
+\newcommand{\bankERDiagram}{%
+\begin{tikzpicture}[>=Stealth, 
+  entity/.style={draw=Primary, fill=PrimaryLight, rounded corners=1pt,
+    minimum width=1.5cm, minimum height=0.65cm, font=\small\bfseries, text=PrimaryDark},
+  rel/.style={draw=Primary, fill=Primary!8, diamond, aspect=2.2,
+    minimum width=0.6cm, font=\small, text=PrimaryDark, inner sep=2pt},
+  attr/.style={draw=Primary!50, fill=white, ellipse,
+    minimum width=1.1cm, minimum height=0.45cm, font=\scriptsize, text=PrimaryDark, inner sep=1pt},
+  ln/.style={thick, Primary!70},
+  card/.style={font=\scriptsize\bfseries, text=Accent},
+  scale=0.88,
+]
+  % === 测站 ===
+  \node[entity] (user) at (3.5, 0) {测站};
+  \node[attr] (a1) at (1.2, 1.0) {站码};
+  \node[attr] (a2) at (2.6, 1.2) {站名};
+  \node[attr] (a3) at (4.4, 1.2) {所属流域};
+  \node[attr] (a4) at (5.8, 1.0) {位置};
+  \draw[ln](user)--(a1); \draw[ln](user)--(a2); \draw[ln](user)--(a3); \draw[ln](user)--(a4);
+  % === 配置 ===
+  \node[rel] (own) at (3.5, -1.6) {配置};
+  \draw[ln](user)--node[card,right]{1}(own);
+  % === 传感器 ===
+  \node[entity] (acct) at (3.5, -3.2) {传感器};
+  \draw[ln](own)--node[card,right]{N}(acct);
+  \node[attr] (b1) at (1.0, -2.8) {设备编号};
+  \node[attr] (b2) at (1.0, -3.8) {安装日期};
+  \node[attr] (b3) at (6.0, -2.8) {监测项};
+  \node[attr] (b4) at (6.0, -3.8) {状态};
+  \draw[ln](acct)--(b1); \draw[ln](acct)--(b2); \draw[ln](acct)--(b3); \draw[ln](acct)--(b4);
+  % === 采集 ===
+  \node[rel] (dep) at (1.2, -5.2) {采集};
+  \draw[ln](acct)--node[card,left]{1}(dep);
+  \node[entity] (ds) at (1.2, -6.8) {采样记录};
+  \draw[ln](dep)--node[card,left]{N}(ds);
+  \node[attr] (c1) at (-1.5, -5.8) {记录编号};
+  \node[attr] (c2) at (-1.5, -6.8) {测值};
+  \node[attr] (c3) at (-1.5, -7.8) {单位};
+  \node[attr] (c4) at (0.2, -8.3) {设备编号};
+  \node[attr] (c5) at (2.2, -8.3) {采样时间};
+  \node[attr] (c6) at (3.6, -7.6) {质量标记};
+  \draw[ln](ds)--(c1); \draw[ln](ds)--(c2); \draw[ln](ds)--(c3);
+  \draw[ln](ds)--(c4); \draw[ln](ds)--(c5); \draw[ln](ds)--(c6);
+  % === 触发 ===
+  \node[rel] (wit) at (5.8, -5.2) {触发};
+  \draw[ln](acct)--node[card,right]{1}(wit);
+  \node[entity] (ws) at (5.8, -6.8) {告警记录};
+  \draw[ln](wit)--node[card,right]{N}(ws);
+  \node[attr] (d1) at (5.0, -8.3) {记录编号};
+  \node[attr] (d2) at (7.8, -5.8) {告警级别};
+  \node[attr] (d3) at (7.8, -6.8) {告警时间};
+  \node[attr] (d4) at (7.0, -8.3) {处置状态};
+  \draw[ln](ws)--(d1); \draw[ln](ws)--(d3); \draw[ln](ws)--(d4); \draw[ln](wit)--(d2);
+\end{tikzpicture}%
+}
+
+% ──────────────────────────────────────
+% 2-10 自顶向下逐层分解（3D透视层叠）
+% ──────────────────────────────────────
+\newcommand{\topDownDecomposition}{%
+\begin{tikzpicture}[>=Stealth, scale=0.85,
+  nd/.style={draw=Primary, fill=PrimaryLight, circle, minimum size=0.55cm,
+    font=\scriptsize\bfseries, text=PrimaryDark, inner sep=1pt},
+  ln/.style={thick, Primary, ->},
+  lbl/.style={font=\small\bfseries, text=PrimaryDark},
+]
+  % === 顶层平面（倾斜平行四边形）===
+  \begin{scope}[shift={(3.5, 0)}]
+    \fill[PrimaryLight!50, draw=Primary, thick]
+      (-2, 0.4) -- (2, 0.4) -- (2.8, -0.4) -- (-1.2, -0.4) -- cycle;
+    \node[nd] (t1) at (0, 0) {P};
+    \node[lbl] at (3.5, 0) {顶层};
+  \end{scope}
+  % === 第1层平面 ===
+  \begin{scope}[shift={(3, -2.5)}]
+    \fill[PrimaryLight!35, draw=Primary, thick]
+      (-2.8, 0.5) -- (2.8, 0.5) -- (3.6, -0.5) -- (-2, -0.5) -- cycle;
+    \node[nd] (a1) at (-1.5, 0) {1};
+    \node[nd] (a2) at (0.3, 0) {2};
+    \node[nd] (a3) at (2.1, 0) {3};
+    % 层内连线
+    \draw[thick, Primary, ->] (a1) -- (a2);
+    \draw[thick, Primary, ->] (a2) -- (a3);
+    \node[lbl] at (4.3, 0) {1层};
+  \end{scope}
+  % === 第2层平面 ===
+  \begin{scope}[shift={(2.5, -5)}]
+    \fill[PrimaryLight!20, draw=Primary, thick]
+      (-3.2, 0.6) -- (3.8, 0.6) -- (4.6, -0.6) -- (-2.4, -0.6) -- cycle;
+    \node[nd] (b1) at (-2, 0) {1.1};
+    \node[nd] (b2) at (-0.5, 0) {1.2};
+    \node[nd] (b3) at (1, 0) {2.1};
+    \node[nd] (b4) at (2.5, 0) {2.2};
+    \node[nd] (b5) at (4, 0) {3.1};
+    % 层内连线
+    \draw[thick, Primary, ->] (b1) -- (b2);
+    \draw[thick, Primary, ->] (b3) -- (b4);
+    \node[lbl] at (5.3, 0) {2层};
+  \end{scope}
+  % === 跨层连线 ===
+  \draw[ln, dashed] (t1) -- (a1);
+  \draw[ln, dashed] (t1) -- (a2);
+  \draw[ln, dashed] (t1) -- (a3);
+  \draw[ln, dashed] (a1) -- (b1);
+  \draw[ln, dashed] (a1) -- (b2);
+  \draw[ln, dashed] (a2) -- (b3);
+  \draw[ln, dashed] (a2) -- (b4);
+  \draw[ln, dashed] (a3) -- (b5);
+\end{tikzpicture}%
+}
+
+% ──────────────────────────────────────
+% 2-12 告警处置流程图
+% ──────────────────────────────────────
+\newcommand{\orderProcessFlowchart}{%
+\begin{tikzpicture}[>=Stealth, 
+  box/.style={draw=Primary, fill=PrimaryLight, rounded corners=2pt,
+    minimum width=3cm, minimum height=0.85cm, font=\small, text=PrimaryDark},
+  arr/.style={->, thick, Primary},
+]
+  % 第一行
+  \node[box](a1) at(0,   0)  {监测数据上报};
+  \node[box](a2) at(4.2, 0)  {数据有效性校验};
+  \node[box](a3) at(8.4, 0)  {告警规则匹配};
+  % 第二行
+  \node[box](b1) at(0,  -1.8) {监测数据入库};
+  \node[box](b2) at(4.2,-1.8) {告警事件生成};
+  \node[box, draw=Accent, fill=Accent!10](b3) at(8.4,-1.8) {异常数据退回复核};
+  % 第三行
+  \node[box](c1) at(0,  -3.6) {值班人员确认};
+  \node[box](c2) at(4.2,-3.6) {生成处置通知};
+  \node[box](c3) at(8.4,-3.6) {告警处置闭环};
+  % 箭头
+  % 第一行：左→右
+  \draw[arr](a1)--(a2); \draw[arr](a2)--(a3);
+  % 告警规则匹配向下汇入告警事件生成
+  \draw[arr](a3.south) -- ++(0,-0.5) -| (b2.north);
+  % 告警事件生成后分别进入数据入库与异常复核
+  \draw[arr](b2)--(b1); \draw[arr](b2)--(b3);
+  % 告警事件生成后下传到处置通知
+  \draw[arr](b2)--(c2);
+  % 第三行：右→左
+  \draw[arr](c3)--(c2); \draw[arr](c2)--(c1);
+\end{tikzpicture}%
+}
+
+% ──────────────────────────────────────
+% 顶层数据流图 Level 0
+% ──────────────────────────────────────
+\newcommand{\dfdLevelZero}{%
+\begin{tikzpicture}[>=Stealth, 
+  ext/.style={draw=PrimaryDark, fill=PrimaryDark!8, rounded corners=1pt,
+    minimum width=2cm, minimum height=0.8cm, font=\small\bfseries, text=PrimaryDark},
+  proc/.style={draw=Primary, fill=PrimaryLight, rounded corners=6pt,
+    minimum width=3cm, minimum height=0.8cm, font=\small, text=PrimaryDark},
+  store/.style={draw=Primary!60, fill=Primary!5,
+    minimum width=3.2cm, minimum height=0.75cm, font=\small, text=PrimaryDark},
+  arr/.style={->, thick, Primary},
+]
+  \node[ext]  (ent) at(0,    0)    {监测站点};
+  \node[proc] (p1)  at(4.5,  0)    {过程1: 监测数据接收};
+  \node[store](s1)  at(10,   0)    {数据存储: 原始监测数据};
+  \node[proc] (p2)  at(4.5, -2.3)  {过程2: 告警分析处理};
+  \node[store](s2)  at(10,  -2.3)  {数据存储: 告警处置结果};
+  \node[proc] (p3)  at(4.5, -4.6)  {过程3: 通知值班人员};
+  \draw[arr](ent)--(p1); \draw[arr](p1)--(s1);
+  \draw[arr](p1)--(p2); \draw[arr](p2)--(s2);
+  \draw[arr](p2)--(p3); \draw[arr](p3.west)-|([xshift=-0.5cm]ent.south)-- (ent.south);
+\end{tikzpicture}%
+}
+
+% ──────────────────────────────────────
+% 子系统数据流图 Level 1
+% ──────────────────────────────────────
+\newcommand{\dfdLevelOne}{%
+\begin{tikzpicture}[>=Stealth, 
+  proc/.style={draw=Primary, fill=PrimaryLight, rounded corners=6pt,
+    minimum width=3.4cm, minimum height=0.8cm, font=\small, text=PrimaryDark},
+  store/.style={draw=Primary!60, fill=Primary!5,
+    minimum width=3.4cm, minimum height=0.75cm, font=\small, text=PrimaryDark},
+  arr/.style={->, thick, Primary},
+]
+  \node[proc] (p1)  at(3.5, 0)     {过程1: 监测数据接收};
+  \node[proc] (df)  at(3.5, -1.8)  {数据流: 监测数据};
+  \node[proc] (p11) at(0.5, -4)    {过程1.1: 检查数据有效性};
+  \node[store](s1)  at(7.5, -4)    {数据存储: 数据校验结果};
+  \node[proc] (p12) at(0.5, -6.2)  {过程1.2: 存储监测数据};
+  \node[store](s2)  at(7.5, -6.2)  {数据存储: 监测数据};
+  \draw[arr](p1)--(df); \draw[arr](df)--(p11);
+  \draw[arr](p11)--(s1); \draw[arr](p11)--(p12);
+  \draw[arr](p12)--(s2);
+\end{tikzpicture}%
+}
+
+% ──────────────────────────────────────
+% DFD 符号（表格小图标）— 带配色
+% ──────────────────────────────────────
+\newcommand{\dfdProcess}{\tikz[baseline=-3pt]{\draw[Primary, thick](0,0)rectangle(0.9,0.4);}}
+\newcommand{\dfdIO}{\tikz[baseline=-3pt]{\draw[Primary, thick](0.15,0)--(0.95,0)--(0.8,0.4)--(0,0.4)--cycle;}}
+\newcommand{\dfdConnector}{\tikz[baseline=-3pt]{\draw[Primary, thick](0.3,0.2)circle(0.2);}}
+\newcommand{\dfdOffPageConnector}{\tikz[baseline=-3pt]{\draw[Primary, thick](0,0.4)--(0.6,0.4)--(0.6,0.15)--(0.3,0)--(0,0.15)--cycle;}}
+\newcommand{\dfdDataFlow}{\tikz[baseline=-3pt]{\draw[->, Primary, thick](0,0.2)--(0.9,0.2);}}
+\newcommand{\dfdDocument}{\tikz[baseline=-3pt]{\draw[Primary, thick](0,0.1)to[out=-10,in=190](0.85,0.1)--(0.85,0.5)--(0,0.5)--cycle;}}
+\newcommand{\dfdOnlineStorage}{\tikz[baseline=-3pt]{\draw[Primary, thick](0,0)--(0.85,0)--(0.85,0.4)--(0,0.4);}}
+\newcommand{\dfdDisk}{\tikz[baseline=-3pt]{%
+  \draw[Primary, thick](0,0.12)--(0,0.38);
+  \draw[Primary, thick](0.75,0.12)--(0.75,0.38);
+  \draw[Primary, thick](0,0.38)to[out=30,in=150](0.75,0.38);
+  \draw[Primary, thick](0,0.12)to[out=-30,in=-150](0.75,0.12);
+  \draw[Primary, thick](0,0.38)to[out=-30,in=-150](0.75,0.38);
+}}
+\newcommand{\dfdDisplay}{\tikz[baseline=-3pt]{\draw[Primary, thick](0.15,0)--(0.7,0)to[out=0,in=0](0.7,0.45)--(0.15,0.45)--(0,0.22)--cycle;}}
+\newcommand{\dfdManualInput}{\tikz[baseline=-3pt]{\draw[Primary, thick](0,0)--(0.85,0)--(0.72,0.4)--(0.13,0.4)--cycle;}}
+\newcommand{\dfdManualOperation}{\tikz[baseline=-3pt]{\draw[Primary, thick](0.13,0)--(0.72,0)--(0.85,0.4)--(0,0.4)--cycle;}}
+\newcommand{\dfdAuxiliary}{\tikz[baseline=-3pt]{\draw[Primary, thick](0,0)rectangle(0.5,0.5);}}
+\newcommand{\dfdCommunicationLink}{\tikz[baseline=-3pt]{%
+  \draw[Primary, thick, decorate, decoration={zigzag, segment length=4pt, amplitude=2pt}]
+    (0, 0.2) -- (0.85, 0.2);
+}}
+
+\endinput

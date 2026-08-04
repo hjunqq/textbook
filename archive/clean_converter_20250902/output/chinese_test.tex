@@ -1,0 +1,282 @@
+% 中文优化LaTeX模板 - 专门解决中文识别问题
+% 智慧水利教材专用
+
+\documentclass[UTF8,12pt,a4paper,oneside]{ctexbook}
+
+% ==== 中文字体配置 ====
+% 确保中文字体正确设置
+\setCJKmainfont{SimSun}[
+    BoldFont=SimHei,
+    ItalicFont=KaiTi
+]
+\setCJKsansfont{SimHei}
+\setCJKmonofont{FangSong}
+
+% 英文字体配置
+\setmainfont{Times New Roman}
+\setsansfont{Arial}
+\setmonofont{Consolas}
+
+% ==== 基础包 ====
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{amsmath}
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{array}
+
+% ==== 页面设置 ====
+\usepackage[
+    top=2.5cm,
+    bottom=2.5cm,
+    left=3cm,
+    right=2.5cm
+]{geometry}
+
+% 行距
+\usepackage{setspace}
+\onehalfspacing
+
+% ==== 超链接 ====
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    urlcolor=blue,
+    citecolor=blue,
+    bookmarksopen=true,
+    pdfstartview=FitH,
+    unicode=true  % 重要：支持Unicode字符
+}
+
+% ==== 代码高亮 ====
+\usepackage{listings}
+\usepackage{xcolor}
+
+% 定义颜色
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+% 基本代码样式
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{blue},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2,
+    frame=single,
+    rulecolor=\color{black},
+    extendedchars=false,  % 避免扩展字符问题
+    inputencoding=utf8    % 明确指定UTF-8输入
+}
+
+\lstset{style=mystyle}
+
+% 特定语言设置
+\lstdefinestyle{javascript}{
+    style=mystyle,
+    language=JavaScript,
+    morekeywords={const, let, var, function, async, await}
+}
+
+\lstdefinestyle{python}{
+    style=mystyle,
+    language=Python,
+    morekeywords={def, class, import, from, as}
+}
+
+\lstdefinestyle{csharp}{
+    style=mystyle,
+    language=[Sharp]C,
+    morekeywords={var, async, await, public, private}
+}
+
+% ==== 图片设置 ====
+\graphicspath{{images/}}
+\setkeys{Gin}{width=0.8\textwidth}
+
+% ==== 标题设置 ====
+\ctexset{
+    chapter = {
+        format = \Large\bfseries\centering\color{blue},
+        beforeskip = 20pt,
+        afterskip = 30pt
+    },
+    section = {
+        format = \large\bfseries\color{blue},
+        beforeskip = 15pt,
+        afterskip = 15pt
+    },
+    subsection = {
+        format = \normalsize\bfseries,
+        beforeskip = 12pt,
+        afterskip = 12pt
+    }
+}
+
+% ==== 文档信息 ====
+\title{\textbf{智慧水利平台架构与开发}}
+\author{教材编写组}
+\date{\today}
+
+% ==== 文档开始 ====
+\begin{document}
+
+% 标题页
+\maketitle
+\newpage
+
+% 目录
+\tableofcontents
+\newpage
+
+% 正文内容
+\section{智慧水利平台架构与开发}\label{ux667aux6167ux6c34ux5229ux5e73ux53f0ux67b6ux6784ux4e0eux5f00ux53d1}
+
+\subsection{第一章 概述}\label{ux7b2cux4e00ux7ae0-ux6982ux8ff0}
+
+\subsubsection{1.1 基本概念}\label{ux57faux672cux6982ux5ff5}
+
+\textbf{智慧水利}是运用物联网、云计算、大数据、人工智能等现代信息技术，对水利工程进行智能化管理和运维的新模式。
+
+主要特点包括：
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{数据驱动}：基于海量数据分析决策
+\item
+  \textbf{智能预警}：实时监测水情变化
+\item
+  \textbf{精准调度}：优化水资源配置
+\item
+  \textbf{协同管理}：多部门信息共享
+\end{enumerate}
+
+\subsubsection{1.2 技术架构}\label{ux6280ux672fux67b6ux6784}
+
+系统采用\textbf{分层架构}设计：
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{感知层}：传感器网络、监测设备
+\item
+  \textbf{网络层}：通信传输、数据传递\\
+\item
+  \textbf{数据层}：数据存储、处理分析
+\item
+  \textbf{应用层}：业务功能、用户界面
+\end{itemize}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# 数据采集示例代码}
+\KeywordTok{class}\NormalTok{ WaterDataCollector:}
+    \KeywordTok{def} \FunctionTok{\_\_init\_\_}\NormalTok{(}\VariableTok{self}\NormalTok{, station\_id):}
+        \VariableTok{self}\NormalTok{.station\_id }\OperatorTok{=}\NormalTok{ station\_id}
+        \VariableTok{self}\NormalTok{.sensors }\OperatorTok{=}\NormalTok{ []}
+    
+    \KeywordTok{def}\NormalTok{ collect\_data(}\VariableTok{self}\NormalTok{):}
+        \CommentTok{"""采集水位、流量数据"""}
+\NormalTok{        data }\OperatorTok{=}\NormalTok{ \{}
+            \StringTok{\textquotesingle{}时间\textquotesingle{}}\NormalTok{: datetime.now(),}
+            \StringTok{\textquotesingle{}水位\textquotesingle{}}\NormalTok{: }\VariableTok{self}\NormalTok{.get\_water\_level(),}
+            \StringTok{\textquotesingle{}流量\textquotesingle{}}\NormalTok{: }\VariableTok{self}\NormalTok{.get\_flow\_rate(),}
+            \StringTok{\textquotesingle{}温度\textquotesingle{}}\NormalTok{: }\VariableTok{self}\NormalTok{.get\_temperature()}
+\NormalTok{        \}}
+        \ControlFlowTok{return}\NormalTok{ data}
+    
+    \KeywordTok{def}\NormalTok{ get\_water\_level(}\VariableTok{self}\NormalTok{):}
+        \CommentTok{\# 获取水位数据}
+        \ControlFlowTok{return} \FloatTok{125.6}  \CommentTok{\# 单位：米}
+\end{Highlighting}
+\end{Shaded}
+
+\subsubsection{1.3 发展趋势}\label{ux53d1ux5c55ux8d8bux52bf}
+
+智慧水利发展呈现以下趋势：
+
+\begin{quote}
+\textbf{重要提示}：数字化转型是水利现代化的必由之路。
+\end{quote}
+
+\textbf{发展方向}： - 🌊 全流域一体化管理 - 🤖 人工智能深度应用\\
+- 📱 移动端智能服务 - 🔗 区块链技术应用
+
+\subsection{第二章
+系统设计}\label{ux7b2cux4e8cux7ae0-ux7cfbux7edfux8bbeux8ba1}
+
+\subsubsection{2.1 需求分析}\label{ux9700ux6c42ux5206ux6790}
+
+根据水利部门实际需求，系统需要实现：
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{实时监测}：24小时不间断监控
+\item
+  \textbf{预警预报}：提前发现风险隐患
+\item
+  \textbf{决策支持}：辅助管理决策
+\item
+  \textbf{应急响应}：快速处置突发事件
+\end{enumerate}
+
+\subsubsection{2.2 数据库设计}\label{ux6570ux636eux5e93ux8bbeux8ba1}
+
+核心数据表包括：
+
+\begin{longtable}[]{@{}lll@{}}
+\toprule\noalign{}
+表名 & 说明 & 主要字段 \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+stations & 监测站点 & 站点ID、名称、位置、类型 \\
+sensors & 传感器信息 & 设备ID、型号、参数、状态 \\
+water\_data & 水文数据 & 时间、水位、流量、降雨量 \\
+alerts & 预警信息 & 预警级别、内容、处理状态 \\
+\end{longtable}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{{-}{-} 创建水文数据表}
+\KeywordTok{CREATE} \KeywordTok{TABLE}\NormalTok{ water\_data (}
+    \KeywordTok{id}\NormalTok{ BIGINT }\KeywordTok{PRIMARY} \KeywordTok{KEY}\NormalTok{,}
+\NormalTok{    station\_id }\DataTypeTok{VARCHAR}\NormalTok{(}\DecValTok{50}\NormalTok{) }\KeywordTok{NOT} \KeywordTok{NULL} \KeywordTok{COMMENT} \StringTok{\textquotesingle{}站点ID\textquotesingle{}}\NormalTok{,}
+\NormalTok{    measure\_time DATETIME }\KeywordTok{NOT} \KeywordTok{NULL} \KeywordTok{COMMENT} \StringTok{\textquotesingle{}监测时间\textquotesingle{}}\NormalTok{,}
+\NormalTok{    water\_level }\DataTypeTok{DECIMAL}\NormalTok{(}\DecValTok{10}\NormalTok{,}\DecValTok{2}\NormalTok{) }\KeywordTok{COMMENT} \StringTok{\textquotesingle{}水位(米)\textquotesingle{}}\NormalTok{,}
+\NormalTok{    flow\_rate }\DataTypeTok{DECIMAL}\NormalTok{(}\DecValTok{15}\NormalTok{,}\DecValTok{2}\NormalTok{) }\KeywordTok{COMMENT} \StringTok{\textquotesingle{}流量(立方米/秒)\textquotesingle{}}\NormalTok{,}
+\NormalTok{    rainfall }\DataTypeTok{DECIMAL}\NormalTok{(}\DecValTok{10}\NormalTok{,}\DecValTok{2}\NormalTok{) }\KeywordTok{COMMENT} \StringTok{\textquotesingle{}降雨量(毫米)\textquotesingle{}}\NormalTok{,}
+\NormalTok{    temperature }\DataTypeTok{DECIMAL}\NormalTok{(}\DecValTok{5}\NormalTok{,}\DecValTok{2}\NormalTok{) }\KeywordTok{COMMENT} \StringTok{\textquotesingle{}水温(摄氏度)\textquotesingle{}}\NormalTok{,}
+\NormalTok{    created\_time DATETIME }\KeywordTok{DEFAULT} \FunctionTok{CURRENT\_TIMESTAMP}
+\NormalTok{);}
+\end{Highlighting}
+\end{Shaded}
+
+\subsection{小结}\label{ux5c0fux7ed3}
+
+本章介绍了智慧水利的基本概念、技术架构和发展趋势，为后续章节的深入学习奠定了基础。
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\emph{注：本文档用于测试中文LaTeX转换效果}
+
+\end{document}

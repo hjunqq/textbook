@@ -20,6 +20,7 @@ import argparse
 import logging
 import os
 import re
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -60,7 +61,7 @@ def setup_logging(log_file: Path) -> logging.Logger:
 def find_pandoc() -> str:
     cmd = 'pandoc'
     try:
-        r = subprocess.run([cmd, '--version'], capture_output=True, text=True)
+        r = subprocess.run([cmd, '--version'], capture_output=True, text=True, encoding='utf-8', errors='replace')
         if r.returncode == 0:
             return cmd
     except Exception:
@@ -69,14 +70,45 @@ def find_pandoc() -> str:
 
 
 def find_xelatex() -> str:
-    cmd = 'xelatex'
-    try:
-        r = subprocess.run([cmd, '--version'], capture_output=True, text=True)
-        if r.returncode == 0:
-            return cmd
-    except Exception:
-        pass
-    return r"/mnt/c/texlive/2025/bin/windows/xelatex.exe"
+    candidates = [
+        shutil.which('xelatex'),
+        r"C:\texlive\2025\bin\windows\xelatex.exe",
+        r"C:\texlive\2024\bin\windows\xelatex.exe",
+        r"C:\Program Files\MiKTeX\miktex\bin\x64\xelatex.exe",
+        r"/mnt/c/texlive/2025/bin/windows/xelatex.exe",
+        r"/mnt/c/texlive/2024/bin/windows/xelatex.exe",
+    ]
+    for cmd in candidates:
+        if not cmd:
+            continue
+        try:
+            r = subprocess.run([cmd, '--version'], capture_output=True, text=True, encoding='utf-8', errors='replace')
+            if r.returncode == 0:
+                return cmd
+        except Exception:
+            pass
+    raise FileNotFoundError("未找到 xelatex，可在 PATH 中配置，或安装 TeX Live / MiKTeX。")
+
+
+def find_biber() -> str:
+    candidates = [
+        shutil.which('biber'),
+        r"C:\texlive\2025\bin\windows\biber.exe",
+        r"C:\texlive\2024\bin\windows\biber.exe",
+        r"C:\Program Files\MiKTeX\miktex\bin\x64\biber.exe",
+        r"/mnt/c/texlive/2025/bin/windows/biber.exe",
+        r"/mnt/c/texlive/2024/bin/windows/biber.exe",
+    ]
+    for cmd in candidates:
+        if not cmd:
+            continue
+        try:
+            r = subprocess.run([cmd, '--version'], capture_output=True, text=True, encoding='utf-8', errors='replace')
+            if r.returncode == 0:
+                return cmd
+        except Exception:
+            pass
+    raise FileNotFoundError("未找到 biber，可在 PATH 中配置，或安装包含 biber 的 TeX 发行版。")
 
 
 def remove_outline_block(md_text: str) -> str:
@@ -153,7 +185,7 @@ class ImprovedConverter:
     # ---------- 基础工具 ----------
     def _to_win_path(self, p: Path) -> str:
         try:
-            r = subprocess.run(["wslpath", "-w", str(p)], capture_output=True, text=True)
+            r = subprocess.run(["wslpath", "-w", str(p)], capture_output=True, text=True, encoding='utf-8', errors='replace')
             if r.returncode == 0:
                 return r.stdout.strip()
         except Exception:
@@ -178,7 +210,7 @@ class ImprovedConverter:
             '--to=latex',
             '--listings'
         ]
-        r = subprocess.run(cmd, capture_output=True, text=True)
+        r = subprocess.run(cmd, capture_output=True, text=True, encoding='utf-8', errors='replace')
         if r.returncode != 0:
             self.logger.error(f"Pandoc失败: {md_path}\n{r.stderr}")
             return False
@@ -432,15 +464,26 @@ class ImprovedConverter:
             self.logger.error("main.tex 不存在，无法编译")
             return None
         xelatex = find_xelatex()
+        biber = find_biber()
         # 进入输出目录编译
         cwd = os.getcwd()
         try:
             os.chdir(self.config.output_dir)
-            # 进行三次编译，确保目录/交叉引用/长表宽度等完全稳定
-            for i in range(3):
-                r = subprocess.run([xelatex, '-interaction=nonstopmode', 'main.tex'], capture_output=True, text=True)
+            commands = [
+                ([xelatex, '-interaction=nonstopmode', 'main.tex'], 'XeLaTeX 第 1 遍'),
+                ([biber, 'main'], 'Biber'),
+                ([xelatex, '-interaction=nonstopmode', 'main.tex'], 'XeLaTeX 第 2 遍'),
+                ([xelatex, '-interaction=nonstopmode', 'main.tex'], 'XeLaTeX 第 3 遍'),
+            ]
+            for cmd, label in commands:
+                self.logger.info(f"开始执行：{label}")
+                r = subprocess.run(cmd, capture_output=True, text=True, encoding='utf-8', errors='replace')
                 if r.returncode != 0:
-                    self.logger.warning(f"第{i+1}次编译返回非零，继续后续编译以稳定目录/引用")
+                    self.logger.warning(f"{label} 返回非零，继续执行后续步骤以便保留日志")
+                    if r.stderr:
+                        self.logger.warning(r.stderr[-1200:])
+                    if r.stdout:
+                        self.logger.warning(r.stdout[-1200:])
         finally:
             os.chdir(cwd)
 
@@ -453,7 +496,7 @@ class ImprovedConverter:
             return None
 
     def run(self) -> int:
-        self.logger.info("🚀 改进版转换器启动")
+        self.logger.info("改进版转换器启动")
         if self.clean_before:
             self._clean_legacy()
         self._copy_images()

@@ -75,7 +75,7 @@ goto end_operation
 echo.
 echo 🔨 仅构建 PDF 文档...
 echo.
-echo 正在使用 XeLaTeX 构建 PDF...
+echo 正在使用 XeLaTeX + Biber 构建 PDF...
 echo.
 python "%CONVERTER_SCRIPT%" --project-root "%PROJECT_ROOT%" --build-only
 goto end_operation
@@ -87,7 +87,7 @@ echo.
 cd /d "%PROJECT_ROOT%\output"
 
 echo 清理 LaTeX 临时文件...
-del /q *.aux *.log *.out *.toc *.fdb_latexmk *.fls *.synctex.gz 2>nul
+del /q *.aux *.log *.out *.toc *.bbl *.bcf *.blg *.run.xml *.fdb_latexmk *.fls *.synctex.gz 2>nul
 
 echo 清理转换日志...
 del /q "%PROJECT_ROOT%\conversion.log" 2>nul

@@ -1,0 +1,434 @@
+% $ biblatex auxiliary file $
+% $ biblatex bbl format version 3.3 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated by
+% biber as required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+
+\refsection{0}
+  \datalist[entry]{nyt/global//global/global/global}
+    \entry{clements2010}{book}{}{}
+      \true{moreauthor}
+      \true{morelabelname}
+      \name{author}{3}{}{%
+        {{hash=806866eee4e5b55ba7360bfe43f4f397}{%
+           family={Clements},
+           familyi={C\bibinitperiod},
+           given={Paul},
+           giveni={P\bibinitperiod}}}%
+        {{hash=b1cd17315cbad2bde9966d6a34ef0b97}{%
+           family={Bachmann},
+           familyi={B\bibinitperiod},
+           given={Felix},
+           giveni={F\bibinitperiod}}}%
+        {{hash=97196c0aaced1368c3042b9299a9b34b}{%
+           family={Bass},
+           familyi={B\bibinitperiod},
+           given={Len},
+           giveni={L\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {Boston}%
+      }
+      \list{publisher}{1}{%
+        {Addison-Wesley}%
+      }
+      \strng{namehash}{0f9987d3b8e344902e830d9d77dff0de}
+      \strng{fullhash}{0f9987d3b8e344902e830d9d77dff0de}
+      \strng{fullhashraw}{0f9987d3b8e344902e830d9d77dff0de}
+      \strng{bibnamehash}{0f9987d3b8e344902e830d9d77dff0de}
+      \strng{authorbibnamehash}{0f9987d3b8e344902e830d9d77dff0de}
+      \strng{authornamehash}{0f9987d3b8e344902e830d9d77dff0de}
+      \strng{authorfullhash}{0f9987d3b8e344902e830d9d77dff0de}
+      \strng{authorfullhashraw}{0f9987d3b8e344902e830d9d77dff0de}
+      \field{sortinit}{C}
+      \field{sortinithash}{4d103a86280481745c9c897c925753c0}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{edition}{2nd}
+      \field{title}{Documenting Software Architectures: Views and Beyond}
+      \field{year}{2010}
+    \endentry
+    \entry{glaessgen2012}{report}{}{}
+      \name{author}{2}{}{%
+        {{hash=3175de934fd8122d24b260837daac583}{%
+           family={Glaessgen},
+           familyi={G\bibinitperiod},
+           given={Edward\bibnamedelima H.},
+           giveni={E\bibinitperiod\bibinitdelim H\bibinitperiod}}}%
+        {{hash=fa77a6b4a59d7a40ac85bbad09583daf}{%
+           family={Stargel},
+           familyi={S\bibinitperiod},
+           given={David\bibnamedelima S.},
+           giveni={D\bibinitperiod\bibinitdelim S\bibinitperiod}}}%
+      }
+      \list{institution}{1}{%
+        {AIAA}%
+      }
+      \strng{namehash}{c869ebeea515ef79fe7c8bfed64b51c2}
+      \strng{fullhash}{c869ebeea515ef79fe7c8bfed64b51c2}
+      \strng{fullhashraw}{c869ebeea515ef79fe7c8bfed64b51c2}
+      \strng{bibnamehash}{c869ebeea515ef79fe7c8bfed64b51c2}
+      \strng{authorbibnamehash}{c869ebeea515ef79fe7c8bfed64b51c2}
+      \strng{authornamehash}{c869ebeea515ef79fe7c8bfed64b51c2}
+      \strng{authorfullhash}{c869ebeea515ef79fe7c8bfed64b51c2}
+      \strng{authorfullhashraw}{c869ebeea515ef79fe7c8bfed64b51c2}
+      \field{sortinit}{G}
+      \field{sortinithash}{32d67eca0634bf53703493fb1090a2e8}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{The Digital Twin Paradigm for Future NASA and U.S. Air Force Vehicles}
+      \field{type}{techreport}
+      \field{year}{2012}
+    \endentry
+    \entry{IEEE1074}{misc}{}{}
+      \list{location}{1}{%
+        {New York}%
+      }
+      \list{publisher}{1}{%
+        {IEEE}%
+      }
+      \field{sortinit}{I}
+      \field{sortinithash}{8d291c51ee89b6cd86bf5379f0b151d8}
+      \field{labeltitlesource}{title}
+      \field{number}{IEEE Std 1074-2006}
+      \field{title}{IEEE Standard for Developing a Software Project Life Cycle Process}
+      \field{year}{2006}
+    \endentry
+    \entry{lorawanSpec2023}{online}{}{}
+      \list{organization}{1}{%
+        {LoRa Alliance}%
+      }
+      \field{sortinit}{L}
+      \field{sortinithash}{7c47d417cecb1f4bd38d1825c427a61a}
+      \field{labeltitlesource}{title}
+      \field{title}{LoRaWAN Specification v1.1}
+      \field{urlday}{19}
+      \field{urlmonth}{4}
+      \field{urlyear}{2026}
+      \field{year}{2023}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://resources.lora-alliance.org/technical-specifications/lorawan-specification-v1-1
+      \endverb
+      \verb{url}
+      \verb https://resources.lora-alliance.org/technical-specifications/lorawan-specification-v1-1
+      \endverb
+    \endentry
+    \entry{ogcStandardsOverview}{online}{}{}
+      \list{organization}{1}{%
+        {Open Geospatial Consortium}%
+      }
+      \field{sortinit}{O}
+      \field{sortinithash}{2cd7140a07aea5341f9e2771efe90aae}
+      \field{labeltitlesource}{title}
+      \field{title}{OGC Standards: Interoperability, APIs, and Geospatial Data}
+      \field{urlday}{19}
+      \field{urlmonth}{4}
+      \field{urlyear}{2026}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://www.ogc.org/standards-overview/
+      \endverb
+      \verb{url}
+      \verb https://www.ogc.org/standards-overview/
+      \endverb
+    \endentry
+    \entry{ogcWCS}{online}{}{}
+      \list{organization}{1}{%
+        {Open Geospatial Consortium}%
+      }
+      \field{sortinit}{O}
+      \field{sortinithash}{2cd7140a07aea5341f9e2771efe90aae}
+      \field{labeltitlesource}{title}
+      \field{title}{OGC WCS Standard | Web Coverage Service Specification}
+      \field{urlday}{19}
+      \field{urlmonth}{4}
+      \field{urlyear}{2026}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://www.ogc.org/standards/wcs/
+      \endverb
+      \verb{url}
+      \verb https://www.ogc.org/standards/wcs/
+      \endverb
+    \endentry
+    \entry{ogcWFS}{online}{}{}
+      \list{organization}{1}{%
+        {Open Geospatial Consortium}%
+      }
+      \field{sortinit}{O}
+      \field{sortinithash}{2cd7140a07aea5341f9e2771efe90aae}
+      \field{labeltitlesource}{title}
+      \field{title}{OGC WFS Standard | Web Feature Service Specification}
+      \field{urlday}{19}
+      \field{urlmonth}{4}
+      \field{urlyear}{2026}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://www.ogc.org/publications/standard/wfs/
+      \endverb
+      \verb{url}
+      \verb https://www.ogc.org/publications/standard/wfs/
+      \endverb
+    \endentry
+    \entry{sommerville2015}{book}{}{}
+      \name{author}{1}{}{%
+        {{hash=70341b3bfcce7026902f4eb1e4111b58}{%
+           family={Sommerville},
+           familyi={S\bibinitperiod},
+           given={Ian},
+           giveni={I\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {Boston}%
+      }
+      \list{publisher}{1}{%
+        {Pearson}%
+      }
+      \strng{namehash}{70341b3bfcce7026902f4eb1e4111b58}
+      \strng{fullhash}{70341b3bfcce7026902f4eb1e4111b58}
+      \strng{fullhashraw}{70341b3bfcce7026902f4eb1e4111b58}
+      \strng{bibnamehash}{70341b3bfcce7026902f4eb1e4111b58}
+      \strng{authorbibnamehash}{70341b3bfcce7026902f4eb1e4111b58}
+      \strng{authornamehash}{70341b3bfcce7026902f4eb1e4111b58}
+      \strng{authorfullhash}{70341b3bfcce7026902f4eb1e4111b58}
+      \strng{authorfullhashraw}{70341b3bfcce7026902f4eb1e4111b58}
+      \field{sortinit}{S}
+      \field{sortinithash}{b164b07b29984b41daf1e85279fbc5ab}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{edition}{10th}
+      \field{title}{Software Engineering}
+      \field{year}{2015}
+    \endentry
+    \entry{nbiot3gpp2016}{online}{}{}
+      \list{organization}{1}{%
+        {3GPP}%
+      }
+      \field{sortinit}{S}
+      \field{sortinithash}{b164b07b29984b41daf1e85279fbc5ab}
+      \field{labeltitlesource}{title}
+      \field{title}{Standardization of NB-IoT completed}
+      \field{urlday}{19}
+      \field{urlmonth}{4}
+      \field{urlyear}{2026}
+      \field{year}{2016}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://www.3gpp.org/news-events/3gpp-news/nb-iot-complete
+      \endverb
+      \verb{url}
+      \verb https://www.3gpp.org/news-events/3gpp-news/nb-iot-complete
+      \endverb
+    \endentry
+    \entry{ISO42010}{misc}{}{}
+      \list{location}{1}{%
+        {Geneva}%
+      }
+      \list{publisher}{1}{%
+        {ISO}%
+      }
+      \field{sortinit}{S}
+      \field{sortinithash}{b164b07b29984b41daf1e85279fbc5ab}
+      \field{labeltitlesource}{title}
+      \field{number}{ISO/IEC/IEEE 42010:2011}
+      \field{title}{Systems and software engineering --- Architecture description}
+      \field{year}{2011}
+    \endentry
+    \entry{ISO12207}{misc}{}{}
+      \list{location}{1}{%
+        {Geneva}%
+      }
+      \list{publisher}{1}{%
+        {ISO}%
+      }
+      \field{sortinit}{S}
+      \field{sortinithash}{b164b07b29984b41daf1e85279fbc5ab}
+      \field{labeltitlesource}{title}
+      \field{number}{ISO/IEC/IEEE 12207:2017}
+      \field{title}{Systems and software engineering --- Software life cycle processes}
+      \field{year}{2017}
+    \endentry
+    \entry{ogcWMS}{online}{}{}
+      \list{organization}{1}{%
+        {Open Geospatial Consortium}%
+      }
+      \field{sortinit}{W}
+      \field{sortinithash}{4315d78024d0cea9b57a0c6f0e35ed0d}
+      \field{labeltitlesource}{title}
+      \field{title}{Web Map Service (WMS) Standard}
+      \field{urlday}{19}
+      \field{urlmonth}{4}
+      \field{urlyear}{2026}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://www.ogc.org/publications/standard/wms/
+      \endverb
+      \verb{url}
+      \verb https://www.ogc.org/publications/standard/wms/
+      \endverb
+    \endentry
+    \entry{nationalWaterNetwork2023}{online}{}{}
+      \list{organization}{1}{%
+        {中国政府网}%
+      }
+      \field{sortinit}{中}
+      \field{sortinithash}{172bfecf596f0f4c156f1720d835724a}
+      \field{labeltitlesource}{title}
+      \field{title}{中共中央 国务院印发《国家水网建设规划纲要》}
+      \field{urlday}{19}
+      \field{urlmonth}{4}
+      \field{urlyear}{2026}
+      \field{year}{2023}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://www.gov.cn/zhengce/202305/content_6876214.htm
+      \endverb
+      \verb{url}
+      \verb https://www.gov.cn/zhengce/202305/content_6876214.htm
+      \endverb
+    \endentry
+    \entry{digitalChina2023}{online}{}{}
+      \list{organization}{1}{%
+        {泉州市人民政府}%
+      }
+      \field{sortinit}{中}
+      \field{sortinithash}{172bfecf596f0f4c156f1720d835724a}
+      \field{labeltitlesource}{title}
+      \field{title}{中共中央、国务院印发《数字中国建设整体布局规划》}
+      \field{urlday}{19}
+      \field{urlmonth}{4}
+      \field{urlyear}{2026}
+      \field{year}{2023}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://www.qz.gov.cn/art/2023/3/7/art_1228968078_59029703.html
+      \endverb
+      \verb{url}
+      \verb https://www.qz.gov.cn/art/2023/3/7/art_1228968078_59029703.html
+      \endverb
+    \endentry
+    \entry{twinYellowRiverInfo2024}{online}{}{}
+      \list{organization}{1}{%
+        {黄河网}%
+      }
+      \field{sortinit}{充}
+      \field{sortinithash}{6bf871cc13b9ed4ed9ed76b46f20d480}
+      \field{labeltitlesource}{title}
+      \field{title}{充分发挥黄委信息平台作用 以数字孪生黄河赋能黄河保护治理}
+      \field{urlday}{19}
+      \field{urlmonth}{4}
+      \field{urlyear}{2026}
+      \field{year}{2024}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://yrcc.gov.cn/xwdt/ztbd/2024zhuanti/szlshhjs/202404/t20240430_431646.html
+      \endverb
+      \verb{url}
+      \verb https://yrcc.gov.cn/xwdt/ztbd/2024zhuanti/szlshhjs/202404/t20240430_431646.html
+      \endverb
+    \endentry
+    \entry{GB2006}{misc}{}{}
+      \name{author}{1}{}{%
+        {{hash=85085c7bb9e8f3cacef590037d07f10b}{%
+           family={国家质量技术监督局},
+           familyi={国\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {北京}%
+      }
+      \list{publisher}{1}{%
+        {中国标准出版社}%
+      }
+      \strng{namehash}{85085c7bb9e8f3cacef590037d07f10b}
+      \strng{fullhash}{85085c7bb9e8f3cacef590037d07f10b}
+      \strng{fullhashraw}{85085c7bb9e8f3cacef590037d07f10b}
+      \strng{bibnamehash}{85085c7bb9e8f3cacef590037d07f10b}
+      \strng{authorbibnamehash}{85085c7bb9e8f3cacef590037d07f10b}
+      \strng{authornamehash}{85085c7bb9e8f3cacef590037d07f10b}
+      \strng{authorfullhash}{85085c7bb9e8f3cacef590037d07f10b}
+      \strng{authorfullhashraw}{85085c7bb9e8f3cacef590037d07f10b}
+      \field{sortinit}{国}
+      \field{sortinithash}{be9f491a44f3f108a82391c21f4de404}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{GB/T 16260.1-2006 软件工程 产品质量 第1部分：质量模型}
+      \field{year}{2006}
+    \endentry
+    \entry{twinYellowRiver2024}{online}{}{}
+      \list{organization}{1}{%
+        {黄河网}%
+      }
+      \field{sortinit}{数}
+      \field{sortinithash}{c2151081eaad4b81c67c93c604e85af9}
+      \field{labeltitlesource}{title}
+      \field{title}{数字孪生黄河建设}
+      \field{urlday}{19}
+      \field{urlmonth}{4}
+      \field{urlyear}{2026}
+      \field{year}{2024}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://yrcc.gov.cn/xwdt/ztbd/2024zhuanti/szlshhjs/index.html
+      \endverb
+      \verb{url}
+      \verb https://yrcc.gov.cn/xwdt/ztbd/2024zhuanti/szlshhjs/index.html
+      \endverb
+    \endentry
+    \entry{twinWater2023}{online}{}{}
+      \list{organization}{1}{%
+        {中国政府网}%
+      }
+      \field{sortinit}{水}
+      \field{sortinithash}{368d9dd17b46d1121c8b291993279c73}
+      \field{labeltitlesource}{title}
+      \field{title}{水利部：五方面推进数字孪生水利建设}
+      \field{urlday}{19}
+      \field{urlmonth}{4}
+      \field{urlyear}{2026}
+      \field{year}{2023}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://www.gov.cn/lianbo/bumen/202306/content_6887458.htm
+      \endverb
+      \verb{url}
+      \verb https://www.gov.cn/lianbo/bumen/202306/content_6887458.htm
+      \endverb
+    \endentry
+    \entry{twinProject2024}{online}{}{}
+      \list{organization}{1}{%
+        {中国政府网}%
+      }
+      \field{sortinit}{水}
+      \field{sortinithash}{368d9dd17b46d1121c8b291993279c73}
+      \field{labeltitlesource}{title}
+      \field{title}{水利部关于推进水库、水闸、蓄滞洪区运行管理数字孪生的指导意见}
+      \field{urlday}{19}
+      \field{urlmonth}{4}
+      \field{urlyear}{2026}
+      \field{year}{2024}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://www.gov.cn/gongbao/2024/issue_11726/202411/content_6989758.html
+      \endverb
+      \verb{url}
+      \verb https://www.gov.cn/gongbao/2024/issue_11726/202411/content_6989758.html
+      \endverb
+    \endentry
+  \enddatalist
+\endrefsection
+\endinput
+
