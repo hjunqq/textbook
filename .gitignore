@@ -70,3 +70,20 @@ site/
 */__pycache__
 
 课堂在线
+
+# 厂商授权素材，不得公开分发
+51World/
+
+# LaTeX 中间产物
+output/*.aux
+output/*.log
+output/*.out
+output/*.toc
+output/*.bcf
+output/*.run.xml
+output/*.fls
+output/*.fdb_latexmk
+output/*.xdv
+output/*.blg
+output/*.bbl-SAVE-ERROR
+output/missfont.log

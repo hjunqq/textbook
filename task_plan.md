@@ -1,5 +1,68 @@
 # LaTeX教材修订计划
 
+## 2026-08-05 全量审计整改（当前主计划）
+
+### 目标
+
+以 `output/chapters/*.tex` 为唯一正文基线，严格执行《教材修改方案-2026-08-04》WP1–WP19，将《教材标准审计报告-2026-08-04》所述 182 项发现逐项编号、逐项处理、逐项验证，最终形成可送审的 `output/main.pdf` 与《修改记录-第三轮》。此前 2026 年 3–4 月记录仅作为历史背景，不视为本轮审计闭环证据。
+
+### 当前决策
+
+- D1：采用推荐方案，补写 Vue Router 与 Pinia 教学小节。
+- D2：采用推荐方案，补写消息队列教学小节。
+- D3：第8章章名采用“智慧水利平台典型应用”。
+- D4：未取得书面授权前，仅使用 TikZ 重绘和文字说明，不放入 51WIM 平台截图。
+- D5：统一版本基线为 Vue 3.4+、Spring Boot 3.2+/Spring Security 6、Java 17、Three.js r160+、Cesium 1.11x、Jakarta EE。
+- D6：参考文献目标 50–60 条有效引用。
+- D7：本轮不回同步 `docs/` 在线版；LaTeX 定稿后另立同步任务。
+
+### 工作包状态
+
+| 顺序 | 工作包 | 状态 | 验收要点 |
+|---|---|---|---|
+| 0 | 审计台账数字化 | completed | 182 项全部获得稳定编号、工作包、文件与状态字段 |
+| 1 | WP1 编译修复 | completed | 两图 TikZ 重绘；306 页基线 PDF 编译通过并完成页面检查 |
+| 2 | WP8 全书结构口径统一 | completed | 主体完成；AUD-161 的精选题迁移并入WP7/WP11验收 |
+| 3 | WP2 第4章结构事故修复 | completed | CSS/HTML 分节、异步/DOM 示例、Router/Pinia、代码合法性 |
+| 4 | WP3 第5章结构与代码硬伤修复 | completed | 章节重组、事务/Security/JWT/均值公式/消息队列修复 |
+| 5 | WP4 第6章公式与事实硬伤修复 | completed | 坐标、投影、公式、GIS/三维 API、IFC、习题与小结正确 |
+| 6 | WP5 SafeHome 与论文残留清扫 | completed | 第3章11项与第6章2项全部闭环；SafeHome、游戏、社交与论文腔残留清零 |
+| 7 | WP6 第7章 UTM 路线纠正 | completed | 第7章重构为423行，主线、量纲、6个短代码清单及视觉验收全部通过 |
+| 8 | WP7 第8章习题与技术栈统一 | completed | 章名、虚拟参数、技术栈、代码、习题与8.5题位统一 |
+| 9 | WP9 第1、2章事实与要素修复 | completed | 事实、案例、学习目标、图表、模板和章节重复整改 |
+| 10 | WP10 第6章6.4重写 | completed | 6.4逻辑页97–106共10页，配套图表、短代码、验收与课程项目路线 |
+| 11 | WP11 第8章8.5新增 | completed | 12页数字孪生案例、图表、习题与前后章联动 |
+| 12 | WP12 参考文献系统扩充 | completed | 50条全部有效引用；死条目、错误条目和链接点验完成 |
+| 13 | WP13 跨章重复压缩 | completed | LOD、坐标、架构、生命周期等口径归一 |
+| 14 | WP14 案例与图表补强 | completed | 第1/2/3/7章案例、SRS节选和 TikZ 图补齐 |
+| 15 | WP15 语言清理 | completed | 口头禅、AI腔、模板化小结、自评句清理 |
+| 16 | WP16 格式与体例统一 | completed | 列表、引号、三线表、层级、术语、章级要素统一 |
+| 17 | WP17 习题体系统一 | completed | 三类分组、题量、难度、超纲与编程题规模统一 |
+| 18 | WP18 出版规范建设 | completed | 扉页、国标参考文献、caption/label、分页与宏包清理 |
+| 19 | WP19 全书终验 | completed | 182项闭环、零Error、图文/引文/链接点验、最终PDF |
+
+### 当前执行顺序
+
+`审计台账数字化 → WP8 → WP2 → WP3 → WP4/WP5 → WP6 → WP7 → WP9 → WP10 → WP11 → WP12/WP13/WP14 → WP15/WP16 → WP17 → WP18 → WP19`
+
+### 本轮错误记录
+
+| 错误 | 尝试 | 处理 |
+|---|---|---|
+| `planning-with-files` 的 `session-catchup.py` 尚不支持 Codex 会话解析 | 1 | 已读取现有计划、发现与进度文件，并用 Git 状态和本轮对话人工恢复上下文 |
+| `compile_bilingual.ps1 main.tex` 在 `latexmk` 已生成306页PDF且报告“All targets up-to-date”后仍返回1 | 1 | 不原样重试；改查 `main.log`、`pdfinfo` 和目标页面。日志阻断项为0，PDF有效，判定为包装脚本退出码误报 |
+| `update_audit_ledger.py` 首次更新后因编号前多一个空格，闭环计数仍显示1/182 | 1 | 放宽行匹配、逐单元格去空格并统一重建行格式；重新运行后复核为14/182，AUD-161保持部分完成 |
+| 在当前工作区执行 `git diff` 返回“Not a git repository” | 1 | 不依赖Git完成内容校验；先用文本检查、编译和PDF视觉检查验收，稍后再定位仓库边界 |
+| WP2首次编译在 `language=css` 处报 `Couldn't load requested language` | 1 | 模板的 listings 语言名大小写敏感，改为其支持的 `language=CSS`；仍满足CSS高亮语义 |
+| WP2第二次编译确认模板没有内置CSS语言定义 | 2 | 改为在章内显式 `\lstdefinelanguage{CSS}`，消除对可选语言包的依赖 |
+| WP2完整编译因55秒命令超时被终止，遗留损坏的 `main.aux/main.bcf` | 1 | 使用 `latexmk -c` 仅清理可再生中间文件，保留源文件与PDF，再从干净状态编译 |
+| WP4/WP10首次编译在6.4闭环图报TikZ键`step`需要取值 | 1 | 自定义样式与TikZ内置键同名；改为`dtstep`，清理中止产生的辅助文件后重编 |
+| WP4/WP10干净重编在文末短暂无法写入可再生的`main.run.xml` | 1 | 文件非只读且无进程占用；改用显式`XeLaTeX → Biber → XeLaTeX ×2`链分步生成，便于隔离文件锁 |
+| WP4补充血缘图首次编译报未定义颜色`LightBlue` | 1 | 改用模板已定义的`PrimaryLight`；连续两遍XeLaTeX恢复194页完整PDF |
+| WP6首次编译在LTTB示意图把一个坐标误作`circle`半径 | 1 | 为该点补`circle(2pt)`；随后完成XeLaTeX→Biber→XeLaTeX×2，生成172页PDF |
+
+---
+
 ## 目标
 
 修订 `output/chapters/*.tex` 中已确认的结构、内容主线和 LaTeX 成品质量问题，优先确保第三章改为智慧水利主线，并逐步修复第六章、第八章、第九章以及编译层面的明显缺陷。

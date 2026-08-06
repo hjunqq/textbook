@@ -10,9 +10,7 @@
 % 拉丁字体
 \setmainfont{TeX Gyre Pagella}[Ligatures=TeX]
 \setsansfont{TeX Gyre Heros}[Scale=0.95]
-\IfFontExistsTF{Inconsolata}{%
-  \setmonofont{Inconsolata}[Scale=0.85]}{%
-  \setmonofont{TeX Gyre Cursor}[Scale=0.85]}
+\setmonofont{TeX Gyre Cursor}[Scale=0.85]
 
 % 中文正文字体：宋体族（衬线）用于正文阅读
 \IfFontExistsTF{Source Han Serif SC}{%
@@ -67,7 +65,7 @@
 \usepackage{etoolbox}
 \usepackage{graphicx}
 \usepackage{pdfpages}
-\graphicspath{{images/}{../docs/chapters/images/}{../docs/assets/images/}}
+\graphicspath{{images/}}
 \usepackage[normalem]{ulem}
 
 % 数学环境
@@ -76,8 +74,6 @@
 % 图片与浮动
 \usepackage{float}
 \usepackage{subcaption}
-\usepackage[chapter]{algorithm}
-\usepackage{algpseudocode}
 
 % ══════════════════════════════════════════
 % 颜色体系（水利蓝主题）
@@ -362,20 +358,10 @@
 % 参考文献管理
 \usepackage[
   backend=biber,
-  style=numeric-comp,
-  sorting=nyt,
-  natbib=true
+  style=gb7714-2015,
+  sorting=none
 ]{biblatex}
 \addbibresource{references.bib}
-
-% 引用格式：上标数字
-\DeclareCiteCommand{\cite}[\mkbibsuperscript]
-  {\usebibmacro{cite:init}%
-   \let\multicitedelim=\supercitedelim}
-  {\usebibmacro{citeindex}%
-   \usebibmacro{cite:comp}}
-  {}
-  {\usebibmacro{cite:dump}}
 
 % 超链接与书签（必须放在最后）
 \usepackage{xurl}
@@ -403,6 +389,20 @@
 % ══════════════════════════════════════════
 \frontmatter
 \pagestyle{plain}
+
+\begin{titlepage}
+\thispagestyle{empty}
+\centering
+\vspace*{2.8cm}
+{\sffamily\bfseries\fontsize{30}{38}\selectfont\color{PrimaryDark}智慧水利平台架构与开发\par}
+\vspace{1.2cm}
+{\Large 水利工程与软件工程融合教材\par}
+\vfill
+{\large 高等学校智慧水利课程教材\par}
+\vspace{1.2cm}
+{\large 2026年8月\par}
+\end{titlepage}
+\cleardoublepage
 
 % 前言
 \input{chapters/preface.tex}
