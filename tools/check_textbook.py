@@ -2,15 +2,32 @@
 # -*- coding: utf-8 -*-
 """
 教材扩写/修订的机器门禁。
-用法（在仓库根目录执行）：
 
-    python tools/check_textbook.py                 # 全量检查，返回 0 表示通过
-    python tools/check_textbook.py --init-baseline # 只在方案启动时执行一次，写基线
-    python tools/check_textbook.py --build         # 额外执行完整编译并检查日志
-    python tools/check_textbook.py --report        # 只出报表，不判定成败（exit 0）
+    python tools/check_textbook.py              # 默认：不得倒退模式
+    python tools/check_textbook.py --build      # 额外跑完整编译并检查日志
+    python tools/check_textbook.py --report     # 只出报表，永远 exit 0
+    python tools/check_textbook.py --strict     # 严格模式：所有指标必须归零（M1/终验用）
+    python tools/check_textbook.py --init-baseline   # 写字数基线（只在启动时跑一次）
+    python tools/check_textbook.py --init-gate       # 写软指标基线（只在启动时跑一次）
 
-设计目标：把"不许删内容""图表必须随文引出""改稿批注不许印出来"这类
-人来判断很累、机器判断很准的规则固化成门禁。任何一条 FAIL，禁止 git commit。
+两类检查：
+
+  硬失败（任何时候都不允许，一票否决）
+    · 任何文件的正文汉字数低于 tools/wordcount_baseline.json
+    · 环境未配对、悬空 \\ref、重复 label
+    · 参考文献表有未引用条目或引用了不存在的键
+    · 编译出现 Error / 未定义引用 / Overfull / 缺字
+
+  软指标（存量问题，只要不比 tools/gate_baseline.json 更差就放行）
+    · 未被 \\ref 引用的图表公式 label 数
+    · 改稿批注残留处数
+    · 缺失的章末要件数
+    · 代码清单缺口、图缺口、载体密度缺口
+
+这样设计的原因：全书有 86 个未引用 label、21 处改稿批注这类存量问题，
+要到 O6、O5 以及整个 A 批做完才可能归零。若一开始就要求全零，
+每个工作包都无法提交。改为"不得倒退"后，每一步只需保证自己不制造新问题、
+并把本包负责的那部分往下压。M1 与终验时用 --strict 要求全部归零。
 """
 
 import argparse
@@ -24,6 +41,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, "output")
 CHAP = os.path.join(OUT, "chapters")
 BASELINE = os.path.join(ROOT, "tools", "wordcount_baseline.json")
+GATEFILE = os.path.join(ROOT, "tools", "gate_baseline.json")
 
 FILES = [
     "preface.tex", "chapter01.tex", "chapter02.tex", "chapter03.tex",
@@ -45,19 +63,16 @@ TARGET = {
     "chapter09.tex":  5500,
 }
 
-# 各章代码清单数量下限（技术章必须有足量可读代码）
 MIN_LISTINGS = {
     "chapter03.tex": 6, "chapter04.tex": 26, "chapter05.tex": 26,
     "chapter06.tex": 14, "chapter07.tex": 14, "chapter08.tex": 22,
 }
-# 各章图数量下限
 MIN_FIGURES = {
     "chapter01.tex": 4, "chapter02.tex": 7, "chapter03.tex": 9,
     "chapter04.tex": 5, "chapter05.tex": 5, "chapter06.tex": 12,
     "chapter07.tex": 8, "chapter08.tex": 14,
 }
 
-# 改稿批注 / 编辑痕迹：这些模式一旦出现在正文，读者会莫名其妙
 EDITORIAL_FAIL = [
     (r"原稿", "出现『原稿』二字"),
     (r"不再(混用|使用|堆叠|重复绘制)", "『不再…』式改稿批注"),
@@ -69,15 +84,13 @@ EDITORIAL_FAIL = [
     (r"未获书面授权", "面向法务的自辩句"),
     (r"本节不再", "『本节不再…』式改稿批注"),
 ]
-# 需人工确认语境的，只提示不阻断
 EDITORIAL_WARN = [
-    (r"本教材(把|不复刻|据此采用)", "编者自述式表述，请确认是面向学生还是面向审稿人"),
+    (r"本教材(把|不复刻|据此采用)", "编者自述式表述，请确认面向学生还是面向审稿人"),
     (r"而不是[“\"]", "否定式排比，密集出现时改为直陈"),
 ]
 
-# 必备章末要件（第9章若定为不编号结语可在 EXEMPT 中豁免）
 REQUIRED_SECTIONS = ["学习目标", "小结", "习题"]
-EXEMPT_REQUIRED = set()          # 例：{"chapter09.tex"}
+EXEMPT_REQUIRED = set()
 
 CJK = re.compile(r"[\u4e00-\u9fff]")
 
@@ -88,7 +101,6 @@ def read(p):
 
 
 def strip_code(text):
-    """去掉代码清单与 TikZ 内部文字，避免用代码注释刷字数。"""
     text = re.sub(r"\\begin\{lstlisting\}.*?\\end\{lstlisting\}", "", text, flags=re.S)
     text = re.sub(r"\\begin\{verbatim\}.*?\\end\{verbatim\}", "", text, flags=re.S)
     text = re.sub(r"\\begin\{tikzpicture\}.*?\\end\{tikzpicture\}", "", text, flags=re.S)
@@ -100,26 +112,26 @@ def body_chars(text):
     return len(CJK.findall(strip_code(text)))
 
 
-def count_env(text, name):
-    b = len(re.findall(r"\\begin\{%s\}" % name, text))
-    e = len(re.findall(r"\\end\{%s\}" % name, text))
-    return b, e
-
-
 class Result:
     def __init__(self):
         self.fails = []
         self.warns = []
         self.lines = []
+        self.metrics = {}
+        self.labels = {}
 
-    def fail(self, msg):
-        self.fails.append(msg)
+    def fail(self, m):
+        self.fails.append(m)
 
-    def warn(self, msg):
-        self.warns.append(msg)
+    def warn(self, m):
+        self.warns.append(m)
 
-    def log(self, msg):
-        self.lines.append(msg)
+    def log(self, m):
+        self.lines.append(m)
+
+    def metric(self, key, value, label):
+        self.metrics[key] = value
+        self.labels[key] = label
 
 
 def check_wordcount(texts, r, init):
@@ -127,37 +139,31 @@ def check_wordcount(texts, r, init):
     total = sum(cur.values())
     if init:
         os.makedirs(os.path.dirname(BASELINE), exist_ok=True)
-        with open(BASELINE, "w", encoding="utf-8") as fh:
-            json.dump(cur, fh, ensure_ascii=False, indent=2)
-        r.log("已写入基线 tools/wordcount_baseline.json")
+        json.dump(cur, open(BASELINE, "w", encoding="utf-8"),
+                  ensure_ascii=False, indent=2)
+        r.log("已写入字数基线 tools/wordcount_baseline.json")
         return
-
-    base = {}
-    if os.path.exists(BASELINE):
-        base = json.load(open(BASELINE, encoding="utf-8"))
-    else:
-        r.warn("缺少 tools/wordcount_baseline.json，无法执行防删除检查；请先 --init-baseline")
-
+    base = json.load(open(BASELINE, encoding="utf-8")) if os.path.exists(BASELINE) else {}
+    if not base:
+        r.warn("缺少 tools/wordcount_baseline.json，防删除检查未生效")
     r.log("")
     r.log("正文汉字数（不含代码清单与 TikZ）")
     r.log("%-16s %8s %8s %8s %8s %7s" % ("文件", "基线", "当前", "增量", "目标", "完成度"))
     for f in FILES:
         c, b, t = cur.get(f, 0), base.get(f, 0), TARGET[f]
-        pct = "%d%%" % round(100.0 * c / t) if t else "-"
-        r.log("%-16s %8d %8d %+8d %8d %7s" % (f, b, c, c - b, t, pct))
-        # 铁律一：任何文件的正文字数不得低于基线
+        r.log("%-16s %8d %8d %+8d %8d %6d%%" % (f, b, c, c - b, t, round(100.0 * c / t)))
         if base and c < b:
-            r.fail("【防删除】%s 正文汉字 %d < 基线 %d，净减少 %d 字。"
-                   "本方案只允许增写；确需删除的段落必须在提交说明中逐段列出并说明替代内容。"
+            r.fail("【防删除】%s 正文汉字 %d < 基线 %d，净减少 %d 字。本方案只允许增写；"
+                   "确需删除的段落必须在提交说明中逐段列出原文并说明替代内容。"
                    % (f, c, b, b - c))
     tb, tt = sum(base.values()) if base else 0, sum(TARGET.values())
-    r.log("%-16s %8d %8d %+8d %8d %7s"
-          % ("合计", tb, total, total - tb, tt, "%d%%" % round(100.0 * total / tt)))
+    r.log("%-16s %8d %8d %+8d %8d %6d%%"
+          % ("合计", tb, total, total - tb, tt, round(100.0 * total / tt)))
 
 
 def check_refs(texts, r):
     labels, refs, dup = [], [], []
-    for f, t in texts.items():
+    for t in texts.values():
         for l in re.findall(r"\\label\{([^}]*)\}", t):
             if l in labels:
                 dup.append(l)
@@ -168,61 +174,52 @@ def check_refs(texts, r):
     dangling = sorted(set(refs) - set(labels))
     if dangling:
         r.fail("悬空引用（\\ref 无对应 \\label）：%s" % ", ".join(dangling))
-    # 铁律二：图、表、公式必须随文引出
-    unref = [l for l in labels if l not in refs and not l.startswith(("ch:", "sec:", "lst:"))]
+    unref = sorted(l for l in labels
+                   if l not in refs and not l.startswith(("ch:", "sec:", "lst:")))
+    r.metric("unref_labels", len(unref), "未被 \\ref 引用的图/表/公式 label")
+    r.log("\nlabel 总数 %d，被引用 %d，待补 \\ref %d 个" % (len(labels), len(set(refs)), len(unref)))
     if unref:
-        r.fail("以下 %d 个图/表/公式 label 从未被 \\ref 引用（教材编校要求图表必须随文引出，"
-               "如『如图6-3所示』『见表8-4』）：\n    %s" % (len(unref), "\n    ".join(sorted(unref))))
-    r.log("\nlabel 总数 %d，被引用 %d，未引用 %d" % (len(labels), len(set(refs)), len(unref)))
+        r.log("  " + "、".join(unref[:12]) + (" …" if len(unref) > 12 else ""))
 
 
 def check_envs(texts, r):
     for f, t in texts.items():
         for env in ("lstlisting", "figure", "table", "tikzpicture", "enumerate",
                     "itemize", "equation", "tabular", "longtable"):
-            b, e = count_env(t, env)
+            b = len(re.findall(r"\\begin\{%s\}" % env, t))
+            e = len(re.findall(r"\\end\{%s\}" % env, t))
             if b != e:
                 r.fail("%s 的 %s 环境未配对：begin=%d end=%d" % (f, env, b, e))
 
 
 def check_density(texts, r):
+    dl = df = 0
+    lines = []
     for f, t in texts.items():
         n = len(re.findall(r"\\begin\{lstlisting\}", t))
         need = MIN_LISTINGS.get(f)
         if need and n < need:
-            r.fail("%s 代码清单 %d 个 < 下限 %d 个" % (f, n, need))
+            dl += need - n
+            lines.append("  %s 代码清单 %d/%d" % (f, n, need))
         nf = len(re.findall(r"\\begin\{figure\}", t))
         needf = MIN_FIGURES.get(f)
         if needf and nf < needf:
-            r.fail("%s 图 %d 幅 < 下限 %d 幅" % (f, nf, needf))
-        # 代码清单必须带 caption/label，便于正文引用
+            df += needf - nf
+            lines.append("  %s 图 %d/%d" % (f, nf, needf))
         for m in re.finditer(r"\\begin\{lstlisting\}(\[[^\]]*\])?", t):
-            opt = m.group(1) or ""
-            if "caption" not in opt:
+            if "caption" not in (m.group(1) or ""):
                 r.warn("%s 第 %d 行附近的代码清单缺 caption/label"
                        % (f, t[:m.start()].count("\n") + 1))
                 break
-
-
-def check_editorial(texts, r):
-    hits, soft = [], 0
-    for f, t in texts.items():
-        for i, line in enumerate(t.split("\n"), 1):
-            for pat, why in EDITORIAL_FAIL:
-                if re.search(pat, line):
-                    hits.append("%s:%d  [%s]  %s" % (f, i, why, line.strip()[:70]))
-            for pat, why in EDITORIAL_WARN:
-                if re.search(pat, line):
-                    soft += 1
-    if hits:
-        r.fail("检出 %d 处改稿批注/编辑痕迹（应改为面向学生的正面表述）：\n    %s"
-               % (len(hits), "\n    ".join(hits)))
-    if soft:
-        r.warn("另有 %d 处编者自述式/否定式排比表述，请人工判断语境" % soft)
+    r.metric("listings_deficit", dl, "代码清单缺口")
+    r.metric("figures_deficit", df, "图缺口")
+    if lines:
+        r.log("\n载体下限缺口：")
+        r.lines.extend(lines)
 
 
 def check_denseness(texts, r):
-    """反注水：技术章每 1200 正文汉字至少配 1 个代码清单、图或表。"""
+    deficit = 0
     for f in ("chapter04.tex", "chapter05.tex", "chapter06.tex",
               "chapter07.tex", "chapter08.tex"):
         t = texts[f]
@@ -231,18 +228,44 @@ def check_denseness(texts, r):
              + len(re.findall(r"\\begin\{table\}", t)))
         need = body_chars(t) // 1200
         if n < need:
-            r.fail("%s 载体密度不足：正文 %d 字仅配 %d 个代码清单/图/表，下限 %d 个。"
-                   "新增内容必须带可运行代码、公式推导、数据表、反例或水利实例，"
-                   "不得是纯文字铺陈。" % (f, body_chars(t), n, need))
+            deficit += need - n
+    r.metric("denseness_deficit", deficit, "载体密度缺口（每1200字1个）")
+
+
+def check_editorial(texts, r):
+    hits, soft = [], 0
+    for f, t in texts.items():
+        for i, line in enumerate(t.split("\n"), 1):
+            for pat, why in EDITORIAL_FAIL:
+                if re.search(pat, line):
+                    hits.append("%s:%d [%s] %s" % (f, i, why, line.strip()[:60]))
+            for pat, why in EDITORIAL_WARN:
+                if re.search(pat, line):
+                    soft += 1
+    r.metric("editorial", len(hits), "改稿批注/编辑痕迹")
+    if hits:
+        r.log("\n待清理的改稿批注：")
+        for h in hits[:10]:
+            r.log("  " + h)
+        if len(hits) > 10:
+            r.log("  …另有 %d 处" % (len(hits) - 10))
+    if soft:
+        r.warn("另有 %d 处编者自述式/否定式排比表述，请人工判断语境" % soft)
 
 
 def check_structure(texts, r):
+    miss, lines = 0, []
     for f, t in texts.items():
         if f == "preface.tex" or f in EXEMPT_REQUIRED:
             continue
         for sec in REQUIRED_SECTIONS:
             if sec not in t:
-                r.fail("%s 缺少章末要件：%s" % (f, sec))
+                miss += 1
+                lines.append("  %s 缺章末要件：%s" % (f, sec))
+    r.metric("structure_missing", miss, "缺失的章末要件")
+    if lines:
+        r.log("")
+        r.lines.extend(lines)
 
 
 def check_bib(texts, r):
@@ -250,8 +273,7 @@ def check_bib(texts, r):
     if not os.path.exists(bibp):
         r.fail("找不到 references.bib")
         return
-    bib = read(bibp)
-    keys = set(re.findall(r"@\w+\{([^,]+),", bib))
+    keys = set(re.findall(r"@\w+\{([^,]+),", read(bibp)))
     cited = set()
     for t in texts.values():
         for c in re.findall(r"\\(?:cite|parencite|textcite|footcite)\{([^}]*)\}", t):
@@ -259,50 +281,68 @@ def check_bib(texts, r):
     if cited - keys:
         r.fail("引用了不存在的文献键：%s" % ", ".join(sorted(cited - keys)))
     if keys - cited:
-        r.fail("参考文献表中有 %d 条从未被引用：%s"
+        r.fail("参考文献表有 %d 条从未被引用：%s"
                % (len(keys - cited), ", ".join(sorted(keys - cited))))
     r.log("\n文献 %d 条，被引用 %d 条" % (len(keys), len(cited & keys)))
 
 
 def check_build(r):
-    env = dict(os.environ)
-    cmds = [["xelatex", "-interaction=nonstopmode", "main.tex"],
-            ["biber", "main"],
-            ["xelatex", "-interaction=nonstopmode", "main.tex"],
-            ["xelatex", "-interaction=nonstopmode", "main.tex"]]
-    for c in cmds:
-        p = subprocess.run(c, cwd=OUT, capture_output=True, env=env)
+    for c in (["xelatex", "-interaction=nonstopmode", "main.tex"],
+              ["biber", "main"],
+              ["xelatex", "-interaction=nonstopmode", "main.tex"],
+              ["xelatex", "-interaction=nonstopmode", "main.tex"]):
+        try:
+            p = subprocess.run(c, cwd=OUT, capture_output=True)
+        except FileNotFoundError:
+            r.warn("找不到 %s，跳过编译检查；编译验证请攒到里程碑统一做" % c[0])
+            return
         if c[0] == "biber" and p.returncode != 0:
-            r.fail("biber 执行失败：%s" % p.stdout.decode("utf-8", "ignore")[-400:])
+            r.fail("biber 执行失败：%s" % p.stdout.decode("utf-8", "ignore")[-300:])
     log = read(os.path.join(OUT, "main.log"))
-    for pat, name in [(r"^! ", "Error"), (r"Overfull \\hbox", "Overfull hbox"),
+    for pat, name in ((r"^! ", "Error"), (r"Overfull \\hbox", "Overfull hbox"),
                       (r"Overfull \\vbox", "Overfull vbox"),
                       (r"Missing character", "缺字"),
-                      (r"There were undefined", "未定义引用/引文")]:
+                      (r"There were undefined", "未定义引用/引文")):
         n = len(re.findall(pat, log, flags=re.M))
         if n:
             r.fail("编译日志中 %s：%d 处" % (name, n))
     m = re.search(r"Output written on \S+ \((\d+) pages\)", log)
-    if m:
-        r.log("\n编译输出 %s 页" % m.group(1))
-    else:
+    r.log("\n编译输出 %s 页" % (m.group(1) if m else "——未生成 PDF"))
+    if not m:
         r.fail("未生成 PDF")
+
+
+def judge_metrics(r, init_gate, strict):
+    if init_gate:
+        os.makedirs(os.path.dirname(GATEFILE), exist_ok=True)
+        json.dump(r.metrics, open(GATEFILE, "w", encoding="utf-8"),
+                  ensure_ascii=False, indent=2)
+        r.log("\n已写入软指标基线 tools/gate_baseline.json：%s"
+              % json.dumps(r.metrics, ensure_ascii=False))
+        return
+    base = json.load(open(GATEFILE, encoding="utf-8")) if os.path.exists(GATEFILE) else {}
+    r.log("")
+    r.log("存量问题（软指标，越小越好）")
+    r.log("%-34s %8s %8s %8s" % ("指标", "起点", "当前", "变化"))
+    for k, v in r.metrics.items():
+        b = base.get(k)
+        d = "" if b is None else "%+d" % (v - b)
+        r.log("%-34s %8s %8d %8s" % (r.labels[k], "-" if b is None else b, v, d))
+        if strict and v:
+            r.fail("【严格模式】%s 仍有 %d 项未清零" % (r.labels[k], v))
+        elif b is not None and v > b:
+            r.fail("【倒退】%s 从 %d 涨到 %d。本轮只允许把存量往下压，"
+                   "不允许制造新的同类问题。" % (r.labels[k], b, v))
 
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--init-baseline", action="store_true")
+    ap.add_argument("--init-gate", action="store_true")
     ap.add_argument("--build", action="store_true")
     ap.add_argument("--report", action="store_true")
-    ap.add_argument("--root", default=None)
+    ap.add_argument("--strict", action="store_true")
     a = ap.parse_args()
-
-    global ROOT, OUT, CHAP, BASELINE
-    if a.root:
-        ROOT = os.path.abspath(a.root)
-        OUT = os.path.join(ROOT, "output")
-        CHAP = os.path.join(OUT, "chapters")
-        BASELINE = os.path.join(ROOT, "tools", "wordcount_baseline.json")
 
     texts = {}
     for f in FILES:
@@ -318,12 +358,13 @@ def main():
         check_refs(texts, r)
         check_envs(texts, r)
         check_density(texts, r)
+        check_denseness(texts, r)
         check_editorial(texts, r)
         check_structure(texts, r)
         check_bib(texts, r)
-        check_denseness(texts, r)
         if a.build:
             check_build(r)
+        judge_metrics(r, a.init_gate, a.strict)
 
     print("\n".join(r.lines))
     if r.warns:
@@ -334,9 +375,9 @@ def main():
         print("\n不通过（%d 项）：" % len(r.fails))
         for i, x in enumerate(r.fails, 1):
             print("  %d. %s" % (i, x))
-        print("\n以上任意一项未清零，禁止提交。")
+        print("\n以上未清零，禁止提交。不许通过删内容或放宽门禁阈值来过检。")
         return 0 if a.report else 1
-    print("\n全部通过。")
+    print("\n通过。")
     return 0
 
 

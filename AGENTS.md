@@ -39,7 +39,7 @@
    接口路径、表结构，以第8章 8.1 节的参数表为唯一来源，其他章一律引用不得自设。
    新增参数必须先写进 8.1 的参数表。
 
-8. **一个工作包一次提交。** 提交前必须 `python tools/check_textbook.py --build` 全绿。
+8. **一个工作包一次提交。** 提交前必须 `python tools/check_textbook.py --build` 输出"通过"（口径见第五节）。
    提交说明里写清：工作包编号、正文字数 before → after、新增了哪些小节/代码/图表、
    删除了什么（如有）。
 
@@ -91,9 +91,23 @@
 ## 五、门禁
 
 ```bash
-python tools/check_textbook.py            # 快速检查
+python tools/check_textbook.py            # 默认：不得倒退模式
 python tools/check_textbook.py --build    # 含完整编译（xelatex→biber→xelatex×2）
-python tools/check_textbook.py --report   # 只看进度表，不判定成败
+python tools/check_textbook.py --report   # 只看报表，永远 exit 0
+python tools/check_textbook.py --strict   # 严格模式：所有软指标必须归零（M1 与终验用）
 ```
 
-任何一项 FAIL 未清零，**禁止 git commit**。
+门禁分两类：
+
+**硬失败**——任何时候都不允许，一票否决：任何文件正文字数低于
+`tools/wordcount_baseline.json`；环境未配对；悬空 `\ref`；重复 label；
+参考文献表有未引用条目；编译出现 Error / 未定义引用 / Overfull / 缺字。
+
+**软指标**——存量问题，只要不比 `tools/gate_baseline.json` 记录的起点更差就放行：
+未被 `\ref` 引用的 label 数、改稿批注处数、缺失的章末要件数、代码清单缺口、
+图缺口、载体密度缺口。全书起点是 86 个未引用 label、17 处改稿批注、3 项缺失要件、
+64 个清单缺口、19 个图缺口——这些要到 O5、O6 和整个 A 批做完才归零，
+所以每个工作包只需保证**不制造新的同类问题**，并把本包负责的那部分往下压。
+
+输出"通过"才可以 `git commit`。**不许修改 `check_textbook.py` 或 `gate_baseline.json`
+来让自己通过**——那是绕路，不是完成。

@@ -100,3 +100,7 @@ output/**/*.fdb_latexmk
 output/**/*.xdv
 output/**/*.blg
 output/**/*.bbl-SAVE-ERROR
+
+# Biber 生成的参考文献中间产物
+output/*.bbl
+output/**/*.bbl

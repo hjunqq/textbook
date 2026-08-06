@@ -29,8 +29,11 @@ git add -A && git commit -m "第三轮修改成果存档（2026-08-05，未经�
 ## 通用收尾段（每条提示词末尾都有，这里说明一次）
 
 ```
-【自检】运行 python tools/check_textbook.py --build ，必须全绿。
-不许通过删内容过检，不许修改 tools/check_textbook.py 的阈值。
+【自检】运行 python tools/check_textbook.py --build ，必须输出"通过"。
+门禁分两类：硬失败（字数下降、环境未配对、悬空引用、文献未闭合、编译报错）一票否决；
+软指标（未引用 label、改稿批注、章末要件、载体缺口）是存量问题，
+只要不比 tools/gate_baseline.json 记录的起点更差就放行，本包负责的那部分要往下压。
+不许通过删内容过检，不许修改 tools/check_textbook.py 或 gate_baseline.json。
 
 【收尾】追加写入《修改记录-第五轮.md》：工作包编号 / 各文件正文字数 before→after /
 新增的小节、代码清单、图、表清单 / 修正的问题条目 / 删除的内容（如有，逐条列出原文与替代）/
@@ -77,7 +80,7 @@ references.bib 里只有 tao2017dts（IEEE Access 的车间四要素文章），
 - tao2019fivedim 必须被 \cite 引用（门禁会检查 bib 无未引用条目）。
 - chapter06.tex 正文汉字数不得低于基线（改写而非删除）。
 
-【自检】python tools/check_textbook.py --build 全绿，不许删内容过检，不许改门禁阈值。
+【自检】python tools/check_textbook.py --build 必须输出"通过"；软指标不得倒退，本包负责的项要下降。不许删内容过检，不许改门禁文件。
 【收尾】追加《修改记录-第五轮.md》并 git commit，首行 "O1 第6章五维模型学术归属修正"。
 做完停下汇报。
 ```
@@ -121,7 +124,7 @@ ifc43-docs.standards.buildingsmart.org 上现行 IFC4X3_ADD2 文档逐一核对�
 - 第 763 行习题按改后正文可以作答。
 - chapter06.tex 正文汉字数净增 ≥ 500 字。
 
-【自检】python tools/check_textbook.py --build 全绿。
+【自检】python tools/check_textbook.py --build 必须输出"通过"；软指标不得倒退，本包负责的项要下降。不许删内容过检，不许改门禁文件。
 【收尾】追加《修改记录-第五轮.md》并 git commit，首行 "O2 第6章IFC4.3段落重写"。
 做完停下汇报。
 ```
@@ -171,7 +174,7 @@ ifc43-docs.standards.buildingsmart.org 上现行 IFC4X3_ADD2 文档逐一核对�
 - 三值质量码 valid/suspect/missing 在第7、8章口径一致。
 - chapter08.tex 正文汉字数净增 ≥ 600 字。
 
-【自检】python tools/check_textbook.py --build 全绿。
+【自检】python tools/check_textbook.py --build 必须输出"通过"；软指标不得倒退，本包负责的项要下降。不许删内容过检，不许改门禁文件。
 【收尾】追加《修改记录-第五轮.md》并 git commit，首行 "O3 第8章质量码与预警级代码修复"。
 做完停下汇报。
 ```
@@ -211,7 +214,7 @@ ifc43-docs.standards.buildingsmart.org 上现行 IFC4X3_ADD2 文档逐一核对�
 - chapter08.tex 正文汉字数净增 ≥ 500 字。
 - 新引的四个文献键被正确引用，门禁 bib 检查通过。
 
-【自检】python tools/check_textbook.py --build 全绿。
+【自检】python tools/check_textbook.py --build 必须输出"通过"；软指标不得倒退，本包负责的项要下降。不许删内容过检，不许改门禁文件。
 【收尾】追加《修改记录-第五轮.md》，注明授权已落实并已归档；git commit，
 首行 "O4 51WIM致谢商标与权威依据补充"。做完停下汇报。
 ```
@@ -269,7 +272,7 @@ ifc43-docs.standards.buildingsmart.org 上现行 IFC4X3_ADD2 文档逐一核对�
 - **每个文件的正文汉字数都不得低于基线**（这是本包最容易翻车的地方：改写时顺手删段落）。
 - 全书正文汉字总数净增 ≥ 800 字。
 
-【自检】python tools/check_textbook.py --build 全绿。
+【自检】python tools/check_textbook.py --build 必须输出"通过"；软指标不得倒退，本包负责的项要下降。不许删内容过检，不许改门禁文件。
 【收尾】追加《修改记录-第五轮.md》，逐条列出 21 处的原文与改后文字；git commit，
 首行 "O5 清除全书改稿批注21处"。做完停下汇报。
 ```
@@ -308,7 +311,7 @@ ifc43-docs.standards.buildingsmart.org 上现行 IFC4X3_ADD2 文档逐一核对�
 - check_refs 零 FAIL。
 - 各文件正文汉字数不低于基线；全书净增 ≥ 3,000 字（86 处引导语，平均 35 字以上）。
 
-【自检】python tools/check_textbook.py --build 全绿。特别注意加 placeins 后可能出现新的
+【自检】python tools/check_textbook.py --build 必须输出"通过"；软指标不得倒退，本包负责的项要下降。不许删内容过检，不许改门禁文件。
 分页问题，Overfull 必须仍为 0。
 【收尾】追加《修改记录-第五轮.md》并 git commit，首行 "O6 全书补ref与浮动体控制"。
 做完停下汇报。
@@ -359,7 +362,7 @@ ifc43-docs.standards.buildingsmart.org 上现行 IFC4X3_ADD2 文档逐一核对�
 - preface.tex 正文汉字数从 1,677 增至 ≥ 2,500。
 - 新增的学时分配表被 \ref 引用。
 
-【自检】python tools/check_textbook.py --build 全绿。
+【自检】python tools/check_textbook.py --build 必须输出"通过"；软指标不得倒退，本包负责的项要下降。不许删内容过检，不许改门禁文件。
 【收尾】追加《修改记录-第五轮.md》并 git commit，首行 "O7 前言承诺修正与配套资源节"。
 做完停下汇报。
 ```
@@ -411,7 +414,7 @@ ifc43-docs.standards.buildingsmart.org 上现行 IFC4X3_ADD2 文档逐一核对�
 - 只插入注释和新建清单文件，**不得修改任何一处正文文字**。
 - 各文件正文汉字数与基线完全相等（注释不计入正文汉字，门禁会验证）。
 
-【自检】python tools/check_textbook.py --build 全绿。
+【自检】python tools/check_textbook.py --build 必须输出"通过"；软指标不得倒退，本包负责的项要下降。不许删内容过检，不许改门禁文件。
 【收尾】追加《修改记录-第五轮.md》并 git commit，首行 "O8 事实核验点标注（10处）"。
 做完停下汇报。
 ```
@@ -1504,7 +1507,7 @@ O7 已完成承诺修正与配套资源节的骨架。本包在 S1/S2/S3 建成�
 - 编码规则、字段名、单位与 A8-1 的 DDL 逐字段一致。
 - 生成脚本可重复运行产出完全相同的数据。
 
-【自检】python tools/check_textbook.py --build 全绿（本包不改 tex，字数应与基线相等）。
+【自检】python tools/check_textbook.py --build 必须输出"通过"；软指标不得倒退，本包负责的项要下降。不许删内容过检，不许改门禁文件。
 另外运行 python companion/datasets/generate.py 两次，diff 确认输出一致。
 【收尾】追加《修改记录-第五轮.md》并 git commit，首行 "S3 示例数据集"。做完停下汇报。
 ```
@@ -1538,7 +1541,7 @@ Controller、SecurityFilterChain、JwtAuthenticationFilter、Kafka 生产者与�
 - 数据库初始化后能加载 S3 的数据集。
 - 教材中所有代码清单在本工程中都能找到对应位置。
 
-【自检】python tools/check_textbook.py --build 全绿；docker compose config 校验通过。
+【自检】python tools/check_textbook.py --build 必须输出"通过"；软指标不得倒退，本包负责的项要下降。不许删内容过检，不许改门禁文件。
 【收尾】追加《修改记录-第五轮.md》，附教材↔工程的逐条核对结果；git commit，
 首行 "S2 配套代码仓库"。做完停下汇报。
 ```
@@ -1568,7 +1571,7 @@ Controller、SecurityFilterChain、JwtAuthenticationFilter、Kafka 生产者与�
   **不要改答案去迁就正文，也不要改正文去迁就答案**，先报出来。
 - 附录不计入正文字数目标（门禁只统计 chapters/ 下的文件），但仍需编译通过。
 
-【自检】python tools/check_textbook.py --build 全绿。
+【自检】python tools/check_textbook.py --build 必须输出"通过"；软指标不得倒退，本包负责的项要下降。不许删内容过检，不许改门禁文件。
 【收尾】追加《修改记录-第五轮.md》并 git commit，首行 "S1 附录A习题参考答案"。
 做完停下汇报。
 ```
