@@ -217,7 +217,38 @@ try {
 
 BIM强调构件语义、属性和工程关系，倾斜摄影强调表面真实感，两者不能互相替代。闸门启闭机、监测仪器等关键对象宜保留可查询语义；大范围地形和周边建筑可用倾斜摄影或地形瓦片表达。
 
-IFC 4.3新增Ports and Waterways Domain，覆盖水道、船闸、闸门、溢洪道等部分设施语义\cite{ifc43Ports}。不能用\texttt{IfcDoor}表示闸门、\texttt{IfcFurniture}表示廊道或把坝体简单当作\texttt{IfcStructuralMember}。同时必须说明标准边界：buildingSMART当前文档仍把坝、堤、堰列为该域范围之外。对这些对象应采用项目分类、属性集和映射规则，并保留原始设计模型，不虚构不存在的IFC实体。
+IFC 4.3 的 Ports and Waterways Domain 面向航道、运河、船闸与升船机、港口码头等通航与港工设施。与水利工程建模最相关的实体是\texttt{IfcMarineFacility}和\texttt{IfcMarinePart}，设施类型通过\texttt{PredefinedType}表达。buildingSMART 的范围说明把 Dams/levees、Weirs、seawalls、groynes 列在该域之外，并将 coastal protection、erosion protection、flood protection 三类复合类型列为范围之外\cite{ifc43Ports}。因此，水库坝体、溢洪道、泄洪闸门、廊道和监测仪器都不能为了追求“有一个实体”而强行套用海事设施语义。
+
+表\ref{tab:ifc-waterworks-mapping}把常见水工对象与 IFC 4.3 的表达边界并列起来。表中列出的枚举值仅限于 IFC 4.3.2 官方文档已经核对的值；“无原生实体”不是数据缺失，而是要求模型交付方保留对象的工程语义，并把项目分类、属性集和映射规则作为可审计的补充层。
+
+\begin{table}[htbp]
+\centering
+\caption{水工对象到IFC 4.3的表达边界}
+\label{tab:ifc-waterworks-mapping}
+\small
+\begin{tabular}{p{2.6cm}p{4.5cm}p{6.5cm}}
+\toprule
+对象 & 可用实体与\texttt{PredefinedType} & 说明与边界 \\
+\midrule
+通航渠道 & \texttt{IfcMarineFacility}；\texttt{NAVIGATIONALCHANNEL}（也可按对象语义选\texttt{CANAL}或\texttt{WATERWAY}） & 表达通航设施本体；应记录航道等级、岸线和运营属性，不能据此推断水库坝体语义。 \\
+船闸（含闸室与闸首） & \texttt{IfcMarineFacility}；\texttt{SHIPLOCK}；\texttt{IfcMarinePart}；\texttt{CHAMBER}/\texttt{GATEHEAD} & \texttt{CHAMBER}是船闸蓄水闸室的纵向空间部分，\texttt{GATEHEAD}是船闸闸门、支承结构与设备的纵向空间部分；两者均限定在船闸语境。 \\
+升船机 & \texttt{IfcMarineFacility}；\texttt{SHIPLIFT}或\texttt{WATERWAYSHIPLIFT} & 表达通航设施中的升船机，不延伸为水库泄洪设施。 \\
+护岸 & \texttt{IfcMarineFacility}；\texttt{REVETMENT} & 表达设施级护岸；若与其他防护工程组成复合系统，应另建项目分类和属性关联。 \\
+防波堤 & \texttt{IfcMarineFacility}；\texttt{BREAKWATER} & 表达港工或滨海设施中的防波堤，不能把该类型泛化为所有挡水建筑物。 \\
+滨海与洪泛防护设施 & \texttt{IfcMarineFacility}；\texttt{MARINEDEFENCE} & 该值的定义是以保护或防御滨海或洪泛区域为主要功能的设施子集；复合的海岸、侵蚀和洪水防护仍按官方范围边界处理。 \\
+坝体 & 无原生实体 & 采用项目分类、\texttt{IfcPropertySet}属性集与映射规则表达坝段、材料和空间关系，并保留原始设计模型；不能借用海事设施类型代替坝体语义。 \\
+溢洪道 & 无原生实体 & 采用项目分类、\texttt{IfcPropertySet}属性集与映射规则表达泄流功能、段落和连接关系，并保留原始设计模型。 \\
+泄洪闸门 & 无原生实体 & 船闸语境的\texttt{GATEHEAD}不能挪用于水库泄洪闸门；应以项目分类、\texttt{IfcPropertySet}属性集和映射规则记录闸门及启闭设备。 \\
+廊道 & 无原生实体 & 以项目分类、\texttt{IfcPropertySet}属性集和映射规则表达廊道空间、断面和连通关系，并保留原始设计模型。 \\
+监测仪器 & 无原生实体 & 以项目分类、\texttt{IfcPropertySet}属性集和映射规则表达仪器编码、测点关系和运维属性，监测时序仍由水利平台数据模型管理。 \\
+项目土方填筑（不等同坝体） & \texttt{IfcEarthworksFill}；\texttt{EMBANKMENT} & 官方定义偏向道路路基或整体抬高地面的土方构件；用于土石坝时只能作为项目层面的约定映射，不能宣称为坝体的标准原生语义。 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+工程映射应先给对象分配稳定的项目分类编码，再用\texttt{IfcPropertySet}补充设计单位、施工阶段、运行状态和数据来源，并在映射规则中写明源模型对象与交付对象的对应关系。对于没有原生实体的对象，原始设计模型是审计依据，IFC 文件中的补充属性是交换层，不应反过来替代原始设计语义。这样既能让通航设施使用标准实体，也能让坝体、溢洪道和监测仪器在跨系统交换时保持可追溯。
+
+为避免把“存在一个相似名称”误读成“语义相同”，本章保留三条正向约束：闸门应按项目分类和属性集表达，不能用\texttt{IfcDoor}表示；廊道应按空间与连通关系表达，不能用\texttt{IfcFurniture}表示；坝体应按工程对象和项目映射规则表达，不能简单当作\texttt{IfcStructuralMember}。其中\texttt{IfcStructuralMember}属于结构分析模型实体，用于分析构件语义，不是水工物理构件的通用替身。对于船闸闸首，只有在对象确实属于船闸空间部分时，才可依据表\ref{tab:ifc-waterworks-mapping}使用\texttt{GATEHEAD}；该值不能迁移到水库泄洪闸门。
 
 模型轻量化应保留业务所需的全局标识、类型、空间层级和关键属性，再把几何转换为glTF或3D Tiles。转换日志记录源模型版本、转换工具、参数、时间和校核结果，以便发现属性丢失时追溯。
 
