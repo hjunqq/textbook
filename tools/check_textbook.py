@@ -174,6 +174,66 @@ def check_refs(texts, r):
     dangling = sorted(set(refs) - set(labels))
     if dangling:
         r.fail("悬空引用（\\ref 无对应 \\label）：%s" % ", ".join(dangling))
+    # 随文引出：每个图/表/公式的 \\label 必须在它自己前后 PROX 行以内被 \\ref 到。
+    # 这条直接编码"读者读到这段话时图就在附近"，章末集中罗列无法满足，
+    # 因此不存在低成本的替代满足方式。
+    PROX = 40
+    far = []
+    for f, t in texts.items():
+        lines = t.split("\n")
+        refpos = {}
+        for i, line in enumerate(lines):
+            for k in re.findall(r"\\(?:ref|autoref|eqref)\{([^}]*)\}", line):
+                refpos.setdefault(k, []).append(i)
+        env, envline = None, 0
+        for i, line in enumerate(lines):
+            m = re.search(r"\\begin\{(figure|table|longtable|equation)\*?\}", line)
+            if m:
+                env, envline = m.group(1), i
+            if re.search(r"\\end\{(figure|table|longtable|equation)\*?\}", line):
+                env = None
+            for k in re.findall(r"\\label\{([^}]*)\}", line):
+                if env is None and not k.startswith(("fig:", "tab:", "eq:")):
+                    continue
+                near = any(abs(p - i) <= PROX for p in refpos.get(k, []))
+                if not near:
+                    far.append("%s:%d %s" % (f, i + 1, k))
+    if far:
+        r.fail("以下 %d 个图/表/公式没有在自己前后 %d 行以内被正文引出：\n    %s\n"
+               "  图表必须在讨论它的那一段附近引出（『……具体差异见表\\ref{...}』），"
+               "章末集中罗列不算。若某个图表在正文中确实没有对应讨论，"
+               "说明那是内容缺口，列出来交给对应的 A 系列工作包补正文，不要硬塞引导语。"
+               % (len(far), PROX, "\n    ".join(far[:40])
+                  + ("\n    …另有 %d 个" % (len(far) - 40) if len(far) > 40 else "")))
+    # 反模板：引导语必须针对该图表本身，不能是一句套话到处盖章。
+    # 把每个含 \\ref 的句子抽出来、抹掉 label 后归一化，同一句话复用 3 次以上即判失败。
+    import collections
+    forms = collections.Counter()
+    where = {}
+    for f, t in texts.items():
+        for i, line in enumerate(t.split("\n")):
+            if not re.search(r"\\(?:ref|autoref|eqref)\{", line):
+                continue
+            for sent in re.split(r"[。；]", line):
+                if not re.search(r"\\(?:ref|autoref|eqref)\{", sent):
+                    continue
+                norm = re.sub(r"\\(?:ref|autoref|eqref)\{[^}]*\}", "@", sent)
+                norm = re.sub(r"[\s\\{}]|\\textit|\\emph|[0-9]", "", norm)
+                if len(norm) < 12:
+                    continue
+                forms[norm] += 1
+                where.setdefault(norm, []).append("%s:%d" % (f, i + 1))
+    dup = [(n, c) for n, c in forms.items() if c >= 3]
+    if dup:
+        msg = []
+        for n, c in sorted(dup, key=lambda x: -x[1])[:6]:
+            msg.append("  用了 %d 次：%s…\n    出现在：%s"
+                       % (c, n[:44], "、".join(where[n][:6])))
+        r.fail("检出 %d 种模板化引导语被反复套用：\n%s\n"
+               "  引导语必须说明这一张图/表要回答什么问题，因此不同图表的引导语必然不同。"
+               "同一句话盖在多个图表上，等于没有引出。"
+               % (len(dup), "\n".join(msg)))
+
     unref = sorted(l for l in labels
                    if l not in refs and not l.startswith(("ch:", "sec:", "lst:")))
     r.metric("unref_labels", len(unref), "未被 \\ref 引用的图/表/公式 label")
