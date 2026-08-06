@@ -336,6 +336,9 @@ public final class QualityService {
         if (score >= 0.50) {
             return new Classification(true, WarningLevel.YELLOW, "达到黄色阈值");
         }
+        if (score >= 0.30) {
+            return new Classification(true, WarningLevel.BLUE, "达到蓝色关注阈值");
+        }
         return new Classification(true, WarningLevel.NONE, "无预警");
     }
 
@@ -363,6 +366,8 @@ public final class QualityService {
 \end{lstlisting}
 
 质量状态合并遵循\texttt{missing > invalid > suspect > valid}的优先级：同一条记录同时缺测、单位错误、范围无效或事件重复时，\texttt{issues}保留全部原因，最终质量状态取最高优先级。这里的\texttt{invalid}是内部校验结论，对外仍映射为三值质量码中的\texttt{suspect}，从而既保留“明显无效”的语义，又与第7章的\texttt{valid/suspect/missing}口径一致。原始值从不被覆盖，\texttt{qualityFlagAdjusted}只表示质量标记发生了受控调整，原始记录与质量结果通过事件标识关联。
+
+示例中的\texttt{seenEventIds}只用内存集合演示幂等语义，生产环境应改用带过期时间的去重存储，例如 Redis 的 SETNX 加 TTL，或数据库唯一约束；去重窗口应覆盖消息系统可能出现的最大重投周期，窗口结束后才允许同一业务标识再次进入处理流程。
 
 \subsection{存储、缓存与一致性}
 
@@ -402,7 +407,7 @@ w_i\ge 0,\quad \sum_{i=1}^{n}w_i=1,
 
 其中$f_i$为归一化指标，$w_i$为经批准的权重。评分只提供风险证据，不能脱离工况、数据质量和专业判断自动升级为控制命令。
 
-示例阈值仅用于单元测试。生产阈值应版本化，并记录适用工程、工况、审批人和生效时间。分类结果中的\texttt{evaluable=false}表示“未评估”，即质量不满足风险判定条件；\texttt{evaluable=true}且\texttt{level=NONE}才表示“无预警”。这两个业务态不能折叠进颜色维度，界面应分别显示质量原因和预警状态。
+示例阈值仅用于单元测试。生产阈值应版本化，并记录适用工程、工况、审批人和生效时间。本例以$S\ge0.30$作为蓝色关注阈值：$0.30\le S<0.50$表示指标出现需关注变化，$S<0.30$才是当前规则下的无预警。蓝色不是“没有变化”，而是把轻度变化交给值班员确认。分类结果中的\texttt{evaluable=false}表示“未评估”，即质量不满足风险判定条件；\texttt{evaluable=true}且\texttt{level=NONE}才表示“无预警”。这两个业务态不能折叠进颜色维度，界面应分别显示质量原因和预警状态。
 
 下面的单元测试把两个业务态固定成可执行的契约：低分且有效的数据是“无预警”，高分但质量不合格的数据是“未评估”，二者不能互换。
 
@@ -428,6 +433,16 @@ public final class QualityClassificationTest {
         assertTrue(result.evaluable());
         assertEquals(QualityService.WarningLevel.NONE, result.level());
         assertEquals("无预警", result.reason());
+    }
+
+    @Test
+    void validAttentionScoreMeansBlue() {
+        QualityService.Classification result =
+            service.classify(0.30, "valid");
+
+        assertTrue(result.evaluable());
+        assertEquals(QualityService.WarningLevel.BLUE, result.level());
+        assertTrue(result.reason().contains("蓝色"));
     }
 
     @Test
