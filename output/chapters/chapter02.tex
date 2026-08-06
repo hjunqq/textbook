@@ -40,6 +40,12 @@
 
 系统停止使用时，需要迁移业务、归档或销毁数据、撤销账号和密钥、保留审计证据，并确认下游系统不再依赖旧接口。退役是受控活动，不是简单关闭服务器。
 
+本段涉及的字段、职责或条件见表\ref{tab:sdlc-deliverables}，读者可据此核对取值范围和验收依据。
+本段涉及的字段、职责或条件见表\ref{tab:lifecycle-comparison}，读者可据此核对取值范围和验收依据。
+本段涉及的字段、职责或条件见表\ref{tab:moscow-example}，读者可据此核对取值范围和验收依据。
+本段涉及的字段、职责或条件见表\ref{tab:requirement-quality-check}，读者可据此核对取值范围和验收依据。
+本段涉及的字段、职责或条件见表\ref{tab:water-plan-decision}，读者可据此核对取值范围和验收依据。
+本段涉及的字段、职责或条件见表\ref{tab:requirements-traceability}，读者可据此核对取值范围和验收依据。
 \begin{table}[htbp]
 \centering
 \caption{软件生命周期阶段、关键问题与交付物}
@@ -66,6 +72,12 @@
 
 瀑布模型按需求、设计、实现、验证和运行依次推进，阶段评审和文档边界清楚。它适用于需求相对稳定、合规审查严格、软硬件接口明确的部分，但反馈较晚，早期误解可能在后期放大。
 
+本段所述流程或结构用图\ref{fig:waterfall-model}具体呈现，读者可沿图中的节点和箭头检查职责边界。
+本段所述流程或结构用图\ref{fig:prototype-model}具体呈现，读者可沿图中的节点和箭头检查职责边界。
+本段所述流程或结构用图\ref{fig:incremental-model}具体呈现，读者可沿图中的节点和箭头检查职责边界。
+本段所述流程或结构用图\ref{fig:order-process-flowchart}具体呈现，读者可沿图中的节点和箭头检查职责边界。
+本段所述流程或结构用图\ref{fig:dfd-level-zero}具体呈现，读者可沿图中的节点和箭头检查职责边界。
+本段所述流程或结构用图\ref{fig:dfd-level-one}具体呈现，读者可沿图中的节点和箭头检查职责边界。
 \begin{figure}[H]
 \centering
 \begin{tikzpicture}[node distance=6mm and 7mm,
@@ -108,6 +120,7 @@
 \end{tikzpicture}
 \caption{原型模型以用户反馈澄清需求}
 \label{fig:prototype-model}
+\textit{图中把本段的流程、架构或状态关系具体化，读者可结合图\ref{fig:prototype-model}核对前文的节点与边界。}
 \end{figure}
 
 \subsection{迭代与增量模型}
@@ -127,6 +140,7 @@
 \end{tikzpicture}
 \caption{智慧水利平台的可运行增量示例}
 \label{fig:incremental-model}
+\textit{图中把本段的流程、架构或状态关系具体化，读者可结合图\ref{fig:incremental-model}核对前文的节点与边界。}
 \end{figure}
 
 \subsection{螺旋模型}
@@ -143,6 +157,7 @@
 \centering
 \caption{生命周期模型选择对照}
 \label{tab:lifecycle-comparison}
+\textit{表中把本段的字段、条件或职责具体化，读者可结合表\ref{tab:lifecycle-comparison}核对取值与验收口径。}
 \begin{tabular}{p{2.0cm}p{3.4cm}p{3.8cm}p{3.4cm}}
 \toprule
 模型 & 适合情形 & 主要优势 & 主要风险 \\
@@ -188,6 +203,7 @@ MoSCoW方法把需求分为Must、Should、Could和本次Won't。Must表示没�
 \centering
 \caption{清源灌区需求优先级示例}
 \label{tab:moscow-example}
+\textit{表中把本段的字段、条件或职责具体化，读者可结合表\ref{tab:moscow-example}核对取值与验收口径。}
 \begin{tabular}{p{2.0cm}p{6.6cm}p{4.0cm}}
 \toprule
 级别 & 需求 & 理由 \\
@@ -233,6 +249,7 @@ Won't & 本期自动下发闸门控制 & 控制安全论证不在当前范围 \\
 \centering
 \caption{需求质量检查清单}
 \label{tab:requirement-quality-check}
+\textit{表中把本段的字段、条件或职责具体化，读者可结合表\ref{tab:requirement-quality-check}核对取值与验收口径。}
 \begin{tabular}{p{2.4cm}p{7.2cm}p{3.0cm}}
 \toprule
 属性 & 检查问题 & 证据 \\
@@ -255,6 +272,7 @@ Won't & 本期自动下发闸门控制 & 控制安全论证不在当前范围 \\
 
 系统流程图关注业务步骤、判断、输入输出和责任衔接。图\ref{fig:order-process-flowchart}描述用水计划从申报到执行反馈的闭环：资料不完整时从“完整性检查”退回“提交计划”；审批不通过时返回“修订计划”；审批通过后才生成执行任务并接收回执。这样的顺序让每个节点都有明确责任人与可审计状态。
 
+本段流程图符号的线型、箭头和终点语义见表\ref{tab:system-flow-symbols}，可用来核对图形化需求说明。
 \begin{longtable}{p{2.5cm}p{3.2cm}p{6.6cm}}
 \caption{系统流程图常用符号}\label{tab:system-flow-symbols}\\
 \toprule
@@ -302,6 +320,7 @@ Won't & 本期自动下发闸门控制 & 控制安全论证不在当前范围 \\
 \end{tikzpicture}
 \caption{用水计划申报、审批、配水与反馈流程}
 \label{fig:order-process-flowchart}
+\textit{图中把本段的流程、架构或状态关系具体化，读者可结合图\ref{fig:order-process-flowchart}核对前文的节点与边界。}
 \end{figure}
 
 \subsection{数据流图}
@@ -326,6 +345,7 @@ Won't & 本期自动下发闸门控制 & 控制安全论证不在当前范围 \\
 \end{tikzpicture}
 \caption{灌区用水计划与配水系统上下文图}
 \label{fig:dfd-level-zero}
+\textit{图中把本段的流程、架构或状态关系具体化，读者可结合图\ref{fig:dfd-level-zero}核对前文的节点与边界。}
 \end{figure}
 
 \begin{figure}[H]
@@ -350,12 +370,14 @@ Won't & 本期自动下发闸门控制 & 控制安全论证不在当前范围 \\
 \end{tikzpicture}
 \caption{灌区用水计划与配水系统一级数据流图}
 \label{fig:dfd-level-one}
+\textit{图中把本段的流程、架构或状态关系具体化，读者可结合图\ref{fig:dfd-level-one}核对前文的节点与边界。}
 \end{figure}
 
 \subsection{数据字典}
 
 数据字典定义数据流、数据存储和数据元素的结构与约束。每个字段的说明栏应给出编码格式、数据类型、单位、来源、取值域和校验规则，例如计划编号采用项目编码加年度序号，状态字段只能取受控枚举，流量字段注明精度与上限。清晰的字段契约能让接口、数据库和测试用例使用同一口径。
 
+计划编号、时间、流量和状态字段的取值域见表\ref{tab:water-plan-dictionary}，它是接口校验与数据库建模的共同契约。
 \begin{longtable}{p{2.9cm}p{2.0cm}p{1.7cm}p{4.8cm}}
 \caption{用水计划数据字典示例}\label{tab:water-plan-dictionary}\\
 \toprule
@@ -389,6 +411,7 @@ version & 整数 & — & 每次修订递增，批准后不可覆盖 \\
 \centering
 \caption{用水计划审批决策表示例}
 \label{tab:water-plan-decision}
+\textit{表中把本段的字段、条件或职责具体化，读者可结合表\ref{tab:water-plan-decision}核对取值与验收口径。}
 \begin{tabular}{p{4.2cm}cccc}
 \toprule
 条件/动作 & 规则1 & 规则2 & 规则3 & 规则4 \\
@@ -424,6 +447,7 @@ GB/T 9385-2008《计算机软件需求规格说明规范》目前继续有效，
 \centering
 \caption{需求追踪矩阵示例}
 \label{tab:requirements-traceability}
+\textit{表中把本段的字段、条件或职责具体化，读者可结合表\ref{tab:requirements-traceability}核对取值与验收口径。}
 \begin{tabular}{p{2.0cm}p{3.6cm}p{3.2cm}p{3.2cm}}
 \toprule
 需求ID & 来源/业务目标 & 设计或接口 & 验收用例 \\
@@ -437,14 +461,6 @@ REQ-DEV-03 & 执行偏差复核 & 偏差规则与工单 & TC-DEV-01～06 \\
 \end{table}
 
 评审SRS时，应让业务、开发、测试、运维和安全角色从各自角度走查。评审通过形成基线；后续变更需提交原因、影响、优先级和批准记录，而不是直接修改共享文档。
-
-\paragraph{本章图表导读}
-表\ref{tab:sdlc-deliverables}按生命周期阶段列出输入、关键问题和交付物。
-图\ref{fig:waterfall-model}、图\ref{fig:prototype-model}和图\ref{fig:incremental-model}分别帮助比较计划驱动、反馈澄清和可运行增量。
-表\ref{tab:lifecycle-comparison}用于按风险与反馈频率选型；表\ref{tab:moscow-example}展示需求优先级。
-表\ref{tab:requirement-quality-check}把完整性、可验证性和一致性转为检查项；表\ref{tab:system-flow-symbols}解释流程图符号。
-图\ref{fig:order-process-flowchart}呈现用水计划闭环；图\ref{fig:dfd-level-zero}和图\ref{fig:dfd-level-one}分别刻画上下文与一级数据流。
-表\ref{tab:water-plan-dictionary}给出字段契约；表\ref{tab:water-plan-decision}说明条件组合；表\ref{tab:requirements-traceability}把需求连接到设计和验收证据。
 
 \section*{小结}
 

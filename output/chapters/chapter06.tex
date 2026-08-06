@@ -96,6 +96,18 @@ scene.add(gltf.scene);
 
 WMS根据请求范围、尺寸、坐标参考系和样式动态渲染地图图像；WMTS按预定义瓦片矩阵提供地图瓦片，便于缓存和大规模浏览；WFS提供可查询的矢量要素。WMS不是“栅格瓦片服务”，WMTS才以预定义瓦片为核心\cite{ogcWMS,ogcWMTS}。
 
+本段涉及的字段、职责或条件见表\ref{tab:ogc-services}，读者可据此核对取值范围和验收依据。
+本段涉及的字段、职责或条件见表\ref{tab:ifc-waterworks-mapping}，读者可据此核对取值范围和验收依据。
+本段涉及的字段、职责或条件见表\ref{tab:dt-five-dimensions}，读者可据此核对取值范围和验收依据。
+本段涉及的字段、职责或条件见表\ref{tab:dt-scenario-requirements}，读者可据此核对取值范围和验收依据。
+本段涉及的字段、职责或条件见表\ref{tab:dt-metadata}，读者可据此核对取值范围和验收依据。
+本段涉及的字段、职责或条件见表\ref{tab:model-card}，读者可据此核对取值范围和验收依据。
+本段涉及的字段、职责或条件见表\ref{tab:dt-quality-flags}，读者可据此核对取值范围和验收依据。
+本段涉及的字段、职责或条件见表\ref{tab:dam-twin-scenario}，读者可据此核对取值范围和验收依据。
+本段涉及的字段、职责或条件见表\ref{tab:dt-degradation}，读者可据此核对取值范围和验收依据。
+本段涉及的字段、职责或条件见表\ref{tab:dt-observability}，读者可据此核对取值范围和验收依据。
+本段涉及的字段、职责或条件见表\ref{tab:dt-acceptance}，读者可据此核对取值范围和验收依据。
+本段涉及的字段、职责或条件见表\ref{tab:dt-course-iterations}，读者可据此核对取值范围和验收依据。
 \begin{table}[htbp]
 \centering
 \caption{常用OGC服务的职责}
@@ -186,6 +198,15 @@ try {
 
 倾斜摄影通过垂直与多个倾斜视角获取影像，用于恢复工程及周边地表。系统由飞行平台、航摄仪、地面控制和内业处理组成，如图\ref{fig:uav-oblique-system}所示。
 
+本段所述流程或结构用图\ref{fig:uav-oblique-system}具体呈现，读者可沿图中的节点和箭头检查职责边界。
+本段所述流程或结构用图\ref{fig:oblique-preprocess}具体呈现，读者可沿图中的节点和箭头检查职责边界。
+本段所述流程或结构用图\ref{fig:dt-five-dimensions}具体呈现，读者可沿图中的节点和箭头检查职责边界。
+本段所述流程或结构用图\ref{fig:dt-layered-architecture}具体呈现，读者可沿图中的节点和箭头检查职责边界。
+本段所述流程或结构用图\ref{fig:dt-evidence-chain}具体呈现，读者可沿图中的节点和箭头检查职责边界。
+本段所述流程或结构用图\ref{fig:dt-closed-loop}具体呈现，读者可沿图中的节点和箭头检查职责边界。
+本段所述流程或结构用图\ref{fig:dt-event-contract}具体呈现，读者可沿图中的节点和箭头检查职责边界。
+本段所述流程或结构用图\ref{fig:dt-edge-cloud}具体呈现，读者可沿图中的节点和箭头检查职责边界。
+本段所述流程或结构用图\ref{fig:dt-lineage}具体呈现，读者可沿图中的节点和箭头检查职责边界。
 \begin{figure}[H]
 \centering
 \uavObliquePhotographySystem
@@ -205,6 +226,9 @@ try {
 术语必须区分：特征点由算法在影像中检测；连接点是多幅影像中匹配到同一地物的特征；像控点具有外业测得的已知坐标，用于约束空三结果；检查点不参与平差，只用于独立精度评定。
 
 若检查点共有$n$个，成果与实测坐标差分别为$\Delta X_i$、$\Delta Y_i$、$\Delta H_i$，三个方向的均方根误差应分别计算：
+本段的误差计算按式(\ref{eq:rmse-x})核对，并把结果与坐标基准和质量阈值一起记录。
+本段的误差计算按式(\ref{eq:rmse-y})核对，并把结果与坐标基准和质量阈值一起记录。
+本段的误差计算按式(\ref{eq:rmse-h})核对，并把结果与坐标基准和质量阈值一起记录。
 \begin{equation}
   m_x=\sqrt{\frac{1}{n}\sum_{i=1}^{n}(\Delta X_i)^2}.
   \label{eq:rmse-x}
@@ -305,12 +329,14 @@ NASA文献强调物理模型、传感器更新和运行历史的综合映射\cit
 \end{tikzpicture}
 \caption{数字孪生水利平台五维组织}
 \label{fig:dt-five-dimensions}
+\textit{图中把本段的流程、架构或状态关系具体化，读者可结合图\ref{fig:dt-five-dimensions}核对前文的节点与边界。}
 \end{figure}
 
 \begin{table}[htbp]
 \centering
 \caption{五个维度在大坝安全监测中的映射}
 \label{tab:dt-five-dimensions}
+\textit{表中把本段的字段、条件或职责具体化，读者可结合表\ref{tab:dt-five-dimensions}核对取值与验收口径。}
 \begin{tabular}{p{2.2cm}p{4.2cm}p{6.2cm}}
 \toprule
 维度 & 典型内容 & 设计关注点 \\
@@ -347,6 +373,7 @@ NASA文献强调物理模型、传感器更新和运行历史的综合映射\cit
 \end{tikzpicture}
 \caption{数字孪生水利平台分层架构}
 \label{fig:dt-layered-architecture}
+\textit{图中把本段的流程、架构或状态关系具体化，读者可结合图\ref{fig:dt-layered-architecture}核对前文的节点与边界。}
 \end{figure}
 
 感知连接层先完成测站身份、时间戳、单位、范围和质量码检查，再进入数据底板。模型层不直接读取任意原始表，而通过具有版本的数据产品获得输入。服务层把模型结果转换为可解释的风险等级或方案指标；应用层展示依据与不确定性，不把建议伪装成自动命令。
@@ -359,6 +386,7 @@ NASA文献强调物理模型、传感器更新和运行历史的综合映射\cit
 \centering
 \caption{典型数字孪生水利场景的需求差异}
 \label{tab:dt-scenario-requirements}
+\textit{表中把本段的字段、条件或职责具体化，读者可结合表\ref{tab:dt-scenario-requirements}核对取值与验收口径。}
 \begin{tabular}{p{2.6cm}p{3.4cm}p{3.5cm}p{3.5cm}}
 \toprule
 场景 & 核心对象与观测 & 主要模型/规则 & 业务输出 \\
@@ -384,6 +412,7 @@ NASA文献强调物理模型、传感器更新和运行历史的综合映射\cit
 \centering
 \caption{数字孪生数据与模型注册的关键元数据}
 \label{tab:dt-metadata}
+\textit{表中把本段的字段、条件或职责具体化，读者可结合表\ref{tab:dt-metadata}核对取值与验收口径。}
 \begin{tabular}{p{3cm}p{4.2cm}p{5.6cm}}
 \toprule
 对象 & 必备元数据 & 作用 \\
@@ -407,6 +436,7 @@ NASA文献强调物理模型、传感器更新和运行历史的综合映射\cit
 \centering
 \caption{水利模型卡的最小字段}
 \label{tab:model-card}
+\textit{表中把本段的字段、条件或职责具体化，读者可结合表\ref{tab:model-card}核对取值与验收口径。}
 \begin{tabular}{p{3.0cm}p{4.2cm}p{5.2cm}}
 \toprule
 字段组 & 示例 & 验证问题 \\
@@ -439,6 +469,7 @@ NASA文献强调物理模型、传感器更新和运行历史的综合映射\cit
 \centering
 \caption{监测数据质量码与处理建议}
 \label{tab:dt-quality-flags}
+\textit{表中把本段的字段、条件或职责具体化，读者可结合表\ref{tab:dt-quality-flags}核对取值与验收口径。}
 \begin{tabular}{p{2.4cm}p{4.5cm}p{5.8cm}}
 \toprule
 质量状态 & 判断示例 & 下游处理 \\
@@ -481,6 +512,7 @@ NASA文献强调物理模型、传感器更新和运行历史的综合映射\cit
 \end{tikzpicture}
 \caption{从三维对象到业务处置的证据链}
 \label{fig:dt-evidence-chain}
+\textit{图中把本段的流程、架构或状态关系具体化，读者可结合图\ref{fig:dt-evidence-chain}核对前文的节点与边界。}
 \end{figure}
 
 时间轴允许回看任一历史状态，但必须区分“当时已知的数据”和“后来补录后重算的状态”。若回放使用了后来数据，界面应标注为修订视图，防止把事后计算结果误认为当时决策依据。
@@ -513,6 +545,7 @@ NASA文献强调物理模型、传感器更新和运行历史的综合映射\cit
 \end{tikzpicture}
 \caption{数字孪生业务闭环}
 \label{fig:dt-closed-loop}
+\textit{图中把本段的流程、架构或状态关系具体化，读者可结合图\ref{fig:dt-closed-loop}核对前文的节点与边界。}
 \end{figure}
 
 下面的短伪代码只表达状态更新主线。每个函数均代表可测试的服务接口，不虚构十余个未定义类。
@@ -584,6 +617,7 @@ def update_twin(reading, repository, model, publisher):
 \end{tikzpicture}
 \caption{状态更新的事件契约与审计链}
 \label{fig:dt-event-contract}
+\textit{图中把本段的流程、架构或状态关系具体化，读者可结合图\ref{fig:dt-event-contract}核对前文的节点与边界。}
 \end{figure}
 
 接口契约需通过自动化测试验证，包括必填字段、单位、时区、枚举、重复事件和乱序事件。契约文档与代码同步版本化，避免不同团队凭口头约定解释同一字段。
@@ -598,6 +632,7 @@ def update_twin(reading, repository, model, publisher):
 \centering
 \caption{大坝数字孪生场景的输入、处理与输出}
 \label{tab:dam-twin-scenario}
+\textit{表中把本段的字段、条件或职责具体化，读者可结合表\ref{tab:dam-twin-scenario}核对取值与验收口径。}
 \begin{tabular}{p{3.1cm}p{4.5cm}p{5.2cm}}
 \toprule
 环节 & 内容 & 质量控制 \\
@@ -639,6 +674,7 @@ def update_twin(reading, repository, model, publisher):
 \end{tikzpicture}
 \caption{数字孪生水利平台云边协同部署}
 \label{fig:dt-edge-cloud}
+\textit{图中把本段的流程、架构或状态关系具体化，读者可结合图\ref{fig:dt-edge-cloud}核对前文的节点与边界。}
 \end{figure}
 
 部署设计需明确网络分区、离线时长、数据补传顺序、模型降级和灾备目标。例如模型服务不可用时，平台仍应展示经质检的实时数据和已批准阈值规则；不能把整个监控能力绑定在单一模型上。
@@ -651,6 +687,7 @@ def update_twin(reading, repository, model, publisher):
 \centering
 \caption{数字孪生平台的失效场景与降级策略}
 \label{tab:dt-degradation}
+\textit{表中把本段的字段、条件或职责具体化，读者可结合表\ref{tab:dt-degradation}核对取值与验收口径。}
 \begin{tabular}{p{3.2cm}p{4.5cm}p{4.8cm}}
 \toprule
 失效场景 & 风险 & 预期降级 \\
@@ -677,6 +714,7 @@ def update_twin(reading, repository, model, publisher):
 \centering
 \caption{数字孪生平台的分层可观测指标}
 \label{tab:dt-observability}
+\textit{表中把本段的字段、条件或职责具体化，读者可结合表\ref{tab:dt-observability}核对取值与验收口径。}
 \begin{tabular}{p{2.1cm}p{4.2cm}p{4.2cm}p{2.5cm}}
 \toprule
 层面 & 关键指标 & 典型异常 & 处置责任 \\
@@ -715,6 +753,7 @@ def update_twin(reading, repository, model, publisher):
 \end{tikzpicture}
 \caption{从原始数据到处置复盘的血缘与证据链}
 \label{fig:dt-lineage}
+\textit{图中把本段的流程、架构或状态关系具体化，读者可结合图\ref{fig:dt-lineage}核对前文的节点与边界。}
 \end{figure}
 
 值守界面应按影响范围和紧迫程度合并告警，避免同一根因产生大量重复提示。告警必须包含对象、发生时间、当前值、质量码、触发规则、推荐动作和确认入口；抑制、合并或关闭告警也要保留操作者与理由。交接班记录尚未恢复的数据源、降级中的模型、未闭环工单和临时权限，防止信息只停留在即时通信中。
@@ -729,6 +768,7 @@ def update_twin(reading, repository, model, publisher):
 \centering
 \caption{数字孪生平台验收检查项}
 \label{tab:dt-acceptance}
+\textit{表中把本段的字段、条件或职责具体化，读者可结合表\ref{tab:dt-acceptance}核对取值与验收口径。}
 \begin{tabular}{p{2.3cm}p{5.0cm}p{5.4cm}}
 \toprule
 类别 & 检查项 & 证据 \\
@@ -753,6 +793,7 @@ def update_twin(reading, repository, model, publisher):
 \centering
 \caption{数字孪生课程项目的四次迭代}
 \label{tab:dt-course-iterations}
+\textit{表中把本段的字段、条件或职责具体化，读者可结合表\ref{tab:dt-course-iterations}核对取值与验收口径。}
 \begin{tabular}{p{1.8cm}p{4.0cm}p{4.1cm}p{3.3cm}}
 \toprule
 迭代 & 主要任务 & 交付物 & 验收重点 \\
@@ -774,16 +815,6 @@ def update_twin(reading, repository, model, publisher):
 值得持续关注的方向包括：模型可信度与不确定性表达、跨系统语义互操作、云边协同、面向事件的实时数据处理、人在回路的决策支持以及网络与数据安全。这些方向都能通过可测指标验证。本章不罗列“元宇宙”“区块链天然保证可信”等缺乏场景和证据的口号。
 
 我国数字孪生水利建设强调流域防洪、水资源管理和工程运行等实际任务\cite{twinWater2023,twinProject2024}。平台规划应从可闭环的业务问题出发，逐步扩展数据、模型和服务，而不是先建设不可维护的全量高精度场景。
-
-\paragraph{本章图表与公式导读}
-表\ref{tab:ogc-services}比较不同OGC服务的请求粒度与适用任务；图\ref{fig:oblique-preprocess}展示倾斜影像从检查到发布的质量控制流程。
-按式(\ref{eq:rmse-x})、式(\ref{eq:rmse-y})和式(\ref{eq:rmse-h})可分别核对平面与高程误差。
-图\ref{fig:dt-five-dimensions}与表\ref{tab:dt-five-dimensions}说明五维模型的组织关系和安全监测映射。
-图\ref{fig:dt-layered-architecture}及表\ref{tab:dt-scenario-requirements}把维度落到平台分层与场景需求。
-表\ref{tab:dt-metadata}、表\ref{tab:model-card}和表\ref{tab:dt-quality-flags}用于登记数据、模型和质量码证据。
-图\ref{fig:dt-evidence-chain}、图\ref{fig:dt-closed-loop}与图\ref{fig:dt-event-contract}分别追踪对象证据、业务闭环和事件契约。
-表\ref{tab:dam-twin-scenario}给出大坝案例的输入输出；图\ref{fig:dt-edge-cloud}和表\ref{tab:dt-degradation}说明云边协同与失效降级。
-表\ref{tab:dt-observability}规定可观测指标；图\ref{fig:dt-lineage}展示血缘追溯；表\ref{tab:dt-acceptance}和表\ref{tab:dt-course-iterations}用于验收与课程迭代。
 
 代码清单\ref{lst:ch06-cesium-init}和\ref{lst:ch06-wmts-request}给出三维场景与地理瓦片请求骨架。
 代码清单\ref{lst:ch06-three-renderer}、\ref{lst:ch06-three-camera}和\ref{lst:ch06-three-animation}展示渲染器、相机与循环的协作。

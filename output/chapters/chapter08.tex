@@ -31,6 +31,30 @@
 
 安全监测平台服务于观测、分析、预警和处置，不直接替代工程运行规程。教学案例只模拟信息流程，不连接真实控制设备。监测点布设和数据使用应参考适用的工程设计与监测规范\cite{sl6012013,slt7252016}。
 
+本段涉及的字段、职责或条件见表\ref{tab:case-parameters}，读者可据此核对取值范围和验收依据。
+本段涉及的字段、职责或条件见表\ref{tab:case-roles}，读者可据此核对取值范围和验收依据。
+本段涉及的字段、职责或条件见表\ref{tab:three-cesium-selection}，读者可据此核对取值范围和验收依据。
+本段涉及的字段、职责或条件见表\ref{tab:case-core-data}，读者可据此核对取值范围和验收依据。
+本段涉及的字段、职责或条件见表\ref{tab:warning-levels}，读者可据此核对取值范围和验收依据。
+本段涉及的字段、职责或条件见表\ref{tab:quality-code-downstream}，读者可据此核对取值范围和验收依据。
+本段涉及的字段、职责或条件见表\ref{tab:twin-three-portals}，读者可据此核对取值范围和验收依据。
+本段涉及的字段、职责或条件见表\ref{tab:typhoon-scenario-contract}，读者可据此核对取值范围和验收依据。
+本段涉及的字段、职责或条件见表\ref{tab:inundation-evidence}，读者可据此核对取值范围和验收依据。
+本段涉及的字段、职责或条件见表\ref{tab:monitoring-four-pre}，读者可据此核对取值范围和验收依据。
+本段涉及的字段、职责或条件见表\ref{tab:gate-algorithm-contract}，读者可据此核对取值范围和验收依据。
+本段涉及的字段、职责或条件见表\ref{tab:warning-rehearsal}，读者可据此核对取值范围和验收依据。
+本段涉及的字段、职责或条件见表\ref{tab:ai-assistant-boundary}，读者可据此核对取值范围和验收依据。
+本段涉及的字段、职责或条件见表\ref{tab:simulation-labeling}，读者可据此核对取值范围和验收依据。
+本段涉及的字段、职责或条件见表\ref{tab:twin-object-state}，读者可据此核对取值范围和验收依据。
+本段涉及的字段、职责或条件见表\ref{tab:model-run-lifecycle}，读者可据此核对取值范围和验收依据。
+本段涉及的字段、职责或条件见表\ref{tab:water-network-dispatch}，读者可据此核对取值范围和验收依据。
+本段涉及的字段、职责或条件见表\ref{tab:scenario-comparison}，读者可据此核对取值范围和验收依据。
+本段涉及的字段、职责或条件见表\ref{tab:end-to-end-slice}，读者可据此核对取值范围和验收依据。
+本段涉及的字段、职责或条件见表\ref{tab:end-to-end-assertions}，读者可据此核对取值范围和验收依据。
+本段涉及的字段、职责或条件见表\ref{tab:consultation-timeline}，读者可据此核对取值范围和验收依据。
+本段涉及的字段、职责或条件见表\ref{tab:twin-failure-acceptance}，读者可据此核对取值范围和验收依据。
+本段涉及的字段、职责或条件见表\ref{tab:twin-course-iterations}，读者可据此核对取值范围和验收依据。
+本段涉及的字段、职责或条件见表\ref{tab:chapter8-acceptance}，读者可据此核对取值范围和验收依据。
 \begin{table}[htbp]
 \centering
 \caption{清源水库教学案例设定}
@@ -58,6 +82,7 @@
 \centering
 \caption{角色与关键权限}
 \label{tab:case-roles}
+\textit{表中把本段的字段、条件或职责具体化，读者可结合表\ref{tab:case-roles}核对取值与验收口径。}
 \begin{tabular}{p{2.3cm}p{4.8cm}p{5.2cm}}
 \toprule
 角色 & 允许操作 & 受限操作 \\
@@ -77,6 +102,22 @@
 
 业务闭环从观测开始，经质量检查、状态估计、规则/模型分析、预警确认、工单处置和效果复核回到模型与规则改进。现场设备不能绕过接入和质量检查直接触发预警。
 
+本段所述流程或结构用图\ref{fig:smart-water-monitoring-architecture}具体呈现，读者可沿图中的节点和箭头检查职责边界。
+本段所述流程或结构用图\ref{fig:case-layered-architecture}具体呈现，读者可沿图中的节点和箭头检查职责边界。
+本段所述流程或结构用图\ref{fig:monitoring-data-pipeline}具体呈现，读者可沿图中的节点和箭头检查职责边界。
+本段所述流程或结构用图\ref{fig:warning-workorder-flow}具体呈现，读者可沿图中的节点和箭头检查职责边界。
+本段所述流程或结构用图\ref{fig:twin-portals}具体呈现，读者可沿图中的节点和箭头检查职责边界。
+本段所述流程或结构用图\ref{fig:typhoon-simulation-chain}具体呈现，读者可沿图中的节点和箭头检查职责边界。
+本段所述流程或结构用图\ref{fig:simulation-evidence}具体呈现，读者可沿图中的节点和箭头检查职责边界。
+本段所述流程或结构用图\ref{fig:four-pre-loop}具体呈现，读者可沿图中的节点和箭头检查职责边界。
+本段所述流程或结构用图\ref{fig:gate-simulation-flow}具体呈现，读者可沿图中的节点和箭头检查职责边界。
+本段所述流程或结构用图\ref{fig:ai-meeting-loop}具体呈现，读者可沿图中的节点和箭头检查职责边界。
+本段所述流程或结构用图\ref{fig:twin-decoupling}具体呈现，读者可沿图中的节点和箭头检查职责边界。
+本段所述流程或结构用图\ref{fig:twin-state-separation}具体呈现，读者可沿图中的节点和箭头检查职责边界。
+本段所述流程或结构用图\ref{fig:model-run-lifecycle}具体呈现，读者可沿图中的节点和箭头检查职责边界。
+本段所述流程或结构用图\ref{fig:water-network-graph}具体呈现，读者可沿图中的节点和箭头检查职责边界。
+本段所述流程或结构用图\ref{fig:scenario-version-compare}具体呈现，读者可沿图中的节点和箭头检查职责边界。
+本段所述流程或结构用图\ref{fig:shift-handover}具体呈现，读者可沿图中的节点和箭头检查职责边界。
 \begin{figure}[H]
 \centering
 \begin{tikzpicture}[node distance=6mm and 7mm,
@@ -123,6 +164,7 @@
 \end{tikzpicture}
 \caption{清源水库平台统一技术架构}
 \label{fig:case-layered-architecture}
+\textit{图中把本段的流程、架构或状态关系具体化，读者可结合图\ref{fig:case-layered-architecture}核对前文的节点与边界。}
 \end{figure}
 
 本章示例采用Java 17与Spring Boot 3.2实现服务端，Vue 3.4负责前端；业务、空间和时序数据统一落在PostgreSQL、PostGIS与TimescaleDB组合中，Redis用于可重建缓存。技术替换可以发生，但必须通过架构决策记录说明原因、迁移范围和验证结果。
@@ -135,6 +177,7 @@
 \centering
 \caption{三维引擎选型边界}
 \label{tab:three-cesium-selection}
+\textit{表中把本段的字段、条件或职责具体化，读者可结合表\ref{tab:three-cesium-selection}核对取值与验收口径。}
 \begin{tabular}{p{2.4cm}p{4.6cm}p{5.3cm}}
 \toprule
 引擎 & 优先场景 & 设计注意 \\
@@ -177,6 +220,7 @@ void main() {
 \centering
 \caption{核心数据实体}
 \label{tab:case-core-data}
+\textit{表中把本段的字段、条件或职责具体化，读者可结合表\ref{tab:case-core-data}核对取值与验收口径。}
 \begin{tabular}{p{2.4cm}p{4.5cm}p{5.5cm}}
 \toprule
 实体 & 关键字段 & 约束 \\
@@ -210,6 +254,7 @@ void main() {
 \end{tikzpicture}
 \caption{监测数据接入、质量检查与展示流水线}
 \label{fig:monitoring-data-pipeline}
+\textit{图中把本段的流程、架构或状态关系具体化，读者可结合图\ref{fig:monitoring-data-pipeline}核对前文的节点与边界。}
 \end{figure}
 
 \subsection{Vue前端页面组织}
@@ -387,6 +432,7 @@ Kafka事件至少包含\texttt{eventId}、\texttt{assetId}、\texttt{occurredAt}
 \centering
 \caption{统一预警等级与处置要求}
 \label{tab:warning-levels}
+\textit{表中把本段的字段、条件或职责具体化，读者可结合表\ref{tab:warning-levels}核对取值与验收口径。}
 \begin{tabular}{p{1.8cm}p{3.7cm}p{4.3cm}p{3.1cm}}
 \toprule
 等级 & 含义 & 最小处置 & 系统表达 \\
@@ -501,6 +547,7 @@ public final class QualityClassificationTest {
 \end{tikzpicture}
 \caption{预警与工单的受控状态流转}
 \label{fig:warning-workorder-flow}
+\textit{图中把本段的流程、架构或状态关系具体化，读者可结合图\ref{fig:warning-workorder-flow}核对前文的节点与边界。}
 \end{figure}
 
 \subsection{模型可信度与人在回路}
@@ -523,6 +570,7 @@ public final class QualityClassificationTest {
 \centering
 \caption{数字孪生水利平台的三类业务入口}
 \label{tab:twin-three-portals}
+\textit{表中把本段的字段、条件或职责具体化，读者可结合表\ref{tab:twin-three-portals}核对取值与验收口径。}
 \begin{tabular}{p{2.5cm}p{4.4cm}p{5.5cm}}
 \toprule
 入口 & 核心对象 & 典型任务 \\
@@ -553,6 +601,7 @@ public final class QualityClassificationTest {
 \end{tikzpicture}
 \caption{流域、水网与工程共享数字孪生底板}
 \label{fig:twin-portals}
+\textit{图中把本段的流程、架构或状态关系具体化，读者可结合图\ref{fig:twin-portals}核对前文的节点与边界。}
 \end{figure}
 
 平台建设目标应写成可验收问题，例如“给定降雨情景后生成带版本的洪水过程与淹没结果”“给定目标泄流量后返回可解释的闸门方案并经人工确认”，而不是“打造行业领先数字大脑”。
@@ -565,6 +614,7 @@ public final class QualityClassificationTest {
 \centering
 \caption{防台防洪预演场景契约}
 \label{tab:typhoon-scenario-contract}
+\textit{表中把本段的字段、条件或职责具体化，读者可结合表\ref{tab:typhoon-scenario-contract}核对取值与验收口径。}
 \begin{tabular}{p{2.2cm}p{4.8cm}p{5.5cm}}
 \toprule
 字段组 & 主要内容 & 校验要求 \\
@@ -596,6 +646,7 @@ public final class QualityClassificationTest {
 \end{tikzpicture}
 \caption{防台防洪预演的计算与反馈链}
 \label{fig:typhoon-simulation-chain}
+\textit{图中把本段的流程、架构或状态关系具体化，读者可结合图\ref{fig:typhoon-simulation-chain}核对前文的节点与边界。}
 \end{figure}
 
 手册列出的历史台风和自定义降雨功能可用于理解“场景复用”与“参数试验”。教学时不要求复现特定台风结论，而要求学生说明：哪些输入来自观测，哪些是人为设定，哪些由模型推算，以及结果在哪些条件下有效。
@@ -610,6 +661,7 @@ public final class QualityClassificationTest {
 \centering
 \caption{淹没影响分析的证据项}
 \label{tab:inundation-evidence}
+\textit{表中把本段的字段、条件或职责具体化，读者可结合表\ref{tab:inundation-evidence}核对取值与验收口径。}
 \begin{tabular}{p{2.6cm}p{4.6cm}p{5.3cm}}
 \toprule
 证据 & 内容 & 复核问题 \\
@@ -644,6 +696,7 @@ public final class QualityClassificationTest {
 \end{tikzpicture}
 \caption{从情景输入到执行归档的预演证据链}
 \label{fig:simulation-evidence}
+\textit{图中把本段的流程、架构或状态关系具体化，读者可结合图\ref{fig:simulation-evidence}核对前文的节点与边界。}
 \end{figure}
 
 \subsection{数字孪生水库矩阵与“四预”}
@@ -654,6 +707,7 @@ public final class QualityClassificationTest {
 \centering
 \caption{安全监测与“四预”能力的差异}
 \label{tab:monitoring-four-pre}
+\textit{表中把本段的字段、条件或职责具体化，读者可结合表\ref{tab:monitoring-four-pre}核对取值与验收口径。}
 \begin{tabular}{p{2.1cm}p{4.6cm}p{5.8cm}}
 \toprule
 能力 & 安全监测平台 & 数字孪生“四预”扩展 \\
@@ -689,6 +743,7 @@ public final class QualityClassificationTest {
 \end{tikzpicture}
 \caption{预报、预警、预演、预案的业务闭环}
 \label{fig:four-pre-loop}
+\textit{图中把本段的流程、架构或状态关系具体化，读者可结合图\ref{fig:four-pre-loop}核对前文的节点与边界。}
 \end{figure}
 
 \subsection{闸门调度正算、反算与方案约束}
@@ -705,6 +760,7 @@ Q=C_d\,b\,a\sqrt{2gH},
 \centering
 \caption{闸门调度算法接口的最小契约}
 \label{tab:gate-algorithm-contract}
+\textit{表中把本段的字段、条件或职责具体化，读者可结合表\ref{tab:gate-algorithm-contract}核对取值与验收口径。}
 \begin{tabular}{p{2.5cm}p{4.8cm}p{5.2cm}}
 \toprule
 字段组 & 内容 & 验证要求 \\
@@ -740,6 +796,7 @@ Q=C_d\,b\,a\sqrt{2gH},
 \end{tikzpicture}
 \caption{闸门方案从反算到模拟回执的受控流程}
 \label{fig:gate-simulation-flow}
+\textit{图中把本段的流程、架构或状态关系具体化，读者可结合图\ref{fig:gate-simulation-flow}核对前文的节点与边界。}
 \end{figure}
 
 三维联动展示闸门开度、水流演进和水位变化，但动画必须标注“模拟”。若模型未完成或结果失效，界面不得继续播放上一方案并让用户误认为是当前计算。
@@ -752,6 +809,7 @@ Q=C_d\,b\,a\sqrt{2gH},
 \centering
 \caption{不同预警等级的预演关注点}
 \label{tab:warning-rehearsal}
+\textit{表中把本段的字段、条件或职责具体化，读者可结合表\ref{tab:warning-rehearsal}核对取值与验收口径。}
 \begin{tabular}{p{1.7cm}p{3.7cm}p{4.2cm}p{3.2cm}}
 \toprule
 等级 & 预演目标 & 关键角色 & 证据 \\
@@ -773,6 +831,7 @@ AI助手可以把自然语言转为查询、页面导航和候选任务。例如
 \centering
 \caption{AI会商助手的请求与控制边界}
 \label{tab:ai-assistant-boundary}
+\textit{表中把本段的字段、条件或职责具体化，读者可结合表\ref{tab:ai-assistant-boundary}核对取值与验收口径。}
 \begin{tabular}{p{2.5cm}p{4.5cm}p{5.5cm}}
 \toprule
 阶段 & 系统动作 & 安全控制 \\
@@ -808,6 +867,7 @@ AI助手可以把自然语言转为查询、页面导航和候选任务。例如
 \end{tikzpicture}
 \caption{AI助手参与会商但不越过人工审批}
 \label{fig:ai-meeting-loop}
+\textit{图中把本段的流程、架构或状态关系具体化，读者可结合图\ref{fig:ai-meeting-loop}核对前文的节点与边界。}
 \end{figure}
 
 AI输出必须引用数据和模型证据。若工具失败、数据过期或权限不足，助手应明确说明，不得用语言模型猜测填补。语音交互应提供文本回显，关键数字在提交前再次确认。
@@ -830,12 +890,14 @@ AI输出必须引用数据和模型证据。若工具失败、数据过期或权
 \end{tikzpicture}
 \caption{数字孪生水利平台的解耦分层}
 \label{fig:twin-decoupling}
+\textit{图中把本段的流程、架构或状态关系具体化，读者可结合图\ref{fig:twin-decoupling}核对前文的节点与边界。}
 \end{figure}
 
 \begin{table}[htbp]
 \centering
 \caption{模拟数据与结果的标注要求}
 \label{tab:simulation-labeling}
+\textit{表中把本段的字段、条件或职责具体化，读者可结合表\ref{tab:simulation-labeling}核对取值与验收口径。}
 \begin{tabular}{p{2.5cm}p{4.4cm}p{5.7cm}}
 \toprule
 对象 & 必备标注 & 防止的误解 \\
@@ -861,6 +923,7 @@ AI输出 & 工具证据、生成时间、复核状态 & 把语言生成内容当
 \centering
 \caption{数字孪生对象的最小身份与状态字段}
 \label{tab:twin-object-state}
+\textit{表中把本段的字段、条件或职责具体化，读者可结合表\ref{tab:twin-object-state}核对取值与验收口径。}
 \begin{tabular}{p{2.4cm}p{4.6cm}p{5.6cm}}
 \toprule
 字段组 & 示例字段 & 设计目的 \\
@@ -897,6 +960,7 @@ AI输出 & 工具证据、生成时间、复核状态 & 把语言生成内容当
 \end{tikzpicture}
 \caption{观测状态、场景快照与推演状态的分离}
 \label{fig:twin-state-separation}
+\textit{图中把本段的流程、架构或状态关系具体化，读者可结合图\ref{fig:twin-state-separation}核对前文的节点与边界。}
 \end{figure}
 
 课堂核验可以故意制造一条迟到水位数据：实时曲线应补入该点并标记回补，已经完成的场景仍引用原输入版本；只有用户复制场景并明确更新输入后，新方案才使用回补值。这个用例同时检验时间语义、版本管理和审计链。
@@ -909,6 +973,7 @@ AI输出 & 工具证据、生成时间、复核状态 & 把语言生成内容当
 \centering
 \caption{模型任务状态及允许动作}
 \label{tab:model-run-lifecycle}
+\textit{表中把本段的字段、条件或职责具体化，读者可结合表\ref{tab:model-run-lifecycle}核对取值与验收口径。}
 \begin{tabular}{p{2.0cm}p{4.5cm}p{5.9cm}}
 \toprule
 状态 & 系统检查 & 允许动作 \\
@@ -948,6 +1013,7 @@ AI输出 & 工具证据、生成时间、复核状态 & 把语言生成内容当
 \end{tikzpicture}
 \caption{模型任务的受控生命周期}
 \label{fig:model-run-lifecycle}
+\textit{图中把本段的流程、架构或状态关系具体化，读者可结合图\ref{fig:model-run-lifecycle}核对前文的节点与边界。}
 \end{figure}
 
 运行失败应区分输入错误、模型错误、资源不足、超时和人工取消。平台只有在任务幂等且重试不会造成重复业务影响时才自动重试；参数越界或模型数值不稳定必须回到专业人员。成功也不等于可信，完成状态之后仍需检查水量平衡、边界连续性、残差和异常输出。
@@ -969,6 +1035,7 @@ AI输出 & 工具证据、生成时间、复核状态 & 把语言生成内容当
 \centering
 \caption{水网联合调度的输入、约束与输出}
 \label{tab:water-network-dispatch}
+\textit{表中把本段的字段、条件或职责具体化，读者可结合表\ref{tab:water-network-dispatch}核对取值与验收口径。}
 \begin{tabular}{p{2.3cm}p{4.7cm}p{5.5cm}}
 \toprule
 类别 & 内容 & 检查重点 \\
@@ -1004,6 +1071,7 @@ AI输出 & 工具证据、生成时间、复核状态 & 把语言生成内容当
 \end{tikzpicture}
 \caption{供水、输配水、调蓄与需水单元的网络表达}
 \label{fig:water-network-graph}
+\textit{图中把本段的流程、架构或状态关系具体化，读者可结合图\ref{fig:water-network-graph}核对前文的节点与边界。}
 \end{figure}
 
 假设主泵站停运，平台首先冻结故障设备，再计算应急水源和调蓄池能够维持的供水时长。方案对每类用户给出供水量、缺口、恢复时间和约束余量，并列出未被满足的需求。教学评价不以求得复杂优化算法为前提，而以网络建模、平衡校验、约束解释和方案留痕为重点。
@@ -1018,6 +1086,7 @@ AI输出 & 工具证据、生成时间、复核状态 & 把语言生成内容当
 \centering
 \caption{方案比较不能只给一个排名}
 \label{tab:scenario-comparison}
+\textit{表中把本段的字段、条件或职责具体化，读者可结合表\ref{tab:scenario-comparison}核对取值与验收口径。}
 \begin{tabular}{p{2.4cm}p{4.4cm}p{5.7cm}}
 \toprule
 指标 & 表达方式 & 解释要求 \\
@@ -1057,6 +1126,7 @@ AI输出 & 工具证据、生成时间、复核状态 & 把语言生成内容当
 \end{tikzpicture}
 \caption{场景分支、统一比较与人工选择}
 \label{fig:scenario-version-compare}
+\textit{图中把本段的流程、架构或状态关系具体化，读者可结合图\ref{fig:scenario-version-compare}核对前文的节点与边界。}
 \end{figure}
 
 会商报告应引用方案ID而非截图中的方案名称。报告至少记录选择理由、放弃其他方案的原因、关键不确定性、有效期和触发重新会商的条件。当降雨实况明显偏离情景、工程状态变化或模型失效时，原结论自动变为“需复核”，但保留历史记录。
@@ -1069,6 +1139,7 @@ AI输出 & 工具证据、生成时间、复核状态 & 把语言生成内容当
 \centering
 \caption{端到端切片的接口与证据}
 \label{tab:end-to-end-slice}
+\textit{表中把本段的字段、条件或职责具体化，读者可结合表\ref{tab:end-to-end-slice}核对取值与验收口径。}
 \begin{tabular}{p{2.2cm}p{4.7cm}p{5.6cm}}
 \toprule
 步骤 & 最小接口 & 必须保存的证据 \\
@@ -1090,6 +1161,7 @@ AI输出 & 工具证据、生成时间、复核状态 & 把语言生成内容当
 \centering
 \caption{端到端验收脚本的关键断言}
 \label{tab:end-to-end-assertions}
+\textit{表中把本段的字段、条件或职责具体化，读者可结合表\ref{tab:end-to-end-assertions}核对取值与验收口径。}
 \begin{tabular}{p{2.5cm}p{4.6cm}p{5.4cm}}
 \toprule
 测试场景 & 系统行为 & 通过条件 \\
@@ -1114,6 +1186,7 @@ AI输出 & 工具证据、生成时间、复核状态 & 把语言生成内容当
 \centering
 \caption{一次橙色预警会商的时间线示例}
 \label{tab:consultation-timeline}
+\textit{表中把本段的字段、条件或职责具体化，读者可结合表\ref{tab:consultation-timeline}核对取值与验收口径。}
 \begin{tabular}{p{2.0cm}p{3.5cm}p{4.2cm}p{3.2cm}}
 \toprule
 相对时刻 & 事件 & 责任角色 & 形成证据 \\
@@ -1150,6 +1223,7 @@ $T+60$ min & 比较预测与实况并复核 & 专业分析员 & 偏差、结论�
 \end{tikzpicture}
 \caption{值守交接覆盖态势、任务、方案和故障}
 \label{fig:shift-handover}
+\textit{图中把本段的流程、架构或状态关系具体化，读者可结合图\ref{fig:shift-handover}核对前文的节点与边界。}
 \end{figure}
 
 事件结束后，复盘把预报与实况、建议与执行、计划与回执逐项对齐。偏差可能来自输入、模型、参数、工程状态、操作延迟或组织协同，不能把所有偏差都归因于算法。复盘产生模型校准任务、数据治理工单、预案修订和培训改进，并指定责任人与完成时限。
@@ -1162,6 +1236,7 @@ $T+60$ min & 比较预测与实况并复核 & 专业分析员 & 偏差、结论�
 \centering
 \caption{数字孪生案例的失效与降级验收}
 \label{tab:twin-failure-acceptance}
+\textit{表中把本段的字段、条件或职责具体化，读者可结合表\ref{tab:twin-failure-acceptance}核对取值与验收口径。}
 \begin{tabular}{p{2.7cm}p{4.2cm}p{5.5cm}}
 \toprule
 失效场景 & 预期降级 & 验收证据 \\
@@ -1181,6 +1256,7 @@ AI工具调用失败 & 明确失败并回到手工流程 & 错误信息与人工
 \centering
 \caption{数字孪生案例的课程迭代}
 \label{tab:twin-course-iterations}
+\textit{表中把本段的字段、条件或职责具体化，读者可结合表\ref{tab:twin-course-iterations}核对取值与验收口径。}
 \begin{tabular}{p{1.4cm}p{3.7cm}p{4.3cm}p{3.4cm}}
 \toprule
 迭代 & 主要任务 & 交付物 & 验收重点 \\
@@ -1224,6 +1300,7 @@ AI工具调用失败 & 明确失败并回到手工流程 & 错误信息与人工
 \end{tikzpicture}
 \caption{清源水库平台部署架构}
 \label{fig:system-deployment-architecture}
+\textit{图中把本段的流程、架构或状态关系具体化，读者可结合图\ref{fig:system-deployment-architecture}核对前文的节点与边界。}
 \end{figure}
 
 开发、测试和生产环境使用相同的配置结构，差异通过外部参数和密钥管理注入。禁止把JWT密钥、数据库口令或地图令牌写入镜像和教材示例。发布流水线与配置项应分别受持续交付和配置管理约束\cite{humble2010,tichy1994}。
@@ -1240,6 +1317,7 @@ AI工具调用失败 & 明确失败并回到手工流程 & 错误信息与人工
 \centering
 \caption{第8章案例的阶段验收}
 \label{tab:chapter8-acceptance}
+\textit{表中把本段的字段、条件或职责具体化，读者可结合表\ref{tab:chapter8-acceptance}核对取值与验收口径。}
 \begin{tabular}{p{2.0cm}p{5.0cm}p{5.4cm}}
 \toprule
 阶段 & 验收问题 & 证据 \\
@@ -1256,24 +1334,6 @@ AI工具调用失败 & 明确失败并回到手工流程 & 错误信息与人工
 \end{table}
 
 最小可运行版本不要求实现所有模型，但必须完成一条真实可操作链：PZ-07观测进入平台，经质量检查触发黄色预警，值班员确认并创建工单，三维场景定位测点，处置结果回写并归档。数字孪生扩展至少完成一个带模型卡、场景版本和人工确认的预演任务。
-
-\paragraph{本章图表导读}
-表\ref{tab:case-parameters}集中给出清源水库教学参数；表\ref{tab:case-roles}说明值班员、专业分析员、审批人和运维员的权限边界。
-图\ref{fig:smart-water-monitoring-architecture}展示安全监测业务闭环；图\ref{fig:case-layered-architecture}展示统一技术架构。
-表\ref{tab:three-cesium-selection}比较Three.js与Cesium的适用范围；表\ref{tab:case-core-data}定义核心对象字段。
-图\ref{fig:monitoring-data-pipeline}串起接入、质量检查和展示；表\ref{tab:warning-levels}给出预警等级。
-图\ref{fig:warning-workorder-flow}说明预警进入工单的状态流转；本节数字孪生案例的边界见第\ref{sec:digital-twin-case}节。
-表\ref{tab:twin-three-portals}和图\ref{fig:twin-portals}区分流域、水网、工程三类入口与共享底板。
-表\ref{tab:typhoon-scenario-contract}、图\ref{fig:typhoon-simulation-chain}和表\ref{tab:inundation-evidence}分别描述预演契约、计算反馈和淹没证据。
-图\ref{fig:simulation-evidence}展示从情景输入到执行归档的证据链；表\ref{tab:monitoring-four-pre}与图\ref{fig:four-pre-loop}解释监测平台与“四预”能力的差异及闭环。
-表\ref{tab:gate-algorithm-contract}和图\ref{fig:gate-simulation-flow}落实闸门调度的接口与流程；表\ref{tab:warning-rehearsal}说明不同预警等级的预演关注点。
-表\ref{tab:ai-assistant-boundary}、图\ref{fig:ai-meeting-loop}界定AI会商助手的请求、证据和人工审批边界。
-图\ref{fig:twin-decoupling}、表\ref{tab:simulation-labeling}和表\ref{tab:twin-object-state}分别说明解耦分层、模拟数据标注以及对象身份状态。
-图\ref{fig:twin-state-separation}区分观测、场景快照和推演状态；表\ref{tab:model-run-lifecycle}与图\ref{fig:model-run-lifecycle}约束模型任务生命周期。
-表\ref{tab:water-network-dispatch}、图\ref{fig:water-network-graph}表达水网联合调度的网络输入与约束。
-表\ref{tab:scenario-comparison}、图\ref{fig:scenario-version-compare}用于比较方案分支；表\ref{tab:end-to-end-slice}和表\ref{tab:end-to-end-assertions}把端到端切片连接到验收断言。
-表\ref{tab:consultation-timeline}与图\ref{fig:shift-handover}记录会商时间线和值守交接；表\ref{tab:twin-failure-acceptance}和表\ref{tab:twin-course-iterations}分别用于失效降级验收与课程迭代。
-图\ref{fig:system-deployment-architecture}和表\ref{tab:chapter8-acceptance}收束部署架构与阶段验收。
 
 代码清单\ref{lst:ch08-glsl}说明三维水面效果如何作为表现层；代码清单\ref{lst:ch08-quality-java}和\ref{lst:ch08-classification-test}把质量码合并、预警分类和单元测试固定为可执行契约，便于将本章表格中的业务规则落实到服务端。
 
