@@ -87,3 +87,16 @@ output/*.xdv
 output/*.blg
 output/*.bbl-SAVE-ERROR
 output/missfont.log
+
+# LaTeX 中间产物（output 子目录）
+output/**/*.aux
+output/**/*.log
+output/**/*.out
+output/**/*.toc
+output/**/*.bcf
+output/**/*.run.xml
+output/**/*.fls
+output/**/*.fdb_latexmk
+output/**/*.xdv
+output/**/*.blg
+output/**/*.bbl-SAVE-ERROR
