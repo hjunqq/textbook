@@ -29,8 +29,6 @@
 
 现代浏览器通常采用多进程架构。图\ref{fig:browser-architecture}强调各模块的协作关系：浏览器引擎负责协调，渲染引擎使用网络模块取得的资源，调用JavaScript引擎执行脚本，并通过UI后端绘制；存储模块为浏览器引擎及页面脚本提供受控的数据持久化能力。
 
-本段所述流程或结构用图\ref{fig:browser-architecture}具体呈现，读者可沿图中的节点和箭头检查职责边界。
-本段所述流程或结构用图\ref{fig:vue-lifecycle}具体呈现，读者可沿图中的节点和箭头检查职责边界。
 \begin{figure}[H]
 \centering
 \begin{tikzpicture}[>=Stealth,thick,node distance=0.9cm and 1.0cm]
@@ -301,7 +299,6 @@ const status = computed(() => props.level >= 5.0 ? 'warning' : 'normal')
 \end{tikzpicture}
 \caption{Vue 3组件生命周期主线}
 \label{fig:vue-lifecycle}
-\textit{图中把本段的流程、架构或状态关系具体化，读者可结合图\ref{fig:vue-lifecycle}核对前文的节点与边界。}
 \end{figure}
 
 定时器、WebSocket连接和第三方图表实例应在\texttt{onMounted}中创建，并在\texttt{onUnmounted}中释放，避免页面切换后的内存泄漏。
@@ -392,6 +389,9 @@ export default defineConfig({
 \end{lstlisting}
 
 交付前至少验证：主要浏览器中的页面布局、接口失败与空数据状态、路由刷新、权限绕过、移动端触控、构建产物及控制台错误。
+
+\paragraph{组件生命周期导读}
+图\ref{fig:vue-lifecycle}把创建、挂载、更新和卸载阶段与水利仪表盘的请求、订阅和资源清理对应起来；编写组件时应在卸载阶段取消定时器和事件监听，避免离开页面后仍然更新已失效的测站视图。
 
 代码清单\ref{lst:ch04-html-shell}至\ref{lst:ch04-js-http}覆盖页面骨架、响应式样式、JavaScript状态、Vue组件、路由、Pinia和HTTP错误处理；学习时可按数据从输入控件到服务请求再回到界面的路径逐段运行。
 

@@ -24,9 +24,6 @@
 
 可视化输入不是一串没有语义的数值。每条记录至少要包含工程编码、测点编码、观测时间、监测项、数值、单位、质量码和来源。若数据经过插值、人工修订或模型估计，还应保留处理标记，避免界面把推算值当作原始观测。
 
-本段涉及的字段、职责或条件见表\ref{tab:ch7-data-types}，读者可据此核对取值范围和验收依据。
-本段涉及的字段、职责或条件见表\ref{tab:ch7-view-contract}，读者可据此核对取值范围和验收依据。
-本段涉及的字段、职责或条件见表\ref{tab:ch7-coordinate-units}，读者可据此核对取值范围和验收依据。
 \begin{table}[htbp]
 \centering
 \caption{清源水库观测数据与展示方式}
@@ -46,11 +43,6 @@
 
 质量码应先于颜色映射。有效数据可进入曲线和状态计算；可疑数据保留但降低视觉权重并提示复核；缺测不连接为连续曲线；人工修订值显示修订标识；设备故障数据不得参与风险判定。颜色只表达业务状态，不能掩盖数据质量。
 
-本段所述流程或结构用图\ref{fig:data-visualization-process}具体呈现，读者可沿图中的节点和箭头检查职责边界。
-本段所述流程或结构用图\ref{fig:lttb-principle}具体呈现，读者可沿图中的节点和箭头检查职责边界。
-本段所述流程或结构用图\ref{fig:chart-technology-selection}具体呈现，读者可沿图中的节点和箭头检查职责边界。
-本段所述流程或结构用图\ref{fig:lod-cluster}具体呈现，读者可沿图中的节点和箭头检查职责边界。
-本段所述流程或结构用图\ref{fig:ray-picking}具体呈现，读者可沿图中的节点和箭头检查职责边界。
 \begin{figure}[H]
 \centering
 \begin{tikzpicture}[node distance=8mm and 7mm,
@@ -96,7 +88,6 @@ A=\frac{1}{2}\left|
 \end{tikzpicture}
 \caption{LTTB降采样的几何直觉}
 \label{fig:lttb-principle}
-\textit{图中把本段的流程、架构或状态关系具体化，读者可结合图\ref{fig:lttb-principle}核对前文的节点与边界。}
 \end{figure}
 
 LTTB适合视觉浏览，不应用其结果替代原始数据计算统计指标。缺测区间应断线或用明确的虚线/阴影表示；插值只用于允许插值的连续物理量，并在提示中给出原始与插值标记。降雨累计量、设备开关状态等数据不能套用相同插值规则。
@@ -109,7 +100,6 @@ LTTB适合视觉浏览，不应用其结果替代原始数据计算统计指标�
 \centering
 \caption{前端展示记录的最小字段}
 \label{tab:ch7-view-contract}
-\textit{表中把本段的字段、条件或职责具体化，读者可结合表\ref{tab:ch7-view-contract}核对取值与验收口径。}
 \begin{tabular}{p{2.7cm}p{4.2cm}p{5.5cm}}
 \toprule
 字段 & 示例 & 用途 \\
@@ -150,7 +140,6 @@ LTTB适合视觉浏览，不应用其结果替代原始数据计算统计指标�
 \end{tikzpicture}
 \caption{图表、三维场景与联动控制器的职责}
 \label{fig:chart-technology-selection}
-\textit{图中把本段的流程、架构或状态关系具体化，读者可结合图\ref{fig:chart-technology-selection}核对前文的节点与边界。}
 \end{figure}
 
 状态颜色需兼顾可访问性：正常、关注、告警、离线不能只依赖红绿差异，还应配合形状、图标、线型和文字。阈值带要注明适用工况和版本，不能让一条没有来源的红线替代业务解释。
@@ -222,7 +211,6 @@ function cancelLongPress() {
 \centering
 \caption{监测点定位涉及的坐标及单位}
 \label{tab:ch7-coordinate-units}
-\textit{表中把本段的字段、条件或职责具体化，读者可结合表\ref{tab:ch7-coordinate-units}核对取值与验收口径。}
 \begin{tabular}{p{3.0cm}p{3.1cm}p{3.2cm}p{3.2cm}}
 \toprule
 坐标阶段 & 典型量 & 单位/精度 & 用途 \\
@@ -279,7 +267,6 @@ const world = {
 \end{tikzpicture}
 \caption{监测点LOD与聚合表达}
 \label{fig:lod-cluster}
-\textit{图中把本段的流程、架构或状态关系具体化，读者可结合图\ref{fig:lod-cluster}核对前文的节点与边界。}
 \end{figure}
 
 若希望聚合半径在屏幕上约为$r_{px}$像素，必须先换算成当前深度处的世界长度。透视相机垂直视场角为$\theta$、对象到相机距离为$d$、画布高度为$H_{px}$时，可近似取
@@ -338,7 +325,6 @@ class PointPicker {
 \end{tikzpicture}
 \caption{从屏幕坐标到场景交点的拾取过程}
 \label{fig:ray-picking}
-\textit{图中把本段的流程、架构或状态关系具体化，读者可结合图\ref{fig:ray-picking}核对前文的节点与边界。}
 \end{figure}
 
 若教学中手工实现M\"oller--Trumbore三角形求交，必须复制向量后再做减法、叉乘和缩放，避免破坏顶点与射线输入：
@@ -402,6 +388,12 @@ raycaster.params.Points.threshold = pickingRadiusWorld;
 \end{enumerate}
 
 验收记录应包含输入数据版本、浏览器与设备、操作步骤、预期结果、实际结果和截图编号。这样，三维展示不只是一次演示，而是可以复现和回归测试的课程成果。
+
+\paragraph{本章图表导读}
+表\ref{tab:ch7-data-types}把观测类型与合适的视觉编码对应起来；图\ref{fig:data-visualization-process}呈现从清洗、聚合到展示的处理链。
+图\ref{fig:lttb-principle}解释LTTB降采样如何保留峰谷；表\ref{tab:ch7-view-contract}给出前端展示记录的最小契约。
+图\ref{fig:chart-technology-selection}帮助选择图表、三维场景和联动控制器；表\ref{tab:ch7-coordinate-units}列出坐标与单位基准。
+图\ref{fig:lod-cluster}说明监测点LOD与聚合表达；图\ref{fig:ray-picking}则把屏幕坐标转换为场景交点。读者应结合这些图表检查对象编码、时间范围、坐标系和交互反馈是否保持一致。
 
 代码清单\ref{lst:ch07-chart}、\ref{lst:ch07-vue-watch}和\ref{lst:ch07-coordinate-transform}用于数据转换、实时联动和坐标基准。
 代码清单\ref{lst:ch07-lod-points}、\ref{lst:ch07-raycaster}和\ref{lst:ch07-picker}展示大规模测点聚合与射线拾取如何回到业务对象。
