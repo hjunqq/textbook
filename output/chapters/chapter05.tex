@@ -87,7 +87,7 @@ class StationController {
 }
 \end{lstlisting}
 
-Spring Boot 3使用\texttt{jakarta.servlet.*}命名空间。旧项目从\texttt{javax.servlet.*}迁移时，应同步检查依赖、过滤器、验证注解和JPA包名。Jakarta Servlet 6.x是本章基线，不再使用“Servlet 4.0是现代规范”的过时表述。
+Spring Boot 3使用\texttt{jakarta.servlet.*}命名空间。旧项目从\texttt{javax.servlet.*}迁移时，应同步检查依赖、过滤器、验证注解和JPA包名。Jakarta Servlet 6.x是本章基线；迁移完成后还应通过编译、集成测试和容器启动检查确认包路径与运行时容器一致。
 
 \section{Jakarta Persistence与事务管理}
 
@@ -331,7 +331,7 @@ class AlertMessageListener {
 
 消息系统不能自动保证业务恰好执行一次。生产者应考虑事务外盒（outbox）或可靠发布；消费者用\texttt{eventId}去重，并配置有限重试、死信队列和监控。消息模式适合告警评估、通知和异步统计，不适合需要立即返回结果的简单查询。
 
-新版Spring Cloud在引入服务发现Starter并启用自动配置后通常无需\texttt{@EnableEurekaClient}；本章不再使用该弃用注解。
+在分布式部署中，服务发现负责把逻辑服务名解析为可用实例，配置中心负责管理环境参数，网关负责认证、限流与路由。Spring Boot应用应通过明确的Starter和配置文件接入这些基础设施，并在健康检查中验证注册状态、心跳超时和实例摘除；业务代码只依赖稳定的服务接口，不把具体注册中心的客户端注解扩散到领域层。这样的边界便于在开发、测试和生产环境切换实现。
 
 \section{性能优化与可观测性}
 

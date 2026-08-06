@@ -125,7 +125,7 @@
 \label{fig:case-layered-architecture}
 \end{figure}
 
-Spring Boot示例不再混用JavaScript后端；数据库不再在PostgreSQL与MySQL之间切换。技术替换可以发生，但必须通过架构决策记录说明原因、迁移范围和验证结果。
+本章示例采用Java 17与Spring Boot 3.2实现服务端，Vue 3.4负责前端；业务、空间和时序数据统一落在PostgreSQL、PostGIS与TimescaleDB组合中，Redis用于可重建缓存。技术替换可以发生，但必须通过架构决策记录说明原因、迁移范围和验证结果。
 
 \subsection{Three.js主线与Cesium扩展}
 
@@ -371,7 +371,7 @@ public final class QualityService {
 
 \subsection{存储、缓存与一致性}
 
-业务、权限和工单数据存入PostgreSQL；PostGIS保存空间点、工程范围和影响区；TimescaleDB扩展用于时序分区与聚合；Redis只保存可重建缓存，不作为唯一数据源。该方案避免了原稿对InfluxDB引擎结构的不严谨描述，也消除了PostgreSQL/MySQL混用。
+业务、权限和工单数据存入PostgreSQL；PostGIS保存空间点、工程范围和影响区；TimescaleDB扩展用于时序分区与聚合；Redis只保存可重建缓存，不作为唯一数据源。业务、空间与时序数据共用一套事务与备份体系，既便于按对象追溯证据，也降低多引擎部署带来的一致性与运维成本。
 
 Kafka事件至少包含\texttt{eventId}、\texttt{assetId}、\texttt{occurredAt}、\texttt{stateVersion}和\texttt{traceId}。消费者按事件ID去重，并在写入结果后提交消费位置。数据库事务与跨服务消息通过事务外盒或可靠发布机制衔接，不宣称一次本地事务能够覆盖所有服务。
 
