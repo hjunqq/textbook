@@ -278,7 +278,7 @@ const status = computed(() => props.level >= 5.0 ? 'warning' : 'normal')
 </template>
 \end{lstlisting}
 
-组件在创建、挂载、更新和卸载阶段提供生命周期钩子。Vue 3中卸载阶段使用\texttt{beforeUnmount}/\texttt{unmounted}或组合式API的\texttt{onBeforeUnmount}/\texttt{onUnmounted}，不使用Vue 2的\texttt{beforeDestroy}/\texttt{destroyed}。
+组件在创建、挂载、更新和卸载阶段提供生命周期钩子。Vue 3中卸载阶段使用\texttt{beforeUnmount}/\texttt{unmounted}或组合式API的\texttt{onBeforeUnmount}/\texttt{onUnmounted}，不使用Vue 2的\texttt{beforeDestroy}/\texttt{destroyed}。图\ref{fig:vue-lifecycle}把这些钩子按创建、挂载、更新、卸载四个阶段串起来。需要在组件内启动的定时刷新、消息订阅和三维场景实例，都应在挂载阶段建立、在卸载阶段释放；忘记释放是监测页面反复切换之后内存持续增长的最常见原因。
 
 \begin{figure}[H]
 \centering
