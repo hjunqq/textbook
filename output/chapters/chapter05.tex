@@ -45,7 +45,8 @@ DELETE & 删除资源 & 删除尚未发布的规则 \\
 
 Spring Boot通过约定、自动配置和Starter依赖减少基础配置。自动配置会依据类路径、配置属性和已有Bean选择合适组件，但开发者仍应理解其条件，避免把“自动”误解为“不可控”。推荐目录如下：
 
-\begin{lstlisting}
+\label{lst:ch05-http}
+\begin{lstlisting}[caption={HTTP方法与资源语义}]
 src/main/java/com/example/water/
   controller/   # HTTP适配
   service/      # 用例与事务边界
@@ -57,7 +58,8 @@ src/main/resources/application.yml
 
 配置应从代码中分离，并可被环境变量覆盖。密钥不得写入版本库。
 
-\begin{lstlisting}
+\label{lst:ch05-application}
+\begin{lstlisting}[caption={Spring Boot应用入口}]
 spring:
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/water}
@@ -70,7 +72,8 @@ security:
 
 依赖注入优先使用构造器，使依赖明确并便于测试。控制器把DTO交给服务，不直接访问数据库。
 
-\begin{lstlisting}[language=Java]
+\label{lst:ch05-query-controller}
+\begin{lstlisting}[language=Java,caption={查询接口控制器}]
 @RestController
 @RequestMapping("/api/stations")
 class StationController {
@@ -95,7 +98,8 @@ Spring Boot 3使用\texttt{jakarta.servlet.*}命名空间。旧项目从\texttt{
 
 先建立实体映射与Repository，再讨论事务边界。实体标识应稳定；接口层DTO与持久化实体分离，避免数据库结构直接成为外部契约。
 
-\begin{lstlisting}[language=Java]
+\label{lst:ch05-jpa-entity}
+\begin{lstlisting}[language=Java,caption={Jakarta实体映射}]
 @Entity
 @Table(name = "water_reading")
 class WaterReading {
@@ -124,7 +128,8 @@ Repository提供基本数据访问，服务层决定一次用例需要哪些读�
 
 \texttt{@Transactional}通常标注在公开服务方法上。Spring默认通过代理拦截外部调用；同一Bean内部用\texttt{this.method()}自调用不会经过代理，因此方法上的新事务注解不会生效。需要\texttt{REQUIRES\_NEW}时，应把该职责放到另一Bean。
 
-\begin{lstlisting}[language=Java]
+\label{lst:ch05-repository}
+\begin{lstlisting}[language=Java,caption={监测记录仓储接口}]
 @Service
 class AuditService {
     private final AuditRepository auditRepository;
@@ -167,7 +172,8 @@ class ReadingCommandService {
 \]
 计数和均值必须初始化，并在计算后再更新计数。
 
-\begin{lstlisting}[language=Java]
+\label{lst:ch05-tx-service}
+\begin{lstlisting}[language=Java,caption={事务服务边界}]
 class WaterDataSummary {
     private long dataCount = 0L;
     private double averageLevel = 0.0;
@@ -188,7 +194,8 @@ class WaterDataSummary {
 
 服务层按用例组织方法，例如“保存监测值”“确认告警”“查询测站详情”。输入DTO先通过Bean Validation完成格式校验，领域规则仍由服务或领域对象校验。统一响应不应把所有结果都包装成HTTP 200；HTTP状态码仍须表达协议层结果。
 
-\begin{lstlisting}[language=Java]
+\label{lst:ch05-exception-handler}
+\begin{lstlisting}[language=Java,caption={参数校验异常处理}]
 record CreateReadingRequest(
         @NotBlank String stationId,
         @DecimalMin("0.0") @DecimalMax("50.0") double level,
@@ -219,7 +226,8 @@ class GlobalExceptionHandler {
 
 认证回答“用户是谁”，授权回答“允许做什么”。Spring Security 6使用\texttt{@EnableMethodSecurity}启用方法授权，并采用Lambda DSL配置过滤链。无状态API关闭服务器会话并在JWT过滤器中建立认证上下文。
 
-\begin{lstlisting}[language=Java]
+\label{lst:ch05-security-chain}
+\begin{lstlisting}[language=Java,caption={Spring Security过滤链}]
 @Configuration
 @EnableMethodSecurity
 class SecurityConfig {
@@ -241,7 +249,8 @@ class SecurityConfig {
 
 浏览器若使用Cookie携带凭据，不能机械关闭CSRF防护；上例适用于只从Authorization头读取Bearer令牌的API。权限只使用一个枚举，避免名称和取值漂移。
 
-\begin{lstlisting}[language=Java]
+\label{lst:ch05-jwt-filter}
+\begin{lstlisting}[language=Java,caption={JWT认证过滤器}]
 enum WaterSystemPermission {
     STATION_READ, READING_WRITE, ALERT_ACKNOWLEDGE
 }
@@ -258,7 +267,8 @@ class AuthorizationService {
 
 JWT密钥通过配置注入并以足够长度的Base64值提供。jjwt 0.11+使用\texttt{parserBuilder()}；刷新令牌即使已过访问式过期点，也应先安全取得Claims，再验证令牌类型、签名、签发者和刷新期限。
 
-\begin{lstlisting}[language=Java]
+\label{lst:ch05-kafka-listener}
+\begin{lstlisting}[language=Java,caption={Kafka告警消费者}]
 @ConfigurationProperties("security.jwt")
 record JwtProperties(String secret, String issuer) {}
 
@@ -290,7 +300,8 @@ class JwtService {
 
 同一应用进程内的领域事件可降低模块耦合。若处理必须在数据库事务成功后执行，应使用\texttt{@TransactionalEventListener}并指定\texttt{AFTER\_COMMIT}，不能用普通\texttt{@EventListener}声称“提交后执行”。
 
-\begin{lstlisting}[language=Java]
+\label{lst:ch05-cache-service}
+\begin{lstlisting}[language=Java,caption={缓存与分页查询}]
 record ReadingSavedEvent(Long readingId, String stationId) {}
 
 @Component
@@ -309,7 +320,8 @@ class ReadingEventHandler {
 
 跨服务通信必须使用网络可达的消息基础设施。下面的Kafka监听器位于告警服务，消费数据服务发布的事件；它不是进程内事件监听器。
 
-\begin{lstlisting}[language=Java]
+\label{lst:ch05-metrics}
+\begin{lstlisting}[language=Java,caption={运行指标记录}]
 record ReadingMessage(String eventId, String stationId,
                       double level, Instant measuredAt) {}
 
@@ -342,6 +354,9 @@ class AlertMessageListener {
 \section{Python Web框架（扩展阅读）}
 
 Flask适合轻量服务和原型，Django提供ORM、管理后台等完整能力，FastAPI适合类型提示驱动的API。技术选择应依据团队能力、生态、性能目标和运维约束。本章不展开Python异步原理，也不将其列入必答题；主线工程仍为Spring Boot。
+
+\paragraph{后端代码清单导读}
+代码清单\ref{lst:ch05-http}至\ref{lst:ch05-metrics}依次覆盖HTTP语义、应用入口、控制器、实体映射、事务、校验、认证、消息消费、缓存和指标记录；读者应从请求进入控制器开始，沿事务与安全边界追踪到数据访问和异步事件。
 
 \section*{小结}
 

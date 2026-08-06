@@ -66,7 +66,7 @@
 
 瀑布模型按需求、设计、实现、验证和运行依次推进，阶段评审和文档边界清楚。它适用于需求相对稳定、合规审查严格、软硬件接口明确的部分，但反馈较晚，早期误解可能在后期放大。
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
 \begin{tikzpicture}[node distance=6mm and 7mm,
   model/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=2.0cm,
@@ -90,7 +90,7 @@
 
 原型用于澄清用户难以直接表达的交互、报表或空间展示需求。团队快速构造可评估版本，收集反馈后修订需求。原型必须注明是探索性还是演化性；探索性原型不应在缺少架构、安全和测试的情况下直接上线。
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
 \begin{tikzpicture}[node distance=6mm and 8mm,
   model/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=2.2cm,
@@ -114,7 +114,7 @@
 
 增量模型把能力分成若干可运行交付，例如先交付测点查询，再交付质量标记、预警和工单。迭代模型允许同一能力反复改进。两者常结合使用：每个增量经过需求、设计、实现和验证，小步获得真实反馈。
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
 \begin{tikzpicture}[node distance=5mm,
   inc/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=10cm,
@@ -273,7 +273,7 @@ Won't & 本期自动下发闸门控制 & 控制安全论证不在当前范围 \\
 \bottomrule
 \end{longtable}
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
 \begin{tikzpicture}[node distance=6mm and 12mm,
   proc/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=2.5cm,
@@ -308,7 +308,7 @@ Won't & 本期自动下发闸门控制 & 控制安全论证不在当前范围 \\
 
 数据流图（DFD）只表达数据如何在外部实体、处理和数据存储之间流动。上下文图把系统视为一个处理，先确定边界；再逐层分解，但父图输入输出必须与子图保持平衡。
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
 \begin{tikzpicture}[node distance=12mm and 23mm,
   entity/.style={draw=Primary,fill=PrimaryLight,minimum width=2.3cm,minimum height=.8cm,align=center},
@@ -328,7 +328,7 @@ Won't & 本期自动下发闸门控制 & 控制安全论证不在当前范围 \\
 \label{fig:dfd-level-zero}
 \end{figure}
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
 \begin{tikzpicture}[node distance=7mm and 6mm,
   process/.style={ellipse,draw=Primary,fill=PrimaryLight,minimum width=2.15cm,minimum height=.9cm,align=center,font=\small},
@@ -437,6 +437,14 @@ REQ-DEV-03 & 执行偏差复核 & 偏差规则与工单 & TC-DEV-01～06 \\
 \end{table}
 
 评审SRS时，应让业务、开发、测试、运维和安全角色从各自角度走查。评审通过形成基线；后续变更需提交原因、影响、优先级和批准记录，而不是直接修改共享文档。
+
+\paragraph{本章图表导读}
+表\ref{tab:sdlc-deliverables}按生命周期阶段列出输入、关键问题和交付物。
+图\ref{fig:waterfall-model}、图\ref{fig:prototype-model}和图\ref{fig:incremental-model}分别帮助比较计划驱动、反馈澄清和可运行增量。
+表\ref{tab:lifecycle-comparison}用于按风险与反馈频率选型；表\ref{tab:moscow-example}展示需求优先级。
+表\ref{tab:requirement-quality-check}把完整性、可验证性和一致性转为检查项；表\ref{tab:system-flow-symbols}解释流程图符号。
+图\ref{fig:order-process-flowchart}呈现用水计划闭环；图\ref{fig:dfd-level-zero}和图\ref{fig:dfd-level-one}分别刻画上下文与一级数据流。
+表\ref{tab:water-plan-dictionary}给出字段契约；表\ref{tab:water-plan-decision}说明条件组合；表\ref{tab:requirements-traceability}把需求连接到设计和验收证据。
 
 \section*{小结}
 

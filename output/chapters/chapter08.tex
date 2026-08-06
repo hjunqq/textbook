@@ -77,7 +77,7 @@
 
 业务闭环从观测开始，经质量检查、状态估计、规则/模型分析、预警确认、工单处置和效果复核回到模型与规则改进。现场设备不能绕过接入和质量检查直接触发预警。
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
 \begin{tikzpicture}[node distance=6mm and 7mm,
   flow/.style={draw=Primary,rounded corners,fill=PrimaryLight,align=center,
@@ -109,7 +109,7 @@
 
 清源水库案例采用一套可追踪技术栈。浏览器端由Vue组件、Router路由、Pinia状态和Three.js场景组成；后端由Spring Boot接口、领域服务、质量与预警服务组成；Kafka传递跨服务事件；Redis存放短期缓存；PostgreSQL承担业务数据，PostGIS存放空间对象，TimescaleDB扩展管理时序观测。
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
 \begin{tikzpicture}[node distance=5mm,
   layer/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=11.5cm,
@@ -152,7 +152,8 @@ Cesium & 流域/水网、地球与大范围地形浏览 & 坐标基准、瓦片�
 
 水体材质中的时间变量使用统一名\texttt{u\_time}，避免局部变量自引用：
 
-\begin{lstlisting}[language=GLSL]
+\label{lst:ch08-glsl}
+\begin{lstlisting}[language=GLSL,caption={水面波动着色器}]
 uniform float u_time;
 uniform float speed;
 varying vec2 vUv;
@@ -189,7 +190,7 @@ void main() {
 \end{tabular}
 \end{table}
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
 \begin{tikzpicture}[node distance=6mm and 7mm,
   pipe/.style={draw=Primary,rounded corners,fill=PrimaryLight,align=center,
@@ -221,7 +222,8 @@ void main() {
 
 后端接口使用Spring Boot 3.2+与Java 17。质量服务对格式、单位、范围、时序和重复五项进行校验；只有明确规则允许时才生成修订值。时序检查要求\texttt{occurredAt}不晚于当前时间且不早于上一条记录，重复检查以\texttt{eventId}去重。下面的完整示例保留原始值，只更新质量标记并返回全部问题：
 
-\begin{lstlisting}[language=Java]
+\label{lst:ch08-quality-java}
+\begin{lstlisting}[language=Java,caption={质量检查服务实现}]
 import java.time.Clock;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -411,7 +413,8 @@ w_i\ge 0,\quad \sum_{i=1}^{n}w_i=1,
 
 下面的单元测试把两个业务态固定成可执行的契约：低分且有效的数据是“无预警”，高分但质量不合格的数据是“未评估”，二者不能互换。
 
-\begin{lstlisting}[language=Java]
+\label{lst:ch08-classification-test}
+\begin{lstlisting}[language=Java,caption={质量码分类测试}]
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -480,7 +483,7 @@ public final class QualityClassificationTest {
 
 预警事件包含输入快照、规则或模型版本、质量状态和不确定性说明。值班员确认后进入工单，工单记录责任人、时限、措施和结果；关闭预警前必须校验关联工单状态。若预警被抑制或合并，也要保留操作者和理由。
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
 \begin{tikzpicture}[node distance=7mm,
   state/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=2.2cm,
@@ -531,7 +534,7 @@ public final class QualityClassificationTest {
 \end{tabular}
 \end{table}
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
 \begin{tikzpicture}[node distance=7mm and 9mm,
   portal/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=2.8cm,
@@ -575,7 +578,7 @@ public final class QualityClassificationTest {
 \end{tabular}
 \end{table}
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
 \begin{tikzpicture}[node distance=6mm and 5mm,
   sim/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=2.0cm,
@@ -622,7 +625,7 @@ public final class QualityClassificationTest {
 
 结果界面应同时提供三维淹没播放、二维专题图、对象列表和表格导出。三维场景便于理解空间关系，表格便于核对数量和属性；任何一种界面失败时，其他表达仍应支持基本研判。
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
 \begin{tikzpicture}[node distance=6mm,
   evidence/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=2.4cm,
@@ -668,7 +671,7 @@ public final class QualityClassificationTest {
 \paragraph{不同技术路线对比}
 数字孪生平台可以从不同的工程起点形成技术路线。以厂商手册为参考的产品集成路线，通常先把流域、水网和工程入口组织成统一门户，再把模型运行、预演任务和工单闭环接到同一套权限与审计机制中。这种路线的优点是业务人员容易按照场景进入系统，适合在已有平台上快速建立可演示、可操作的流程；它的边界是产品中的对象编码、数据质量规则和模型适用范围仍需项目团队重新核验，手册中的示例数据也不能直接替代真实工程数据。以公开标准和数据底板为中心的路线，则先确定对象目录、时空基准、数据交换协议、元数据和版本规则，再把不同厂商或不同专业模型作为可替换服务接入。它有利于长期积累和跨系统交换，但前期需要投入更多的目录治理、接口设计和质量校验工作。以数字孪生流域或区域治理为牵引的路线，强调跨工程的联合预报、影响分析和调度协同，重点解决数据范围大、模型链条长和多部门协作的问题；其验收不能只看单个三维页面，而要检查情景输入、模型版本、结果证据和处置回执是否能够闭环。项目定制路线则围绕某一类水库、水闸或河段的规程和业务动作构建，能够精确贴合现场，但需要用清晰的扩展点避免把一次性约定固化为全行业标准。四类路线可以组合使用：厂商方案是其中一种实现的参考，公开政策和行业样本提供业务边界，标准化底板提供交换约束，项目规则负责把模型结果转成可审批、可追溯的行动。教学案例采用这种分层比较方式，目的在于训练方案选择和证据核验能力，而不是评价某个产品的优劣。
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
 \begin{tikzpicture}[node distance=8mm,
   fourpre/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=2.2cm,
@@ -717,7 +720,7 @@ Q=C_d\,b\,a\sqrt{2gH},
 
 反算可能存在多组可行解，平台应按安全约束、均衡启闭、设备可用性和操作次数排序，不只返回一个“最优值”。专业人员可锁定某些闸门或修改目标，系统创建新方案版本并重新计算。
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
 \begin{tikzpicture}[node distance=6mm and 7mm,
   gate/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=2.3cm,
@@ -783,7 +786,7 @@ AI助手可以把自然语言转为查询、页面导航和候选任务。例如
 \end{tabular}
 \end{table}
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
 \begin{tikzpicture}[node distance=6mm,
   ai/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=2.35cm,
@@ -813,7 +816,7 @@ AI输出必须引用数据和模型证据。若工具失败、数据过期或权
 
 可复制的平台把空间底板、业务数据、模型算法和应用编排分开。更换洪水模型时，不应重新制作工程模型和用户体系；新增工程时，通过元数据和适配器接入，而不是复制一套源码。
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
 \begin{tikzpicture}[node distance=5mm,
   twinlayer/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=11cm,
@@ -874,7 +877,7 @@ AI输出 & 工具证据、生成时间、复核状态 & 把语言生成内容当
 
 实时孪生视图以“观测状态”为主，预演视图以“场景状态”为主。两者必须使用不同颜色或边框并显示时间戳。用户从实时视图进入预演时，平台复制一份输入快照；后续实测数据继续更新实时视图，但不直接改变正在比较的方案。
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
 \begin{tikzpicture}[node distance=6mm and 8mm,
   state/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=2.6cm,
@@ -921,7 +924,7 @@ AI输出 & 工具证据、生成时间、复核状态 & 把语言生成内容当
 \end{tabular}
 \end{table}
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
 \begin{tikzpicture}[node distance=5mm and 7mm,
   run/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=2.0cm,
@@ -980,7 +983,7 @@ AI输出 & 工具证据、生成时间、复核状态 & 把语言生成内容当
 \end{tabular}
 \end{table}
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
 \begin{tikzpicture}[node distance=7mm and 10mm,
   net/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=2.2cm,
@@ -1033,7 +1036,7 @@ AI输出 & 工具证据、生成时间、复核状态 & 把语言生成内容当
 
 模型校准与业务验收不是同一件事。校准检查模型能否合理复现历史过程；业务验收检查在当前平台内，输入是否正确、运行是否稳定、结果是否可解释、失败是否可降级、角色是否按权限完成任务。即使历史拟合良好，超出校准范围的极端情景仍应标记为低可信。
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
 \begin{tikzpicture}[node distance=6mm and 8mm,
   branch/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=2.5cm,
@@ -1128,7 +1131,7 @@ $T+60$ min & 比较预测与实况并复核 & 专业分析员 & 偏差、结论�
 
 交接班不能只说“系统正常”。交班人应确认当前预警、未闭环工单、正在运行的模型任务、已批准方案及其有效期、失效服务、数据龄期和待复核结论；接班人逐项确认并签署。若方案将在下一班次到期，平台应在交接页面突出提示，避免把过期建议继续当作当前方案。
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
 \begin{tikzpicture}[node distance=6mm and 8mm,
   handover/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=2.35cm,
@@ -1200,7 +1203,7 @@ AI工具调用失败 & 明确失败并回到手工流程 & 错误信息与人工
 
 部署图继续使用统一技术栈。浏览器访问Vue静态资源与API入口；Spring Boot服务通过Kafka协同；PostgreSQL/PostGIS/TimescaleDB作为主数据底座；Redis为缓存；对象存储保存模型、纹理和报告。数据库名称、代码和图示必须一致。
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
 \begin{tikzpicture}[node distance=6mm and 8mm,
   deploy/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=2.45cm,
@@ -1253,6 +1256,26 @@ AI工具调用失败 & 明确失败并回到手工流程 & 错误信息与人工
 \end{table}
 
 最小可运行版本不要求实现所有模型，但必须完成一条真实可操作链：PZ-07观测进入平台，经质量检查触发黄色预警，值班员确认并创建工单，三维场景定位测点，处置结果回写并归档。数字孪生扩展至少完成一个带模型卡、场景版本和人工确认的预演任务。
+
+\paragraph{本章图表导读}
+表\ref{tab:case-parameters}集中给出清源水库教学参数；表\ref{tab:case-roles}说明值班员、专业分析员、审批人和运维员的权限边界。
+图\ref{fig:smart-water-monitoring-architecture}展示安全监测业务闭环；图\ref{fig:case-layered-architecture}展示统一技术架构。
+表\ref{tab:three-cesium-selection}比较Three.js与Cesium的适用范围；表\ref{tab:case-core-data}定义核心对象字段。
+图\ref{fig:monitoring-data-pipeline}串起接入、质量检查和展示；表\ref{tab:warning-levels}给出预警等级。
+图\ref{fig:warning-workorder-flow}说明预警进入工单的状态流转；本节数字孪生案例的边界见第\ref{sec:digital-twin-case}节。
+表\ref{tab:twin-three-portals}和图\ref{fig:twin-portals}区分流域、水网、工程三类入口与共享底板。
+表\ref{tab:typhoon-scenario-contract}、图\ref{fig:typhoon-simulation-chain}和表\ref{tab:inundation-evidence}分别描述预演契约、计算反馈和淹没证据。
+图\ref{fig:simulation-evidence}展示从情景输入到执行归档的证据链；表\ref{tab:monitoring-four-pre}与图\ref{fig:four-pre-loop}解释监测平台与“四预”能力的差异及闭环。
+表\ref{tab:gate-algorithm-contract}和图\ref{fig:gate-simulation-flow}落实闸门调度的接口与流程；表\ref{tab:warning-rehearsal}说明不同预警等级的预演关注点。
+表\ref{tab:ai-assistant-boundary}、图\ref{fig:ai-meeting-loop}界定AI会商助手的请求、证据和人工审批边界。
+图\ref{fig:twin-decoupling}、表\ref{tab:simulation-labeling}和表\ref{tab:twin-object-state}分别说明解耦分层、模拟数据标注以及对象身份状态。
+图\ref{fig:twin-state-separation}区分观测、场景快照和推演状态；表\ref{tab:model-run-lifecycle}与图\ref{fig:model-run-lifecycle}约束模型任务生命周期。
+表\ref{tab:water-network-dispatch}、图\ref{fig:water-network-graph}表达水网联合调度的网络输入与约束。
+表\ref{tab:scenario-comparison}、图\ref{fig:scenario-version-compare}用于比较方案分支；表\ref{tab:end-to-end-slice}和表\ref{tab:end-to-end-assertions}把端到端切片连接到验收断言。
+表\ref{tab:consultation-timeline}与图\ref{fig:shift-handover}记录会商时间线和值守交接；表\ref{tab:twin-failure-acceptance}和表\ref{tab:twin-course-iterations}分别用于失效降级验收与课程迭代。
+图\ref{fig:system-deployment-architecture}和表\ref{tab:chapter8-acceptance}收束部署架构与阶段验收。
+
+代码清单\ref{lst:ch08-glsl}说明三维水面效果如何作为表现层；代码清单\ref{lst:ch08-quality-java}和\ref{lst:ch08-classification-test}把质量码合并、预警分类和单元测试固定为可执行契约，便于将本章表格中的业务规则落实到服务端。
 
 \section*{小结}
 

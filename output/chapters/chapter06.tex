@@ -39,7 +39,8 @@ P=\begin{bmatrix}
 
 本章统一使用WebGL2，不提供名义上的WebGL1回退。WebGL1对顶点数组对象、32位索引和扩展支持的要求不同，若确需兼容，应单独实现并测试兼容分支。
 
-\begin{lstlisting}[language=JavaScript,breaklines=true]
+\label{lst:ch06-cesium-init}
+\begin{lstlisting}[language=JavaScript,breaklines=true,caption={Cesium地理场景初始化}]
 const canvas = document.querySelector('#scene');
 const gl = canvas.getContext('webgl2');
 if (!gl) throw new Error('当前浏览器不支持 WebGL2');
@@ -52,7 +53,8 @@ gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
 顶点着色器必须显式声明使用的uniform。下面的最小着色器把模型、观察和投影矩阵分开，便于定位坐标错误。
 
-\begin{lstlisting}
+\label{lst:ch06-three-scene}
+\begin{lstlisting}[caption={三维对象属性读取}]
 #version 300 es
 layout(location = 0) in vec3 aPosition;
 uniform mat4 uModel;
@@ -73,7 +75,8 @@ Three.js封装了场景、相机、材质、灯光和渲染器。工程项目宜
 
 官方addon路径为\texttt{three/addons/loaders/GLTFLoader.js}\cite{threeGLTFLoader}。glTF/GLB适合Web交付；加载后仍需检查单位、坐标轴、材质色彩空间和包围盒。
 
-\begin{lstlisting}[language=JavaScript,breaklines=true]
+\label{lst:ch06-wmts-request}
+\begin{lstlisting}[language=JavaScript,breaklines=true,caption={WMTS地理瓦片请求}]
 import * as THREE from 'three';
 import { GLTFLoader } from
   'three/addons/loaders/GLTFLoader.js';
@@ -110,7 +113,8 @@ WFS & 矢量要素 & 可查询属性与几何 & 河道、测站编辑查询 \\
 
 教学示例使用自建GeoServer，不依赖商业底图密钥：
 
-\begin{lstlisting}[language=JavaScript]
+\label{lst:ch06-three-renderer}
+\begin{lstlisting}[language=JavaScript,caption={Three.js渲染器创建}]
 const imagery = new Cesium.WebMapTileServiceImageryProvider({
   url: 'https://gis.example.edu/geoserver/gwc/service/wmts',
   layer: 'water:cgcs2000_basemap',
@@ -136,7 +140,8 @@ CGCS2000地理二维坐标系代码是EPSG:4490\cite{epsg4490}，EPSG:4326对应
 
 下面示例把CGCS2000经纬度转换到中央经线111度的6度带（19带）。\texttt{tmerc}表示横轴墨卡托/高斯—克吕格计算；带号前缀是否写入东坐标，应与项目数据规范一致。
 
-\begin{lstlisting}[language=JavaScript]
+\label{lst:ch06-three-camera}
+\begin{lstlisting}[language=JavaScript,caption={透视相机与场景}]
 const CGCS2000 =
   '+proj=longlat +a=6378137 +rf=298.257222101 +type=crs';
 const GK19 =
@@ -160,7 +165,8 @@ GNSS通常给出椭球高，水利工程常使用1985国家高程基准下的正
 
 Cesium的\texttt{Cesium3DTileset.fromUrl}返回Promise，应等待对象创建完成后再加入场景\cite{cesium3DTileset}：
 
-\begin{lstlisting}[language=JavaScript]
+\label{lst:ch06-three-animation}
+\begin{lstlisting}[language=JavaScript,caption={三维渲染循环}]
 try {
   const tileset = await Cesium.Cesium3DTileset.fromUrl(
     '/tiles/dam/tileset.json'
@@ -180,7 +186,7 @@ try {
 
 倾斜摄影通过垂直与多个倾斜视角获取影像，用于恢复工程及周边地表。系统由飞行平台、航摄仪、地面控制和内业处理组成，如图\ref{fig:uav-oblique-system}所示。
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
 \uavObliquePhotographySystem
 \caption{无人机倾斜摄影测量系统组成}
@@ -189,7 +195,7 @@ try {
 
 生产流程包括航线设计、影像采集、质量检查、空中三角测量、密集匹配、网格与纹理生成、坐标校核、切片和发布。Agisoft Metashape是PhotoScan更名后的现行名称，Bentley ContextCapture则沿用Smart 3D产品线的技术谱系；项目文档应记录软件版本与名称沿革，正文统一采用当前名称，便于学生按官方资料复现实验。
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
 \obliqueImagePreprocessQC
 \caption{倾斜影像预处理与质量控制流程}
@@ -278,7 +284,7 @@ NASA文献强调物理模型、传感器更新和运行历史的综合映射\cit
 \]
 其中$PE$为物理实体、$VE$为虚拟实体、$Ss$为服务、$DD$为孪生数据、$CN$为连接。本章沿用该五维划分，并结合水利业务对各维度作工程化细化，不把“孪生数据”改写成“数据处理”。
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
 \begin{tikzpicture}[>=Stealth,node distance=1.2cm and 1.4cm]
 \tikzset{d/.style={draw=Primary,rounded corners=2pt,fill=PrimaryLight,
@@ -322,7 +328,7 @@ NASA文献强调物理模型、传感器更新和运行历史的综合映射\cit
 
 平台可划分为物理对象层、感知连接层、数据底板层、模型与知识层、服务层和交互应用层。分层的目的不是增加名词，而是明确数据在哪里校验、模型在哪里运行、结果由谁解释、指令由谁批准。
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
 \begin{tikzpicture}[node distance=.35cm]
 \tikzset{layer/.style={draw=Primary,rounded corners=2pt,fill=PrimaryLight,
@@ -457,7 +463,7 @@ NASA文献强调物理模型、传感器更新和运行历史的综合映射\cit
 
 状态着色与几何材质分离。原始模型材质属于资产表现，风险着色属于临时业务覆盖层；退出专题模式后应恢复原材质。这样既避免反复修改模型文件，也能同时支持渗压、位移、巡检等多个专题。
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
 \begin{tikzpicture}[>=Stealth,node distance=.75cm and 1.0cm]
 \tikzset{evidence/.style={draw=Primary,rounded corners=2pt,fill=PrimaryLight,
@@ -487,7 +493,7 @@ NASA文献强调物理模型、传感器更新和运行历史的综合映射\cit
 
 一次完整闭环包括“感知—质检—状态更新—模型计算—风险解释—人工确认—指令下发—执行反馈—效果评估”。并非所有场景都允许自动控制：大坝安全和防洪调度通常需要权限、会商和人工确认。
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
 \begin{tikzpicture}[>=Stealth,node distance=.55cm]
 \tikzset{dtstep/.style={draw=Primary,rounded corners=2pt,fill=PrimaryLight,
@@ -511,7 +517,8 @@ NASA文献强调物理模型、传感器更新和运行历史的综合映射\cit
 
 下面的短伪代码只表达状态更新主线。每个函数均代表可测试的服务接口，不虚构十余个未定义类。
 
-\begin{lstlisting}[language=Python]
+\label{lst:ch06-python-model}
+\begin{lstlisting}[language=Python,caption={数字孪生模型计算接口}]
 def update_twin(reading, repository, model, publisher):
     checked = validate_unit_time_quality(reading)
     repository.save_raw(checked)
@@ -539,7 +546,8 @@ def update_twin(reading, repository, model, publisher):
 
 状态更新事件至少包含事件标识、对象标识、发生时间、状态版本、模型版本和追踪标识：
 
-\begin{lstlisting}
+\label{lst:ch06-json-contract}
+\begin{lstlisting}[caption={模型事件契约示例}]
 {
   "eventId": "01J5...",
   "eventType": "twin.state.updated.v1",
@@ -556,7 +564,7 @@ def update_twin(reading, repository, model, publisher):
 
 控制命令比状态事件要求更严格。命令包含发起人、审批记录、目标设备、期望状态、有效期和幂等键；执行端返回接收、拒绝、执行中、成功或失败状态。超时不等于未执行，调用方必须查询最终状态，避免重复启闭设备。
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
 \begin{tikzpicture}[>=Stealth,node distance=.9cm and 1.0cm]
 \tikzset{svc/.style={draw=Primary,rounded corners=2pt,fill=PrimaryLight,
@@ -613,7 +621,7 @@ def update_twin(reading, repository, model, publisher):
 
 现场边缘节点适合完成协议接入、缓存、初步质检和断网续传；中心平台负责全局数据治理、模型调度和综合应用。控制指令采用最小权限、双向认证和可审计通道，不能因引入“数字孪生”而绕过原有安全规程。
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
 \begin{tikzpicture}[>=Stealth,node distance=.8cm and .9cm]
 \tikzset{box/.style={draw=Primary,rounded corners=2pt,fill=PrimaryLight,
@@ -686,7 +694,7 @@ def update_twin(reading, repository, model, publisher):
 
 数据血缘记录数据集从来源到结果的变换关系。最小血缘节点包含来源标识、时间范围、处理规则版本、输入与输出校验摘要、执行状态和责任主体；模型结果还要关联模型卡、参数集和运行环境。血缘不是另存一份不可维护的说明文档，而应由采集、计算和发布流程自动写入元数据存储，并能从三维对象或告警详情反向查询。
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
 \begin{tikzpicture}[node distance=5mm and 7mm,
   item/.style={draw=Primary,rounded corners,fill=PrimaryLight,align=center,minimum width=2.25cm,minimum height=0.85cm,font=\small}]
@@ -766,6 +774,20 @@ def update_twin(reading, repository, model, publisher):
 值得持续关注的方向包括：模型可信度与不确定性表达、跨系统语义互操作、云边协同、面向事件的实时数据处理、人在回路的决策支持以及网络与数据安全。这些方向都能通过可测指标验证。本章不罗列“元宇宙”“区块链天然保证可信”等缺乏场景和证据的口号。
 
 我国数字孪生水利建设强调流域防洪、水资源管理和工程运行等实际任务\cite{twinWater2023,twinProject2024}。平台规划应从可闭环的业务问题出发，逐步扩展数据、模型和服务，而不是先建设不可维护的全量高精度场景。
+
+\paragraph{本章图表与公式导读}
+表\ref{tab:ogc-services}比较不同OGC服务的请求粒度与适用任务；图\ref{fig:oblique-preprocess}展示倾斜影像从检查到发布的质量控制流程。
+按式(\ref{eq:rmse-x})、式(\ref{eq:rmse-y})和式(\ref{eq:rmse-h})可分别核对平面与高程误差。
+图\ref{fig:dt-five-dimensions}与表\ref{tab:dt-five-dimensions}说明五维模型的组织关系和安全监测映射。
+图\ref{fig:dt-layered-architecture}及表\ref{tab:dt-scenario-requirements}把维度落到平台分层与场景需求。
+表\ref{tab:dt-metadata}、表\ref{tab:model-card}和表\ref{tab:dt-quality-flags}用于登记数据、模型和质量码证据。
+图\ref{fig:dt-evidence-chain}、图\ref{fig:dt-closed-loop}与图\ref{fig:dt-event-contract}分别追踪对象证据、业务闭环和事件契约。
+表\ref{tab:dam-twin-scenario}给出大坝案例的输入输出；图\ref{fig:dt-edge-cloud}和表\ref{tab:dt-degradation}说明云边协同与失效降级。
+表\ref{tab:dt-observability}规定可观测指标；图\ref{fig:dt-lineage}展示血缘追溯；表\ref{tab:dt-acceptance}和表\ref{tab:dt-course-iterations}用于验收与课程迭代。
+
+代码清单\ref{lst:ch06-cesium-init}和\ref{lst:ch06-wmts-request}给出三维场景与地理瓦片请求骨架。
+代码清单\ref{lst:ch06-three-renderer}、\ref{lst:ch06-three-camera}和\ref{lst:ch06-three-animation}展示渲染器、相机与循环的协作。
+代码清单\ref{lst:ch06-python-model}、\ref{lst:ch06-three-scene}和\ref{lst:ch06-json-contract}把模型计算、对象属性和事件契约连接起来。
 
 \section*{小结}
 

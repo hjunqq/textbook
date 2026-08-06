@@ -82,7 +82,7 @@
 
 汛期某时刻，库区雨量站上报分钟雨量。遥测终端按通信规约编码，接入服务校验站码、时间和单位；质量服务标记缺测、突变或回补；洪水预报模型读取同一输入快照并输出过程线；规则服务结合批准阈值生成黄色预警。值班员确认后创建工单，专业人员复核模型与现场情况，审批人决定是否启动预案，处置结果再与后续实况比较。
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
 \begin{tikzpicture}[node distance=6mm and 6mm,
   casebox/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=2.15cm,
@@ -107,7 +107,7 @@
 \draw[->,draw=Accent,dashed,thick,bend right=28] (learn) to node[below,font=\scriptsize]{规则/模型校正} (quality);
 \end{tikzpicture}
 \caption{一次洪水预警从监测到复核的闭环}
-\label{fig:smart-water-evolution}
+\label{fig:flood-warning-loop}
 \end{figure}
 
 这个案例揭示了四条边界。第一，传感器读数经过质检后才成为可用数据；第二，模型输出是带适用范围的证据，不是自动决策；第三，平台建议不能绕过人工审批和工程规程；第四，处置完成不等于流程结束，还要用实况复核并归档。
@@ -118,7 +118,7 @@
 
 为便于学习，本书把平台划分为感知层、平台层、应用层和用户层。分层是职责边界，不代表必须部署为四套系统。
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
 \begin{tikzpicture}[node distance=5mm,
   layer/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=11.2cm,
@@ -175,7 +175,7 @@
 
 软件工程用系统化、可验证的方法组织软件生命周期。核心活动包括需求获取与分析、架构和详细设计、实现与集成、验证与确认、部署运行、维护演化以及最终退役\cite{ISO12207,sommerville2015}。
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
 \begin{tikzpicture}[node distance=6mm and 5mm,
   life/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=2.0cm,
@@ -204,6 +204,12 @@
 在清源水库案例中，软件工程把模糊愿望转为可验收交付物：需求阶段明确“谁在什么场景下解决什么问题”；设计阶段确定对象、数据流和权限边界；实现阶段按接口契约协作；验证阶段覆盖正常、异常和降级路径；运行阶段用监控、工单和复盘持续改进。
 
 软件工程也帮助团队识别“技术可行”与“工程可用”的差异。模型能运行并不代表结果可用于业务，页面能显示并不代表数据可信，设备能接收命令并不代表允许自动控制。只有将质量属性、人在回路和审计证据纳入生命周期，平台才能长期稳定运行。
+
+\paragraph{本章图表导读}
+表\ref{tab:smart-water-features}把业务牵引、数据可信、模型支撑、协同闭环和安全运行放在同一张验收视图中。
+表\ref{tab:monitoring-protocol-roles}用于区分测站通信规约、通用消息协议和数据交换标准的职责。
+图\ref{fig:flood-warning-loop}沿一次洪水预警链路展示数据质检、模型计算、人工确认和复核归档的顺序。
+图\ref{fig:smart-water-architecture}说明四层架构中的观测上行与受控下行；图\ref{fig:sdlc-flow}则把需求、设计、实现、验证、运行和反馈组成可追踪的生命周期闭环。阅读这些图表时，应同时标注责任角色、输入证据和验收条件。
 
 \section*{小结}
 

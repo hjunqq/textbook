@@ -29,7 +29,7 @@
 
 现代浏览器通常采用多进程架构。图\ref{fig:browser-architecture}强调各模块的协作关系：浏览器引擎负责协调，渲染引擎使用网络模块取得的资源，调用JavaScript引擎执行脚本，并通过UI后端绘制；存储模块为浏览器引擎及页面脚本提供受控的数据持久化能力。
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
 \begin{tikzpicture}[>=Stealth,thick,node distance=0.9cm and 1.0cm]
   \tikzset{box/.style={draw=Primary,rectangle,rounded corners=2pt,
@@ -62,7 +62,8 @@ HTML描述内容的结构和语义。\texttt{header}、\texttt{nav}、\texttt{ma
 
 下面的页面骨架只负责内容组织，不在HTML中混入具体视觉样式。
 
-\begin{lstlisting}[language=html]
+\label{lst:ch04-html-shell}
+\begin{lstlisting}[language=html,caption={水利平台页面骨架}]
 <!doctype html>
 <html lang="zh-CN">
 <head>
@@ -89,7 +90,8 @@ HTML描述内容的结构和语义。\texttt{header}、\texttt{nav}、\texttt{ma
 
 CSS负责视觉呈现。规则由选择器和声明块组成，层叠结果主要受来源、优先级和出现顺序影响。工程中宜使用类选择器组织组件样式，避免依赖过深的DOM层级。
 
-\begin{lstlisting}[language=CSS]
+\label{lst:ch04-css-responsive}
+\begin{lstlisting}[language=CSS,caption={监测卡片响应式样式}]
 :root { --normal: #1677ff; --warning: #d46b08; }
 .monitor-grid {
   display: grid;
@@ -116,7 +118,8 @@ Grid适合仪表盘的二维区域布局，Flexbox适合工具栏等一维排列
 
 字符串可用模板字面量组合，也可通过\texttt{trim()}、\texttt{includes()}、\texttt{slice()}和\texttt{split()}完成常见处理。完成字符串处理后，再使用比较、逻辑和算术运算符表达业务规则。例如，某水库汛期警戒水位统一设为5.0米：
 
-\begin{lstlisting}[language=JavaScript]
+\label{lst:ch04-js-basics}
+\begin{lstlisting}[language=JavaScript,caption={JavaScript基础变量与函数}]
 const stationName = "东湖水库";
 const warningLevel = 5.0; // 单位：m，本章同一示例场景统一采用该阈值
 const reading = { stationId: "ST-01", level: 5.12, unit: "m" };
@@ -127,7 +130,8 @@ console.log(message.trim());
 
 数组常用\texttt{map()}完成映射、\texttt{filter()}完成筛选、\texttt{reduce()}完成聚合；对象解构可以明确取出字段。函数应保持单一职责并显式返回结果。
 
-\begin{lstlisting}[language=JavaScript]
+\label{lst:ch04-js-condition}
+\begin{lstlisting}[language=JavaScript,caption={监测值条件判断}]
 const readings = [4.72, 5.12, 4.95];
 const alarms = readings
   .filter(level => level >= 5.0)
@@ -144,7 +148,8 @@ function validateLevel(level) {
 
 \texttt{try}包围可能失败的操作，\texttt{catch}处理异常，\texttt{finally}执行清理。异常不能被静默吞掉，应在界面给出可理解提示，并把技术细节记录到日志系统。
 
-\begin{lstlisting}[language=JavaScript]
+\label{lst:ch04-js-array}
+\begin{lstlisting}[language=JavaScript,caption={测站数组处理}]
 function parseReading(raw) {
   try {
     const reading = JSON.parse(raw);
@@ -160,7 +165,8 @@ function parseReading(raw) {
 
 Promise有pending、fulfilled和rejected三种状态。\texttt{then()}返回新的Promise，因此可把“取数—解析—呈现”组织成链；链末使用\texttt{catch()}集中处理失败。
 
-\begin{lstlisting}[language=JavaScript]
+\label{lst:ch04-js-fetch}
+\begin{lstlisting}[language=JavaScript,caption={前端数据请求示例}]
 function loadLatestLevel(stationId) {
   return fetch(`/api/stations/${stationId}/latest`)
     .then(response => {
@@ -180,7 +186,8 @@ loadLatestLevel("ST-01")
 
 \texttt{async/await}用于以顺序形式表达同样的异步过程。彼此独立的请求应通过\texttt{Promise.all()}并发执行；有依赖关系的请求才顺序等待。
 
-\begin{lstlisting}[language=JavaScript]
+\label{lst:ch04-js-debug}
+\begin{lstlisting}[language=JavaScript,caption={调试监测查询}]
 async function loadDashboard(stationId) {
   try {
     const [latest, alarms] = await Promise.all([
@@ -204,7 +211,8 @@ DOM是HTML文档在浏览器中的对象表示。优先使用\texttt{querySelect
 
 下面示例完整展示事件绑定、输入校验和界面更新。警戒值仍为同一场景的5.0米。
 
-\begin{lstlisting}[language=html]
+\label{lst:ch04-html-vue}
+\begin{lstlisting}[language=html,caption={测站列表模板}]
 <label for="level-input">水位（m）</label>
 <input id="level-input" type="number" step="0.01">
 <button id="check-level" type="button">判断状态</button>
@@ -229,7 +237,8 @@ DOM是HTML文档在浏览器中的对象表示。优先使用\texttt{querySelect
 
 ES模块通过\texttt{export}和\texttt{import}建立清晰依赖。接口访问、业务计算和视图组件应分层组织，避免在组件中散布重复的网络代码。
 
-\begin{lstlisting}[language=JavaScript]
+\label{lst:ch04-js-lifecycle}
+\begin{lstlisting}[language=JavaScript,caption={组件生命周期清理}]
 // level.js
 export function levelStatus(level, warning = 5.0) {
   return level >= warning ? "warning" : "normal";
@@ -248,7 +257,8 @@ console.log(levelStatus(5.12));
 
 本章使用Vue 3.4+组合式API。\texttt{ref}适合基本值，\texttt{reactive}适合对象，\texttt{computed}表达派生状态；组件通过props接收数据，通过emit通知父组件。下面的单文件组件把状态声明、属性校验、模板绑定和事件发射放在同一示例中，便于沿着数据流理解组件边界。
 
-\begin{lstlisting}[language=Vue]
+\label{lst:ch04-vue-component}
+\begin{lstlisting}[language=Vue,caption={测站卡片组合式组件}]
 <script setup>
 import { computed } from 'vue'
 const props = defineProps({
@@ -270,7 +280,7 @@ const status = computed(() => props.level >= 5.0 ? 'warning' : 'normal')
 
 组件在创建、挂载、更新和卸载阶段提供生命周期钩子。Vue 3中卸载阶段使用\texttt{beforeUnmount}/\texttt{unmounted}或组合式API的\texttt{onBeforeUnmount}/\texttt{onUnmounted}，不使用Vue 2的\texttt{beforeDestroy}/\texttt{destroyed}。
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
 \begin{tikzpicture}[>=Stealth,node distance=0.6cm]
   \tikzset{life/.style={draw=Primary,rounded corners=2pt,fill=PrimaryLight,
@@ -297,7 +307,8 @@ const status = computed(() => props.level >= 5.0 ? 'warning' : 'normal')
 
 Vue Router把URL映射到页面组件。路由配置应包含稳定的路径、名称和组件；页面级组件可用动态导入实现按需加载。路由守卫适合做登录状态和角色检查，但细粒度业务权限仍须由后端验证。
 
-\begin{lstlisting}[language=JavaScript]
+\label{lst:ch04-js-router}
+\begin{lstlisting}[language=JavaScript,caption={路由参数读取与跳转}]
 import { createRouter, createWebHistory } from 'vue-router';
 
 const router = createRouter({
@@ -318,7 +329,8 @@ export default router;
 
 Pinia集中管理跨组件共享且具有业务含义的状态，如当前测站、实时读数和告警数量。只在单个组件内部使用的展开状态不必放入仓库。
 
-\begin{lstlisting}[language=JavaScript]
+\label{lst:ch04-js-pinia}
+\begin{lstlisting}[language=JavaScript,caption={Pinia测站状态管理}]
 import { defineStore } from 'pinia';
 
 export const useStationStore = defineStore('station', {
@@ -342,7 +354,8 @@ export const useStationStore = defineStore('station', {
 
 应用入口依次注册Pinia和Router，再挂载根组件：
 
-\begin{lstlisting}[language=JavaScript]
+\label{lst:ch04-js-event}
+\begin{lstlisting}[language=JavaScript,caption={事件委托与状态更新}]
 import { createApp } from 'vue';
 import { createPinia } from 'pinia';
 import App from './App.vue';
@@ -363,7 +376,8 @@ createApp(App).use(createPinia()).use(router).mount('#app');
 \item \textbf{运行时}：对高频输入防抖，对监测流批量刷新，避免无意义的深层监听。
 \end{itemize}
 
-\begin{lstlisting}[language=JavaScript]
+\label{lst:ch04-js-http}
+\begin{lstlisting}[language=JavaScript,caption={HTTP错误处理封装}]
 // vite.config.js：明确生产构建目标并保留可追踪的分包名称
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
@@ -375,6 +389,11 @@ export default defineConfig({
 \end{lstlisting}
 
 交付前至少验证：主要浏览器中的页面布局、接口失败与空数据状态、路由刷新、权限绕过、移动端触控、构建产物及控制台错误。
+
+\paragraph{组件生命周期导读}
+图\ref{fig:vue-lifecycle}把创建、挂载、更新和卸载阶段与水利仪表盘的请求、订阅和资源清理对应起来；编写组件时应在卸载阶段取消定时器和事件监听，避免离开页面后仍然更新已失效的测站视图。
+
+代码清单\ref{lst:ch04-html-shell}至\ref{lst:ch04-js-http}覆盖页面骨架、响应式样式、JavaScript状态、Vue组件、路由、Pinia和HTTP错误处理；学习时可按数据从输入控件到服务请求再回到界面的路径逐段运行。
 
 \section*{小结}
 

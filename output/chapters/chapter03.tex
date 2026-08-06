@@ -85,7 +85,7 @@
 
 图\ref{fig:uml-usecase}给出一个最小用例图。系统边界内放置业务能力，边界外放置参与者；连线表示参与关系，而不是调用顺序。
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
 \begin{tikzpicture}[>=Stealth, every node/.style={font=\small}]
   \draw[rounded corners=3pt, thick, draw=Primary] (-1.8,-2.0) rectangle (4.4,2.0);
@@ -127,7 +127,7 @@
 
 图\ref{fig:uml-class}把“测点产生监测记录、监测记录可触发告警事件”的领域关系落实为类、属性、操作和多重性。读图时先检查职责，再检查关联方向和数量约束。
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
 \begin{tikzpicture}[>=Stealth, node distance=1.0cm and 1.2cm,
   class/.style={draw=Primary, rounded corners=2pt, fill=PrimaryLight, text width=3.6cm, align=left, font=\small}]
@@ -161,7 +161,7 @@
 
 \textbf{（4）时序图（Sequence Diagram）：}时序图按时间顺序描述参与者与构件之间的消息交互，适合核对跨模块责任、同步与异步边界以及异常分支。图\ref{fig:uml-sequence}展示“告警触发—推送—确认”的主路径：分析服务生成事件，消息服务推送通知，值班人员确认后由告警服务持久化状态并返回结果。实际设计还应补充推送失败、重复确认和超时升级分支。
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
 \begin{tikzpicture}[>=Stealth, every node/.style={font=\small}]
   \foreach \x/\name in {0/分析服务,3/告警服务,6/消息服务,9/值班终端}{
@@ -355,7 +355,8 @@
 
 下面用与本章构件级设计一致的接口名定义统一监测数据读取能力：
 
-\begin{lstlisting}[language=Java]
+\label{lst:ch03-java-interface}
+\begin{lstlisting}[language=Java,caption={监测数据提供接口}]
 public interface MonitoringDataProvider {
     MonitoringData readMonitoringData();
 }
@@ -456,7 +457,7 @@ Web 应用（如用户界面层、后端逻辑层、数据库层）。在典型�
 
 智慧水库安全监测平台：将监测接入、预警分析、用户界面分离。在该平台中，分层架构也被有效应用。监测接入层负责与各类监测设备通信，获取原始数据；预警分析层根据监测数据和预设规则进行分析判断，决定是否触发告警；用户界面层则为用户提供监测总览、趋势曲线和告警处置界面。这种层次划分使系统的各个功能模块相互独立，便于开发、测试和后续维护升级。典型的分层架构模式如图\ref{fig:layered-architecture}所示。
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
 \begin{tikzpicture}[>=Stealth, scale=0.9, thick]
   \node[draw=Primary, rectangle, minimum width=5cm, minimum height=0.7cm, fill=PrimaryLight, text=PrimaryDark, rounded corners=2pt, thick] at (0,3) (ui) {\small\bfseries 表示层（用户界面）};
@@ -535,7 +536,7 @@ MVC 的主要优势在于其高可维护性和可扩展性。由于各部分相�
 
 以一个水库安全监测平台为例，测站信息、监测记录和告警规则等属于模型部分；用户看到的监测大屏、趋势图页面和测站详情页等是视图；而处理查询条件、图层切换、告警确认等操作的部分则是控制器。通过 MVC 模式，系统的结构清晰，开发和维护变得更加高效（见图\ref{fig:mvc-architecture}）。
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
 \begin{tikzpicture}[>=Stealth, scale=0.9, thick]
   \node[draw=Primary, rectangle, minimum width=1.3cm, minimum height=0.8cm, fill=PrimaryLight, text=PrimaryDark, rounded corners=2pt, thick] at (0,1.2) (model) {\small\bfseries Model};
@@ -568,7 +569,7 @@ MVC 的主要优势在于其高可维护性和可扩展性。由于各部分相�
 
 以省级智慧水利平台为例，监测接入、告警分析、工单管理和专题分析等功能都可以通过微服务架构实现。每个微服务独立开发、部署和扩展，能够快速响应业务需求的变化，保证系统的高可用性和高性能。微服务架构的整体结构如图\ref{fig:microservices-architecture}所示。
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
 \begin{tikzpicture}[>=Stealth, scale=0.85, thick]
   % API Gateway
@@ -965,6 +966,11 @@ Web 应用通常采用多种导航类型。全局导航一般位于页面顶部�
 （3）数据存储接口设计
 
 数据存储接口负责协调数据服务与业务服务之间的数据交互。对于监测数据写入，接口应明确测点编码、时间戳、单位、质量标记和值来源等字段规范；对于查询场景，接口应支持按工程、测点、时间范围、数据类型和预警等级等条件进行组合检索。为了兼顾性能与可维护性，可以将时序数据查询、告警事件检索、统计报表生成和归档数据访问拆分为不同接口族，并配套分页、缓存和权限校验机制，确保多角色、多终端访问时仍能保持稳定响应。
+
+\paragraph{架构类型对照}
+表\ref{tab:arch-comparison}把分层、客户/服务器和分布式架构放在同一选择矩阵中，读者应结合并发规模、部署边界、团队能力和故障隔离要求解释每一列，而不是把三种架构误认为互斥答案。
+
+代码清单\ref{lst:ch03-java-interface}以最小接口展示构件边界：调用方只依赖监测数据契约，设备协议和重试细节可以留在实现层。
 
 \section*{小结}
 
