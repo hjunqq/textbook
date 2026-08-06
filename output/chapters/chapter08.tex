@@ -219,32 +219,150 @@ void main() {
 
 \subsection{Spring Boot后端与数据质量}
 
-后端接口使用Spring Boot 3.2+与Java 17。质量服务对格式、单位、范围、时序和重复进行校验；只有明确规则允许时才生成修订值。下面的示例同时累加计数并写入修订标记：
+后端接口使用Spring Boot 3.2+与Java 17。质量服务对格式、单位、范围、时序和重复五项进行校验；只有明确规则允许时才生成修订值。时序检查要求\texttt{occurredAt}不晚于当前时间且不早于上一条记录，重复检查以\texttt{eventId}去重。下面的完整示例保留原始值，只更新质量标记并返回全部问题：
 
 \begin{lstlisting}[language=Java]
-public QualityResult inspect(Reading r) {
-    int errorCount = 0;
-    boolean corrected = false;
-    List<String> issues = new ArrayList<>();
+import java.time.Clock;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
-    if (r.value() == null) {
-        issues.add("missing"); errorCount++;
+record Reading(String eventId, String item, Double value, String unit,
+               Instant occurredAt, String quality) {
+    Reading withQuality(String nextQuality) {
+        return new Reading(eventId, item, value, unit, occurredAt, nextQuality);
     }
-    if (!unitRegistry.matches(r.item(), r.unit())) {
-        issues.add("unit_mismatch"); errorCount++;
+}
+
+record QualityResult(Reading reading, List<String> issues,
+                     boolean qualityFlagAdjusted) {}
+
+interface UnitRegistry {
+    boolean matches(String item, String unit);
+}
+
+interface RangePolicy {
+    boolean isInvalid(Reading reading);
+}
+
+public final class QualityService {
+    public enum WarningLevel { NONE, BLUE, YELLOW, ORANGE, RED }
+
+    public record Classification(boolean evaluable,
+                                 WarningLevel level,
+                                 String reason) {}
+
+    private final UnitRegistry unitRegistry;
+    private final RangePolicy range;
+    private final Clock clock;
+    private final Set<String> seenEventIds =
+        ConcurrentHashMap.newKeySet();
+
+    public QualityService(UnitRegistry unitRegistry,
+                          RangePolicy range, Clock clock) {
+        this.unitRegistry = Objects.requireNonNull(unitRegistry);
+        this.range = Objects.requireNonNull(range);
+        this.clock = Objects.requireNonNull(clock);
     }
-    Reading output = r;
-    if (r.value() != null && range.isClearlyInvalid(r)) {
-        output = r.withQuality("suspect");
-        corrected = true;
-        issues.add("range_violation"); errorCount++;
+
+    public QualityResult inspect(Reading r, Reading previous) {
+        Objects.requireNonNull(r, "reading");
+        List<String> issues = new ArrayList<>();
+        String qualityState = normalizeQuality(r.quality());
+
+        if (r.value() == null) {
+            issues.add("missing_value");
+            qualityState = mergeQuality(qualityState, "missing");
+        } else if (!Double.isFinite(r.value())) {
+            issues.add("invalid_format");
+            qualityState = mergeQuality(qualityState, "invalid");
+        }
+
+        if (!unitRegistry.matches(r.item(), r.unit())) {
+            issues.add("unit_mismatch");
+            qualityState = mergeQuality(qualityState, "suspect");
+        }
+
+        if (r.value() != null && Double.isFinite(r.value())
+                && range.isInvalid(r)) {
+            issues.add("invalid_range");
+            qualityState = mergeQuality(qualityState, "invalid");
+        }
+
+        Instant now = clock.instant();
+        boolean timeError = r.occurredAt() == null
+                || r.occurredAt().isAfter(now)
+                || (previous != null && previous.occurredAt() != null
+                    && r.occurredAt().isBefore(previous.occurredAt()));
+        if (timeError) {
+            issues.add("occurredAt_order");
+            qualityState = mergeQuality(qualityState, "suspect");
+        }
+
+        if (r.eventId() == null || !seenEventIds.add(r.eventId())) {
+            issues.add("duplicate_eventId");
+            qualityState = mergeQuality(qualityState, "suspect");
+        }
+
+        // 对外质量码仍保持valid/suspect/missing三值口径；
+        // invalid作为内部校验结果，最终进入未评估分支。
+        String outputQuality = "invalid".equals(qualityState)
+                ? "suspect" : qualityState;
+        boolean qualityFlagAdjusted =
+                !Objects.equals(outputQuality, r.quality());
+        Reading output = r.withQuality(outputQuality);
+        return new QualityResult(output, List.copyOf(issues),
+                qualityFlagAdjusted);
     }
-    return new QualityResult(output, errorCount,
-        corrected, issues);
+
+    public Classification classify(double score, String quality) {
+        if (!"valid".equals(quality)) {
+            return new Classification(false, WarningLevel.NONE,
+                    "未评估：质量码=" + quality);
+        }
+        if (!Double.isFinite(score)) {
+            return new Classification(false, WarningLevel.NONE,
+                    "未评估：评分不是有限值");
+        }
+        if (score >= 0.85) {
+            return new Classification(true, WarningLevel.RED, "达到红色阈值");
+        }
+        if (score >= 0.70) {
+            return new Classification(true, WarningLevel.ORANGE, "达到橙色阈值");
+        }
+        if (score >= 0.50) {
+            return new Classification(true, WarningLevel.YELLOW, "达到黄色阈值");
+        }
+        return new Classification(true, WarningLevel.NONE, "无预警");
+    }
+
+    private static String normalizeQuality(String quality) {
+        if (quality == null || quality.isBlank()) return "missing";
+        return switch (quality) {
+            case "valid", "suspect", "missing" -> quality;
+            default -> "suspect";
+        };
+    }
+
+    private static String mergeQuality(String current, String candidate) {
+        return priority(candidate) > priority(current) ? candidate : current;
+    }
+
+    private static int priority(String quality) {
+        return switch (quality) {
+            case "missing" -> 3;
+            case "invalid" -> 2;
+            case "suspect" -> 1;
+            default -> 0;
+        };
+    }
 }
 \end{lstlisting}
 
-\texttt{corrected}表示输出记录的质量标记发生了受控修订，不表示篡改原始值。原始记录与质量结果分别存储，通过事件标识关联。
+质量状态合并遵循\texttt{missing > invalid > suspect > valid}的优先级：同一条记录同时缺测、单位错误、范围无效或事件重复时，\texttt{issues}保留全部原因，最终质量状态取最高优先级。这里的\texttt{invalid}是内部校验结论，对外仍映射为三值质量码中的\texttt{suspect}，从而既保留“明显无效”的语义，又与第7章的\texttt{valid/suspect/missing}口径一致。原始值从不被覆盖，\texttt{qualityFlagAdjusted}只表示质量标记发生了受控调整，原始记录与质量结果通过事件标识关联。
 
 \subsection{存储、缓存与一致性}
 
@@ -256,7 +374,7 @@ Kafka事件至少包含\texttt{eventId}、\texttt{assetId}、\texttt{occurredAt}
 
 \subsection{蓝黄橙红四级预警}
 
-本章统一使用蓝、黄、橙、红四级，不再混用五级颜色、0--3数字和\texttt{none}字符串。具体阈值必须由项目依据工程规程、监测设计和批准的模型确定；教材只规定一致的数据结构。
+本章使用蓝、黄、橙、红四级预警，并用\texttt{WarningLevel.NONE}表示当前规则下的无预警状态。具体阈值由项目依据工程规程、监测设计和批准的模型确定；教材只规定一致的数据结构。质量不合格的记录进入“未评估”状态，不能借用\texttt{NONE}把“未评估”伪装成“无预警”。
 
 \begin{table}[htbp]
 \centering
@@ -266,6 +384,7 @@ Kafka事件至少包含\texttt{eventId}、\texttt{assetId}、\texttt{occurredAt}
 \toprule
 等级 & 含义 & 最小处置 & 系统表达 \\
 \midrule
+无预警 & 当前规则下未触发预警 & 保持监测，保留质量与规则版本 & \texttt{NONE}+正常状态 \slash 文字 \\
 蓝色 & 指标出现需关注变化 & 值班员确认，检查数据质量 & 蓝色+信息图标+文字 \\
 黄色 & 多指标或趋势提示异常 & 专业复核，创建工单 & 黄色+三角形+时限 \\
 橙色 & 风险增大，需要会商 & 启动会商，评估预案 & 橙色+高亮+责任人 \\
@@ -283,19 +402,64 @@ w_i\ge 0,\quad \sum_{i=1}^{n}w_i=1,
 
 其中$f_i$为归一化指标，$w_i$为经批准的权重。评分只提供风险证据，不能脱离工况、数据质量和专业判断自动升级为控制命令。
 
-\begin{lstlisting}[language=Java]
-public enum WarningLevel { BLUE, YELLOW, ORANGE, RED }
+示例阈值仅用于单元测试。生产阈值应版本化，并记录适用工程、工况、审批人和生效时间。分类结果中的\texttt{evaluable=false}表示“未评估”，即质量不满足风险判定条件；\texttt{evaluable=true}且\texttt{level=NONE}才表示“无预警”。这两个业务态不能折叠进颜色维度，界面应分别显示质量原因和预警状态。
 
-public WarningLevel classify(double score, String quality) {
-    if (!"valid".equals(quality)) return WarningLevel.BLUE;
-    if (score >= 0.85) return WarningLevel.RED;
-    if (score >= 0.70) return WarningLevel.ORANGE;
-    if (score >= 0.50) return WarningLevel.YELLOW;
-    return WarningLevel.BLUE;
+下面的单元测试把两个业务态固定成可执行的契约：低分且有效的数据是“无预警”，高分但质量不合格的数据是“未评估”，二者不能互换。
+
+\begin{lstlisting}[language=Java]
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.time.Clock;
+import org.junit.jupiter.api.Test;
+
+public final class QualityClassificationTest {
+    private final QualityService service = new QualityService(
+        (item, unit) -> true,
+        reading -> false,
+        Clock.systemUTC());
+
+    @Test
+    void validLowScoreMeansNoWarning() {
+        QualityService.Classification result =
+            service.classify(0.01, "valid");
+
+        assertTrue(result.evaluable());
+        assertEquals(QualityService.WarningLevel.NONE, result.level());
+        assertEquals("无预警", result.reason());
+    }
+
+    @Test
+    void SuspectHighScoreMeansNotEvaluated() {
+        QualityService.Classification result =
+            service.classify(0.90, "suspect");
+
+        assertFalse(result.evaluable());
+        assertEquals(QualityService.WarningLevel.NONE, result.level());
+        assertTrue(result.reason().startsWith("未评估"));
+    }
 }
 \end{lstlisting}
 
-示例阈值仅用于单元测试。生产阈值应版本化，并记录适用工程、工况、审批人和生效时间。
+质量检查完成后，下游处理按表\ref{tab:quality-code-downstream}执行。可疑记录可以保留用于追溯，但不能因为有数值就自动参与风险评分；缺测记录必须断开过程线并进入补测或数据修复流程。
+
+\begin{table}[htbp]
+\centering
+\caption{质量码到下游处理的统一口径}
+\label{tab:quality-code-downstream}
+\begin{tabular}{p{1.7cm}p{3.3cm}p{2.2cm}p{4.0cm}p{2.1cm}}
+\toprule
+质量码 & 含义 & 是否参与打分 & 界面表现 & 是否计入统计 \\
+\midrule
+\texttt{valid} & 格式、单位、范围、时序和重复检查通过 & 是 & 正常颜色映射，可显示\texttt{NONE}或蓝黄橙红预警 & 是 \\
+\texttt{suspect} & 存在单位、范围、时序或重复问题，数值仅供复核 & 否 & 保留原值并加“可疑”标记，提示复核 & 否，单列质量统计 \\
+\texttt{missing} & 测点缺测或记录没有可用值 & 否 & 过程线断点、灰色缺测标记，提示补测 & 否，计入缺测率 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+质量接口的响应还应携带检查时刻、规则版本和问题列表，不能只返回一个颜色或一个布尔值。前端收到\texttt{missing}时保留时间轴位置但断开连线，收到\texttt{suspect}时允许查看原始值和复核记录，收到\texttt{valid}后才把数值送入评分组件。若\texttt{qualityFlagAdjusted=true}，页面要同时显示原始质量码、调整后的质量码和调整原因；这样运维人员可以区分传感器上送的问题与平台校验产生的问题，审计日志也能复现同一条记录为何没有进入风险判定。
 
 \subsection{从预警到工单与复盘}
 
@@ -1107,7 +1271,7 @@ AI工具调用失败 & 明确失败并回到手工流程 & 错误信息与人工
 
 \item[\textbf{实践题}]
 \item 在两课时内实现Vue页面对28个测点的筛选、曲线和三维定位联动。
-\item 实现一条Spring Boot质量检查接口，验证缺测、单位错误、可疑值和修订标记。
+\item 实现一条Spring Boot质量检查接口，验证格式、单位、范围、时序和重复五项，并提交缺测、可疑值与质量标记调整记录。
 \item 为自定义降雨场景编写输入契约、模型卡和$T+0$至$T+24\,h$结果元数据，不要求实现水动力算法。
 \item 用容器编排或等价环境部署前端、Spring Boot、PostgreSQL和Redis，并提交健康检查与配置说明。
 \item 设计一次模型服务超时和一次三维场景失败的降级演练，证明二维地图、图表和工单仍可使用。
