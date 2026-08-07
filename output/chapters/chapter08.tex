@@ -1180,6 +1180,731 @@ public final class QualityService {
 
 示例中的\texttt{seenEventIds}只用内存集合演示幂等语义，生产环境应改用带过期时间的去重存储，例如 Redis 的 SETNX 加 TTL，或数据库唯一约束；去重窗口应覆盖消息系统可能出现的最大重投周期，窗口结束后才允许同一业务标识再次进入处理流程。
 
+\subsection{监测主线后端实现}
+
+A8-1 的字段字典和 DDL 是后端实现的唯一来源。实体类只负责把持久化字段映射成有类型的对象，业务
+规则放在服务层，Controller 负责 HTTP 契约，Kafka 消费者负责把消息接入同一条事务链。四层职责不能
+互换：Controller 不直接拼接 SQL，实体类不调用消息客户端，消费者不绕开质量服务写入预警。这样做的
+好处是可以分别测试字段映射、事务边界、权限判定和消息重投。
+
+实体映射首先固定表名和列名，再处理空间类型、JSONB 和复合主键。\texttt{asset}的空间列使用 JTS
+\texttt{Point}承载 PointZ，坐标系约束仍由数据库保证；应用在写入前检查 SRID，读取时把坐标转换为
+前端约定的经纬度和高程。代码清单\ref{lst:ch08-entity-asset}展示与 A8-1 完全对应的资产实体，
+构造器只接受必填字段，更新时间由持久化回调维护。
+
+\label{lst:ch08-entity-asset}
+\begin{lstlisting}[language=Java,caption={AssetEntity 空间对象实体}]
+package cn.example.water.monitoring.asset;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Table;
+import org.locationtech.jts.geom.Point;
+
+import java.time.Instant;
+import java.util.Objects;
+
+@Entity
+@Table(name = "asset")
+public class AssetEntity {
+    @Id
+    @Column(name = "asset_id", nullable = false, length = 64)
+    private String assetId;
+
+    @Column(name = "asset_type", nullable = false, length = 32)
+    private String assetType;
+    @Column(name = "display_name", nullable = false, length = 128)
+    private String displayName;
+    @Column(name = "unit", length = 32)
+    private String unit;
+    @Column(name = "geometry", nullable = false,
+            columnDefinition = "geometry(PointZ,4490)")
+    private Point geometry;
+    @Column(name = "elevation_m")
+    private Double elevationM;
+    @Column(name = "active", nullable = false)
+    private boolean active = true;
+    @Column(name = "metadata", nullable = false, columnDefinition = "jsonb")
+    private String metadata = "{}";
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private Instant createdAt;
+    @Column(name = "updated_at", nullable = false)
+    private Instant updatedAt;
+
+    protected AssetEntity() { }
+
+    public AssetEntity(String assetId, String assetType,
+                       String displayName, Point geometry) {
+        this.assetId = Objects.requireNonNull(assetId);
+        this.assetType = Objects.requireNonNull(assetType);
+        this.displayName = Objects.requireNonNull(displayName);
+        this.geometry = Objects.requireNonNull(geometry);
+        this.createdAt = Instant.now();
+        this.updatedAt = this.createdAt;
+    }
+
+    @PreUpdate
+    void touch() { updatedAt = Instant.now(); }
+
+    public String getAssetId() { return assetId; }
+    public String getAssetType() { return assetType; }
+    public String getDisplayName() { return displayName; }
+    public Point getGeometry() { return geometry; }
+    public boolean isActive() { return active; }
+    public void deactivate() { active = false; }
+}
+\end{lstlisting}
+
+观测实体的主键由测点、发生时间和版本组成，正好对应 A8-1 的时序表约束。代码清单\ref{lst:ch08-entity-reading}
+把复合主键拆成\texttt{ReadingId}，并用\texttt{@EmbeddedId}保存；\texttt{eventId}仍然单独设置唯一
+约束，供 Kafka 幂等消费使用。实体不提供覆盖原始值的 setter，修订通过新版本构造，保证追加式审计。
+
+\label{lst:ch08-entity-reading}
+\begin{lstlisting}[language=Java,caption={ReadingEntity 与复合主键}]
+package cn.example.water.monitoring.reading;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+
+import java.io.Serializable;
+import java.time.Instant;
+import java.util.Objects;
+
+@Embeddable
+public class ReadingId implements Serializable {
+    @Column(name = "asset_id", nullable = false, length = 64)
+    private String assetId;
+    @Column(name = "occurred_at", nullable = false)
+    private Instant occurredAt;
+    @Column(name = "version", nullable = false)
+    private int version;
+
+    protected ReadingId() { }
+    public ReadingId(String assetId, Instant occurredAt, int version) {
+        this.assetId = Objects.requireNonNull(assetId);
+        this.occurredAt = Objects.requireNonNull(occurredAt);
+        this.version = version;
+    }
+    public String getAssetId() { return assetId; }
+    public Instant getOccurredAt() { return occurredAt; }
+    public int getVersion() { return version; }
+    @Override public boolean equals(Object o) {
+        if (!(o instanceof ReadingId other)) return false;
+        return version == other.version
+            && assetId.equals(other.assetId)
+            && occurredAt.equals(other.occurredAt);
+    }
+    @Override public int hashCode() {
+        return Objects.hash(assetId, occurredAt, version);
+    }
+}
+
+@Entity
+@Table(name = "reading")
+public class ReadingEntity {
+    @EmbeddedId
+    private ReadingId id;
+    @Column(name = "reading_id", insertable = false, updatable = false)
+    private Long readingId;
+    @Column(name = "event_id", nullable = false, unique = true)
+    private String eventId;
+    @Column(name = "value")
+    private Double value;
+    @Column(name = "unit", nullable = false)
+    private String unit;
+    @Column(name = "quality", nullable = false)
+    private String quality;
+    @Column(name = "source", nullable = false)
+    private String source;
+    @Column(name = "revision_reason")
+    private String revisionReason;
+    @Column(name = "received_at", nullable = false)
+    private Instant receivedAt;
+
+    protected ReadingEntity() { }
+    public ReadingEntity(ReadingId id, String eventId, Double value,
+                         String unit, String quality, String source) {
+        this.id = Objects.requireNonNull(id);
+        this.eventId = Objects.requireNonNull(eventId);
+        this.value = value;
+        this.unit = Objects.requireNonNull(unit);
+        this.quality = Objects.requireNonNull(quality);
+        this.source = Objects.requireNonNull(source);
+        this.receivedAt = Instant.now();
+    }
+    public ReadingId getId() { return id; }
+    public String getEventId() { return eventId; }
+    public Double getValue() { return value; }
+    public String getQuality() { return quality; }
+}
+\end{lstlisting}
+
+预警、工单和模型运行实体共享“状态由数据库约束、业务转换由服务层执行”的边界。JSONB 字段在
+Hibernate 6 中可用\texttt{@JdbcTypeCode(SqlTypes.JSON)}映射为字符串或专用 DTO；教材示例先保留原始
+JSON 字符串，以突出字段契约和审计快照。代码清单\ref{lst:ch08-entity-workflow}把三类过程对象放在
+同一份可读代码中，实际工程按类名拆分为三个 Java 文件。
+
+\label{lst:ch08-entity-workflow}
+\begin{lstlisting}[language=Java,caption={Warning、WorkOrder 与 ModelRun 实体}]
+package cn.example.water.monitoring.workflow;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
+import java.time.Instant;
+import java.util.UUID;
+
+@Entity
+@Table(name = "warning")
+public class WarningEntity {
+    @Id @Column(name = "warning_id")
+    private Long warningId;
+    @Column(name = "asset_id", nullable = false)
+    private String assetId;
+    @Column(name = "source_event_id", nullable = false)
+    private String sourceEventId;
+    @Column(nullable = false) private String level;
+    @Column(nullable = false) private boolean evaluable;
+    private Double score;
+    @Column(nullable = false) private String reason;
+    @Column(name = "rule_version", nullable = false)
+    private String ruleVersion;
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(nullable = false, columnDefinition = "jsonb")
+    private String evidence;
+    @Column(nullable = false) private String status = "open";
+    @Column(name = "created_at", nullable = false)
+    private Instant createdAt;
+    protected WarningEntity() { }
+    public WarningEntity(String assetId, String eventId, String level,
+                         boolean evaluable, String reason,
+                         String ruleVersion, String evidence) {
+        this.assetId = assetId; this.sourceEventId = eventId;
+        this.level = level; this.evaluable = evaluable;
+        this.reason = reason; this.ruleVersion = ruleVersion;
+        this.evidence = evidence; this.createdAt = Instant.now();
+    }
+    public Long getWarningId() { return warningId; }
+    public String getAssetId() { return assetId; }
+    public String getLevel() { return level; }
+    public boolean isEvaluable() { return evaluable; }
+    public String getStatus() { return status; }
+    public void acknowledge() {
+        if (!"open".equals(status)) throw new IllegalStateException("状态已变化");
+        status = "acknowledged";
+    }
+}
+
+@Entity
+@Table(name = "work_order")
+public class WorkOrderEntity {
+    @Id @Column(name = "work_order_id") private Long workOrderId;
+    @Column(name = "warning_id", nullable = false) private Long warningId;
+    @Column(name = "owner_role", nullable = false) private String ownerRole;
+    @Column(name = "due_at", nullable = false) private Instant dueAt;
+    @Column(nullable = false) private String action;
+    private String result;
+    @Column(nullable = false) private String status = "pending";
+    @Column(name = "created_at", nullable = false) private Instant createdAt;
+    @Column(name = "completed_at") private Instant completedAt;
+    protected WorkOrderEntity() { }
+    public WorkOrderEntity(Long warningId, String ownerRole,
+                           Instant dueAt, String action) {
+        this.warningId = warningId; this.ownerRole = ownerRole;
+        this.dueAt = dueAt; this.action = action;
+        this.createdAt = Instant.now();
+    }
+    public Long getWorkOrderId() { return workOrderId; }
+    public String getStatus() { return status; }
+    public Instant getDueAt() { return dueAt; }
+    public void complete(String result) {
+        if (!"in_progress".equals(status))
+            throw new IllegalStateException("工单状态不允许完成");
+        this.result = result;
+        this.status = "completed";
+        this.completedAt = Instant.now();
+    }
+}
+
+@Entity
+@Table(name = "model_run")
+public class ModelRunEntity {
+    @Id @Column(name = "run_id") private UUID runId;
+    @Column(name = "model_name", nullable = false) private String modelName;
+    @Column(name = "model_version", nullable = false) private String modelVersion;
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "input_snapshot", nullable = false, columnDefinition = "jsonb")
+    private String inputSnapshot;
+    @Column(name = "started_at", nullable = false) private Instant startedAt;
+    @Column(name = "finished_at") private Instant finishedAt;
+    @Column(nullable = false) private String status;
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "jsonb") private String result;
+    @Column(name = "error_message") private String errorMessage;
+    @Column(name = "requested_by", nullable = false) private String requestedBy;
+    protected ModelRunEntity() { }
+    public UUID getRunId() { return runId; }
+    public String getStatus() { return status; }
+}
+\end{lstlisting}
+
+三类实体虽然在一个清单中并列，但生产代码应按文件拆分并使用包级访问控制；\texttt{WarningEntity}
+的\texttt{acknowledge()}只允许从 open 转为 acknowledged，关闭和重新打开由服务层依据角色和审批记录
+执行。实体层不自行发送 Kafka 事件，避免持久化回调在事务尚未提交时把“预警已生成”误发给下游。
+
+Repository 只表达查询意图，不把数据库连接细节泄漏到 Controller。代码清单\ref{lst:ch08-repository}
+使用 Spring Data JPA 的方法查询和原生空间查询：普通列表由方法名生成 SQL，影响区查询明确写出
+\texttt{ST\_Within}和 SRID，避免把经纬度当作平面坐标。观测查询以复合主键的测点和时间范围为条件，
+并保留质量码过滤参数，供服务层决定是否参与打分。
+
+\label{lst:ch08-repository}
+\begin{lstlisting}[language=Java,caption={监测主线 Repository 接口}]
+package cn.example.water.monitoring.persistence;
+
+import cn.example.water.monitoring.asset.AssetEntity;
+import cn.example.water.monitoring.reading.ReadingEntity;
+import cn.example.water.monitoring.reading.ReadingId;
+import cn.example.water.monitoring.workflow.WarningEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import java.time.Instant;
+import java.util.List;
+
+public interface AssetRepository extends JpaRepository<AssetEntity, String> {
+    List<AssetEntity> findByActiveTrueAndAssetTypeOrderByAssetId(String assetType);
+
+    @Query(value = """
+        SELECT * FROM asset
+        WHERE active = true
+          AND geometry && ST_Transform(
+              ST_SetSRID(ST_GeomFromText(:wkt), :inputSrid), 4490)
+          AND ST_Within(geometry, ST_Transform(
+              ST_SetSRID(ST_GeomFromText(:wkt), :inputSrid), 4490))
+        ORDER BY asset_id
+        """, nativeQuery = true)
+    List<AssetEntity> findInArea(@Param("wkt") String wkt,
+                                 @Param("inputSrid") int inputSrid);
+}
+
+public interface ReadingRepository
+        extends JpaRepository<ReadingEntity, ReadingId> {
+    boolean existsByEventId(String eventId);
+
+    @Query("""
+        select r from ReadingEntity r
+        where r.id.assetId = :assetId
+          and r.id.occurredAt >= :fromAt
+          and r.id.occurredAt < :toAt
+          and (:quality is null or r.quality = :quality)
+        order by r.id.occurredAt asc, r.id.version asc
+        """)
+    Page<ReadingEntity> findWindow(@Param("assetId") String assetId,
+                                   @Param("fromAt") Instant fromAt,
+                                   @Param("toAt") Instant toAt,
+                                   @Param("quality") String quality,
+                                   Pageable pageable);
+}
+
+public interface WarningRepository extends JpaRepository<WarningEntity, Long> {
+    @Query("""
+        select w from WarningEntity w
+        where w.status in ('open', 'acknowledged')
+        order by w.createdAt asc
+        """)
+    List<WarningEntity> findOpenQueue(Pageable pageable);
+}
+\end{lstlisting}
+
+服务层负责事务、质量语义和权限边界。代码清单\ref{lst:ch08-service}展示一个可注入的服务：读取曲线
+默认只取 valid，确认预警使用带状态条件的更新，创建工单要求调用者已经通过 Spring Security 6 的
+角色检查。服务返回 DTO 或领域结果，不把 JPA 实体直接暴露给前端，防止懒加载和内部审计字段泄漏。
+
+\label{lst:ch08-service}
+\begin{lstlisting}[language=Java,caption={监测主线事务服务}]
+package cn.example.water.monitoring.service;
+
+import cn.example.water.monitoring.persistence.AssetRepository;
+import cn.example.water.monitoring.persistence.ReadingRepository;
+import cn.example.water.monitoring.persistence.WarningRepository;
+import cn.example.water.monitoring.reading.ReadingEntity;
+import cn.example.water.monitoring.workflow.WarningEntity;
+import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+
+import java.time.Instant;
+import java.util.List;
+import java.util.Set;
+
+@Service
+public class MonitoringService {
+    private final AssetRepository assets;
+    private final ReadingRepository readings;
+    private final WarningRepository warnings;
+
+    public MonitoringService(AssetRepository assets,
+                             ReadingRepository readings,
+                             WarningRepository warnings) {
+        this.assets = assets;
+        this.readings = readings;
+        this.warnings = warnings;
+    }
+
+    @Transactional
+    public Page<ReadingEntity> readings(String assetId, Instant fromAt,
+                                       Instant toAt, String quality,
+                                       Pageable pageable) {
+        if (!fromAt.isBefore(toAt)) {
+            throw new IllegalArgumentException("时间窗必须为正");
+        }
+        String filter = quality == null || quality.isBlank()
+                ? "valid" : quality;
+        if (!Set.of("valid", "suspect", "missing").contains(filter)) {
+            throw new IllegalArgumentException("质量码不在允许集合");
+        }
+        return readings.findWindow(assetId, fromAt, toAt, filter, pageable);
+    }
+
+    @Transactional
+    public WarningEntity acknowledge(long warningId) {
+        WarningEntity warning = warnings.findById(warningId)
+                .orElseThrow(() -> new IllegalArgumentException("预警不存在"));
+        warning.acknowledge();
+        return warning;
+    }
+
+    @Transactional(readOnly = true)
+    public List<WarningEntity> openWarnings(Pageable pageable) {
+        return warnings.findOpenQueue(pageable);
+    }
+}
+\end{lstlisting}
+
+Repository 接口在真实项目中分别保存为独立 Java 文件；清单把它们并列展示，是为了看清查询方法与
+实体的对应关系。服务层把质量码默认设为 valid 只是查询筛选的默认值，
+不会改写数据库；当调用方显式查询 suspect 或 missing 时，界面必须展示相应质量提示。
+
+监测主线接口采用稳定路径和明确的请求响应。表\ref{tab:monitoring-api-contract}把测点、观测、预警
+和工单四类接口列成契约，并注明角色和幂等要求。路径中的\texttt{from}、\texttt{to}和\texttt{agg}
+均为查询参数，不改变第8章参数表中的工程常数；分页、排序和质量过滤通过统一请求对象传递。
+
+\begin{table}[htbp]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\caption{清源水库监测主线接口契约}
+\label{tab:monitoring-api-contract}
+\begin{tabular}{p{2.8cm}p{2.7cm}p{3.5cm}p{2.3cm}p{2.5cm}}
+\toprule
+方法与路径 & 请求参数 & 成功响应 & 角色 & 关键约束 \\
+\midrule
+GET /assets & assetType、after、limit & 测点摘要与经纬高 & 值班员、分析员 & 只返回 active 对象 \\
+\shortstack{\texttt{GET /assets/}\\
+\texttt{\{id\}/readings?}\\
+\texttt{from=\&to=\&agg=}} & 时间窗、质量码、聚合粒度 & 时间桶、值、样本数、质量 & 值班员、分析员 & 时间窗左闭右开 \\
+GET /warnings & level、status、page & 预警证据摘要 & 值班员、分析员 & 未评估单独显示 \\
+POST /warnings/{id}/ack & 请求追踪号、版本 & 最新预警状态 & 值班员 & open 条件更新，重复可重试 \\
+POST /work-orders & warningId、ownerRole、dueAt、action & 工单编号与状态 & 值班员、审批人 & 预警必须存在 \\
+POST /work-orders/{id}/complete & result、版本 & 回执与完成时间 & 值班员 & 只允许 in\_progress \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Controller 将 HTTP 类型转换为服务参数，并统一处理异常。代码清单\ref{lst:ch08-controller}给出
+Spring MVC 的完整入口和 DTO record；\texttt{@PreAuthorize}使用 Spring Security 6 的方法授权，
+不把角色判断散落在字符串比较中。Controller 只返回必要字段，证据快照和原始观测仍由专业接口按权限
+读取。
+
+\label{lst:ch08-controller}
+\begin{lstlisting}[language=Java,caption={监测主线 REST Controller 与 DTO}]
+package cn.example.water.monitoring.web;
+
+import cn.example.water.monitoring.service.MonitoringService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.Instant;
+
+public record ReadingQuery(
+        @NotNull
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+        Instant from,
+        @NotNull
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+        Instant to,
+        String quality) { }
+
+public record AckRequest(@NotBlank String requestId) { }
+
+public record WorkOrderRequest(long warningId, @NotBlank String ownerRole,
+                               Instant dueAt, @NotBlank String action) { }
+
+@RestController
+@RequestMapping("/api")
+public class MonitoringController {
+    private final MonitoringService service;
+    public MonitoringController(MonitoringService service) {
+        this.service = service;
+    }
+
+    @GetMapping("/assets/{assetId}/readings")
+    @PreAuthorize("hasAnyRole('DUTY_OFFICER','ANALYST')")
+    public Page<?> readings(@PathVariable String assetId,
+                            @Valid ReadingQuery query, Pageable pageable) {
+        return service.readings(assetId, query.from(), query.to(),
+                                query.quality(), pageable);
+    }
+
+    @PostMapping("/warnings/{warningId}/ack")
+    @PreAuthorize("hasRole('DUTY_OFFICER')")
+    public ResponseEntity<?> acknowledge(@PathVariable long warningId,
+                                         @Valid @RequestBody AckRequest request) {
+        return ResponseEntity.ok(service.acknowledge(warningId));
+    }
+}
+\end{lstlisting}
+
+Controller 的分页对象和日期格式由 Spring MVC 解析，统一异常处理器应把参数错误、权限错误、状态冲突
+和数据库约束冲突转换为稳定的 HTTP 错误码。确认接口的\texttt{requestId}用于日志和链路追踪；真正
+的幂等保证仍由 warning 的状态条件和客户端重复提交处理共同完成。
+
+工单写入需要同时检查预警存在性、责任角色和截止时间。代码清单\ref{lst:ch08-workorder-chain}把
+Repository、事务服务和 Controller 的创建/完成动作连成一条链；完成动作只允许 in\_progress 状态，
+并把回执写入同一个事务。实际工程可把状态转换抽成领域服务，但不能让 Controller 直接修改 status 字段。
+
+\label{lst:ch08-workorder-chain}
+\begin{lstlisting}[language=Java,caption={工单创建与完成的后端链}]
+package cn.example.water.monitoring.workorder;
+
+import cn.example.water.monitoring.workflow.WorkOrderEntity;
+import jakarta.transaction.Transactional;
+import jakarta.validation.constraints.NotBlank;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.Instant;
+
+public interface WorkOrderRepository
+        extends JpaRepository<WorkOrderEntity, Long> {
+}
+
+public record CreateWorkOrder(long warningId,
+                              @NotBlank String ownerRole,
+                              Instant dueAt,
+                              @NotBlank String action) { }
+
+@Service
+class WorkOrderCommandService {
+    private final WorkOrderRepository orders;
+    private final WarningLookup warnings;
+    WorkOrderCommandService(WorkOrderRepository orders,
+                            WarningLookup warnings) {
+        this.orders = orders; this.warnings = warnings;
+    }
+
+    @Transactional
+    WorkOrderEntity create(CreateWorkOrder command) {
+        if (!warnings.exists(command.warningId()))
+            throw new IllegalArgumentException("预警不存在");
+        if (command.dueAt().isBefore(Instant.now()))
+            throw new IllegalArgumentException("截止时间必须在未来");
+        return orders.save(new WorkOrderEntity(command.warningId(),
+                command.ownerRole(), command.dueAt(), command.action()));
+    }
+
+    @Transactional
+    WorkOrderEntity complete(long orderId, String result) {
+        WorkOrderEntity order = orders.findById(orderId)
+                .orElseThrow(() -> new IllegalArgumentException("工单不存在"));
+        order.complete(result);
+        return order;
+    }
+}
+
+interface WarningLookup {
+    boolean exists(long warningId);
+}
+
+@RestController
+@RequestMapping("/api/work-orders")
+class WorkOrderController {
+    private final WorkOrderCommandService service;
+    WorkOrderController(WorkOrderCommandService service) {
+        this.service = service;
+    }
+
+    @PostMapping
+    @PreAuthorize("hasAnyRole('DUTY_OFFICER','APPROVER')")
+    WorkOrderEntity create(@RequestBody CreateWorkOrder command) {
+        return service.create(command);
+    }
+
+    @PostMapping("/{id}/complete")
+    @PreAuthorize("hasRole('DUTY_OFFICER')")
+    WorkOrderEntity complete(@PathVariable long id,
+                             @RequestParam String result) {
+        return service.complete(id, result);
+    }
+}
+\end{lstlisting}
+
+上面清单中的\texttt{WarningLookup}是对预警服务的最小端口，真实项目由预警 Repository 适配器实现；
+这样工单服务不依赖预警表的全部字段。\texttt{WorkOrderEntity.complete}应检查当前状态并设置完成时间，
+此处与实体清单同样按独立文件组织。接口表中的 POST /work-orders 和 POST /work-orders/{id}/complete
+因此都有可追踪的实现入口，异常和审计日志再由统一 Web 层补充。
+
+Kafka 消费者必须在数据库唯一约束和业务去重之间形成双保险。代码清单\ref{lst:ch08-kafka-consumer}
+使用 Java 17 record 表达事件，监听器只负责反序列化和调用事务服务；事务服务先用\texttt{eventId}
+查询，再依赖数据库唯一键处理并发重投。重复事件被确认但不重复写入，质量服务失败则抛出异常让消息
+按照重试策略重新投递，不能在 catch 中静默吞掉错误。
+
+\label{lst:ch08-kafka-consumer}
+\begin{lstlisting}[language=Java,caption={Kafka 观测事件消费与幂等写入}]
+package cn.example.water.monitoring.ingest;
+
+import cn.example.water.monitoring.persistence.ReadingRepository;
+import cn.example.water.monitoring.reading.ReadingEntity;
+import cn.example.water.monitoring.reading.ReadingId;
+import jakarta.transaction.Transactional;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+
+import java.time.Instant;
+
+public record ReadingEvent(String eventId, String assetId,
+                           Instant occurredAt, int version,
+                           Double value, String unit,
+                           String quality, String source) { }
+
+@Component
+class ReadingKafkaConsumer {
+    private final ReadingIngestionService ingestion;
+    ReadingKafkaConsumer(ReadingIngestionService ingestion) {
+        this.ingestion = ingestion;
+    }
+
+    @KafkaListener(topics = "monitoring.readings",
+                   groupId = "monitoring-quality")
+    public void onMessage(ReadingEvent event) {
+        ingestion.accept(event);
+    }
+}
+
+@Service
+class ReadingIngestionService {
+    private final ReadingRepository readings;
+    ReadingIngestionService(ReadingRepository readings) {
+        this.readings = readings;
+    }
+
+    @Transactional
+    public void accept(ReadingEvent event) {
+        if (readings.existsByEventId(event.eventId())) return;
+        ReadingId id = new ReadingId(event.assetId(),
+                event.occurredAt(), event.version());
+        ReadingEntity reading = new ReadingEntity(
+                id, event.eventId(), event.value(), event.unit(),
+                event.quality(), event.source());
+        try {
+            readings.saveAndFlush(reading);
+        } catch (DataIntegrityViolationException duplicate) {
+            // 并发重投由唯一键裁决，记录后确认消息即可
+        }
+    }
+}
+\end{lstlisting}
+
+监听器的消费组名称、Topic 和事件字段属于接口契约，应与 Kafka 管理配置和第8章事件字段保持一致。
+教材示例使用\texttt{saveAndFlush}让唯一键冲突尽早暴露；生产环境还要配置退避重试、死信 Topic 和
+监控指标。若质量服务需要调用外部系统，先把观测写入数据库，再通过事务发件箱发布事件，避免数据库
+回滚后 Kafka 已经通知下游。
+
+后端实现还需要统一异常、审计和测试。参数错误返回 400，认证失败返回 401，角色不足返回 403，状态
+冲突返回 409，数据库暂时不可用则由网关和消息重试策略处理。每次写操作携带\texttt{traceId}和
+\texttt{requestId}，审计记录对象 ID、旧状态、新状态、操作者和原因。测试至少覆盖：复合主键版本追加、
+重复事件、缺测质量码、空间 SRID 错误、open 预警重复确认、工单过期和 Kafka 重投。这样，代码清单中的
+每个注解都能对应一个可观察的运行行为，而不是为了展示框架而堆叠注解。
+
+实体、Repository、服务和 Controller 之间还存在一条容易被忽视的生命周期关系。HTTP 请求开始时，
+Controller 创建参数对象并完成格式校验；服务层打开事务，读取实体并执行状态转换；Repository 在事务
+提交前把变更写入数据库；事务成功后，发件箱发布后续事件。任何一步失败，用户都应得到明确的错误码，
+而不是一个看似成功但下游永远收不到的 200 响应。把这一生命周期画出来，有助于学生理解为什么不能
+在 Controller 中直接调用\texttt{repository.save()}后立即发送 Kafka 消息。
+
+DTO 与实体分离还解决了版本兼容问题。实体字段服从数据库契约，DTO 字段服从接口契约，二者之间由
+Mapper 明确转换。新增可选字段时，旧客户端仍能解析原有响应；当数据库增加审计字段时，前端不会因为
+序列化默认行为看到内部信息。对于空间对象，DTO 可以返回\texttt{longitude}、\texttt{latitude}、
+\texttt{elevation}和坐标系标识，而实体继续保留 JTS PointZ。对于证据快照，DTO 返回摘要和哈希，
+专业分析员按权限再请求完整 JSON，避免把大对象塞进列表接口。
+
+参数校验要分为语法、业务和数据库三层。语法层检查 UUID、时间格式、字符串长度和必填字段；业务层
+检查时间窗左闭右开、质量码集合、截止时间和状态转移；数据库层通过主键、唯一键、外键和检查约束兜底。
+三层校验不能互相替代：只做数据库约束会让错误在事务末尾才暴露，只有 Controller 校验又无法防止并发
+写入绕过应用层。错误响应统一包含错误码、消息、字段路径和追踪号，值班员能据此修正输入，运维员能据
+此定位服务日志。
+
+权限判定需要细到操作而不是只到页面。查看测点摘要可以授予值班员和专业分析员，读取原始 suspect 值
+应额外要求数据质量权限，确认预警只授予值班员，关闭预警和修改规则版本则需要审批人。Controller 上的
+\texttt{@PreAuthorize}是第一道门，服务层还要检查对象所属工程和当前状态，数据库角色负责限制表级
+操作。这样即使有人绕过前端直接调用接口，也不能把别的工程的工单改为已完成。权限变化和委派都写入
+审计事件，查询时按事件时间判断当时的有效角色。
+
+事务边界要与水利业务动作对应。写入观测和质量结果属于一个本地事务，生成预警和创建工单可以由不同
+服务异步完成；预警确认和工单派发可以在同一服务事务中写状态与发件箱，但不应把外部短信、值班电话
+或三维场景刷新强行放入数据库事务。外部动作失败时，发件箱事件可以重试，预警状态仍然可查询。通过
+把本地事实和外部副作用分开，系统既能保证数据库一致，又能在消息系统短暂不可用时继续接收观测。
+
+消息幂等不仅是“检查 eventId”。消费者需要判断事件版本、发生时间和来源，拒绝同一事件的版本倒退；
+不同来源但同一测点同一时刻的事件需要由质量服务标记冲突，而不是简单覆盖。数据库唯一键解决并发重
+投，业务规则解决语义冲突，死信队列保存无法自动处理的消息。重试策略记录次数、最后错误和下一次重试
+时间，运维看板显示积压和最老消息年龄。这样，28 个测点的补传不会因为一次网络抖动而形成无限重试。
+
+查询接口的性能也要与数据语义同时设计。实时曲线默认限制时间窗和返回点数，聚合参数决定读取连续
+聚合视图还是原始表；当请求窗口过大时，服务返回提示并要求分段查询。预警列表使用状态和等级索引，
+禁止把完整 evidence JSON 一次性返回给所有行；工单列表只读取未完成任务和必要字段。分页游标应以
+创建时间和主键组成稳定排序，避免新增预警导致第二页重复或跳过。性能优化不能删除质量码、版本和事件
+标识，因为这些字段是审计和解释所必需的。
+
+测试数据必须沿用 A8-1 的编码和质量口径。单元测试构造 valid、suspect、missing 三种观测，集成测试
+写入重复 eventId、未来时间和无效几何，端到端测试发送一条事件并验证观测、预警、工单和审计记录。测试
+夹具中的坐标系、时间精度和状态值写进数据字典，不能临时使用 MySQL 或 InfluxDB 的替代类型。若使用
+Testcontainers，容器镜像要包含 PostGIS 和 TimescaleDB 扩展，并在启动时执行同一套迁移脚本。
+
+监测主线的可观测性包含四类指标：请求指标、数据库指标、消息指标和业务指标。请求指标记录接口耗时、
+状态码和响应大小；数据库指标记录连接池等待、慢查询、超表块和索引膨胀；消息指标记录消费延迟、重试
+次数和死信数量；业务指标记录合格观测比例、未评估预警、平均确认时延和逾期工单。四类指标通过
+\texttt{traceId}或事件 ID 关联，值班员看业务看板，运维员看基础设施看板，专业分析员看质量和模型看板。
+
+版本发布时，先运行数据库迁移和实体映射测试，再启动只读实例验证查询计划，最后逐步放量消费者和
+Controller。回滚时保留已经产生的预警和工单，不删除审计记录；若新版本增加字段，旧版本继续读取兼容
+列，直到观察期结束。发布说明列出 API 版本、消息 schema、实体字段、数据库迁移号和回滚条件，确保
+前端、后端、数据和运维能够同步升级。这样的发布流程把“代码能编译”提升为“业务链可恢复”。
+
 \subsection{存储、缓存与一致性}
 
 业务、权限和工单数据存入PostgreSQL；PostGIS保存空间点、工程范围和影响区；TimescaleDB扩展用于时序分区与聚合；Redis只保存可重建缓存，不作为唯一数据源。业务、空间与时序数据共用一套事务与备份体系，既便于按对象追溯证据，也降低多引擎部署带来的一致性与运维成本。
