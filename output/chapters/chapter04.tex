@@ -1233,6 +1233,278 @@ const status = computed(() => props.level >= 5.0 ? 'warning' : 'normal')
 
 定时器、WebSocket连接和第三方图表实例应在\texttt{onMounted}中创建，并在\texttt{onUnmounted}中释放，避免页面切换后的内存泄漏。
 
+\subsection{Vue 3.4 组合式 API 与响应式状态}
+
+Vue 3.4 的组合式 API 把状态、派生值、监听器和生命周期放进同一段\texttt{script setup}中。\texttt{ref}适合数字、字符串和布尔值等基本值，读写时在 JavaScript 中使用\texttt{.value}；模板会自动解包，不需要写\texttt{count.value}。\texttt{reactive}适合对象和数组，直接读写属性，不要把整个响应式对象重新赋值。两者混用时要保持边界清楚：表单字段可以用\texttt{reactive}，加载状态和选中的测站编号可以用\texttt{ref}。
+
+\texttt{computed}用于从已有状态推导出只读结果，并按依赖缓存；过滤后的测站列表、是否存在预警和格式化后的更新时间都适合用它表达。\texttt{watch}适合观察一个明确的源并执行副作用，例如筛选条件变化后重新请求；\texttt{watchEffect}会自动收集同步执行阶段访问的依赖，适合小范围联动，但依赖不透明时要注意误触发。监听器若创建了定时器、订阅或请求，必须返回清理函数或在组件卸载时终止。
+
+清单\ref{lst:ch04-a46-reactivity}展示五种 API 的职责和\texttt{.value}边界。代码中的\texttt{watch}只在站点编号变化时触发请求，\texttt{watchEffect}只记录当前筛选状态；真实项目中应给请求加取消信号，防止快速输入时旧响应覆盖新状态。
+
+\label{lst:ch04-a46-reactivity}
+\begin{lstlisting}[language=Vue,caption={Vue 3 响应式 API 与监听器}]
+<script setup>
+import { computed, reactive, ref, watch, watchEffect } from 'vue';
+
+const selectedId = ref('ST-01');
+const form = reactive({ keyword: '', onlyWarning: false });
+const stations = ref([
+  { id: 'ST-01', name: '上游测站', warning: false },
+  { id: 'ST-02', name: '下游测站', warning: true }
+]);
+const visibleStations = computed(() => stations.value.filter(station => {
+  const match = station.name.includes(form.keyword.trim());
+  return match && (!form.onlyWarning || station.warning);
+}));
+
+watch(selectedId, id => console.log('重新加载测站', id));
+watchEffect(() => console.log('筛选数量', visibleStations.value.length));
+</script>
+\end{lstlisting}
+
+\subsection{模板指令与组件通信}
+
+模板指令把状态映射成可读的 HTML。\texttt{v-if}按条件创建或销毁节点，适合权限区域和少量切换内容；\texttt{v-show}只切换\texttt{display}，适合频繁显示/隐藏且初始化代价较高的面板。\texttt{v-for}渲染集合时必须提供稳定的\texttt{:key}，应使用测站 ID 而不是数组索引；列表排序或插入时，稳定 key 能让 Vue 复用正确的节点。\texttt{v-model}把输入控件与状态双向同步，\texttt{v-bind}（简写为冒号）绑定属性，\texttt{v-on}（简写为\texttt{@}）绑定事件。
+
+清单\ref{lst:ch04-a46-directives}用同一页面展示这些指令。预警说明使用\texttt{v-if}避免给普通测站创建无用节点，帮助文字使用\texttt{v-show}保持布局稳定；输入框用\texttt{v-model.trim}去除首尾空白，按钮通过\texttt{@click}修改状态。模板只负责声明关系，复杂筛选仍放在\texttt{computed}中。
+
+\label{lst:ch04-a46-directives}
+\begin{lstlisting}[language=Vue,caption={Vue 模板指令与稳定 key}]
+<template>
+  <label>
+    关键字
+    <input v-model.trim="form.keyword" type="search">
+  </label>
+  <label>
+    <input v-model="form.onlyWarning" type="checkbox">
+    只看预警
+  </label>
+  <ul>
+    <li v-for="station in visibleStations" :key="station.id">
+      <button type="button" v-bind:aria-label="`打开${station.name}`"
+              v-on:click="selectedId = station.id">
+        {{ station.name }}
+      </button>
+      <span v-if="station.warning" class="warning">需要关注</span>
+      <span v-show="!station.warning" class="normal">正常</span>
+    </li>
+  </ul>
+</template>
+\end{lstlisting}
+
+父组件通过 props 向下传递只读数据，通过 emit 向上报告用户动作；子组件不应直接修改 prop，否则数据流会变成隐式双向绑定。slot 允许父组件注入一段带上下文的呈现内容，适合让“测站卡片”复用标题、操作区和空状态。provide/inject 适合跨越多层组件传递只读配置或服务，例如单位格式化器、主题令牌和请求客户端；共享的可变业务状态仍应交给 Pinia，不能把所有状态藏在依赖注入中。
+
+清单\ref{lst:ch04-a46-communication}把四种通信方式放在一个父子组件示例中。\texttt{StationCard}只接收\texttt{station}，点击按钮时发出\texttt{select}事件；父组件通过 slot 提供操作区，并用 provide/inject 传递单位文本。provide 的值在父组件中冻结，防止子组件意外篡改全局配置。
+
+\label{lst:ch04-a46-communication}
+\begin{lstlisting}[language=Vue,caption={Vue props、emit、slot 与 provide/inject}]
+<!-- StationCard.vue -->
+<script setup>
+import { inject } from 'vue';
+const props = defineProps({ station: { type: Object, required: true } });
+const emit = defineEmits(['select']);
+const levelUnit = inject('levelUnit', 'm');
+</script>
+<template>
+  <article>
+    <h3>{{ props.station.name }}</h3>
+    <p>水位：{{ props.station.level }} {{ levelUnit }}</p>
+    <slot name="actions">
+      <button type="button" @click="emit('select', props.station.id)">查看</button>
+    </slot>
+  </article>
+</template>
+
+<!-- StationPanel.vue 的 script setup 片段 -->
+<script setup>
+import { provide, readonly, ref } from 'vue';
+const levelUnit = ref('m');
+provide('levelUnit', readonly(levelUnit));
+</script>
+\end{lstlisting}
+
+\subsection{生命周期与资源清理}
+
+组件生命周期描述实例从建立到销毁的过程。\texttt{onMounted}适合访问已经挂载的 DOM、启动定时刷新、建立 WebSocket 或初始化图表；\texttt{onUpdated}只用于确有必要的 DOM 同步，不应在其中无条件修改响应式状态；\texttt{onUnmounted}负责清除定时器、移除监听器、取消请求和销毁第三方实例。开发者可以把资源创建与清理写在同一段组合式函数中，让调用方不容易漏掉释放逻辑。
+
+图\ref{fig:ch04-a46-lifecycle-cleanup}把“建立资源—使用资源—释放资源”与组件钩子对应起来。离开测站页面时，即使网络回调稍后到达，也不应再修改已卸载的组件；取消信号和布尔标记可以共同防止竞态。对于定时器，清理函数必须保存创建时返回的句柄，不能重新调用一个相同参数的\texttt{setInterval}来“猜测”旧句柄。
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[>=Stealth,thick,node distance=0.85cm and 1.0cm]
+  \tikzset{lifeitem/.style={draw=Primary,rounded corners=2pt,minimum width=3.1cm,minimum height=.7cm,align=center,fill=PrimaryLight,text=PrimaryDark,font=\small}}
+  \node[lifeitem] (mount) {onMounted\\创建定时器/订阅};
+  \node[lifeitem,right=of mount] (use) {组件运行\\更新响应式状态};
+  \node[lifeitem,right=of use] (unmount) {onUnmounted\\清理资源};
+  \draw[->,draw=Primary] (mount)--(use);
+  \draw[->,draw=Primary] (use)--(unmount);
+  \draw[->,draw=Accent] (unmount.south) to[bend right=35] node[below,font=\scriptsize]{取消回调与请求} (mount.south);
+\end{tikzpicture}
+\caption{Vue 3 组件资源的建立、使用与清理}
+\label{fig:ch04-a46-lifecycle-cleanup}
+\end{figure}
+
+清单\ref{lst:ch04-a46-lifecycle}演示一个完整的定时刷新组件。\texttt{onMounted}保存定时器句柄，\texttt{onUnmounted}清除它；请求函数收到\texttt{AbortSignal}后，组件离开页面可以立即取消未完成请求。这个模式也适用于图表实例、地图图层和事件总线订阅。
+
+\label{lst:ch04-a46-lifecycle}
+\begin{lstlisting}[language=Vue,caption={onMounted 与 onUnmounted 的清理模式}]
+<script setup>
+import { onMounted, onUnmounted, ref } from 'vue';
+
+const latest = ref(null);
+const controller = new AbortController();
+let timerId;
+
+async function refresh() {
+  const response = await fetch('/api/stations/ST-01/latest', {
+    signal: controller.signal
+  });
+  if (response.ok) latest.value = await response.json();
+}
+
+onMounted(() => {
+  refresh();
+  timerId = window.setInterval(refresh, 30_000);
+});
+onUnmounted(() => {
+  window.clearInterval(timerId);
+  controller.abort();
+});
+</script>
+\end{lstlisting}
+
+\subsection{测站列表筛选页：从 SFC 到组件拆分}
+
+一个可交付的 Vue 页面至少包含数据来源、筛选状态、加载反馈和可操作的列表项。父组件负责获取测站、保存筛选条件并计算可见集合，子组件负责单行展示和发出选择事件；这样，筛选逻辑可以独立测试，行组件也能在地图侧栏复用。完整页面需要同时处理加载中、空结果和正常结果三种状态，不能只展示一张静态数组。
+
+清单\ref{lst:ch04-a46-station-row}是可复用的行组件，清单\ref{lst:ch04-a46-station-filter}是使用它的完整筛选页。父组件使用\texttt{ref}保存原始数组，\texttt{reactive}保存表单，\texttt{computed}生成过滤结果，\texttt{v-for(:key)}渲染行，\texttt{v-model}接收输入，\texttt{v-if}表达加载和空状态，并在\texttt{onMounted}中加载数据。读者可以把 API 函数替换为 A4-5 的\texttt{request.js}，页面结构不需要改变。
+
+\label{lst:ch04-a46-station-row}
+\begin{lstlisting}[language=Vue,caption={测站列表行组件 StationRow.vue}]
+<script setup>
+defineProps({
+  station: { type: Object, required: true },
+  selected: { type: Boolean, default: false }
+});
+const emit = defineEmits(['select']);
+</script>
+
+<template>
+  <li :class="{ selected }">
+    <button type="button" @click="emit('select', station.id)">
+      <strong>{{ station.name }}</strong>
+      <span>{{ station.level ?? '—' }} m</span>
+      <span v-if="station.warning" class="warning">预警</span>
+    </button>
+  </li>
+</template>
+\end{lstlisting}
+
+\label{lst:ch04-a46-station-filter}
+\begin{lstlisting}[language=Vue,caption={测站列表筛选页 StationFilterPage.vue}]
+<script setup>
+import { computed, onMounted, reactive, ref } from 'vue';
+import StationRow from './StationRow.vue';
+import { request } from '../api/request.js';
+
+const stations = ref([]);
+const loading = ref(false);
+const selectedId = ref(null);
+const filters = reactive({ keyword: '', onlyWarning: false });
+const visibleStations = computed(() => stations.value.filter(station => {
+  const match = station.name.includes(filters.keyword);
+  return match && (!filters.onlyWarning || station.warning);
+}));
+
+async function loadStations() {
+  loading.value = true;
+  try {
+    stations.value = await request('/stations');
+  } finally {
+    loading.value = false;
+  }
+}
+function selectStation(id) { selectedId.value = id; }
+onMounted(loadStations);
+</script>
+
+<template>
+  <section aria-labelledby="station-title">
+    <h2 id="station-title">测站列表</h2>
+    <label>筛选
+      <input v-model.trim="filters.keyword" type="search">
+    </label>
+    <label><input v-model="filters.onlyWarning" type="checkbox">只看预警</label>
+    <p v-if="loading" role="status">正在加载测站……</p>
+    <p v-else-if="visibleStations.length === 0">没有符合条件的测站</p>
+    <ul v-else>
+      <StationRow v-for="station in visibleStations" :key="station.id"
+                  :station="station" :selected="station.id === selectedId"
+                  @select="selectStation" />
+    </ul>
+  </section>
+</template>
+\end{lstlisting}
+
+SFC 的\texttt{script setup}会在编译阶段生成组件上下文，顶层声明可以直接在模板中使用；它不是把模板当作一段 HTML 字符串拼接，因此类型、依赖和生命周期更容易被工具检查。组件拆分后要保持 props 的单向流动，子组件通过 emit 提交意图，父组件决定是否更新选中状态。对测站列表进行验收时，至少测试关键字大小写、预警筛选、空结果、加载失败、键盘焦点和卸载清理；每一项都应能在 Vue Devtools 或浏览器网络面板中找到证据。
+
+\subsubsection{响应式 API 的选择方法}
+
+组合式 API 的价值不在于把所有逻辑都写进一个文件，而在于让“数据从哪里来、怎样变化、谁负责副作用”可以逐段阅读。设计测站页面时，先画出状态边界：服务器返回的测站数组属于原始状态，筛选关键字和复选框属于交互状态，过滤后的数组属于派生状态，加载请求、提示消息和日志属于副作用。原始状态使用\texttt{ref}或\texttt{reactive}保存，派生状态使用\texttt{computed}表达，副作用使用\texttt{watch}或\texttt{watchEffect}承载，这样一个函数只承担一种职责，调试时可以沿依赖链定位问题。
+
+\texttt{ref}返回一个带\texttt{value}属性的容器，替换基本值时必须写入\texttt{value}；将一个\texttt{ref}放进\texttt{reactive}对象后，模板可以自动解包，但在普通 JavaScript 代码中仍要留意引用层级。\texttt{reactive}使用代理追踪属性读写，适合表单和配置对象；如果需要把对象整体替换为接口的新结果，应使用\texttt{ref}包住对象，或逐项更新原代理。接口响应可以先映射为教材定义的字段，再交给模板，避免把后端的可选字段直接扩散到所有子组件。
+
+选择\texttt{computed}还是\texttt{watch}可以问两个问题：结果是否能由已有状态纯粹计算，是否需要调用网络、写入存储或操作 DOM。纯计算选择\texttt{computed}，它会缓存结果并在依赖改变时失效；需要副作用时选择\texttt{watch}，明确列出监听源、是否立即执行以及是否深度监听。\texttt{watchEffect}适合把多个轻量依赖组合成一个同步动作，例如更新页面标题或记录筛选统计；当副作用涉及请求、定时器或订阅时，优先使用带清理函数的\texttt{watch}，并让每一次异步任务携带自己的取消信号。
+
+\begin{table}[H]
+\centering
+\caption{Vue 响应式 API 的职责边界与验收问题}
+\label{tab:ch04-a46-reactivity-choice}
+\begin{tabular}{p{2.3cm}p{3.5cm}p{4.8cm}}
+\toprule
+API & 适合表达的内容 & 代码评审时的核对问题 \\
+\midrule
+\texttt{ref} & 基本值、可整体替换的对象 & 是否在 JavaScript 中正确使用\texttt{.value}，模板是否依赖自动解包 \\
+\texttt{reactive} & 表单、稳定结构的对象和数组 & 是否把代理对象整体替换，是否把深层可变状态暴露给子组件 \\
+\texttt{computed} & 过滤、排序、格式化等纯派生值 & 函数是否无网络请求和写操作，依赖是否完整 \\
+\texttt{watch} & 具有明确来源的异步或外部副作用 & 是否处理竞态、错误和清理，是否设定合理的\texttt{flush}时机 \\
+\texttt{watchEffect} & 少量依赖的同步联动 & 自动收集的依赖是否稳定，是否会因隐式访问造成重复执行 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+表\ref{tab:ch04-a46-reactivity-choice}可以作为代码走查清单。若一个\texttt{computed}内部出现\texttt{fetch}，说明派生值与副作用发生了混合；若一个\texttt{watch}只做字符串拼接，说明它可以改写为\texttt{computed}。对监测数据而言，响应式 API 只负责界面状态，阈值计算和数据质量判定仍应由后端或领域服务提供，前端展示结果时保留测点编号、采样时间和质量码，方便值班员追溯。
+
+\subsubsection{模板指令的性能与可访问性}
+
+\texttt{v-if}和\texttt{v-show}的差异可以从生命周期理解：\texttt{v-if}切换时会触发子树的创建和销毁，适合权限面板、错误提示和一次性弹窗；\texttt{v-show}保留节点并切换样式，适合值班员反复打开的筛选抽屉。切换地图图层或大型表格时，要把初始化成本、键盘焦点和屏幕阅读器行为一起评估。隐藏内容若仍能被辅助技术读取，应同步设置合适的语义属性，避免用户获得与视觉状态不一致的反馈。
+
+列表渲染的稳定\texttt{:key}不仅影响性能，也影响输入框的值和焦点。测站列表从“全部”切换到“仅预警”时，若使用数组索引作为 key，Vue 可能把旧行复用给另一测站，导致焦点和局部编辑值错位。使用后端分配的测站 ID 可以保持身份稳定；当接口暂时没有 ID 时，应在数据进入组件前生成生命周期内不变的客户端键，并在提交时仍使用业务主键。排序、分页和实时插入都要用同一条身份规则。
+
+\texttt{v-model}的修饰符是输入契约的一部分。\texttt{.trim}适合名称和编码搜索，\texttt{.number}只在输入内容确实是数值时使用，闸门开度等测量值还要在提交前进行单位和范围校验。对于时间字段，要把本地时区转换和展示格式分开，提交 ISO 时间戳，页面按值班员所在时区显示。\texttt{v-bind:aria-label}、\texttt{role=status}和\texttt{aria-live}可以让加载、空结果和预警变化被读屏软件感知；这些属性与 CSS 颜色共同构成信息表达，不能只依赖红黄蓝色块。
+
+\subsubsection{组件通信的测试边界}
+
+props、emit、slot 和 provide/inject 形成四条不同的依赖路径。props 是父到子的输入，组件应把它当作只读快照；emit 是子到父的事件，事件名应描述意图而不是内部实现，例如\texttt{select}、\texttt{retry}和\texttt{update-filter}。slot 负责布局插槽，父组件可以替换操作区而不复制整张卡片；provide/inject 负责跨层配置，典型内容是单位、主题和请求客户端。把实时测站数组直接通过 provide 传到任意深层会隐藏数据流，应使用 Pinia 或显式 props 让业务状态的所有者清晰可见。
+
+组件测试可以从契约出发设计三组用例。第一组给定 props，检查标题、数值单位和质量码标签是否正确渲染；第二组触发按钮或键盘操作，断言 emit 的事件名和参数只包含业务主键；第三组替换 slot 内容，确认默认操作区和自定义操作区都保持可访问名称。provide/inject 的测试使用测试级容器提供只读单位和假的请求函数，避免依赖真实网络。这样既能验证组件自身，也能验证它与父页面之间的边界。
+
+\subsubsection{生命周期、竞态与数据刷新}
+
+监测页面常见的竞态发生在“用户快速切换测站”或“离开页面后请求才返回”。每次加载都应生成一个请求控制器，并把当前请求的序号或测站 ID保存在闭包中；响应到达时，只有仍然匹配当前序号的结果才写入状态。\texttt{AbortController}可以释放网络资源，但取消并不保证所有中间层都立即停止，因此仍需在写入前检查\texttt{signal.aborted}。异常分类应区分网络不可达、权限过期、服务器错误和业务空结果，让界面给出可行动的提示。
+
+定时刷新要先定义业务窗口，再确定间隔。若清源水库的实时读数允许三十秒延迟，页面可以使用三十秒定时器；当浏览器标签页进入后台时，可以暂停刷新，回到前台再立即拉取一次。刷新函数不能因为上一次请求较慢而并发堆积，可以使用“正在加载”标志、队列或取消旧请求实现串行化。定时器、事件监听器、WebSocket 和图表实例都必须在\texttt{onUnmounted}中释放，资源的创建与释放最好位于同一组合式函数，便于复用和单元测试。
+
+可把生命周期验收写成可观察的步骤：挂载组件后检查只创建一个定时器；切换测站时确认旧请求被取消或其结果被丢弃；卸载组件后检查网络面板没有继续写入、控制台没有更新已销毁实例的警告；重新挂载时确认资源数量回到一个。对实时订阅还要验证断线重连、重复消息和权限失效，避免把连接重试当作无限循环。图\ref{fig:ch04-a46-lifecycle-cleanup}中的箭头代表这些可测试的资源边界，而不是抽象的装饰。
+
+\subsubsection{测站筛选页的交付检查}
+
+完整页面的验收应覆盖数据、交互、错误和可访问性四个维度。数据维度检查接口字段映射、单位转换、时间格式和质量码；交互维度检查关键字、预警复选框、键盘选择和详情跳转；错误维度检查加载失败、权限过期、网络超时以及空结果；可访问性维度检查标题层级、表单标签、焦点可见性和状态播报。每个维度都应有可复现的输入和预期输出，不能用“页面看起来正常”代替证据。
+
+筛选条件最好在 URL 或路由状态中保存可分享的部分，例如关键字和当前页码；临时的展开状态留在组件内部。用户从详情页返回列表时，若希望恢复筛选条件，应通过\texttt{useRoute}读取查询参数，再用\texttt{router.replace}更新而不是不断新增历史记录。接口返回的分页总数应与后端口径一致，前端只负责展示和发起下一页请求，不能用当前页长度猜测全量数量。实时预警到达时，优先更新对应测站的行状态，并保留当前滚动位置和键盘焦点。
+
+组件拆分完成后，可以把列表页看成一条可替换的管线：\texttt{request.js}负责认证、超时和错误分类，页面负责状态编排，\texttt{StationRow}负责单行呈现，Pinia负责跨路由共享的当前测站。每个部分都能用假数据独立测试，再用一次端到端测试验证真实接口连接。这样的结构既适合本章的教学演示，也能平滑扩展到地图侧栏、移动端值班视图和大屏轮播，而不需要把所有逻辑重新复制一遍。
+
 \section{Vue Router与Pinia应用组织}
 
 Vue Router把URL映射到页面组件。路由配置应包含稳定的路径、名称和组件；页面级组件可用动态导入实现按需加载。路由守卫适合做登录状态和角色检查，但细粒度业务权限仍须由后端验证。
