@@ -202,6 +202,801 @@ void main() {
 \end{tabular}
 \end{table}
 
+\subsection{关系模型、空间索引与时序分区}
+
+上一张表描述的是业务实体，真正落地时还必须回答三个问题：一条观测由谁产生、在什么时刻产生，
+它的空间位置如何检索；一条预警如何追溯到证据，并在处置后形成可审计的工单；一次模型运行使用了
+哪一批输入，结果是否可以复现。为此，本节采用“关系主表保存事实、PostGIS 保存空间、TimescaleDB
+管理时间分区、JSONB 保存可演化证据”的组合。关系主表中的稳定字段承担约束和连接职责，JSONB 只承载
+版本化的扩展属性，不能把核心字段全部塞进无结构文档。这样既能让 SQL 查询得到类型检查，也能让
+新传感器的附加元数据在不频繁改表的情况下演进。
+
+\texttt{asset} 是工程对象和测点的主索引。\texttt{asset\_id} 使用业务编码而不是数据库自增号，
+因为网关、三维模型、工单和报表都要用同一个编码关联对象；\texttt{geometry} 使用带高程的
+\texttt{PointZ}，坐标系固定为清源水库项目约定的 EPSG:4490，避免平面距离和经纬度混用。空间
+检索通过 GiST 索引完成，例如“查询某个影响区内的测点”可以由\texttt{ST\_Within} 使用索引候选集，
+再对候选集做精确判断。若测点迁移，不覆盖原几何，而是新增版本或写入变更审计表；本包的五张核心表
+先保存当前有效对象，历史版本通过\texttt{metadata}中的\texttt{validFrom}、\texttt{validTo}
+和变更事件追溯。
+
+\texttt{reading} 是高频追加表。主键包含\texttt{asset\_id}、\texttt{occurred\_at}和版本号，
+保证同一测点同一时刻的修订值可以共存；\texttt{event\_id}具有唯一约束，用于消费者幂等。缺测
+记录允许\texttt{value}为空，但必须把质量码写为\texttt{missing}；单位不匹配、时间倒序和重复
+事件由质量服务标记为\texttt{suspect}。这一约束将第7章的三值质量码落实到了数据库层，而不是只靠
+Java 代码约定。原始记录只追加不更新，修订操作产生新版本并写入\texttt{revision\_reason}，
+因此任何一条报表数值都可以回到原始事件和修订责任人。
+
+\texttt{reading}按\texttt{occurred\_at}做时间维度切块，并按\texttt{asset\_id}配置哈希分区。
+时间切块让近时查询只扫描少量块，哈希分区把高并发写入分散到多个块；分区数不是教材中的固定工程
+参数，部署时应根据测点规模、写入峰值和节点数量通过压测确定。切块大小也要与保留策略一起决定：
+太小会增加目录和合并开销，太大又会让单次聚合扫描过多冷数据。迁移脚本应在测试环境先创建一个
+时间块，写入代表性的一天数据后观察写入延迟、压缩比例和查询计划，再确定生产配置。
+
+\texttt{reading\_15m}连续聚合视图只纳入\texttt{valid}观测，并保留样本数、最小值、最大值和平均值。
+这样，预警服务可以快速读取趋势，而审计人员仍可回查所有原始值。连续聚合不是“把原表删掉”，而是
+在原始数据之上维护可重建的派生结果。刷新策略设置一个覆盖迟到消息的时间回看窗口，例中回看 30 天、
+延迟 5 分钟只是教学参数；实际窗口应覆盖通信补传和消息重投的最大时长。若补传超出窗口，运维员应
+手工触发一次重算，并在模型运行记录中写明重算范围。
+
+预警、工单和模型运行表都保存业务过程，而不是把过程状态写在测点行上。预警保存评分、规则版本、
+证据快照和可评估标志；工单以预警外键关联，并保存责任角色、时限、动作和回执；模型运行保存输入
+快照、版本、状态和结果。三类表均设置状态检查约束和时间索引，使“待确认预警”“即将到期工单”“近
+期失败运行”成为可解释的查询。对于跨服务事件，事务发件箱记录发布意图，消费者以\texttt{event\_id}
+去重；本节的数据库约束与第8章质量服务共同构成一致性边界。
+
+表\ref{tab:ch08-database-dictionary}给出字段、类型、约束、单位和教学含义的最小字典。实施时可以
+增加字段，但不能改变这些字段的语义；若必须调整类型，应先增加兼容列、完成双写和回填，再切换读路径。
+字典中的“无”表示该字段是离散状态或标识，不代表可以省略校验。特别是\texttt{quality}、\texttt{level}
+和\texttt{status}三类枚举都需要在接口契约、数据库检查约束和前端显示文案中保持相同大小写。
+
+\begin{table}[htbp]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{2pt}
+\caption{第8章核心数据库字段字典}
+\label{tab:ch08-database-dictionary}
+\begin{tabular}{p{2.0cm}p{3.1cm}p{2.8cm}p{1.5cm}p{4.8cm}}
+\toprule
+字段 & 类型 & 约束 & 单位 & 说明 \\
+\midrule
+\shortstack{asset.\\asset\_id} & text & 主键、唯一 & 无 & 工程对象和测点的稳定业务编码 \\
+\shortstack{asset.\\asset\_type} & text & 非空 & 无 & 测点、闸门、坝段等项目分类 \\
+asset.geometry & geometry(PointZ,4490) & 非空、GiST 索引 & 度、米 & 测点经纬度与高程位置 \\
+asset.metadata & jsonb & 可为空 & 无 & 厂商标识、量程和扩展属性 \\
+\shortstack{reading.\\event\_id} & text & 非空、唯一 & 无 & 消息幂等键，跨服务保持不变 \\
+\shortstack{reading.\\occurred\_at} & timestamptz & 主键组成 & UTC & 观测发生时间，不得晚于当前时间 \\
+reading.value & numeric & 缺测时为空 & 由监测项定义 & 原始数值，数据库不覆盖历史版本 \\
+reading.quality & text & valid/suspect/missing & 无 & 第7章统一的三值质量码 \\
+reading.version & integer & 非空、正数 & 无 & 同一事件的修订版本序号 \\
+\shortstack{warning.\\level} & text & \shortstack{NONE/BLUE/\\YELLOW/\\ORANGE/RED} & 无 & 规则评估得到的预警等级 \\
+\shortstack{warning.\\evaluable} & boolean & 非空 & 无 & false 表示“未评估”而非无预警 \\
+\shortstack{warning.\\evidence} & jsonb & 非空 & 无 & 指标、阈值、规则版本组成的证据快照 \\
+\shortstack{work\_order.\\warning\_id} & bigint & 外键、非空 & 无 & 对应的预警事件 \\
+\shortstack{work\_order.\\due\_at} & timestamptz & 非空 & UTC & 处置时限，供到期查询 \\
+\shortstack{model\_run.\\input\_snapshot} & jsonb & 非空 & 无 & 可复现的输入范围与版本摘要 \\
+\shortstack{model\_run.\\status} & text & 状态检查 & 无 & queued/running/succeeded/failed \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+图\ref{fig:ch08-database-er}用实体关系图呈现外键方向和审计边界。图中的箭头表示数据库中的
+可追溯关系，不表示消息一定同步到达；异步事件仍需通过事件标识和状态版本处理乱序。阅读图时先从
+\texttt{asset}向下追踪观测，再从观测和规则证据进入预警，最后沿工单回执闭合业务链；模型运行则以
+输入快照和结果独立留痕，避免把模型输出误当作原始观测。
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  er/.style={draw=Primary,rounded corners,fill=PrimaryLight,align=center,
+    minimum width=2.65cm,minimum height=1.05cm,font=\small},
+  rel/.style={->,draw=PrimaryDark,thick},
+  node distance=12mm and 18mm]
+\node[er] (asset) {asset\\工程对象/测点};
+\node[er,right=of asset] (reading) {reading\\时序观测};
+\node[er,right=of reading] (warning) {warning\\预警事件};
+\node[er,below=of warning] (work) {work\_order\\处置工单};
+\node[er,below=of asset] (run) {model\_run\\模型运行};
+\draw[rel] (asset) -- node[above,font=\scriptsize]{1:N} (reading);
+\draw[rel] (asset) -- node[left,font=\scriptsize]{1:N} (run);
+\draw[rel] (asset) |- node[pos=.25,left,font=\scriptsize]{1:N} (warning);
+\draw[rel] (warning) -- node[right,font=\scriptsize]{1:N} (work);
+\draw[rel,dashed] (reading) -- node[above,font=\scriptsize]{event\_id证据} (warning);
+\end{tikzpicture}
+\caption{第8章核心实体关系与追溯路径}
+\label{fig:ch08-database-er}
+\end{figure}
+
+下面三段 SQL 按“基础表—时序表—业务流程表”的顺序组织，构成 A8-2 实体代码和 S3 数据集的唯一
+字段来源。代码清单\ref{lst:ch08-sql-asset}先安装扩展并建立空间对象表；执行前应由迁移工具记录版本，
+而不是让应用启动时隐式建表。空间参考系、编码检查和 GiST 索引属于表的契约，缺一项都会让三维对象
+与监测数据发生难以定位的偏移。
+
+\label{lst:ch08-sql-asset}
+\begin{lstlisting}[language=SQL,caption={空间对象表与空间索引 DDL}]
+CREATE EXTENSION IF NOT EXISTS postgis;
+CREATE EXTENSION IF NOT EXISTS timescaledb;
+
+CREATE TABLE asset (
+    asset_id       text PRIMARY KEY,
+    asset_type     text NOT NULL,
+    display_name   text NOT NULL,
+    unit           text,
+    geometry       geometry(PointZ, 4490) NOT NULL,
+    elevation_m    numeric,
+    active         boolean NOT NULL DEFAULT true,
+    metadata       jsonb NOT NULL DEFAULT '{}'::jsonb,
+    created_at     timestamptz NOT NULL DEFAULT now(),
+    updated_at     timestamptz NOT NULL DEFAULT now(),
+    CONSTRAINT asset_id_format
+        CHECK (asset_id ~ '^[A-Z0-9-]+$')
+);
+
+CREATE INDEX asset_geometry_gist_idx
+    ON asset USING GIST (geometry);
+CREATE INDEX asset_type_active_idx
+    ON asset (asset_type, active);
+\end{lstlisting}
+
+空间索引只负责缩小候选集，业务仍要在查询中写明坐标系和边界条件；例如影响区查询应先将输入多边形
+转换为 4490，再调用空间谓词。\texttt{asset\_type}与\texttt{active}的组合索引服务于“当前有效的
+某类对象”列表，避免把已退役测点传给实时订阅。\texttt{updated\_at}由应用或数据库触发器维护，
+用于缓存失效和三维模型刷新，而不能被前端任意修改。
+
+代码清单\ref{lst:ch08-sql-reading}把高频观测表转换为 TimescaleDB 超表，并给出时间块、哈希分区和
+连续聚合的策略。迁移时先建普通表再执行转换，能让外键和检查约束在同一个事务脚本中审查；生产环境
+还应根据写入峰值调整分区数，并为冷数据设置压缩和保留策略。连续聚合只读有效值，质量码和样本数
+仍然保留在结果中，便于界面解释“平均值为什么没有纳入某条数据”。
+
+\label{lst:ch08-sql-reading}
+\begin{lstlisting}[language=SQL,caption={时序观测表、分区与连续聚合 DDL}]
+CREATE TABLE reading (
+    asset_id         text NOT NULL REFERENCES asset(asset_id),
+    occurred_at      timestamptz NOT NULL,
+    version          integer NOT NULL DEFAULT 1,
+    reading_id       bigserial,
+    event_id         text NOT NULL UNIQUE,
+    value            numeric,
+    unit             text NOT NULL,
+    quality          text NOT NULL,
+    source           text NOT NULL,
+    revision_reason  text,
+    received_at      timestamptz NOT NULL DEFAULT now(),
+    PRIMARY KEY (asset_id, occurred_at, version),
+    CONSTRAINT reading_version_positive CHECK (version > 0),
+    CONSTRAINT reading_quality_check
+        CHECK (quality IN ('valid','suspect','missing')),
+    CONSTRAINT missing_value_check
+        CHECK (value IS NOT NULL OR quality = 'missing')
+);
+
+SELECT create_hypertable(
+    'reading', by_range('occurred_at'),
+    by_hash('asset_id', 4), if_not_exists => TRUE
+);
+
+CREATE INDEX reading_asset_time_idx
+    ON reading (asset_id, occurred_at DESC);
+CREATE INDEX reading_quality_time_idx
+    ON reading (quality, occurred_at DESC);
+
+CREATE MATERIALIZED VIEW reading_15m
+WITH (timescaledb.continuous) AS
+SELECT asset_id,
+       time_bucket('15 minutes', occurred_at) AS bucket,
+       avg(value) AS value_avg, min(value) AS value_min,
+       max(value) AS value_max, count(*) AS sample_count
+FROM reading
+WHERE quality = 'valid'
+GROUP BY asset_id, bucket
+WITH NO DATA;
+
+SELECT add_continuous_aggregate_policy(
+    'reading_15m',
+    start_offset => INTERVAL '30 days',
+    end_offset => INTERVAL '5 minutes',
+    schedule_interval => INTERVAL '5 minutes'
+);
+\end{lstlisting}
+
+主键包含时间列是时序表的工程折中：它满足超表分区键的唯一性要求，也允许同一时刻保存多个版本。
+跨测点查询使用\texttt{occurred\_at}范围条件，单测点查询使用\texttt{asset\_id}加时间降序索引；
+质量索引服务于统计任务和数据修复，但不能代替质量服务的优先级合并。\texttt{event\_id}的唯一约束
+是数据库级幂等保险，应用层仍要返回“重复事件已忽略”的可观察结果。若消息重复到达，不能把它当作
+新版本；只有人工修订且带有不同版本号时，才允许保留相同业务时刻的另一行。
+
+预警、工单和模型运行表共享状态与证据约束，代码清单\ref{lst:ch08-sql-workflow}给出外键、检查条件
+和面向队列查询的索引。预警的\texttt{evaluable=false}允许等级保持 NONE，但界面必须显示“未评估”及
+原因；工单的状态转换由后端服务控制，数据库检查约束只负责拒绝拼写错误；模型运行结果允许为空，
+但只有\texttt{succeeded}状态才可被下游引用。这样的分层把“数据结构正确”和“业务流程合法”分开，
+便于在单元测试、集成测试和审计查询中分别验证。
+
+\label{lst:ch08-sql-workflow}
+\begin{lstlisting}[language=SQL,caption={预警、工单与模型运行表 DDL}]
+CREATE TABLE warning (
+    warning_id      bigserial PRIMARY KEY,
+    asset_id        text NOT NULL REFERENCES asset(asset_id),
+    source_event_id text NOT NULL,
+    level           text NOT NULL,
+    evaluable       boolean NOT NULL,
+    score           numeric,
+    reason          text NOT NULL,
+    rule_version    text NOT NULL,
+    evidence        jsonb NOT NULL,
+    status          text NOT NULL DEFAULT 'open',
+    created_at      timestamptz NOT NULL DEFAULT now(),
+    CONSTRAINT warning_level_check
+        CHECK (level IN ('NONE','BLUE','YELLOW','ORANGE','RED')),
+    CONSTRAINT warning_status_check
+        CHECK (status IN ('open','acknowledged','closed'))
+);
+
+CREATE INDEX warning_open_queue_idx
+    ON warning (status, level, created_at DESC);
+
+CREATE TABLE work_order (
+    work_order_id  bigserial PRIMARY KEY,
+    warning_id     bigint NOT NULL REFERENCES warning(warning_id),
+    owner_role     text NOT NULL,
+    due_at         timestamptz NOT NULL,
+    action         text NOT NULL,
+    result         text,
+    status         text NOT NULL DEFAULT 'pending',
+    created_at     timestamptz NOT NULL DEFAULT now(),
+    completed_at   timestamptz,
+    CONSTRAINT work_order_status_check
+        CHECK (status IN ('pending','in_progress','completed','cancelled'))
+);
+
+CREATE INDEX work_order_due_idx
+    ON work_order (status, due_at);
+
+CREATE TABLE model_run (
+    run_id             uuid PRIMARY KEY,
+    model_name         text NOT NULL,
+    model_version      text NOT NULL,
+    input_snapshot     jsonb NOT NULL,
+    started_at         timestamptz NOT NULL,
+    finished_at        timestamptz,
+    status             text NOT NULL,
+    result             jsonb,
+    error_message      text,
+    requested_by       text NOT NULL,
+    CONSTRAINT model_run_status_check
+        CHECK (status IN ('queued','running','succeeded','failed')),
+    CONSTRAINT model_run_finish_check
+        CHECK (finished_at IS NULL OR finished_at >= started_at)
+);
+
+CREATE INDEX model_run_status_time_idx
+    ON model_run (status, started_at DESC);
+\end{lstlisting}
+
+这些索引对应三类典型查询：值班员按等级和时间查看未关闭预警，运维员按时限查看即将到期工单，
+专业分析员按模型版本和运行状态筛选可复现结果。索引不是越多越好；每增加一个索引都会增加写入、
+备份和压缩成本，因此应在压测报告中记录命中率、写入延迟和索引体积。对于\texttt{evidence}、
+\texttt{input\_snapshot}等 JSONB 字段，先以整对象审计和版本追溯为主，只有查询频率稳定后才考虑
+建立表达式索引；否则容易把临时查询固化为难以迁移的结构。
+
+DDL 的执行顺序也属于系统设计的一部分。部署脚本先安装扩展，再创建\texttt{asset}，随后创建引用它
+的\texttt{reading}和\texttt{warning}，最后创建\texttt{work\_order}与\texttt{model\_run}。回滚
+不能直接删除已经产生证据的表，而应先停止写入、导出审计快照并把迁移标记为失效。升级时采用“增加
+列—双写—回填—切换—观察—清理”的六步流程；观察期内保留旧列，直到连续两个备份周期和一次恢复演练
+均成功。对于时间分区和连续聚合，回滚还要清理策略对象并保留原始观测，绝不能只删除聚合结果而让
+报表失去可解释性。
+
+本节的字段字典、实体关系图和三段 DDL 共同构成数据库契约。后续实体类、接口 DTO、前端表格和示例
+数据必须逐列对照该契约；如果业务需要增加“巡检照片”或“会商结论”等信息，应作为版本化扩展属性或
+新增业务表，并在数据字典中登记来源、权限、保留期限和脱敏规则。通过这种方式，空间位置、原始观测、
+质量状态、风险证据、处置回执和模型结果形成闭环，学生可以从一条事件 ID 走完从采集到复核的追溯路径，
+也能理解为什么数据库设计是平台架构的约束，而不是编码完成后的附属文档。
+
+\subsection{数据库迁移、查询与运行维护练习}
+
+DDL 解决了“表能否创建”的问题，平台上线还需要回答“数据能否安全地进入、查询和恢复”。本小节把
+常用操作拆成短小而完整的 SQL 练习，所有语句都假定在只读副本或隔离的迁移事务中执行。练习的目的
+不是让应用直接拼接字符串，而是让学生看懂索引、约束和查询条件之间的因果关系。每段语句都配有
+输入前提、结果解释和回滚边界，后续 Java Repository 可以把它们转成参数化查询。
+
+迁移脚本必须可重复执行，并把版本写入数据库。代码清单\ref{lst:ch08-sql-migration}示例用一个轻量
+版本表记录迁移名称和校验摘要；真正的发布工具还应记录执行人、开始时间、结束时间和失败日志。若
+迁移中途失败，恢复脚本只回滚本次版本，不直接删除已有业务数据。
+
+\label{lst:ch08-sql-migration}
+\begin{lstlisting}[language=SQL,caption={可重复执行的迁移版本记录}]
+CREATE TABLE IF NOT EXISTS schema_migration (
+    version      text PRIMARY KEY,
+    description  text NOT NULL,
+    checksum     text NOT NULL,
+    applied_at   timestamptz NOT NULL DEFAULT now(),
+    applied_by   text NOT NULL
+);
+
+INSERT INTO schema_migration(version, description, checksum, applied_by)
+VALUES ('A8-1-001', 'core asset reading warning ddl', 'sha256:TODO', current_user)
+ON CONFLICT (version) DO NOTHING;
+\end{lstlisting}
+
+对象清单是最频繁的读路径之一。代码清单\ref{lst:ch08-sql-asset-list}用状态和类型过滤有效测点，
+并只取前端需要的列；不使用\texttt{SELECT *}可以避免新增列后无意扩大接口载荷，也能让数据库更容易
+复用覆盖索引。分页时应使用稳定的\texttt{asset\_id}游标，不能把页码当作长期一致性的依据。
+
+\label{lst:ch08-sql-asset-list}
+\begin{lstlisting}[language=SQL,caption={按类型和状态读取测点清单}]
+SELECT asset_id, display_name, asset_type, unit,
+       ST_X(geometry) AS longitude,
+       ST_Y(geometry) AS latitude,
+       elevation_m
+FROM asset
+WHERE active = true
+  AND asset_type = :asset_type
+  AND (:after_id IS NULL OR asset_id > :after_id)
+ORDER BY asset_id
+LIMIT :page_size;
+\end{lstlisting}
+
+空间查询必须明确输入多边形的坐标系。代码清单\ref{lst:ch08-sql-spatial-query}先把外部边界转换到
+4490，再用 GiST 支持的包围盒过滤和精确谓词；若输入无效，接口应在参数校验阶段返回错误，而不是让
+数据库把空结果当作“区域内没有测点”。
+
+\label{lst:ch08-sql-spatial-query}
+\begin{lstlisting}[language=SQL,caption={影响区内测点的空间查询}]
+WITH area AS (
+    SELECT ST_Transform(
+        ST_SetSRID(ST_GeomFromText(:wkt), :input_srid), 4490
+    ) AS boundary
+)
+SELECT a.asset_id, a.display_name, a.asset_type
+FROM asset AS a CROSS JOIN area
+WHERE a.active
+  AND a.geometry && area.boundary
+  AND ST_Within(a.geometry, area.boundary)
+ORDER BY a.asset_id;
+\end{lstlisting}
+
+实时曲线应按测点和时间窗读取，而不是扫描整个超表。代码清单\ref{lst:ch08-sql-recent-reading}只返回
+质量码为 valid 的观测；界面若要展示 suspect 或 missing，应另开一条明确的质量提示查询，避免把
+“没有合格数据”误画成一条平滑曲线。
+
+\label{lst:ch08-sql-recent-reading}
+\begin{lstlisting}[language=SQL,caption={按时间窗读取有效观测}]
+SELECT occurred_at, value, unit, quality, event_id, version
+FROM reading
+WHERE asset_id = :asset_id
+  AND occurred_at >= :start_at
+  AND occurred_at < :end_at
+  AND quality = 'valid'
+ORDER BY occurred_at, version;
+\end{lstlisting}
+
+质量统计要同时显示总量和分码数量。代码清单\ref{lst:ch08-sql-quality-count}用条件聚合统计一个时间窗
+内的 valid、suspect、missing，统计结果附带窗口起止时间，便于跨班次比较。该查询不修改质量码，
+修正应由质量服务生成新版本并保留责任人。
+
+\label{lst:ch08-sql-quality-count}
+\begin{lstlisting}[language=SQL,caption={质量码分布统计查询}]
+SELECT asset_id,
+       count(*) AS total_count,
+       count(*) FILTER (WHERE quality = 'valid') AS valid_count,
+       count(*) FILTER (WHERE quality = 'suspect') AS suspect_count,
+       count(*) FILTER (WHERE quality = 'missing') AS missing_count
+FROM reading
+WHERE occurred_at >= :start_at AND occurred_at < :end_at
+GROUP BY asset_id
+ORDER BY asset_id;
+\end{lstlisting}
+
+消息重投是流式系统的常态。代码清单\ref{lst:ch08-sql-idempotent-insert}展示“先插入、冲突即忽略”的
+数据库兜底；应用收到 0 行影响时应记录重复事件并确认消息，而不是反复重试。若同一业务事件需要
+修订，必须生成新的版本并写明原因，不能利用冲突绕过审计规则。
+
+\label{lst:ch08-sql-idempotent-insert}
+\begin{lstlisting}[language=SQL,caption={基于事件 ID 的幂等写入}]
+INSERT INTO reading(asset_id, occurred_at, event_id, value,
+                    unit, quality, source, version)
+VALUES (:asset_id, :occurred_at, :event_id, :value,
+        :unit, :quality, :source, 1)
+ON CONFLICT (event_id) DO NOTHING;
+\end{lstlisting}
+
+预警队列按等级和创建时间排序。代码清单\ref{lst:ch08-sql-warning-queue}明确排除已关闭状态，并把
+evaluable 标志作为结果列返回；这样界面可以同时显示“蓝色关注”“无预警”和“未评估”，而不是只依据
+颜色字段猜测业务状态。
+
+\label{lst:ch08-sql-warning-queue}
+\begin{lstlisting}[language=SQL,caption={待处理预警队列查询}]
+SELECT warning_id, asset_id, level, evaluable, score,
+       reason, rule_version, created_at
+FROM warning
+WHERE status IN ('open', 'acknowledged')
+ORDER BY CASE level
+           WHEN 'RED' THEN 1 WHEN 'ORANGE' THEN 2
+           WHEN 'YELLOW' THEN 3 WHEN 'BLUE' THEN 4 ELSE 5
+         END,
+         created_at;
+\end{lstlisting}
+
+工单到期查询需要使用数据库当前时间和明确的状态集合。代码清单\ref{lst:ch08-sql-due-work-order}把已经
+取消或完成的工单排除，并返回预警等级，值班员可以先处理高等级且临近截止时间的事项。真正更新状态
+时还要携带版本号，防止两个角色互相覆盖。
+
+\label{lst:ch08-sql-due-work-order}
+\begin{lstlisting}[language=SQL,caption={即将到期工单查询}]
+SELECT w.work_order_id, w.warning_id, w.owner_role,
+       w.due_at, w.action, p.level
+FROM work_order AS w
+JOIN warning AS p ON p.warning_id = w.warning_id
+WHERE w.status IN ('pending', 'in_progress')
+  AND w.due_at <= now() + INTERVAL '2 hours'
+ORDER BY p.level DESC, w.due_at;
+\end{lstlisting}
+
+模型运行审计必须把版本和输入快照一起返回。代码清单\ref{lst:ch08-sql-model-audit}按模型名称和时间窗
+筛选成功与失败运行，失败运行只用于故障定位，不能被下游当作可复现结果。若结果需要重新发布，应
+建立新的运行记录而不是覆盖旧结果。
+
+\label{lst:ch08-sql-model-audit}
+\begin{lstlisting}[language=SQL,caption={模型运行审计查询}]
+SELECT run_id, model_name, model_version, status,
+       started_at, finished_at, input_snapshot
+FROM model_run
+WHERE model_name = :model_name
+  AND started_at >= :start_at
+  AND started_at < :end_at
+ORDER BY started_at DESC;
+\end{lstlisting}
+
+连续聚合查询只读取已物化的时间桶。代码清单\ref{lst:ch08-sql-aggregate-query}把桶边界、样本数和
+质量语义一起返回，前端可以在样本不足时显示“数据稀疏”而不绘制误导性的折线。对于跨越夏令时或
+多时区的部署，数据库统一使用 UTC，展示层再按用户时区转换。
+
+\label{lst:ch08-sql-aggregate-query}
+\begin{lstlisting}[language=SQL,caption={读取十五分钟连续聚合结果}]
+SELECT bucket, value_avg, value_min, value_max, sample_count
+FROM reading_15m
+WHERE asset_id = :asset_id
+  AND bucket >= :start_at
+  AND bucket < :end_at
+ORDER BY bucket;
+\end{lstlisting}
+
+迟到消息会让最近的聚合桶需要重算。代码清单\ref{lst:ch08-sql-refresh-aggregate}展示手工刷新窗口的
+语句；它只在运维员确认补传范围后执行，并在变更记录中写明起止时间。自动策略继续负责日常刷新，
+手工刷新不能成为绕过质量审核的常规写入口。
+
+\label{lst:ch08-sql-refresh-aggregate}
+\begin{lstlisting}[language=SQL,caption={补传后的连续聚合刷新}]
+CALL refresh_continuous_aggregate(
+    'reading_15m', :refresh_start, :refresh_end
+);
+
+INSERT INTO schema_migration(version, description, checksum, applied_by)
+VALUES (:audit_version, 'late data aggregate refresh', :checksum, current_user);
+\end{lstlisting}
+
+冷数据保留策略必须服从证据保留期限。代码清单\ref{lst:ch08-sql-retention}用 TimescaleDB 策略对象
+表达自动清理窗口；教学示例没有把窗口写死为工程参数，生产项目应从法规、合同和审计要求中取得批准
+值，并在删除前完成备份校验。若某段数据仍被未关闭工单引用，业务服务应先延长其保留期限。
+
+\label{lst:ch08-sql-retention}
+\begin{lstlisting}[language=SQL,caption={时序数据保留策略示例}]
+SELECT add_retention_policy(
+    'reading', drop_after => INTERVAL '730 days'
+);
+
+-- 发布前由项目配置替换保留窗口，并核对审计与备份要求
+SELECT hypertable_name, num_chunks, compression_enabled
+FROM timescaledb_information.hypertables
+WHERE hypertable_name = 'reading';
+\end{lstlisting}
+
+压缩策略要避开仍在频繁更新的热数据。代码清单\ref{lst:ch08-sql-compression}把压缩按时间列组织，
+并先查询压缩状态再决定是否执行；质量修订窗口没有关闭前，不应提前压缩。压缩不是删除，恢复演练
+仍需验证索引、连续聚合和原始版本都可读。
+
+\label{lst:ch08-sql-compression}
+\begin{lstlisting}[language=SQL,caption={按时间块配置时序压缩}]
+ALTER TABLE reading SET (
+    timescaledb.compress,
+    timescaledb.compress_segmentby = 'asset_id',
+    timescaledb.compress_orderby = 'occurred_at DESC'
+);
+
+SELECT add_compression_policy(
+    'reading', compress_after => INTERVAL '30 days'
+);
+\end{lstlisting}
+
+状态更新必须包含并发控制条件。代码清单\ref{lst:ch08-sql-warning-ack}用“当前状态仍为 open”的
+条件完成确认；若影响行数为 0，说明另一个角色已经处理，服务应返回最新状态而不是覆盖它。此规则
+也适用于工单完成和模型运行取消，避免前端的旧页面把新处置结果改回去。
+
+\label{lst:ch08-sql-warning-ack}
+\begin{lstlisting}[language=SQL,caption={带状态条件的预警确认}]
+UPDATE warning
+SET status = 'acknowledged'
+WHERE warning_id = :warning_id
+  AND status = 'open'
+RETURNING warning_id, status, created_at;
+\end{lstlisting}
+
+工单回执必须与处置结果一起提交。代码清单\ref{lst:ch08-sql-work-order-close}在一个事务中写入
+完成时间和结果，空结果会被接口层拒绝。数据库层保留“已完成但没有结果”的异常查询入口，供运维
+人员在数据修复时补齐证据，而不是静默填入默认文字。
+
+\label{lst:ch08-sql-work-order-close}
+\begin{lstlisting}[language=SQL,caption={工单完成与回执写入}]
+BEGIN;
+UPDATE work_order
+SET status = 'completed', completed_at = now(), result = :result
+WHERE work_order_id = :work_order_id
+  AND status = 'in_progress';
+SELECT warning_id FROM work_order WHERE work_order_id = :work_order_id;
+COMMIT;
+\end{lstlisting}
+
+数据库健康检查关注约束违反的前兆。代码清单\ref{lst:ch08-sql-health-check}统计缺少有效坐标、异常
+质量码和未来时间戳的记录；它不自动改数据，只产生检查报告。每日检查结果应和发布版本关联，才能在
+出现异常时判断是设备问题、迁移问题还是程序问题。
+
+\label{lst:ch08-sql-health-check}
+\begin{lstlisting}[language=SQL,caption={核心表健康检查}]
+SELECT 'asset_without_geometry' AS check_name, count(*) AS failures
+FROM asset WHERE geometry IS NULL
+UNION ALL
+SELECT 'reading_bad_quality', count(*)
+FROM reading WHERE quality NOT IN ('valid','suspect','missing')
+UNION ALL
+SELECT 'reading_in_future', count(*)
+FROM reading WHERE occurred_at > now();
+\end{lstlisting}
+
+备份恢复演练需要验证“能否恢复业务链”而不只是“文件存在”。代码清单\ref{lst:ch08-sql-backup-scope}列出
+恢复演练所需的最小对象集合；实际备份工具负责导出数据和权限，SQL 只用于登记快照元信息。演练完成
+后要用一条事件 ID 串起测点、观测、预警、工单和模型运行，确认外键和 JSONB 证据均可读取。
+
+\label{lst:ch08-sql-backup-scope}
+\begin{lstlisting}[language=SQL,caption={备份快照登记}]
+CREATE TABLE IF NOT EXISTS backup_snapshot (
+    snapshot_id  text PRIMARY KEY,
+    started_at   timestamptz NOT NULL,
+    finished_at  timestamptz,
+    object_count integer NOT NULL,
+    checksum     text NOT NULL,
+    verified     boolean NOT NULL DEFAULT false
+);
+INSERT INTO backup_snapshot(snapshot_id, started_at, object_count, checksum)
+VALUES (:snapshot_id, now(), :object_count, :checksum);
+\end{lstlisting}
+
+权限查询只返回当前角色可见的对象。代码清单\ref{lst:ch08-sql-role-view}采用视图封装敏感字段，
+让报表用户看见编码、等级和统计结果，但看不到不必要的个人信息或完整设备密钥。生产环境还要结合
+应用层授权和数据库审计，视图本身不能替代角色管理。
+
+\label{lst:ch08-sql-role-view}
+\begin{lstlisting}[language=SQL,caption={面向报表角色的最小视图}]
+CREATE OR REPLACE VIEW warning_report AS
+SELECT warning_id, asset_id, level, evaluable,
+       score, reason, status, created_at
+FROM warning
+WHERE status <> 'closed' OR created_at >= now() - INTERVAL '90 days';
+
+GRANT SELECT ON warning_report TO report_reader;
+\end{lstlisting}
+
+异常数据修复必须可审计。代码清单\ref{lst:ch08-sql-revision-audit}把修订前后的值登记为 JSONB，
+并在写入新观测版本前生成审计行；如果修订没有批准号，接口应拒绝提交。审计表可以独立归档，不能
+因为前端只展示最新值就删除。
+
+\label{lst:ch08-sql-revision-audit}
+\begin{lstlisting}[language=SQL,caption={观测修订审计登记}]
+CREATE TABLE IF NOT EXISTS reading_revision_audit (
+    audit_id       bigserial PRIMARY KEY,
+    event_id       text NOT NULL,
+    old_value      numeric,
+    new_value      numeric,
+    old_quality    text NOT NULL,
+    new_quality    text NOT NULL,
+    reason         text NOT NULL,
+    approved_by    text NOT NULL,
+    audited_at     timestamptz NOT NULL DEFAULT now()
+);
+\end{lstlisting}
+
+数据库观察指标要与业务指标对应。代码清单\ref{lst:ch08-sql-observability}从系统视图读取超表大小、
+索引大小和最近数据时间；它不直接给出“系统健康”结论，而是为压测和运维看板提供证据。指标异常时
+应同时查看 Kafka 积压、质量码分布和工单延迟，不能只看数据库 CPU。
+
+\label{lst:ch08-sql-observability}
+\begin{lstlisting}[language=SQL,caption={数据库容量与新鲜度观察}]
+SELECT hypertable_name, table_bytes, index_bytes,
+       total_bytes
+FROM hypertable_detailed_size('reading');
+
+SELECT max(occurred_at) AS latest_reading,
+       now() - max(occurred_at) AS data_lag
+FROM reading;
+\end{lstlisting}
+
+最后一个练习把事件链完整串起来。代码清单\ref{lst:ch08-sql-trace-event}使用同一事件标识关联观测、
+预警和工单，并把模型运行的输入快照作为独立结果返回。若某一步没有记录，报告应明确显示“链路缺口”，
+而不是用空字符串伪造闭环。这种查询是课程项目验收时最有价值的可复现证据之一。
+
+\label{lst:ch08-sql-trace-event}
+\begin{lstlisting}[language=SQL,caption={按事件标识追溯业务闭环}]
+SELECT r.event_id, r.asset_id, r.occurred_at, r.quality,
+       w.warning_id, w.level, w.evaluable,
+       o.work_order_id, o.status AS work_status,
+       m.run_id, m.model_version, m.status AS run_status
+FROM reading AS r
+LEFT JOIN warning AS w ON w.source_event_id = r.event_id
+LEFT JOIN work_order AS o ON o.warning_id = w.warning_id
+LEFT JOIN model_run AS m
+  ON m.input_snapshot ->> 'eventId' = r.event_id
+WHERE r.event_id = :event_id;
+\end{lstlisting}
+
+以上练习覆盖迁移、空间检索、时序读取、质量统计、幂等写入、预警处置、聚合刷新、生命周期管理、
+并发控制、备份恢复、权限隔离、修订审计和链路追溯。它们与三段基础 DDL 形成由“结构—查询—运维”
+组成的最小闭环。教学时可以先让学生阅读执行计划，再让学生改变时间窗、质量码或状态条件，观察
+结果如何变化；只有能够解释每个条件为什么存在，才算真正掌握数据库设计，而不是记住几条 SQL。
+
+\subsection{从业务约束到物理设计的推导}
+
+数据库设计的起点不是“选哪一种数据库”，而是列出业务事实、事实发生的时间、事实的责任边界以及
+事实被谁查询。以清源水库安全监测平台为例，测点编码是跨系统共享的事实，不能因为前端换了树形目录
+就改写；观测时间是设备事件的事实，不能用服务器接收时间替代；质量码是校验结论，不能与原始数值
+混为一列；预警等级是规则输出，必须携带规则版本和证据；工单是处置过程，需要责任人和回执；模型
+运行是一次可复现计算，需要输入快照和版本。把这些事实逐一写成字段，才会得到本节的五张核心表。
+
+实体边界还决定事务边界。采集服务接收一条观测时，应该在同一个本地事务中写入\texttt{reading}和
+质量处理结果，再通过事务发件箱发布“观测已接收”事件；它不能把预警、工单和模型运行也强行放入
+一个跨服务事务。预警服务收到事件后依据规则版本计算，若结果不可评估，则落表为\texttt{evaluable}
+为 false 并保留原因。工单服务只消费已经落库的预警事件，生成处置任务并等待回执。每个服务都能
+独立重试，因为状态和事件标识已经落在数据库中。
+
+外键是数据库层最直接的业务保证。\texttt{warning.asset\_id}要求预警必须指向仍可识别的工程对象；
+\texttt{work\_order.warning\_id}要求工单不能脱离预警凭空出现；模型运行不直接外键到每一条观测，
+而是保存输入快照，因为一次运行可能读取聚合结果、多个测点和一组规则参数。若把模型输入硬编码成
+若干外键，后续版本的输入范围难以重现。快照中的事件范围、质量过滤条件和查询版本必须写入可审计字段，
+并在模型日志中登记哈希摘要。
+
+枚举约束的价值在于让错误尽早暴露。质量码只允许 valid、suspect、missing，预警等级只允许 NONE、
+BLUE、YELLOW、ORANGE、RED，工单和模型运行也各自拥有有限状态集合。前端可以提供友好文案，但不能
+向数据库写入“正常”“蓝色预警中”等自由文本。新增状态先扩展接口契约、迁移脚本和统计口径，再修改
+显示层；如果只改显示层，历史报表会出现同义词，统计无法按状态合并。
+
+数值约束必须与测量物理意义相符。观测值允许为空只在质量码为 missing 时成立；温度、位移、渗压等
+监测项的合理范围由测点类型和项目规则提供，通用表只负责保留数值和质量结论，不把某个工程的阈值
+硬编码到所有测点。单位字段保留在观测行中，是因为设备更换或校准可能改变单位；单位注册表负责检查
+一致性，历史数据不能因为后来修改注册表就失去原来的解释。修订时新增版本并携带原因，审计可以看出
+从何值改到何值、谁批准、何时生效。
+
+索引设计也应从查询场景倒推。空间看板需要“影响区内的有效测点”，因此选择 GiST 空间索引；实时曲线
+需要“某测点最近一段时间的观测”，因此选择测点加时间的降序 B-tree；预警中心需要“未关闭且等级高的
+事件”，因此建立状态、等级、创建时间的组合索引；工单看板需要“按时限排序的未完成任务”，因此
+索引状态和截止时间；模型审计需要“某版本的最近运行”，因此索引模型状态和开始时间。索引列的顺序
+必须与过滤和排序相配，不能因为字段名称重要就盲目建索引。
+
+时序分区的核心是把时间局部性转化为物理局部性。查询最近一小时的测点，不应触碰数年前的块；归档
+两年前的数据，不应锁住实时写入块。切块大小需要用代表性写入压测确定：块太小会让规划器管理大量
+对象，块太大则使压缩和备份粒度变粗。哈希分区解决的是热点测点写入集中问题，不能代替时间维度；两者
+同时使用时，要观察单测点查询是否因为跨分区而退化。生产配置和压测结果必须写入部署文档，不把例题
+中的四个分区误当作全书固定参数。
+
+连续聚合适合重复读取的统计结果，但不适合替换证据。预警计算可以读取十五分钟平均值以降低延迟，
+但触发处置前要保留对应的原始窗口、样本数和质量分布。聚合刷新存在迟到数据，因此策略需要保留一段
+回看窗口；通信链路补传超过窗口时，运维员应运行一次受控重算，并在\texttt{model\_run}或变更日志中
+注明时间范围。任何人都不能直接编辑聚合表来“修正报表”，修正应回到原始观测或重新运行聚合策略。
+
+备份策略要同时覆盖结构、数据、权限和扩展。PostGIS 的空间列、TimescaleDB 的超表元数据、连续
+聚合策略和角色授权缺一项都可能导致恢复后查询失败。全量备份之外还要保留增量或归档日志，并定期在
+隔离环境恢复。恢复演练的验收不是“服务能启动”，而是能否用一条事件标识查到测点、原始观测、质量
+结论、预警证据、工单回执和模型输入；能否按角色隐藏不应查看的字段；能否在恢复后继续写入新的时间块。
+
+权限设计遵循最小必要原则。采集角色只写观测和发件箱，质量角色可更新质量标记但不能修改原始值，
+预警角色可创建和关闭预警，值班员可确认工单并提交回执，分析员可读取脱敏的历史数据，运维员才可
+执行分区、压缩和恢复操作。数据库角色与应用角色一一对应，凭据存放在密钥服务中，代码和教材示例不
+出现真实口令。审计日志至少保留角色、对象、操作、时间、请求追踪号和结果摘要，便于把数据库行为与
+Kafka 消息、HTTP 请求和前端操作对应起来。
+
+模式演进要优先考虑兼容。增加可空列通常可以向后兼容，删除列和改变枚举则必须经过观察期；大表添加
+非空约束应先回填并验证，再分阶段切换。实体类和 DTO 不应复制一套互不相同的字段名，数据库字典是
+唯一来源，代码生成或手工实现都应在代码审查中逐列核对。若 A8-2 需要把\texttt{asset}映射为 Java
+实体，应保留\texttt{asset\_id}、\texttt{geometry}和\texttt{metadata}的原语义，并对空间类型
+明确转换策略；若 S3 生成示例数据，应按照同一编码规则和质量码集合生成，不能为方便而使用随机中文键。
+
+测试要覆盖约束、查询计划和故障恢复三个层次。单元测试验证质量优先级和分类结果，集成测试验证外键、
+唯一键、空间坐标系、超表写入和连续聚合，端到端测试验证从事件接入到工单回执的链路。性能测试使用
+与目标测点规模相近的数据分布，分别记录高峰写入、最近查询、空间查询、预警队列和聚合刷新延迟。
+故障测试包括消息重复、乱序、数据库短暂不可用、超表块压缩失败和恢复后重放；每个故障都要说明预期
+质量码、状态转移和用户可见提示。
+
+最后，数据库文档必须让不在场的同学也能复现。字段字典说明类型、单位、约束和示例值，迁移脚本说明
+版本顺序和回滚边界，ER 图说明关系方向，查询练习说明输入参数和结果含义，运维手册说明备份、恢复、
+压缩、保留和监控。课程项目验收时，学生提交一份从\texttt{event\_id}出发的追溯报告，附执行计划、
+质量统计、预警证据、工单回执和模型运行快照。报告中若出现“数据库里有记录但无法解释来源”，就说明
+数据契约尚未闭合；若出现“界面显示正常但质量码为 missing”，就说明展示层没有尊重数据库语义。
+
+通过以上推导，数据库设计和 DDL 不再是孤立的 SQL 片段，而是从业务事实、质量口径、空间关系、时序
+性能、权限边界、审计要求和运维生命周期共同推导出的可验证契约。后续章节可以在此基础上讨论实体
+映射、接口实现和示例数据，而不必重新发明字段或偷偷改变工程参数。
+
+在课堂演练中，可以把一次数据异常拆成四个观察窗口。第一窗口查看接入消息，确认事件 ID、测点编码
+和发生时间是否完整；第二窗口查看质量服务，确认缺测、单位错误、范围异常、时序倒置和重复事件是否
+分别留下原因；第三窗口查看数据库，确认原始观测只追加、预警证据包含规则版本、工单具有责任角色和
+时限；第四窗口查看前端，确认“无预警”“蓝色关注”和“未评估”使用不同文案和颜色。四个窗口的记录
+必须能够用追踪号互相定位，单独看某一层的截图不能代替链路证据。
+
+数据库容量规划也应从测点数量、采样周期和保留期限推导。估算时先计算每天的事件行数，再加入索引、
+JSONB 证据、备份副本和压缩后的增长系数；写入峰值还要考虑设备同时上线、补传和消息重投。估算结果
+只用于容量初始值，最终仍要用接近生产分布的回放数据压测。压测不仅看平均吞吐，还要记录第九十五和
+第九十九百分位延迟、锁等待、超表块数量、连续聚合刷新滞后以及故障重试后的积压恢复时间。
+
+当项目需要接入新的监测项时，先在数据字典登记名称、单位、精度、采样周期和质量规则，再创建或复用
+测点类型；不要直接在 JSONB 中写一个未经登记的键。新增字段若会参与预警、统计或模型输入，必须同步
+更新接口契约、索引评估、备份清单和验收查询。这样做虽然增加了前期沟通，却能避免后期出现“报表有一
+列、接口没有一列、模型又按另一列计算”的隐性分叉。
+
+数据库契约还应服务于教学复盘。学生可以从事件追溯查询出发，逐个删除或改变查询条件，观察外键、质量
+码、状态和索引如何影响结果；也可以故意发送重复事件、未来时间戳和缺少单位的记录，验证系统是否在
+正确的位置拒绝或标记。实验报告要写清“哪一层发现问题、哪一层保存证据、哪一层向用户解释”，而不
+只是贴出一条 SQL 的执行结果。能够回答这些问题，才说明学生理解了关系模型与水利业务之间的映射。
+
+工程交付时还要把数据库契约交给不同角色共同评审：业务人员检查字段是否能表达处置流程，测量人员
+检查单位和精度，开发人员检查实体与 DTO 映射，运维人员检查分区、备份和恢复，安全人员检查角色与
+审计范围。评审结论写入版本记录，后续修改沿用同一流程。这样，DDL 既是可执行的初始化脚本，也是
+业务、技术和运维之间的共同语言；当教材示例迁移到真实项目时，读者知道哪些内容可以复用，哪些内容
+必须经过项目审批和压测后才能确定。
+
+因此，数据库评审记录应成为发布包的一部分，与代码、配置和数据样例共同归档，并在每次迁移后更新。
+归档内容还应包含执行计划、失败重试记录和恢复演练的校验结果，保证后来接手系统的人员能够复现设计
+依据并判断一次变更是否真正达到了预期效果。
+这些材料也为课程答辩提供可核验的证据链。
+学生应在报告中引用对应的迁移版本和查询清单。
+并说明每条证据的生成时间。
+可供复核。
+
+数据库设计还要考虑数据进入系统之前的契约校验。网关收到消息时先检查事件标识、测点编码、发生时间、
+单位和载荷格式；缺少任一必填项就进入拒收或隔离队列，并保留原始报文摘要。通过校验的消息再进入质量
+服务，质量服务依据测点类型读取量程和单位注册表，生成 valid、suspect 或 missing 质量码。这个顺序
+可以把“消息格式错误”和“数值虽然可解析但不可信”区分开，后续统计和预警才不会把两类问题混为一谈。
+
+观测写入采用追加式版本模型，会牺牲少量存储空间，却换来清晰的审计边界。设备重传同一事件时，唯一
+事件键保证幂等；人工确认量程或修复时间戳时，新增版本并在修订原因中说明依据。查询最新值必须明确
+按版本和事件时间排序，报表若要重现过去状态，则读取指定版本快照。这样既能支持现场快速纠错，也不会
+让“修正后的数字”覆盖掉审计人员需要的原始事实。
+
+空间数据的精度需要与业务用途匹配。点位用于测点定位和影响区筛选时，使用带高程的 PointZ 能够同时
+满足平面地图和剖面分析；如果某个业务需要线或面，应在项目扩展表中登记几何类型、坐标系和精度要求，
+不要把线面强行塞进点字段。三维模型中的局部坐标、工程坐标与经纬度之间要保留转换参数，并在模型
+运行输入快照中登记版本，避免相同测点在不同软件中出现肉眼难以发现的偏移。
+
+时间数据的准确性也不能只看时间戳格式。设备时钟漂移、网关缓存和消息重投都会造成到达顺序与发生顺序
+不一致。数据库同时保存 \texttt{occurred\_at}、\texttt{received\_at} 和事件 ID，质量服务依据当前时间与上一条观测检查
+未来时间、倒序和重复；流式消费者按发生时间排序时必须设置允许迟到窗口。窗口外的补传进入人工复核，
+而不是静默插入实时曲线。通过把三个时间概念分别保存，系统可以解释“数据什么时候发生、什么时候到达、
+什么时候被平台处理”。
+
+预警表的证据字段应能让专业分析员复算当时的判定。证据至少包括归一化指标、权重、阈值、规则版本、
+参与计算的数据窗口和质量统计；只保存一个分数会使处置过程无法复核。无预警意味着规则已经成功计算
+且没有触发阈值，未评估意味着质量条件不足，蓝色则表示指标出现需要关注的变化。三者在数据库中分别
+由等级、evaluable 和 reason 表达，前端不得把空 reason 当作正常状态。
+
+工单与预警的关联不是简单的“多一张表”。预警可能被多次确认、转派和补充回执，工单需要记录责任角色、
+截止时间、动作、结果和完成时间。状态更新必须使用当前状态条件和追踪号，若并发更新失败则返回最新状态
+供用户刷新。处置结果应包含测点、时间、操作前后状态和依据，不能只写“已处理”。这些字段支持事后
+统计处置时延和重复工单，也能帮助模型评估哪些预警经常被人工驳回。
+
+模型运行记录把算法版本和输入快照固定下来，解决“同样的代码为什么结果不同”的问题。输入快照包括
+测点集合、时间范围、质量过滤条件、特征版本和规则参数；结果字段存储摘要，完整输出可存入版本化对象
+存储并在表中保存地址和校验和。运行失败时记录错误类别和重试次数，成功后才能被预警或报表引用。模型
+升级必须创建新版本并进行对照运行，旧版本结果继续保留，直到审批人确认迁移完成。
+
+最后，数据库指标应反映用户关心的业务体验。除了写入吞吐和查询延迟，还要观察最近数据滞后、合格数据
+比例、未评估预警数量、待处理工单时长、连续聚合刷新延迟和恢复演练成功率。监控看板把这些指标按测点、
+工程和时间窗分组，运维员可以区分“设备没有上报”“数据到达但质量不合格”“规则未运行”和“工单没有
+及时关闭”。只有把技术指标与业务状态连起来，数据库设计才真正支撑安全监测平台的运行闭环。
+
 图\ref{fig:monitoring-data-pipeline}把这些字段串成一条流水线：接入、质量检查、存储、聚合、展示，并标出每一段落地的关键字段。沿这条线可以回答一个常被问到的问题——界面上的某个数值究竟是原始观测、聚合结果还是模型输出。
 
 \begin{figure}[H]
@@ -389,7 +1184,7 @@ public final class QualityService {
 
 业务、权限和工单数据存入PostgreSQL；PostGIS保存空间点、工程范围和影响区；TimescaleDB扩展用于时序分区与聚合；Redis只保存可重建缓存，不作为唯一数据源。业务、空间与时序数据共用一套事务与备份体系，既便于按对象追溯证据，也降低多引擎部署带来的一致性与运维成本。
 
-Kafka事件至少包含\texttt{eventId}、\texttt{assetId}、\texttt{occurredAt}、\texttt{stateVersion}和\texttt{traceId}。消费者按事件ID去重，并在写入结果后提交消费位置。数据库事务与跨服务消息通过事务外盒或可靠发布机制衔接，不宣称一次本地事务能够覆盖所有服务。
+Kafka事件至少包含\texttt{eventId}、\texttt{assetId}、\texttt{occurredAt}、\texttt{stateVersion}和\texttt{traceId}。消费者按事件ID去重，并在写入结果后提交消费位置。数据库事务与跨服务消息通过事务发件箱或可靠发布机制衔接，不宣称一次本地事务能够覆盖所有服务。
 
 \section{智能分析、预警与业务闭环}
 
