@@ -1,0 +1,52 @@
+[
+  {
+    "warning_id": "w-0001",
+    "asset_id": "DAM-A-WL-01",
+    "level": "BLUE",
+    "evaluable": true,
+    "quality": "valid",
+    "score": 0.36,
+    "reason": "水位出现需关注变化",
+    "status": "open"
+  },
+  {
+    "warning_id": "w-0002",
+    "asset_id": "DAM-A-PZ-07",
+    "level": "YELLOW",
+    "evaluable": true,
+    "quality": "valid",
+    "score": 0.58,
+    "reason": "渗压趋势超过黄色阈值",
+    "status": "acknowledged"
+  },
+  {
+    "warning_id": "w-0003",
+    "asset_id": "DAM-A-WL-02",
+    "level": "ORANGE",
+    "evaluable": true,
+    "quality": "valid",
+    "score": 0.74,
+    "reason": "水位包络接近设计洪水位",
+    "status": "open"
+  },
+  {
+    "warning_id": "w-0004",
+    "asset_id": "DAM-A-WL-03",
+    "level": "RED",
+    "evaluable": true,
+    "quality": "valid",
+    "score": 0.92,
+    "reason": "校核洪水位情景需人工会商",
+    "status": "open"
+  },
+  {
+    "warning_id": "w-0005",
+    "asset_id": "DAM-A-WL-01",
+    "level": "NONE",
+    "evaluable": false,
+    "quality": "missing",
+    "score": null,
+    "reason": "缺测导致未评估",
+    "status": "closed"
+  }
+]
