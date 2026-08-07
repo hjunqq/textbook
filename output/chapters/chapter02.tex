@@ -469,7 +469,7 @@ Won't & 本期自动下发闸门控制 & 控制安全论证不在当前范围 \\
 
 \subsection{系统流程图}
 
-系统流程图关注业务步骤、判断、输入输出和责任衔接。图\ref{fig:order-process-flowchart}描述用水计划从申报到执行反馈的闭环：资料不完整时从“完整性检查”退回“提交计划”；审批不通过时返回“修订计划”；审批通过后才生成执行任务并接收回执。这样的顺序让每个节点都有明确责任人与可审计状态。
+系统流程图关注业务步骤、判断、输入输出和责任衔接。图\ref{fig:order-process-flowchart}描述用水计划从申报到执行反馈的闭环：资料不完整时从“资料完整？”退回“提交用水计划”；审批不通过时返回“修订计划”；审批通过后才生成执行任务并接收回执。这样的顺序让每个节点都有明确责任人与可审计状态。
 
 绘制流程图之前先统一符号，否则同一个菱形在不同人笔下可能表示条件判断，也可能表示人工审核环节，图就失去了作为交流依据的价值。表\ref{tab:system-flow-symbols}给出本书采用的符号约定。
 
@@ -574,6 +574,37 @@ Won't & 本期自动下发闸门控制 & 控制安全论证不在当前范围 \\
 \label{fig:dfd-level-one}
 \end{figure}
 
+一级图只说明四个主要处理之间的边界，不能直接替代接口和数据校验设计。以“2.0 校验与分析”为例，二级分解可以把输入拆成字段完整性检查、重复提交检查、需水量计算和渠道能力匹配四个处理，再把每个处理的输出写回统一的数据存储。图\ref{fig:ch02-dfd-level-two}给出这一展开，同时保留从一级图传入的“申报资料”和传出的“校核结果”两个边界流。二级图新增的内部数据流可以更细，但不能改变父处理对外承诺的名称、方向和含义。
+
+绘制二级图时要做三项平衡检查。第一，边界平衡：父图的每条输入和输出在子图中都必须找到对应流；第二，处理守恒：每个处理不能凭空产生业务数据，也不能吞掉没有去向的输入；第三，存储责任：读取和写入哪个数据存储要明确，不能用一条双向箭头掩盖读写时序。若子图需要引入“外部信用评分”一类新实体，应先回到上下文图讨论系统边界，而不是直接画进二级图。
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=8mm and 7mm,
+  process/.style={ellipse,draw=Primary,fill=PrimaryLight,minimum width=2.25cm,minimum height=.75cm,align=center,font=\small},
+  store/.style={draw=Primary,double,minimum width=2.3cm,minimum height=.65cm,align=center,font=\small},
+  ext/.style={draw=Accent,rounded corners,fill=Accent!10,minimum width=2.3cm,minimum height=.65cm,align=center,font=\small}]
+\node[ext] (in) {申报资料};
+\node[process,right=of in] (p21) {2.1 完整性\\与重复检查};
+\node[process,right=of p21] (p22) {2.2 需水量\\计算};
+\node[process,below=of p22] (p23) {2.3 渠道能力\\匹配};
+\node[process,left=of p23] (p24) {2.4 生成\\校核结果};
+\node[store,below=of p21] (d1) {D1 用水计划};
+\node[store,below=of p24] (d2) {D2 工程能力};
+\node[ext,right=of p23] (out) {校核结果};
+\draw[->,thick] (in)--(p21);
+\draw[->,thick] (p21)--(p22);
+\draw[->,thick] (p22)--(p23);
+\draw[->,thick] (p23)--(p24);
+\draw[->,thick] (p24)--(out);
+\draw[<->,thick] (p21)--(d1);
+\draw[<->,thick] (p23)--(d2);
+\draw[->,dashed] (p24)--(d1);
+\end{tikzpicture}
+\caption{校验与分析处理的二级数据流图}
+\label{fig:ch02-dfd-level-two}
+\end{figure}
+
 \subsection{数据字典}
 
 数据字典定义数据流、数据存储和数据元素的结构与约束。每个字段的说明栏应给出编码格式、数据类型、单位、来源、取值域和校验规则，例如计划编号采用项目编码加年度序号，状态字段只能取受控枚举，流量字段注明精度与上限。清晰的字段契约能让接口、数据库和测试用例使用同一口径。表\ref{tab:water-plan-dictionary}按这个要求整理了用水计划的主要字段。填写时最容易省略的是“取值域”与“校验规则”两栏，而恰恰是这两栏决定了接口能否拒绝非法输入——把它们留空，等于把校验责任推给了下游每一个调用方。
@@ -603,9 +634,83 @@ version & 整数 & — & 每次修订递增，批准后不可覆盖 \\
 
 数据流也要定义。例如“执行回执”至少包含任务ID、设备ID、指令时间、实际启闭时间、目标流量、实测流量、质量码和回执状态。涉及水工设备动作时，接口、日志和界面统一使用“闸门启闭”，并分别记录目标开度、实际开度、启闭状态与操作指令，避免把动作命令和观测结果混为一项。
 
+\subsection{实体关系与规范化}
+
+数据流图回答“数据如何移动”，实体关系模型回答“数据对象如何长期保存以及彼此如何关联”。清源灌区至少要区分用水户、地块、渠道、用水计划、配水任务和执行回执；一个用水户可以拥有多个地块，一个计划可以拆成多个任务，一个任务可以产生多条带时间的回执。图\ref{fig:ch02-er-water-plan}用主键、外键和基数表达这些关系，图中英文实体名分别对应“用水户、地块、用水计划、渠道、配水任务、执行回执”。实体名称对应业务对象，属性名称对应数据字典，二者不一致时应先修订概念模型再写表结构。
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=9mm and 12mm,
+  ent/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=2.5cm,minimum height=.85cm,align=center,font=\small\CJKfamily{zhsong}},
+  rel/.style={draw=Accent,diamond,aspect=2.0,fill=Accent!10,inner sep=1pt,align=center,font=\scriptsize}]
+\node[ent] (user) {WaterUser\\PK applicantId};
+\node[ent,right=of user] (plot) {Plot\\PK plotId\\FK applicantId};
+\node[ent,below=of plot] (plan) {WaterPlan\\PK planId\\FK plotId};
+\node[ent,left=of plan] (canal) {Canal\\PK canalId};
+\node[ent,right=of plan] (task) {DispatchTask\\PK taskId\\FK planId};
+\node[ent,below=of task] (receipt) {ExecutionReceipt\\PK receiptId\\FK taskId};
+\draw[-,thick] (user)--node[above,font=\scriptsize]{1:N}(plot);
+\draw[-,thick] (plot)--node[right,font=\scriptsize]{1:N}(plan);
+\draw[-,thick] (plan)--node[above,font=\scriptsize]{1:N}(task);
+\draw[-,thick] (task)--node[right,font=\scriptsize]{1:N}(receipt);
+\draw[-,thick] (canal)--node[above,font=\scriptsize]{1:N}(plan);
+\end{tikzpicture}
+\caption{清源灌区用水计划核心实体关系}
+\label{fig:ch02-er-water-plan}
+\end{figure}
+
+规范化不是为了把表拆得越细越好，而是用函数依赖减少更新异常，再结合查询和审计场景决定是否保留合理冗余。若把用水户名称、地块名称和计划字段全部重复存入一张大表，修改名称时容易出现新旧值并存；若把每一条回执都覆盖到计划当前状态，又会丢失历史。应先写出“谁决定谁”的依赖，再选择主键、候选键和外键。表\ref{tab:ch02-normalization}用同一个计划实例说明从未分解记录到第三范式的判断路径。
+
+\begin{table}[htbp]
+\centering
+\caption{用水计划数据的规范化判断}
+\label{tab:ch02-normalization}
+\begin{tabular}{p{2.1cm}p{4.0cm}p{5.8cm}}
+\toprule
+阶段 & 主要依赖与问题 & 调整后的关系 \\
+未分解记录 & 一行同时含用水户、地块、计划和多条回执；回执重复造成更新与删除异常 & 将重复的回执组识别为独立数据集合，保留计划与回执的关联键 \\
+第一范式 & 字段保持原子值，回执不再以“回执1/回执2”多列出现 & 用水计划(planId, plotId, startTime, endTime, status)；执行回执(receiptId, taskId, occurredAt, value, quality) \\
+第二范式 & 非主键字段完全依赖所属主键，计划字段不依赖回执编号 & 配水任务(taskId, planId, canalId, requestedVolume)；回执只依赖receiptId及其任务外键 \\
+第三范式 & 用水户名称、渠道名称等描述字段不由计划编号间接决定 & 用水户、地块、渠道单独维护，计划只保存代理键；展示时通过受控关联读取名称 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+规范化结果还要回到业务查询验证。值班员查看趋势需要按测点和时间范围快速过滤，审批人查看计划需要按状态和版本排序，运维员追查回执需要按任务编号定位全部事件；这些访问路径可以通过索引、物化视图或缓存优化，但优化不能破坏主数据的唯一性和审计历史。实体关系图、数据字典和接口契约应使用同一组编号，任何新增字段都要说明来源、依赖、迁移方式和回滚策略。
+
+\subsection{状态转换图与判定树}
+
+实体关系描述“有什么”，状态转换描述“对象在什么事件下如何变化”。用水计划至少经历草稿、已提交、待校核、已批准、执行中、已完成和已退回等状态；每条转换都应标出触发事件、前置条件和操作者。状态图能暴露两个常见遗漏：退回后是否允许修改并再次提交，以及执行中发现水量偏差后回到哪个受控状态。图\ref{fig:ch02-plan-state}把正常路径、退回路径和撤回边界画在一起，读者可以据此编写状态转换测试。
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=9mm and 9mm,
+  state/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=2.0cm,minimum height=.62cm,align=center,font=\small}]
+\node[state] (draft) {草稿};
+\node[state,right=of draft] (submitted) {已提交};
+\node[state,right=of submitted] (checking) {待校核};
+\node[state,right=of checking] (approved) {已批准};
+\node[state,right=of approved] (running) {执行中};
+\node[state,below=of running] (closed) {已完成};
+\node[state,below=of checking] (returned) {已退回};
+\draw[->,thick] (draft)--node[above,font=\scriptsize]{提交}(submitted);
+\draw[->,thick] (submitted)--node[above,font=\scriptsize]{受理}(checking);
+\draw[->,thick] (checking)--node[above,font=\scriptsize]{校核通过}(approved);
+\draw[->,thick] (approved)--node[above,font=\scriptsize]{进入时段}(running);
+\draw[->,thick] (running)--node[right,font=\scriptsize]{回执完成}(closed);
+\draw[->,thick] (checking)--node[left,font=\scriptsize]{资料或水量问题}(returned);
+\draw[->,thick] (returned) -| node[near start,below,font=\scriptsize]{补充后再提交} (draft);
+\draw[->,dashed,thick] (running) to[bend left=35] node[right,font=\scriptsize]{受控撤回} (returned);
+\end{tikzpicture}
+\caption{用水计划状态与受控转换}
+\label{fig:ch02-plan-state}
+\end{figure}
+
+判定树适合把连续的条件判断展示成从根到叶的路径。它与决策表互相校验：树强调阅读顺序和早期分流，表强调所有组合是否覆盖。绘制时先把安全和合规硬门槛放在靠近根的位置，再放业务偏好和效率条件；每个叶节点都应有唯一动作，不能让同一条路径同时落到批准和调整两个结果。
+
 \subsection{决策表}
 
-当业务结果由多个条件组合决定时，决策表比长段落更清楚。下表示例只用于需求澄清，真实阈值应由批准规则确定。表\ref{tab:water-plan-decision}给出三个条件的组合及其对应动作。检查决策表是否完备的办法是数组合：$n$个二值条件共有$2^n$种取值，表中各条规则覆盖的组合数，加上用“无关”合并掉的组合数，应当正好等于这个总数；对不上就说明有组合没有被任何规则接住。
+当业务结果由多个条件组合决定时，决策表比长段落更清楚。下表示例只用于需求澄清，真实阈值应由批准规则确定。表\ref{tab:water-plan-decision}给出三个条件的组合及其对应动作，并把“水量不满足时渠道状态无关”显式写成“—”。三个二值条件共有$2^3=8$种组合：规则1覆盖1种，规则2用一个无关项覆盖2种，规则3覆盖4种，规则4覆盖1种，合计8种且互不重叠。检查决策表时先列出全部组合，再标记每条规则覆盖的集合；若有组合没有被接住，或同一组合落入两个不同动作，就必须回到业务规则修订。
 
 \begin{table}[htbp]
 \centering
@@ -617,7 +722,7 @@ version & 整数 & — & 每次修订递增，批准后不可覆盖 \\
 \midrule
 资料完整 & 是 & 是 & 否 & 是 \\
 水量可满足 & 是 & 否 & — & 是 \\
-渠道可用 & 是 & 是 & — & 否 \\
+渠道可用 & 是 & — & — & 否 \\
 \midrule
 批准计划 & $\checkmark$ & & & \\
 进入方案调整 & & $\checkmark$ & & $\checkmark$ \\
@@ -625,6 +730,53 @@ version & 整数 & — & 每次修订递增，批准后不可覆盖 \\
 \bottomrule
 \end{tabular}
 \end{table}
+
+把同一规则改画成判定树，可以帮助审批人按固定顺序阅读。图\ref{fig:ch02-approval-tree}先判断资料完整性，再判断水量是否满足；只有水量满足时才继续判断渠道是否可用。这样，规则2的渠道状态不会被错误地当作必填条件，树上的每个叶节点都能对应表中的一个动作。
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=7mm and 12mm,
+  decision/.style={draw=Accent,diamond,aspect=2.0,fill=Accent!10,align=center,inner sep=1pt,font=\scriptsize},
+  leaf/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=2.0cm,minimum height=.55cm,align=center,font=\scriptsize}]
+\node[decision] (complete) {资料完整？};
+\node[leaf,below left=of complete] (return) {退回补充};
+\node[decision,below right=of complete] (water) {水量可满足？};
+\node[leaf,below left=of water] (adjust) {进入方案调整};
+\node[decision,below right=of water] (canal) {渠道可用？};
+\node[leaf,below left=of canal] (adjust2) {进入方案调整};
+\node[leaf,below right=of canal] (approve) {批准计划};
+\draw[->,thick] (complete)--node[above left,font=\scriptsize]{否}(return);
+\draw[->,thick] (complete)--node[above right,font=\scriptsize]{是}(water);
+\draw[->,thick] (water)--node[above left,font=\scriptsize]{否}(adjust);
+\draw[->,thick] (water)--node[above right,font=\scriptsize]{是}(canal);
+\draw[->,thick] (canal)--node[above left,font=\scriptsize]{否}(adjust2);
+\draw[->,thick] (canal)--node[above right,font=\scriptsize]{是}(approve);
+\end{tikzpicture}
+\caption{配水审批规则的判定树}
+\label{fig:ch02-approval-tree}
+\end{figure}
+
+结构化分析的工作顺序可以概括为“先边界、后处理；先输入输出、后内部细节；先数据定义、后规则判断”。在清源灌区案例中，0层图先回答谁与系统交换什么，1层图再回答接收、校验、审批和生成配水分别负责什么，2层图才展开校验内部的字段、重复、计算和能力匹配。三层图的编号应保持父子对应，例如一级的2.0在二级只能拆成2.1、2.2、2.3等，不应在没有说明的情况下突然出现另一个“校核服务”。这样，需求、设计和测试可以沿编号逐层追踪。
+
+每一层都要检查“黑洞、白洞和灰洞”。黑洞是处理有输入却没有输出，通常表示处理结果没有定义；白洞是处理凭空产生输出，说明漏写输入或外部约束；灰洞是输入输出虽然存在，但处理规则无法解释数据如何变换。以“校核需水与渠道能力”为例，输入应包括计划时段、申请量、渠道能力版本和已批准计划，输出应至少包括校核结果、差额、使用的版本和失败原因。若只画一个“校核通过”箭头，测试人员无法判断差额如何展示，审批人也无法复核系统采用了哪一份能力数据。
+
+DFD中的数据流名称应使用名词短语，处理名称应使用动词短语，数据存储名称应说明保存的对象。把“审批人”画成数据流会混淆角色与消息，把“处理所有事情”画成处理会失去可验证边界。对于同一条流，父图和子图的名称可以缩短，但含义必须一致；例如父图的“批准计划”在子图中可以拆成“批准结果”和“审计记录”，但两者都要能回到父图的输出契约。平衡检查完成后，再为每个处理补处理说明、前置条件、业务规则、异常结果和事务边界。
+
+实体关系模型也需要经历从概念到逻辑的两次校验。概念模型先确认业务对象是否真实存在以及关系基数是否符合业务，例如一个计划可以对应多个配水任务，但一个任务只能来源于一个计划；逻辑模型再补主键、外键、唯一约束、状态枚举和时间字段。若审批人要求“按计划版本查看当时的渠道能力”，就不能只保存渠道当前名称，而应在计划或校核结果中保存能力版本标识，并把版本来源写入审计记录。关系基数、唯一性和历史保留要求会直接影响后续接口的幂等键与数据库约束。
+
+规范化检查可从函数依赖开始。设关系$R$依次包含计划编号、地块编号、用水户编号、用水户名称和申请量五个字段，则计划编号决定地块编号和申请量，地块编号决定用水户编号，用水户编号决定用水户名称；把这些字段放在同一张关系中会产生传递依赖。拆分为计划、地块和用水户三张关系后，修改用水户名称只需更新一处，查询时通过外键关联。规范化并不意味着禁止冗余：为报表保留经审计的快照是合理的，但快照必须标注生成时间、来源版本和不可回写属性，不能与主数据混为一张可编辑表。
+
+状态模型的每条转换都应形成至少一个正向和一个拒绝测试。提交动作要验证草稿字段完整、用户权限有效且版本未过期；校核通过要验证水量和渠道能力来自同一版本；进入执行中要验证当前时间落在计划时段；完成要验证回执达到结束条件。对于重复提交、超时、撤回和回执迟到等事件，状态机必须规定幂等结果和人工处理入口。若一个事件在不同状态下意义不同，应在事件名或状态守卫中写清边界，不能让同一个“确认”动作既代表审批确认又代表设备执行确认。
+
+判定树与状态图结合使用时，树负责一次决策，状态图负责决策后的长期变化。资料不完整的计划在树上落到“退回补充”，随后在状态图中回到草稿；水量不足的计划进入方案调整，调整后要重新走完整性和能力校核；渠道不可用则不能直接批准，而要记录替代渠道或人工会商结果。为每个叶节点指定唯一的后置状态，可以把业务规则转成一组覆盖测试：三条件决策表需要覆盖8个组合，状态转换测试还要覆盖每条合法边、每个拒绝边和至少一次重复事件。
+
+完成模型后，应召开一次跨角色走查。值班员检查异常是否有可执行的接手动作，审批人检查规则和责任是否可追溯，专业分析员检查数据口径与版本，开发人员检查每个处理是否有输入输出契约，测试人员检查每个叶节点和状态转换是否有验收证据，运维员检查日志、指标和回滚所需的数据是否存在。走查结果按模型编号记录问题，修订后重新执行边界平衡、依赖检查和规则覆盖检查，直到模型可以直接支撑SRS、接口设计和测试用例。
+
+模型之间还要建立互相校验的证据链。DFD中的“用水计划”应能在ER图中找到对应实体，在状态图中找到生命周期，在决策表中找到影响审批的条件，在数据字典中找到字段和取值域；如果其中一处使用了不同名称，评审人就应追问是否是同一个对象或两个不同概念。这样的交叉核对可以尽早发现“计划状态”与“审批结果”被混成一个字段、回执时间与计划时段单位不一致、以及一条规则没有对应测试用例等问题。最终交付时，可把模型编号、需求编号和测试编号放进同一张索引表，支持从任一证据反向定位上下文。
+
+对于含有人工判断的流程，还应把“系统给出的候选结果”和“人员作出的最终决定”分开建模。水量平衡校核可以由系统计算并给出差额，审批人仍需确认是否采用替代时段；替代方案的理由、版本和批准人应成为审计数据，而不是写在备注中的自由文本。若专业分析员修改了阈值，系统应记录修改前后值和生效范围，避免下一轮模型或测试误把一次临时会商当成永久规则。结构化分析因此不仅是画图，也是在定义责任、证据和变化边界。
+
+在课程实践中，学生可以先用纸笔完成三层DFD，再用实体关系图核对数据存储，最后从状态图和判定树各抽取一条正常路径与一条异常路径，写成验收用例。教师评审时重点查看编号是否贯通、边界是否平衡、条件是否穷尽，以及每个叶节点是否有明确责任人和证据；这比单纯检查图形是否美观更能检验需求分析质量。
 
 \section{软件需求规格说明与验收}
 
