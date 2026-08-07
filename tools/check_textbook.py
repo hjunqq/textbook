@@ -156,6 +156,27 @@ def check_wordcount(texts, r, init):
             r.fail("【防删除】%s 正文汉字 %d < 基线 %d，净减少 %d 字。本方案只允许增写；"
                    "确需删除的段落必须在提交说明中逐段列出原文并说明替代内容。"
                    % (f, c, b, b - c))
+    # 增量防删除：静态基线是 O1 之前的旧值，随着各章增长，它已经拦不住
+    # "从 38,000 删到 12,000 仍高于基线" 这类回退。再加一道与上一次提交的对比。
+    try:
+        import subprocess as _sp
+        for f in FILES:
+            prev = _sp.run(["git", "show", "HEAD:output/chapters/%s" % f],
+                           cwd=ROOT, capture_output=True, text=True)
+            if prev.returncode:
+                continue
+            pc = body_chars(prev.stdout)
+            drop = pc - cur.get(f, 0)
+            if drop > 1000:
+                r.fail("【增量防删除】%s 比上一次提交少了 %d 字（%d → %d）。"
+                       "个别改写造成的小幅波动可以接受，超过 1000 字属于成段删除，"
+                       "必须在提交说明中逐段列出原文与替代内容。"
+                       % (f, drop, pc, cur.get(f, 0)))
+            elif drop > 200:
+                r.warn("%s 比上一次提交少 %d 字，请确认是改写而非删除" % (f, drop))
+    except Exception:
+        pass
+
     tb, tt = sum(base.values()) if base else 0, sum(TARGET.values())
     r.log("%-16s %8d %8d %+8d %8d %6d%%"
           % ("合计", tb, total, total - tb, tt, round(100.0 * total / tt)))
