@@ -86,6 +86,172 @@ HTML描述内容的结构和语义。\texttt{header}、\texttt{nav}、\texttt{ma
 
 表格适合表达二维数据，不应用于页面布局。水位表至少应包含表头、单位和测量时间；表单提交前还需结合业务规则校验站点、时间范围和数值边界。
 
+\subsection{文档流、渲染流程与页面地标}
+
+HTML 文件被浏览器接收后，先经过字节解码和词法分析，再形成 DOM 树；CSS 规则形成 CSSOM，二者合并为渲染树，随后经历样式计算、布局、绘制和合成。这个过程解释了为什么标签的先后顺序会影响页面的阅读顺序，也解释了为什么在首屏反复改动大量节点会触发重排和重绘。对监测页面而言，文档流首先保证“标题—导航—数据—说明”的阅读路径，然后再由 CSS 决定列数、间距和颜色。只有把结构和表现分开，地图、曲线等高频更新区域才不会破坏键盘操作和屏幕阅读器的上下文。
+
+图\ref{fig:ch04-document-flow}把“源代码—浏览器处理—可访问页面”串成一条链：左侧是开发者写入的结构，中央是浏览器逐步生成的对象，右侧是值班员实际使用的地标区域。图中三个阶段并不是三个独立页面，而是同一份 HTML 在不同处理阶段的表示；调试时应先判断问题属于结构、样式还是脚本，再选择对应工具。
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[>=Stealth,thick,node distance=0.65cm and 0.9cm]
+  \tikzset{flow/.style={draw=Primary,rounded corners=2pt,minimum width=3.0cm,minimum height=0.62cm,align=center,fill=PrimaryLight,text=PrimaryDark,font=\small},
+    stage/.style={draw=PrimaryDark,rounded corners=2pt,minimum width=3.1cm,minimum height=0.62cm,align=center,fill=PrimaryLight,text=PrimaryDark,font=\small}}
+  \node[flow] (source) {HTML源文件\\语义标签与属性};
+  \node[stage,right=of source] (tree) {DOM/CSSOM\\样式计算};
+  \node[stage,right=of tree] (layout) {布局—绘制—合成\\浏览器渲染};
+  \node[flow,right=of layout] (landmark) {页面地标\\键盘与辅助技术};
+  \draw[->,draw=Primary] (source)--(tree);
+  \draw[->,draw=Primary] (tree)--(layout);
+  \draw[->,draw=Primary] (layout)--(landmark);
+  \node[below=0.45cm of tree,align=center,font=\scriptsize,text=PrimaryDark] {结构错误先修 HTML\\样式错误再查 CSS};
+  \node[below=0.45cm of layout,align=center,font=\scriptsize,text=PrimaryDark] {脚本只更新必要节点\\避免无谓重排};
+\end{tikzpicture}
+\caption{语义化文档从源文件到可访问页面的处理链}
+\label{fig:ch04-document-flow}
+\end{figure}
+
+\paragraph{文档流的调试方法}
+
+浏览器默认按照文档流从上到下、从左到右排列块级内容。一个元素脱离文档流（例如绝对定位）后，后续元素不会为它保留原来的空间；如果把整个监测面板都用绝对坐标拼接，窗口尺寸、字体缩放或语言切换都会使内容互相遮挡。教学示例应先用正常流表达层次，再在确有叠加需求的局部使用定位。开发者工具中的 Elements 面板可以检查 DOM 层级和可访问名称，Computed 面板可以核对最终样式，Performance 面板则用来定位布局抖动。把这三个检查步骤对应到图\ref{fig:ch04-document-flow}的三个处理阶段，能够比“盲目调像素”更快找到根因。
+
+渲染流程还决定了更新策略。水位数值每五分钟更新一次时，只需替换输出节点的文本；趋势图在一秒内收到多条消息时，应先在内存中合并，再在一个动画帧内刷新。若同时修改宽度、字体和位置，浏览器可能在一次任务中多次计算布局。将读操作（如\texttt{getBoundingClientRect}）集中在批次开头，将写操作集中在批次结尾，可以减少布局抖动。Vue 等框架会把这类批处理封装起来，但开发者仍需避免在循环中读取刚写入的布局属性。
+
+\paragraph{从地标到可访问名称}
+
+语义标签不仅是代码风格。\texttt{header}表示页面或区域的引导信息，\texttt{nav}表示一组重要导航，\texttt{main}表示页面唯一的主要内容，\texttt{section}表示具有主题标题的内容组，\texttt{article}表示可以独立发布的报告或公告，\texttt{aside}放置辅助信息，\texttt{footer}承载来源与更新时间，\texttt{figure}与\texttt{figcaption}把图表和说明绑定。若只是为了布局而没有主题标题，应使用\texttt{div}，而不是滥用\texttt{section}。每个地标都应能由键盘到达，并通过标题或\texttt{aria-label}获得可理解的名称。
+
+下面的清单把地标、跳转链接和实时区域放在一个可直接打开的文件中。正文先用\texttt{href=\"\#monitor-main\"}提供“跳到主要内容”链接，再用\texttt{aria-labelledby}把区域标题与地标关联；这样，屏幕阅读器用户无需重复经过全局导航即可进入水位数据。代码中的\texttt{tabindex=\"-1\"}只用于让脚本把焦点移动到主要内容，不会把普通文本加入键盘遍历顺序。完整骨架见清单\ref{lst:ch04-a41-landmarks}。
+
+\label{lst:ch04-a41-landmarks}
+\begin{lstlisting}[language=html,caption={带地标和跳转链接的监测页面骨架}]
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>清源水库安全监测平台</title>
+</head>
+<body>
+  <a class="skip-link" href="#monitor-main">跳到主要内容</a>
+  <header>
+    <h1>清源水库安全监测平台</h1>
+    <p>面向值班员的实时监测工作台</p>
+  </header>
+  <nav aria-label="主导航">
+    <a href="#monitor-main">实时监测</a>
+    <a href="#warning-panel">预警事件</a>
+    <a href="#data-note">数据说明</a>
+  </nav>
+  <main id="monitor-main" tabindex="-1">
+    <h2>实时监测</h2>
+    <section aria-labelledby="level-title">
+      <h3 id="level-title">水位概览</h3>
+      <p>当前水位：<output id="level" aria-live="polite">--</output> m</p>
+      <figure>
+        <div id="level-chart" role="img"
+             aria-label="最近一小时水位趋势图"></div>
+        <figcaption>最近一小时水位趋势（示意）</figcaption>
+      </figure>
+    </section>
+    <aside id="warning-panel" aria-labelledby="warning-title">
+      <h3 id="warning-title">预警事件</h3>
+      <p id="warning-message" role="status">暂无需要处理的事件</p>
+    </aside>
+  </main>
+  <footer id="data-note">
+    <p>数据来源：清源水库安全监测平台；更新时间：
+      <time datetime="2026-08-07T08:00:00+08:00">08:00</time></p>
+  </footer>
+</body>
+</html>
+\end{lstlisting}
+
+页面地标解决“我现在在哪里”的问题，表单控件则解决“我能提交什么”的问题。原生校验由浏览器在提交前执行，适合检查必填、格式和基本范围；\texttt{required}防止空值，\texttt{pattern}检查编码格式，\texttt{min}、\texttt{max}和\texttt{step}约束数值。校验消息应告诉用户如何修正，而不是只显示“输入错误”。清单\ref{lst:ch04-a41-form}用查询时段和测站编码说明这些属性的组合，并用\texttt{novalidate}保留自定义消息的控制权；实际项目也可以让浏览器显示默认消息，但提交到后端前必须再次校验。
+
+\label{lst:ch04-a41-form}
+\begin{lstlisting}[language=html,caption={监测查询表单的原生校验与可访问提示}]
+<form id="query-form" novalidate>
+  <fieldset>
+    <legend>查询条件</legend>
+    <label for="station-code">测站编码</label>
+    <input id="station-code" name="stationCode" required
+           pattern="ST-[0-9]{2}" placeholder="ST-01"
+           aria-describedby="station-help">
+    <small id="station-help">格式：ST-加两位数字</small>
+
+    <label for="start-time">开始时间</label>
+    <input id="start-time" name="startTime" type="datetime-local"
+           required aria-describedby="time-help">
+    <label for="sample-step">采样间隔（分钟）</label>
+    <input id="sample-step" name="step" type="number"
+           min="5" max="60" step="5" value="5" required>
+    <small id="time-help">时间范围还需由服务端校验</small>
+  </fieldset>
+  <p id="query-error" role="alert" aria-live="assertive"></p>
+  <button type="submit">查询</button>
+</form>
+\end{lstlisting}
+
+前端校验不能替代后端校验：浏览器中的脚本可以被禁用、篡改或绕过，网络请求也可能被直接构造。第5章使用 Jakarta Validation 的\texttt{@Valid}在服务端重新检查 DTO；前端负责即时反馈，后端负责最终信任边界。两层校验的规则应来自同一份数据字典，例如测站编码的格式、时间范围的时区和采样间隔的允许集合必须保持一致。若后端拒绝请求，前端还要把字段级错误映射回\texttt{aria-describedby}指向的提示区域，而不是只在控制台记录异常。
+
+\paragraph{键盘操作、焦点与动态内容}
+
+可访问页面需要一条可预测的键盘路径：跳转链接首先获得焦点，随后进入主导航，按 Tab 到达查询表单，再进入数据卡片和预警区域。不要用正整数\texttt{tabindex}人为重排顺序，因为 DOM 顺序才是屏幕阅读器和自动化测试能够稳定复现的顺序。弹出详情后，应把焦点移动到对话框标题，关闭时恢复到触发按钮；如果只是页面内提示，则用\texttt{role=\"status\"}表达普通更新，用\texttt{role=\"alert\"}表达需要立即处理的异常。
+
+清单\ref{lst:ch04-a41-focus}展示一个不依赖框架的焦点恢复脚本。它只负责交互语义，视觉样式仍交给 CSS；后续换成 Vue 组件时，可以把\texttt{openDialog}和\texttt{closeDialog}放入组件方法，并在卸载时移除事件监听。这样既能保持原生 HTML 的可测试性，也能避免把键盘逻辑散落在多个点击回调中。
+
+\label{lst:ch04-a41-focus}
+\begin{lstlisting}[language=JavaScript,caption={监测详情对话框的焦点管理}]
+document.body.insertAdjacentHTML('beforeend', `
+  <button id="open-station" type="button">查看测站详情</button>
+  <dialog id="station-dialog">
+    <h2 autofocus>测站详情</h2>
+    <p>此处显示经过后端校验的测站信息。</p>
+    <button data-close type="button">关闭</button>
+  </dialog>`);
+
+const dialog = document.querySelector('#station-dialog');
+const openButton = document.querySelector('#open-station');
+let lastFocused = null;
+
+function openDialog() {
+  lastFocused = document.activeElement;
+  dialog.showModal();
+  dialog.querySelector('[autofocus]')?.focus();
+}
+
+function closeDialog() {
+  dialog.close();
+  lastFocused?.focus();
+}
+
+openButton.addEventListener('click', openDialog);
+dialog.querySelector('[data-close]')
+  .addEventListener('click', closeDialog);
+dialog.addEventListener('cancel', closeDialog);
+\end{lstlisting}
+
+以上结构把“数据展示”“用户输入”“预警反馈”分成可命名的区域，后续添加 CSS 或 Vue 模板时仍然保留同一棵语义树。实践中应使用键盘、放大字体、屏幕阅读器和自动化检查至少各验证一次：键盘检查是否存在焦点陷阱，放大检查是否出现横向滚动，读屏检查是否能读出标题与单位，自动化检查则确认每个表单控件都有可计算名称。对于水利值班员这类需要连续操作的界面，可访问性不是额外装饰，而是减少误操作和漏读预警的工程要求。
+
+\paragraph{语义标签的选择决策}
+
+标签的选择应依据内容职责，而不是浏览器默认样式。若一段内容是全站导航，应使用\texttt{nav}并为多个导航分别命名；若它只是操作按钮旁的装饰性链接，普通\texttt{div}或\texttt{span}即可。\texttt{main}在一个文档中只能有一个，且不应嵌套在\texttt{header}、\texttt{nav}或\texttt{aside}中；\texttt{section}需要一个可见标题，标题层级应从\texttt{h1}逐级向下，不能为了字号跳过层级。把这些规则落实到监测页面后，读屏用户可以按地标列表直接跳到“实时监测”或“预警事件”，自动化测试也能用稳定的角色和名称定位元素。
+
+开发团队可以把页面结构当成接口来评审。提交一个新的监测卡片时，先回答三个问题：卡片是否有独立主题，是否能脱离周围内容被单独理解，是否包含需要实时播报的状态。如果卡片有标题且内容可独立解释，可使用\texttt{article}；如果只是多个指标的同类分组，使用带标题的\texttt{section}；如果仅用于栅格布局，使用\texttt{div}。实时水位数字本身使用\texttt{output}或普通文本即可，只有在数值变化需要立即通知时才增加\texttt{aria-live}，并设置合适的播报等级，避免每个传感器的细小波动同时打断值班员。
+
+\paragraph{原生校验的边界与测试}
+
+原生校验不是一个“提交按钮上的开关”，而是一组浏览器约束的组合。\texttt{required}检查是否为空，\texttt{pattern}适合编码和格式，数值控件的\texttt{min}、\texttt{max}、\texttt{step}共同决定可接受的离散集合，日期控件的\texttt{min}与\texttt{max}表达时间窗口。以查询表单为例，采样间隔设为 5 分钟并不意味着后端可以相信任何来自浏览器的 5 的倍数；客户端脚本可以被绕过，攻击者也可以直接发送 HTTP 请求，所以服务器必须再次校验测站是否属于当前用户的权限范围、起止时间是否有序、时间跨度是否超过查询上限。前端收到 400 响应后，应把服务端返回的字段错误映射到对应\texttt{input}的描述节点，并保留用户已经填写的其他条件。
+
+校验的可测试性来自明确的状态转换。空测站编码应显示“请输入测站编码”，格式错误应显示示例“ST-01”，采样间隔超出范围应说明允许区间；三个错误同时存在时，页面可以在表单顶部汇总数量，同时在字段旁保留具体原因。提交成功后，焦点应移动到结果标题或第一个结果项，而不是留在已经失效的提交按钮上。这样，鼠标用户、键盘用户和辅助技术用户都能得到同等的反馈。第5章的\texttt{@Valid}负责服务端对象校验，本章的 HTML 约束负责尽早发现明显错误，两者的错误码和字段名应写入接口契约并由前后端共同测试。
+
+\paragraph{从静态骨架到可维护组件}
+
+语义化骨架并不限制后续框架选型。迁移到 Vue 3 时，\texttt{header}、\texttt{nav}和\texttt{main}仍保留在模板中，数据变化只更新\texttt{output}、表格行或图表容器；迁移到服务端渲染时，标题、时间和数据来源仍以相同标签输出。组件边界应围绕业务职责划分，例如“测站概览”组件维护一个区域标题和一组指标，“预警事件”组件维护事件列表及其状态播报，父页面负责地标顺序和焦点移动。这样，组件替换不会破坏文档结构，CSS 重构也不会改变键盘路径。
+
+在验收阶段，可以把图\ref{fig:ch04-document-flow}转化为一张检查清单：首先检查源文件是否有唯一的\texttt{main}、连续标题和可计算的表单名称；然后在 Elements 面板检查 DOM 是否与设计的地标一致；最后用 Performance 面板观察一次批量数据更新是否引起多次布局。对于动态预警，再用屏幕阅读器确认普通状态更新不会抢占焦点，真正需要值班员处理的事件才会进入\texttt{alert}区域。结构、渲染和交互三个层面都通过后，页面才算完成，而不是只看截图是否“像设计稿”。
+
 \section{CSS样式与响应式布局}
 
 CSS负责视觉呈现。规则由选择器和声明块组成，层叠结果主要受来源、优先级和出现顺序影响。工程中宜使用类选择器组织组件样式，避免依赖过深的DOM层级。
