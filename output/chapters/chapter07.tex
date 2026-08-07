@@ -355,6 +355,123 @@ function encodeReading(reading, task) {
 
 清单\ref{lst:ch07-visual-encoding}把质量码转换为线型、纹理或形状，并把单位保留在标签中。它不直接决定蓝黄橙红预警颜色；预警服务返回等级和规则版本，展示层只负责依据图例渲染。这样，数据质量和业务风险两个维度即使同时出现在一张图上，也能被用户分别解释。
 
+\subsection{色彩体系与可读性}
+
+色彩不是越多越好，而是要与数据的语义结构相匹配。顺序型色板用于从低到高的单调量，例如雨量、淹没深度或模型残差；颜色明度或饱和度应沿一个方向变化，读者可以据此判断相对大小。发散型色板用于有明确中心的偏差，例如“低于基线—接近基线—高于基线”，中心值应使用中性颜色，两端使用对称或可解释的色相。定性色板用于类别区分，例如渗压、位移、水位和雨量四类测项，颜色之间不应暗示高低顺序。把三类色板混用会让读者误以为类别颜色代表数值大小，或把接近中心的偏差看成“没有数据”。
+
+彩虹色阶在水利看板中尤其容易产生错觉。彩虹色阶的明度不单调，黄色和绿色区域在相同数值差下显得更亮，蓝紫交界又容易形成虚假的边界；色觉障碍用户也难以区分部分色相。连续变量优先使用感知均匀的单调色带，并在图例中写出分级边界、单位和缺测标记。若必须沿用已有工程色带，应同时提供数值标签、等值线或纹理，使用户不用依赖色相就能读出结论。
+
+\begin{table}[htbp]
+\centering
+\caption{色板类型与水利展示场景}
+\label{tab:ch7-color-palettes}
+\begin{tabular}{p{2.4cm}p{3.8cm}p{3.8cm}p{3.3cm}}
+\toprule
+色板类型 & 数据语义 & 推荐编码 & 清源水库示例 \\
+\midrule
+顺序型 & 数值从低到高，方向单调 & 单调明度/饱和度，图例给出边界 & 雨量、淹没深度、残差绝对值 \\
+发散型 & 以中心值为界的正负偏差 & 中心中性色，两端对比色，标注零点 & 渗压相对基线偏差 \\
+定性型 & 无顺序的类别集合 & 互相可区分的色相，并配形状或文字 & 渗压、位移、水位、雨量 \\
+质量状态 & valid/\allowbreak suspect/\allowbreak missing & 边框、纹理、线型和文字优先 & 可疑点菱形、缺测断线 \\
+预警等级 & NONE/\allowbreak BLUE/\allowbreak YELLOW/\allowbreak ORANGE/\allowbreak RED & 业务颜色+等级文字+图标 & 蓝黄橙红预警与处置入口 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+表\ref{tab:ch7-color-palettes}把“质量状态色”和“预警等级色”列成两行。质量状态回答“这条数据能否信任”，预警等级回答“业务风险需要怎样处置”；一条suspect数据可以带有数值和空间位置，但不能因为颜色鲜艳就参与风险评分；一条valid数据可以得到NONE或蓝黄橙红等级。界面应在图例、详情卡和导出报告中同时呈现两个字段，不能用一个“状态颜色”字段把二者折叠。
+
+\paragraph{对比度与色觉障碍}
+网页和大屏验收至少检查文字与背景的对比度。普通正文文字通常以4.5:1作为最低目标，大号文字和图形元素可采用3:1的最低目标；关键数值、轴标签和告警文字应优先达到4.5:1。对比度计算使用相对亮度$L$：
+\[
+  C=\frac{L_{\mathrm{bright}}+0.05}{L_{\mathrm{dark}}+0.05}.
+\]
+设计时要在浅色背景、深色背景、灰度打印和投影环境分别抽样，不能只在设计软件的白色画布上判断。蓝色预警在深色大屏上可能需要提高明度，红色文字在浅色背景上需要更深的色值；最终色值、文字和图标一起验收，而不是只验收色块。
+
+色觉障碍和低视力用户需要冗余通道。预警颜色配合等级文字和图标，质量状态配合边框、纹理、虚实线和提示；地图色斑配合等值线和数值标注；图表中的可疑点使用菱形或虚线，缺测点使用断线和灰色遮罩。屏幕阅读器能够读取图表摘要、当前筛选条件和选中对象，键盘用户可以按固定顺序进入筛选、图例、图表点详情和处置按钮。不能把“鼠标悬停时显示tooltip”当作唯一说明方式。
+
+\paragraph{颜色令牌与状态组合}
+工程实现应先建立颜色令牌表，再把令牌映射到组件，而不是在每个页面里临时挑选十六进制色值。令牌至少包括背景、正文、边框、顺序型色阶、预警等级和质量状态六组。背景令牌对应浅色和深色两套值，正文令牌同时给出普通文字和大号文字的对比度结果；组件只引用令牌名称，不能直接复制某个页面的颜色。这样在清源水库平台切换大屏主题时，只需替换一组令牌即可重新计算对比度，不会出现地图已经变暗而图例仍使用浅色文字的局部失配。
+
+颜色令牌还要记录适用对象、禁用对象和替代通道。例如，红色预警令牌只能表示需要立即处置的业务等级，不能同时表示“数据无效”；无效数据应该使用灰色遮罩、断线和“missing”文字。蓝色预警令牌表示出现需关注的变化，不能被当作普通链接色或选中态颜色。选中态应使用边框加粗、焦点环或轻微放大来表达，以免用户把“当前选中”误读为“风险升高”。当同一个点同时具有 suspect 质量码和橙色预警时，详情卡必须把质量码、等级、规则版本和处置建议分成独立字段，颜色只作为辅助提示。
+
+\paragraph{验收矩阵与动态场景}
+静态截图通过对比度检查并不代表运行时可读。验收应建立“背景×状态×组件×通道”的矩阵：背景至少覆盖浅色、深色、灰度和投影四种场景；状态覆盖 NONE、BLUE、YELLOW、ORANGE、RED 以及 valid、suspect、missing 的组合；组件覆盖地图点、折线、柱状图、表格、按钮和弹窗；通道则检查颜色、文字、图标、纹理和键盘焦点。每个格子记录前景色、背景色、对比度、是否有非颜色提示、屏幕阅读器读出的文本以及截图编号。若某格只依赖颜色，验收记录必须标为不通过，直到补上文字或形状通道。
+
+动态变化同样需要可读性约束。预警等级从 NONE 升为 BLUE 时，界面应显示“出现需关注变化”的文字并在时间轴上留下状态变化；从 BLUE 升为 YELLOW 时，除颜色变化外还应更新处置入口和确认状态。质量码从 valid 变为 missing 时，折线应断开或显示空值，不得用上一时刻的颜色继续连线造成“仍有观测”的错觉。数据恢复为 valid 后，系统要保留缺测区间的空白，并在详情中显示恢复时间，不能把补传值伪装成连续实时数据。动画持续时间要短且可暂停，闪烁只用于需要立即确认的事件，普通蓝色变化不应造成视觉疲劳。
+
+\paragraph{色板版本与审计}
+色板是界面契约的一部分，应与预警规则版本一起进入配置仓库。每次调整蓝、黄、橙、红的色值，都要记录变更原因、影响页面、对比度复测结果和导出报告样例；历史报告继续按照生成时的版本解释，避免同一个等级在不同月份呈现不同含义。前端加载令牌时若发现版本不匹配，应在开发环境给出明显提示，在生产环境采用最近一次通过验收的版本并上报监控。设计人员、业务值班员和无障碍测试人员应共同签字，不能只由视觉设计人员确认色相“好看”。
+
+对打印和数据导出也要保留语义。黑白打印时，等级可以用不同线型、填充纹理和缩写文字区分；导出的表格把颜色转换为“等级”与“质量码”两列，并在表头给出解释；PDF 或图片的替代文本按“对象—数值—质量—预警—时间”顺序生成。这样，读者即使没有彩色屏幕、无法使用鼠标或通过屏幕阅读器访问，也能复核同一条监测记录。颜色设计的完成标准不是一张漂亮的截图，而是在不同设备、不同用户和不同输出媒介中都能得到一致的业务结论。
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=5mm and 7mm,
+  enc/.style={draw=Primary,rounded corners,fill=PrimaryLight,align=center,
+    minimum width=2.7cm,minimum height=.75cm,text=PrimaryDark}]
+\node[enc] (data) {业务语义：质量码+预警等级};
+\node[enc,right=of data] (color) {颜色：色板与对比度};
+\node[enc,right=of color] (redundant) {冗余通道：形状/纹理/文字};
+\node[enc,below=of redundant] (access) {可达性：键盘/阅读器/替代文本};
+\node[enc,below=of data] (test) {验收：浅底/深底/灰度/投影};
+\draw[->,draw=Primary,thick] (data)--(color);
+\draw[->,draw=Primary,thick] (color)--(redundant);
+\draw[->,draw=Primary,thick] (redundant)--(access);
+\draw[->,draw=Accent,dashed,thick] (access)--(test);
+\draw[->,draw=Accent,dashed,thick] (test)--(data);
+\end{tikzpicture}
+\caption{色彩、冗余编码与可达性验收闭环}
+\label{fig:ch7-color-accessibility}
+\end{figure}
+
+图\ref{fig:ch7-color-accessibility}强调色彩设计不是调色板选择的单一步骤。先确定业务语义，再选色板和对比度，随后补充形状、纹理、文字与替代文本，最后在不同显示条件下验收；若验收发现红绿色差异在灰度打印中消失，应回到冗余编码环节补充图标或线型，而不是继续调换色相。
+
+\label{lst:ch07-warning-palette}
+\begin{lstlisting}[language=JavaScript,breaklines=true,caption={预警等级与质量状态的双维度色彩配置}]
+const warningPalette = {
+  NONE:   {color: '#607D8B', icon: 'check', text: '无预警'},
+  BLUE:   {color: '#1976D2', icon: 'info', text: '蓝色预警'},
+  YELLOW: {color: '#F9A825', icon: 'triangle', text: '黄色预警'},
+  ORANGE: {color: '#EF6C00', icon: 'diamond', text: '橙色预警'},
+  RED:    {color: '#C62828', icon: 'alert', text: '红色预警'}
+};
+const qualityStyle = {
+  valid:   {border: 'solid', texture: 'none', text: '有效'},
+  suspect: {border: 'dashed', texture: 'hatch', text: '可疑'},
+  missing: {border: 'dotted', texture: 'empty', text: '缺测'}
+};
+
+function styleReading(reading) {
+  const warning = warningPalette[reading.warningLevel] ?? warningPalette.NONE;
+  const quality = qualityStyle[reading.quality] ?? qualityStyle.missing;
+  return {...warning, ...quality, label: `${warning.text}/${quality.text}`};
+}
+\end{lstlisting}
+
+清单\ref{lst:ch07-warning-palette}中的两套配置互不覆盖：预警等级提供业务颜色和图标，质量状态提供边框、纹理和文字。`styleReading`的标签把二者组合为可读短语，详情面板再展开规则版本、检查时刻和处置入口。若颜色加载失败，图标和文字仍能表达状态；若质量服务返回missing，界面不得把它回退为NONE。
+
+\label{lst:ch07-aria-accessible}
+\begin{lstlisting}[language=JavaScript,breaklines=true,caption={ECharts图表的无障碍与替代文本配置}]
+const option = {
+  aria: {
+    enabled: true,
+    decal: {show: true},
+    description: '清源水库PZ-07最近24小时渗压趋势；缺测断线，可疑点虚线'
+  },
+  title: {text: 'PZ-07渗压（kPa）—最近24小时'},
+  legend: {data: ['有效', '可疑', '缺测']},
+  series: [{type: 'line', name: '有效', data: validPoints},
+    {type: 'line', name: '可疑', data: suspectPoints,
+      lineStyle: {type: 'dashed'} }]
+};
+chart.setOption(option);
+chart.getDom().setAttribute('tabindex', '0');
+chart.getDom().setAttribute('role', 'img');
+chart.getDom().setAttribute('aria-label', option.aria.description);
+\end{lstlisting}
+
+无障碍验收还要提供表格化替代文本：列出时间、数值、单位、质量码、预警等级和变化说明，允许键盘用户逐行读取。焦点顺序从筛选条件进入图例，再进入图表摘要和详情按钮；弹出详情后把焦点移入对话框，关闭后返回原来的图表点。这样，键盘和屏幕阅读器用户可以完成与鼠标用户相同的“筛选—定位—查看证据—确认处置”路径。
+
 \paragraph{从业务问题到图表规格}
 设计一张图表可以按“问题—数据—编码—交互—证据”五步执行。第一步写出读者要做的动作，例如比较两个时段的水位、定位异常测点或判断降雨响应是否滞后；第二步列出完成动作所需的字段、单位、时间窗和质量码；第三步依据表\ref{tab:ch7-task-chart}选择位置、长度、颜色、形状或纹理，并确定坐标轴和分级规则；第四步设计筛选、悬停、点击、缩放和键盘操作，说明这些操作改变的是视图还是查询条件；第五步规定图例、数据版本、生成时间和可下载明细，使读者能够复核图形背后的数据。没有这五步，图表往往只展示“有什么数据”，却没有帮助用户完成判断。
 
