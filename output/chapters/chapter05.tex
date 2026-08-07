@@ -18,7 +18,7 @@
 
 \section{后端服务与REST接口概述}
 
-后端位于用户界面与数据资源之间，承担身份校验、业务计算、持久化、审计和系统集成。典型请求链路为“浏览器或设备网关—控制器—应用服务—Repository—数据库”。控制器只处理协议转换和输入校验，业务规则放在服务层，数据访问集中在Repository；若进一步拆分为网络服务，还需显式管理边界、版本和分布式失败\cite{newman2021}。
+后端位于用户界面与数据资源之间，承担身份校验、业务计算、持久化、审计和系统集成。典型请求链路为“浏览器或设备网关—控制器—应用服务—Repository—数据库”。控制器只处理协议转换和输入校验，业务规则放在服务层，数据访问集中在Repository；若进一步拆分为微服务，还需显式管理边界、版本和分布式失败\cite{newman2021}。
 
 HTTP方法的基本语义见表\ref{tab:http-methods}。接口设计不仅要返回数据，还要正确使用状态码：创建成功通常返回201，参数无效返回400，未认证返回401，无权限返回403，资源不存在返回404，服务器异常返回500。
 
@@ -26,20 +26,129 @@ HTTP方法的基本语义见表\ref{tab:http-methods}。接口设计不仅要返
 \centering
 \caption{REST接口常用HTTP方法}
 \label{tab:http-methods}
-\begin{tabular}{lll}
+\begin{tabular}{llll}
 \toprule
-方法 & 典型语义 & 水利示例 \\
+方法 & 典型语义 & 水利示例 & 是否幂等 \\
 \midrule
-GET & 查询资源 & 查询测站最新水位 \\
-POST & 创建资源或触发命令 & 创建告警处置单 \\
-PUT & 整体替换资源 & 更新测站完整配置 \\
-PATCH & 局部修改资源 & 修改告警状态 \\
-DELETE & 删除资源 & 删除尚未发布的规则 \\
+GET & 查询资源 & 查询测站最新水位 & 是 \\
+POST & 创建资源或触发命令 & 创建告警处置单 & 否（需业务幂等键） \\
+PUT & 整体替换资源 & 更新测站完整配置 & 是 \\
+PATCH & 局部修改资源 & 修改告警状态 & 取决于操作定义 \\
+DELETE & 删除资源 & 删除尚未发布的规则 & 是 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
+表\ref{tab:http-methods}中的幂等性描述的是同一请求重复执行后的资源最终状态，而不是网络层只发送一次。值班员在弱网环境下可能重复点击“提交处置”，客户端可以为一次业务操作生成\texttt{Idempotency-Key}，服务端以“用户+键+资源类型”建立唯一约束并缓存第一次响应；这样重试不会创建两条处置单。\texttt{POST}本身通常不是幂等的，只有把业务键、去重窗口和冲突响应写进契约，才能把它安全地用于设备重投。
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[>=Stealth,thick,node distance=0.35cm and 0.3cm]
+  \tikzset{layer/.style={draw=Primary,rounded corners=2pt,minimum width=2.05cm,minimum height=.68cm,align=center,fill=PrimaryLight,text=PrimaryDark,font=\scriptsize}}
+  \node[layer] (client) {浏览器/网关\\HTTP请求};
+  \node[layer,right=of client] (controller) {Controller\\协议与校验};
+  \node[layer,right=of controller] (service) {Application Service\\用例与规则};
+  \node[layer,right=of service] (repo) {Repository\\查询与持久化};
+  \node[layer,right=of repo] (db) {PostgreSQL\\PostGIS/TimescaleDB};
+  \draw[->,draw=Primary] (client)--(controller);
+  \draw[->,draw=Primary] (controller)--(service);
+  \draw[->,draw=Primary] (service)--(repo);
+  \draw[->,draw=Primary] (repo)--(db);
+  \draw[->,draw=Accent] (db.south) to[bend right=35] node[below,font=\scriptsize]{结果沿原链路返回} (client.south);
+\end{tikzpicture}
+\caption{监测值写入分层链路}
+\label{fig:ch05-request-chain}
+\end{figure}
+
+图\ref{fig:ch05-request-chain}把一次监测值写入拆成五个可测试边界：控制器负责把JSON转换为命令并拒绝格式错误，应用服务检查测站状态、质量码和时间窗口，Repository执行参数化查询，数据库保证约束与索引。任何一层都不应越过下一层直接修改另一层的内部状态；例如控制器不拼接SQL，Repository不决定预警业务规则。
+
 资源路径使用名词，例如\texttt{/api/stations/ST-01/readings}；筛选条件放入查询参数，例如\texttt{?from=...\&to=...}。设备协议接入属于边缘网关职责，本章不展开Modbus或MQTT细节。
+
+资源建模先回答“系统管理的对象是什么”。测站是稳定资源，监测读数是按时间追加的子资源，告警处置单是具备状态迁移的业务资源。查询最新读数可以使用\texttt{GET /api/stations/ST-01/readings/latest}，查询时间范围使用\texttt{GET /api/stations/ST-01/readings?from=...\&to=...}；创建一条读数使用\texttt{POST /api/readings}，请求体包含测站 ID、采样时间、数值、单位和质量码。路径表达资源层级，查询参数表达视图条件，业务动作只有在无法用资源状态表达时才使用动词，例如\texttt{POST /api/alerts/AL-01/acknowledge}。
+
+分层依赖方向应从外向内收敛：Controller 依赖 Application Service，Service 依赖领域对象和 Repository 接口，Repository 的具体实现依赖 PostgreSQL、PostGIS 或 TimescaleDB。领域对象不依赖 HTTP、JSON 和 Spring 注解，便于在单元测试中用内存对象验证规则。若把数据库实体直接作为响应体，内部字段、懒加载关系和审计信息可能泄露到外部契约；DTO 映射应在控制器或应用服务边界完成，并为时间、单位和质量码提供稳定格式。
+
+\label{lst:ch05-rest-layer}
+\begin{lstlisting}[language=Java,caption={分层 REST 查询：DTO、服务与仓储接口}]
+public record LatestReadingResponse(
+        String stationId, double level, String unit,
+        Instant measuredAt, String quality) {}
+
+public interface ReadingQueryRepository {
+    Optional<WaterReading> findLatest(String stationId);
+}
+
+@Service
+public class ReadingQueryService {
+    private final ReadingQueryRepository repository;
+
+    public ReadingQueryService(ReadingQueryRepository repository) {
+        this.repository = repository;
+    }
+
+    @Transactional(readOnly = true)
+    public LatestReadingResponse latest(String stationId) {
+        WaterReading reading = repository.findLatest(stationId)
+                .orElseThrow(() -> new EntityNotFoundException("测站无读数"));
+        return new LatestReadingResponse(reading.stationId(), reading.level(),
+                reading.unit(), reading.measuredAt(), reading.quality());
+    }
+}
+\end{lstlisting}
+
+清单\ref{lst:ch05-rest-layer}用只读事务包住查询，并把实体转换为响应 DTO；它没有把数据库实现类型暴露给控制器。查询结果为空时抛出领域可识别的异常，由统一异常处理器转换为404，客户端可以据此显示“暂无读数”或提示测站编号，而不是把空对象误当作水位为零。
+
+写入接口要把协议校验、业务校验和持久化顺序写清。协议层检查必填字段、数值格式和时间字符串，应用服务检查测站是否存在、采样时间是否落在允许窗口、质量码是否允许参与计算，Repository 在事务中保存记录。创建成功返回\texttt{201 Created}并在\texttt{Location}头给出新资源地址；重复的幂等键返回第一次创建的响应或\texttt{409 Conflict}，不能静默创建第二条记录。
+
+\label{lst:ch05-rest-write}
+\begin{lstlisting}[language=Java,caption={监测值写入：POST、校验与201 Location}]
+public record CreateReadingRequest(
+        @NotBlank String stationId,
+        @NotNull @DecimalMin("0.0") @DecimalMax("50.0") BigDecimal level,
+        @NotBlank String unit,
+        @NotNull Instant measuredAt,
+        @NotBlank String quality) {}
+
+@RestController
+@RequestMapping("/api/readings")
+public class ReadingCommandController {
+    private final ReadingCommandService service;
+
+    public ReadingCommandController(ReadingCommandService service) {
+        this.service = service;
+    }
+
+    @PostMapping
+    ResponseEntity<ReadingResponse> create(
+            @Valid @RequestBody CreateReadingRequest request,
+            @RequestHeader(value = "Idempotency-Key", required = false) String key) {
+        WaterReading saved = service.create(request, key);
+        URI location = URI.create("/api/readings/" + saved.id());
+        return ResponseEntity.created(location).body(ReadingResponse.from(saved));
+    }
+}
+\end{lstlisting}
+
+这里使用\texttt{BigDecimal}表达水位，避免用\texttt{double}承载边界校验时出现二进制浮点舍入误差；服务内部仍可按明确规则转换为数据库数值类型。\texttt{@Valid @RequestBody}只负责触发Bean Validation，诸如“测站属于当前工程”“时间不得早于上一条记录”等跨字段规则必须在服务层再次检查。控制器接收可选的幂等键，但不负责保存去重记录，去重状态由服务层和数据库唯一约束共同保证。
+
+分页、排序和过滤也要形成稳定的 URL 契约。\texttt{page}从0开始还是从1开始必须在全书统一；本章示例采用从0开始的\texttt{page}、正数\texttt{size}，排序使用\texttt{sort=measuredAt,desc}，过滤使用\texttt{stationId}、\texttt{quality}和时间范围。服务端限制\texttt{size}上限，拒绝未知排序字段，返回\texttt{content}、\texttt{page}、\texttt{size}、\texttt{totalElements}和\texttt{totalPages}，这样前端可以显示总页数而不是用当前页长度猜测。
+
+游标分页适合持续追加的时序读数：客户端携带上一页最后一条记录的\texttt{measuredAt,id}，服务端按联合索引向后查找，避免高页码\texttt{OFFSET}扫描大量历史数据。游标应视为不透明字符串，不能让客户端自行修改时间边界；接口文档还要说明读数在分页期间追加时的排序稳定性。报表导出属于异步任务时，使用任务资源返回\texttt{202 Accepted}，由客户端轮询任务状态，而不是让一次 HTTP 请求长时间占用连接。
+
+服务发现与微服务边界必须以业务能力为中心。数据采集、读数查询、预警评估和通知可以是不同服务，但每个服务拥有明确的数据所有权和 API 契约；拆分不是把每个类都部署成独立进程。开发环境可用配置文件把逻辑服务名映射到固定地址，生产环境再接入服务注册与发现组件、健康检查和负载均衡。业务代码只依赖接口客户端，不能把某个注册中心的注解散落到领域层，这样更换实现时只需调整基础设施配置。
+
+跨服务调用要显式处理超时、重试和降级。查询测站详情可以在短超时后返回缓存快照，并在界面标注数据时间；写入监测值则不能因为重试而重复落库，应把请求 ID 和幂等键贯穿网关、服务日志与数据库。链路追踪至少传递\texttt{traceId}和\texttt{requestId}，错误响应包含可定位的错误码而不暴露内部堆栈。服务之间若共享 PostgreSQL 表，边界会失去意义，应改为通过版本化 API 或消息事件交换数据。
+
+API 版本化需要在兼容性和演进速度之间作出可审计的选择。对外公开的水利平台接口可以采用路径版本\texttt{/api/v1/stations}，在字段增加时保持旧字段语义不变；删除字段、改变单位或改变时间时区都属于破坏性变更，应发布\texttt{v2}并给出迁移窗口。版本号不应随着每次修复递增，补丁修复和兼容字段增加可以通过文档和变更日志说明。响应体可带\texttt{Deprecation}和\texttt{Sunset}提示，让调用方在停止旧版本前完成升级。
+
+错误响应应同时满足机器可判断和人可理解。建议统一包含\texttt{type}、\texttt{title}、\texttt{status}、\texttt{code}、\texttt{detail}和\texttt{traceId}，其中\texttt{code}使用稳定枚举，\texttt{detail}只提供当前请求的上下文。参数错误可以按字段返回多个问题，资源不存在包含资源类型和业务 ID，权限失败不透露资源是否真实存在。日志中的\texttt{traceId}与响应中的值一致，运维人员可以从一次值班员操作追到网关、服务和数据库查询。
+
+幂等键的生命周期要覆盖消息最大重投和人工重试周期。服务端保存键、请求摘要、响应状态和过期时间；同一个键携带不同请求体时返回冲突，防止客户端误把一个键当作通用令牌。数据库唯一约束是最后一道防线，应用层缓存只用于快速返回，不能替代约束。处置单的状态迁移也要有唯一规则，例如只有\texttt{OPEN}可以变为\texttt{ACKNOWLEDGED}，重复确认返回当前状态而不是再次产生副作用。
+
+分页查询需要稳定排序，否则实时读数追加时会出现重复或漏项。排序字段后追加唯一 ID 作为 tie-breaker；服务端在响应中回显实际排序方向和时间区间，客户端翻页时携带同一条件。导出任务和大范围历史查询应限制最大时间跨度，超过阈值改为异步任务并在完成后提供下载地址。对外接口还应设置速率限制和请求体大小上限，避免错误客户端占满数据库连接。
+
+服务发现的健康检查至少分为进程存活、依赖可达和业务可用三类。进程存活用于重启异常实例，依赖可达检查数据库、Redis 和 Kafka 连接，业务可用则验证关键表结构、时序写入权限和预警规则加载。网关路由切换时先摘除不健康实例，再等待正在处理的请求完成；客户端重试只针对明确的瞬态错误，写入请求必须携带幂等键。通过这些约束，微服务边界才能在故障时保持数据一致和可观察。
+接口文档还应给出示例请求、示例响应、错误码和限流规则，并在每次版本发布时同步更新 OpenAPI 描述；值班员和前端开发者据此可以复现问题、核对字段单位并确认兼容范围。
 
 \section{Spring Boot企业级开发基础}
 
