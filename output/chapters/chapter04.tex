@@ -1507,7 +1507,33 @@ props、emit、slot 和 provide/inject 形成四条不同的依赖路径。props
 
 \section{Vue Router与Pinia应用组织}
 
-Vue Router把URL映射到页面组件。路由配置应包含稳定的路径、名称和组件；页面级组件可用动态导入实现按需加载。路由守卫适合做登录状态和角色检查，但细粒度业务权限仍须由后端验证。
+Vue Router把 URL 映射到页面组件，\texttt{App.vue}中的\texttt{<router-view />}是路由组件真正出现的位置。路由表应包含稳定的路径、名称、组件和元数据；页面级组件使用动态导入可以把首屏代码与详情页代码分开下载。导航的职责边界要保持清楚：路由负责页面切换和参数解析，页面负责展示与交互，后端负责最终的身份和权限判定。
+
+\subsection{根组件、路由表与登录守卫}
+
+根组件通常只保留全局布局和路由出口。导航栏、全局提示和面包屑可以放在出口上下方；具体页面由路由决定。下面的骨架包含一个可跳过登录页、测站列表、动态测站详情和告警中心，读者可以直接放入 Vite 5 项目验证路径匹配。动态段\texttt{:id}会被解析为字符串参数，若业务要求数值或固定格式，应在页面或守卫中完成校验。
+
+清单\ref{lst:ch04-a47-app-shell}展示\texttt{App.vue}的最小骨架，清单\ref{lst:ch04-js-router}给出完整路由表。守卫返回一个带名称的目标对象，而不是拼接字符串；\texttt{redirect}查询参数保留用户原本想访问的路径，登录成功后可以跳回去。守卫必须识别当前是否已经在登录页，形成防环判断，否则匿名用户访问登录页也会再次被重定向。
+
+\label{lst:ch04-a47-app-shell}
+\begin{lstlisting}[language=Vue,caption={App.vue 根组件与 router-view}]
+<script setup>
+import { RouterLink, RouterView } from 'vue-router';
+</script>
+
+<template>
+  <header class="app-header">
+    <RouterLink to="/">清源水库安全监测平台</RouterLink>
+    <nav aria-label="主导航">
+      <RouterLink to="/stations">测站</RouterLink>
+      <RouterLink to="/alerts">告警中心</RouterLink>
+    </nav>
+  </header>
+  <main>
+    <RouterView />
+  </main>
+</template>
+\end{lstlisting}
 
 \label{lst:ch04-js-router}
 \begin{lstlisting}[language=JavaScript,caption={路由参数读取与跳转}]
@@ -1516,36 +1542,119 @@ import { createRouter, createWebHistory } from 'vue-router';
 const router = createRouter({
   history: createWebHistory(),
   routes: [
-    { path: '/', name: 'home', component: () => import('./views/Home.vue') },
-    { path: '/stations/:id', name: 'station',
+    { path: '/', name: 'home', redirect: { name: 'stations' } },
+    { path: '/login', name: 'login', component: () => import('./views/Login.vue') },
+    { path: '/stations', name: 'stations', component: () => import('./views/StationList.vue'),
+      meta: { requiresAuth: true },
+      children: [
+        { path: 'map', name: 'station-map', component: () => import('./views/StationMap.vue') }
+      ] },
+    { path: '/stations/:id', name: 'station-detail',
       component: () => import('./views/StationDetail.vue'),
       props: true, meta: { requiresAuth: true } }
   ]
 });
 
 router.beforeEach(to => {
-  if (to.meta.requiresAuth && !sessionStorage.getItem('token')) return '/login';
+  const hasToken = Boolean(sessionStorage.getItem('access_token'));
+  if (to.meta.requiresAuth && !hasToken && to.name !== 'login') {
+    return { name: 'login', query: { redirect: to.fullPath } };
+  }
 });
 export default router;
 \end{lstlisting}
 
-Pinia集中管理跨组件共享且具有业务含义的状态，如当前测站、实时读数和告警数量。只在单个组件内部使用的展开状态不必放入仓库。
+嵌套路由要求父页面提供自己的\texttt{<router-view />}，否则子路由虽然匹配成功却没有渲染位置。测站列表可以在页头显示筛选器，在内容区域再放一个出口承载地图子页；动态详情则使用顶层路径，便于从地图标记和列表行直接跳转。\texttt{useRouter}用于发起导航，\texttt{useRoute}用于读取当前路径、查询参数和动态参数。编程式导航应使用路由名称和参数对象，避免把业务 ID 直接拼进未经编码的 URL。
+
+\label{lst:ch04-a47-navigation}
+\begin{lstlisting}[language=Vue,caption={useRouter、useRoute 与编程式导航}]
+<script setup>
+import { computed } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+
+const route = useRoute();
+const router = useRouter();
+const stationId = computed(() => String(route.params.id ?? ''));
+const returnTo = computed(() => String(route.query.from ?? 'stations'));
+
+function openStation(id) {
+  router.push({ name: 'station-detail', params: { id }, query: { from: returnTo.value } });
+}
+function backToList() {
+  router.replace({ name: 'stations', query: { selected: stationId.value } });
+}
+</script>
+
+<template>
+  <button type="button" @click="backToList">返回测站列表</button>
+  <button type="button" @click="openStation('ST-02')">打开下游测站</button>
+</template>
+\end{lstlisting}
+
+登录页读取守卫写入的\texttt{redirect}，成功后只允许跳转到应用内部的路径，并对缺省值回退到测站首页。令牌写入和清理应复用 A4-5 的请求封装，页面只负责提交凭据和显示错误。后端仍要校验令牌和权限，前端守卫只是减少无意义的页面加载，不能作为安全边界。
+
+\label{lst:ch04-a47-login}
+\begin{lstlisting}[language=Vue,caption={登录成功后的安全回跳}]
+<script setup>
+import { ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { request } from '../api/request.js';
+
+const route = useRoute();
+const router = useRouter();
+const account = ref('');
+const password = ref('');
+const errorMessage = ref('');
+
+function safeRedirect(value) {
+  return typeof value === 'string' && value.startsWith('/') && !value.startsWith('//')
+    ? value : '/stations';
+}
+async function submit() {
+  errorMessage.value = '';
+  try {
+    const result = await request('/auth/login', {
+      method: 'POST', body: JSON.stringify({ account: account.value, password: password.value })
+    });
+    sessionStorage.setItem('access_token', result.accessToken);
+    await router.replace(safeRedirect(route.query.redirect));
+  } catch (error) {
+    errorMessage.value = error.message || '登录失败，请稍后重试';
+  }
+}
+</script>
+
+<template>
+  <form @submit.prevent="submit">
+    <label>账号<input v-model.trim="account" autocomplete="username" required></label>
+    <label>密码<input v-model="password" type="password" autocomplete="current-password" required></label>
+    <button type="submit">登录</button>
+    <p v-if="errorMessage" role="alert">{{ errorMessage }}</p>
+  </form>
+</template>
+\end{lstlisting}
 
 \label{lst:ch04-js-pinia}
 \begin{lstlisting}[language=JavaScript,caption={Pinia测站状态管理}]
 import { defineStore } from 'pinia';
+import { loadLatestLevel } from '../api/stations.js';
 
 export const useStationStore = defineStore('station', {
-  state: () => ({ currentId: null, latest: null, loading: false }),
+  state: () => ({ currentId: null, latest: null, loading: false, error: null }),
   getters: {
     isWarning: state => (state.latest?.level ?? 0) >= 5.0
   },
   actions: {
     async loadLatest(id) {
       this.loading = true;
+      this.error = null;
       try {
         this.latest = await loadLatestLevel(id);
         this.currentId = id;
+      } catch (error) {
+        this.error = error;
+        this.latest = null;
+        throw error;
       } finally {
         this.loading = false;
       }
@@ -1553,6 +1662,117 @@ export const useStationStore = defineStore('station', {
   }
 });
 \end{lstlisting}
+
+Pinia集中管理跨组件共享且具有业务含义的状态，如当前测站、实时读数和告警数量；只在单个组件内部使用的展开状态保留在组件中。组件调用\texttt{useStationStore()}得到的是一个带响应式属性的 store。直接写\texttt{const \{ latest, loading \} = store}会把属性值拷贝出来，后续更新无法驱动模板；需要使用\texttt{storeToRefs}保留响应式引用，动作方法则可以直接从 store 取出。
+
+\label{lst:ch04-a47-store-usage}
+\begin{lstlisting}[language=Vue,caption={组件内使用 Pinia 与 storeToRefs}]
+<script setup>
+import { onMounted } from 'vue';
+import { storeToRefs } from 'pinia';
+import { useStationStore } from '../stores/station.js';
+
+const stationStore = useStationStore();
+const { latest, loading, isWarning } = storeToRefs(stationStore);
+const { loadLatest } = stationStore;
+
+onMounted(() => loadLatest('ST-01'));
+</script>
+
+<template>
+  <p v-if="loading" role="status">正在读取最新水位……</p>
+  <p v-else-if="latest">{{ latest.level }} m <strong v-if="isWarning">需要关注</strong></p>
+  <p v-else>暂无读数</p>
+</template>
+\end{lstlisting}
+
+清单\ref{lst:ch04-a47-store-usage}中，\texttt{storeToRefs}只处理状态和 getter，\texttt{loadLatest}仍保留为动作函数。若需要批量修改状态，可以调用 store 的动作；表单输入不应直接写入后端缓存字段，提交时由动作完成校验和请求。跨路由共享的当前测站、最新读数和告警计数放在 Pinia 后，列表、地图和详情页可以读取同一份状态，避免页面之间各自维护副本。
+
+\subsection{StationDetail 的动态参数与数据加载}
+
+路由配置中的\texttt{props: true}会把\texttt{:id}动态段作为组件 prop 注入。这样，详情组件不必依赖全局路由对象，单元测试可以直接传入\texttt{id}；查询参数仍可通过\texttt{useRoute}读取。\texttt{defineProps}应明确类型和必填约束，收到参数后再调用 store 动作加载数据，并在参数变化时重新加载。组件卸载时沿用前面的取消信号和清理模式。
+
+\label{lst:ch04-a47-station-detail}
+\begin{lstlisting}[language=Vue,caption={StationDetail.vue 接收动态路由参数}]
+<script setup>
+import { watch } from 'vue';
+import { storeToRefs } from 'pinia';
+import { useStationStore } from '../stores/station.js';
+
+const props = defineProps({ id: { type: String, required: true } });
+const stationStore = useStationStore();
+const { latest, loading, error } = storeToRefs(stationStore);
+
+watch(() => props.id, id => stationStore.loadLatest(id), { immediate: true });
+</script>
+
+<template>
+  <article aria-labelledby="station-detail-title">
+    <h1 id="station-detail-title">测站 {{ props.id }}</h1>
+    <p v-if="loading" role="status">正在加载……</p>
+    <p v-else-if="error" role="alert">{{ error.message }}</p>
+    <dl v-else-if="latest"><dt>最新水位</dt><dd>{{ latest.level }} m</dd></dl>
+    <p v-else>暂无有效读数</p>
+  </article>
+</template>
+\end{lstlisting}
+
+选项式 store 适合把状态、getter 和动作按对象分栏展示，便于刚接触 Pinia 的读者建立映射；setup 式 store 使用\texttt{ref}、\texttt{computed}和普通函数，适合复用组合式函数和精确控制公开成员。两种写法都通过\texttt{defineStore}注册，组件侧的\texttt{storeToRefs}用法一致。选择时以团队可读性和测试边界为依据，不要在同一个 store 中混用两套状态来源。
+
+\label{lst:ch04-a47-setup-store}
+\begin{lstlisting}[language=JavaScript,caption={Pinia setup 式 store 对照}]
+import { computed, ref } from 'vue';
+import { defineStore } from 'pinia';
+import { loadLatestLevel } from '../api/stations.js';
+
+export const useStationSetupStore = defineStore('station-setup', () => {
+  const currentId = ref(null);
+  const latest = ref(null);
+  const loading = ref(false);
+  const error = ref(null);
+  const isWarning = computed(() => (latest.value?.level ?? 0) >= 5.0);
+
+  async function loadLatest(id) {
+    loading.value = true;
+    error.value = null;
+    try {
+      latest.value = await loadLatestLevel(id);
+      currentId.value = id;
+    } catch (cause) {
+      error.value = cause;
+      latest.value = null;
+      throw cause;
+    } finally {
+      loading.value = false;
+    }
+  }
+  return { currentId, latest, loading, error, isWarning, loadLatest };
+});
+\end{lstlisting}
+
+路由和状态仓库的联调可以按一条链路验收：从未登录状态访问详情，守卫应把路径保存到登录页；登录成功后回到原详情，\texttt{StationDetail}收到 ID 并触发加载；列表、地图和详情同时打开时，Pinia 的最新读数同步变化；刷新浏览器后，令牌和路由状态按约定恢复或清空。测试还要覆盖无效测站 ID、令牌过期、后端返回空读数和用户快速切换测站等情况。这样既验证了组件，又验证了路由、守卫和 store 之间的契约。
+
+\subsection{路由参数、查询状态与可恢复导航}
+
+路径参数、查询参数和元数据承担不同的业务含义。测站 ID 是资源身份，应放在动态路径中并参与后端权限校验；关键字、页码和排序方向是可分享的视图状态，适合放在查询参数中；“是否需要登录”和“允许哪些角色”属于路由元数据，由守卫读取。三类信息分开后，复制一个详情链接可以准确打开同一测站，复制列表链接可以恢复筛选条件，而权限规则仍由统一守卫维护。
+
+查询参数都是字符串，页面需要在入口处完成解析和默认值处理。例如页码应转换为大于零的整数，排序字段必须从白名单中选择，关键字要限制长度并进行编码。更新筛选条件时使用\texttt{router.replace}，这样值班员连续输入关键字不会产生几十条无意义的历史记录；选择一个测站进入详情时使用\texttt{router.push}，浏览器返回键才能回到原列表。路由变化后，页面应根据新参数重新计算请求键，避免沿用旧列表的缓存结果。
+
+守卫可以分成全局、路由级和组件级三个层次。全局守卫负责令牌存在性和登录回跳，路由级元数据表达某个页面的角色要求，组件级守卫只处理离开页面前的未保存编辑。守卫函数应保持短小，把令牌解析、用户资料和权限集合交给独立服务；异步守卫返回 Promise 时要有超时和失败分支，网络不可用不能让导航一直处于 pending 状态。权限不足应进入明确的 403 页面，不能把所有失败都送回登录页，否则用户无法区分“没有登录”和“已经登录但权限不足”。
+
+可恢复导航还要考虑浏览器刷新和多标签页。路由状态由 URL 承载，刷新后仍能重建页面；Pinia 内存状态刷新后会清空，因此需要在页面挂载时依据路由参数重新请求，而不是把测站读数永久写进本地存储。访问令牌的生命周期由第5章安全策略决定，前端只读取是否存在和请求返回的 401，不自行延长令牌有效期。多标签页同时退出时，应通过统一的登出入口清理令牌，并在下一次导航触发守卫，避免一个标签页还显示已失效的业务页面。
+
+\subsection{Pinia 状态建模、错误恢复与持久化边界}
+
+一个清晰的 store 至少区分四类字段：资源数据、请求状态、错误对象和用户选择。\texttt{latest}代表后端数据，\texttt{loading}代表当前请求，\texttt{error}说明失败原因，\texttt{currentId}表示用户正在查看的资源。动作负责改变这些字段的顺序：开始请求时清空旧错误并置为加载中，成功时一次性提交新数据，失败时保留可诊断错误并清理不再可信的旧数据，最后无论成功失败都恢复加载标志。这样的状态机可以直接映射到模板的加载、成功、空结果和错误四个分支。
+
+实时读数还需要定义“旧数据是否可见”的策略。短暂网络抖动时可以保留带时间戳的上一笔读数，同时在界面标注“数据更新时间”和“正在重试”；权限失败、测点被删除或质量码为 missing 时，旧读数不能继续伪装成当前值。store 可以保存\texttt{lastUpdatedAt}和\texttt{quality}，由计算属性决定是否允许展示趋势线。业务阈值和质量判定由后端服务给出，Pinia 只保存结果与请求上下文，避免前端和后端使用两套阈值。
+
+缓存策略要与路由粒度匹配。测站列表可以按筛选条件缓存短时间结果，详情页的实时读数应以测站 ID 和时间窗口组成缓存键；切换测站时清理与旧 ID 相关的请求控制器，登出时清理所有含敏感信息的 store。持久化插件只适合保存非敏感的界面偏好，例如列表列宽和主题；访问令牌、测站读数和告警详情不写入 localStorage。若确需跨刷新恢复筛选条件，优先使用 URL 查询参数，以便审计和复现。
+
+Pinia 动作可以返回领域结果，让调用方决定提示方式。比如\texttt{loadLatest}返回成功的读数或抛出带错误码的异常，详情页显示可读提示，后台轮询则记录指标并安排下一次重试。错误码应区分\texttt{AUTH\_EXPIRED}、\texttt{NOT\_FOUND}、\texttt{QUALITY\_MISSING}和\texttt{NETWORK\_TIMEOUT}，不要在 store 内把所有异常拼成一段不可检索的字符串。日志中只记录测站编号、请求追踪 ID 和错误类别，令牌与个人信息禁止进入浏览器控制台。
+
+组件、路由和 store 的职责可以用一次“故障演练”检验：先让列表请求超时，页面显示重试按钮且路由仍保持；点击重试后只发起一个新请求，旧请求的回调不会覆盖新结果；再让详情接口返回 404，页面显示资源不存在并提供回列表链接；最后让令牌失效，守卫带着原路径跳到登录页，登录完成后只恢复一次导航。演练记录请求时间线、路由变化和 store 状态变化，能把竞态问题从偶然现象变成可复核证据。
 
 应用入口依次注册Pinia和Router，再挂载根组件：
 
