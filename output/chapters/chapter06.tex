@@ -5,7 +5,7 @@
 通过本章学习，学生应能够：
 \begin{enumerate}
 \item 说明三维渲染坐标变换与WebGL2渲染管线，使用Three.js加载工程模型；
-\item 区分WMS、WMTS与WFS，正确处理CGCS2000、投影坐标和高程基准；
+\item 区分WMS、WMTS、WFS与WCS，正确处理CGCS2000、投影坐标和高程基准；
 \item 说明倾斜摄影、BIM与3D Tiles在水利场景中的分工和生产流程；
 \item 设计数字孪生水利平台的分层架构、数据闭环和验收指标；
 \item 将三维场景与实时监测、模型计算和业务服务建立可追踪关联。
@@ -253,6 +253,7 @@ scene.add(gltf.scene);
 \subsection{OGC地图与要素服务}
 
 WMS根据请求范围、尺寸、坐标参考系和样式动态渲染地图图像；WMTS按预定义瓦片矩阵提供地图瓦片，便于缓存和大规模浏览；WFS提供可查询的矢量要素。WMS不是“栅格瓦片服务”，WMTS才以预定义瓦片为核心\cite{ogcWMS,ogcWMTS}。表\ref{tab:ogc-services}把这几种服务按“返回什么”并列：WMS返回按请求参数渲染出来的图像，WMTS返回预先切好的瓦片，WFS返回可查询的矢量要素本身。选型时先确定业务需要的是图像、瓦片还是要素，再决定用哪一种；把三者当成同一件事的不同实现，是产生大量无效缓存与重复请求的根源。
+WMS根据请求范围、尺寸、坐标参考系和样式动态渲染地图图像；WMTS按预定义瓦片矩阵提供地图瓦片，便于缓存和大规模浏览；WFS提供可查询的矢量要素；WCS覆盖栅格数据本体，可按范围和波段取得原始像元值，适合DEM取值与淹没分析\cite{ogcWMS,ogcWMTS,ogcWCS}。3D Tiles是OGC社区标准，按层次细节（LOD）流式加载大规模三维对象，适合把BIM、倾斜摄影和点云交付到浏览器。表\ref{tab:ogc-services}把这些服务按“返回什么”并列：WMS返回按请求参数渲染出来的图像，WMTS返回预先切好的瓦片，WFS返回可查询的矢量要素本身，WCS返回可分析的栅格覆盖，3D Tiles返回带层次结构的三维内容。选型时先确定业务需要的是图像、瓦片、要素、原始像元还是三维流式内容，再决定服务路线。
 
 \begin{table}[htbp]
 \centering
@@ -265,25 +266,121 @@ WMS根据请求范围、尺寸、坐标参考系和样式动态渲染地图图�
 WMS & 动态地图图像 & 范围与样式灵活 & 专题图叠加 \\
 WMTS & 预定义地图瓦片 & 易缓存、吞吐高 & 稳定底图 \\
 WFS & 矢量要素 & 可查询属性与几何 & 河道、测站编辑查询 \\
+WCS & 栅格覆盖 & 返回原始像元与波段 & DEM取值、淹没分析 \\
+3D Tiles & 三维瓦片内容 & LOD流式加载、按视域请求 & BIM、倾斜摄影、点云 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
+经典OGC服务常用KVP（Key-Value Pair）请求表达操作。下面三条最小请求分别展示图像、要素和覆盖数据的返回类型；实际项目还需加入认证、版本、异常格式和服务地址。WMS 1.3.0使用\texttt{CRS}参数而不是旧版本的\texttt{SRS}；当坐标系为EPSG:4490时，规范轴序是纬度在前、经度在后，\texttt{BBOX}应按该顺序填写。客户端若沿用“经度,纬度”的习惯，会得到空白图或位置偏移。
+
+\label{lst:ch06-wms-getmap}
+\begin{lstlisting}[language=HTTP,breaklines=true,caption={WMS 1.3.0 GetMap最小请求}]
+GET /geoserver/water/wms?SERVICE=WMS&VERSION=1.3.0
+  &REQUEST=GetMap&LAYERS=water:reservoir
+  &STYLES=&CRS=EPSG:4490
+  &BBOX=34.20,113.70,34.30,113.85
+  &WIDTH=1024&HEIGHT=768&FORMAT=image/png
+\end{lstlisting}
+
+\label{lst:ch06-wfs-getfeature}
+\begin{lstlisting}[language=HTTP,breaklines=true,caption={WFS GetFeature最小请求}]
+GET /geoserver/water/ows?SERVICE=WFS&VERSION=2.0.0
+  &REQUEST=GetFeature&TYPENAMES=water:station
+  &SRSNAME=EPSG:4490&COUNT=100
+  &BBOX=113.70,34.20,113.85,34.30,EPSG:4490
+  &OUTPUTFORMAT=application/json
+\end{lstlisting}
+
+\label{lst:ch06-wcs-getcoverage}
+\begin{lstlisting}[language=HTTP,breaklines=true,caption={WCS GetCoverage最小请求}]
+GET /geoserver/water/ows?SERVICE=WCS&VERSION=2.0.1
+  &REQUEST=GetCoverage&COVERAGEID=water:dem
+  &SUBSET=Long(113.70,113.85)&SUBSET=Lat(34.20,34.30)
+  &FORMAT=image/tiff
+\end{lstlisting}
+
+读者可以比较三条请求的响应：GetMap是渲染后的PNG，适合叠加展示；GetFeature是带属性和几何的要素集合，适合查询、编辑和业务联动；GetCoverage保留栅格像元，适合读取高程、分类值或模型输入。WCS的响应不能被当成“已经画好的图片”，否则淹没分析会失去原始数值。OGC API系列（Features、Tiles、Coverages、Maps）正在逐步补充和替代经典OWS的接口形态，新建平台应评估其资源化路径，并与第9章关于开放接口演进的讨论保持一致。
+
+服务选型还要考虑数据生命周期。WMS样式和图例变化时可以重新渲染，不必重建原始数据；WMTS适合版本稳定的底图，更新时按区域和层级增量切片；WFS的属性字段属于业务契约，字段改名应通过版本化接口发布；WCS的覆盖数据需要保留像元分辨率、NoData值、单位和采样时间，供模型计算复现；3D Tiles则在每个瓦片中维护几何、纹理和层级元数据，客户端按视域和屏幕误差请求内容。把这些服务混在一个“地图接口”里，会使缓存策略、权限边界和数据更新节奏互相牵制。
+
+WMS请求的范围、宽高和样式直接影响渲染开销，值班员查看监测专题图时可以限制最大图片尺寸和并发数；WFS查询应设置要素数量上限、空间过滤和返回字段白名单，避免一次请求拖出全库；WCS需要限制覆盖范围、波段和输出格式，防止把整幅DEM下载到浏览器；3D Tiles通过最大屏幕空间误差和最大同时加载瓦片数控制显存。服务端应把这些上限写进能力文档和错误响应，客户端看到限制错误后缩小范围或改用异步任务，而不是无限重试。
+
+安全上，GetCapabilities、GetMap等公开能力与测站属性、原始DEM和工程模型的访问级别不同。GeoServer工作空间、图层和样式分别配置角色权限，服务网关再加入令牌校验、速率限制和审计日志；缓存键必须包含用户可见范围和数据版本，避免把受限图层的瓦片返回给其他角色。WFS和WCS的查询参数进入数据库或栅格处理器前要做白名单校验，日志记录请求摘要、traceId、图层、CRS和耗时，不记录完整令牌。
+
+GeoServer发布前应先用小范围样本检查坐标轴和像元值，再扩大到完整覆盖。GetMap通过肉眼检查颜色和图例，GetFeature检查属性、几何和坐标轴，GetCoverage抽取几个像元与原始文件对比，3D Tiles则检查LOD切换、纹理色彩空间和业务ID是否保留。冒烟通过后才启动GWC预生成；预生成任务按层级和行政/工程范围拆分，失败任务可重跑，缓存目录采用版本号避免新旧瓦片混用。
+
+OGC API路线强调资源、链接和可发现性，Features返回集合与分页链接，Tiles返回瓦片集和模板，Coverages返回覆盖描述与子集能力，Maps返回渲染结果及样式信息。经典WMS/WFS/WCS仍然是存量系统的主流接口，因此平台可以采用“兼容层+新接口”策略：内部数据模型保持统一，外部根据客户端能力选择OWS或OGC API；迁移期间对同一测站和DEM样本做双接口结果比对，确认坐标、属性和像元值一致后再逐步切换。
+
+三维场景与二维服务的联动也要有明确边界。Cesium加载3D Tiles只负责空间表达，测站状态、质量码和预警等级仍从业务API按稳定ID查询；WMS/WMTS作为背景或专题叠加，WFS用于点选和编辑，WCS为淹没分析提供原始栅格输入。告警事件发生时，前端可以改变构件颜色和标签，但不把渲染颜色写回原始模型或瓦片。这样，模型版本、地图服务版本和业务数据版本各自可回滚，三维页面的视觉状态也能追溯到具体的服务响应。
+
+\paragraph{服务能力文档与故障处理}
+每个服务都应维护一份能力文档，列出服务版本、操作、图层或覆盖名称、坐标参考系、轴序、输出格式、最大请求范围和异常编码。文档中的示例请求使用脱敏域名和小范围数据，读者可以替换地址后直接验证。平台启动时对GetCapabilities做健康检查，检查图层是否存在、CRS是否和数据库元数据一致；运行中持续记录响应时延、返回字节、缓存命中率、4xx/5xx数量和上游数据库耗时。当WMS渲染失败时，前端显示专题图不可用但保留基础底图；当WFS或WCS不可用时，相关查询按钮进入受控禁用状态，避免把空结果当成“没有测站”或“没有积水”。
+
+GeoServer的样式、图层权限和GWC缓存配置应与数据版本一起纳入发布包。样式变更可能改变WMS像素结果，但不应改变WFS属性或WCS像元；因此图层发布记录需要分别保存样式版本和数据版本。缓存键至少包含图层、样式、CRS、范围、宽高、时间维度和数据版本，清理任务按版本或区域执行。对有时间维度的水位或降雨图层，缓存时间参数必须参与键计算，否则新旧时刻会显示同一张图片。
+
+3D Tiles发布还要检查瓦片内容的空间参考、几何误差和属性透传。每个瓦片的包围体用于视锥和屏幕空间误差判断，包围体错误会造成过早卸载或加载过多；纹理需要按颜色空间标注，业务属性应通过稳定ID关联到后端，不把完整监测记录塞进瓦片。转换工具输出日志包含源模型、坐标转换、LOD阈值、纹理压缩和失败对象，抽样加载根节点、中间层和叶节点后再开放服务。模型更新采用新目录和新版本号，客户端完成切换后再回收旧目录，避免长连接用户读到半发布状态。
+
+在课堂实验中，可以用同一个水库范围分别请求GetMap、GetFeature和GetCoverage：先把WMS图像叠加在Cesium地球上，再点击WFS测站取得属性，最后从WCS读取DEM像元计算局部高程；若三者的CRS、范围或轴序不一致，叠加结果会立即暴露偏移。实验报告应记录请求参数、响应头、关键字段、像元单位和错误处理，并解释为何3D Tiles不能替代WCS的数值覆盖。这个流程把协议学习与水利业务任务连起来，也为后续数字孪生闭环提供可复用的服务测试样例。
+
+服务迁移到OGC API时，先建立资源目录和链接关系，再为旧客户端保留兼容代理。代理层负责把旧KVP参数转换为新的路径和查询参数，同时记录原始请求与新请求的对应关系；双写或双读期间对同一范围进行结果哈希、属性数量和像元统计比较。迁移完成后，能力文档标出推荐接口和弃用时间，监控面板按接口版本分别统计流量，确保没有客户端在不知情的情况下被切断。开放接口的演进应当以数据一致性、权限一致性和可观测性为验收条件，而不是只看URL是否更现代。
+
+故障演练时可以人为关闭GWC、限制WCS范围或撤销某个图层权限，观察客户端是否展示清晰状态、服务端是否记录审计、缓存是否保持版本隔离。演练结果进入运行手册，下一次发布前由值班员按同一脚本复核。
+
+复核还应覆盖错误坐标系、越界范围、超大图片、未知图层和过期令牌等异常输入，检查服务是否返回稳定错误码并且不泄露内部路径。异常请求的traceId与发布版本写入审计记录，便于把一次空白地图还原为具体的参数和配置。
+对异常响应还要检查Content-Type、错误码和重试建议，前端按契约展示可操作的提示。
+服务端同时限制错误详情长度，避免把数据库或文件系统信息暴露给外部用户。
+客户端日志只保留必要上下文和traceId。
+故障恢复后再开放自动刷新。
+恢复记录应关联演练编号和验证人员。
+并标注验证结果。
+记录已归档并可追溯。
+后续复测沿用同一编号和样本。
+
 教学示例使用自建GeoServer，不依赖商业底图密钥：
 
 \label{lst:ch06-three-renderer}
-\begin{lstlisting}[language=JavaScript,caption={Three.js渲染器创建}]
+\begin{lstlisting}[language=JavaScript,breaklines=true,caption={Cesium无商业底图密钥的WMTS初始化}]
+const viewer = new Cesium.Viewer('scene', {
+  baseLayer: false,
+  baseLayerPicker: false,
+  geocoder: false,
+  timeline: false,
+  animation: false
+});
 const imagery = new Cesium.WebMapTileServiceImageryProvider({
   url: 'https://gis.example.edu/geoserver/gwc/service/wmts',
   layer: 'water:cgcs2000_basemap',
   style: '',
   format: 'image/png',
-  tileMatrixSetID: 'EPSG:4490'
+  tileMatrixSetID: 'EPSG:4490',
+  tilingScheme: new Cesium.GeographicTilingScheme(),
+  maximumLevel: 18
 });
 viewer.imageryLayers.addImageryProvider(imagery);
 \end{lstlisting}
 
-实际部署需要将示例域名替换为课程或项目服务器，并在服务端配置跨域、访问控制和缓存策略。
+实际部署需要将示例域名替换为课程或项目服务器，并在服务端配置跨域、访问控制和缓存策略。Cesium示例关闭了Ion底图、地形、地理编码、时间轴和动画组件，因此不会隐式请求商业token；业务底图只来自自建GeoServer。由于EPSG:4490是地理坐标瓦片矩阵，必须使用\texttt{GeographicTilingScheme}，并把\texttt{maximumLevel}设置为GWC gridset实际提供的最大层级。GeoServer GWC默认内置EPSG:4326与EPSG:900913两个gridset，EPSG:4490需要手工创建并核对原点、瓦片宽高、比例尺和矩阵层级。
+
+GeoServer发布流程可以拆成四个可回滚步骤：先在工作区登记数据源和坐标元数据，再创建工作空间和图层，随后配置样式与访问权限，最后在GWC中创建或绑定gridset并预生成热点区域缓存。发布前用GetCapabilities确认服务版本、图层名和CRS，发布后用一条GetMap、一条GetFeature和一条GetCoverage请求做冒烟测试。缓存清理和重新切片要有任务 ID 与进度记录，不在高峰时段直接删除全部瓦片。
+
+\label{lst:ch06-geoserver-gridset}
+\begin{lstlisting}[language=YAML,breaklines=true,caption={GeoServer GWC EPSG:4490 gridset配置要点}]
+gridSet:
+  name: EPSG:4490
+  srs: 4490
+  tileWidth: 256
+  tileHeight: 256
+  extent: [113.0, 34.0, 114.0, 35.0]
+  metersPerUnit: 111319.490793
+  levels:
+    - {level: 0, resolution: 0.703125}
+    - {level: 1, resolution: 0.3515625}
+  cacheLayers:
+    - water:cgcs2000_basemap
+\end{lstlisting}
+
+清单\ref{lst:ch06-geoserver-gridset}是教学配置片段，真实项目需从测区范围和服务规范计算分辨率、矩阵宽高与最大层级。若图层声明的CRS与gridset不一致，缓存会在切片阶段产生错位；若最大层级没有和Cesium的\texttt{maximumLevel}同步，客户端会持续请求不存在的瓦片并制造404噪声。发布脚本应把这两项作为启动前检查。
 
 \subsection{CGCS2000与投影坐标}
 
@@ -883,7 +980,7 @@ def update_twin(reading, repository, model, publisher):
 状态更新事件至少包含事件标识、对象标识、发生时间、状态版本、模型版本和追踪标识：
 
 \label{lst:ch06-json-contract}
-\begin{lstlisting}[caption={模型事件契约示例}]
+\begin{lstlisting}[language=JSON,caption={模型事件契约示例}]
 {
   "eventId": "01J5...",
   "eventType": "twin.state.updated.v1",
