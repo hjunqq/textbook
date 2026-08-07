@@ -692,6 +692,13 @@ Welford 增量算法把新值与当前均值的差作为修正量，数值稳定
 
 \label{lst:ch05-repository}
 \begin{lstlisting}[language=Java,caption={监测记录仓储接口}]
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.*;
+import java.time.Instant;
+
+record ReadingSavedEvent(Long readingId, String stationId) {}
+
 @Service
 class AuditService {
     private final AuditRepository auditRepository;
@@ -709,22 +716,190 @@ class AuditService {
 class ReadingCommandService {
     private final WaterReadingRepository repository;
     private final AuditService auditService;
+    private final ApplicationEventPublisher eventPublisher;
 
     ReadingCommandService(WaterReadingRepository repository,
-            AuditService auditService) {
+            AuditService auditService,
+            ApplicationEventPublisher eventPublisher) {
         this.repository = repository;
         this.auditService = auditService;
+        this.eventPublisher = eventPublisher;
     }
 
     @Transactional
     public void save(WaterReading reading) {
-        repository.save(reading);
+        WaterReading saved = repository.save(reading);
         auditService.record("SAVE_READING"); // 经另一Bean代理调用
+        eventPublisher.publishEvent(
+                new ReadingSavedEvent(saved.getId(), saved.getStationId()));
     }
 }
 \end{lstlisting}
 
-主业务是否应与审计记录使用不同事务，取决于失败语义；不能只为展示传播行为而滥用新事务。首次后端课程重点掌握默认传播、回滚规则和事务边界即可。
+主业务是否应与审计记录使用不同事务，取决于失败语义；不能只为展示传播行为而滥用新事务。首次后端课程重点掌握默认传播、回滚规则和事务边界即可。清单\ref{lst:ch05-repository}还把领域事件发布放在保存之后，但事件处理器要等主事务提交成功才执行；如果保存回滚，提交后监听器不会收到该事件，从而避免把未落库的读数传播给下游。
+
+\subsection{事务的 ACID 契约与边界}
+
+事务不是“把几行代码包起来”的装饰，而是数据库为一个业务用例提供的契约。原子性要求保存读数、更新最新值和写入审计要么全部成功、要么全部回滚；一致性要求外键、唯一键、非空和业务检查在提交点成立；隔离性控制并发事务之间能看到哪些中间状态；持久性要求提交后的数据在进程重启后仍可恢复。应用服务应围绕一个可说明的业务结果划定边界，例如“接收一个测站读数并生成审计事件”，而不是让控制器、Repository 和异步线程各自开启一段互不相干的事务。
+
+清单\ref{lst:ch05-repository}中的\texttt{save}由外部调用进入事务代理，Repository 写入和审计调用共享默认事务；\texttt{AuditService.record}使用\texttt{REQUIRES\_NEW}时会挂起外层事务，形成独立审计提交。图\ref{fig:ch05-tx-proxy}把代理边界、挂起和提交后事件画成一条时序，读者可以据此判断“代码出现了注解”是否真的意味着运行时开启了新事务。
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[>=Stealth,thick,node distance=0.5cm and 0.45cm]
+\node[draw,rounded corners,fill=blue!8,align=center] (http) {HTTP\\控制器};
+\node[draw,rounded corners,fill=green!10,align=center,right=of http] (proxy) {Spring\\事务代理};
+\node[draw,rounded corners,fill=yellow!18,align=center,right=of proxy] (tx) {主事务\\保存读数};
+\node[draw,rounded corners,fill=orange!18,align=center,below=of tx] (audit) {REQUIRES\_NEW\\审计事务};
+\node[draw,rounded corners,fill=purple!10,align=center,right=of tx] (commit) {提交成功\\AFTER\_COMMIT};
+\draw[->] (http) -- (proxy);
+\draw[->] (proxy) -- (tx);
+\draw[->] (tx) -- node[above,font=\scriptsize]{挂起/恢复} (audit);
+\draw[->] (tx) -- (commit);
+\end{tikzpicture}
+\caption{事务代理、自调用与提交后事件的边界}
+\label{fig:ch05-tx-proxy}
+\end{figure}
+
+如果控制器在同一个 Bean 中用\texttt{this.save()}调用另一个带事务注解的方法，调用不会穿过代理，传播属性、只读标志和回滚规则都不会被重新评估。解决办法是把用例拆到另一个 Spring Bean，通过构造器注入调用；或者在确实需要动态边界时使用\texttt{TransactionTemplate}。把代理对象注入自己、依靠反射或强制打开全局事务都会增加理解成本，教材示例优先采用清晰的 Bean 边界。
+
+事务边界还应考虑外部调用。数据库事务中不应等待慢 HTTP 请求、文件上传或人工确认；这些动作应先提交本地状态，再由事务发件箱或消息队列异步推进。若外部系统必须参与一致性，需要明确超时、补偿、幂等和人工处置，不要假定数据库回滚可以撤销已经发出的网络请求。
+
+\subsection{七种传播行为与使用场景}
+
+Spring 的传播行为描述“已有事务到达一个方法时怎么办”。\texttt{REQUIRED}是默认值：有事务就加入，没有就创建，适合一个用例内的普通读写；\texttt{REQUIRES\_NEW}挂起外层并创建独立事务，适合必须独立保留的审计或失败记录，但会增加连接占用；\texttt{NESTED}在支持保存点的资源上建立嵌套边界，局部回滚不必撤销外层已完成的步骤，适合批次中允许单行失败的场景，使用前要确认数据库和事务管理器支持保存点。
+
+\texttt{SUPPORTS}有事务就加入、没有就以非事务方式执行，适合可选的一致性读取；\texttt{NOT\_SUPPORTED}会挂起外层并以非事务方式执行，适合不应锁住数据库的轻量指标采集，但它不能读取未提交状态；\texttt{MANDATORY}要求调用方已有事务，没有则立即失败，适合只能作为事务内部步骤的约束检查；\texttt{NEVER}要求调用方没有事务，发现事务就失败，适合明确禁止持有数据库锁的外部适配器。七种行为不是性能开关，选择时要从失败语义、锁持有时间和恢复方式解释原因。
+
+\label{lst:ch05-propagation-service}
+\begin{lstlisting}[language=Java,caption={事务传播行为的服务边界示例}]
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.*;
+
+@Service
+class ReadingBatchService {
+    private final ReadingRepository readings;
+    private final AuditService audit;
+    private final MetricService metrics;
+
+    ReadingBatchService(ReadingRepository readings, AuditService audit,
+                        MetricService metrics) {
+        this.readings = readings;
+        this.audit = audit;
+        this.metrics = metrics;
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void saveBatch(List<WaterReading> batch) {
+        readings.saveAll(batch);
+        audit.record("BATCH_SAVED");
+        metrics.sample(batch.size());
+    }
+}
+
+@Service
+class MetricService {
+    @Transactional(propagation = Propagation.NOT_SUPPORTED,
+                   readOnly = true)
+    public void sample(int count) {
+        // 只记录内存指标，不延长写事务的锁持有时间
+    }
+}
+\end{lstlisting}
+
+清单\ref{lst:ch05-propagation-service}刻意把主写入、独立审计和不参与事务的指标分开。批次写入失败时，主事务回滚；审计是否保留失败事实由\texttt{AuditService}的传播属性决定；指标采集不应因为数据库回滚而伪装成已处理。实践中应在集成测试中记录事务状态和连接数，防止把\texttt{REQUIRES\_NEW}放进大循环导致连接池耗尽。
+
+\subsection{隔离级别与并发异常}
+
+隔离级别回答“一个事务能看到其他事务的哪些变化”。READ UNCOMMITTED 允许脏读，在 PostgreSQL 中通常按 READ COMMITTED 处理，不能把它当作真正的脏读实验；READ COMMITTED 是 PostgreSQL 默认值，每条语句看到一个新的已提交快照，适合大多数读写接口，但同一事务两次查询可能看到不同结果；REPEATABLE READ 固定事务快照，能避免不可重复读，但写入冲突会在提交时失败；SERIALIZABLE 进一步要求并发执行结果等价于串行执行，冲突时需要重试，吞吐和锁等待成本也更高。
+
+脏读是读取到尚未提交的数据，读到回滚值会使预警计算产生错误；不可重复读是同一事务两次读取同一行得到不同版本；幻读是两次范围查询返回的行集合变化；丢失更新是两个写者基于旧值覆盖彼此结果。\texttt{@Version}可以发现实体级丢失更新，唯一约束和检查约束负责拒绝非法状态，隔离级别则决定范围读取和并发写入之间的可见性。提升隔离级别不是万能修复，必须配合重试上限、退避和可观测告警。
+
+\label{lst:ch05-isolation-test}
+\begin{lstlisting}[language=Java,caption={隔离级别与乐观锁的集成测试思路}]
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+@SpringBootTest
+@ActiveProfiles("test")
+class ReadingConcurrencyTest {
+    private final ReadingCommandService service;
+    private final WaterReadingRepository repository;
+
+    ReadingConcurrencyTest(ReadingCommandService service,
+                           WaterReadingRepository repository) {
+        this.service = service;
+        this.repository = repository;
+    }
+
+    @Transactional(readOnly = true)
+    void repeatedReadUsesDeclaredSnapshot() {
+        // 测试中配合两个事务和 SQL 日志观察快照，而不是只断言返回值
+    }
+
+    void staleVersionIsConflict() {
+        WaterReading first = repository.findById(1L).orElseThrow();
+        WaterReading second = repository.findById(1L).orElseThrow();
+        service.replace(first, "1.20");
+        assertThatThrownBy(() -> service.replace(second, "1.30"))
+                .isInstanceOf(OptimisticLockingFailureException.class);
+    }
+}
+\end{lstlisting}
+
+清单\ref{lst:ch05-isolation-test}强调测试应验证并发协议而非依赖线程睡眠。真实测试使用两个事务、屏障或数据库锁制造可重复的交错顺序，记录隔离级别、SQL 和回滚结果；随机压测则用于发现长尾锁等待。服务层把乐观锁异常转换为409，客户端重新读取后由专业分析员决定保留哪一个订正值，不能自动覆盖另一人的修改。
+
+回滚规则也属于事务契约。Spring 默认对未检查异常和\texttt{Error}回滚，对受检异常提交；业务服务若把受检异常作为“数据拒收”信号，就应明确使用\texttt{rollbackFor}，或者把异常转换为领域运行时异常。相反，某些可预期的通知失败可能允许主记录提交，此时使用\texttt{noRollbackFor}还不够，还要把失败原因写入重试表或事务发件箱。代码评审应逐个列出异常类型、数据库状态和补偿动作，避免 catch 后只打印日志导致半完成状态。
+
+批量导入的事务边界取决于业务语义。全批次原子提交能保证“全部成功或全部失败”，但一条坏数据会让整批回滚，并长时间占用锁；按测站或固定数量分块可以缩短事务，却必须返回每块的批次号、成功数和失败行号。无论选择哪一种，重复提交都要靠幂等键或唯一约束处理，重试不能依赖“上次大概执行到哪里”的内存变量。事务日志、审计记录和补发任务应能通过同一个追踪 ID 关联起来。
+
+数据库事务提交后，缓存刷新、指标增加和消息发布都可能失败。\texttt{AFTER\_COMMIT}监听器不能把异常传回已经完成的主事务，因此处理器要采用幂等键、有限重试和死信记录；对关键跨服务事件，应由事务发件箱表保存事件内容和状态，再由独立发布器投递 Kafka，发布成功后更新状态。这样即使应用在提交后立刻崩溃，事件仍能从数据库恢复，而不是依赖进程内队列的偶然顺序。
+
+只读事务适合查询和报表，但它不会自动限制数据库用户写权限，也不会阻止代码调用\texttt{save}。服务层仍应通过接口设计避免写入，数据库账号可以在只读副本上使用更小权限；如果查询需要锁定行，应明确使用带锁查询而不是把\texttt{readOnly=true}当作锁。读写分离时要说明复制延迟，刚写入的读数不能立刻从滞后的副本读取，否则值班员会看到旧状态。
+
+事务测试至少包含：成功提交后事件被处理；主事务回滚时事件不被处理；审计独立事务在主事务失败时仍保留失败事实；两个版本同时更新时只有一个成功；死锁或序列化冲突按上限重试后返回稳定错误码。测试数据使用固定时钟和固定操作者，日志保存事务 ID、连接线程和隔离级别，避免用不可重复的 sleep 掩盖竞态。
+测试报告还应保存数据库版本、迁移版本和测试用例的追踪标识，便于在不同环境复核相同结论。
+
+\subsection{只读事务与事件发布闭环}
+
+查询方法可以标注\texttt{@Transactional(readOnly = true)}，让连接驱动和 ORM 知道该事务不应执行写入；这不是数据库权限替代品，也不保证所有数据库都自动获得更高性能。只读方法仍需限制结果集、关闭懒加载泄漏并在事务内完成 DTO 映射。写方法则应在一个事务中完成状态检查、实体保存、审计和领域事件发布，事件处理器使用\texttt{AFTER\_COMMIT}把指标或缓存刷新放到提交之后。
+
+\label{lst:ch05-read-only}
+\begin{lstlisting}[language=Java,caption={只读查询与提交后事件的完整调用}]
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.*;
+
+@Service
+class ReadingUseCase {
+    private final WaterReadingRepository repository;
+    private final ApplicationEventPublisher publisher;
+
+    ReadingUseCase(WaterReadingRepository repository,
+                   ApplicationEventPublisher publisher) {
+        this.repository = repository;
+        this.publisher = publisher;
+    }
+
+    @Transactional(readOnly = true)
+    ReadingResponse latest(String stationId) {
+        return repository.findFirstByStationIdOrderByMeasuredAtDesc(stationId)
+                .map(ReadingResponse::from)
+                .orElseThrow(() -> new EntityNotFoundException("测站无读数"));
+    }
+
+    @Transactional
+    ReadingResponse save(WaterReading reading) {
+        WaterReading saved = repository.save(reading);
+        publisher.publishEvent(
+                new ReadingSavedEvent(saved.getId(), saved.getStationId()));
+        return ReadingResponse.from(saved);
+    }
+}
+\end{lstlisting}
+
+清单\ref{lst:ch05-read-only}中的查询在事务内完成实体到 DTO 的转换，写入则在保存后发布事件。若主事务回滚，\texttt{AFTER\_COMMIT}监听器不执行；若监听器自身失败，主事务也不会被重新回滚，因此监听器必须具备幂等、重试和失败告警。跨进程通知不能只依靠进程内事件，应把事件写入事务发件箱，再由可靠发布器投递 Kafka。
 
 \subsection{统计量更新}
 
@@ -1070,18 +1245,25 @@ class JwtService {
 
 \label{lst:ch05-cache-service}
 \begin{lstlisting}[language=Java,caption={缓存与分页查询}]
-record ReadingSavedEvent(Long readingId, String stationId) {}
+import org.springframework.context.event.EventListener;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.event.*;
+
+interface MetricsCounter {
+    void increment(String stationId);
+}
 
 @Component
 class ReadingEventHandler {
+    private final MetricsCounter metricsCounter;
+
+    ReadingEventHandler(MetricsCounter metricsCounter) {
+        this.metricsCounter = metricsCounter;
+    }
+
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     void afterCommit(ReadingSavedEvent event) {
         metricsCounter.increment(event.stationId());
-    }
-
-    private final MetricsCounter metricsCounter;
-    ReadingEventHandler(MetricsCounter metricsCounter) {
-        this.metricsCounter = metricsCounter;
     }
 }
 \end{lstlisting}
@@ -1109,7 +1291,7 @@ class AlertMessageListener {
 }
 \end{lstlisting}
 
-消息系统不能自动保证业务恰好执行一次。生产者应考虑事务外盒（outbox）或可靠发布；消费者用\texttt{eventId}去重，并配置有限重试、死信队列和监控。消息模式适合告警评估、通知和异步统计，不适合需要立即返回结果的简单查询。
+消息系统不能自动保证业务恰好执行一次。生产者应考虑事务发件箱（outbox）或可靠发布；消费者用\texttt{eventId}去重，并配置有限重试、死信队列和监控。消息模式适合告警评估、通知和异步统计，不适合需要立即返回结果的简单查询。
 
 在分布式部署中，服务发现负责把逻辑服务名解析为可用实例，配置中心负责管理环境参数，网关负责认证、限流与路由。Spring Boot应用应通过明确的Starter和配置文件接入这些基础设施，并在健康检查中验证注册状态、心跳超时和实例摘除；业务代码只依赖稳定的服务接口，不把具体注册中心的客户端注解扩散到领域层。这样的边界便于在开发、测试和生产环境切换实现。
 
