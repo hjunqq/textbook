@@ -1644,6 +1644,240 @@ class AlertMessageListener {
 
 在分布式部署中，服务发现负责把逻辑服务名解析为可用实例，配置中心负责管理环境参数，网关负责认证、限流与路由。Spring Boot应用应通过明确的Starter和配置文件接入这些基础设施，并在健康检查中验证注册状态、心跳超时和实例摘除；业务代码只依赖稳定的服务接口，不把具体注册中心的客户端注解扩散到领域层。这样的边界便于在开发、测试和生产环境切换实现。
 
+\subsection{为什么引入消息队列}
+
+同步调用把生产者、消费者和网络故障绑在同一个请求里。写入服务保存读数后同步调用预警服务，若预警服务重启、网络抖动或处理变慢，写入请求就会超时；客户端重试又可能造成重复保存。同步链路还会把峰值流量直接传给下游，多个消费者同时扩容时难以平滑。Kafka 把事件写入持久化主题，生产者与消费者通过分区和偏移量解耦，消费者可以按自己的速度追赶积压。
+
+消息队列不是“异步就一定可靠”。生产者要处理发送失败、确认超时和序列化异常，消费者要处理重复投递、处理失败、顺序和重平衡；主题还要设置副本、保留时间、分区数和消费者组。事件体必须包含事件 ID、主体 ID、发生时间、模式版本和追踪 ID，不能只发送一个无法解释的数值。事件版本向后兼容时新增可选字段，破坏性变更发布新主题或新版本。
+
+\label{lst:ch05-kafka-config}
+\begin{lstlisting}[language=YAML,caption={Spring Kafka 生产与消费配置}]
+spring:
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all
+      enable-idempotence: true
+      properties:
+        spring.json.add.type.headers: false
+    consumer:
+      group-id: reading-alert-v1
+      enable-auto-commit: false
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: com.example.water.events
+        spring.json.value.default.type: com.example.water.events.ReadingSavedMessage
+    listener:
+      ack-mode: record
+      concurrency: 3
+\end{lstlisting}
+
+清单\ref{lst:ch05-kafka-config}把生产者确认设为\texttt{acks=all}并打开 Kafka 的幂等生产者，减少网络重试造成的重复记录；消费者关闭自动提交，让业务处理成功后再提交偏移量。\texttt{spring.json.trusted.packages}只允许教材事件包，不能为了省事写\texttt{*}，否则恶意消息可能诱导反序列化不应实例化的类型。生产配置还应通过机密变量注入 SASL、TLS 和凭据，日志不得输出连接密码。
+
+\subsection{生产者、事件模式与发送确认}
+
+生产者把领域对象转换为事件 DTO，再通过\texttt{KafkaTemplate}发送。发送成功只表示 broker 接受并按确认策略写入，不表示消费者已经处理；因此接口若需要立即反馈，只返回本地保存结果和事件 ID，消费者处理状态通过状态查询或通知接口提供。发送回调记录分区、偏移量和耗时，失败进入重试或发件箱，而不是在 HTTP 线程中无限阻塞。
+
+\label{lst:ch05-kafka-producer}
+\begin{lstlisting}[language=Java,caption={KafkaTemplate 生产者与发送回调}]
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.stereotype.Service;
+import java.time.Instant;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+
+record ReadingSavedMessage(String eventId, String stationId,
+                           String quality, Instant measuredAt,
+                           String schemaVersion, String traceId) {}
+
+@Service
+class ReadingEventPublisher {
+    private final KafkaTemplate<String, ReadingSavedMessage> kafka;
+    private final EventPublishFailureStore failures;
+
+    ReadingEventPublisher(KafkaTemplate<String, ReadingSavedMessage> kafka,
+                          EventPublishFailureStore failures) {
+        this.kafka = kafka;
+        this.failures = failures;
+    }
+
+    void publish(String stationId, String quality, Instant measuredAt,
+                 String traceId) {
+        String eventId = UUID.randomUUID().toString();
+        ReadingSavedMessage message = new ReadingSavedMessage(
+                eventId, stationId, quality, measuredAt, "v1", traceId);
+        CompletableFuture<?> future = kafka.send("water.reading.saved",
+                stationId, message);
+        future.whenComplete((result, error) -> {
+            if (error != null) failures.record(eventId, message, error);
+        });
+    }
+}
+\end{lstlisting}
+
+清单\ref{lst:ch05-kafka-producer}使用测站 ID 作为消息键，使同一测站的事件在同一分区内保持顺序；分区数量和热点测站要通过压测评估。生产者不能在回调里直接修改主业务记录，因为回调可能在另一个线程执行且原事务早已结束；发送失败应写入可重试存储，后台任务按照退避策略再次发送。事件 ID 在数据库和消息体中保持一致，便于消费者去重和运维追踪。
+
+\subsection{消费者幂等与去重约束}
+
+Kafka 至少一次投递意味着消费者可能在业务提交后、偏移量提交前崩溃，重启后再次收到同一消息。幂等处理要把“是否处理过”与业务写入放进同一个数据库事务，并用事件 ID 唯一约束作为并发闸门。先插入去重表，若违反唯一约束则返回“已处理”；插入成功后执行预警评估和状态更新，事务提交后再提交偏移量。只在内存 Set 中去重会在重启或多实例之间失效。
+
+\label{lst:ch05-kafka-idempotency}
+\begin{lstlisting}[language=Java,caption={事件去重表与消费者事务}]
+import jakarta.persistence.*;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import java.time.Instant;
+
+@Entity
+@Table(name = "consumed_event",
+       uniqueConstraints = @UniqueConstraint(name = "uk_event_id",
+                                              columnNames = "eventId"))
+class ConsumedEvent {
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    @Column(nullable = false, length = 64) private String eventId;
+    @Column(nullable = false) private Instant consumedAt;
+    protected ConsumedEvent() {}
+    ConsumedEvent(String eventId, Instant consumedAt) {
+        this.eventId = eventId; this.consumedAt = consumedAt;
+    }
+}
+
+@Service
+class ReadingAlertConsumer {
+    private final ConsumedEventRepository consumed;
+    private final AlertApplicationService alerts;
+
+    ReadingAlertConsumer(ConsumedEventRepository consumed,
+                         AlertApplicationService alerts) {
+        this.consumed = consumed; this.alerts = alerts;
+    }
+
+    @Transactional
+    @KafkaListener(topics = "water.reading.saved", groupId = "alert-v1")
+    void onMessage(ReadingSavedMessage message) {
+        try {
+            consumed.saveAndFlush(new ConsumedEvent(
+                    message.eventId(), Instant.now()));
+        } catch (DataIntegrityViolationException duplicate) {
+            return; // 唯一约束表明该事件已成功处理
+        }
+        alerts.evaluate(message.stationId(), message.measuredAt(),
+                        message.quality(), message.traceId());
+    }
+}
+\end{lstlisting}
+
+清单\ref{lst:ch05-kafka-idempotency}的去重表应设置保留窗口，覆盖消息最大重投和人工补发周期；过期清理必须与审计要求协调，不能在仍可能重投时删除记录。若业务更新跨越多个数据库或调用外部系统，去重记录、状态更新和外部副作用需要事务发件箱、幂等 API 或补偿流程共同保证。消费者组扩容只改变分区分配，不会自动消除重复消息。
+
+\subsection{重试、退避与死信队列}
+
+失败要先分类。网络瞬断、数据库连接暂时耗尽和下游503属于可重试错误，应使用有限次数、指数退避和抖动；JSON 格式错误、未知事件版本、违反业务约束属于不可重试错误，应立即进入死信并通知值班员。无限重试会让一个坏消息长期阻塞分区，重试主题或死信主题要保留原事件、异常类型、首次失败时间、重试次数和原始追踪 ID。
+
+\label{lst:ch05-kafka-retry}
+\begin{lstlisting}[language=Java,caption={DefaultErrorHandler 与死信发布}]
+import org.apache.kafka.common.TopicPartition;
+import org.springframework.context.annotation.*;
+import org.springframework.kafka.core.*;
+import org.springframework.kafka.listener.*;
+import org.springframework.util.backoff.ExponentialBackOff;
+
+@Configuration
+class KafkaErrorHandlingConfig {
+    @Bean
+    DeadLetterPublishingRecoverer deadLetterPublishingRecoverer(
+            KafkaOperations<Object, Object> template) {
+        return new DeadLetterPublishingRecoverer(template,
+                (record, error) -> new TopicPartition(
+                        record.topic() + ".DLT", record.partition()));
+    }
+
+    @Bean
+    DefaultErrorHandler kafkaErrorHandler(
+            DeadLetterPublishingRecoverer recoverer) {
+        ExponentialBackOff backOff = new ExponentialBackOff(1000L, 2.0);
+        backOff.setMaxElapsedTime(30_000L);
+        DefaultErrorHandler handler = new DefaultErrorHandler(recoverer, backOff);
+        handler.addNotRetryableExceptions(
+                IllegalArgumentException.class, JsonParseException.class);
+        return handler;
+    }
+}
+\end{lstlisting}
+
+清单\ref{lst:ch05-kafka-retry}把不可重试异常直接送入死信，把瞬态异常限制在30秒窗口内。生产环境还要监控重试次数、死信增长、消费延迟和分区积压；死信处理界面允许专业分析员查看原因、修复数据后按原事件 ID 补发，补发仍经过去重约束。重试任务不能绕过认证和审计，也不能把死信内容原样展示给无权限用户。
+
+\subsection{事务发件箱与可靠发布}
+
+数据库提交和 Kafka 发送是两个资源，直接在事务中先保存再发送可能出现“数据库已提交、消息发送失败”，先发送再提交则可能出现“消息已消费、数据库回滚”。事务发件箱把待发送事件作为业务事务的一部分写入\texttt{outbox\_event}表，提交后由发布器轮询或使用 CDC 读取，发送成功后更新状态。发布器崩溃可以从状态为 pending 的记录继续，消费者仍需幂等，因为发送确认和状态更新之间也可能重试。
+
+\label{lst:ch05-outbox}
+\begin{lstlisting}[language=Java,caption={事务发件箱写入与发布任务}]
+import jakarta.persistence.*;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.*;
+import org.springframework.transaction.annotation.Transactional;
+import java.time.Instant;
+
+@Entity
+@Table(name = "outbox_event")
+class OutboxEvent {
+    @Id @Column(length = 64) private String eventId;
+    @Column(nullable = false, length = 120) private String topic;
+    @Column(nullable = false, columnDefinition = "text") private String payload;
+    @Column(nullable = false, length = 16) private String status;
+    @Column(nullable = false) private Instant createdAt;
+    protected OutboxEvent() {}
+    OutboxEvent(String id, String topic, String payload, Instant now) {
+        eventId = id; this.topic = topic; this.payload = payload;
+        status = "PENDING"; createdAt = now;
+    }
+}
+
+@Service
+class OutboxService {
+    private final OutboxRepository outbox;
+    private final KafkaTemplate<String, String> kafka;
+
+    OutboxService(OutboxRepository outbox, KafkaTemplate<String, String> kafka) {
+        this.outbox = outbox; this.kafka = kafka;
+    }
+
+    @Scheduled(fixedDelay = 1000)
+    @Transactional
+    void publishPending() {
+        outbox.lockNextBatch(100).forEach(event ->
+                kafka.send(event.topic(), event.getEventId(), event.getPayload())
+                     .whenComplete((ok, error) -> outbox.markResult(
+                             event.getEventId(), error == null)));
+    }
+}
+\end{lstlisting}
+
+发件箱表要有状态、尝试次数、最后错误、下次重试时间和创建时间索引；发布器用行锁或租约避免多实例重复领取，发送确认和状态更新采用幂等更新。对于高吞吐时序事件，可以按日期分区、批量发送并设置保留期限，历史成功记录归档而不是无限增长。发件箱解决的是“本地事务与消息之间的原子记录”，不能替代 Kafka 副本、TLS、消费者幂等和死信治理。
+
+消息安全还包括主题权限和数据脱敏。生产者只允许写入指定主题，消费者只允许读取所属组；不同环境使用不同集群凭据和主题前缀。事件中不放密码、JWT、个人信息或不必要的原始测点数据，日志使用事件 ID 和摘要定位。主题 ACL、Schema 版本、保留策略、灾备恢复和重放演练应纳入发布清单，确保异常时可以追踪“谁在何时向哪个主题写入了什么版本的事件”。
+
+\subsection{分区、顺序与消费者组}
+
+Kafka 主题由多个分区组成，分区是并行度和顺序边界。同一测站使用同一消息键时，事件在该分区内按偏移量有序；不同测站可以并行处理。分区数增加后不能保证跨分区全局顺序，预警规则若需要跨测站比较，应在应用层按时间窗口重新排序，或把比较任务建模为独立的聚合流。消费者组中的每个分区同一时刻只分配给一个消费者，但重平衡会暂停处理并重新分配，代码必须能安全重启。
+
+消费者提交偏移量的时机决定交付语义。先提交再执行业务可能丢失事件，处理成功再提交可能重复但可通过去重保证最终效果；长时间处理时要延长会话和最大轮询间隔，或把耗时任务转成任务表并快速确认消息。消费者处理线程不应执行无界的外部调用，数据库、HTTP 和模型推理都设置超时，失败交给错误处理器。积压指标按主题、分区和消费者组观察，不能只看应用实例 CPU。
+
+事件模式要有注册和兼容策略。生产者在消息中带模式版本，消费者对未知可选字段忽略，对未知必需字段进入死信；发布新版本前先运行旧消费者的契约测试。JSON 序列化默认的类型头可能泄露实现包名，配置中关闭类型头并使用受控的默认类型；跨服务使用明确的 DTO，不把 JPA 实体直接序列化。事件字段单位、时间时区、质量码和追踪 ID 在文档中固定，变化时附带迁移说明。
+
+批量发送和批量消费要控制资源。生产者可以按字节大小或时间窗口聚合，但必须设置最大等待时间，避免低流量时延迟无限增长；消费者批量拉取后逐条执行，部分失败记录每条事件 ID 和错误原因，不能把整批成功标记掩盖了坏行。发件箱发布器按状态和下次重试时间领取小批次，使用数据库行锁或租约避免多个实例重复发布。归档和清理任务保留失败记录及审计摘要，满足故障追溯与合规要求。
+
+消息链路的端到端测试从数据库事务开始：创建读数、写入发件箱、发布 Kafka、消费者去重、预警服务更新和死信补偿都使用固定事件 ID 和追踪 ID。测试模拟 broker 暂停、网络超时、消费者崩溃、重平衡、重复投递和未知模式，检查主记录是否重复、偏移量是否前进、死信是否可重放。压测记录生产吞吐、消费者延迟、数据库锁等待和 Redis/Kafka 连接数，容量结论以测量数据为依据。
+
+当 Kafka 集群不可用时，写入接口要依据业务级别选择策略：关键监测原始记录仍可先落库并由发件箱延迟发布，实时预警状态则返回“暂未评估”并在界面显示数据时间；不应为了保持 HTTP 200 而假装告警已完成。恢复后发布器按创建时间和优先级追赶积压，并限制重放速率，避免恢复瞬间再次冲击下游。运维手册记录暂停消费、扩容分区、迁移死信和回滚模式版本的步骤。
+
 \section{性能优化与可观测性}
 
 性能优化先测量再修改。数据库查询应建立与查询模式匹配的索引并使用分页；热点且允许短暂陈旧的数据可缓存；外部调用设置连接、读取和总超时；线程池与数据库连接池容量应依据压测结果配置。
