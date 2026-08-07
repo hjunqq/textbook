@@ -236,9 +236,10 @@ x=E-E_0,\qquad y=H-H_0,\qquad z=-(N-N_0).
 
 \label{lst:ch07-coordinate-transform}
 \begin{lstlisting}[language=JavaScript,breaklines=true,caption={坐标与单位转换}]
-const cgcs2000 = '+proj=longlat +ellps=GRS80 +no_defs';
+const cgcs2000 = '+proj=longlat +ellps=GRS80 +no_defs +type=crs';
 const gauss = '+proj=tmerc +lat_0=0 +lon_0=117 '
-  + '+k=1 +x_0=500000 +y_0=0 +ellps=GRS80 +units=m';
+  + '+k_0=1 +x_0=500000 +y_0=0 +ellps=GRS80 '
+  + '+units=m +no_defs +type=crs';
 
 const [east, north] = proj4(
   cgcs2000, gauss, [longitude, latitude]);
