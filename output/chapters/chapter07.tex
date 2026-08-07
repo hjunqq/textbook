@@ -422,32 +422,223 @@ chart.setOption({
 
 \subsection{可运行的实时曲线}
 
-ECharts实例必须先设置完整初始配置，再进行增量更新。下面示例把最近300个水位点保留在前端；更长时间范围应重新请求聚合数据。
+ECharts的\texttt{setOption}不是“把新对象覆盖到旧对象”这么简单。默认\texttt{notMerge:false}时，框架会把新配置与旧配置合并；\texttt{series}优先按稳定的\texttt{id}匹配，同一序列只更新被提供的字段。\texttt{lazyUpdate:true}允许把短时间内的多次更新合并到下一帧，适合5\,min采样或批量补传。若业务要删除一条已经不存在的序列，必须显式使用\texttt{replaceMerge:['series']}，否则旧序列可能继续留在图例和tooltip中。对于大批量点位，\texttt{appendData}可以把数据追加到指定序列，避免每次复制整份数组；它适合只追加、不需要重新排序的历史尾部。
+
+表\ref{tab:ch07-echarts-update}对照三种更新方式。选择方式时先问“是否改变序列结构”：只改数据点可局部合并，需要删除序列就替换集合，持续追加的高频数据则使用追加接口。无论哪一种方式，应用状态都要保存原始缓冲，不能把图表实例的合并结果当作业务状态。
+
+\begin{table}[htbp]
+\centering
+\caption{ECharts三种更新方式与适用边界}
+\label{tab:ch07-echarts-update}
+\begin{tabular}{p{3.0cm}p{4.2cm}p{5.0cm}}
+\toprule
+方式 & 关键调用 & 适用场景与注意事项 \\
+\midrule
+局部合并 & \texttt{setOption(option)} & 默认按\texttt{id}合并；保留未提供的配置，适合更新已有序列数据 \\
+替换集合 & \texttt{replaceMerge} & 删除或重排序列时使用；必须重新提供完整序列集合 \\
+流式追加 & \texttt{appendData(...)} & 只追加尾部点；不负责排序、去重和窗口裁剪，应用层先完成校验 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \label{lst:ch07-chart}
-\begin{lstlisting}[language=JavaScript,breaklines=true,caption={图表数据转换}]
+\begin{lstlisting}[language=JavaScript,breaklines=true,caption={基于应用状态的实时水位曲线更新}]
 const chart = echarts.init(document.querySelector('#level'));
+const state = {level: [], maxPoints: 300};
+
 chart.setOption({
   animation: false,
-  xAxis: { type: 'time' },
-  yAxis: { type: 'value', name: 'm' },
-  series: [{ id: 'level', type: 'line',
-    showSymbol: false, data: [] }]
+  xAxis: {type: 'time'},
+  yAxis: {type: 'value', name: '水位/m'},
+  series: [{id: 'level', name: '库水位', type: 'line',
+    showSymbol: false, connectNulls: false, data: []}]
 });
 
 function appendReading(reading) {
-  const series = chart.getOption().series[0];
-  const next = [...series.data,
-    [reading.occurredAt, reading.value]].slice(-300);
-  chart.setOption({ series: [{ id: 'level', data: next }] });
+  const point = reading.quality === 'missing'
+    ? [reading.occurredAt, null]
+    : [reading.occurredAt, reading.value];
+  state.level = [...state.level, point]
+    .sort((a, b) => Date.parse(a[0]) - Date.parse(b[0]))
+    .slice(-state.maxPoints);
+  chart.setOption({series: [{id: 'level', data: state.level}]},
+    {notMerge: false, lazyUpdate: true});
 }
 \end{lstlisting}
 
-代码先调用\texttt{setOption}建立坐标轴和带稳定ID的序列，因此后续局部配置能找到更新目标。生产代码还应验证单位和质量码，并在组件卸载时解除消息订阅、窗口事件与图表实例。
+清单\ref{lst:ch07-chart}把数据缓冲放在\texttt{state.level}中，图表只承担渲染职责，因此加入阈值带、第二条曲线或重新排序时不会依赖\texttt{series[0]}的下标。缺测点明确写成空值并保持\texttt{connectNulls:false}；排序、去重和300点窗口裁剪在应用状态中完成。300点对5\,min水位采样约为25\,h，若查询窗口是固定24小时，应改用时间戳裁剪而不是照搬点数。
 
-\subsection{图表与三维对象联动}
+\paragraph{内置LTTB与历史浏览}
+第7章前面推导的LTTB可以直接对应到ECharts的\texttt{sampling:'lttb'}。库在折线点数超过像素宽度时按桶保留峰谷，前端只需声明采样策略；原始数据仍保存在后端，统计和质量审计不能使用降采样后的视觉序列。初次加载历史曲线时可同时设置\texttt{sampling:'lttb'}、\texttt{showSymbol:false}和\texttt{progressive}，在不改变业务数值的前提下减少绘制压力。
 
-用户点击图表上的异常点时，联动控制器读取\texttt{assetId}和时间，定位场景中的测点并打开同一时刻的详情；反向点击三维测点时，曲线切换到对应监测项并标出当前事件。联动状态应放在页面状态管理中，不要通过运行时给图表对象“动态挂方法”。
+\label{lst:ch07-window-options}
+\begin{lstlisting}[language=JavaScript,breaklines=true,caption={历史曲线的降采样、缩放与阈值带}]
+const historyOption = {
+  animation: false,
+  dataZoom: [
+    {type: 'inside', xAxisIndex: 0, filterMode: 'none'},
+    {type: 'slider', xAxisIndex: 0, height: 18}
+  ],
+  visualMap: {show: false, dimension: 1, pieces: [
+    {lte: 165.0, color: '#1976D2'},
+    {gt: 165.0, lte: 168.0, color: '#F9A825'},
+    {gt: 168.0, color: '#C62828'}
+  ]},
+  series: [{id: 'level', type: 'line', sampling: 'lttb',
+    showSymbol: false, progressive: 5000, progressiveThreshold: 10000,
+    data: historyPoints,
+    markLine: {data: [{yAxis: 168.0, name: '正常蓄水位'}]},
+    markArea: {data: [[{yAxis: 165.0}, {yAxis: 168.0}]]}}]
+};
+chart.setOption(historyOption);
+\end{lstlisting}
+
+清单\ref{lst:ch07-window-options}同时展示了\texttt{dataZoom}、\texttt{markLine}、\texttt{markArea}和\texttt{visualMap.pieces}的职责：缩放改变可见时间范围，标线标出单一基准，阴影标出阈值带，分段映射控制曲线颜色。阈值来源、适用工况和规则版本必须显示在图例或详情中；不能用一条红色水平线代替第8章的质量检查和预警规则。颜色分段只服务于阅读，风险计算仍读取原始数值和质量码。
+
+\paragraph{追加接口与结构变更}
+当消息以严格递增的事件时间到达时，可以使用\texttt{appendData}追加尾部点；迟到消息、删除测项和改变时间窗则必须回到应用状态重建序列并调用\texttt{setOption}。\texttt{appendData}不会替你去重，也不会自动删除旧点，300点窗口仍由状态层或服务端维护。若同一图表从一条曲线切换为“水位+雨量+阈值带”，应在一次\texttt{replaceMerge}中提交完整序列集合，避免旧的图例项留在界面。
+
+\label{lst:ch07-append-data}
+\begin{lstlisting}[language=JavaScript,breaklines=true,caption={高频尾部数据的appendData与结构切换}]
+function appendTail(reading) {
+  if (reading.quality === 'missing') return;
+  chart.appendData({seriesIndex: 0,
+    data: [[reading.occurredAt, reading.value]]});
+}
+
+function replaceWithTwoSeries(level, rain) {
+  chart.setOption({
+    legend: {data: ['库水位', '时段雨量']},
+    series: [
+      {id: 'level', name: '库水位', type: 'line', data: level},
+      {id: 'rain', name: '时段雨量', type: 'bar', data: rain}
+    ]
+  }, {replaceMerge: ['series'], lazyUpdate: true});
+}
+\end{lstlisting}
+
+\subsection{渲染器、性能预算与生命周期}
+
+Canvas适合连续折线、数千个点和频繁刷新，绘制由一个位图上下文完成；SVG适合需要逐个DOM节点访问、少量图形和精确打印的页面，但节点过多会增加布局与事件开销。\texttt{large:true}和\texttt{largeThreshold}适合大量散点或柱形的批量绘制，却会关闭部分交互能力，不能直接用于需要逐点点击的监测点。\texttt{progressive}与\texttt{progressiveThreshold}把大数据分批绘制，优先保证页面响应；它们不会改变数据顺序，也不能替代服务端聚合。
+
+组件生命周期同样是性能的一部分。创建图表时保存实例，使用\texttt{ResizeObserver}监听容器尺寸并调用\texttt{chart.resize()}；组件卸载时解除观察器、消息订阅和事件监听，最后调用\texttt{chart.dispose()}。不销毁旧实例会让Canvas、定时器和闭包继续占用内存，切换测点几百次后才暴露为卡顿，难以从单次截图发现。
+
+\label{lst:ch07-responsive-dispose}
+\begin{lstlisting}[language=JavaScript,breaklines=true,caption={响应式尺寸与ECharts实例销毁}]
+function mountChart(container, option, subscribe) {
+  const chart = echarts.init(container, null, {renderer: 'canvas'});
+  const observer = new ResizeObserver(() => chart.resize());
+  observer.observe(container);
+  chart.setOption(option);
+  const unsubscribe = subscribe(reading => updateReading(chart, reading));
+  return () => {
+    unsubscribe();
+    observer.disconnect();
+    chart.off('click');
+    chart.dispose();
+  };
+}
+\end{lstlisting}
+
+清单\ref{lst:ch07-responsive-dispose}把“创建—订阅—调整—销毁”作为一个可测试的闭环。移动端旋转、侧栏收起和大屏窗口切换都会触发尺寸变化；如果只在\texttt{window.resize}上监听，容器在网格布局中改变宽度时可能没有回调。销毁函数应由Vue 3的\texttt{onUnmounted}调用，不能等待浏览器自动回收。
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=6mm and 9mm,
+  life/.style={draw=Primary,rounded corners,fill=PrimaryLight,align=center,
+    minimum width=2.8cm,minimum height=.75cm,text=PrimaryDark}]
+\node[life] (create) {创建实例：初始化option};
+\node[life,right=of create] (update) {状态更新：合并或追加};
+\node[life,right=of update] (resize) {容器变化：chart.resize};
+\node[life,below=of resize] (dispose) {卸载组件：unsubscribe+dispose};
+\draw[->,thick,draw=Primary] (create)--(update)--(resize)--(dispose);
+\draw[->,thick,dashed,draw=Accent] (resize)|-(update);
+\end{tikzpicture}
+\caption{ECharts实例的创建、更新、响应式与销毁生命周期}
+\label{fig:ch07-echarts-lifecycle}
+\end{figure}
+
+图\ref{fig:ch07-echarts-lifecycle}提醒读者把图表当作有生命周期的资源。状态层保存数据和筛选条件，ECharts负责把状态投影到屏幕；容器变化只触发尺寸重算，数据更新才触发配置合并；页面离开时先解除外部资源，再销毁图表。职责分离后，性能问题可以分别用消息吞吐、更新耗时、绘制耗时和内存曲线定位。
+
+\subsection{图表与三维对象的双向联动}
+
+图表和三维场景联动的关键不是让两个库互相调用，而是共享稳定的对象标识和时间窗口。ECharts点击事件的\texttt{params.data}保存当前点的原始数组或对象，\texttt{params.seriesId}说明来自哪条序列，\texttt{params.dataIndex}用于定位应用状态中的索引；控制器据此取出\texttt{assetId}，再调用三维场景的高亮接口。反向点击三维对象时，从\texttt{object.userData.assetId}查找图表序列和数据索引，使用\texttt{dispatchAction}发送\texttt{highlight}与\texttt{showTip}。多张图表可通过\texttt{echarts.connect([a,b])}或相同的\texttt{group}共享缩放和提示，但对象定位仍由业务控制器完成。
+
+\label{lst:ch07-link-controller}
+\begin{lstlisting}[language=JavaScript,breaklines=true,caption={ECharts与Three.js对象的双向联动控制器}]
+function createLinkController(chart, scene, readings) {
+  const byAsset = new Map(readings.map((r, i) => [r.assetId, {i, r}]));
+  const onChartClick = params => {
+    const point = params.data?.assetId
+      ? params.data : readings[params.dataIndex];
+    if (!point) return;
+    scene.focusAsset(point.assetId, point.occurredAt);
+  };
+  const onSceneSelect = object => {
+    const assetId = object.userData.assetId;
+    const hit = byAsset.get(assetId);
+    if (!hit) return;
+    chart.dispatchAction({type: 'highlight', seriesId: 'level', dataIndex: hit.i});
+    chart.dispatchAction({type: 'showTip', seriesId: 'level', dataIndex: hit.i});
+  };
+  chart.on('click', onChartClick);
+  scene.on('select', onSceneSelect);
+  return () => {
+    chart.off('click', onChartClick);
+    scene.off('select', onSceneSelect);
+  };
+}
+\end{lstlisting}
+
+清单\ref{lst:ch07-link-controller}没有把\texttt{assetId}写死在图表下标里：筛选、排序或插入阈值带后，控制器仍可通过应用状态查找对象。真实项目还要把时间窗口作为\texttt{focusAsset}的参数，三维场景显示同一时刻的质量码和预警等级；若该点是missing，图表应定位到空值区间并打开质量详情，而不是强行显示最近的有效点。解绑函数必须在组件卸载时执行，否则每次进入页面都会叠加一组点击处理器。
+
+\label{lst:ch07-connect-charts}
+\begin{lstlisting}[language=JavaScript,breaklines=true,caption={多图表缩放联动与组标识}]
+const levelChart = echarts.init(document.querySelector('#level'));
+const rainChart = echarts.init(document.querySelector('#rain'));
+levelChart.group = 'clearing-reservoir-time';
+rainChart.group = 'clearing-reservoir-time';
+echarts.connect('clearing-reservoir-time');
+
+function focusTime(chart, occurredAt) {
+  chart.dispatchAction({type: 'dataZoom',
+    startValue: occurredAt, endValue: Date.parse(occurredAt) + 6 * 3600 * 1000});
+}
+\end{lstlisting}
+
+多图表联动只同步视图范围，不等于两个测项具有相同采样周期。雨量和水位共享时间轴后，仍要在图例中标注5\,min格网、聚合方法和质量码；渗压以1\,h采样时，应显示最近观测年龄或使用独立的点标记。图表控制器是业务边界，ECharts和Three.js是可替换的渲染实现，后续迁移到其他库时只需重写适配器而不改动对象编码、时间契约和质量规则。
+
+\paragraph{更新预算与批处理}
+实时界面的“及时”应转化为可测量的预算。采样消息到达后，状态层完成校验和去重的时间、\texttt{setOption}提交时间、浏览器绘制时间以及用户看到新点的端到端延迟分别记录。5\,min采样不需要每个消息都强制重绘，可以在100--200\,ms的合帧窗口内合并同一测点的补传；需要立即呈现的红色预警则走单独的确认通道，不能被普通曲线更新阻塞。监控面板显示更新队列长度、丢弃的重复点、迟到修订数和最近一次成功绘制时间，出现卡顿时先判断是数据源、状态层还是渲染器超预算。
+
+ECharts配置对象应保持稳定的结构。坐标轴、图例、阈值规则和事件监听器在初始化时声明，数据数组在状态层更新；不要在每条消息里重新创建formatter函数、渐变色或大量匿名对象。对同一时刻到达的多个测项，可先按\texttt{assetId}分组，完成质量合并和时间排序后只提交一次\texttt{setOption}。若用户正在拖动\texttt{dataZoom}，后台更新暂存在缓冲区，松开鼠标后再按当前窗口合并，避免更新与交互争夺主线程。
+
+\paragraph{Canvas、SVG与大数据量}
+渲染器的选择要写进组件契约。Canvas适合连续折线和动态点云，优点是节点数量不随数据点线性增长；SVG适合十几个需要逐个获得焦点的图形、论文式打印和无障碍DOM查询。一个页面可以让概览曲线使用Canvas，让少量可点击的告警标记使用SVG，但必须避免在同一容器反复初始化两个实例。散点超过\texttt{largeThreshold}后可以启用\texttt{large}，代价是逐点样式和鼠标事件减少；需要点击单点的场景应先服务端聚合或按缩放级别分层，而不是盲目打开\texttt{large}。
+
+\paragraph{渐进绘制与用户反馈}
+\texttt{progressive}把绘制任务拆成若干批次，适合首次加载长时间序列；页面应同步显示“正在绘制”状态，允许用户先查看坐标轴和图例。用户拖动时间轴时可暂停渐进任务并优先绘制当前窗口，松开后再补齐背景序列。渐进绘制期间，阈值带、缺测阴影和当前选中点必须保持可见，否则用户可能先看到一条没有质量上下文的曲线而做出错误判断。绘制完成后记录点数、批次数和耗时，作为不同浏览器和屏幕分辨率下的回归指标。
+
+\paragraph{查询、缩放与缓存}
+\texttt{dataZoom}只改变视图范围，不应触发浏览器把多年原始数据全部保留在内存。拖动到尚未缓存的时间段时，控制器按当前范围和采样周期请求服务端聚合结果，并给旧请求加取消标记；新请求返回后检查时间窗版本，晚到的旧响应不能覆盖用户已经选择的新范围。缓存键至少包含\texttt{assetId}、起止时间、聚合粒度、质量过滤、规则版本和坐标时区，避免同一条曲线在不同过滤条件下错误复用。缓存命中率、查询耗时和返回点数应在开发工具中可见，学生据此理解“缩放流畅”依赖服务端契约而不是单一前端技巧。
+
+\paragraph{联动一致性与防抖}
+图表点击、三维拾取和列表选择都通过同一个联动事件模型传递。事件至少包含\texttt{assetId}、\texttt{occurredAt}、当前时间窗、质量码和来源组件；控制器先比较事件版本，再决定是否更新其他视图。指针移动产生的高频预览可以节流，用户确认预警、提交工单和导出报告不能节流丢失。时间窗输入采用防抖并显示加载状态，用户再次输入时取消上一个请求；服务返回后若发现规则版本已经变化，应提示“按新规则重新计算”，而不是静默替换颜色。
+
+\paragraph{可测试的验收场景}
+ECharts工程验收至少准备五组数据：单点连续到达、同一事件重复到达、乱序与迟到、质量missing区间、序列删除后再加入。逐组检查曲线是否按\texttt{id}更新、旧图例是否清理、缺测是否断线、阈值带是否与版本一致、联动是否能在图表与三维之间往返。再用窄屏、深色主题、灰度打印和键盘操作复测，确认ResizeObserver触发、实例销毁后无订阅残留。验收结果和截图随版本归档，后续升级ECharts时可复用同一组回归数据，不把“这次看起来正常”当作性能和可访问性的证明。
+
+\paragraph{状态快照与恢复}
+实时页面还要考虑浏览器刷新、网络短暂中断和标签页挂起。状态层可以把最近一次通过校验的时间窗、序列缓冲摘要和规则版本保存为快照，恢复后先显示“数据恢复中”，再从服务端按快照时间重新拉取增量。快照只保存对象标识、时间范围、质量统计和最后事件游标，不保存未经校验的临时颜色或整个ECharts option，避免把旧的合并结果当成新状态。网络恢复时，按事件游标补拉消息并重新执行去重、迟到和质量规则；补拉完成前，图表保持缺测阴影，不把断线期间误画成连续曲线。
+
+可观测性指标要与用户体验对应。前端记录“最后有效观测时间”“最后收到消息时间”和“最后成功绘制时间”三个时间点，详情卡据此区分传感器无数据、网络无消息和浏览器未绘制。若绘制延迟超过预算，页面提示“显示可能滞后”并允许切换到低频聚合；若质量缺测率超过阈值，图例显示缺测比例而不是只改变曲线颜色。值班员确认预警后，控制器把确认人、时间和规则版本写入事件流，刷新或切换设备不会丢失确认状态。这样，ECharts只是显示链路的一环，实时性、可靠性和可追溯性仍由完整的数据契约保证。
+
+当图表同时承担研判和操作入口时，数据更新还应保护用户上下文。刷新序列不能重置当前缩放范围、选中测点、键盘焦点和展开的详情卡；规则版本改变时先保留旧视图并提示差异，用户确认后再切换。导出图片或表格使用同一时间窗和过滤条件，并把采样周期、聚合方法、质量码过滤和预警规则版本写入元数据。这样现场值班员看到的屏幕、分析员导出的报告和审计人员回放的历史记录可以相互复核，避免“屏幕上看过但无法重现”的联动结果。
+此外，联动事件要设定来源和幂等键，重复点击只更新一次焦点；图表与三维场景分别记录处理耗时，便于定位是网络、状态管理还是渲染造成的延迟。
+
+\paragraph{触控长按与清理}
+
+用户点击图表上的异常点时，联动控制器读取\texttt{assetId}和时间，定位场景中的测点并打开同一时刻的详情；反向点击三维测点时，曲线切换到对应监测项并标出当前事件。联动状态放在页面状态管理中，图表对象只使用库提供的事件接口，便于测试和解绑。
 
 交互事件可能很密集。指针移动使用节流，时间范围查询使用防抖，告警确认则不得被节流丢弃。触控长按必须在抬起或取消时清理定时器：
 
