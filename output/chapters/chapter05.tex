@@ -476,7 +476,7 @@ class WaterDataSummary {
 \begin{lstlisting}[language=Java,caption={参数校验异常处理}]
 record CreateReadingRequest(
         @NotBlank String stationId,
-        @DecimalMin("0.0") @DecimalMax("50.0") double level,
+        @NotNull @DecimalMin("0.0") @DecimalMax("50.0") BigDecimal level,
         @NotNull Instant measuredAt) {}
 
 @RestControllerAdvice
@@ -499,6 +499,208 @@ class GlobalExceptionHandler {
 \end{lstlisting}
 
 异常处理器把可预期错误转换为稳定契约；意外异常只向客户端返回通用信息，详细堆栈写入受控日志。日志应包含请求标识、测站标识和事件类型，但不得记录密码、完整令牌或敏感个人信息。
+
+\subsection{读写接口的完整闭环}
+
+一个可交付的 REST 资源至少要说明集合查询、单项查询、创建、整体更新和删除的语义。以监测读数为例，\texttt{GET /api/readings/{id}}返回单条记录，\texttt{GET /api/readings}支持分页与过滤，\texttt{POST /api/readings}创建新记录，\texttt{PUT /api/readings/{id}}替换可编辑字段，\texttt{DELETE /api/readings/{id}}删除尚未归档的记录。更新和删除前要检查资源版本、用户权限和业务状态；已进入审计归档的读数应采用逻辑失效或拒绝删除，而不是直接破坏时序证据。
+
+\label{lst:ch05-crud-controller}
+\begin{lstlisting}[language=Java,caption={监测读数 GET/POST/PUT/DELETE 控制器}]
+@RestController
+@RequestMapping("/api/readings")
+class ReadingCrudController {
+    private final ReadingApplicationService service;
+
+    ReadingCrudController(ReadingApplicationService service) {
+        this.service = service;
+    }
+
+    @GetMapping
+    Page<ReadingResponse> list(@PageableDefault(size = 20) Pageable pageable,
+                               @RequestParam(required = false) String stationId,
+                               @RequestParam(required = false) String quality) {
+        return service.list(pageable, stationId, quality);
+    }
+
+    @GetMapping("/{id}")
+    ReadingResponse get(@PathVariable long id) {
+        return service.get(id);
+    }
+
+    @PostMapping
+    ResponseEntity<ReadingResponse> create(@Valid @RequestBody CreateReadingRequest request,
+                                           UriComponentsBuilder builder) {
+        ReadingResponse created = service.create(request);
+        URI location = builder.path("/api/readings/{id}")
+                .buildAndExpand(created.id()).toUri();
+        return ResponseEntity.created(location).body(created);
+    }
+
+    @PutMapping("/{id}")
+    ReadingResponse replace(@PathVariable long id,
+                            @Valid @RequestBody ReplaceReadingRequest request) {
+        return service.replace(id, request);
+    }
+
+    @DeleteMapping("/{id}")
+    ResponseEntity<Void> delete(@PathVariable long id) {
+        service.delete(id);
+        return ResponseEntity.noContent().build();
+    }
+}
+\end{lstlisting}
+
+清单\ref{lst:ch05-crud-controller}把协议层的五个入口连接到同一个应用服务。集合查询返回\texttt{Page}并由\texttt{Pageable}限制页大小，创建成功返回201和\texttt{Location}，删除成功返回204；异常由统一处理器转换为400、404或409。控制器没有直接访问 Repository，也没有把数据库实体作为响应体，因而可以独立替换持久化实现。
+
+\label{lst:ch05-dto-mapper}
+\begin{lstlisting}[language=Java,caption={DTO 与实体的双向映射}]
+record ReplaceReadingRequest(
+        @NotNull BigDecimal level,
+        @NotBlank String unit,
+        @NotNull Instant measuredAt,
+        @NotBlank String quality,
+        @NotNull Long version) {}
+
+record ReadingResponse(long id, String stationId, BigDecimal level,
+                       String unit, Instant measuredAt, String quality,
+                       long version) {
+    static ReadingResponse from(WaterReading entity) {
+        return new ReadingResponse(entity.getId(), entity.getStationId(),
+                entity.getLevel(), entity.getUnit(), entity.getMeasuredAt(),
+                entity.getQuality(), entity.getVersion());
+    }
+}
+
+final class ReadingMapper {
+    private ReadingMapper() {}
+
+    static WaterReading toEntity(CreateReadingRequest request) {
+        return WaterReading.create(request.stationId(), request.level(),
+                request.unit(), request.measuredAt(), request.quality());
+    }
+}
+\end{lstlisting}
+
+清单\ref{lst:ch05-dto-mapper}把外部字段转换集中在映射边界，单位、质量码和版本号不会因为数据库字段改名而泄露到 API。\texttt{version}为后续的乐观锁校验预留位置；更新请求携带旧版本时，服务层可以在保存前检查版本是否仍然匹配，冲突返回409并提示客户端重新读取，而不是覆盖另一个值班员刚提交的数据。
+
+\label{lst:ch05-command-service}
+\begin{lstlisting}[language=Java,caption={应用服务中的写入、更新与删除规则}]
+@Service
+class ReadingApplicationService {
+    private final WaterReadingRepository repository;
+    private final StationRepository stations;
+
+    ReadingApplicationService(WaterReadingRepository repository,
+                              StationRepository stations) {
+        this.repository = repository;
+        this.stations = stations;
+    }
+
+    @Transactional
+    ReadingResponse create(CreateReadingRequest request) {
+        if (!stations.existsById(request.stationId()))
+            throw new EntityNotFoundException("测站不存在");
+        WaterReading entity = ReadingMapper.toEntity(request);
+        return ReadingResponse.from(repository.save(entity));
+    }
+
+    @Transactional
+    ReadingResponse replace(long id, ReplaceReadingRequest request) {
+        WaterReading entity = repository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("读数不存在"));
+        entity.replaceIfVersion(request.level(), request.unit(),
+                request.measuredAt(), request.quality(), request.version());
+        return ReadingResponse.from(repository.save(entity));
+    }
+
+    @Transactional
+    void delete(long id) {
+        WaterReading entity = repository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("读数不存在"));
+        if (entity.isArchived()) throw new ConflictException("归档读数不可删除");
+        repository.delete(entity);
+    }
+}
+\end{lstlisting}
+
+服务层同时承担跨字段业务规则和事务边界。测站存在性、采样时间窗口、质量码取值域和归档状态都不能只依赖注解；它们需要读取当前领域状态并在同一事务中决定是否保存。更新使用版本号防止丢失写入，删除先检查归档标记，所有分支都能映射到明确的领域异常。
+
+\subsection{统一错误响应与参数校验}
+
+Spring Boot 3提供的\texttt{ProblemDetail}可以承载标准状态、标题、详情和扩展字段。参数缺失或格式错误返回400，权限不足返回403，资源不存在返回404，版本冲突或状态不允许返回409，未认证由安全过滤链返回401。错误响应不应把 Java 异常类名、SQL 片段和堆栈发给客户端；服务端日志通过\texttt{traceId}保留诊断信息，前端只根据稳定错误码显示可行动提示。
+
+\label{lst:ch05-problem-advice}
+\begin{lstlisting}[language=Java,caption={RestControllerAdvice 统一错误响应}]
+@RestControllerAdvice
+class ReadingProblemAdvice {
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    ResponseEntity<ProblemDetail> invalid(MethodArgumentNotValidException ex) {
+        ProblemDetail problem = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+        problem.setTitle("请求参数无效");
+        problem.setProperty("code", "VALIDATION_ERROR");
+        problem.setProperty("fields", ex.getBindingResult().getFieldErrors()
+                .stream().map(FieldError::getField).distinct().toList());
+        return ResponseEntity.badRequest().body(problem);
+    }
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    ResponseEntity<ProblemDetail> notFound(EntityNotFoundException ex) {
+        ProblemDetail problem = ProblemDetail.forStatus(HttpStatus.NOT_FOUND);
+        problem.setTitle("资源不存在");
+        problem.setProperty("code", "READING_NOT_FOUND");
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(problem);
+    }
+
+    @ExceptionHandler(ConflictException.class)
+    ResponseEntity<ProblemDetail> conflict(ConflictException ex) {
+        ProblemDetail problem = ProblemDetail.forStatus(HttpStatus.CONFLICT);
+        problem.setTitle("资源状态冲突");
+        problem.setProperty("code", "READING_CONFLICT");
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(problem);
+    }
+}
+\end{lstlisting}
+
+清单\ref{lst:ch05-problem-advice}只把字段名和稳定错误码放入响应，具体原因留在受控日志。校验字段列表可以帮助前端逐项标记输入框；对跨字段错误，服务层抛出带业务码的异常。异常处理器本身也应有测试，确保新异常不会意外回落到500，并验证响应的\texttt{Content-Type}为\texttt{application/problem+json}。
+
+浮点边界是参数校验的常见陷阱。Jakarta Bean Validation 对\texttt{double}和\texttt{float}不保证\texttt{@DecimalMin}与\texttt{@DecimalMax}的十进制精确语义，二进制舍入可能让边界值在比较时偏离预期；水位、雨量等带单位的小数应使用\texttt{BigDecimal}或整数最小单位，并在转换时指定舍入模式。校验通过后仍要执行物理范围、单位换算和质量码优先级检查，避免“格式合法”被误解为“业务可信”。
+
+\subsection{三层校验与错误定位}
+
+参数校验可以分为表示层、领域层和持久化层三道闸。表示层验证 JSON 是否完整、类型是否正确、字符串长度和枚举值是否落在公开契约内；领域层验证测站是否存在、单位是否与测点配置匹配、采样时间是否满足时序顺序、质量码是否允许进入计算；持久化层通过非空约束、唯一约束、外键和检查约束保证最后一道数据完整性。三层校验不是重复劳动，而是分别面对不同入口：HTTP 请求、内部消息和数据库脚本都可能绕过其中一层。
+
+同一字段的错误要有稳定的错误码。\texttt{stationId}为空属于\texttt{FIELD\_REQUIRED}，测站不存在属于\texttt{STATION\_NOT\_FOUND}，水位超出批准范围属于\texttt{LEVEL\_OUT\_OF\_RANGE}，采样时间倒退属于\texttt{MEASURED\_AT\_ORDER}。错误码与 HTTP 状态码分离：字段错误和业务规则错误都可以返回400，但前端通过错误码决定提示文本和是否允许重试。错误详情不要包含数据库列名、SQL 或内部堆栈，以免把实现细节暴露给外部调用者。
+
+校验分组适合处理创建和更新的差异。创建读数要求\texttt{stationId}、\texttt{measuredAt}、\texttt{level}和\texttt{quality}全部提供；更新读数可能只允许修改订正值和质量码，同时必须携带版本号；删除请求不需要读取体，但要检查资源状态和操作者权限。把三种请求复用为一个“万能 DTO”会产生大量可选字段，容易出现“字段缺失却被当作清空”的歧义。为每种用例定义独立 record，能让 OpenAPI 文档、测试和错误提示保持一致。
+
+\subsection{HTTP 状态转换与事务语义}
+
+HTTP 状态码应与业务结果一一对应。查询成功返回200，集合为空仍返回200并给出空的\texttt{content}；创建成功返回201和\texttt{Location}，异步导入返回202并给出任务地址；替换成功返回200或204，删除成功返回204；参数解析失败返回400，缺少身份返回401，身份存在但权限不足返回403，资源找不到返回404，版本或状态冲突返回409，服务器暂时不可用返回503。不要把所有异常包装成200再在响应体中写一个\texttt{success=false}，这样会让网关、监控和浏览器缓存失去判断依据。
+
+创建接口的事务边界应覆盖“验证测站—生成实体—保存读数—写入审计”的完整用例。若数据库保存成功而审计失败，系统需要依据业务要求回滚主记录或将审计事件写入事务发件箱；不能在控制器中先保存实体、再用另一个连接写日志。更新接口在同一事务中读取版本、执行状态检查和写入新值，数据库的唯一约束与版本列负责处理并发竞争。删除接口若采用逻辑删除，应把删除时间、操作者和原因写入审计字段，查询默认过滤已删除记录，但管理员接口仍可按权限恢复或查看。
+
+幂等请求与重试的关系也要写进接口说明。客户端在连接超时后重试\texttt{POST}时，服务端先查询幂等键；如果已有相同请求摘要，则返回原响应和同一\texttt{Location}；如果摘要不同，返回409并要求客户端生成新键。幂等记录应保存到与业务写入同一事务的表中，过期时间覆盖网关重试、消息重投和人工补发的最大窗口。只放在内存 Map 中会在服务重启后丢失，无法保证关键基础设施数据的唯一性。
+
+\subsection{DTO 契约与单位转换}
+
+DTO 是接口版本和领域模型之间的缓冲层。后端内部可以把水位存为米制\texttt{BigDecimal}，外部请求允许厘米或毫米，但转换必须依据显式单位字段和工程配置完成，并在响应中返回统一单位。未知单位返回400，单位缺失不能默认为米；同一测站的历史数据应在存储层使用统一单位，避免查询时把不同量纲相加。时间字段统一使用带时区的 ISO 8601 字符串，服务层转换为\texttt{Instant}后再比较，展示时由前端选择值班员时区。
+
+响应 DTO 只输出读者需要的字段：资源 ID、测站 ID、数值、单位、采样时间、质量码、版本和更新时间。数据库主键、内部租户标识、软删除标记和审计人不应因为实体序列化而意外暴露。对枚举新增值时，服务端可以先在响应中保留未知值的兼容处理，客户端显示“未知状态”而不是解析失败；删除或重命名枚举则必须通过新 API 版本完成。
+
+\subsection{测试矩阵与接口可观测性}
+
+每个端点至少覆盖正常、参数错误、未认证、无权限、资源不存在、版本冲突和重复请求七类场景。正常场景验证状态码、响应体和\texttt{Location}；参数错误验证字段列表和错误码；未认证与无权限验证401/403的区别；资源不存在验证404不泄露其他资源信息；版本冲突验证409并保留数据库原值；重复请求验证幂等键返回同一资源。测试还要确认异常日志包含\texttt{traceId}，但不含完整 JWT、密码和个人信息。
+
+MockMvc 或 WebTestClient 可以在没有真实网络的情况下验证控制器协议，服务层单元测试使用假的 Repository 和时钟验证业务规则，PostgreSQL 集成测试验证唯一约束、检查约束和事务回滚。测试数据应在每个用例开始时明确准备，在结束时清理或使用独立事务回滚；不要依赖测试执行顺序。对于时间窗口和质量码，测试数据要覆盖边界值、闰秒处理约定和 missing/suspect/valid 三种质量状态。
+
+参数校验和异常处理的价值在于让失败尽早、信息稳定、恢复可行。失败响应告诉客户端应该修正输入、重新认证、重新读取资源还是稍后重试；服务端指标则按错误码统计参数错误率、冲突率和资源缺失率，帮助运维区分客户端缺陷与数据库故障。这样，接口设计就从“能返回 JSON”提升为可测试、可观测、可演进的后端契约。
+接口文档应把这些约定转换为可执行示例：为每个端点列出请求头、路径参数、查询参数、请求体、成功响应、错误响应和重试建议。示例数据使用测站编号、采样时间和质量码的真实组合，避免只展示抽象的“foo/bar”。前端联调时先依据文档生成契约测试，后端发布时再用同一组样例验证字段名称、单位和状态码，发现不一致就阻断版本发布。
+
+对于批量写入，接口还要说明部分成功语义。可以把每条读数放入独立结果数组，返回成功、重复、参数错误和业务拒收四种结果，并给出批次追踪 ID；也可以采用全批次原子事务，但要限制批量大小和锁持有时间。无论选择哪种方案，都必须记录每条测站 ID 和错误码，使值班员能够补发失败记录而不重复提交已经成功的读数。
+
+批次接口还应限制单次记录数量、请求体大小和处理时长，并在响应中返回可检索的批次号。异步导入使用任务资源和进度状态，客户端轮询任务而不是长时间占用连接；任务失败时保留失败行号和错误码，便于只补发有问题的测点。这样既保护数据库连接池，也让数据修复过程可审计。
+
+写入接口的审计字段还应记录采集来源、操作者、设备时间与服务器接收时间，并明确时钟偏差处理策略；当设备时间超出允许窗口时，服务端应保留原始值和拒收原因，便于后续核查而不是静默修正。接口响应中的\texttt{traceId}、批次号与幂等键关联后，值班员可以从一次补发操作追踪到数据库事务和审计事件。对于修改和删除操作，审计记录还应保存变更前后的关键字段、授权角色及审批依据，避免只留下“操作成功”而无法解释业务状态为何改变。
 
 \section{Spring Security 6与JWT}
 
