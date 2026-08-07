@@ -14,7 +14,7 @@
 
 \paragraph*{引言}
 
-智慧水利后端负责接入监测数据、执行业务规则、维护一致性并向前端提供接口。本章统一采用Java 17、Spring Boot 3.2+、Spring Security 6、Jakarta Persistence 3.1与Jakarta Servlet 6.x；JWT示例按jjwt 0.11+接口编写。分布式事务和领域驱动设计作为选学内容，不作为首次后端课程的前置要求。
+智慧水利后端负责接入监测数据、执行业务规则、维护一致性并向前端提供接口。本章统一采用Java 17、Spring Boot 3.2+、Spring Security 6、Jakarta Persistence 3.1与Jakarta Servlet 6.x；JWT示例按jjwt 0.11.x接口编写。分布式事务和领域驱动设计作为选学内容，不作为首次后端课程的前置要求。
 
 \section{后端服务与REST接口概述}
 
@@ -1170,6 +1170,14 @@ MockMvc 或 WebTestClient 可以在没有真实网络的情况下验证控制器
 
 \label{lst:ch05-security-chain}
 \begin{lstlisting}[language=Java,caption={Spring Security过滤链}]
+import org.springframework.context.annotation.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.config.annotation.method.configuration.*;
+import org.springframework.security.config.annotation.web.builders.*;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.*;
+import org.springframework.security.web.authentication.*;
+
 @Configuration
 @EnableMethodSecurity
 @EnableConfigurationProperties(JwtProperties.class)
@@ -1181,6 +1189,11 @@ class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
             .sessionManagement(s -> s.sessionCreationPolicy(
                     SessionCreationPolicy.STATELESS))
+            .exceptionHandling(e -> e
+                    .authenticationEntryPoint((request, response, ex) ->
+                            response.sendError(HttpStatus.UNAUTHORIZED.value()))
+                    .accessDeniedHandler((request, response, ex) ->
+                            response.sendError(HttpStatus.FORBIDDEN.value())))
             .authorizeHttpRequests(a -> a
                     .requestMatchers("/actuator/health", "/api/auth/**").permitAll()
                     .anyRequest().authenticated())
@@ -1194,26 +1207,73 @@ class SecurityConfig {
 
 \label{lst:ch05-jwt-filter}
 \begin{lstlisting}[language=Java,caption={JWT认证过滤器}]
+import jakarta.servlet.*;
+import jakarta.servlet.http.*;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.web.filter.OncePerRequestFilter;
+import java.io.IOException;
+import java.util.stream.Collectors;
+
 enum WaterSystemPermission {
     STATION_READ, READING_WRITE, ALERT_ACKNOWLEDGE
 }
 
-@Service
-class AuthorizationService {
-    void require(Authentication auth, WaterSystemPermission permission) {
-        boolean granted = auth.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals(permission.name()));
-        if (!granted) throw new AccessDeniedException("权限不足");
+class JwtAuthenticationFilter extends OncePerRequestFilter {
+    private final JwtService jwtService;
+    private final TokenRevocationService revocations;
+
+    JwtAuthenticationFilter(JwtService jwtService,
+                            TokenRevocationService revocations) {
+        this.jwtService = jwtService;
+        this.revocations = revocations;
+    }
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain chain)
+            throws ServletException, IOException {
+        String header = request.getHeader("Authorization");
+        if (header != null && header.startsWith("Bearer ")) {
+            String token = header.substring("Bearer ".length());
+            try {
+                Claims claims = jwtService.parseAccess(token);
+                String jti = claims.getId();
+                if (jti != null && !revocations.isRevoked(jti)) {
+                    var authorities = jwtService.permissions(claims).stream()
+                            .map(SimpleGrantedAuthority::new)
+                            .collect(Collectors.toUnmodifiableSet());
+                    var authentication = new UsernamePasswordAuthenticationToken(
+                            claims.getSubject(), null, authorities);
+                    authentication.setDetails(new WebAuthenticationDetailsSource()
+                            .buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                }
+            } catch (JwtException ex) {
+                SecurityContextHolder.clearContext();
+            }
+        }
+        chain.doFilter(request, response);
     }
 }
 \end{lstlisting}
 
-JWT密钥通过配置注入并以足够长度的Base64值提供。jjwt 0.11+使用\texttt{parserBuilder()}；刷新令牌即使已过访问式过期点，也应先安全取得Claims，再验证令牌类型、签名、签发者和刷新期限。
+JWT 密钥通过配置注入并以足够长度的 Base64 值提供。本章示例锁定 jjwt 0.11.x：\texttt{parseClaimsJws} 返回 Claims 之前已经完成签名验证，签名不合法会抛出异常，应用不能先手工解码 Base64 再“验证”字段。刷新流程若需要接受已过期的刷新令牌，只能在捕获\texttt{ExpiredJwtException}后读取其 Claims；由于解析器已经验证签名，随后还要检查\texttt{type=refresh}、issuer、audience、subject、jti 和服务端撤销状态，绝不能把过期 access token 当作刷新凭据。
 
 \label{lst:ch05-kafka-listener}
-\begin{lstlisting}[language=Java,caption={Kafka告警消费者}]
+\begin{lstlisting}[language=Java,caption={jjwt 0.11.x 签名验证与访问令牌解析}]
+import io.jsonwebtoken.*;
+import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.io.Decoders;
+import javax.crypto.SecretKey;
+import java.util.List;
+
 @ConfigurationProperties("security.jwt")
-record JwtProperties(String secret, String issuer) {}
+record JwtProperties(String secret, String issuer,
+                     long accessSeconds, long refreshSeconds) {}
 
 @Service
 class JwtService {
@@ -1226,18 +1286,307 @@ class JwtService {
                 Decoders.BASE64.decode(properties.secret()));
     }
 
-    Claims parseAllowExpired(String token) {
-        try {
-            return Jwts.parserBuilder().setSigningKey(key).build()
-                    .parseClaimsJws(token).getBody();
-        } catch (ExpiredJwtException ex) {
-            return ex.getClaims();
-        }
+    Claims parseAccess(String token) {
+        Claims claims = Jwts.parserBuilder().setSigningKey(key)
+                .requireIssuer(properties.issuer()).build()
+                .parseClaimsJws(token).getBody();
+        if (!"access".equals(claims.get("type", String.class)))
+            throw new JwtException("token type is not access");
+        return claims;
+    }
+
+    List<String> permissions(Claims claims) {
+        return claims.get("permissions", List.class);
     }
 }
 \end{lstlisting}
 
 刷新服务必须进一步确认Claims中的\texttt{type=refresh}、签发者和服务端撤销状态，才可签发新令牌对。配置常量由\texttt{JwtProperties}共享，不跨类访问私有常量。
+
+\begin{tipbox}
+版本迁移提示：jjwt 0.12.x 将解析器接口拆为\texttt{Jwts.parser().verifyWith(key).build()}与\texttt{parseSignedClaims(token).getPayload()}两步，对应本章 0.11.x 的\texttt{parserBuilder().setSigningKey(key).build()}和\texttt{parseClaimsJws(token).getBody()}。迁移时逐项核对签名算法、issuer、type、过期处理和异常类型，不能只做方法名替换。
+\end{tipbox}
+
+认证链路可以拆成“凭据校验—令牌签发—请求认证—权限决策—撤销与轮换”五个环节。图\ref{fig:ch05-auth-sequence}把访问令牌和刷新令牌的边界画出：访问令牌短期有效，携带权限进入过滤器；刷新令牌只发送到刷新端点，服务端验证类型和撤销状态后签发新的令牌对。前端不能把刷新令牌当作普通 API 凭据，也不能在浏览器日志、URL 或错误消息中输出完整令牌。
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[>=Stealth,thick,node distance=0.45cm and 0.35cm]
+\node[draw,rounded corners,fill=blue!8,align=center] (login) {登录\\输入凭据};
+\node[draw,rounded corners,fill=green!10,align=center,right=of login] (issue) {认证服务\\签发令牌对};
+\node[draw,rounded corners,fill=yellow!15,align=center,right=of issue] (api) {API 请求\\Bearer access};
+\node[draw,rounded corners,fill=orange!18,align=center,below=of api] (filter) {过滤器\\验签/类型/jti};
+\node[draw,rounded corners,fill=purple!10,align=center,left=of filter] (decision) {方法授权\\角色与权限};
+\node[draw,rounded corners,fill=red!10,align=center,left=of decision] (refresh) {刷新端点\\仅 refresh};
+\draw[->] (login) -- (issue);
+\draw[->] (issue) -- (api);
+\draw[->] (api) -- (filter);
+\draw[->] (filter) -- (decision);
+\draw[->] (refresh) -- (issue);
+\draw[->,dashed] (filter) to[bend right=18] node[below,font=\scriptsize]{401/403} (refresh);
+\end{tikzpicture}
+\caption{Spring Security 6 与 JWT 的认证授权时序}
+\label{fig:ch05-auth-sequence}
+\end{figure}
+
+令牌的声明应最小化。\texttt{sub}标识用户或服务主体，\texttt{iss}限制签发者，\texttt{aud}限制使用方，\texttt{iat}和\texttt{exp}描述有效时间，\texttt{jti}用于撤销和审计，\texttt{type}区分 access 与 refresh，权限集合只携带授权决策需要的稳定代码。不要把身份证号、手机号、设备密钥或完整业务对象放入 JWT；JWT 是带签名的可读载荷，不是加密容器。
+
+\label{lst:ch05-jwt-issue}
+\begin{lstlisting}[language=Java,caption={jjwt 0.11.x 签发访问与刷新令牌}]
+import io.jsonwebtoken.Jwts;
+import java.time.Instant;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
+
+record TokenPair(String accessToken, String refreshToken,
+                 Instant accessExpiresAt, Instant refreshExpiresAt) {}
+
+class TokenIssuer {
+    private final JwtProperties properties;
+    private final SecretKey key;
+
+    TokenIssuer(JwtProperties properties, SecretKey key) {
+        this.properties = properties;
+        this.key = key;
+    }
+
+    TokenPair issue(String subject, List<String> permissions, Instant now) {
+        Instant accessExp = now.plusSeconds(properties.accessSeconds());
+        Instant refreshExp = now.plusSeconds(properties.refreshSeconds());
+        String access = build(subject, permissions, "access", now, accessExp);
+        String refresh = build(subject, List.of(), "refresh", now, refreshExp);
+        return new TokenPair(access, refresh, accessExp, refreshExp);
+    }
+
+    private String build(String subject, List<String> permissions, String type,
+                         Instant issuedAt, Instant expiresAt) {
+        return Jwts.builder().setId(UUID.randomUUID().toString())
+                .setSubject(subject).setIssuer(properties.issuer())
+                .setIssuedAt(Date.from(issuedAt)).setExpiration(Date.from(expiresAt))
+                .claim("type", type).claim("permissions", permissions)
+                .signWith(key).compact();
+    }
+}
+\end{lstlisting}
+
+清单\ref{lst:ch05-jwt-issue}用不同的 jti 生成访问与刷新令牌，刷新令牌不携带业务权限，减少权限变更后的残留窗口。签发时间由注入的时钟提供，测试可以固定\texttt{Instant}验证过期边界；生产环境要考虑设备与服务器时钟偏差，允许的时钟容差必须写入安全配置并监控。密钥轮换时保留短暂的旧密钥验证窗口，并给每个密钥版本设置撤销和淘汰日期。
+
+\label{lst:ch05-login}
+\begin{lstlisting}[language=Java,caption={登录端点、密码校验与令牌签发}]
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
+
+record LoginRequest(String username, String password) {}
+record LoginResponse(String accessToken, String refreshToken,
+                     Instant accessExpiresAt, Instant refreshExpiresAt) {}
+
+@RestController
+@RequestMapping("/api/auth")
+class LoginController {
+    private final UserAccountService accounts;
+    private final PasswordEncoder passwordEncoder;
+    private final TokenIssuer issuer;
+    private final Clock clock;
+
+    LoginController(UserAccountService accounts, PasswordEncoder passwordEncoder,
+                    TokenIssuer issuer, Clock clock) {
+        this.accounts = accounts;
+        this.passwordEncoder = passwordEncoder;
+        this.issuer = issuer;
+        this.clock = clock;
+    }
+
+    @PostMapping("/login")
+    LoginResponse login(@Valid @RequestBody LoginRequest request) {
+        UserAccount account = accounts.findEnabled(request.username())
+                .orElseThrow(BadCredentialsException::new);
+        if (!passwordEncoder.matches(request.password(), account.passwordHash()))
+            throw new BadCredentialsException("用户名或密码错误");
+        TokenPair pair = issuer.issue(account.id(), account.permissions(),
+                Instant.now(clock));
+        return new LoginResponse(pair.accessToken(), pair.refreshToken(),
+                pair.accessExpiresAt(), pair.refreshExpiresAt());
+    }
+}
+\end{lstlisting}
+
+密码只保存经过适当成本因子哈希后的结果，登录错误统一返回“凭据无效”，不区分用户名不存在还是密码错误，避免账号枚举。登录端点应有速率限制、失败计数和审计事件；密码重置、二次认证和设备绑定属于更高层的身份系统，不能用把字段塞进 JWT 的方式替代。
+
+\label{lst:ch05-jwt-refresh}
+\begin{lstlisting}[language=Java,caption={刷新令牌的签名、类型和轮换检查}]
+import io.jsonwebtoken.*;
+import java.time.Instant;
+
+class RefreshService {
+    private final JwtService jwtService;
+    private final TokenIssuer issuer;
+    private final TokenRevocationService revocations;
+    private final RefreshSessionRepository sessions;
+    private final Clock clock;
+
+    RefreshService(JwtService jwtService, TokenIssuer issuer,
+                   TokenRevocationService revocations,
+                   RefreshSessionRepository sessions, Clock clock) {
+        this.jwtService = jwtService;
+        this.issuer = issuer;
+        this.revocations = revocations;
+        this.sessions = sessions;
+        this.clock = clock;
+    }
+
+    TokenPair refresh(String token) {
+        Claims claims = jwtService.parseRefreshAllowExpired(token);
+        String jti = claims.getId();
+        if (jti == null || revocations.isRevoked(jti))
+            throw new BadCredentialsException("刷新会话已撤销");
+        RefreshSession session = sessions.findActive(jti)
+                .orElseThrow(() -> new BadCredentialsException("刷新会话不存在"));
+        revocations.revoke(jti, claims.getExpiration().toInstant());
+        return issuer.issue(session.subject(), session.permissions(),
+                Instant.now(clock));
+    }
+}
+\end{lstlisting}
+
+刷新采用轮换策略：每次成功使用旧 refresh jti 后立即撤销，并生成新的 refresh jti；若同一旧令牌再次出现，系统可以判定重放并撤销整个会话族。解析过期刷新令牌时只允许捕获签名已验证的\texttt{ExpiredJwtException}，还要检查过期时间、issuer、type、jti 和服务端会话，不能使用\texttt{parseClaimsJwt}或手工拼接 Claims。
+
+\label{lst:ch05-revocation}
+\begin{lstlisting}[language=Java,caption={基于 jti 与版本号的令牌撤销}]
+import java.time.Duration;
+import java.time.Instant;
+import org.springframework.data.redis.core.StringRedisTemplate;
+
+interface TokenRevocationService {
+    boolean isRevoked(String jti);
+    void revoke(String jti, Instant expiresAt);
+}
+
+@Service
+class RedisTokenRevocationService implements TokenRevocationService {
+    private final StringRedisTemplate redis;
+
+    RedisTokenRevocationService(StringRedisTemplate redis) {
+        this.redis = redis;
+    }
+
+    public boolean isRevoked(String jti) {
+        return Boolean.TRUE.equals(redis.hasKey("jwt:revoked:" + jti));
+    }
+
+    public void revoke(String jti, Instant expiresAt) {
+        long seconds = Math.max(1, Duration.between(
+                Instant.now(), expiresAt).getSeconds());
+        redis.opsForValue().set("jwt:revoked:" + jti, "1",
+                Duration.ofSeconds(seconds));
+    }
+}
+\end{lstlisting}
+
+清单\ref{lst:ch05-revocation}让撤销记录的 TTL 不超过原令牌剩余寿命，避免黑名单永久增长。高并发平台还可以使用用户令牌版本号：用户注销或改密时递增版本，过滤器比较令牌中的版本与当前账户版本；jti 黑名单适合撤销单个设备，版本号适合撤销用户全部会话，两者可以组合。撤销状态读取失败时要按安全策略拒绝请求或进入受限降级，不能把 Redis 不可达默认为“令牌有效”。
+
+\label{lst:ch05-method-security}
+\begin{lstlisting}[language=Java,caption={方法级权限与跨域策略}]
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+class StationWriteController {
+    @PreAuthorize("hasAuthority('READING_WRITE')")
+    @PostMapping("/api/readings")
+    ReadingResponse create(@Valid @RequestBody CreateReadingRequest request) {
+        return service.create(request);
+    }
+
+    private final ReadingApplicationService service;
+    StationWriteController(ReadingApplicationService service) {
+        this.service = service;
+    }
+}
+
+@Configuration
+class CorsConfig {
+    @Bean
+    CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration c = new CorsConfiguration();
+        c.setAllowedOrigins(List.of("https://water.example.edu"));
+        c.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
+        c.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/api/**", c);
+        return source;
+    }
+}
+\end{lstlisting}
+
+方法级权限是控制器之后的第二道边界，不能只依赖前端按钮隐藏。CORS 只约束浏览器跨源读取，不等于身份认证；允许来源、方法和请求头要使用明确白名单，不能在携带凭据时使用任意来源。系统还应区分未认证的401和已认证但无权限的403，日志记录权限代码和追踪 ID，不回显完整 JWT。
+
+认证与授权测试要覆盖：合法访问令牌、签名错误、issuer 错误、type 错误、过期令牌、撤销 jti、权限不足、无 Authorization 头、CORS 预检和密钥轮换窗口。测试不应把真实密钥写进源码，使用测试专用随机密钥和固定时钟；集成测试验证过滤器确实建立\texttt{SecurityContext}，方法授权验证权限缺失时返回403。刷新测试还要验证旧 refresh jti 不能重复使用，并检查 Redis 过期后黑名单自动清理。
+
+\subsection{威胁模型与认证边界}
+
+安全设计先描述需要保护的对象和攻击路径。清源水库平台至少要保护值班员身份、测站写入权限、预警处置记录、设备上报密钥和审计日志；攻击者可能伪造 Bearer 令牌、重放被窃取的刷新令牌、利用错误码枚举账号、通过跨源页面诱导请求，或在日志和备份中搜寻长期有效的密钥。JWT 只解决“令牌由谁签发、内容是否被篡改”，不能解决令牌被复制后的重放，也不能代替传输层加密、账户生命周期和数据库权限。
+
+访问令牌的有效期应短于一次值班班次中可接受的暴露窗口，刷新令牌的寿命则受设备风险、撤销能力和人工换班流程约束。有效期不是越长越方便：时间越长，泄露后的可利用窗口越大；时间越短，客户端刷新和故障恢复越频繁。工程上要结合网关超时、Redis 可用性、时钟偏差和移动网络重连确定数值，并把这些配置写入安全评审记录，而不是在代码中散落魔法数字。
+
+\subsection{密钥生命周期与配置管理}
+
+HMAC 密钥必须来自受控密钥管理器或部署平台的机密变量，应用配置只保存变量名和密钥版本。启动时校验 Base64 可解码、长度满足算法要求、issuer 非空且当前版本处于有效窗口；校验失败立即阻止实例接收流量。日志只能输出密钥版本和摘要，不能输出密钥本身、完整 JWT 或配置对象的\texttt{toString}。
+
+密钥轮换分为准备、双读、切换和退役四步。准备阶段生成新密钥并登记版本；双读阶段验证器按令牌头部的\texttt{kid}选择旧或新密钥，但签发只使用新密钥；切换阶段撤销异常版本并观察认证失败率；退役阶段等待最长刷新令牌寿命加时钟容差后删除旧密钥。若令牌没有\texttt{kid}，轮换时只能按时间窗口尝试有限的候选密钥，并应在下一次签发中补上版本标识。
+
+\subsection{密码、账户与登录防护}
+
+密码存储使用 Spring Security 的\texttt{PasswordEncoder}，例如 BCrypt 或 Argon2，并由安全基线规定成本因子。数据库只保存哈希、算法版本、修改时间和失败计数，不保存明文或可逆加密后的密码。登录成功后清零失败计数并记录设备和追踪 ID；连续失败触发指数退避或临时锁定，解锁由风险策略决定。管理员重置密码时应递增账户令牌版本，使旧访问和刷新令牌全部失效。
+
+认证异常的外部表现要统一。用户名不存在、密码错误、账户停用和二次认证失败都返回相同的401描述，详细原因只写入受控审计；资源存在性检查在权限判断之后执行，避免未授权用户通过404/403差异推测测站编号。审计事件记录主体、客户端、时间、结果码和关联的\texttt{jti}，但不记录密码、Authorization 头或完整刷新令牌。
+
+\subsection{CSRF、CORS 与浏览器存储}
+
+本章过滤链关闭 CSRF 的前提是 API 只从 Authorization 头读取 Bearer 令牌，且访问令牌不由浏览器自动附带。如果改用 HttpOnly Cookie 保存凭据，浏览器会自动发送 Cookie，必须启用 CSRF 令牌或采用双重提交方案；把 Cookie 标记为 HttpOnly 只能降低脚本读取风险，不能阻止跨站请求本身。SameSite、Secure、过期时间和域路径应与部署拓扑一起评审。
+
+CORS 预检请求只是在浏览器侧询问“是否允许这个源访问”，服务端仍要执行身份认证和方法授权。生产环境把来源列入白名单，明确允许的方法、请求头、暴露头和缓存时长；不能因为预检失败就放开\texttt{*}，也不能把 CORS 当作防火墙。非浏览器设备、Kafka 消费者和内部任务不受 CORS 保护，仍需使用服务身份和网络策略。
+
+前端存储策略要根据威胁模型选择。内存存储能缩短刷新后的暴露时间但页面刷新会丢失；\texttt{sessionStorage}限定标签页生命周期，却仍可能被同源脚本读取；\texttt{localStorage}便于持久登录但一旦发生 XSS 会长期暴露。更高要求的系统可以把刷新凭据放入受保护 Cookie，将短期访问令牌保存在内存，并配合 CSP、依赖审计和严格的 DOM 写入规则。无论选择哪种方案，网络日志、错误监控和浏览器历史都不应包含令牌。
+
+\subsection{权限建模与最小授权}
+
+权限代码要表达稳定能力而不是界面按钮。例如\texttt{STATION\_READ}允许读取测站，\texttt{READING\_WRITE}允许写入读数，\texttt{ALERT\_ACKNOWLEDGE}允许确认预警；“值班员”“专业分析员”“审批人”和“运维员”是角色，角色到权限的映射由服务端配置管理。资源范围还要单独检查：拥有读数写入权限不代表可以修改所有工程或归档记录。
+
+方法级注解适合表达粗粒度能力，细粒度的测站归属、时间窗口和状态迁移放在应用服务。授权判断失败应保持无副作用，不能先保存实体再检查权限；批量接口要逐条验证资源范围，避免一条请求越权覆盖其他测站。权限增加采用向后兼容策略，权限删除或含义改变则发布版本化变更，并在审计中记录授权策略版本。
+
+\subsection{撤销、重放与故障降级}
+
+撤销服务不可达时，系统必须事先确定“安全失败”还是“可用优先”。对写入、密码修改和预警处置等高风险操作应拒绝请求并返回503，读取公开状态可以使用短时间缓存但要标记缓存时间。Redis 黑名单记录应带 TTL，TTL 至少覆盖令牌剩余寿命；用户版本号变更要通过事务更新并在缓存失效后最终一致。撤销接口本身需要认证、幂等和审计，不能让任意客户端提交 jti 即可封禁其他用户。
+
+重放检测不仅适用于刷新令牌，也适用于一次性登录链接、密码重置链接和设备注册码。服务端保存随机值的哈希、主体、用途、首次使用时间和过期时间；第一次消费后原子地标记已用，重复消费返回统一错误。消息或 HTTP 重试必须携带请求 ID，不能通过比较请求到达时间猜测是否重复。检测到同一刷新会话族的异常重放时，可撤销该用户全部会话并通知运维复核。
+
+\subsection{认证链路的可观测性与演练}
+
+安全指标包括401/403比率、签名失败、issuer/type 不匹配、刷新成功率、撤销查询延迟、Redis 错误、密钥版本分布和账户锁定次数。指标标签不能使用完整用户名、令牌或高基数的原始 URL，避免监控系统本身泄露隐私。日志采用结构化字段记录\texttt{traceId}、主体哈希、jti 哈希、权限结果和策略版本；审计日志单独存储并设置保留和访问权限。
+
+演练应覆盖密钥误配、Redis 故障、旧密钥退役过早、时钟漂移、刷新令牌重放和网关错误转码。每次演练记录检测时间、拒绝比例、恢复步骤和未覆盖的请求类型；恢复后检查旧令牌是否仍能访问、黑名单是否增长异常、缓存是否持有过期权限。安全控制只有在故障状态下仍然可解释，才算完成工程闭环。
+
+接口契约中还应明确 Authorization 头的大小上限、令牌格式、401/403/429/503 的响应结构和重试建议。网关负责基础限流，应用服务负责账户和 jti 级别的风控，数据库负责审计唯一性；三层职责不能互相假定。发布前使用自动化扫描检查依赖漏洞、弱密钥、调试端点和错误日志，人工复核权限矩阵与数据范围。这样，学生可以把安全实现从一段过滤器代码扩展为可部署、可轮换、可审计的系统能力。
+
+\subsection{令牌失效与会话迁移}
+
+用户退出登录不等于浏览器立即忘记令牌。客户端应清除内存中的访问令牌、撤销当前 refresh jti，并在下一次请求收到401时停止自动重试，避免失败请求形成循环。服务端注销接口验证当前 refresh 会话的主体和设备范围，再写入撤销记录；管理员强制下线则递增账户版本并记录原因。多个终端同时在线时，注销一个设备不应误伤其他设备，除非操作明确选择“退出全部会话”。
+
+会话迁移要考虑密钥轮换和权限变更。权限从“可写入”降为“只读”后，已签发的短期 access token 仍可能在剩余寿命内携带旧权限；高风险权限可以采用更短的 access 有效期、实时版本检查或敏感接口再次查询账户状态。普通读取允许短暂使用令牌声明以降低延迟，但预警确认、规则发布和测站配置修改应在服务层执行最新权限检查。
+
+令牌解析失败的错误分类只用于内部指标，不直接返回给客户端。签名失败、过期、issuer 不匹配、type 错误和撤销状态分别计数，响应统一为401；权限不足返回403；触发账户或 IP 限流返回429并给出重试时间；密钥服务或撤销存储不可用返回503。这样既不给攻击者提供试错反馈，又让运维能从指标判断是密钥配置错误、时钟漂移还是恶意重放。
+
+刷新端点要限制调用频率和来源，不能接受跨域任意站点的请求体。客户端只在访问令牌临近过期或收到明确的401时刷新一次，使用互斥锁合并并发刷新，避免多个请求同时消费同一个旧 refresh jti。服务端轮换成功后返回新令牌对和过期时间，客户端只保留最新一对；如果轮换失败，清除本地凭据并要求重新登录，不能继续使用已经被撤销的旧令牌。
+
+审计数据要区分“认证事件”和“业务操作”。登录成功、登录失败、刷新、撤销、密钥切换属于认证事件；创建读数、确认预警、修改配置属于业务操作。两类事件共享 traceId 和主体，但保留不同的保留期限、访问角色和脱敏规则。审计表设置事件 ID 唯一约束，写入失败时按照 A5-5 的事务边界决定回滚主操作、写入发件箱或进入人工补偿，不能静默丢失。
+
+安全配置应在启动检查和运行检查中分别验证。启动检查确认 issuer、密钥版本、撤销存储地址和 CORS 白名单存在；运行检查周期性验证密钥即将过期、Redis 延迟、刷新失败率和时间同步偏差。健康端点可以报告“认证依赖不可用”，但不能在响应中泄露密钥版本之外的敏感配置。发布流水线在切换流量前先调用认证探针，验证合法令牌、非法签名和撤销令牌的三条路径。
+
+在多服务部署中，不同服务是否共享 JWT 签名密钥要有明确决策。共享密钥便于验证但扩大泄露影响，任一服务都能伪造其他服务信任的令牌；公钥验证和集中签发可以缩小签名权限，服务只持有验证公钥，签发服务通过安全通道保护私钥。无论采用 HMAC 还是非对称算法，issuer、audience、算法白名单和密钥版本都写入契约，禁止根据令牌头部的算法字段动态信任未知算法。
+
+最后，教材示例中的安全代码必须配套“不能做什么”的检查清单：不手工 Base64 解码后信任 Claims，不使用未验签的解析 API，不把 refresh 当 access，不把密钥放在前端变量或 Git，不在异常中回显完整令牌，不用 CORS 放宽替代权限，不在过滤器里执行数据库写事务。代码审查、自动化测试和部署演练共同覆盖这些边界，学生才不会把一个能运行的 Demo 误当作生产级认证系统。
 
 \section{事务事件与消息队列}
 
