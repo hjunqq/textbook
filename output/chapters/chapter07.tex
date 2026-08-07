@@ -67,15 +67,16 @@
 
 实时曲线通常采用滑动时间窗口，只保留最近若干分钟或小时；历史查询则按屏幕宽度和时间跨度选择聚合粒度。后端应提供原始与聚合数据接口，前端不应一次下载多年高频数据再自行压缩。
 
-当历史点数远大于横向像素数时，可使用Largest-Triangle-Three-Buckets（LTTB）降采样。算法保留首尾点，把中间序列分桶；在每个桶中，选择与前一已选点和下一桶平均点构成三角形面积最大的点，从而尽量保留峰谷与转折\cite{steinarsson2013lttb}。对候选点$B$，面积为
+当历史点数远大于横向像素数时，可使用Largest-Triangle-Three-Buckets（LTTB）降采样。设原始序列有$N$个点，目标序列有$m$个点且$m\ge3$，先保留首点和尾点，把中间的$N-2$个点均分为$m-2$个桶。遍历第$k$个桶时，$P_{\mathrm{prev}}$是第$k-1$桶已经选出的点，$P_{\mathrm{cand}}$是当前桶中的候选点，$\overline{P}_{C}$是第$k+1$桶的横纵坐标均值；末桶没有下一桶时用尾点代替均值。对每个候选点计算三角形面积，保留面积最大的点作为下一轮的$P_{\mathrm{prev}}$，这样峰值、谷值和转折处会优先留下，而平缓段的冗余点被压缩\cite{steinarsson2013lttb}。记三点坐标为$(x_{\mathrm{prev}},y_{\mathrm{prev}})$、$(x_{\mathrm{cand}},y_{\mathrm{cand}})$和$(\bar{x}_{C},\bar{y}_{C})$，面积记为$S$：
 
 \[
-A=\frac{1}{2}\left|
-(x_A-x_C)(y_B-y_A)-(x_A-x_B)(y_C-y_A)
-\right|.
+  S=\frac{1}{2}\left|
+ (x_{\mathrm{prev}}-\bar{x}_{C})(y_{\mathrm{cand}}-y_{\mathrm{prev}})
+ -(x_{\mathrm{prev}}-x_{\mathrm{cand}})(\bar{y}_{C}-y_{\mathrm{prev}})
+ \right|.
 \]
 
-图\ref{fig:lttb-principle}用一个桶说明这个取舍：横轴被均分成若干桶，算法在当前桶内逐点试算三角形面积，保留面积最大的那一点，因此峰值和拐点更容易被留下，平缓段落中的冗余点则被丢弃。
+清单\ref{lst:ch07-lttb}把分桶、下一桶均值和最大面积选择写成可运行的数组函数。图\ref{fig:lttb-principle}用一个桶画出$P_{\mathrm{prev}}$、两个候选点和$\overline{P}_{C}$，半透明三角形表示被选候选点对应的面积；桶边界只用于说明遍历范围，不代表真实时间采样间隔。
 
 \begin{figure}[H]
 \centering
@@ -83,14 +84,52 @@ A=\frac{1}{2}\left|
 \draw[->,gray] (0,0)--(11,0) node[right]{时间};
 \draw[->,gray] (0,0)--(0,4.3) node[above]{观测值};
 \draw[gray!60] plot[smooth] coordinates {(0.5,1.0)(1.2,1.4)(2,1.2)(2.8,2.7)(3.6,1.7)(4.4,2.0)(5.2,3.7)(6,2.2)(6.8,2.5)(7.6,1.4)(8.4,3.0)(9.2,2.6)(10,3.4)};
-\foreach \x in {2.5,5,7.5}{\draw[gray,dashed] (\x,.1)--(\x,4);}
-\fill[Primary] (0.5,1.0) circle(2pt) (2.8,2.7) circle(2pt) (5.2,3.7) circle(2pt) (7.6,1.4) circle(2pt) (10,3.4) circle(2pt);
-\draw[Primary,thick] (0.5,1.0)--(2.8,2.7)--(5.2,3.7)--(7.6,1.4)--(10,3.4);
-\node[font=\small,text=PrimaryDark] at (5.5,4.05) {分桶后保留能代表峰谷与转折的点};
+\draw[gray,dashed] (3.1,.1)--(3.1,4.0);
+\draw[gray,dashed] (6.3,.1)--(6.3,4.0);
+\fill[Accent!20] (3.1,.15) rectangle (6.3,4.0);
+\coordinate (prev) at (2.8,2.7);
+\coordinate (cand) at (4.4,2.0);
+\coordinate (candtwo) at (5.2,3.7);
+\coordinate (nextmean) at (7.0,2.6);
+\fill[Primary] (prev) circle(2pt) node[above left]{$P_{\mathrm{prev}}$};
+\fill[Accent] (cand) circle(2pt) node[below]{$P_{\mathrm{cand}}$};
+\fill[Accent] (candtwo) circle(2pt);
+\fill[PrimaryDark] (nextmean) circle(2pt) node[above]{$\overline{P}_{C}$};
+\draw[Accent,fill=Accent!25,opacity=.75] (prev)--(candtwo)--(nextmean)--cycle;
+\draw[Primary,thick] (0.5,1.0)--(prev)--(candtwo)--(7.6,1.4)--(10,3.4);
+\node[font=\small,text=PrimaryDark] at (4.7,4.05) {当前桶：比较候选三角形面积};
+\node[font=\scriptsize,text=Accent] at (5.4,.35) {半透明三角形为最大面积候选};
 \end{tikzpicture}
 \caption{LTTB降采样的几何直觉}
 \label{fig:lttb-principle}
 \end{figure}
+
+\label{lst:ch07-lttb}
+\begin{lstlisting}[language=JavaScript,breaklines=true,caption={LTTB分桶与最大三角形选择}]
+function lttb(points, threshold) {
+  if (threshold >= points.length || threshold === 0) return points;
+  const sampled = [points[0]];
+  const every = (points.length - 2) / (threshold - 2);
+  let a = 0;
+  for (let i = 0; i < threshold - 2; i += 1) {
+    const avgStart = Math.floor((i + 1) * every) + 1;
+    const avgEnd = Math.min(Math.floor((i + 2) * every) + 1, points.length);
+    const next = points.slice(avgStart, avgEnd);
+    const avg = next.length ? next.reduce((s, p) => [s[0] + p[0], s[1] + p[1]], [0, 0])
+      .map(v => v / next.length) : points[points.length - 1];
+    const rangeStart = Math.floor(i * every) + 1;
+    const rangeEnd = Math.floor((i + 1) * every) + 1;
+    let best = rangeStart; let maxArea = -1;
+    for (let j = rangeStart; j < rangeEnd; j += 1) {
+      const area = Math.abs((points[a][0] - avg[0]) * (points[j][1] - points[a][1])
+        - (points[a][0] - points[j][0]) * (avg[1] - points[a][1])) / 2;
+      if (area > maxArea) { maxArea = area; best = j; }
+    }
+    sampled.push(points[best]); a = best;
+  }
+  sampled.push(points.at(-1)); return sampled;
+}
+\end{lstlisting}
 
 LTTB适合视觉浏览，不应用其结果替代原始数据计算统计指标。缺测区间应断线或用明确的虚线/阴影表示；插值只用于允许插值的连续物理量，并在提示中给出原始与插值标记。降雨累计量、设备开关状态等数据不能套用相同插值规则。
 
@@ -928,6 +967,46 @@ const world = {
 
 中央经线\texttt{lon\_0}必须按工程所在投影带确定，不能照抄示例。UTM同属横轴墨卡托投影体系，适合某些国际数据交换，但不是国内水利工程坐标的默认主线；输入若为UTM，应先核对带号、半球、基准和元数据，再转换到项目统一坐标。
 
+国内测绘成果有时把带号前缀拼接到东坐标左侧。例如3度带39号的成果可能写成\texttt{39500000.00}，其中前两位是带号，真正参与局部原点相减的东坐标是\texttt{500000.00}。如果把带号坐标直接送入场景，局部坐标会突然增加三千多万米，单精度顶点和相机裁剪都会失效。剥离带号必须依据元数据中的带宽和带号，不要按字符串长度盲切；剥离后的结果要与中央经线、\texttt{+x\_0=500000}和控制点复核。
+
+\label{lst:ch07-strip-zone-prefix}
+\begin{lstlisting}[language=JavaScript,breaklines=true,caption={剥离国内测绘成果的带号前缀}]
+function stripZonePrefix(easting, zoneWidth, zoneNumber) {
+  const text = String(easting);
+  const prefix = String(zoneNumber);
+  if (!text.startsWith(prefix)) throw new Error('带号与坐标不一致');
+  const local = Number(text.slice(prefix.length));
+  if (!Number.isFinite(local) || local < 0 || local > 1000000) {
+    throw new Error('东坐标范围异常');
+  }
+  return {zoneWidth, zoneNumber, easting: local};
+}
+const east = stripZonePrefix('39500000.00', 3, 39);
+\end{lstlisting}
+
+位移箭头也要把工程方位角转换为场景向量。规定北为0°、方位角顺时针增加，位移量为$d$、方位角为$\alpha$时，在本章$x$向东、$z$向南的约定下有
+\[
+  \boldsymbol v=(d\sin\alpha,\;0,\;-d\cos\alpha).
+\]
+因此向北位移的$z$分量为负，向东位移的$x$分量为正。角度必须先由度转换为弧度，箭头长度还应设置可视化比例并在图例中标注真实位移，避免把放大的绘制长度误读成工程量。
+
+\label{lst:ch07-displacement-vector}
+\begin{lstlisting}[language=JavaScript,breaklines=true,caption={按北起顺时针方位角生成位移箭头向量}]
+function displacementVector(distance, azimuthDeg, displayScale = 1) {
+  const alpha = azimuthDeg * Math.PI / 180;
+  return new THREE.Vector3(
+    distance * Math.sin(alpha) * displayScale,
+    0,
+    -distance * Math.cos(alpha) * displayScale
+  );
+}
+const arrow = displacementVector(0.012, 35, 1000);
+\end{lstlisting}
+
+坐标链路的验收不能只看一个点“落在坝上”。至少应选取三个控制点和一个工程边界点，分别比较经纬度、投影东/北坐标、局部坐标和屏幕像素位置；每次转换记录源CRS、目标CRS、轴序、椭球、带号、原点版本和误差。若所有点整体平移，优先检查局部原点或带号；若误差随东向或北向增大，检查投影中央经线和单位；若只有高程方向异常，检查正常高与正高基准。把诊断量分开记录，比在渲染层加入一个无法解释的固定偏移更容易复核。
+
+局部原点也要有生命周期。工程扩建、模型更新或分区加载时可能更换原点，旧对象不能直接用新原点重算，否则历史截图和事件坐标无法复现。展示记录应保存\texttt{originVersion}，三维场景切换原点时先把所有对象转换到统一工程坐标，再一次性更新相机和拾取索引；对象的\texttt{assetId}不随原点变化。GPU使用单精度时，局部坐标尽量保持在数公里范围内，跨区域浏览用分块或相对相机原点技术，避免把高斯投影的大坐标直接塞进顶点缓冲。
+
 \subsection{状态编码、LOD与聚合}
 
 清源水库的28个观测点规模较小，可以逐点绘制；流域级场景可能包含成千上万个对象，需要LOD和聚合。近距离显示图标、方向和标签，中距离只显示状态符号，远距离按空间网格或工程对象聚合。LOD阈值应按屏幕占用和交互任务实测，不以固定“米数”套用所有相机。图\ref{fig:lod-cluster}把三档表达画在同一场景中：近处逐点带标签，中距离只保留状态符号，远距离按空间网格聚合并标注数量。切换阈值应当用实际屏幕占用和交互任务实测确定，图中标注的距离只是示意。
@@ -948,13 +1027,34 @@ const world = {
 \label{fig:lod-cluster}
 \end{figure}
 
-若希望聚合半径在屏幕上约为$r_{px}$像素，必须先换算成当前深度处的世界长度。透视相机垂直视场角为$\theta$、对象到相机距离为$d$、画布高度为$H_{px}$时，可近似取
+若希望聚合半径在屏幕上约为$r_{\mathrm{px}}$像素，必须先换算成当前深度处的世界长度。透视相机垂直视场角为$\theta$、对象到相机距离为$d$、画布高度为$H_{\mathrm{px}}$时，可近似取
 
 \[
-r_{world}=\frac{2d\tan(\theta/2)}{H_{px}}\,r_{px}.
+  r_{\mathrm{world}}=\frac{2d\tan(\theta/2)}{H_{\mathrm{px}}}\,r_{\mathrm{px}}.
 \]
 
-然后再用$r_{world}$作为世界坐标网格大小。相机移动或视口变化时重新计算；不能把“20像素”直接写入以米为单位的网格参数。
+然后再用$r_{\mathrm{world}}$作为世界坐标网格大小。相机移动或视口变化时重新计算；不能把“20像素”直接写入以米为单位的网格参数。相机的\texttt{fov}是垂直视场角，本章公式正是按垂直方向推导；若\texttt{camera.zoom}\texttt{!=1}，投影尺度还要除以缩放因子。距离$d$应取对象到相机的世界空间距离，而不是屏幕上的像素距离。
+
+LOD不只是“近处多画、远处少画”，而是要为每一级定义可回答的问题。近景用于定位和读数，必须保留测点名称、质量码、当前值和可点击区域；中景用于判断坝段或设备群的状态，保留状态符号、数量和最高风险；远景用于导航和范围比较，只需聚合数量、缺测比例和风险摘要。聚合代表点的选择应使用稳定规则，例如以网格中心为位置、以最高预警等级作为边框、以valid数据的最新时间作为摘要时间，并在详情中列出组内测点数量和被排除的missing点。
+
+聚合不能把质量状态和业务等级混为一个颜色。一个簇内只要存在橙色预警，就可以用橙色边框提示需要下钻；若簇内全部是missing，应显示灰色缺测符号而不是NONE；若有suspect点但没有业务预警，符号可加斜线纹理并显示可疑比例。下钻后，三维对象、曲线和列表共享同一\texttt{assetId}过滤条件，返回上一级时恢复原来的时间窗和相机位置。LOD切换还要有迟滞区间，避免相机在阈值附近轻微抖动造成对象频繁创建和销毁。
+
+性能预算可以用屏幕占用而不是固定米数表达。测点圆点直径低于3像素时，增加几何细节没有收益；文字标签低于8像素时，应隐藏文字并保留可访问的列表入口；聚合圆点达到20像素以上且重叠严重时，优先显示数量和最高风险。每一级记录对象数、三角形数、材质切换次数和帧时间，按普通笔记本、值班室大屏和移动设备分别验收。这样，LOD阈值来自任务和设备能力，而不是照抄某个项目的距离常数。
+
+\label{lst:ch07-world-radius}
+\begin{lstlisting}[language=JavaScript,breaklines=true,caption={按相机距离换算聚合与拾取世界半径}]
+function distanceToPoint(camera, point) {
+  return camera.position.distanceTo(point);
+}
+function pixelsToWorld(px, distance, fovRad, heightPx, zoom = 1) {
+  return 2 * distance * Math.tan(fovRad / 2) * px / heightPx / zoom;
+}
+function radiusForObject(camera, point, px, canvasHeight) {
+  const distance = distanceToPoint(camera, point);
+  const fovRad = THREE.MathUtils.degToRad(camera.fov);
+  return pixelsToWorld(px, distance, fovRad, canvasHeight, camera.zoom);
+}
+\end{lstlisting}
 
 \subsection{状态变化与渲染更新}
 
@@ -967,6 +1067,12 @@ r_{world}=\frac{2d\tan(\theta/2)}{H_{px}}\,r_{px}.
 \subsection{射线拾取与安全的向量运算}
 
 屏幕点击首先转换为归一化设备坐标，再由相机生成射线，与场景对象求交。Three.js的\texttt{Raycaster}已经处理常见网格与点对象；拾取器在构造时保存场景引用，并在方法中通过该引用访问可拾取对象，使依赖关系显式、便于测试和复用。
+
+归一化设备坐标的原点在画布中心，$x$向右为正，$y$向上为正；浏览器事件的$y$轴向下，因此换算时要用$1-2(y-y_0)/H$。画布有CSS缩放、设备像素比或侧栏偏移时，必须使用\texttt{getBoundingClientRect()}得到当前矩形，不能直接拿窗口宽高。射线与多个对象相交时，交点结果按沿射线的距离排序；业务层还要过滤不可见、无权限或已聚合的对象，并用\texttt{userData.assetId}回到数据记录。
+
+手工求交的数值容差应与场景尺度相关。固定的$10^{-8}$在米级局部场景通常足够，但当模型缩放到毫米或数十公里时应按边长和相机距离调整。求交函数返回点坐标后，再计算点到相机的距离用于排序；若方向向量没有归一化，参数$t$只表示方向上的倍数，不能直接显示为“距离米数”。射线命中点还应带上对象层级、三角形索引和时间窗，详情卡据此解释用户点到的是模型表面、测点符号还是聚合簇。
+
+拾取测试要覆盖画布边缘、窄屏旋转、设备像素比为2的屏幕、对象被遮挡和相邻对象重叠。测试输入保存客户端坐标、画布矩形、相机参数和预期\texttt{assetId}，而不是只保存一张截图。若模型分块异步加载，点击发生在分块尚未到达时，界面应显示加载状态并允许重试；加载完成后用同一屏幕坐标重新计算射线，不要沿用旧的交点距离。
 
 \label{lst:ch07-lod-points}
 \begin{lstlisting}[language=JavaScript,caption={LOD监测点聚合}]
@@ -998,17 +1104,18 @@ class PointPicker {
 \node at (1.6,1.2) {屏幕点击};
 \coordinate (cam) at (5.1,1.2);
 \fill[Primary] (cam) circle(2pt) node[above]{相机};
-\draw[->,draw=Primary,thick] (1.8,1.2)--(cam);
-\draw[->,draw=Accent,thick] (cam)--(9.2,2.5);
+\draw[draw=Primary,thick] (1.8,1.2)--(cam);
+\node[font=\scriptsize,text=PrimaryDark] at (3.6,1.45) {NDC换算};
+\draw[draw=Accent,thick] (cam)--(10.4,2.88);
 \draw[fill=PrimaryLight,draw=Primary] (8.2,.3)--(9.5,2.8)--(10.4,.7)--cycle;
-\fill[Accent] (8.9,1.9) circle(2.5pt) node[above right]{最近交点};
-\node[font=\small] at (7.1,2.35) {世界射线};
+\fill[Accent] (9.37,2.55) circle(2.5pt) node[above right]{最近交点};
+\node[font=\small,text=Accent] at (7.2,2.65) {世界射线};
 \end{tikzpicture}
 \caption{从屏幕坐标到场景交点的拾取过程}
 \label{fig:ray-picking}
 \end{figure}
 
-若教学中手工实现M\"oller--Trumbore三角形求交，必须复制向量后再做减法、叉乘和缩放，避免破坏顶点与射线输入：
+若教学中手工实现M\"oller--Trumbore三角形求交，必须复制向量后再做减法、叉乘和缩放，避免破坏顶点与射线输入。函数返回的是交点的世界坐标，不是参数$t$；若\texttt{direction}没有归一化，$t$表示沿射线方向的缩放量而不等于米制距离，按交点远近排序时应使用\texttt{origin.distanceTo(point)}或先归一化方向向量：
 
 \label{lst:ch07-raycaster}
 \begin{lstlisting}[language=JavaScript,caption={射线拾取器定义}]
@@ -1042,13 +1149,34 @@ function pixelsToWorld(px, distance, fovRad, heightPx) {
   return 2 * distance * Math.tan(fovRad / 2)
     * px / heightPx;
 }
+const distance = distanceToPoint(camera, pointWorld);
 const pickingRadiusWorld = pixelsToWorld(
-  20, distanceToPoint, THREE.MathUtils.degToRad(camera.fov),
-  canvas.clientHeight);
+  20, distance, THREE.MathUtils.degToRad(camera.fov),
+  canvas.clientHeight) / camera.zoom;
 raycaster.params.Points.threshold = pickingRadiusWorld;
 \end{lstlisting}
 
 这里的\texttt{pickingRadiusWorld}已定义且量纲与场景一致。对象深度变化明显时，应按候选对象距离计算或改用屏幕空间命中测试；不能把固定像素半径直接当成米。
+
+触控半径还要服从无障碍和误触控制。移动端的可点击区域应大于视觉圆点，但相邻测点过密时不能简单把所有半径都放大，否则一次触控会命中多个对象。拾取器可以先按世界半径得到候选集合，再按屏幕距离、质量状态、当前筛选和对象层级排序；列表模式给出候选名称、数值、更新时间和距离，用户确认后才打开详情。长按菜单的出现位置应避开手指遮挡，并提供键盘等价操作，不能让触控成为唯一入口。
+
+三维标签和图表详情要共享同一字段顺序：对象名称、\texttt{assetId}、指标与单位、事件时间、质量码、预警等级、规则版本和数据来源。标签只显示短名称与当前状态，完整字段在信息面板中展开；当质量为missing时显示最后有效时间和缺测原因，当质量为suspect时显示问题数组和复核入口。这样用户不会把“没有标签”误认为“没有数据”，也不会把颜色变化误认为质量已经通过校验。
+
+模型分块加载与联动查询应有取消和过期策略。用户快速切换测点时，旧的历史请求和详情请求要通过\texttt{AbortController}取消；服务返回后比较\texttt{assetId}、时间窗和状态版本，过期响应只写入缓存而不更新当前面板。三维对象被卸载后，联动控制器删除其索引；对象重新加载时从\texttt{userData.assetId}恢复索引并重新绑定事件。每次下钻都记录入口、筛选条件和退出时间，便于复盘值班员是从哪一条曲线进入模型的。
+
+拾取验收还应包含安全边界。无权限对象在射线相交后立即过滤，不能先把敏感属性放进浏览器再隐藏；聚合簇只返回允许展示的数量和风险摘要，点击下钻时重新向服务端申请成员列表。对外共享的截图和导出文件去除内部坐标、设备序列号和未授权字段，但保留质量码、时间窗和规则版本，保证教学演示与审计证据之间有清晰边界。
+
+信息面板的加载顺序要与网络和渲染解耦。先显示来自当前展示记录的对象名称、最新有效值和质量状态，再异步加载短期曲线、阈值版本和相邻对象；多年历史与模型结果按用户操作再请求。每一层都带独立的加载、空数据、权限不足和失败状态，用户可以重试某一层而不丢失已经看到的摘要。面板关闭后取消未完成请求，重新打开时依据时间窗和状态版本决定是否复用缓存，避免旧响应覆盖新选择。
+
+聚合簇的“最高风险”还要说明计算口径。等级排序采用NONE、BLUE、YELLOW、ORANGE、RED的业务顺序，质量为missing的对象不参与风险排序但计入缺测数量；suspect对象可出现在候选列表中并降低可信度，不应因为其数值较大就提升簇等级。簇详情同时给出成员总数、有效数、可疑数、缺测数、最高等级成员和最近更新时间，值班员下钻前就能判断这个聚合符号是否值得处置。
+
+三维交互的回归数据应覆盖原点变更、LOD切换和时间回放三种组合。先在旧原点下选中一个测点并打开详情，再切换新原点和远近景，回放到同一事件时间，最终仍应定位到相同\texttt{assetId}并显示相同质量码。若只验证“点在屏幕上出现”，无法发现对象索引、时间窗或质量过滤已经漂移；把这条组合路径加入实践题，学生才能理解渲染正确性与业务正确性是两件必须同时满足的事。
+
+这组回归还应记录相机位置、视场角、设备像素比和窗口尺寸，保证同一点击坐标在不同设备上能解释。报告中同时保存命中的三维对象、图表数据索引和事件时间；若三者不一致，优先修复坐标或状态契约，而不是调整拾取半径掩盖问题。
+回归报告还应标出渲染器、模型块版本和浏览器版本，使同一坐标偏差能够在软件升级后定位和比较。
+同时记录设备像素比和当前LOD级别，便于比较不同屏幕下的命中范围与帧时间。
+还要保留测试输入和预期对象清单，确保回归结果可由其他同学独立复现。
+提交前再次复核截图与日志。
 
 \subsection{信息面板与渐进披露}
 
