@@ -709,6 +709,197 @@ function validateLevel(level) {
 }
 \end{lstlisting}
 
+\subsection{类型、相等性与可预测数据}
+
+JavaScript 的类型分为原始值和对象引用。字符串、数字、布尔值、\texttt{null}、\texttt{undefined}、\texttt{bigint}和\texttt{symbol}是原始值；数组、普通对象、函数和日期对象通过引用访问。变量声明的是绑定，不是给值贴上的永久标签，因此同一个绑定在运行中可能先保存字符串、后保存数字。监测数据进入页面时应尽早完成解析和校验，把接口中的字符串数值转换为有限数字，把缺失值转换为明确的\texttt{null}或质量状态，避免在模板中依赖隐式类型转换。
+
+相等性判断优先使用严格相等\texttt{===}和严格不等\texttt{!==}，它们不会在比较前自动转换类型。\texttt{5 === "5"}为假，\texttt{null === undefined}也为假；如果业务确实要把空值视为同一类，应先写出显式的归一化函数，再比较归一化结果。抽象相等\texttt{==}会触发复杂的转换规则，容易把空字符串、零和\texttt{false}混为一谈，在水位、流量等数值字段中尤其危险。
+
+清单\ref{lst:ch04-a44-types}用类型守卫和显式转换建立一个可复用的读数解析函数。函数先检查对象结构，再将字符串转换为数字，最后区分“缺测”和“无效”；调用方可以根据返回的判别字段决定显示、统计或拒收，而不必在多个组件中重复一套隐式规则。
+
+\label{lst:ch04-a44-types}
+\begin{lstlisting}[language=JavaScript,caption={监测读数的类型守卫与严格比较}]
+function parseLevel(raw) {
+  if (raw === null || raw === undefined || raw === '') {
+    return { kind: 'missing', value: null };
+  }
+  const value = typeof raw === 'number' ? raw : Number(raw);
+  if (!Number.isFinite(value)) return { kind: 'invalid', value: null };
+  return { kind: 'valid', value };
+}
+
+const reading = parseLevel('4.20');
+if (reading.kind === 'valid' && reading.value === 4.2) {
+  console.log('可以进入展示流程');
+}
+\end{lstlisting}
+
+\subsection{函数、闭包与数组高阶方法}
+
+函数是可以传递和返回的值。命名函数适合表达稳定的业务操作，箭头函数适合短小的映射和筛选；函数参数和返回值应当有明确含义，避免依赖外部可变变量。闭包是函数与其创建时词法环境的组合，常用于封装计数器、节流器和带配置的校验器。闭包并不会复制所有数据，若把很大的监测数组长期保存在闭包中，组件卸载后仍可能无法回收，因此要在生命周期结束时释放引用。
+
+数组的\texttt{map}、\texttt{filter}、\texttt{find}、\texttt{some}、\texttt{every}和\texttt{reduce}表达的是不同意图：映射改变每个元素的形状，筛选保留满足条件的元素，查找返回一个元素，\texttt{some}/\texttt{every}判断集合性质，归约把集合折叠成一个结果。它们通常比手写索引循环更容易测试，但要注意每次链式调用都可能创建新数组；高频数据流应在测量后决定是否批量处理或复用缓冲区。
+
+清单\ref{lst:ch04-a44-closures}把闭包和高阶数组方法放在同一个水位摘要函数中。\texttt{makeRollingAverage}只暴露\texttt{push}和\texttt{value}两个操作，内部样本数组不能被调用方直接修改；摘要函数使用\texttt{filter}排除缺测，再用\texttt{reduce}求和，结果可以直接供卡片组件使用。
+
+\label{lst:ch04-a44-closures}
+\begin{lstlisting}[language=JavaScript,caption={闭包与数组高阶方法}]
+function makeRollingAverage(limit = 3) {
+  const samples = [];
+  return {
+    push(value) {
+      if (Number.isFinite(value)) samples.push(value);
+      if (samples.length > limit) samples.shift();
+    },
+    value() {
+      return samples.length === 0
+        ? null
+        : samples.reduce((sum, item) => sum + item, 0) / samples.length;
+    }
+  };
+}
+
+const readings = [{ level: 4.1 }, { level: null }, { level: 4.3 }];
+const validLevels = readings.map(item => item.level)
+  .filter(level => Number.isFinite(level));
+const average = validLevels.reduce((sum, level) => sum + level, 0)
+  / validLevels.length;
+console.log(average);
+\end{lstlisting}
+
+\subsection{解构、展开与 ES 模块}
+
+对象解构把接口返回的字段绑定到局部变量，数组解构适合处理有固定位置的结果；默认值可以覆盖字段缺失，重命名可以避免与外层变量冲突。展开语法用于复制浅层对象或拼接数组，但它不会深拷贝嵌套对象，不能用来伪造不可变数据。更新测站状态时，应创建新的顶层对象并保留未改变字段，避免一个组件修改对象后悄悄影响另一个组件。
+
+ES 模块用\texttt{export}声明公共接口，用\texttt{import}建立静态依赖。模块边界最好按业务职责划分：\texttt{readings.js}负责类型和计算，\texttt{api.js}负责请求，组件只组合这些接口。静态导入让构建工具能够分析依赖和做代码分割，动态\texttt{import()}则适合把不在首屏的地图或报表功能延迟加载。模块不应通过全局变量共享状态，测试时也不应依赖导入顺序。
+
+清单\ref{lst:ch04-a44-modules}展示“定义模块—使用模块”的完整关系。两个文件都写在同一清单中，复制到 Vite 5 项目的\texttt{src/lib}目录后可直接改成对应路径；调用方拿到的是新对象，不会修改原始 API 响应。
+
+\label{lst:ch04-a44-modules}
+\begin{lstlisting}[language=JavaScript,caption={ES 模块、解构与展开}]
+// readings.js
+export function summarizeReading(reading) {
+  const { stationId, level: rawLevel, quality = 'missing' } = reading;
+  const level = rawLevel === null ? null : Number(rawLevel);
+  return { stationId, level, quality };
+}
+
+// station-panel.js
+import { summarizeReading } from './readings.js';
+
+const response = { stationId: 'ST-01', level: '4.20', quality: 'valid' };
+const summary = summarizeReading(response);
+const viewModel = { ...summary, updated: true };
+console.log(viewModel);
+\end{lstlisting}
+
+\subsection{DOM 查询、增删改与安全写入}
+
+DOM 是 HTML 文档在浏览器中的对象表示，节点之间形成父子和兄弟关系。\texttt{querySelector}和\texttt{querySelectorAll}适合按 CSS 选择器查找节点，\texttt{closest}适合从事件目标向上找到所属卡片，\texttt{matches}适合判断状态。新增节点使用\texttt{createElement}和\texttt{append}，删除使用\texttt{remove}，属性使用\texttt{setAttribute}或属性本身修改。外部数据写入文本时使用\texttt{textContent}，不要把未经转义的测站名称或事件说明拼接到\texttt{innerHTML}，否则数据可能被当成脚本执行。
+
+DOM 操作还要考虑布局代价。循环中逐个读取布局尺寸、再逐个写入样式，可能在每次迭代之间强制浏览器重新计算布局。可以先把数据转换为文档片段，完成一次写入；高频图表则交给专用渲染层，DOM 只保留标题、单位和当前值。清单\ref{lst:ch04-a44-dom}先创建一个安全的测站列表，再用\texttt{textContent}更新一个条目，完整展示查询、增删和文本写入。
+
+\label{lst:ch04-a44-dom}
+\begin{lstlisting}[language=JavaScript,caption={安全创建和更新测站 DOM}]
+document.body.innerHTML = '<ul id="station-list"></ul>';
+const list = document.querySelector('#station-list');
+const stations = [
+  { id: 'ST-01', name: '上游测站', level: 4.2 },
+  { id: 'ST-02', name: '下游测站', level: 4.6 }
+];
+
+const fragment = document.createDocumentFragment();
+for (const station of stations) {
+  const item = document.createElement('li');
+  item.dataset.stationId = station.id;
+  item.textContent = `${station.name}：${station.level} m`;
+  fragment.append(item);
+}
+list.replaceChildren(fragment);
+list.querySelector('[data-station-id="ST-02"]').textContent = '下游测站：更新中';
+\end{lstlisting}
+
+\subsection{事件对象、捕获与冒泡}
+
+浏览器事件沿 DOM 树传播，通常分为捕获、目标和冒泡三个阶段。捕获从\texttt{window}向目标节点下行，目标阶段执行目标监听器，冒泡再从目标向祖先上行。监听器第二个参数可以使用\texttt{capture: true}参加捕获阶段；普通监听器默认在冒泡阶段执行。事件对象的\texttt{target}是最初触发的节点，\texttt{currentTarget}是当前正在执行监听器的节点，两者不同是理解事件委托的关键。
+
+\texttt{preventDefault()}阻止浏览器默认行为，例如阻止表单跳转或链接导航；\texttt{stopPropagation()}停止事件继续传播，但不应被当作解决所有重复触发的工具，因为它会让祖先组件失去观察事件的机会。业务代码应先判断是否真的需要阻止默认行为，再记录事件来源和用户操作，不能为了“让按钮不动”而无条件调用两个方法。
+
+图\ref{fig:ch04-a44-event-flow}展示一个测站列表项被点击时的三阶段路径。捕获监听器适合做全局审计或焦点准备，目标监听器处理当前控件，冒泡监听器适合事件委托；在同一元素上注册多个监听器时，还要注意注册顺序和是否调用了\texttt{stopImmediatePropagation}。
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[>=Stealth,thick,node distance=0.85cm]
+  \tikzset{event/.style={draw=Primary,rounded corners=2pt,minimum width=3.7cm,minimum height=.65cm,align=center,fill=PrimaryLight,text=PrimaryDark,font=\small}}
+  \node[event] (capture) {捕获阶段\\window → list};
+  \node[event,below=of capture] (target) {目标阶段\\具体按钮或列表项};
+  \node[event,below=of target] (bubble) {冒泡阶段\\list → document};
+  \draw[->,draw=Primary] (capture)--(target);
+  \draw[->,draw=Primary] (target)--(bubble);
+  \node[align=left,font=\scriptsize,text=TextGray,right=1.0cm of target] {事件对象：\\target / currentTarget};
+\end{tikzpicture}
+\caption{DOM 事件传播的捕获、目标与冒泡三阶段}
+\label{fig:ch04-a44-event-flow}
+\end{figure}
+
+\subsection{事件委托与长列表}
+
+事件委托把一个监听器放在稳定的父容器上，通过\texttt{event.target.closest()}判断用户点击的具体项目。它有两个好处：列表新增项目不必重复绑定监听器，监听器数量也不会随测点数增长。委托代码必须确认目标确实属于当前容器，避免点击嵌套按钮或其他区域时误触发；对于键盘操作，还要同时处理按钮的\texttt{click}事件和必要的键盘语义，不能只监听\texttt{mousedown}。
+
+长列表的瓶颈不只在监听器数量，还在节点数量和布局计算。分页适合用户逐页查看，虚拟滚动只渲染可视区附近的窗口，并把滚动位置映射到数据索引。实现虚拟滚动时需要估计行高、保留上下占位空间、处理动态高度和键盘焦点；如果测站卡片高度差异很大，先采用分页或分组折叠，再在性能测量确认后引入更复杂的窗口化算法。清单\ref{lst:ch04-a44-events}展示固定父容器上的事件委托，清单\ref{lst:ch04-a44-virtual-list}进一步演示只渲染可视窗口的基本思路。
+
+\label{lst:ch04-a44-events}
+\begin{lstlisting}[language=JavaScript,caption={测站列表的事件委托与 preventDefault}]
+document.body.innerHTML = `
+  <a id="station-link" href="/stations">测站列表</a>
+  <ul id="delegated-list">
+    <li><button data-station-id="ST-01">上游测站</button></li>
+    <li><button data-station-id="ST-02">下游测站</button></li>
+  </ul>
+  <output id="delegated-result" aria-live="polite"></output>`;
+
+const delegatedList = document.querySelector('#delegated-list');
+const output = document.querySelector('#delegated-result');
+delegatedList.addEventListener('click', event => {
+  const button = event.target.closest('button[data-station-id]');
+  if (!button || !delegatedList.contains(button)) return;
+  output.textContent = `选择了 ${button.dataset.stationId}`;
+});
+
+document.querySelector('#station-link').addEventListener('click', event => {
+  event.preventDefault();
+  output.textContent = '已在当前页面打开测站列表';
+});
+\end{lstlisting}
+
+\label{lst:ch04-a44-virtual-list}
+\begin{lstlisting}[language=JavaScript,caption={长测站列表的可视窗口渲染思路}]
+const root = document.createElement('div');
+root.innerHTML = '<div id="virtual-list" style="height:160px;overflow:auto"></div>';
+document.body.append(root);
+const viewport = root.querySelector('#virtual-list');
+const records = Array.from({ length: 1000 }, (_, index) => ({
+  id: `ST-${String(index + 1).padStart(4, '0')}`,
+  level: (4 + index / 100).toFixed(2)
+}));
+const rowHeight = 32;
+
+function renderWindow() {
+  const first = Math.floor(viewport.scrollTop / rowHeight);
+  const visible = records.slice(first, first + 8);
+  viewport.replaceChildren(...visible.map(record => {
+    const row = document.createElement('div');
+    row.style.height = `${rowHeight}px`;
+    row.textContent = `${record.id}：${record.level} m`;
+    return row;
+  }));
+}
+viewport.addEventListener('scroll', renderWindow, { passive: true });
+renderWindow();
+\end{lstlisting}
+
+事件、DOM 和数据结构应一起设计。点击预警按钮时，事件委托只负责识别测站和触发动作，业务函数负责校验状态，视图层负责更新\texttt{output}；如果接口请求尚未完成，按钮应显示忙碌状态而不是重复创建监听器。长列表采用窗口化后，仍要给屏幕阅读器提供当前项数量和位置说明，滚动时不要把焦点强行移到新节点。完成事件流、默认行为、委托边界和性能窗口的测试，JavaScript 才真正支撑了水利监测页面的可靠交互。
+
 \subsection{异常处理}
 
 \texttt{try}包围可能失败的操作，\texttt{catch}处理异常，\texttt{finally}执行清理。异常不能被静默吞掉，应在界面给出可理解提示，并把技术细节记录到日志系统。
@@ -777,23 +968,29 @@ DOM是HTML文档在浏览器中的对象表示。优先使用\texttt{querySelect
 下面示例完整展示事件绑定、输入校验和界面更新。警戒值仍为同一场景的5.0米。
 
 \label{lst:ch04-html-vue}
-\begin{lstlisting}[language=html,caption={测站列表模板}]
+\begin{lstlisting}[language=html,caption={测站输入 HTML 片段}]
 <label for="level-input">水位（m）</label>
 <input id="level-input" type="number" step="0.01">
 <button id="check-level" type="button">判断状态</button>
 <output id="level-result" aria-live="polite"></output>
-<script>
-  const input = document.querySelector('#level-input');
-  const result = document.querySelector('#level-result');
-  document.querySelector('#check-level').addEventListener('click', () => {
-    const level = Number(input.value);
-    if (!Number.isFinite(level)) {
-      result.textContent = '请输入有效水位';
-      return;
-    }
-    result.textContent = level >= 5.0 ? '达到警戒水位' : '水位正常';
-  });
-</script>
+\end{lstlisting}
+
+清单\ref{lst:ch04-a44-dom-script}把同一页面的行为代码单独列出，使用 JavaScript 语言标注后，关键字、字符串和箭头函数能够正确高亮；HTML 清单只负责结构，脚本清单负责查询节点、转换输入和更新输出。
+
+\label{lst:ch04-a44-dom-script}
+\begin{lstlisting}[language=JavaScript,caption={测站输入 JavaScript 片段}]
+const input = document.querySelector('#level-input');
+const result = document.querySelector('#level-result');
+const button = document.querySelector('#check-level');
+
+button.addEventListener('click', () => {
+  const level = Number(input.value);
+  if (!Number.isFinite(level)) {
+    result.textContent = '请输入有效水位';
+    return;
+  }
+  result.textContent = level >= 5.0 ? '达到警戒水位' : '水位正常';
+});
 \end{lstlisting}
 
 高频监测数据不应逐条触发复杂布局。可以先把数据聚合到内存，再按固定帧率更新图表；列表较长时采用分页或虚拟滚动。
