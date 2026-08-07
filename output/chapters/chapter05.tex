@@ -378,20 +378,56 @@ Spring Boot 3使用\texttt{jakarta.servlet.*}命名空间。旧项目从\texttt{
 
 \label{lst:ch05-jpa-entity}
 \begin{lstlisting}[language=Java,caption={Jakarta实体映射}]
+import jakarta.persistence.*;
+import java.math.BigDecimal;
+import java.time.Instant;
+
 @Entity
 @Table(name = "water_reading")
-class WaterReading {
+public class WaterReading {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(nullable = false) private String stationId;
-    @Column(nullable = false) private double level;
+    @Column(name = "station_id", nullable = false, length = 32)
+    private String stationId;
+    @Column(nullable = false, precision = 12, scale = 4)
+    private BigDecimal level;
+    @Column(nullable = false, length = 12) private String unit;
     @Column(nullable = false) private Instant measuredAt;
+    @Column(nullable = false, length = 16) private String quality;
+    @Version @Column(nullable = false) private long version;
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private Instant createdAt;
+    @Column(name = "updated_at", nullable = false)
+    private Instant updatedAt;
 
     protected WaterReading() {}
-    WaterReading(String stationId, double level, Instant measuredAt) {
+    public WaterReading(String stationId, BigDecimal level, String unit,
+                        Instant measuredAt, String quality, Instant now) {
         this.stationId = stationId;
         this.level = level;
+        this.unit = unit;
         this.measuredAt = measuredAt;
+        this.quality = quality;
+        this.createdAt = now;
+        this.updatedAt = now;
+    }
+
+    public Long getId() { return id; }
+    public String getStationId() { return stationId; }
+    public BigDecimal getLevel() { return level; }
+    public String getUnit() { return unit; }
+    public Instant getMeasuredAt() { return measuredAt; }
+    public String getQuality() { return quality; }
+    public long getVersion() { return version; }
+    public Instant getCreatedAt() { return createdAt; }
+    public Instant getUpdatedAt() { return updatedAt; }
+    public void replace(BigDecimal level, String unit, Instant measuredAt,
+                        String quality, Instant now) {
+        this.level = level;
+        this.unit = unit;
+        this.measuredAt = measuredAt;
+        this.quality = quality;
+        this.updatedAt = now;
     }
 }
 
@@ -401,6 +437,254 @@ interface WaterReadingRepository extends JpaRepository<WaterReading, Long> {
 \end{lstlisting}
 
 Repository提供基本数据访问，服务层决定一次用例需要哪些读写。查询列表时应分页，避免把多年监测记录一次加载到内存。
+
+实体映射的关键不是把每一列机械地搬到 Java 字段，而是明确身份、精度、生命周期和并发语义。水位属于有单位的测量值，使用\texttt{BigDecimal}并设置数据库精度，避免在累计统计时把二进制浮点误差当作工程变化；\texttt{measuredAt}记录设备采样时间，\texttt{createdAt}和\texttt{updatedAt}记录服务器侧生命周期。\texttt{version}由 JPA 在更新时递增，控制器将它映射为响应中的版本，服务层在替换前比较客户端版本。清单\ref{lst:ch05-jpa-entity}补齐了实体访问器，因而前面 DTO 的\texttt{ReadingResponse.from}能够通过公开的只读方法取值，而不会依赖反射或直接暴露字段。
+
+实体的无参构造器供 JPA 反射创建，业务构造器负责建立完整不变量；访问器默认只读，修改通过\texttt{replace}等有业务含义的方法完成。数据库列名、长度、精度和非空约束应与迁移脚本逐项对照，不能只相信 Java 类型。特别是字符串枚举要用稳定的代码值，展示文字由界面字典提供，这样新增中文名称不会破坏历史记录。
+
+\subsection{关联关系与懒加载边界}
+
+测站与读数是一对多关系，读数与测站是多对一关系。多对一侧通常使用懒加载，避免每读取一条读数都立即查询测站；一对多集合也使用懒加载，并通过专门的查询决定何时批量取出。清单\ref{lst:ch05-jpa-association}展示了维护双向关系的最小写法：只有聚合根方法可以建立关联，集合不直接暴露给控制器，序列化层使用 DTO 打断循环引用。
+
+\label{lst:ch05-jpa-association}
+\begin{lstlisting}[language=Java,caption={测站与读数的懒加载关联}]
+import jakarta.persistence.*;
+import java.time.Instant;
+import java.util.*;
+
+@Entity
+class StationEntity {
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    @Column(name = "station_id", nullable = false, unique = true)
+    private String stationId;
+    @OneToMany(mappedBy = "station", fetch = FetchType.LAZY)
+    private final Set<StationReadingEntity> readings = new LinkedHashSet<>();
+
+    protected StationEntity() {}
+    StationEntity(String stationId) { this.stationId = stationId; }
+    public String getStationId() { return stationId; }
+    public Set<StationReadingEntity> getReadings() {
+        return Collections.unmodifiableSet(readings);
+    }
+    public void attach(StationReadingEntity reading) {
+        readings.add(reading);
+        reading.attachTo(this);
+    }
+}
+
+@Entity
+class StationReadingEntity {
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "station_pk", nullable = false)
+    private StationEntity station;
+    @Column(nullable = false) private Instant measuredAt;
+
+    protected StationReadingEntity() {}
+    StationReadingEntity(Instant measuredAt) { this.measuredAt = measuredAt; }
+    void attachTo(StationEntity station) { this.station = station; }
+    public Long getId() { return id; }
+    public Instant getMeasuredAt() { return measuredAt; }
+    public StationEntity getStation() { return station; }
+}
+\end{lstlisting}
+
+懒加载不是“永远不加载”，而是把加载时机交给用例。若在事务外调用集合访问器，会出现\texttt{LazyInitializationException}；若为了避免异常把所有关系改成\texttt{EAGER}，列表接口又会产生大量无关数据和更大的连接结果集。更安全的做法是在服务层打开事务，在查询中声明需要的关联，随后立即映射成 DTO 并结束实体生命周期。日志、JSON 序列化和模板渲染都不应隐式触发懒加载。
+
+\subsection{N+1 查询与 fetch join}
+
+N+1 的典型形状是先查询 N 条读数，再对每条读数访问一次测站字段，数据库日志中会出现 1 条集合查询加 N 条单项查询。数据量小的时候不明显，到了清源水库的历史查询或报表导出就会耗尽连接池。修复前先用 SQL 日志、慢查询日志或测试断言确认问题，再选择 fetch join、\texttt{@EntityGraph}、批量大小或 DTO 投影；不能仅凭“加了索引”推断 N+1 已消失。
+
+\label{lst:ch05-fetch-join}
+\begin{lstlisting}[language=Java,caption={用 fetch join 消除列表接口的 N+1}]
+import org.springframework.data.jpa.repository.*;
+import org.springframework.data.repository.query.Param;
+import java.time.Instant;
+import java.util.List;
+
+public interface StationReadingQueryRepository
+        extends JpaRepository<StationReadingEntity, Long> {
+    @Query("select r from StationReadingEntity r "
+         + "join fetch r.station s "
+         + "where s.stationId = :stationId "
+         + "and r.measuredAt >= :from and r.measuredAt < :to "
+         + "order by r.measuredAt desc, r.id desc")
+    List<StationReadingEntity> findForReport(
+            @Param("stationId") String stationId,
+            @Param("from") Instant from,
+            @Param("to") Instant to);
+
+    @EntityGraph(attributePaths = "station")
+    List<StationReadingEntity> findTop100ByOrderByMeasuredAtDescIdDesc();
+}
+\end{lstlisting}
+
+清单\ref{lst:ch05-fetch-join}的\texttt{join fetch}适合有限时间窗的报表；它不适合直接套在带分页的多值集合上，因为连接后数据库先展开行，分页可能截断聚合结果。分页场景可以先按主键分页，再用第二次\texttt{where id in (...)}批量抓取关联，或改用只返回所需字段的 DTO 投影。\texttt{@EntityGraph}是声明式替代，优点是查询方法仍然可读，缺点是复杂条件下需要回到显式 JPQL 或原生 SQL。
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{JPA 查询策略与适用边界}
+\label{tab:ch05-jpa-query-strategies}
+\begin{tabular}{p{0.18\textwidth}p{0.33\textwidth}p{0.36\textwidth}}
+\toprule
+策略 & 解决的问题 & 使用边界与验证方式 \\
+\midrule
+派生查询 & 简单字段、排序和存在性判断 & 方法名必须可读；复杂条件拆成查询对象并用 SQL 日志核对 \\
+\texttt{@Query} & 明确的 JPQL、fetch join 或聚合 & 参数命名一致；关联集合分页前先验证行数和重复 \\
+\texttt{Pageable/Page} & 列表分页、总数和排序 & 限制最大页大小；检查 count 查询是否走索引 \\
+DTO 投影 & 只取列表需要的列 & 避免把实体关系带出事务；字段增加要同步契约测试 \\
+原生 SQL & PostGIS、TimescaleDB 等数据库特性 & 绑定参数、迁移脚本和方言版本必须一起评审 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+选择策略时应先写出业务问题再选 API。表\ref{tab:ch05-jpa-query-strategies}中的派生查询适合“查某测站最新一条”，\texttt{Page}适合界面翻页，fetch join适合一次性生成小范围报告；三者都要以执行计划和集成测试确认，而不是把 Repository 方法数量当作性能指标。
+
+\subsection{派生查询、Pageable 与稳定分页}
+
+Spring Data 的派生查询名称按“动词 + 属性 + 条件 + 排序”组合，例如\texttt{findByStationIdAndQualityOrderByMeasuredAtDescIdDesc}。属性名必须与实体字段对应，重命名时编译器会提示错误；查询含义复杂或涉及时间半开区间时，优先使用\texttt{@Query}明确写出条件。所有列表接口都应限制\texttt{size}，默认排序追加唯一 ID 作为 tie-breaker，保证追加新读数时不会在页边界重复或漏掉记录。
+
+\label{lst:ch05-pageable-repository}
+\begin{lstlisting}[language=Java,caption={Pageable 分页查询与服务层上限}]
+import org.springframework.data.domain.*;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+interface ReadingPageRepository extends JpaRepository<WaterReading, Long> {
+    Page<WaterReading> findByStationIdAndQuality(
+            String stationId, String quality, Pageable pageable);
+}
+
+@Service
+class ReadingPageService {
+    private static final int MAX_PAGE_SIZE = 200;
+    private final ReadingPageRepository repository;
+
+    ReadingPageService(ReadingPageRepository repository) {
+        this.repository = repository;
+    }
+
+    @Transactional(readOnly = true)
+    Page<ReadingResponse> page(String stationId, String quality,
+                               int page, int size) {
+        int bounded = Math.min(Math.max(size, 1), MAX_PAGE_SIZE);
+        Pageable request = PageRequest.of(page, bounded,
+                Sort.by(Sort.Order.desc("measuredAt"),
+                        Sort.Order.desc("id")));
+        return repository.findByStationIdAndQuality(stationId, quality, request)
+                .map(ReadingResponse::from);
+    }
+}
+\end{lstlisting}
+
+清单\ref{lst:ch05-pageable-repository}返回的\texttt{Page}包含总元素数和总页数，适合需要页码跳转的管理界面；只需向后滚动时可以使用游标分页，避免高页码的\texttt{OFFSET}扫描。默认排序必须显式写出，不能依赖数据库自然顺序。查询服务只把实体映射成 DTO 后离开事务，避免序列化阶段再次访问懒加载关系。
+
+\subsection{乐观锁与审计字段}
+
+监测读数的修改通常不是高冲突写入，但测站配置、预警规则和人工订正可能被多个值班员同时编辑。\texttt{@Version}把冲突检测交给数据库更新条件：更新语句带上旧版本，影响行数为零就抛出乐观锁异常，异常处理器返回409，客户端重新读取后让用户决定是否合并。它不能替代权限检查，也不能保证跨表操作自动一致；跨聚合修改仍要由事务边界和约束共同保护。
+
+审计字段至少分为创建时间、更新时间、操作者和来源。创建/更新时间可以由 Spring Data Auditing 自动填充，操作者来自经过认证的主体；设备上报的\texttt{stationId}和采样时间属于业务字段，不能用服务器时间覆盖。对逻辑删除记录保留删除时间和原因，查询默认过滤，审计查询按权限开放。
+
+\label{lst:ch05-version-audit}
+\begin{lstlisting}[language=Java,caption={乐观锁与审计字段映射}]
+import jakarta.persistence.*;
+import org.springframework.data.annotation.*;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import java.time.Instant;
+
+@MappedSuperclass
+@EntityListeners(AuditingEntityListener.class)
+abstract class AuditedEntity {
+    @CreatedDate @Column(nullable = false, updatable = false)
+    private Instant createdAt;
+    @LastModifiedDate @Column(nullable = false)
+    private Instant updatedAt;
+    @CreatedBy @Column(length = 64, updatable = false)
+    private String createdBy;
+    @LastModifiedBy @Column(length = 64)
+    private String updatedBy;
+    public Instant getCreatedAt() { return createdAt; }
+    public Instant getUpdatedAt() { return updatedAt; }
+    public String getUpdatedBy() { return updatedBy; }
+}
+
+@Entity
+@Table(name = "station_config")
+class StationConfigEntity extends AuditedEntity {
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    @Version @Column(nullable = false)
+    private long version;
+    @Column(name = "station_id", nullable = false, unique = true)
+    private String stationId;
+    @Column(nullable = false) private boolean archived;
+    public long getVersion() { return version; }
+    public String getStationId() { return stationId; }
+    public boolean isArchived() { return archived; }
+}
+\end{lstlisting}
+
+启用审计时要在配置类加入\texttt{@EnableJpaAuditing}并提供\texttt{AuditorAware<String>}，测试中用固定操作者替代真实登录主体。审计字段写入与业务更新必须属于同一事务；如果把审计写入另一个异步任务，主记录提交后任务失败会造成不可解释的缺口。清单\ref{lst:ch05-version-audit}的版本列属于并发控制，审计人和时间属于追责信息，两者用途不同，不能用一个“更新时间”字段代替。
+
+\subsection{索引设计与 PostgreSQL 迁移}
+
+索引要由过滤、排序、连接和唯一性共同决定。测站读数列表通常先按\texttt{station\_id}过滤，再按\texttt{measured\_at}和\texttt{id}倒序，因此联合索引应保持相同的前缀顺序；质量码只有在选择性较高或统计查询频繁时才适合放入索引。索引不能替代时间分区、TimescaleDB 超表或 PostGIS 空间索引，创建后要用\texttt{EXPLAIN (ANALYZE, BUFFERS)}核对实际执行计划。
+
+\label{lst:ch05-index-migration}
+\begin{lstlisting}[language=SQL,caption={PostgreSQL 索引与扩展迁移}]
+-- V20260807_01__reading_indexes.sql
+CREATE EXTENSION IF NOT EXISTS postgis;
+CREATE EXTENSION IF NOT EXISTS timescaledb;
+
+CREATE INDEX IF NOT EXISTS idx_reading_station_time
+    ON water_reading (station_id, measured_at DESC, id DESC);
+CREATE INDEX IF NOT EXISTS idx_reading_quality_time
+    ON water_reading (quality, measured_at DESC)
+    WHERE quality IN ('valid', 'suspect');
+CREATE UNIQUE INDEX IF NOT EXISTS uk_reading_idempotency
+    ON reading_idempotency (idempotency_key);
+
+-- 大表迁移时在低峰期执行，并在发布记录中保存执行耗时
+\end{lstlisting}
+
+清单\ref{lst:ch05-index-migration}使用版本化迁移而不是让应用启动时猜测表结构。\texttt{ddl-auto: validate}只校验实体和数据库是否一致，生产环境的建表、扩展、索引和超表转换都应由迁移工具执行。索引创建会占用 I/O 和锁资源，大表可采用在线创建并单独观察；删除索引前先检查慢查询和回滚方案。迁移版本必须可重复检查，禁止把密码、真实连接串或未审计的临时 SQL 提交到教材仓库。
+
+建表策略要与发布流程绑定。开发 Profile 可以在一次性实验数据库上使用自动更新，帮助学生快速观察列映射；测试 Profile 使用迁移脚本建立干净数据库，确保约束、索引和扩展都经过验证；生产 Profile 只允许校验，迁移由发布流水线在备份和审批之后执行。这样，应用启动不会因为实体类的一个拼写变化而悄悄改写业务表，数据库变更也能在代码评审中看到完整差异。
+
+一次迁移应当有明确的前置条件、执行动作、验证查询和回滚策略。新增可空列通常可以先发布，再由后台任务填充，最后在下一版本加非空约束；直接把大表列改为非空可能长时间持锁。删除列则要先停止读写、确认日志和报表不再引用，保留一个可恢复窗口。对时序表，分区或超表转换还要评估历史数据规模、压缩策略和保留期限，避免一次性操作阻塞实时写入。
+
+索引列的顺序应由真实查询的选择性决定，而不是按字段名称排列。以测站和时间联合索引为例，先按\texttt{station\_id}筛选能缩小扫描范围，再用时间倒序满足最新读数列表；若查询还经常过滤质量码，应通过执行计划判断把质量码放进联合索引还是建立部分索引。索引过多会拖慢写入、增加 vacuum 成本和备份体积，所以每个索引都要登记服务、查询模板、预计收益和删除条件。
+
+\subsection{查询测试、执行计划与观测}
+
+Repository 测试不能只验证返回了几条记录，还要验证查询语义和数据库行为。对最新读数测试“同一时间按 ID 取最大值”的稳定排序，对分页测试第一页、最后一页和空页，对时间范围测试左闭右开避免相邻窗口重复。对 fetch join 测试查询次数上限，使用 SQL 统计器或数据源代理确认没有 N+1；对乐观锁测试两个事务读取同一版本时只有一个更新成功。
+
+集成测试应使用独立的 PostgreSQL 数据库，并在测试开始时执行同一套迁移脚本。测试数据包含多个测站、相同时间戳的不同 ID、valid/suspect/missing 三种质量码以及跨月时间边界。这样既能验证索引前缀和排序，也能发现 DTO 映射把单位、时区或质量码丢失的问题。测试结束后回滚事务或销毁临时数据库，不能依赖开发机残留数据。
+
+执行计划是查询优化的证据。使用\texttt{EXPLAIN (ANALYZE, BUFFERS)}时记录规划时间、实际行数、共享命中率和是否发生顺序扫描；不要只看“用了索引”这一行。数据量变化后要重新分析统计信息，时间序列持续增长时还要观察分区裁剪和压缩段读取。优化目标是满足接口时延和数据库资源预算，而不是让每条 SQL 都套上索引。
+
+应用层也应暴露可观测指标：按查询名统计耗时分位数、返回行数、分页页大小、慢查询次数和锁等待；日志中记录\texttt{traceId}、测站和时间窗口，不记录完整 SQL 参数中的敏感信息。发现慢查询时，先从请求追踪定位到 Repository，再对照执行计划和数据库指标，最后决定改查询、改索引还是调整缓存。缓存只适合允许短暂陈旧的读模型，不能掩盖实体关系和事务边界设计错误。
+
+当时序数据达到保留期限，可以按业务规则归档或压缩，而不是直接删除在线表中的随机行。归档任务要记录批次号、时间窗口、行数和校验摘要，完成后再更新保留标记；查询服务默认只访问在线窗口，需要历史数据时走异步任务。任何清理操作都要经过审批、备份和演练，保证误删时能恢复并解释影响范围。
+
+分页接口的总数查询也可能成为瓶颈。管理界面需要精确总页数时使用\texttt{Page}，但在持续追加的时序流中可以返回“是否还有下一页”和游标，避免对数百万行执行\texttt{count(*)}。接口文档应说明两种模式的排序、最大窗口和一致性范围；客户端不能把游标解码后自行改写时间边界，否则会跳过记录或重复处理。服务端应对非法游标返回400，并在日志中保留解析失败的错误码。
+
+查询对象还要保护数据库资源。限制单次时间跨度、最大页大小、并发导出任务数和每个租户的速率；复杂统计超过预算就创建异步任务，返回任务 ID 和进度。取消任务时释放连接和临时表，失败时保留执行计划摘要和迁移版本，方便运维复盘。通过这些约束，JPA 不只是把 SQL 隐藏起来，而是把数据访问契约、性能预算和恢复路径一起交给应用设计。
+
+数据访问评审还应检查三个容易被忽略的边界。第一，实体的时间字段必须明确时区，数据库连接和应用 JVM 统一使用 UTC，展示层再转换为值班员时区；第二，单位换算应在进入实体前完成并保存单位代码，不能让查询层猜测“米”或“毫米”；第三，删除和归档要区分业务证据与缓存数据，水位原始记录通常只允许追加订正，不允许物理覆盖。把这些边界写进实体约束、Repository 方法名和集成测试，才能让后续的事务、消息和预警计算建立在可信数据上。
+
+还要把数据访问失败设计成可恢复的运维事件。连接池耗尽、锁等待超时、违反唯一约束和迁移版本不匹配分别对应不同的处理路径：前两者需要限流、重试或降级，唯一约束通常提示客户端重复提交，版本不匹配则应阻止实例加入流量并触发发布告警。异常日志记录 SQL 操作名、迁移版本、追踪 ID 和安全的参数摘要，响应只返回稳定错误码。值班员据此可以区分“请求需要修改”“稍后重试”和“发布需要回滚”，而不是面对一条无法行动的数据库异常文本。
+
+最后，查询契约应写入接口文档和回归测试：字段名称、单位、时区、排序、分页边界及错误码都要有固定示例。数据库优化只有在契约不变、结果可复现、故障可定位的前提下才有意义。
+发布前还应由应用、数据库和运维共同复核迁移窗口、备份点与回滚责任人。
+
+\subsection{统计服务中的数值稳定性}
+
+\texttt{WaterDataSummary}是服务层的内存统计对象，不是 JPA 实体，也不承担 Repository 或事务职责。它适合在一次批处理用例内聚合读数，完成后由服务决定是否持久化汇总表。这个对象不是线程安全的：两个线程同时更新可能读到相同的\texttt{dataCount}并覆盖结果；并且直接累加大量\texttt{double}会积累舍入误差。并发场景应按测站分片、在服务层串行处理，或使用数据库聚合与明确的锁策略。
+
+Welford 增量算法把新值与当前均值的差作为修正量，数值稳定性优于反复计算“总和除以计数”。本章示例用\texttt{averageLevel += (newLevel - averageLevel) / (dataCount + 1)}表达核心步骤；若业务要求厘米级可追溯，应把输入规范化为\texttt{BigDecimal}，并在批量汇总结束时统一舍入，而不是每条记录都截断。
 
 \subsection{事务边界与传播}
 
@@ -457,10 +741,13 @@ class WaterDataSummary {
     private double averageLevel = 0.0;
 
     public void updateStatistics(double newLevel) {
-        averageLevel = (averageLevel * dataCount + newLevel)
+        averageLevel += (newLevel - averageLevel)
                 / (dataCount + 1);
         dataCount++;
     }
+
+    public long getDataCount() { return dataCount; }
+    public double getAverageLevel() { return averageLevel; }
 }
 \end{lstlisting}
 
