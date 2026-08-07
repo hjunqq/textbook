@@ -15,14 +15,6 @@
 
 智慧水利平台的前端把测站、工程、告警和调度数据转化为可理解、可操作的界面。本章采用Vue 3.4+、Vue Router 4、Pinia 2与Vite 5作为教学基线；示例遵循HTML、CSS和ECMAScript标准，不依赖特定浏览器的私有能力。
 
-\lstdefinelanguage{CSS}{
-  sensitive=true,
-  morekeywords={color,background,display,grid,grid-template-columns,gap,
-    padding,border,border-radius,fill,minmax,repeat},
-  morecomment=[s]{/*}{*/},
-  morestring=[b]"
-}
-
 \section{Web基础概念与浏览器架构}
 
 浏览器通过HTTP或HTTPS请求资源，解析HTML形成DOM树，解析CSS形成CSSOM树，再计算布局并绘制页面；JavaScript通过事件循环处理用户操作、网络响应和定时任务。智慧水利页面常同时展示地图、曲线与告警，因此应避免在短时间内反复修改大量DOM节点。
@@ -277,6 +269,165 @@ CSS负责视觉呈现。规则由选择器和声明块组成，层叠结果主�
 \end{lstlisting}
 
 Grid适合仪表盘的二维区域布局，Flexbox适合工具栏等一维排列。响应式设计不能只缩小字号，还应调整列数、触控目标和信息优先级。上例在窄屏上改为单列，读者可以进一步用浏览器的设备模拟器检查断点前后的卡片顺序、触控区域和滚动方向。
+
+\subsection{盒模型与尺寸计算}
+
+浏览器把每个元素视为一个矩形盒子。盒子从内到外依次由内容区、内边距（\texttt{padding}）、边框（\texttt{border}）和外边距（\texttt{margin}）组成。\texttt{width}和\texttt{height}默认只描述内容区，因此一个写成\texttt{width: 320px; padding: 16px; border: 1px solid}的监测卡片，水平方向实际占用的是 $320+16\times2+1\times2=354$ 像素；如果三个卡片放入宽度为 1024 像素的网格，间隙还要从可用空间中扣除。尺寸计算不清楚时，卡片会出现意外换行，图表也可能被挤出容器。
+
+工程中通常在全局使用\texttt{box-sizing: border-box}，让声明的宽高包含内边距和边框。这样设计稿给出的 320 像素就是盒子的外部尺寸，组件之间的对齐更容易推导；只有需要精确控制内容区的排版组件，才保留\texttt{content-box}并在接口文档中写明。图\ref{fig:ch04-css-box-model}从外到内标出四层区域，读者可以据此判断 DevTools 中高亮的颜色对应哪一个尺寸。
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[font=\small]
+  \draw[fill=PrimaryLight,draw=Primary] (0,0) rectangle (10,3.3);
+  \node[PrimaryDark] at (5,0.35) {margin 外边距};
+  \draw[fill=white,draw=PrimaryDark] (0.75,0.75) rectangle (9.25,2.55);
+  \node[PrimaryDark] at (5,0.95) {border 边框};
+  \draw[fill=ChapterBg,draw=Accent] (1.35,1.15) rectangle (8.65,2.15);
+  \node[PrimaryDark] at (5,1.28) {padding 内边距};
+  \draw[fill=white,draw=Accent] (2.05,1.48) rectangle (7.95,1.82);
+  \node[PrimaryDark] at (5,1.65) {content 内容区};
+\end{tikzpicture}
+\caption{CSS 盒模型的四层尺寸关系}
+\label{fig:ch04-css-box-model}
+\end{figure}
+
+清单\ref{lst:ch04-css-box-sizing}用同一条规则把测站卡片、数值输出和图表容器纳入统一盒模型。选择器中的通配符会命中伪元素，因此\texttt{::before}和\texttt{::after}生成的装饰也不会把布局撑大。工程中仍应通过组件类限制样式范围，避免把第三方地图容器的内部计算误改为全局规则。
+
+\label{lst:ch04-css-box-sizing}
+\begin{lstlisting}[language=CSS,caption={监测卡片的 border-box 盒模型}]
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+.station-card {
+  width: min(100%, 20rem);
+  padding: 1rem;
+  border: 1px solid #d9e2ec;
+  margin: 0;
+  background: #fff;
+}
+
+.station-card__value {
+  min-height: 2.5rem;
+  overflow-wrap: anywhere;
+}
+\end{lstlisting}
+
+\paragraph{选择器、优先级与层叠}
+
+选择器优先级可以写成三元组 $(a,b,c)$：$a$ 统计 ID 选择器，$b$ 统计类、属性和伪类，$c$ 统计元素和伪元素。比较时先看 $a$，相同再看 $b$，最后比较 $c$；三元组都相同，后出现的声明覆盖先出现的声明。内联样式可以看作更高的来源层级，但它仍然应被限制在确有运行时主题需求的场景。优先级不是“数选择器字符个数”，例如一个 ID 的权重高于许多个类，类的权重也高于任意数量的元素选择器。
+
+表\ref{tab:ch04-css-specificity}用监测页面的选择器给出三条可计算的规则。遇到颜色或间距没有生效时，先在 DevTools 的 Styles 面板查看被划掉的声明，再按表中的三元组和来源层级定位冲突；直接追加\texttt{!important}只能隐藏原因，不能替代层叠设计。
+
+\begin{table}[H]
+\centering
+\caption{CSS 选择器优先级三元组示例}
+\label{tab:ch04-css-specificity}
+\begin{tabular}{p{0.28\textwidth}p{0.16\textwidth}p{0.42\textwidth}}
+\toprule
+选择器 & $(a,b,c)$ & 计算与应用场景 \\
+\midrule
+\texttt{\#monitor-main} & (1,0,0) & 页面主要区域的唯一标识，适合页面级布局边界 \\
+\texttt{.station-card.warning} & (0,2,0) & 同时命中组件和状态类，用于预警卡片的局部样式 \\
+\texttt{section output} & (0,0,2) & 两个元素选择器，作为低优先级默认样式 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+层叠还受来源、重要性和继承影响。用户代理样式提供浏览器默认值，作者样式提供项目规则，用户样式用于个性化设置；在同一来源内，再比较普通声明和\texttt{!important}声明。颜色、字体等属性通常会从父元素继承，盒模型尺寸、外边距和定位则不会自动继承。可以用 CSS 自定义属性把主题色和间距作为显式契约传递给组件，但应为变量提供合理的后备值。\texttt{!important}会打断这种层叠关系，导致后续维护者不得不增加更高优先级；只有无障碍用户样式覆盖或第三方组件无法修改时才考虑使用，并在注释中写明边界。
+
+清单\ref{lst:ch04-css-cascade}把主题变量、继承和状态类放在一个可检查的层级中。\texttt{color}从\texttt{.dashboard}继承到输出文本，\texttt{border-color}由状态类显式覆盖；组件内部不需要知道页面使用的是哪一种蓝色，只依赖变量名。改变主题时只替换变量值，避免在几十个选择器中逐一寻找颜色常量。
+
+\label{lst:ch04-css-cascade}
+\begin{lstlisting}[language=CSS,caption={主题变量与状态层叠规则}]
+:root {
+  --water-primary: #1565c0;
+  --water-warning: #d46b08;
+  --panel-gap: 1rem;
+}
+
+.dashboard {
+  color: #263238;
+  background: #f5f9ff;
+}
+
+.dashboard .station-card {
+  border: 1px solid var(--water-primary, #1565c0);
+  margin-block-end: var(--panel-gap);
+}
+
+.station-card.is-warning {
+  border-color: var(--water-warning, #d46b08);
+}
+\end{lstlisting}
+
+\subsection{单位体系与可伸缩界面}
+
+CSS 单位应与测量对象和缩放目标相匹配。\texttt{px}适合边框、图标描边和需要稳定像素精度的细节；\texttt{em}相对于当前元素字体大小，适合让按钮内边距随文字一起放大；\texttt{rem}相对于根元素字体大小，适合全站间距和字号的统一刻度；\texttt{vw}、\texttt{vh}分别相对于视口宽度和高度，适合大屏容器的比例尺寸；百分比通常相对于父元素对应属性，适合网格列宽和进度条。长度单位混用并非错误，错误在于没有说明比例的参照物。
+
+水利值班室大屏可以让根字号作为缩放基准，用\texttt{rem}表达卡片间距，用\texttt{min()}和\texttt{max()}限制极端窗口；移动端查询表单则让宽度使用百分比或\texttt{min(100\%, 28rem)}，保证输入框不会超出屏幕。\texttt{vh}用于整屏高度时要考虑移动浏览器地址栏变化，关键按钮不能只放在视口底部。长度选择还要与浏览器的字体放大设置一起测试，不能用固定像素锁死可读性。
+
+清单\ref{lst:ch04-css-units}展示同一监测面板中不同单位的职责。根字号是全站设计令牌，组件内的\texttt{em}保证按钮文本和内边距同步放大，\texttt{vw}只参与宽屏布局的上限计算；通过\texttt{clamp()}可以在最小、首选和最大值之间平滑过渡。
+
+\label{lst:ch04-css-units}
+\begin{lstlisting}[language=CSS,caption={监测面板的 CSS 单位策略}]
+:root { font-size: 16px; }
+
+.monitor-shell {
+  width: min(100%, 92vw);
+  min-height: min(80vh, 48rem);
+  padding: clamp(1rem, 2vw, 2rem);
+  gap: clamp(.75rem, 1.5vw, 1.5rem);
+}
+
+.monitor-shell h2 {
+  font-size: clamp(1.25rem, 1rem + 1vw, 2rem);
+}
+
+.monitor-shell button {
+  padding: .6em 1em;
+  min-height: 2.75rem;
+}
+\end{lstlisting}
+
+\subsection{定位、层叠上下文与覆盖关系}
+
+\texttt{position}有五种常用取值。\texttt{static}是默认值，元素按普通文档流排列；\texttt{relative}仍保留原位置，只在需要时相对自身偏移，并可作为绝对定位后代的参照；\texttt{absolute}脱离文档流，参照最近的定位祖先；\texttt{fixed}相对视口固定，适合始终可见的工具条，但要考虑遮挡和移动端安全区域；\texttt{sticky}在滚动到阈值后暂时固定，适合表格表头或测站分组标题。定位不是布局的替代品，卡片网格仍应优先使用 Grid 或 Flexbox。
+
+\texttt{z-index}只在同一层叠上下文内比较。设置\texttt{transform}、\texttt{opacity}小于 1、\texttt{filter}或某些定位属性，可能创建新的层叠上下文；此时子元素即使写了很大的\texttt{z-index}，也不能越过父上下文与外部兄弟比较。监测地图上的预警浮层应有明确的上下文边界：地图图层、测站详情、全局键盘提示分别建立可解释的层级，避免为了“显示在最上面”把\texttt{z-index}写成无穷增长的数字。
+
+清单\ref{lst:ch04-css-position}给出一个独立的监测工具条和浮层样式。工具条使用\texttt{sticky}保留在滚动容器顶部，浮层使用相对定位的卡片作为参照；\texttt{isolation: isolate}明确创建上下文，使第三方地图的层级不会穿透到业务提示中。读者可以在浏览器中滚动长列表并切换状态类，观察定位和层叠的实际效果。
+
+\label{lst:ch04-css-position}
+\begin{lstlisting}[language=CSS,caption={监测工具条与预警浮层的定位}]
+.monitor-page {
+  position: relative;
+  isolation: isolate;
+}
+
+.monitor-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  gap: .75rem;
+  padding: .75rem 1rem;
+  background: rgb(255 255 255 / .94);
+}
+
+.station-popover {
+  position: absolute;
+  inset: 3.5rem 1rem auto auto;
+  z-index: 20;
+  max-width: min(24rem, calc(100vw - 2rem));
+  padding: 1rem;
+  border: 1px solid #d46b08;
+  background: #fffaf0;
+}
+\end{lstlisting}
+
+盒模型、优先级、单位和定位需要一起调试。先在 Elements 面板确认元素是否处于预期的文档流，再在 Computed 面板核对最终的\texttt{box-sizing}、尺寸和来源，最后用不同字体缩放、窗口宽度和键盘操作验证。对于清源水库安全监测平台的卡片，推荐先确定结构尺寸和层叠边界，再添加颜色与动画；这样即使浏览器禁用动画或值班员放大字体，关键水位、预警等级和更新时间仍然可读。CSS 规则的教学目标不是记住属性清单，而是能够从布局现象反推盒模型、层叠和参照系。
 
 \section{JavaScript基础编程}
 
