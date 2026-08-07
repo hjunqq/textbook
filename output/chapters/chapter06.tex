@@ -54,7 +54,7 @@ gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 顶点着色器必须显式声明使用的uniform。下面的最小着色器把模型、观察和投影矩阵分开，便于定位坐标错误。
 
 \label{lst:ch06-three-scene}
-\begin{lstlisting}[caption={三维对象属性读取}]
+\begin{lstlisting}[language=GLSL,caption={三维对象属性读取}]
 #version 300 es
 layout(location = 0) in vec3 aPosition;
 uniform mat4 uModel;
@@ -65,6 +65,164 @@ void main() {
     gl_Position = uProjection * uView * uModel
                   * vec4(aPosition, 1.0);
 }
+\end{lstlisting}
+
+图形管线的每一级都应有可观测的输入和输出。模型矩阵错误通常表现为整体位置或朝向异常，观察矩阵错误表现为相机方向和“上下颠倒”，投影矩阵错误则表现为远近比例、裁剪或深度顺序异常。把问题定位到管线阶段，比盲目调节模型坐标更可靠。图\ref{fig:ch06-render-pipeline}用一条测站构件的路径概括了顶点从局部坐标到屏幕像素的转换；调试时可以在每个箭头处输出包围盒、矩阵和深度范围。
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=7mm, every node/.style={font=\small},
+  box/.style={draw,rounded corners,align=center,minimum width=2.35cm,minimum height=8mm,fill=blue!5},
+  arr/.style={-{Latex[length=2mm]},thick}]
+  \node[box] (model) {模型坐标\\构件顶点};
+  \node[box,right=of model] (world) {世界坐标\\$M$};
+  \node[box,right=of world] (view) {观察坐标\\$V$};
+  \node[box,right=of view] (clip) {裁剪坐标\\$P$};
+  \node[box,right=of clip] (screen) {屏幕像素\\视口变换};
+  \draw[arr] (model)--node[above]{放置}(world);
+  \draw[arr] (world)--node[above]{相机}(view);
+  \draw[arr] (view)--node[above]{投影}(clip);
+  \draw[arr] (clip)--node[above]{除以$w$}(screen);
+\end{tikzpicture}
+\caption{WebGL三维渲染管线中的坐标变换}
+\label{fig:ch06-render-pipeline}
+\end{figure}
+
+Three.js r160+ 的最小可运行程序必须同时创建场景、相机、渲染器和渲染循环。只有把网格加入场景而没有渲染器，浏览器不会产生任何像素；只有相机而没有更新宽高比，窗口改变大小后会出现拉伸。清单\ref{lst:ch06-three-minimal}把这些职责放在一个模块中，并在每一帧读取渲染区域尺寸。\texttt{setAnimationLoop}由Three.js根据当前渲染器选择合适的动画调度方式，在支持 WebXR 的环境中也能复用。
+
+\label{lst:ch06-three-minimal}
+\begin{lstlisting}[language=JavaScript,breaklines=true,caption={Three.js r160+最小可运行渲染骨架}]
+import * as THREE from 'three';
+
+const canvas = document.querySelector('#scene');
+const renderer = new THREE.WebGLRenderer({canvas, antialias: true});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(canvas.clientWidth, canvas.clientHeight, false);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x102a43);
+const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 5000);
+camera.position.set(12, 8, 18);
+
+const geometry = new THREE.BoxGeometry(4, 2, 3);
+const material = new THREE.MeshStandardMaterial({color: 0x4ea5d9});
+const damBlock = new THREE.Mesh(geometry, material);
+scene.add(damBlock);
+scene.add(new THREE.HemisphereLight(0xddeeff, 0x223344, 1.4));
+
+function resize() {
+  const width = canvas.clientWidth;
+  const height = canvas.clientHeight;
+  if (height === 0) return;
+  camera.aspect = width / height;
+  camera.updateProjectionMatrix();
+  renderer.setSize(width, height, false);
+}
+window.addEventListener('resize', resize);
+resize();
+renderer.setAnimationLoop(() => {
+  damBlock.rotation.y += 0.002;
+  renderer.render(scene, camera);
+});
+\end{lstlisting}
+
+颜色管理必须区分“纹理已经是 sRGB 编码”和“光照计算使用线性空间”。r152 以后，渲染器输出使用\texttt{outputColorSpace}，常见显示器输出设置为\texttt{THREE.SRGBColorSpace}；旧的\texttt{outputEncoding}与\texttt{sRGBEncoding}不应作为 r160+ 新代码。颜色贴图应标记为 sRGB，法线、粗糙度和金属度贴图保持线性数据。Three.js 当前默认启用\texttt{THREE.ColorManagement.enabled}，但项目仍应在初始化处写出假设并在截图回归测试中固定曝光和色调映射。
+
+\label{lst:ch06-color-space}
+\begin{lstlisting}[language=JavaScript,caption={Three.js色彩空间与纹理颜色标注}]
+import * as THREE from 'three';
+
+THREE.ColorManagement.enabled = true;
+const renderer = new THREE.WebGLRenderer({antialias: true});
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.0;
+
+const colorMap = new THREE.TextureLoader().load('/textures/concrete-color.png');
+colorMap.colorSpace = THREE.SRGBColorSpace;
+const normalMap = new THREE.TextureLoader().load('/textures/concrete-normal.png');
+// 法线、粗糙度、金属度是线性数据，不要标成 sRGB。
+const material = new THREE.MeshStandardMaterial({map: colorMap, normalMap});
+\end{lstlisting}
+
+几何体、材质和光照共同决定水工构件的可读性。几何体负责顶点、索引和法线，材质负责颜色、粗糙度、透明度与纹理，灯光负责把这些属性转换成视线可见的亮度。坝体、闸门和廊道通常需要不同的选择反馈：鼠标悬停只改变材质的高亮状态，选中后才显示属性面板；不要为了改变颜色复制整套几何体，否则会成倍增加显存。场景图应当以工程、构筑物、构件和传感器图层分组，业务 ID 放在\texttt{userData}，点击拾取时沿父节点向上查找该 ID。
+
+图\ref{fig:ch06-scene-graph}展示了这一层级。将业务标识与渲染节点分离后，模型替换、LOD切换和实时数据更新都不会破坏监测对象的引用；反之，如果把“DamGateMesh001”这样的显示名称当成主键，模型导出时重命名就会使告警联动失效。
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[level 1/.style={sibling distance=38mm},
+  level 2/.style={sibling distance=18mm}, every node/.style={draw,rounded corners,align=center,font=\small,fill=green!6},
+  edge from parent/.style={draw,-{Latex[length=2mm]}}]
+  \node {场景 Scene\\userData: projectId}
+    child {node {坝体 Dam\\assetId}
+      child {node {闸门 Gate\\assetId}}
+      child {node {廊道 Gallery\\assetId}}}
+    child {node {监测层 Monitoring}
+      child {node {测点 Sensor\\stationId}}};
+\end{tikzpicture}
+\caption{水利三维场景的场景图与业务标识层级}
+\label{fig:ch06-scene-graph}
+\end{figure}
+
+透视投影矩阵还涉及深度区间约定。本章采用的 OpenGL/WebGL 矩阵把归一化设备坐标的 $z$ 映射到 $[-1,1]$；WebGPU、Direct3D 以及 Cesium 某些 reverse-Z 配置采用 $[0,1]$，投影矩阵第三行的系数随之改变。把一个 API 的矩阵直接复制到另一个 API 会导致近远裁剪、深度测试或反转深度错误。工程代码应在相机模块记录 API、深度范围、是否 reverse-Z 和近远面，而不是只保存一个四乘四矩阵。
+
+WebGL2 基于 OpenGL ES 3.0，提供顶点数组对象、32 位索引、实例化和多渲染目标等能力。若因旧设备必须使用 WebGL1，兼容范围要写成具体扩展：\texttt{OES\_vertex\_array\_object}提供顶点数组对象，\texttt{OES\_element\_index\_uint}允许 32 位索引，\texttt{WEBGL\_draw\_buffers}支持多渲染目标；WebGL1 不支持 GLSL ES 3.00、统一缓冲对象（UBO）、实例化内置支持和整型纹理。清单\ref{lst:ch06-webgl-capabilities}把能力探测集中在初始化阶段，缺失能力时给出可解释的降级，而不是运行到绘制阶段才出现黑屏。
+
+\label{lst:ch06-webgl-capabilities}
+\begin{lstlisting}[language=JavaScript,caption={WebGL能力探测与兼容性记录}]
+function inspectWebGL(canvas) {
+  const gl2 = canvas.getContext('webgl2');
+  if (gl2) {
+    return {version: 2, instancing: true, indexUint32: true,
+      drawBuffers: true, shadingLanguage: 'GLSL ES 3.00'};
+  }
+  const gl1 = canvas.getContext('webgl');
+  if (!gl1) throw new Error('需要支持 WebGL 的浏览器');
+  const extensions = {
+    vao: Boolean(gl1.getExtension('OES_vertex_array_object')),
+    indexUint32: Boolean(gl1.getExtension('OES_element_index_uint')),
+    drawBuffers: Boolean(gl1.getExtension('WEBGL_draw_buffers')),
+  };
+  return {version: 1, ...extensions, instancing: false,
+    shadingLanguage: 'GLSL ES 1.00'};
+}
+\end{lstlisting}
+
+Three.js 的官方 addon 文档常把\texttt{three/addons/}作为 importmap 别名；它只有在浏览器 importmap 或构建工具显式配置别名时才有效。使用 npm 和 Vite 的工程，真实文件路径通常是\texttt{three/examples/jsm/...}，可以通过 Vite 的依赖解析或项目自己的别名映射为简短路径。学生应先确认运行方式，再选择导入语句；“文档示例能打开”不等于“直接粘贴到 Vite 就能编译”。清单\ref{lst:ch06-addon-import}列出两种环境的对应关系。
+
+\label{lst:ch06-addon-import}
+\begin{lstlisting}[language=JavaScript,caption={Three.js addon路径与构建环境对应}]
+// 浏览器 importmap：three/addons 必须在 importmap 中声明。
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+// npm + Vite：未配置别名时使用 examples/jsm 的真实路径。
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
+\end{lstlisting}
+
+性能优化必须先建立预算。实例化适合大量共享几何和材质的护栏、植被或测点标记；LOD适合从远到近逐级替换模型；纹理压缩和最大尺寸控制显著影响显存；视锥裁剪、遮挡裁剪和按需加载减少 GPU 与网络工作量。清单\ref{lst:ch06-instancing-lod}用实例化绘制 28 个测点，并以距离切换高低细节模型。实际阈值要依据目标终端帧时间和交互任务测量，不能把“开启实例化”当成所有场景的万能优化。
+
+\label{lst:ch06-instancing-lod}
+\begin{lstlisting}[language=JavaScript,caption={实例化测点与距离驱动的LOD选择}]
+const markerGeometry = new THREE.SphereGeometry(0.08, 8, 6);
+const markerMaterial = new THREE.MeshBasicMaterial({color: 0xffcc00});
+const markers = new THREE.InstancedMesh(markerGeometry, markerMaterial, 28);
+const transform = new THREE.Object3D();
+stations.forEach((station, index) => {
+  transform.position.fromArray(station.position);
+  transform.updateMatrix();
+  markers.setMatrixAt(index, transform.matrix);
+});
+markers.instanceMatrix.needsUpdate = true;
+scene.add(markers);
+
+const lod = new THREE.LOD();
+lod.addLevel(highDetailModel, 0);
+lod.addLevel(mediumDetailModel, 250);
+lod.addLevel(lowDetailModel, 800);
+scene.add(lod);
 \end{lstlisting}
 
 CPU负责准备缓冲、纹理和绘制命令，GPU执行顶点处理、图元装配、光栅化、片元处理和深度/混合测试。性能差异受场景、设备和实现影响，不使用“固定快10倍或100倍”之类无出处断言；应通过帧时间、绘制调用数和显存占用实测。

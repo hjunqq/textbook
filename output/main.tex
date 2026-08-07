@@ -156,6 +156,18 @@
 }
 \lstalias{json}{JSON}
 
+\lstdefinelanguage{GLSL}{
+  morekeywords={attribute,uniform,varying,in,out,layout,location,
+    vec2,vec3,vec4,mat3,mat4,sampler2D,float,int,bool,const,void,
+    return,if,else,for,struct,precision,lowp,mediump,highp,
+    gl_Position,gl_FragColor,texture,discard},
+  morecomment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  morestring=[b]",
+  sensitive=true
+}
+\lstalias{glsl}{GLSL}
+
 \lstdefinelanguage{HTTP}{
   morekeywords={GET,POST,PUT,DELETE,PATCH,HEAD,OPTIONS,HTTP},
   morecomment=[l]{\#},
