@@ -88,20 +88,28 @@
 \begin{figure}[H]
 \centering
 \begin{tikzpicture}[>=Stealth, every node/.style={font=\small}]
-  \draw[rounded corners=3pt, thick, draw=Primary] (-1.8,-2.0) rectangle (4.4,2.0);
-  \node[font=\small\bfseries, text=PrimaryDark] at (1.3,1.72) {智慧水库安全监测平台};
+  \draw[thick, draw=Primary] (-1.8,-2.0) rectangle (5.2,2.0);
+  \node[font=\small\bfseries, text=PrimaryDark] at (1.7,1.62) {清源水库安全监测平台};
   \node[draw, circle, minimum size=5mm] (operator) at (-3.4,0.8) {};
   \draw (operator.south) -- ++(0,-0.6) coordinate (obody);
   \draw ($(operator.south)+(0,-0.2)$) -- ++(-0.35,-0.25);
   \draw ($(operator.south)+(0,-0.2)$) -- ++(0.35,-0.25);
   \draw (obody) -- ++(-0.3,-0.45); \draw (obody) -- ++(0.3,-0.45);
-  \node[below=1.15cm of operator] {值班人员};
+  \node[below=1.15cm of operator] {值班员};
   \node[draw=Primary, ellipse, fill=PrimaryLight, minimum width=2.4cm] (view) at (0,0.9) {查看监测态势};
   \node[draw=Primary, ellipse, fill=PrimaryLight, minimum width=2.4cm] (ack) at (0,-0.8) {确认告警事件};
   \node[draw=Primary, ellipse, fill=PrimaryLight, minimum width=2.4cm] (rule) at (3.0,0.2) {维护预警规则};
-  \node[draw, rectangle, rounded corners=2pt] (manager) at (6.0,0.2) {工程管理人员};
+  \node[draw=Primary, ellipse, fill=PrimaryLight, minimum width=2.4cm] (log) at (2.0,-0.8) {记录处置日志};
+  \node[draw, circle, minimum size=5mm] (managerHead) at (6.4,0.8) {};
+  \draw (managerHead.south) -- ++(0,-0.6) coordinate (managerBody);
+  \draw ($(managerHead.south)+(0,-0.2)$) -- ++(-0.35,-0.25);
+  \draw ($(managerHead.south)+(0,-0.2)$) -- ++(0.35,-0.25);
+  \draw (managerBody) -- ++(-0.3,-0.45); \draw (managerBody) -- ++(0.3,-0.45);
+  \node[below=1.15cm of managerHead] {运维员};
   \draw (operator.east) -- (view.west); \draw (operator.east) -- (ack.west);
-  \draw (manager.west) -- (rule.east);
+  \draw (managerHead.west) -- (rule.east);
+  \draw[dashed,->] (ack) -- node[above, font=\scriptsize, fill=white, inner sep=1pt] {«include»} (log);
+  \draw[dashed,->] (rule) -- node[above, font=\scriptsize, fill=white, inner sep=1pt] {«extend»} (view);
 \end{tikzpicture}
 \caption{智慧水库平台用例图示例}
 \label{fig:uml-usecase}
@@ -117,25 +125,45 @@
 
 \textbf{关系：}
 
-继承关系（Inheritance）：表示一个类继承了另一个类的属性和方法，通常用一条带箭头的实线表示。
+继承关系（Inheritance）：表示一个类继承了另一个类的属性和方法，使用实线加空心三角箭头，三角形指向父类。
 
 关联关系（Association）：表示类之间的联系，通常用一条实线表示。
 
 依赖关系（Dependency）：表示一个类依赖于另一个类来完成某个操作，通常用带箭头的虚线表示。
 
-聚合与组合关系（Aggregation and Composition）：表示类与类之间的整体与部分关系，聚合表示较弱的“包含关系”，组合表示较强的“包含关系”。
+聚合与组合关系（Aggregation and Composition）：表示类与类之间的整体与部分关系，聚合使用整体端的空心菱形，组合使用整体端的实心菱形；菱形位置比“强弱”文字更能明确整体端归属。
+
+实现关系表示类对接口的实现，使用虚线加空心三角；依赖关系使用虚线加开放箭头；关联关系使用实线，若需要表达导航性则在被导航端使用开放箭头。表\ref{tab:uml-relations}把线型、端点符号和适用语义放在一起，绘图时先确定关系语义，再选择符号，不要把所有连线都画成普通实线箭头。
+
+\begin{table}[htbp]
+\centering
+\caption{UML类图关系符号与语义}
+\label{tab:uml-relations}
+\begin{tabular}{p{2.4cm}p{4.2cm}p{7.0cm}}
+\toprule
+关系 & 图形符号 & 语义与判读要点 \\
+\midrule
+泛化 & 实线 + 空心三角 & 子类继承父类，三角指向更一般的类 \\
+实现 & 虚线 + 空心三角 & 类实现接口，三角指向接口 \\
+关联 & 实线，可带开放箭头 & 对象之间存在结构联系，箭头只表示导航方向 \\
+依赖 & 虚线 + 开放箭头 & 使用方在某次操作中依赖被使用方 \\
+聚合 & 实线 + 空心菱形 & 整体与部分可独立存在，菱形在整体端 \\
+组合 & 实线 + 实心菱形 & 部分的生命周期受整体约束，菱形在整体端 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 图\ref{fig:uml-class}把“测点产生监测记录、监测记录可触发告警事件”的领域关系落实为类、属性、操作和多重性。读图时先检查职责，再检查关联方向和数量约束。
 
 \begin{figure}[H]
 \centering
 \begin{tikzpicture}[>=Stealth, node distance=1.0cm and 1.2cm,
-  class/.style={draw=Primary, rounded corners=2pt, fill=PrimaryLight, text width=3.6cm, align=left, font=\small}]
-  \node[class] (station) {\textbf{MonitoringPoint}\\\hrulefill\\pointId: String\\type: PointType\\\hrulefill\\updateStatus()};
-  \node[class, right=of station] (record) {\textbf{MonitoringRecord}\\\hrulefill\\timestamp: Instant\\value: Decimal\\quality: QualityCode\\\hrulefill\\validate()};
-  \node[class, below=of record] (alarm) {\textbf{AlarmEvent}\\\hrulefill\\level: AlarmLevel\\status: AlarmStatus\\\hrulefill\\acknowledge()};
-  \draw[->, thick] (station) -- node[above, font=\scriptsize] {1 产生 0..*} (record);
-  \draw[->, thick] (record) -- node[right, font=\scriptsize] {0..* 触发 0..1} (alarm);
+  class/.style={draw=Primary, fill=PrimaryLight, text width=3.6cm, align=left, font=\small}]
+  \node[class] (station) {\textbf{MonitoringPoint}\\\rule{\linewidth}{0.4pt}\\pointId: String\\type: PointType\\\rule{\linewidth}{0.4pt}\\updateStatus()};
+  \node[class, right=of station] (record) {\textbf{MonitoringRecord}\\\rule{\linewidth}{0.4pt}\\timestamp: Instant\\value: Decimal\\quality: QualityCode\\\rule{\linewidth}{0.4pt}\\validate()};
+  \node[class, below=of record] (alarm) {\textbf{AlarmEvent}\\\rule{\linewidth}{0.4pt}\\level: AlarmLevel\\status: AlarmStatus\\\rule{\linewidth}{0.4pt}\\acknowledge()};
+  \draw[-{Stealth[open]}, thick] (station) -- node[near start, above, font=\scriptsize] {1} node[near end, above, font=\scriptsize] {0..*} (record);
+  \draw[-{Stealth[open]}, thick] (record) -- node[near start, right, font=\scriptsize] {0..1} node[near end, left, font=\scriptsize] {1..*} (alarm);
 \end{tikzpicture}
 \caption{监测点、监测记录与告警事件类图示例}
 \label{fig:uml-class}
@@ -159,6 +187,61 @@
 
 状态图对于系统中如告警处置、巡检工单流转等具有多个阶段的过程非常有用。
 
+告警事件是清源水库平台中适合绘制状态图的对象：它从规则服务创建开始，经过通知、确认和处置，最终闭环或被专业分析员判为误报。图\ref{fig:alarm-event-state}把正常路径和超时升级放在同一张图中，读者应特别注意“已通知”到“已确认”的超时转移并不会跳过审批责任，升级事件仍要留下原事件号和升级原因。
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=7mm and 9mm,
+  state/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=2.2cm,
+    minimum height=.68cm,align=center,font=\small},
+  trans/.style={->,draw=Primary,thick}]
+\node[state] (new) {新建};
+\node[state,right=of new] (notified) {已通知};
+\node[state,right=of notified] (acked) {已确认};
+\node[state,below=of acked] (handling) {处置中};
+\node[state,left=of handling] (closed) {已闭环};
+\node[state,right=of handling] (false) {已误报};
+\draw[trans] (new)--node[above,font=\scriptsize]{发送通知}(notified);
+\draw[trans] (notified)--node[above,font=\scriptsize]{确认}(acked);
+\draw[trans] (acked)--node[right,font=\scriptsize]{生成工单}(handling);
+\draw[trans] (handling)--node[below,font=\scriptsize]{回执与复核}(closed);
+\draw[trans] (acked)--node[above right,font=\scriptsize]{判定误报}(false);
+\draw[trans,dashed] (notified) to[bend left=25] node[above,font=\scriptsize]{超时升级}(handling);
+\draw[trans,dashed] (handling) to[bend right=25] node[below,font=\scriptsize]{复核为误报}(false);
+\end{tikzpicture}
+\caption{告警事件生命周期状态图}
+\label{fig:alarm-event-state}
+\end{figure}
+
+状态转换必须由事件、权限和证据共同决定。例如“已通知”不能仅因页面刷新就变成“已确认”，而要有值班员身份、确认时间和事件版本；“已闭环”需要处置回执与专业复核，“已误报”要保留误报原因并进入规则改进清单。超时升级可以改变责任岗位和通知渠道，但不能覆盖原状态历史。这样的状态模型能支撑幂等处理、重复确认和审计回放。
+
+活动图则强调“谁在什么泳道执行哪一步”。图\ref{fig:alarm-activity}将预警处置拆成平台和岗位两个泳道，展示事件创建、通知、确认、审批和回执的顺序；与状态图相比，它关注动作流和责任分工，而不是对象当前状态。
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=6mm and 8mm,
+  act/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=2.55cm,
+    minimum height=.62cm,align=center,font=\small},
+  lane/.style={draw=TextGray,dashed,minimum width=5.9cm,minimum height=4.25cm},
+  flow/.style={->,draw=Primary,thick}]
+\node[lane] (platformLane) at (-3.1,0) {};
+\node[lane] (roleLane) at (3.1,0) {};
+\node[font=\small\bfseries] at (-3.1,1.85) {平台};
+\node[font=\small\bfseries] at (3.1,1.85) {值班员/审批人};
+\node[act] (create) at (-3.1,1.0) {创建事件};
+\node[act] (notify) at (-3.1,0.0) {发送通知};
+\node[act] (ack) at (3.1,0.0) {确认并研判};
+\node[act] (approve) at (3.1,-1.0) {审批处置};
+\node[act] (receipt) at (-3.1,-1.0) {记录回执};
+\draw[flow] (create)--(notify);
+\draw[flow] (notify)--(ack);
+\draw[flow] (ack)--(approve);
+\draw[flow] (approve)--(receipt);
+\end{tikzpicture}
+\caption{预警处置泳道活动图}
+\label{fig:alarm-activity}
+\end{figure}
+
 \textbf{（4）时序图（Sequence Diagram）：}时序图按时间顺序描述参与者与构件之间的消息交互，适合核对跨模块责任、同步与异步边界以及异常分支。图\ref{fig:uml-sequence}展示“告警触发—推送—确认”的主路径：分析服务生成事件，消息服务推送通知，值班人员确认后由告警服务持久化状态并返回结果。实际设计还应补充推送失败、重复确认和超时升级分支。
 
 \begin{figure}[H]
@@ -168,15 +251,29 @@
     \node[draw=Primary, fill=PrimaryLight, rounded corners=2pt, minimum width=2.0cm] (n\x) at (\x,0) {\name};
     \draw[dashed, draw=TextGray] (\x,-0.4) -- (\x,-5.0);
   }
+  \draw[draw=Primary, fill=PrimaryLight] (-0.08,-1.0) rectangle (0.08,-1.8);
+  \draw[draw=Primary, fill=PrimaryLight] (2.92,-1.9) rectangle (3.08,-4.0);
+  \draw[draw=Primary, fill=PrimaryLight] (5.92,-2.8) rectangle (6.08,-3.4);
+  \draw[draw=Primary, fill=PrimaryLight] (8.92,-2.8) rectangle (9.08,-4.0);
   \draw[->, thick] (0,-1.0) -- node[above] {创建告警事件} (3,-1.0);
-  \draw[->, thick] (3,-1.9) -- node[above] {异步推送} (6,-1.9);
-  \draw[->, thick] (6,-2.8) -- node[above] {告警通知} (9,-2.8);
+  \draw[-{Stealth[open]}, thick] (3,-1.9) -- node[above, fill=white, inner sep=1pt] {异步推送} (6,-1.9);
+  \draw[-{Stealth[open]}, thick] (6,-2.8) -- node[above, fill=white, inner sep=1pt] {告警通知} (9,-2.8);
   \draw[->, thick] (9,-3.7) -- node[above] {确认（事件号、版本）} (3,-3.7);
-  \draw[->, thick] (3,-4.6) -- node[above] {确认结果} (9,-4.6);
+  \draw[dashed,-{Stealth[open]}, thick] (3,-4.6) -- node[above, fill=white, inner sep=1pt] {确认结果} (9,-4.6);
 \end{tikzpicture}
-\caption{告警触发、推送与确认时序图}
+\caption{告警触发、推送与确认时序图（实心箭头为同步消息，开放箭头为异步或返回消息）}
 \label{fig:uml-sequence}
 \end{figure}
+
+在清源水库案例中，几种视图不是彼此独立的插图，而是一组可以相互校验的设计证据。建模评审应先从用例图开始：值班员确认预警、运维员维护规则分别对应哪些业务目标，系统边界外的角色是否都能找到责任人。随后把每个重要用例落实到类图中的职责，例如告警服务负责生成和更新事件，监测记录负责保存测值与质量码，监测点只维护自身标识和采集状态。若一个类同时承担通知、审批、历史查询等互不相干的职责，就应拆分服务或引入协作者，而不应靠增加更多方法掩盖耦合。
+
+类图中的多重性还要和数据约束、接口返回值保持一致。一个监测点可以产生零到多条记录，记录可以不触发告警，也可以在不同规则下触发多个事件；因此图中的数量不能被实现成一个必填的单值字段。对告警事件使用 $1..*$ 的一端，表示每个事件至少关联一条触发依据，审计时可以沿着事件号追溯到原始记录。若业务规则允许人工创建没有测值依据的事件，应在需求和数据库约束中明确例外，而不是悄悄把图上的多重性改成 $0..*$。
+
+状态图、活动图和时序图则从三个角度检查同一条处置链。状态图回答“事件此刻处于什么阶段、哪些转移合法”，活动图回答“哪一个岗位执行下一步动作”，时序图回答“跨服务消息以何种顺序到达”。例如确认操作在状态图中只能把“已通知”变为“已确认”，在活动图中由值班员泳道执行，在时序图中则必须携带事件号和版本号写回告警服务。三张图若出现不一致，优先回到业务规则核对；不要为了让箭头看起来连贯而删除超时、拒绝或重复消息等异常分支。
+
+图形符号也应服务于审查，而不是装饰。同步调用需要等待返回结果，适合用于创建事件和保存确认；异步消息只保证进入消息通道，适合用于通知推送，后续应由重试、幂等键和死信处理兜底。开放箭头、虚线返回线和激活条可以帮助读者判断等待关系，但它们不能替代接口契约。实现时仍需写清超时、重试次数、事件版本和操作者身份，并把这些字段作为日志或审计记录的一部分保存。
+
+提交 UML 文档前可按以下顺序自检：第一，所有角色、用例和岗位名称是否采用全书统一术语；第二，每一条关联是否说明方向、数量和生命周期归属；第三，正常、超时、拒绝、重复提交和误报路径是否至少在一种行为视图中出现；第四，图中的类名、方法名与代码接口是否一致；第五，状态转移是否有触发事件、权限条件和可追溯证据。通过这五项检查，图纸才能成为开发、测试和运维共同使用的契约，而不是只在评审会上展示的静态图片。
 
 3.部署模型
 
