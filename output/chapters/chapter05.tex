@@ -154,8 +154,176 @@ API 版本化需要在兼容性和演进速度之间作出可审计的选择。�
 
 Spring Boot通过约定、自动配置和Starter依赖减少基础配置。自动配置会依据类路径、配置属性和已有Bean选择合适组件，但开发者仍应理解其条件，避免把“自动”误解为“不可控”。推荐目录如下：
 
+\subsection{起步依赖与自动配置的边界}
+
+起步依赖是一组经过验证的依赖坐标，目的是让项目以一致的版本组合获得 Web、验证、JPA、PostgreSQL 和 Actuator 能力。它不是一个运行时服务，也不会替业务代码决定领域规则；Maven 解析依赖树后，Spring Boot 才根据类路径中的类和配置条件创建自动配置 Bean。排查启动问题时，应先查看依赖树和条件评估报告，再决定是补充依赖、修改配置还是排除某项自动配置。
+
+\label{lst:ch05-boot-dependencies}
+\begin{lstlisting}[language=Java,caption={Spring Boot 3.2 起步依赖与版本管理}]
+<parent>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-starter-parent</artifactId>
+  <version>3.2.12</version>
+</parent>
+<properties>
+  <java.version>17</java.version>
+</properties>
+<dependencies>
+  <dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-web</artifactId>
+  </dependency>
+  <dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-validation</artifactId>
+  </dependency>
+  <dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-data-jpa</artifactId>
+  </dependency>
+  <dependency>
+    <groupId>org.postgresql</groupId>
+    <artifactId>postgresql</artifactId>
+    <scope>runtime</scope>
+  </dependency>
+</dependencies>
+\end{lstlisting}
+
+清单\ref{lst:ch05-boot-dependencies}锁定 Java 17 和 Spring Boot 3.2 基线，依赖版本由父 POM 的依赖管理统一维护。PostgreSQL 驱动只在运行时需要，编译阶段依赖 JDBC 抽象；若后续接入 PostGIS 或 TimescaleDB，仍以 PostgreSQL 连接为基础，在数据库迁移脚本中启用扩展。生产项目应提交锁定的 Maven Wrapper 版本，构建机使用\texttt{./mvnw}而不是依赖本地 Maven 的偶然版本。
+
+自动配置的关键是条件注解：类路径存在某个类、容器中尚未有同类型 Bean、配置属性满足条件时，配置类才会生效。自定义 Bean 会改变“缺少 Bean”条件的结果，因此添加一个数据源或消息转换器可能使默认配置退让。开发者应把覆盖点写成显式配置，并在启动日志中记录生效的 Profile 和关键连接信息（密码保持隐藏），避免把自动配置当作不可追踪的黑盒。
+
+\subsection{application.yml 与 Profile 多环境}
+
+配置文件按环境拆分，公共配置放在\texttt{application.yml}，开发、测试和生产差异分别放在\texttt{application-development.yml}、\texttt{application-test.yml}和\texttt{application-production.yml}。启动时使用\texttt{SPRING\_PROFILES\_ACTIVE}选择 Profile，敏感值通过环境变量或密钥管理器注入。Profile 只表达环境差异，不应把业务阈值复制成多套；清源水库的工程参数仍以第8章 8.1 参数表为唯一来源。
+
+\label{lst:ch05-profile-config}
+\begin{lstlisting}[language=YAML,caption={多环境配置与外部化密钥}]
+# application.yml：所有环境共享的安全默认值
+spring:
+  application:
+    name: water-reading-service
+  jpa:
+    open-in-view: false
+  profiles:
+    default: development
+
+# application-development.yml
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/water}
+    username: ${DB_USER:water_app}
+    password: ${DB_PASSWORD:}
+security:
+  jwt:
+    issuer: ${JWT_ISSUER:water-platform-dev}
+
+# application-production.yml
+spring:
+  config:
+    activate:
+      on-profile: production
+  jpa:
+    hibernate:
+      ddl-auto: validate
+security:
+  jwt:
+    secret: ${JWT_SECRET_BASE64}
+    issuer: ${JWT_ISSUER}
+\end{lstlisting}
+
+清单\ref{lst:ch05-profile-config}把生产环境的 JWT 密钥和发行者设为必填外部变量，缺少变量时让应用在启动阶段失败，而不是运行到认证请求才发现\texttt{issuer}为空。生产环境使用\texttt{ddl-auto: validate}只校验表结构，建表和扩展由版本化迁移脚本完成；开发环境可以使用\texttt{update}辅助实验，但不得把它作为生产建表策略。配置审计应检查 Profile 是否被正确激活、数据库 URL 是否指向允许的网络段和日志是否遮蔽密码。
+
+\subsection{依赖注入与 Bean 生命周期}
+
+控制反转把对象创建、依赖组装和销毁交给 Spring 容器；依赖注入则描述组件如何获得所需协作者。构造器注入能保证对象创建后依赖完整，字段注入会隐藏依赖并增加测试难度。一个 Bean 通常经历实例化、依赖注入、\texttt{@PostConstruct}初始化、投入使用和\texttt{@PreDestroy}销毁阶段；连接池、线程池和订阅应在对应生命周期内建立和关闭。
+
+\label{lst:ch05-di-lifecycle}
+\begin{lstlisting}[language=Java,caption={构造器注入与 Bean 生命周期}]
+@Configuration
+class WaterInfrastructureConfig {
+    @Bean(destroyMethod = "close")
+    ScheduledExecutorService refreshExecutor() {
+        return Executors.newScheduledThreadPool(2);
+    }
+}
+
+@Service
+class StationRefreshService {
+    private final StationRepository repository;
+    private final ScheduledExecutorService executor;
+    private ScheduledFuture<?> task;
+
+    StationRefreshService(StationRepository repository,
+                          ScheduledExecutorService executor) {
+        this.repository = repository;
+        this.executor = executor;
+    }
+
+    @PostConstruct
+    void start() {
+        task = executor.scheduleAtFixedRate(
+                repository::refreshLatest, 0, 30, TimeUnit.SECONDS);
+    }
+
+    @PreDestroy
+    void stop() {
+        if (task != null) task.cancel(true);
+    }
+}
+\end{lstlisting}
+
+清单\ref{lst:ch05-di-lifecycle}展示了基础设施 Bean 与业务服务的依赖方向。调度器由配置类创建并统一销毁，服务只依赖接口和执行器；测试时可以注入假的\texttt{StationRepository}和单线程执行器，验证刷新是否按预期发生。定时任务中的异常要被捕获并记录，否则一次未处理异常可能停止后续刷新；任务间隔还要结合数据库连接池容量和监测数据的时效要求确定。
+
+Bean 的作用域也影响生命周期。单例适合无状态服务和连接池，原型适合每次创建独立对象，请求作用域只在 Web 请求中使用。把请求上下文注入单例时，要通过代理或显式参数传递，不能把上一次请求的测站 ID 保存到共享字段。配置属性 record 采用构造器绑定，必须通过\texttt{@EnableConfigurationProperties}或\texttt{@ConfigurationPropertiesScan}注册；仅在 record 上写注解而没有启用扫描，容器不会创建可注入的\texttt{JwtProperties}。
+
+工程目录应与依赖方向一致：\texttt{controller}只依赖\texttt{service}，\texttt{service}依赖领域对象和仓储接口，\texttt{repository}适配 PostgreSQL/PostGIS/TimescaleDB，\texttt{config}集中放安全、序列化和外部客户端。测试代码按同样的包结构组织，配置文件分为测试 Profile 和生产 Profile，避免在测试中意外连接真实清源水库数据库。
+
+\subsection{自动配置诊断与启动契约}
+
+当应用启动失败时，先区分“没有 Bean”“Bean 有多个候选”“配置属性缺失”和“外部依赖不可达”四类原因。开启条件评估报告后，可以看到某个自动配置类为何匹配或未匹配；例如缺少 PostgreSQL 驱动会使数据源自动配置跳过，存在两个相同类型的 Repository 实现会触发歧义。解决问题的顺序应是检查依赖树、读取有效 Profile、核对环境变量、最后才考虑排除自动配置。直接添加随机注解可能掩盖根因，使后续环境再次失败。
+
+启动日志是部署契约的一部分。应用应输出应用名、版本、激活的 Profile、数据库主机（不含密码）、消息主题和健康检查地址；配置值按敏感级别脱敏，JWT 密钥只输出长度或摘要。容器编排系统在收到健康检查前不应把实例加入负载均衡，数据库迁移完成后才允许读取和写入请求。启动阶段如果发现 issuer、数据库 URL 或关键业务参数缺失，应立即失败并给出变量名，而不是使用空字符串继续运行。
+
+配置属性 record 可以集中表达一组强相关参数，并通过 Bean Validation 在启动时校验。发行者不能为空，超时时间必须为正数，数据库连接池大小应有上限。校验失败时应用不会进入可服务状态，运维人员可以在部署日志中定位具体字段。配置对象只负责承载值，密钥轮换、令牌撤销和环境权限仍由安全组件完成，避免把认证逻辑塞进 YAML 解析器。
+
+\label{lst:ch05-config-validation}
+\begin{lstlisting}[language=Java,caption={配置属性注册与启动校验}]
+@ConfigurationProperties(prefix = "security.jwt")
+@Validated
+public record JwtProperties(
+        @NotBlank String secret,
+        @NotBlank String issuer,
+        @Min(60) @Max(86_400) long accessSeconds,
+        @Min(300) @Max(2_592_000) long refreshSeconds) {}
+
+@Configuration
+@EnableConfigurationProperties(JwtProperties.class)
+class SecurityPropertiesConfig {}
+\end{lstlisting}
+
+清单\ref{lst:ch05-config-validation}把配置错误前移到启动阶段，并明确访问令牌和刷新令牌的有效期范围。生产值由密钥管理器注入，配置文件只保留变量占位符；测试可以提供一组短有效期值验证刷新逻辑，但不应把测试密钥复制到生产 Profile。若项目使用\texttt{@ConfigurationPropertiesScan}，可以在启动类统一开启扫描；两种注册方式选择其一即可，重复注册会造成 Bean 名称冲突。
+
+\subsection{Bean 作用域、代理与资源释放}
+
+单例 Bean 在应用上下文中只有一个实例，适合无状态服务、Repository 和连接池；它的字段必须线程安全，不能保存某个请求的测站 ID 或当前用户。请求作用域 Bean 每次 HTTP 请求创建，适合请求追踪信息；原型 Bean 每次注入时创建，适合短生命周期的可变对象。把请求作用域对象注入单例时，Spring 使用代理延迟解析当前请求，测试时则要显式建立请求上下文。
+
+生命周期回调要与资源类型匹配。数据库连接池和线程池由配置类创建，使用\texttt{destroyMethod}或\texttt{@PreDestroy}关闭；消息消费者在应用停止时先停止接收，再等待正在处理的消息完成；WebSocket 和定时刷新在组件或服务销毁时取消。若把资源创建写在构造器里而没有对应释放，容器重启和测试重复启动会留下线程、文件句柄或网络连接。
+
+代理机制还影响\texttt{@Transactional}、\texttt{@Async}和\texttt{@Cacheable}。这些注解通过代理拦截外部调用，同类内部使用\texttt{this.method()}绕过代理，因此不会获得事务、异步或缓存行为。解决方案是把不同边界拆到另一个 Bean，或在确有必要时使用编程式模板；不要通过反射强行调用代理。代码评审应把注解所在方法的调用路径写进测试，确保“看起来有注解”与“运行时真的生效”一致。
+
+\subsection{工程骨架的测试切片}
+
+工程骨架搭好后，应尽早验证各层能否独立启动。\texttt{@WebMvcTest}只加载控制器和 MVC 基础设施，适合检查 JSON、状态码和参数校验；\texttt{@DataJpaTest}加载实体、Repository 和事务测试数据库，适合验证查询与索引；完整的\texttt{@SpringBootTest}才会装配安全、消息和外部客户端。测试 Profile 使用独立数据库或容器，禁止依赖开发机正在运行的 PostgreSQL 实例。
+
+配置测试至少覆盖三种情况：合法 Profile 能启动并读取 issuer；缺少 JWT 密钥时启动失败；生产 Profile 的\texttt{ddl-auto}为\texttt{validate}且不会自动改表。依赖注入测试用假的 Repository 和时钟替换真实实现，验证刷新任务、超时和资源释放；集成测试再验证真实 PostgreSQL、Redis 或 Kafka 的连接。这样的分层测试能在代码进入控制器之前发现配置绑定和 Bean 生命周期问题。
+
+目录结构还应服务于模块边界。\texttt{common}只放真正跨模块的值对象和错误码，不能把所有工具类都塞进去；\texttt{api}只放外部 DTO 和客户端契约，\texttt{domain}不依赖 Spring Web；数据库迁移文件按版本命名并与发布记录关联。新增预警服务时，先复制边界和测试结构，再决定是否拆分进程，避免目录先于业务边界膨胀。
+每个模块还应提供自己的 README，写明启动 Profile、依赖的外部服务、健康检查和测试命令；新成员按文档即可在隔离环境复现启动过程，减少“只在某台机器上可用”的隐性配置。
+文档还应列出本地开发所需的端口、初始化命令和清理方式，保证测试结束后不会遗留后台进程。
+
 \label{lst:ch05-http}
-\begin{lstlisting}[caption={HTTP方法与资源语义}]
+\begin{lstlisting}[language=Java,caption={HTTP方法与资源语义}]
 src/main/java/com/example/water/
   controller/   # HTTP适配
   service/      # 用例与事务边界
@@ -168,7 +336,7 @@ src/main/resources/application.yml
 配置应从代码中分离，并可被环境变量覆盖。密钥不得写入版本库。
 
 \label{lst:ch05-application}
-\begin{lstlisting}[caption={Spring Boot应用入口}]
+\begin{lstlisting}[language=YAML,caption={Spring Boot应用入口与JWT配置}]
 spring:
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/water}
@@ -177,6 +345,7 @@ spring:
 security:
   jwt:
     secret: ${JWT_SECRET_BASE64}
+    issuer: ${JWT_ISSUER:water-platform}
 \end{lstlisting}
 
 依赖注入优先使用构造器，使依赖明确并便于测试。控制器把DTO交给服务，不直接访问数据库。
@@ -339,6 +508,7 @@ class GlobalExceptionHandler {
 \begin{lstlisting}[language=Java,caption={Spring Security过滤链}]
 @Configuration
 @EnableMethodSecurity
+@EnableConfigurationProperties(JwtProperties.class)
 class SecurityConfig {
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http,
