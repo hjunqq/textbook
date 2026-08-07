@@ -1,0 +1,1 @@
+{"name":"qingyuan-web","private":true,"type":"module","scripts":{"dev":"vite","build":"vite build","test":"vitest run"},"dependencies":{"@vitejs/plugin-vue":"5.2.3","echarts":"5.5.1","pinia":"2.1.7","three":"0.160.1","vue":"3.4.38","vue-router":"4.4.5","vite":"5.4.8"},"devDependencies":{}}

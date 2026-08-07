@@ -1,0 +1,50 @@
+services:
+  frontend:
+    build: ./frontend
+    depends_on: {backend: {condition: service_healthy}}
+    ports: ["8080:80"]
+    networks: [app-net]
+  backend:
+    build: ./backend
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      DB_URL: jdbc:postgresql://postgres:5432/qingyuan
+      DB_USER: qingyuan_app
+      DB_PASSWORD_FILE: /run/secrets/db_password
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      REDIS_URL: redis://redis:6379
+    secrets: [db_password, kafka_password]
+    depends_on:
+      postgres: {condition: service_healthy}
+      redis: {condition: service_healthy}
+      kafka: {condition: service_healthy}
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/actuator/health/readiness | grep -q UP"]
+      interval: 10s
+      timeout: 3s
+      retries: 12
+    networks: [app-net, data-net]
+  postgres:
+    image: postgis/postgis:16-3.4
+    environment: {POSTGRES_DB: qingyuan, POSTGRES_USER: qingyuan_app, POSTGRES_PASSWORD_FILE: /run/secrets/db_password}
+    volumes: [pg-data:/var/lib/postgresql/data, ./db:/docker-entrypoint-initdb.d:ro]
+    secrets: [db_password]
+    healthcheck: {test: ["CMD-SHELL", "pg_isready -U qingyuan_app -d qingyuan"], interval: 10s, timeout: 5s, retries: 10}
+    networks: [data-net]
+  redis:
+    image: redis:7.2-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes: [redis-data:/data]
+    healthcheck: {test: ["CMD", "redis-cli", "ping"], interval: 10s, timeout: 3s, retries: 10}
+    networks: [data-net]
+  kafka:
+    image: bitnami/kafka:3.7
+    environment: {KAFKA_CFG_NODE_ID: 1, KAFKA_CFG_PROCESS_ROLES: broker,controller, KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093, KAFKA_CFG_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093, KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092}
+    volumes: [kafka-data:/bitnami/kafka]
+    healthcheck: {test: ["CMD-SHELL", "kafka-topics.sh --bootstrap-server localhost:9092 --list"], interval: 15s, timeout: 5s, retries: 10}
+    networks: [data-net]
+secrets:
+  db_password: {file: ./secrets/db_password.txt}
+  kafka_password: {file: ./secrets/kafka_password.txt}
+volumes: {pg-data: {}, redis-data: {}, kafka-data: {}}
+networks: {app-net: {driver: bridge}, data-net: {driver: bridge, internal: true}}
