@@ -2,7 +2,7 @@
 \addcontentsline{toc}{chapter}{前言}
 
 \begin{notebox}
-\textbf{写给翻开这本书的你}
+\paragraph{写给翻开这本书的你}
 
 如果你是一名水利工程专业的大三学生，你可能正在思考一个问题：学水利的，为什么要学写代码？
 
@@ -12,7 +12,7 @@
 \section*{为什么写这本书}
 
 % TODO-核对[O8-01]：《国家水网建设规划纲要》是否使用“数字孪生水利体系”这一原词（通行表述为“推进数字孪生水网建设”）；此处未引用 nationalWaterNetwork2023 —— 待编者确认后修改，勿自行改写
-近年来，"数字孪生水利""智慧水利"已从政策文件走进了工程实践。《国家水网建设规划纲要》明确提出建设数字孪生水利体系的目标，各流域管理机构和水利工程单位对兼具水利专业背景和软件开发能力的复合型人才需求急剧增长。
+近年来，“数字孪生水利”“智慧水利”已从政策文件走进了工程实践。《国家水网建设规划纲要》明确提出建设数字孪生水利体系的目标，各流域管理机构和水利工程单位对兼具水利专业背景和软件开发能力的复合型人才需求急剧增长。
 
 然而在教学中，我们面临一个尴尬的现实：计算机专业的软件工程教材讲得深，但案例全是电商、社交，与水利毫无关系；水利信息化教材介绍了不少概念，但很少教学生怎样动手搭建一个真正能跑起来的平台。本教材的初衷，就是填补这个空白——用水利工程的真实场景来串联软件开发的完整流程，让你学到的每一行代码都与专业相关。
 
@@ -21,13 +21,13 @@
 全书九章，按照\textbf{“打基础 $\rightarrow$ 学技术 $\rightarrow$ 做项目”}的思路组织，分为三个部分。
 
 \begin{tipbox}
-\textbf{第一部分\quad 基础篇（第1--3章）}
+\paragraph{第一部分\quad 基础篇（第1--3章）}
 
 从智慧水利的概念出发，建立对平台整体架构的认知。然后进入软件工程的核心内容：需求怎么分析、系统怎么设计、架构怎么选型。这部分是后续所有开发工作的理论根基。
 \end{tipbox}
 
 \begin{tipbox}
-\textbf{第二部分\quad 技术篇（第4--7章）}
+\paragraph{第二部分\quad 技术篇（第4--7章）}
 
 四章对应平台开发与可视化表达的核心技术链：
 \begin{itemize}
@@ -40,14 +40,14 @@
 \end{tipbox}
 
 \begin{tipbox}
-\textbf{第三部分\quad 应用篇（第8--9章）}
+\paragraph{第三部分\quad 应用篇（第8--9章）}
 
 前两部分学到的方法与技术，在这里汇聚成完整的项目实践。第8章以\textbf{水利工程安全监测平台}为起点，从业务需求、总体架构和数据模型出发，完成前后端、三维场景、智能分析、部署与验收的完整链路；并在8.5节进一步演进到数字孪生水利平台，以流域、水网和工程三类入口贯通“预报、预警、预演、预案”。第9章回顾全书，并给出技术展望与后续学习指引。
 \end{tipbox}
 
 \section*{怎么使用这本书}
 
-\textbf{先说最重要的一条：一定要动手写代码。}
+\paragraph{先说最重要的一条：一定要动手写代码。}
 
 软件开发不是看会的，是写会的。每章末尾都有思考题和练习题，思考题帮你梳理概念，练习题要求你实际编码。请认真对待它们。
 
@@ -131,11 +131,11 @@ Issues反馈渠道 & 勘误、环境问题和可复现实验报告 & 在配套�
 \end{tabular}
 \end{table}
 
-\textbf{代码仓库结构。}配套代码的根目录为\texttt{companion/}\allowbreak\texttt{water-platform-}\allowbreak\texttt{demo/}（S2 提交\texttt{f71b52a}）。\texttt{frontend/}的可运行入口是\texttt{package.json}、\texttt{src/}\allowbreak\texttt{main.js}、\texttt{src/router/}\allowbreak\texttt{index.js}、\texttt{src/stores/}\allowbreak\texttt{monitoring.js}、\texttt{src/utils/}\allowbreak\texttt{request.js}和\texttt{src/components/}\allowbreak\texttt{MonitoringDashboard.vue}，并配有\texttt{vite.config.js}、\texttt{Dockerfile}和\texttt{nginx.conf}；\texttt{backend/}包含\texttt{pom.xml}、\texttt{src/main/java/}\allowbreak\texttt{edu/example/}\allowbreak\texttt{qingyuan/}下的实体、Repository、服务、JWT 过滤器和安全配置，以及\texttt{application.yml}和\texttt{Dockerfile}；\texttt{db/}包含\texttt{001\_init.sql}与\texttt{load-s3-data.sql}；根目录的\texttt{docker-compose.yml}负责编排前端、后端、PostgreSQL、Redis和Kafka，\texttt{secrets/}只提交\texttt{*.example}模板。目录中的每个服务都提供配置样例和健康检查说明，学生可以先运行最小链路，再逐个替换为章节中的实现。
+\paragraph{代码仓库结构。}配套代码的根目录为\texttt{companion/}\allowbreak\texttt{water-platform-}\allowbreak\texttt{demo/}（S2 提交\texttt{f71b52a}）。\texttt{frontend/}的可运行入口是\texttt{package.json}、\texttt{src/}\allowbreak\texttt{main.js}、\texttt{src/router/}\allowbreak\texttt{index.js}、\texttt{src/stores/}\allowbreak\texttt{monitoring.js}、\texttt{src/utils/}\allowbreak\texttt{request.js}和\texttt{src/components/}\allowbreak\texttt{MonitoringDashboard.vue}，并配有\texttt{vite.config.js}、\texttt{Dockerfile}和\texttt{nginx.conf}；\texttt{backend/}包含\texttt{pom.xml}、\texttt{src/main/java/}\allowbreak\texttt{edu/example/}\allowbreak\texttt{qingyuan/}下的实体、Repository、服务、JWT 过滤器和安全配置，以及\texttt{application.yml}和\texttt{Dockerfile}；\texttt{db/}包含\texttt{001\_init.sql}与\texttt{load-s3-data.sql}；根目录的\texttt{docker-compose.yml}负责编排前端、后端、PostgreSQL、Redis和Kafka，\texttt{secrets/}只提交\texttt{*.example}模板。目录中的每个服务都提供配置样例和健康检查说明，学生可以先运行最小链路，再逐个替换为章节中的实现。
 
-\textbf{示例数据集。}\texttt{companion/datasets/}（S3 提交\texttt{4fed08e}）由\texttt{generate.py}生成，固定随机种子为\texttt{20260807}。\texttt{stations.csv/json}含28个测点元数据，字段为\texttt{asset\_id}、\texttt{asset\_type}、\texttt{display\_name}、单位、经纬度、\texttt{elevation\_m}、量程、精度、阈值和投运日期；\texttt{water\_level.csv}含3个库水位测点各1,200条、5分钟间隔的观测；\texttt{rainfall.csv}含5个雨量测点各288条，\texttt{piezometer.csv}含12个渗压测点各288条；三类观测共同使用\texttt{asset\_id}、\texttt{occurred\_at}、\texttt{version}、\texttt{event\_id}、\texttt{value}、\texttt{unit}、\texttt{quality}和\texttt{source}字段；\texttt{warnings.json}含蓝、黄、橙、红和缺测未评估样例。质量码只取\texttt{valid}、\texttt{suspect}、\texttt{missing}，文件中的缺测、超量程和跳变记录均保留原因。使用前应先阅读README中的字段说明，确认时间采用ISO 8601、时区采用UTC+8，并在报告中注明数据版本。
+\paragraph{示例数据集。}\texttt{companion/datasets/}（S3 提交\texttt{4fed08e}）由\texttt{generate.py}生成，固定随机种子为\texttt{20260807}。\texttt{stations.csv/json}含28个测点元数据，字段为\texttt{asset\_id}、\texttt{asset\_type}、\texttt{display\_name}、单位、经纬度、\texttt{elevation\_m}、量程、精度、阈值和投运日期；\texttt{water\_level.csv}含3个库水位测点各1,200条、5分钟间隔的观测；\texttt{rainfall.csv}含5个雨量测点各288条，\texttt{piezometer.csv}含12个渗压测点各288条；三类观测共同使用\texttt{asset\_id}、\texttt{occurred\_at}、\texttt{version}、\texttt{event\_id}、\texttt{value}、\texttt{unit}、\texttt{quality}和\texttt{source}字段；\texttt{warnings.json}含蓝、黄、橙、红和缺测未评估样例。质量码只取\texttt{valid}、\texttt{suspect}、\texttt{missing}，文件中的缺测、超量程和跳变记录均保留原因。使用前应先阅读README中的字段说明，确认时间采用ISO 8601、时区采用UTC+8，并在报告中注明数据版本。
 
-\textbf{环境版本基线。}为避免“在我的电脑上可以运行”的差异，建议按表\ref{tab:preface-companion-versions}的主线配置准备环境；补丁版本可以在同一大版本内更新，但不得跨越书中API假设。仓库快照中前端实际锁定Vue 3.4.38、Vite 5.4.8、Pinia 2.1.7、Vue Router 4.4.5、ECharts 5.5.1、Three.js 0.160.1和\texttt{@vitejs/plugin-vue} 5.2.3；后端\texttt{pom.xml}锁定Java 17、Spring Boot 3.2.10，应用版本为0.1.0；Compose 使用\texttt{postgis/postgis:16-3.4}、\texttt{redis:7.2-alpine}和Bitnami Kafka 3.7。Python生成脚本只使用标准库，建议Python 3.11或更高版本；若操作系统或CPU架构不同，应在提交问题时同时附上版本输出和启动日志。
+\paragraph{环境版本基线。}为避免“在我的电脑上可以运行”的差异，建议按表\ref{tab:preface-companion-versions}的主线配置准备环境；补丁版本可以在同一大版本内更新，但不得跨越书中API假设。仓库快照中前端实际锁定Vue 3.4.38、Vite 5.4.8、Pinia 2.1.7、Vue Router 4.4.5、ECharts 5.5.1、Three.js 0.160.1和\texttt{@vitejs/plugin-vue} 5.2.3；后端\texttt{pom.xml}锁定Java 17、Spring Boot 3.2.10，应用版本为0.1.0；Compose 使用\texttt{postgis/postgis:16-3.4}、\texttt{redis:7.2-alpine}和Bitnami Kafka 3.7。Python生成脚本只使用标准库，建议Python 3.11或更高版本；若操作系统或CPU架构不同，应在提交问题时同时附上版本输出和启动日志。
 
 \begin{table}[htbp]
 \centering
@@ -153,13 +153,13 @@ Issues反馈渠道 & 勘误、环境问题和可复现实验报告 & 在配套�
 \end{tabular}
 \end{table}
 
-\textbf{答案与勘误。}附录A的编辑源文件是\texttt{appendix/appendixA.md}，随主文档编译的答案入口是\texttt{output/appendix/answers.tex}，在 PDF 中以“附录A 习题参考答案”出现。它按章节和题号提供客观题答案、简答题评分要点、实践题验收清单与延伸阅读；建议先独立完成并保存运行日志，再按题号检索评分证据，不直接复制完整项目。发现错别字、公式编号、代码环境或数据字段问题时，请在配套仓库Issues提交；注明书名、章节、页码、资源提交号、环境版本和最小复现步骤。每条勘误在确认后记录处理状态，读者可据此区分已修复问题与个人环境差异。
+\paragraph{答案与勘误。}附录A的编辑源文件是\texttt{appendix/appendixA.md}，随主文档编译的答案入口是\texttt{output/appendix/answers.tex}，在 PDF 中以“附录A 习题参考答案”出现。它按章节和题号提供客观题答案、简答题评分要点、实践题验收清单与延伸阅读；建议先独立完成并保存运行日志，再按题号检索评分证据，不直接复制完整项目。发现错别字、公式编号、代码环境或数据字段问题时，请在配套仓库Issues提交；注明书名、章节、页码、资源提交号、环境版本和最小复现步骤。每条勘误在确认后记录处理状态，读者可据此区分已修复问题与个人环境差异。
 
 \section*{适用对象}
 
-\textbf{本书以水利工程及相关专业高年级本科生为主要读者}，兼顾研究生，以及有志于从事水利信息化、智慧水利平台开发的技术人员。
+\paragraph{本书以水利工程及相关专业高年级本科生为主要读者}，兼顾研究生，以及有志于从事水利信息化、智慧水利平台开发的技术人员。
 
-\textbf{先修知识依赖}：学习本书前，你需要具备以下基础：
+\paragraph{先修知识依赖}：学习本书前，你需要具备以下基础：
 
 \begin{itemize}
 \item 至少学过一门编程语言（C、Python或Java均可）

@@ -279,7 +279,7 @@ function inspectReading(r, rules, previous) {
 const checked = inspectReading(reading, {unit: 'm', min: 130, max: 180}, previous);
 \end{lstlisting}
 
-清单\ref{lst:ch07-quality-check}展示了优先级合并的一个直观实现：缺测先得到missing，单位、范围和时序错误把记录降为suspect并设置拒收标记，其他无法确认但仍可展示的情况也使用suspect。具体工程可根据行业字典把拒收标记映射到后端的无效分支，但对外展示契约仍保持valid、suspect、missing三值，避免第7章和第8章出现两套枚举。必须保留问题数组，便于在详情卡中解释为什么一条记录没有参与打分。质量码在前端只读，修订由后端质量服务完成并通过版本号推送，避免浏览器各自采用不同的阈值。
+清单\ref{lst:ch07-quality-check}展示了优先级合并的一个直观实现：缺测先得到missing，单位、范围和时序错误把记录降为suspect并设置拒收标记，其他无法确认但仍可展示的情况也使用suspect。具体工程可根据行业字典把拒收标记映射到后端的无效分支，但对外展示契约仍保持valid、suspect、missing三值，避免本章和第8章出现两套枚举。必须保留问题数组，便于在详情卡中解释为什么一条记录没有参与打分。质量码在前端只读，修订由后端质量服务完成并通过版本号推送，避免浏览器各自采用不同的阈值。
 
 质量结果还要进入统计口径。日均值、最大值和超阈次数应分别给出“仅valid”“valid+suspect”和“全部到达记录”三种选择，默认统计只使用valid；suspect值可以在趋势图中显示，却不能悄悄混入风险评分。报表页要显示有效率、缺测率、可疑率、迟到率和修订次数，并把分母写清楚。例如某天有288个5\,min格网，若其中24格missing，完整率是264/288，而不是用264个有效点的平均值冒充完整率。跨测项比较时还要统一时间格网和过滤条件，否则水位的288个点与渗压的24个点会产生看似可比、实则分母不同的曲线。质量指标本身也应带时间窗和规则版本，方便在规则调整后复算历史报表。
 
@@ -437,7 +437,7 @@ chart.setOption({
 
 双轴图的验收至少包含三组检查：把雨量全部乘以2后，柱形高度应变化而水位线不应被代码静默改写；把水位单位从米改为厘米后，轴标题和数据转换应同时变化；把某个时刻质量码改为missing后，曲线应断开并在tooltip中提示。若读者仅凭图形无法判断这些变化，说明图例、单位或质量说明仍不完整。
 
-本书以Apache ECharts为图表主线。ECharts最初由百度团队开源，2018年捐赠给Apache软件基金会，2021年从孵化器毕业为顶级项目，现由ASF社区维护并持续发布版本\cite{apacheECharts}。了解这段沿革有助于区分项目起源与当前治理主体。图\ref{fig:chart-technology-selection}划出三者的职责边界：图表库负责二维统计视图，三维引擎负责场景与空间定位，中间由一个联动控制器负责转发选中对象与时间范围。把联动逻辑写进任意一侧，都会让两个库互相依赖，日后替换其中之一时牵连面很大。Chart.js可用于轻量页面，Three.js负责三维场景；二者通过对象标识和时间范围与图表协同。
+本书以Apache ECharts为图表主线。ECharts最初由百度团队开源，2018年捐赠给Apache软件基金会，2021年从孵化器毕业为顶级项目，现由ASF社区维护并持续发布版本\cite{apacheECharts}。了解这段沿革有助于区分项目起源与当前治理主体。图\ref{fig:chart-technology-selection}划出三者的职责边界：图表库负责二维统计视图，三维引擎负责场景与空间定位，中间由一个联动控制器负责转发选中对象与时间范围。把联动逻辑写进任意一侧，都会让两个库互相依赖，日后替换其中之一时牵连面很大。Three.js负责三维场景，图表与场景之间不直接互相调用，选中对象和时间范围一律由联动控制器转发。
 
 \begin{figure}[H]
 \centering
@@ -508,7 +508,7 @@ function appendReading(reading) {
 清单\ref{lst:ch07-chart}把数据缓冲放在\texttt{state.level}中，图表只承担渲染职责，因此加入阈值带、第二条曲线或重新排序时不会依赖\texttt{series[0]}的下标。缺测点明确写成空值并保持\texttt{connectNulls:false}；排序、去重和300点窗口裁剪在应用状态中完成。300点对5\,min水位采样约为25\,h，若查询窗口是固定24小时，应改用时间戳裁剪而不是照搬点数。
 
 \paragraph{内置LTTB与历史浏览}
-第7章前面推导的LTTB可以直接对应到ECharts的\texttt{sampling:'lttb'}。库在折线点数超过像素宽度时按桶保留峰谷，前端只需声明采样策略；原始数据仍保存在后端，统计和质量审计不能使用降采样后的视觉序列。初次加载历史曲线时可同时设置\texttt{sampling:'lttb'}、\texttt{showSymbol:false}和\texttt{progressive}，在不改变业务数值的前提下减少绘制压力。
+本章前面推导的LTTB可以直接对应到ECharts的\texttt{sampling:'lttb'}。库在折线点数超过像素宽度时按桶保留峰谷，前端只需声明采样策略；原始数据仍保存在后端，统计和质量审计不能使用降采样后的视觉序列。初次加载历史曲线时可同时设置\texttt{sampling:'lttb'}、\texttt{showSymbol:false}和\texttt{progressive}，在不改变业务数值的前提下减少绘制压力。
 
 \label{lst:ch07-window-options}
 \begin{lstlisting}[language=JavaScript,breaklines=true,caption={历史曲线的降采样、缩放与阈值带}]
@@ -1197,15 +1197,6 @@ raycaster.params.Points.threshold = pickingRadiusWorld;
 \end{enumerate}
 
 验收记录应包含输入数据版本、浏览器与设备、操作步骤、预期结果、实际结果和截图编号。这样，三维展示不只是一次演示，而是可以复现和回归测试的课程成果。
-
-\paragraph{本章图表导读}
-表\ref{tab:ch7-data-types}把观测类型与合适的视觉编码对应起来；图\ref{fig:data-visualization-process}呈现从清洗、聚合到展示的处理链。
-图\ref{fig:lttb-principle}解释LTTB降采样如何保留峰谷；表\ref{tab:ch7-view-contract}给出前端展示记录的最小契约。
-图\ref{fig:chart-technology-selection}帮助选择图表、三维场景和联动控制器；表\ref{tab:ch7-coordinate-units}列出坐标与单位基准。
-图\ref{fig:lod-cluster}说明监测点LOD与聚合表达；图\ref{fig:ray-picking}则把屏幕坐标转换为场景交点。读者应结合这些图表检查对象编码、时间范围、坐标系和交互反馈是否保持一致。
-
-代码清单\ref{lst:ch07-chart}、\ref{lst:ch07-vue-watch}和\ref{lst:ch07-coordinate-transform}用于数据转换、实时联动和坐标基准。
-代码清单\ref{lst:ch07-lod-points}、\ref{lst:ch07-raycaster}和\ref{lst:ch07-picker}展示大规模测点聚合与射线拾取如何回到业务对象。
 
 \section*{小结}
 

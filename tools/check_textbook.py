@@ -162,7 +162,8 @@ def check_wordcount(texts, r, init):
         import subprocess as _sp
         for f in FILES:
             prev = _sp.run(["git", "show", "HEAD:output/chapters/%s" % f],
-                           cwd=ROOT, capture_output=True, text=True)
+                           cwd=ROOT, capture_output=True, text=True,
+                           encoding="utf-8", errors="replace")
             if prev.returncode:
                 continue
             pc = body_chars(prev.stdout)
@@ -379,7 +380,9 @@ def check_build(r):
             return
         if c[0] == "biber" and p.returncode != 0:
             r.fail("biber 执行失败：%s" % p.stdout.decode("utf-8", "ignore")[-300:])
-    log = read(os.path.join(OUT, "main.log"))
+    with open(os.path.join(OUT, "main.log"), encoding="utf-8",
+              errors="replace") as _f:
+        log = _f.read()
     for pat, name in ((r"^! ", "Error"), (r"Overfull \\hbox", "Overfull hbox"),
                       (r"Overfull \\vbox", "Overfull vbox"),
                       (r"Missing character", "缺字"),

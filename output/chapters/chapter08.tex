@@ -345,7 +345,7 @@ Java 代码约定。原始记录只追加不更新，修订操作产生新版本
 证据快照和可评估标志；工单以预警外键关联，并保存责任角色、时限、动作和回执；模型运行保存输入
 快照、版本、状态和结果。三类表均设置状态检查约束和时间索引，使“待确认预警”“即将到期工单”“近
 期失败运行”成为可解释的查询。对于跨服务事件，事务发件箱记录发布意图，消费者以\texttt{event\_id}
-去重；本节的数据库约束与第8章质量服务共同构成一致性边界。
+去重；本节的数据库约束与本章质量服务共同构成一致性边界。
 
 表\ref{tab:ch08-database-dictionary}给出字段、类型、约束、单位和教学含义的最小字典。实施时可以
 增加字段，但不能改变这些字段的语义；若必须调整类型，应先增加兼容列、完成双写和回填，再切换读路径。
@@ -1993,13 +1993,13 @@ public class MonitoringService {
 }
 \end{lstlisting}
 
-Repository 接口在真实项目中分别保存为独立 Java 文件；清单把它们并列展示，是为了看清查询方法与
+Repository 接口在真实项目中分别保存为独立 Java 文件；清单\ref{lst:ch08-repository}把它们并列展示，是为了看清查询方法与
 实体的对应关系。服务层把质量码默认设为 valid 只是查询筛选的默认值，
 不会改写数据库；当调用方显式查询 suspect 或 missing 时，界面必须展示相应质量提示。
 
 监测主线接口采用稳定路径和明确的请求响应。表\ref{tab:monitoring-api-contract}把测点、观测、预警
 和工单四类接口列成契约，并注明角色和幂等要求。路径中的\texttt{from}、\texttt{to}和\texttt{agg}
-均为查询参数，不改变第8章参数表中的工程常数；分页、排序和质量过滤通过统一请求对象传递。
+均为查询参数，不改变本章8.1节参数表中的工程常数；分页、排序和质量过滤通过统一请求对象传递。
 
 \begin{table}[htbp]
 \centering
@@ -2238,7 +2238,7 @@ class ReadingIngestionService {
 }
 \end{lstlisting}
 
-监听器的消费组名称、Topic 和事件字段属于接口契约，应与 Kafka 管理配置和第8章事件字段保持一致。
+监听器的消费组名称、Topic 和事件字段属于接口契约，应与 Kafka 管理配置和本章事件字段保持一致。
 教材示例使用\texttt{saveAndFlush}让唯一键冲突尽早暴露；生产环境还要配置退避重试、死信 Topic 和
 监控指标。若质量服务需要调用外部系统，先把观测写入数据库，再通过事务发件箱发布事件，避免数据库
 回滚后 Kafka 已经通知下游。
@@ -2525,9 +2525,31 @@ public final class QualityClassificationTest {
 \end{tabular}
 \end{table}
 
-三类入口关系图示把这种共享关系画了出来：三类入口各有界面，但底板、对象编码和事件契约只有一套。如果三个入口各自维护一份工程台账，同一座水库的名称、编码和特征水位很快就会出现三个版本。
+图\ref{fig:twin-portal-sharing}把这种共享关系画了出来：三类入口各有界面，但底板、对象编码和事件契约只有一套。如果三个入口各自维护一份工程台账，同一座水库的名称、编码和特征水位很快就会出现三个版本。
 
-
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=6mm and 6mm,
+  portal/.style={draw=Primary,rounded corners,fill=white,minimum width=3.3cm,
+    minimum height=1.15cm,align=center,font=\scriptsize},
+  shared/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=10.9cm,
+    minimum height=.9cm,align=center,font=\scriptsize},
+  ar/.style={->,draw=Accent,thick}]
+\node[portal] (basin) {流域入口\\防洪形势、区域预警};
+\node[portal,right=of basin] (net) {水网入口\\调水路径、供需平衡};
+\node[portal,right=of net] (proj) {工程入口\\单座工程安全与调度};
+\node[shared,below=14mm of net] (obj) {统一对象编码：工程、测点、闸门、渠段、需水单元};
+\node[shared,below=of obj] (base) {统一数据底板：时空数据、三维模型、元数据与版本};
+\node[shared,below=of base] (evt) {统一事件契约：观测、质量码、预警、方案、回执};
+\draw[ar] (basin) -- (obj);
+\draw[ar] (net) -- (obj);
+\draw[ar] (proj) -- (obj);
+\draw[->,draw=Primary,thick] (obj)--(base);
+\draw[->,draw=Primary,thick] (base)--(evt);
+\end{tikzpicture}
+\caption{流域、水网、工程三类入口共享同一套编码、底板与事件契约}
+\label{fig:twin-portal-sharing}
+\end{figure}
 
 平台建设目标应写成可验收问题，例如“给定降雨情景后生成带版本的洪水过程与淹没结果”“给定目标泄流量后返回可解释的闸门方案并经人工确认”，而不是“打造行业领先数字大脑”。
 
@@ -2605,9 +2627,29 @@ public final class QualityClassificationTest {
 
 结果界面应同时提供三维淹没播放、二维专题图、对象列表和表格导出。三维场景便于理解空间关系，表格便于核对数量和属性；任何一种界面失败时，其他表达仍应支持基本研判。
 
-证据链图示把从情景输入到执行归档的证据串成一条链。这张图主要用于排查：会商结论受到质疑时沿链逐段回放，可以定位分歧究竟出在输入设定、模型版本、空间叠加还是人工判断上。
+图\ref{fig:case-evidence-chain}把从情景输入到执行归档的证据串成一条链。这张图主要用于排查：会商结论受到质疑时沿链逐段回放，可以定位分歧究竟出在输入设定、模型版本、空间叠加还是人工判断上。
 
-
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=4mm and 5mm,
+  ev/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=2.35cm,
+    minimum height=1.25cm,align=center,font=\scriptsize},
+  ar/.style={->,draw=Primary,thick}]
+\node[ev] (in) {情景输入\\降雨、初始水位\\边界条件版本};
+\node[ev,right=of in] (run) {模型运行\\模型与参数版本\\输入快照};
+\node[ev,right=of run] (sp) {空间叠加\\空间版本、阈值\\受影响对象清单};
+\node[ev,right=of sp] (hum) {人工判断\\比较指标、意见\\选择与放弃理由};
+\node[ev,right=of hum] (arch) {执行归档\\方案ID、回执\\有效期与批准人};
+\draw[ar] (in)--(run);
+\draw[ar] (run)--(sp);
+\draw[ar] (sp)--(hum);
+\draw[ar] (hum)--(arch);
+\draw[->,draw=Accent,thick,dashed] (arch.south) -- ++(0,-.6)
+  -- node[below,font=\scriptsize]{结论受质疑时沿链逐段回放} ($(in.south)+(0,-.6)$) -- (in.south);
+\end{tikzpicture}
+\caption{从情景输入到执行归档的证据链及其回放方向}
+\label{fig:case-evidence-chain}
+\end{figure}
 
 \subsection{数字孪生水库矩阵与“四预”}
 
@@ -2761,15 +2803,47 @@ AI助手可以把自然语言转为查询、页面导航和候选任务。例如
 \end{tabular}
 \end{table}
 
-AI会商流程图示把助手放回会商流程中：它位于人与工具之间，负责解析意图并编排调用，但每一条通向执行的路径都要穿过人工审批节点。
+图\ref{fig:ai-consultation-flow}把助手放回会商流程中：它位于人与工具之间，负责解析意图并编排调用，但每一条通向执行的路径都要穿过人工审批节点。
 
-
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=5mm and 6mm,
+  st/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=2.4cm,
+    minimum height=.95cm,align=center,font=\scriptsize},
+  tool/.style={draw=Primary,rounded corners,fill=white,minimum width=2.4cm,
+    minimum height=.7cm,align=center,font=\scriptsize},
+  gate/.style={draw=Accent,rounded corners,fill=Accent!12,minimum width=2.4cm,
+    minimum height=1.0cm,align=center,font=\scriptsize},
+  ar/.style={->,draw=Primary,thick}]
+\node[st] (ask) {用户提问\\工程、时段、目标};
+\node[st,right=of ask] (agent) {助手解析意图\\回显歧义字段\\编排工具调用};
+\node[tool,right=of agent] (t2) {模型运行查询};
+\node[tool,above=of t2] (t1) {观测与质量码查询};
+\node[tool,below=of t2] (t3) {空间叠加与影响};
+\node[st,right=of t2] (cand) {候选结论\\附数据与模型证据};
+\node[gate,below=15mm of cand] (appr) {人工审批\\审批人、权限、有效期};
+\node[st,left=12mm of appr] (exec) {执行与回执\\写入审计};
+\draw[ar] (ask)--(agent);
+\draw[ar] (agent)--(t1);
+\draw[ar] (agent)--(t2);
+\draw[ar] (agent)--(t3);
+\draw[ar] (t1)--(cand);
+\draw[ar] (t2)--(cand);
+\draw[ar] (t3)--(cand);
+\draw[->,draw=Accent,thick] (cand)--(appr);
+\draw[->,draw=Accent,thick] (appr)--node[above,font=\scriptsize]{通过}(exec);
+\draw[->,draw=Accent,thick,dashed] (appr.south) -- ++(0,-.55)
+  -| node[near start,below,font=\scriptsize]{不通过：说明缺什么证据，退回补充} (agent.south);
+\end{tikzpicture}
+\caption{AI会商助手位于人与工具之间，通向执行的每条路径都穿过人工审批}
+\label{fig:ai-consultation-flow}
+\end{figure}
 
 AI输出必须引用数据和模型证据。若工具失败、数据过期或权限不足，助手应明确说明，不得用语言模型猜测填补。语音交互应提供文本回显，关键数字在提交前再次确认。
 
 \subsection{底板与算法解耦、权限与模拟标注}\label{sec:ch08-twin-permission}
 
-本节把第6章\ref{sec:ch06-twin-permission}的安全、权限和降级原则落到案例的数据底板、算法服务和模拟标注，任何高风险动作仍需授权角色确认并保留回滚证据。
+本节把\ref{sec:ch06-twin-permission}节的安全、权限和降级原则落到案例的数据底板、算法服务和模拟标注，任何高风险动作仍需授权角色确认并保留回滚证据。
 
 可复制的平台把空间底板、业务数据、模型算法和应用编排分开。更换洪水模型时，不应重新制作工程模型和用户体系；新增工程时，通过元数据和适配器接入，而不是复制一套源码。
 
@@ -2793,13 +2867,11 @@ AI输出必须引用数据和模型证据。若工具失败、数据过期或权
 
 模拟标注规则规定模拟数据与结果的标注要求。演示环境的水位、流量必须带明确标记，否则截图一旦流出，很容易被当作真实工程结论引用，这类误用发生之后极难澄清。情景输入应标明观测、设定或插值来源与时间；模型结果标明“模拟”、版本和运行时间；推荐方案标明目标、约束、有效期和审批状态；演示数据注明单位和非工程结论；AI输出附工具证据、生成时间和复核状态。
 
-
-
 权限应按对象、操作和场景状态共同判断。例如专业分析员可运行模型但不能批准控制；审批人可批准已复核方案但不能修改模型参数；演示账号不得访问真实工程数据。
 
 \subsection{对象编码、时空基线与孪生状态}\label{sec:ch08-twin-event-quality}
 
-本节把第6章\ref{sec:ch06-twin-event-quality}的事件时间、质量码和状态估计框架落到案例对象编码、时间基线和孪生状态快照，质量不合格的数据沿同一优先级进入隔离或降级流程。
+本节把\ref{sec:ch06-twin-event-quality}节的事件时间、质量码和状态估计框架落到案例对象编码、时间基线和孪生状态快照，质量不合格的数据沿同一优先级进入隔离或降级流程。
 
 数字孪生首先要解决“现实对象、业务记录和三维对象是不是同一个对象”。清源水库为大坝、闸门、测点、摄像机、道路和避险点分配稳定编码；业务表、时序数据、空间要素和三维模型都保存该编码。对象改名不改变编码，对象拆分、合并或退役则形成新的版本关系。
 
@@ -2855,13 +2927,11 @@ AI输出必须引用数据和模型证据。若工具失败、数据过期或权
 
 \subsection{模型任务编排与运行生命周期}\label{sec:ch08-twin-contract}
 
-本节把第6章\ref{sec:ch06-twin-contract}的事件与接口契约落到模型任务编排、输入快照、运行状态和结果回执，任务事件与控制命令分别保留幂等键、审批和审计字段。
+本节把\ref{sec:ch06-twin-contract}节的事件与接口契约落到模型任务编排、输入快照、运行状态和结果回执，任务事件与控制命令分别保留幂等键、审批和审计字段。
 
 模型平台不只是一个“运行”按钮。一次模型任务应经历草稿、校验、排队、运行、完成或失败、复核、发布和归档等状态。每次运行绑定场景版本、输入快照、模型镜像、参数集、算力规格和发起人，因而可以复现，也可以解释为什么两次结果不同。
 
 模型状态规则列出模型任务的各个状态及该状态下允许的动作。状态机的价值恰恰在于禁止某些动作：运行中的任务不允许修改参数，已发布的结果不允许原地覆盖，这些限制正是结果可复现的前提。草稿可编辑和删除，已校验状态检查单位、范围与适用性，排队或运行状态只允许查看日志或授权取消，完成状态核对产物清单与校验和，失败状态记录错误类别与重试次数，已发布状态绑定复核意见、审批人和有效期，归档状态只读查询和复现。
-
-
 
 图\ref{fig:model-run-lifecycle}把这些状态连成受控生命周期，并标出失败与复核两条回路。任务失败不是终点，而应回到校验环节并保留失败原因，否则同一类失败会反复出现却查不到记录。
 
@@ -2957,7 +3027,7 @@ AI输出必须引用数据和模型证据。若工具失败、数据过期或权
 
 \subsection{场景版本、方案比较与不确定性表达}\label{sec:ch08-twin-model-card}
 
-本节把第6章\ref{sec:ch06-twin-model-card}的模型卡框架落到清源水库的场景版本、方案比较和不确定性表达，具体字段与审批证据按案例数据和模型运行记录生成。
+本节把\ref{sec:ch06-twin-model-card}节的模型卡框架落到清源水库的场景版本、方案比较和不确定性表达，具体字段与审批证据按案例数据和模型运行记录生成。
 
 一个场景由输入版本、模型版本、参数集和评价指标共同标识。修改降雨、初始水位或闸门约束都会产生新版本；只改变镜头、图层透明度等显示设置不会产生计算版本。平台用父子关系保存分支，允许从同一基线形成“现状延续”“提前泄洪”“局地强降雨”等方案。
 
@@ -2985,15 +3055,41 @@ AI输出必须引用数据和模型证据。若工具失败、数据过期或权
 
 模型校准与业务验收不是同一件事。校准检查模型能否合理复现历史过程；业务验收检查在当前平台内，输入是否正确、运行是否稳定、结果是否可解释、失败是否可降级、角色是否按权限完成任务。即使历史拟合良好，超出校准范围的极端情景仍应标记为低可信。
 
-方案分支比较图示把场景的分支关系与比较过程画了出来：多个方案从同一基线分出，在统一指标下并排比较，最终由人工选定并留下选择理由。
+图\ref{fig:scenario-branch-compare}把场景的分支关系与比较过程画了出来：多个方案从同一基线分出，在统一指标下并排比较，最终由人工选定并留下选择理由。
 
-
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=6mm and 10mm,
+  base/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=2.6cm,
+    minimum height=1.0cm,align=center,font=\small},
+  plan/.style={draw=Primary,rounded corners,fill=white,minimum width=2.9cm,
+    minimum height=.95cm,align=center,font=\scriptsize},
+  judge/.style={draw=Accent,rounded corners,fill=Accent!10,minimum width=2.9cm,
+    minimum height=1.0cm,align=center,font=\scriptsize},
+  ar/.style={->,draw=Primary,thick}]
+\node[base] (b) {基线场景\\版本 v1};
+\node[plan,right=of b] (p2) {方案B：提前12h预泄\\控泄 900\,m$^3$/s};
+\node[plan,above=of p2] (p1) {方案A：维持现状\\不预泄};
+\node[plan,below=of p2] (p3) {方案C：分级预泄\\控泄 600\,m$^3$/s};
+\node[judge,right=of p2] (cmp) {统一指标并排比较\\最高库水位、下游流量\\淹没面积、预留库容};
+\node[judge,right=of cmp] (pick) {人工选定\\记录选择理由\\与放弃原因};
+\draw[ar] (b)--(p1);
+\draw[ar] (b)--(p2);
+\draw[ar] (b)--(p3);
+\draw[ar] (p1)--(cmp);
+\draw[ar] (p2)--(cmp);
+\draw[ar] (p3)--(cmp);
+\draw[ar] (cmp)--(pick);
+\end{tikzpicture}
+\caption{方案分支从同一基线分出、并排比较到人工选定的过程}
+\label{fig:scenario-branch-compare}
+\end{figure}
 
 会商报告应引用方案ID而非截图中的方案名称。报告至少记录选择理由、放弃其他方案的原因、关键不确定性、有效期和触发重新会商的条件。当降雨实况明显偏离情景、工程状态变化或模型失效时，原结论自动变为“需复核”，但保留历史记录。
 
 \subsection{端到端实现切片与验收脚本}\label{sec:ch08-twin-course}
 
-本节把第6章\ref{sec:ch06-twin-course}的课程迭代路线落到可运行的端到端切片和验收脚本，学生按对象编码、数据契约、模型卡和业务闭环逐轮提交证据。
+本节把\ref{sec:ch06-twin-course}节的课程迭代路线落到可运行的端到端切片和验收脚本，学生按对象编码、数据契约、模型卡和业务闭环逐轮提交证据。
 
 课程实现可选取“自定义降雨—洪水预报—淹没影响—橙色预演—会商归档”作为端到端切片。切片不要求完成整个平台，却必须跨越数据、模型、空间分析、权限、前端和审计，因而能够暴露只做页面或只写算法时看不到的接口问题。
 
@@ -3020,9 +3116,93 @@ AI输出必须引用数据和模型证据。若工具失败、数据过期或权
 
 验收脚本先走正常路径，再注入错误。正常路径验证同一场景ID能贯通页面、日志和报告；错误路径分别注入无单位降雨、过期初始水位、模型超时、损坏栅格、无权限审批和结果过期。每个错误都要观察状态码、用户提示、审计记录和降级页面。断言至少覆盖：缺少单位时不创建任务且定位字段；初始状态过期时显示数据龄期并绑定确认记录；模型超时时无旧模拟结果冒充新结果；产物校验失败时禁止发布；无权限审批时状态不变且不产生控制命令；实况偏离情景时原结论标记需复核但历史仍可查询。
 
-验收断言清单给出验收脚本的关键断言。注意断言不止检查返回值，还要检查用户提示、审计记录和降级页面：一个只验证正常路径返回200的脚本，无法证明系统在异常情况下仍然可用。
+清单\ref{lst:ch08-acceptance-assert}给出验收脚本的关键断言。注意断言不止检查返回值，还要检查用户提示、审计记录和降级页面：一个只验证正常路径返回200的脚本，无法证明系统在异常情况下仍然可用。
 
+\label{lst:ch08-acceptance-assert}
+\begin{lstlisting}[language=Java,caption={端到端切片的验收断言}]
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@AutoConfigureMockMvc
+class ScenarioSliceAcceptanceTest {
 
+    @Autowired MockMvc mvc;
+    @Autowired AuditLogRepository auditLogs;
+
+    /** 正常路径：同一 scenarioId 必须贯通场景、模型任务与报告。 */
+    @Test
+    @WithMockUser(username = "analyst01", roles = {"ANALYST"})
+    void normalPathKeepsOneScenarioIdAcrossTheWholeSlice() throws Exception {
+        String scenarioId = JsonPath.read(
+            mvc.perform(post("/api/scenarios")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(payload("rain-200mm-24h.json")))
+               .andExpect(status().isCreated())
+               .andReturn().getResponse().getContentAsString(), "$.scenarioId");
+
+        String runId = JsonPath.read(
+            mvc.perform(post("/api/model-runs")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("{\"scenarioId\":\"" + scenarioId + "\"}"))
+               .andExpect(status().isAccepted())
+               .andReturn().getResponse().getContentAsString(), "$.runId");
+
+        // 产物必须带模型版本与校验和，否则结果无法追溯
+        mvc.perform(get("/api/model-runs/{id}/artifacts", runId))
+           .andExpect(status().isOk())
+           .andExpect(jsonPath("$.modelVersion").isNotEmpty())
+           .andExpect(jsonPath("$.checksum").isNotEmpty())
+           .andExpect(jsonPath("$.scenarioId").value(scenarioId));
+
+        // 报告引用方案ID而不是方案名称
+        mvc.perform(post("/api/reports")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"scenarioId\":\"" + scenarioId + "\"}"))
+           .andExpect(status().isCreated())
+           .andExpect(jsonPath("$.references[0].scenarioId").value(scenarioId));
+
+        // 断言三：审计记录必须落库，且能按 scenarioId 检索
+        assertThat(auditLogs.findByBusinessKey(scenarioId))
+            .as("端到端切片的每一步都要留下审计记录")
+            .hasSizeGreaterThanOrEqualTo(4);
+    }
+
+    /** 错误路径：缺单位的降雨必须被拒绝，并给出可读提示而不是 500。 */
+    @Test
+    @WithMockUser(username = "analyst01", roles = {"ANALYST"})
+    void rainfallWithoutUnitIsRejectedWithReadableMessage() throws Exception {
+        mvc.perform(post("/api/scenarios")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(payload("rain-missing-unit.json")))
+           .andExpect(status().isBadRequest())
+           .andExpect(jsonPath("$.code").value("INPUT_UNIT_MISSING"))
+           .andExpect(jsonPath("$.message").value(containsString("降雨量缺少单位")))
+           .andExpect(jsonPath("$.field").value("rainfall.unit"));
+    }
+
+    /** 错误路径：模型超时后页面必须降级为“未评估”，不得给出颜色结论。 */
+    @Test
+    @WithMockUser(username = "duty01", roles = {"DUTY"})
+    void modelTimeoutDegradesToNotAssessedInsteadOfAColor() throws Exception {
+        mvc.perform(get("/api/scenarios/{id}/summary", timedOutScenarioId()))
+           .andExpect(status().isOk())
+           .andExpect(jsonPath("$.classification").value("NOT_ASSESSED"))
+           .andExpect(jsonPath("$.warningLevel").doesNotExist())
+           .andExpect(jsonPath("$.degradedReason").value("MODEL_RUN_TIMEOUT"));
+    }
+
+    /** 错误路径：值班员无权发布方案，拒绝后仍要留审计。 */
+    @Test
+    @WithMockUser(username = "duty01", roles = {"DUTY"})
+    void dutyOfficerCannotPublishPlanButTheAttemptIsAudited() throws Exception {
+        mvc.perform(post("/api/reviews/{id}/publish", pendingReviewId()))
+           .andExpect(status().isForbidden())
+           .andExpect(jsonPath("$.code").value("ROLE_NOT_ALLOWED"));
+
+        assertThat(auditLogs.findByActionAndResult("REVIEW_PUBLISH", "DENIED"))
+            .as("被拒绝的高风险操作同样要留下审计")
+            .isNotEmpty();
+    }
+}
+\end{lstlisting}
 
 最终由不同角色共同演示：场景编辑者准备输入，模型运行者启动计算，专业分析员比较结果，审批人确认方案，值班员查看执行回执。任何一人都不能独自完成从改参数到下发控制的全链路。教师依据接口契约、失败证据和审计记录评分，而不是依据固定演示路径是否顺利播放。
 
@@ -3053,15 +3233,38 @@ $T+60$ min & 比较预测与实况并复核 & 专业分析员 & 偏差、结论�
 
 交接班不能只说“系统正常”。交班人应确认当前预警、未闭环工单、正在运行的模型任务、已批准方案及其有效期、失效服务、数据龄期和待复核结论；接班人逐项确认并签署。若方案将在下一班次到期，平台应在交接页面突出提示，避免把过期建议继续当作当前方案。
 
-交接班流程图示把交接班要覆盖的四类内容画在一起：当前态势、未闭环任务、已批准方案及其有效期、失效服务与数据龄期。其中方案有效期最容易被漏掉——一份昨夜批准、今晨已经过期的调度建议，若没有在交接页面上突出提示，很可能被接班人继续当作当前方案执行。
+图\ref{fig:shift-handover-flow}把交接班要覆盖的四类内容画在一起：当前态势、未闭环任务、已批准方案及其有效期、失效服务与数据龄期。其中方案有效期最容易被漏掉——一份昨夜批准、今晨已经过期的调度建议，若没有在交接页面上突出提示，很可能被接班人继续当作当前方案执行。
 
-
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=5mm and 7mm,
+  item/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=5.0cm,
+    minimum height=1.15cm,align=center,font=\scriptsize},
+  warn/.style={draw=Accent,rounded corners,fill=Accent!12,minimum width=5.0cm,
+    minimum height=1.15cm,align=center,font=\scriptsize},
+  sign/.style={draw=Primary,rounded corners,fill=white,minimum width=10.7cm,
+    minimum height=.9cm,align=center,font=\scriptsize},
+  ar/.style={->,draw=Primary,thick}]
+\node[item] (a) {当前态势\\水位、雨情、预警等级与趋势};
+\node[item,right=of a] (b) {未闭环任务\\待确认告警、在办工单、责任人};
+\node[warn,below=of a] (c) {已批准方案及有效期\\过期方案必须显式标红};
+\node[item,below=of b] (d) {失效服务与数据龄期\\离线测点、积压消息、最后更新时刻};
+\coordinate (mid) at ($(c)!0.5!(d)$);
+\node[sign,below=6mm of mid] (sig) {交班人与接班人双签，异常项转为交接工单并写入审计};
+\draw[ar] (a)--(c);
+\draw[ar] (b)--(d);
+\draw[ar] (c) -- (sig);
+\draw[ar] (d) -- (sig);
+\end{tikzpicture}
+\caption{值守交接班必须覆盖的四类内容与双签确认}
+\label{fig:shift-handover-flow}
+\end{figure}
 
 事件结束后，复盘把预报与实况、建议与执行、计划与回执逐项对齐。偏差可能来自输入、模型、参数、工程状态、操作延迟或组织协同，不能把所有偏差都归因于算法。复盘产生模型校准任务、数据治理工单、预案修订和培训改进，并指定责任人与完成时限。
 
 \subsection{失效降级、验收与课程实现}\label{sec:ch08-twin-acceptance}
 
-本节把第6章\ref{sec:ch06-twin-acceptance}的六类验收框架落到案例的失效降级、阶段门禁和课程实现；端到端切片与脚本按同一组输入快照和追踪号复核。
+本节把\ref{sec:ch06-twin-acceptance}节的六类验收框架落到案例的失效降级、阶段门禁和课程实现；端到端切片与脚本按同一组输入快照和追踪号复核。
 
 数字孪生平台失败时必须保留基本监测能力。模型服务不可用时仍展示经质检的实时数据；三维场景失败时降级到二维地图和表格；AI助手不可用时保留手工查询和会商；网络中断时边缘缓存并标记数据龄期。
 
@@ -3086,9 +3289,25 @@ AI工具调用失败 & 明确失败并回到手工流程 & 错误信息与人工
 
 课程项目可分六次迭代：需求与对象编码、数据契约、三维底座、监测预警、数字孪生预演、部署验收。每次迭代都提交可执行用例，避免到期末才拼接无法联调的页面。
 
-课程迭代清单把课程项目拆成六次迭代并给出每次的可执行用例。这样安排是为了让联调风险前移：第三次迭代结束时三维底座就要能加载真实测点，而不是等到期末才发现坐标对不上。六次迭代依次交付需求与对象编码、数据与事件契约、三维场景与状态联动、预警和工单闭环、预演或闸门方案、部署降级与验收；每次都提交边界一致性、单位时间质量码、坐标定位、权限审计、模型卡证据或失败可降级的可执行用例。
+表\ref{tab:ch08-course-iterations}把课程项目拆成六次迭代并给出每次的可执行用例。这样安排是为了让联调风险前移：第三次迭代结束时三维底座就要能加载真实测点，而不是等到期末才发现坐标对不上。六次迭代依次交付需求与对象编码、数据与事件契约、三维场景与状态联动、预警和工单闭环、预演或闸门方案、部署降级与验收；每次都提交边界一致性、单位时间质量码、坐标定位、权限审计、模型卡证据或失败可降级的可执行用例。
 
-
+\begin{table}[htbp]
+\centering
+\caption{课程项目六次迭代的交付物与可执行用例}
+\label{tab:ch08-course-iterations}
+\begin{tabular}{p{1.5cm}p{5.0cm}p{6.2cm}}
+\toprule
+迭代 & 交付物 & 必须通过的可执行用例 \\
+\midrule
+第1次 & 需求说明与对象编码规则 & 同一工程在三个界面上的名称、编码与特征水位完全一致 \\
+第2次 & 数据契约与事件契约 & 一条观测带单位、时间、质量码入库，并产生一条可订阅事件 \\
+第3次 & 三维场景与状态联动 & 加载真实测点坐标，点击曲线异常点后相机定位到同一\texttt{assetId} \\
+第4次 & 预警评估与工单闭环 & 黄色预警生成工单，值班员确认后回执可追溯到原始读数 \\
+第5次 & 预演或闸门方案 & 模型运行留下模型卡、输入快照与人工确认记录 \\
+第6次 & 部署、降级与验收 & 模型超时时页面显示“未评估”，无权限操作被拒绝且留审计 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 最终演示至少包含正常监测、质量异常、黄色预警、橙色预演、模型失败和无权限操作六类场景。评价重点是链路是否可追溯、失败是否诚实可见、角色是否越权，而不是三维效果是否“炫酷”。
 
@@ -3241,7 +3460,7 @@ Kafka 重放和定时补传都可能造成重复事件。服务端以 \texttt{ev
 
 \subsection{可观测性、备份与恢复}\label{sec:ch08-twin-lineage}
 
-本节把第6章\ref{sec:ch06-twin-lineage}的可观测性、血缘和值守框架落到案例的备份、恢复、交接和复盘，恢复判断同时检查服务、数据、模型和业务闭环。
+本节把\ref{sec:ch06-twin-lineage}节的可观测性、血缘和值守框架落到案例的备份、恢复、交接和复盘，恢复判断同时检查服务、数据、模型和业务闭环。
 
 恢复演练按“冻结—恢复—只读核验—重放—放开写入—复盘”推进，而不是只检查备份文件是否存在。图\ref{fig:recovery-rehearsal-timeline}用时间轴标出每个阶段的责任人与放行条件，学生可据此填写一次可复核的演练记录。
 \begin{figure}[H]
@@ -3264,6 +3483,8 @@ Kafka 重放和定时补传都可能造成重复事件。服务端以 \texttt{ev
 
 \subsection{阶段验收}
 
+案例做到什么程度算完成，需要在动手之前就写清楚。表\ref{tab:chapter8-acceptance}把需求、架构、数据、三维、预警、孪生和运维七个阶段各自要回答的问题与必须交出的证据并列。这张表的用法是自查而不是打分：每一行的「证据」列如果拿不出对应文件，说明那个阶段并未真正通过，无论页面看起来多完整。
+
 \begin{table}[htbp]
 \centering
 \caption{第8章案例的阶段验收}
@@ -3284,26 +3505,6 @@ Kafka 重放和定时补传都可能造成重复事件。服务端以 \texttt{ev
 \end{table}
 
 最小可运行版本不要求实现所有模型，但必须完成一条真实可操作链：PZ-07观测进入平台，经质量检查触发黄色预警，值班员确认并创建工单，三维场景定位测点，处置结果回写并归档。数字孪生扩展至少完成一个带模型卡、场景版本和人工确认的预演任务。
-
-\paragraph{本章图表导读}
-表\ref{tab:case-parameters}集中给出清源水库教学参数；表\ref{tab:case-roles}说明值班员、专业分析员、审批人和运维员的权限边界。
-图\ref{fig:smart-water-monitoring-architecture}展示安全监测业务闭环；图\ref{fig:case-layered-architecture}展示统一技术架构。
-表\ref{tab:three-cesium-selection}比较Three.js与Cesium的适用范围；表\ref{tab:case-core-data}定义核心对象字段。
-图\ref{fig:monitoring-data-pipeline}串起接入、质量检查和展示；表\ref{tab:warning-levels}给出预警等级。
-图\ref{fig:warning-workorder-flow}说明预警进入工单的状态流转；本节数字孪生案例的边界见第\ref{sec:digital-twin-case}节。
-表\ref{tab:twin-three-portals}和三类入口关系图示区分流域、水网、工程三类入口与共享底板。
-表\ref{tab:typhoon-scenario-contract}、图\ref{fig:typhoon-simulation-chain}和表\ref{tab:inundation-evidence}分别描述预演契约、计算反馈和淹没证据。
-证据链图示展示从情景输入到执行归档的证据链；表\ref{tab:monitoring-four-pre}与图\ref{fig:four-pre-loop}解释监测平台与“四预”能力的差异及闭环。
-表\ref{tab:gate-algorithm-contract}和图\ref{fig:gate-simulation-flow}落实闸门调度的接口与流程；表\ref{tab:warning-rehearsal}说明不同预警等级的预演关注点。
-表\ref{tab:ai-assistant-boundary}、AI会商流程图示界定AI会商助手的请求、证据和人工审批边界。
-图\ref{fig:twin-decoupling}、模拟标注规则和表\ref{tab:twin-object-state}分别说明解耦分层、模拟数据标注以及对象身份状态。
-图\ref{fig:twin-state-separation}区分观测、场景快照和推演状态；模型状态规则与图\ref{fig:model-run-lifecycle}约束模型任务生命周期。
-表\ref{tab:water-network-dispatch}、图\ref{fig:water-network-graph}表达水网联合调度的网络输入与约束。
-表\ref{tab:scenario-comparison}、方案分支比较图示用于比较方案分支；表\ref{tab:end-to-end-slice}和验收断言清单把端到端切片连接到验收断言。
-表\ref{tab:consultation-timeline}与交接班流程图示记录会商时间线和值守交接；表\ref{tab:twin-failure-acceptance}和课程迭代清单分别用于失效降级验收与课程迭代。
-图\ref{fig:system-deployment-architecture}和表\ref{tab:chapter8-acceptance}收束部署架构与阶段验收。
-
-代码清单\ref{lst:ch08-glsl}说明三维水面效果如何作为表现层；代码清单\ref{lst:ch08-quality-java}和\ref{lst:ch08-classification-test}把质量码合并、预警分类和单元测试固定为可执行契约，便于将本章表格中的业务规则落实到服务端。
 
 \section*{小结}
 
