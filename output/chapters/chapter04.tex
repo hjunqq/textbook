@@ -677,6 +677,77 @@ CSS 自定义属性是运行时可继承的设计令牌。主题色、背景色�
 
 Flexbox 和 Grid 的选择、断点的推导、大屏的缩放策略以及暗色主题都应通过可观察的验收条件闭环。先用窄屏和键盘完成基本任务，再逐步扩展到 1920、2560 和 3840 的画布；检查每个断点是否保留水位、预警和时间信息，检查图表是否保持纵横比，检查按钮是否仍有足够命中区，最后切换暗色和高对比度模式。这样，响应式 CSS 服务的是数据优先级和操作路径，而不是单纯追求某一张截图与设计稿完全重合。
 
+\subsection{Flex布局的故障定位与可访问性验收}
+
+前端页面出现“按钮被挤出屏幕”“摘要文字遮住数值”或“窄屏时卡片突然变高”时，先不要随意增加媒体查询。应把问题还原为 Flex 容器和项目的尺寸计算：容器的可用主轴空间等于自身内容盒宽度减去内边距、边框和间隙；项目的基准尺寸由 \texttt{flex-basis} 或自身内容决定；增长和收缩因子再按剩余空间分配。若项目的最小内容尺寸大于分配结果，浏览器会保留最小尺寸，常见表现就是横向溢出。对长测站名、单位文本和操作按钮，通常需要在项目上显式写 \texttt{min-width: 0}，在确实允许截断的地方再配合 \texttt{overflow-wrap} 或省略号。
+
+清单\ref{lst:ch04-a49-flex-debug}把一个可诊断的告警摘要栏拆成三层。外层使用\texttt{display:flex}分配主轴空间，中间摘要允许收缩，右侧操作组再次使用\texttt{display:flex}组织按钮；\texttt{flex: 0 0 auto} 保证确认按钮不被压成不可点击的窄条，\texttt{flex: 1 1 18rem} 则让摘要在宽屏分享空间、窄屏主动换行。读者可以在开发者工具中逐项取消属性，观察“内容最小尺寸”“换行”和“按钮命中区”分别由哪条规则决定。
+
+\label{lst:ch04-a49-flex-debug}
+\begin{lstlisting}[language=CSS,caption={可诊断的告警摘要 Flex 样式}]
+.alert-summary {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .75rem 1rem;
+  padding: .75rem 1rem;
+  border: 1px solid #b0bec5;
+}
+
+.alert-summary__reading {
+  flex: 1 1 18rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.alert-summary__reading strong {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.alert-summary__actions {
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  gap: .5rem;
+}
+
+.alert-summary button {
+  min-block-size: 2.75rem;
+  padding-inline: 1rem;
+}
+
+@media (max-width: 36rem) {
+  .alert-summary { align-items: stretch; }
+  .alert-summary__reading,
+  .alert-summary__actions { flex-basis: 100%; }
+}
+\end{lstlisting}
+
+Flex 的视觉顺序还涉及语义和键盘路径。\texttt{order}只改变绘制顺序，不改变 DOM 顺序、Tab 顺序和屏幕阅读器朗读顺序；如果把“确认”按钮视觉上移到“查看”之前，键盘用户仍会按 DOM 顺序获得焦点，容易产生误操作。因此正确做法是先按业务流程组织 HTML，再用对齐和间隙完成视觉呈现。告警条应为状态摘要使用\texttt{role=status}或明确的标题，为需要立即打断的异常使用\texttt{role=alert}，但不能把每次轮询都变成打断式播报。颜色只作辅助信息，蓝、黄、橙、红之外还应有文字、图标或数值阈值说明。
+
+复杂页面的验收可以分成四个可重复步骤。第一步在 320、768、1280 和联屏宽度下检查主轴是否出现溢出，记录发生溢出的具体项目和计算宽度；第二步用键盘从页面标题移动到筛选、查看、确认和导出，确认焦点环不被\texttt{overflow:hidden}裁切，且视觉顺序与操作顺序一致；第三步把浏览器字号放大到 200\%，检查文字是否被固定高度遮挡；第四步切换高对比度和暗色主题，确认状态不仅由颜色传达。若问题只在某一测站名称出现，优先修复项目的最小尺寸和断词策略，不要把整个页面改成固定宽度。
+
+\begin{table}[htbp]
+\centering
+\caption{Flex布局常见现象与定位路径}
+\label{tab:ch04-flex-diagnostics}
+\begin{tabular}{p{0.24\textwidth}p{0.31\textwidth}p{0.31\textwidth}}
+\toprule
+现象 & 先检查 & 教学结论 \\
+\midrule
+右侧按钮被挤出 & 项目是否有\texttt{min-width:0}、按钮是否为\texttt{flex:0 0 auto} & 先保障操作命中区，再让摘要文本收缩 \\
+窄屏出现横向滚动 & 容器的\texttt{flex-wrap}、长文本断词和固定宽度 & 换行是布局策略，不是异常补丁 \\
+焦点顺序与视觉顺序不一致 & DOM 顺序、\texttt{order}和键盘 Tab 路径 & 语义顺序优先于视觉排列 \\
+放大字号后文字被遮挡 & 固定高度、\texttt{overflow:hidden}和行高 & 组件高度应允许内容增长 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+表\ref{tab:ch04-flex-diagnostics}可作为联调记录模板：每次修改只改变一个影响因素，并在四种视口、两种主题和键盘操作下复测。这样，CSS 调试就从“调到看起来差不多”变成可以由同伴复核的工程过程。
+
 \section{JavaScript基础编程}
 
 现代JavaScript使用\texttt{const}声明不重新赋值的绑定，使用\texttt{let}声明需要变化的绑定。基本类型包括数字、字符串、布尔值、\texttt{null}、\texttt{undefined}、\texttt{bigint}与\texttt{symbol}；对象、数组和函数属于引用类型。
@@ -1128,6 +1199,183 @@ export default defineConfig(({ mode }) => {
 \end{lstlisting}
 
 异步页面的验收可以沿着一条证据链进行：先观察事件循环是否在绘制前合并状态，再用 Promise 状态确认一次请求不会被重复落定；切换测站时查看旧请求是否收到取消信号，模拟 401 和超时确认页面分别跳转登录或给出重试提示；最后在 Vite 开发环境检查\texttt{/api}代理和不同模式的\texttt{import.meta.env}值。这样，JWT 不再只是后端代码中的一段签名逻辑，而是贯穿登录、请求、错误处理和页面反馈的可验证流程。
+
+\subsection{登录到受保护接口的前后端联调闭环}
+
+前端能否显示测站列表，不应只看页面是否出现了加载动画，而要核对一条完整的认证契约。第5章的登录控制器返回访问令牌，令牌至少包含主体、发行者、有效期、令牌类型和权限代码；前端登录页保存访问令牌，\texttt{request.js}在每次受保护请求中注入 Bearer 头，后端的 \texttt{SecurityFilterChain} 和 JWT 过滤器验签后把主体放入安全上下文，控制器再依据方法权限决定是否执行。图\ref{fig:ch04-jwt-integration}把这条链路与失败分支并列画出，调试时可逐段定位是凭据错误、令牌过期、权限不足还是网络转发问题。
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[>=Stealth,thick,node distance=0.55cm and 0.45cm]
+  \tikzset{authstage/.style={draw=Primary,rounded corners=2pt,minimum width=2.2cm,minimum height=.75cm,align=center,fill=PrimaryLight,text=PrimaryDark,font=\scriptsize},
+    fail/.style={draw=Accent,rounded corners=2pt,minimum width=2.2cm,minimum height=.65cm,align=center,fill=white,text=PrimaryDark,font=\scriptsize}}
+  \node[authstage] (login) {Login.vue\\提交凭据};
+  \node[authstage,right=of login] (request) {request.js\\注入 Bearer};
+  \node[authstage,right=of request] (filter) {JWT过滤器\\验签/过期/jti};
+  \node[authstage,right=of filter] (security) {SecurityContext\\权限决策};
+  \node[authstage,right=of security] (api) {Controller\\返回数据};
+  \node[fail,below=of filter] (auth401) {401\\清理令牌并登录};
+  \node[fail,below=of security] (auth403) {403\\显示权限不足};
+  \draw[->,draw=Primary] (login)--(request);
+  \draw[->,draw=Primary] (request)--(filter);
+  \draw[->,draw=Primary] (filter)--(security);
+  \draw[->,draw=Primary] (security)--(api);
+  \draw[->,draw=Accent] (filter) -- node[right,font=\scriptsize]{失效} (auth401);
+  \draw[->,draw=Accent] (security) -- node[right,font=\scriptsize]{无权限} (auth403);
+\end{tikzpicture}
+\caption{前端登录、JWT过滤器与受保护接口的联调链路}
+\label{fig:ch04-jwt-integration}
+\end{figure}
+
+联调第一步是建立最小契约表。登录请求的字段名、成功状态码、令牌字段和失败错误码必须与后端一致；访问测站列表时，前端不能把“没有令牌”和“令牌已过期”都当成空数组；收到 401 要清理本地令牌并保留原始路径，收到 403 则说明身份已经识别但权限不足，应显示明确的无权提示。后端返回 404 时，页面应说明测站不存在；返回 422 或业务校验错误时，应把字段级错误绑定到表单。只有把状态码和界面行为一一对应，值班员才不会通过反复刷新来猜测系统状态。
+
+下面的登录服务只负责调用接口和保存令牌，页面组件负责表单校验与导航。令牌键名必须和请求封装一致；本章前面的示例使用\texttt{token}，因此所有调用方都复用同一常量，避免登录成功却无法访问列表的隐蔽错误。清单\ref{lst:ch04-a49-auth-client}同时展示了 401、403 和网络错误的分流，可在浏览器 Network 面板中逐项模拟。
+
+\label{lst:ch04-a49-auth-client}
+\begin{lstlisting}[language=JavaScript,caption={前端登录与受保护请求的联调客户端}]
+const TOKEN_KEY = 'token';
+
+export async function login(account, password) {
+  const response = await fetch('/api/auth/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    body: JSON.stringify({ account, password })
+  });
+  const body = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    const error = new Error(body.code ?? `HTTP_${response.status}`);
+    error.status = response.status;
+    throw error;
+  }
+  if (typeof body.accessToken !== 'string' || body.accessToken.length < 20) {
+    throw new Error('AUTH_CONTRACT_INVALID');
+  }
+  sessionStorage.setItem(TOKEN_KEY, body.accessToken);
+  return body;
+}
+
+export async function loadStations() {
+  const token = sessionStorage.getItem(TOKEN_KEY);
+  const response = await fetch('/api/stations', {
+    headers: { Accept: 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}) }
+  });
+  if (response.status === 401) {
+    sessionStorage.removeItem(TOKEN_KEY);
+    throw Object.assign(new Error('AUTH_EXPIRED'), { status: 401 });
+  }
+  if (response.status === 403) {
+    throw Object.assign(new Error('FORBIDDEN'), { status: 403 });
+  }
+  if (!response.ok) throw new Error(`HTTP_${response.status}`);
+  return response.json();
+}
+\end{lstlisting}
+
+联调第二步是检查时间和环境。浏览器与服务端时钟相差过大，会让刚签发的令牌立即被判定为尚未生效或已过期；测试环境应记录服务端当前时间、\texttt{iat}、\texttt{exp}和时区，不要直接放宽生产过期校验。Vite 开发代理的目标应指向第5章后端实际端口，生产环境则由网关转发同一\texttt{/api}前缀；若浏览器出现 CORS 错误，先确认请求是否绕过代理，再决定是否配置允许的来源、方法和请求头。允许任意来源并不能解决认证问题，反而会扩大令牌泄露面。
+
+联调第三步是观察重试和登出。网络超时可以重试幂等的 GET，但创建处置单等 POST 必须带业务幂等键，并在服务端确认重复请求的响应语义；401 只触发一次清理和跳转，不能让多个并发请求各自创建登录跳转；登出除了删除浏览器令牌，还应调用后端撤销接口或让短期令牌自然过期，多标签页则通过\texttt{storage}事件同步退出状态。刷新令牌若采用 HttpOnly Cookie，前端不能读取它，只能根据刷新接口结果更新内存中的访问令牌；若采用内存集合保存撤销状态，生产实现还要设置过期时间并监控容量。
+
+\begin{table}[htbp]
+\centering
+\caption{前后端认证联调的证据清单}
+\label{tab:ch04-auth-contract}
+\begin{tabular}{p{0.22\textwidth}p{0.30\textwidth}p{0.34\textwidth}}
+\toprule
+检查点 & 浏览器证据 & 服务端证据 \\
+\midrule
+登录成功 & POST 返回 200，响应含 accessToken，未把密码写入日志 & issuer、subject、type 和 exp 校验通过 \\
+访问列表 & 请求带 Authorization，响应 200 或明确的 401/403 & 过滤器写入 SecurityContext，权限方法给出决策 \\
+令牌过期 & 收到一次 401，令牌被清理并回到原路径 & 记录 jti、失败原因和请求追踪 ID，不记录完整令牌 \\
+网络异常 & 超时显示重试，幂等请求才自动重试 & 网关和应用日志能按追踪 ID 对齐时间线 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+表\ref{tab:ch04-auth-contract}中的每项都应在测试记录中附上请求时间、状态码和脱敏后的响应摘要。这样，前后端联调不依赖“我这边能打开”的口头判断，而是有一组可以重放、可以审计的证据。
+
+\subsection{认证契约测试与故障复盘}
+
+认证联调的难点往往不在“能否登录”，而在多个请求同时发生、页面刷新和网络抖动时是否仍然保持同一套状态语义。测试设计应先画出状态机：匿名、已登录、令牌即将过期、令牌已过期、权限不足和服务不可达是六种不同状态；每种状态都要规定界面文案、是否保留原路径、是否允许重试以及日志中应出现的事件。比如匿名用户访问测站详情，守卫保存\texttt{redirect=/stations/ST-02}并跳转登录；登录成功后只恢复一次导航；如果后端返回 403，则停留在业务页面并显示权限说明，而不是再次跳到登录页。
+
+请求并发时需要防止“竞态覆盖”。用户快速切换两个测站，先发出的请求可能后返回；如果直接把每个响应写入同一个状态变量，旧测站数据就会覆盖新测站。解决方法是给请求附带递增序号或\texttt{AbortController}，只有当前序号仍然有效的响应才能提交。清单\ref{lst:ch04-a49-race-test}用一个最小的加载器演示取消与序号双重保护，代码可在浏览器控制台中替换模拟的\texttt{fetcher}进行测试。
+
+\label{lst:ch04-a49-race-test}
+\begin{lstlisting}[language=JavaScript,caption={切换测站时防止旧请求覆盖新状态}]
+let sequence = 0;
+let controller = null;
+
+export async function loadStation(stationId, fetcher = fetch) {
+  const current = ++sequence;
+  controller?.abort();
+  controller = new AbortController();
+  const response = await fetcher(`/api/stations/${encodeURIComponent(stationId)}`, {
+    headers: { Accept: 'application/json' },
+    signal: controller.signal
+  });
+  if (!response.ok) throw new Error(`HTTP_${response.status}`);
+  const result = await response.json();
+  if (current !== sequence) return { stale: true };
+  return { stale: false, station: result };
+}
+
+export function resetRequests() {
+  sequence += 1;
+  controller?.abort();
+  controller = null;
+}
+\end{lstlisting}
+
+测试这个加载器时，可以让第一个模拟请求延迟 200 毫秒、第二个只延迟 20 毫秒，再快速调用两次函数。预期结果是第二个测站先更新界面，第一个请求要么收到取消异常，要么返回\texttt{stale:true}而被丢弃。登出时调用\texttt{resetRequests()}，可以阻止已经在路上的响应把敏感数据重新写回页面。若采用集中式 Pinia store，应把序号和取消控制器放在动作内部，不要暴露给组件随意修改。
+
+错误提示也要区分可恢复性。401 通常要求重新认证，重试同一个请求没有意义；403 需要改变角色或联系审批人，自动重试只会制造日志噪声；404 应引导用户返回列表或刷新资源目录；409 表示幂等键或版本冲突，应显示“数据已被其他人修改”并提供重新读取；429 要遵守服务端的\texttt{Retry-After}；502、503 和网络超时可以指数退避，但要设置最大次数和总时长。前端不应依据错误文本猜测状态，应该读取稳定的\texttt{code}、\texttt{traceId}和可选字段错误列表。
+
+\begin{table}[htbp]
+\centering
+\caption{认证及接口错误的前端处理矩阵}
+\label{tab:ch04-auth-errors}
+\begin{tabular}{p{0.17\textwidth}p{0.28\textwidth}p{0.38\textwidth}}
+\toprule
+状态 & 业务含义 & 前端动作与验收证据 \\
+\midrule
+401 & 未登录或访问令牌失效 & 清理令牌、保留原路径、只发起一次登录跳转；记录脱敏 traceId \\
+403 & 已识别身份但权限不足 & 停留当前页面，展示所需权限和申请入口；不得循环登录 \\
+404 & 测站或事件不存在 & 显示资源不存在并提供返回列表；不把空对象当作零值 \\
+409 & 版本或幂等键冲突 & 重新读取资源并提示人工确认；保留冲突双方版本号 \\
+429/503 & 限流或服务暂不可用 & 按 Retry-After 或退避重试，超过上限后提供手动重试 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+表\ref{tab:ch04-auth-errors}还可以转化为端到端测试用例。每个用例至少包含初始路由、是否已有令牌、请求次数、最终 URL、页面可见文案和日志关联 ID；对于涉及权限的用例，测试账号的角色要固定并在用例说明中写明。这样，修复一次 401 跳转或 403 提示后，其他页面也能沿同一矩阵回归，而不是只验证当前开发者电脑上的一个按钮。
+
+前后端对字段的兼容要采用“先增加、后切换、再清理”的节奏。后端新增\texttt{qualityFlag}时，可以在一段时间同时返回旧字段和新字段，前端先读取新字段、缺失时回退旧字段，并在日志中统计回退次数；确认所有客户端已经升级后再删除旧字段。删除字段前要检查缓存、导出任务和消息消费者，不能只在 Swagger 页面中看到接口变更就直接发布。日期时间统一使用带时区的 ISO 8601 字符串，数值单位写进字段说明，枚举值变化则由版本化接口或兼容映射处理。
+
+本章的联调案例以清源水库安全监测平台为背景，但验收方法可以迁移到其他水利业务。无论是测站读数、告警处置还是工程巡检，均可沿“输入契约—认证上下文—业务状态—持久化结果—界面反馈”五个问题追踪。发生故障时先用\texttt{traceId}把浏览器 Network、网关访问日志、应用日志和数据库审计串起来，再判断属于前端状态、网络转发、认证授权还是领域规则；不要一看到页面空白就修改 CSS，也不要一看到 401 就延长令牌有效期。可复核的证据链比局部的临时修补更能降低值班系统的运行风险。
+
+跨域配置是联调中最容易被忽略的边界。开发代理把浏览器请求伪装成同源，只能解决开发端口不同的问题；生产环境的允许来源、允许方法、允许请求头和是否允许凭据必须由网关与后端共同约定。带 Authorization 头的请求会触发预检，服务端应正确响应\texttt{OPTIONS}，但不能因为预检通过就跳过真正请求的认证。\texttt{Access-Control-Allow-Origin:*}与带凭据请求不能同时使用，允许来源也应是配置白名单而不是反射任意\texttt{Origin}。发现“浏览器报跨域、curl 正常”时，应分别检查预检响应、实际响应和网关是否丢失认证头。
+
+令牌存储还要与页面威胁模型匹配。\texttt{sessionStorage}便于教学演示和标签页隔离，但同源脚本可以读取它；HttpOnly Cookie 能阻止脚本直接读取令牌，却要求服务端设置 SameSite、Secure 和 CSRF 防护。无论采用哪种方式，都不能把访问令牌放在 URL、页面标题或埋点参数中。浏览器控制台只输出状态码、错误码和追踪 ID，服务端日志对令牌做哈希或只记录 jti。前端构建产物中也不能出现 JWT 签名密钥、数据库连接串和内部网段。
+
+认证性能要从令牌解析、撤销查询和业务查询三个阶段测量。每次请求都访问远程撤销存储会增加延迟，完全不查撤销又无法快速吊销泄露令牌；可按风险把访问令牌设为短期，把 jti 撤销集合缓存到 Redis 并设置与令牌 exp 对齐的过期时间。权限代码应使用稳定枚举，角色展开在服务端完成，前端只用于隐藏不应操作的控件，不能以“按钮不可见”代替后端授权。批量读取测站时，后端还要限制单次资源数量和查询时间窗口，避免一个合法令牌成为高负载接口的放大器。
+
+发布前可以进行一次“故障注入式”验收：把响应状态依次改为 401、403、404、409、429 和 503；把响应延迟设置为 100 毫秒、超时阈值和超时阈值的两倍；将令牌的 exp 调整到过去、将 issuer 改成错误值、删掉 permissions 字段；再让代理返回无效 JSON。每个场景都要记录页面是否可操作、是否产生重复请求、是否保存了原路径、是否有泄露敏感信息和是否生成唯一 traceId。故障注入的目标不是让页面永不出错，而是让错误有边界、有提示、有恢复动作，并且不会把错误状态伪装成正常水位或空告警。
+
+当后端接口需要升级时，先在契约测试中锁定字段类型和枚举取值，再在前端适配层集中处理兼容逻辑。组件不要直接拼接 URL、读取 token 或解释状态码；它们调用经过封装的 API 函数，由适配层把后端错误转换为稳定的领域错误。这样，即使网关把路径从\texttt{/api}迁移到版本化前缀，或后端把分页字段从\texttt{total}扩展为\texttt{totalElements}，页面仍然只需替换一处适配代码。对清源水库这种值班系统，接口的可观测性和可回退性与视觉效果同样重要。
+
+为了让联调结果可复现，还应固定测试数据和时间窗口。每个测站至少准备一条 valid 读数、一条 suspect 读数和一条 missing 读数，分别验证正常展示、可信等级降低和停止打分；告警处置单准备“待确认—已确认—已关闭”三种状态，检查不同角色能执行的动作。测试请求携带固定的\texttt{X-Request-Id}，响应日志保留该值、测站 ID、质量码和耗时，数据库审计记录再补充操作者和事务结果。这样，页面截图只是结果的一部分，真正的验收依据还包括接口报文、日志和持久化状态。
+
+联调完成后要删除调试开关和临时账号，复查构建产物中是否残留测试地址、令牌样本或密码字段。代码评审重点看三处：所有受保护请求是否统一经过请求封装，所有失败分支是否保持稳定错误码，所有涉及权限的后端方法是否有独立测试。只有前端、网关、Spring Security 和数据库审计同时给出一致证据，才可以把“登录到看见数据”判定为闭环完成。
+
+最后应把联调证据归档到版本化测试记录：记录前端构建版本、后端 Git 提交、数据库迁移版本、代理目标和测试账号角色，附上脱敏请求样例及关键日志的 traceId。下一次升级依照同一记录重放，就能判断问题是新代码引入还是环境漂移；对于值班系统，这种可追溯性比临时把页面“调到能显示”更重要。
+
+在课堂练习中，学生可以先用浏览器开发者工具完成状态码和请求头观察，再用后端测试替身注入过期令牌、缺失字段和延迟响应，最后把结果写入联调表。练习评价不只看页面是否出现数据，还要检查是否正确区分认证、授权、网络和业务错误，是否保留了测站上下文，是否遵守令牌和个人信息的脱敏要求。
+
+练习报告还应说明一次失败请求如何从页面回溯到服务端：先记录用户动作和路由，再记录请求方法、路径、状态码、响应错误码和 traceId，最后核对过滤器日志、业务日志与审计表是否指向同一操作者和测站。若链路中任何一段缺失，系统就难以在值班交接时复原现场。
+
+当证据链完整时，团队可以在不复现全部现场的情况下定位问题：状态码说明协议边界，错误码说明领域原因，traceId 串起跨服务时间线，审计记录确认最终写入。前端课程至此不只是“把页面做出来”，而是把可操作、可解释、可审计的界面交付给真正承担值班责任的用户。
+
+在清源水库演练中，值班员先从测站列表打开详情，专业分析员随后提交处置意见，审批人确认后才允许关闭事件。三个角色看到的按钮、请求权限和审计结果必须一致；若任何一个角色在页面上看到可点击操作却收到 403，应回到路由元数据、后端方法授权和角色映射逐层核对。通过这种真实工作流走查，学生能把前端组件、JWT 权限和水利业务责任联系起来。
 
 \section{DOM操作与事件处理}
 

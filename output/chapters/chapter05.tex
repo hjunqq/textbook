@@ -66,7 +66,30 @@ DELETE & 删除资源 & 删除尚未发布的规则 & 是 \\
 
 资源建模先回答“系统管理的对象是什么”。测站是稳定资源，监测读数是按时间追加的子资源，告警处置单是具备状态迁移的业务资源。查询最新读数可以使用\texttt{GET /api/stations/ST-01/readings/latest}，查询时间范围使用\texttt{GET /api/stations/ST-01/readings?from=...\&to=...}；创建一条读数使用\texttt{POST /api/readings}，请求体包含测站 ID、采样时间、数值、单位和质量码。路径表达资源层级，查询参数表达视图条件，业务动作只有在无法用资源状态表达时才使用动词，例如\texttt{POST /api/alerts/AL-01/acknowledge}。
 
-分层依赖方向应从外向内收敛：Controller 依赖 Application Service，Service 依赖领域对象和 Repository 接口，Repository 的具体实现依赖 PostgreSQL、PostGIS 或 TimescaleDB。领域对象不依赖 HTTP、JSON 和 Spring 注解，便于在单元测试中用内存对象验证规则。若把数据库实体直接作为响应体，内部字段、懒加载关系和审计信息可能泄露到外部契约；DTO 映射应在控制器或应用服务边界完成，并为时间、单位和质量码提供稳定格式。
+分层依赖方向应从外向内收敛：Controller 依赖 Application Service，Service 依赖领域对象和 Repository 接口，Repository 的具体实现依赖 PostgreSQL、PostGIS 或 TimescaleDB。领域对象不依赖 HTTP、JSON 和 Spring 注解，便于在单元测试中用内存对象验证规则。若把数据库实体直接作为响应体，内部字段、懒加载关系和审计信息可能泄露到外部契约；DTO 映射应在控制器或应用服务边界完成，并为时间、单位和质量码提供稳定格式。图\ref{fig:ch05-rest-contract}把“请求进入—校验—用例—响应”四个边界与失败返回位置标出，便于把接口测试从状态码断言扩展到字段、事务和审计证据。
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[>=Stealth,thick,node distance=0.52cm and 0.48cm]
+  \tikzset{boundary/.style={draw=Primary,rounded corners=2pt,minimum width=2.15cm,minimum height=.8cm,align=center,fill=PrimaryLight,text=PrimaryDark,font=\scriptsize},
+    error/.style={draw=Accent,rounded corners=2pt,minimum width=2.15cm,minimum height=.65cm,align=center,fill=white,text=PrimaryDark,font=\scriptsize}}
+  \node[boundary] (http) {HTTP请求\\JSON/状态码};
+  \node[boundary,right=of http] (validate) {Controller\\格式校验};
+  \node[boundary,right=of validate] (usecase) {Application\\Service用例};
+  \node[boundary,right=of usecase] (repo) {Repository\\事务与查询};
+  \node[boundary,right=of repo] (dto) {Response DTO\\稳定契约};
+  \node[error,below=of validate] (bad) {400/422\\输入错误};
+  \node[error,below=of usecase] (domain) {404/409\\领域冲突};
+  \draw[->,draw=Primary] (http)--(validate);
+  \draw[->,draw=Primary] (validate)--(usecase);
+  \draw[->,draw=Primary] (usecase)--(repo);
+  \draw[->,draw=Primary] (repo)--(dto);
+  \draw[->,draw=Accent] (validate)--(bad);
+  \draw[->,draw=Accent] (usecase)--(domain);
+\end{tikzpicture}
+\caption{REST接口的契约边界与失败返回}
+\label{fig:ch05-rest-contract}
+\end{figure}
 
 \label{lst:ch05-rest-layer}
 \begin{lstlisting}[language=Java,caption={分层 REST 查询：DTO、服务与仓储接口}]
@@ -1167,6 +1190,31 @@ MockMvc 或 WebTestClient 可以在没有真实网络的情况下验证控制器
 \section{Spring Security 6与JWT}
 
 认证回答“用户是谁”，授权回答“允许做什么”。Spring Security 6使用\texttt{@EnableMethodSecurity}启用方法授权，并采用Lambda DSL配置过滤链。无状态API关闭服务器会话并在JWT过滤器中建立认证上下文。
+
+图\ref{fig:ch05-security-filter}把一次受保护请求经过过滤器链的决策点展开。认证过滤器只负责从 Bearer 令牌得到可信主体和权限，授权规则再决定该主体能否访问具体方法；两者分开后，过期令牌应得到 401，权限不足应得到 403，业务方法不必重复解析令牌。图中的“拒绝”分支还提醒读者：过滤器不能把异常吞掉后继续当作匿名用户执行写操作，审计日志要记录拒绝原因和请求追踪 ID。
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[>=Stealth,thick,node distance=0.5cm and 0.45cm]
+  \tikzset{stage/.style={draw=Primary,rounded corners=2pt,minimum width=2.35cm,minimum height=.78cm,align=center,fill=PrimaryLight,text=PrimaryDark,font=\scriptsize},
+    reject/.style={draw=Accent,rounded corners=2pt,minimum width=2.35cm,minimum height=.68cm,align=center,fill=white,text=PrimaryDark,font=\scriptsize}}
+  \node[stage] (http) {HTTP请求\\Authorization};
+  \node[stage,right=of http] (jwt) {JwtAuthentication\\Filter验签};
+  \node[stage,right=of jwt] (context) {SecurityContext\\主体与权限};
+  \node[stage,right=of context] (method) {方法授权\\@PreAuthorize};
+  \node[stage,right=of method] (service) {业务服务\\事务边界};
+  \node[reject,below=of jwt] (badtoken) {401\\令牌无效/过期};
+  \node[reject,below=of method] (denied) {403\\权限不足};
+  \draw[->,draw=Primary] (http)--(jwt);
+  \draw[->,draw=Primary] (jwt)--(context);
+  \draw[->,draw=Primary] (context)--(method);
+  \draw[->,draw=Primary] (method)--(service);
+  \draw[->,draw=Accent] (jwt)--(badtoken);
+  \draw[->,draw=Accent] (method)--(denied);
+\end{tikzpicture}
+\caption{Spring Security 6 的 JWT 认证与方法授权边界}
+\label{fig:ch05-security-filter}
+\end{figure}
 
 \label{lst:ch05-security-chain}
 \begin{lstlisting}[language=Java,caption={Spring Security过滤链}]
