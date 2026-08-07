@@ -2116,9 +2116,221 @@ Actuator 与日志端点本身也是生产攻击面。只暴露健康和必要�
 复盘结论应同步到发布记录和运维知识库。
 容量评估还应标注数据版本和运行环境，保证不同批次的结果可比较。
 
-\section{Python Web框架（扩展阅读）}
+\section{测试策略与质量门禁}
 
-Flask适合轻量服务和原型，Django提供ORM、管理后台等完整能力，FastAPI适合类型提示驱动的API。技术选择应依据团队能力、生态、性能目标和运维约束。本章不展开Python异步原理，也不将其列入必答题；主线工程仍为Spring Boot。
+测试不是在开发完成后“补一遍请求”，而是把接口契约、事务边界和安全策略转化为可以重复执行的证据。对清源水库安全监测平台而言，测试数据必须带有测站编号、采样时间、质量码和操作者上下文；只验证 HTTP 状态码而不检查质量码和审计字段，仍可能把无效读数送入风险计算。测试报告应记录代码版本、数据库迁移版本、配置 Profile、时区和数据集版本，便于值班员在故障复盘时重现同一条件。
+
+单元测试关注一个类在依赖替身下的决策：例如服务层收到越界水位时是否拒绝写入、重复的幂等键是否返回同一结果、乐观锁冲突是否转换为409。它不启动 Servlet 容器，也不依赖真实网络。集成测试则验证多个边界的协作，包括 Spring MVC 参数绑定、Spring Security 过滤链、JPA 事务和 PostgreSQL 约束；这类测试允许启动应用上下文，但必须明确清理数据。端到端测试再覆盖 Kafka、Redis 或反向代理等外部依赖，数量应少而稳定，不能把所有业务分支都塞进一条慢测试。
+
+服务层的单元测试可以用 Mockito 构造仓储和时钟替身，重点断言“调用了什么”以及“拒绝了什么”。清单\ref{lst:ch05-unit-service-test}给出一个可独立阅读的例子：测试使用固定时钟和明确的质量码，避免依赖当前时间导致偶发失败。异常断言应检查稳定的领域错误码，而不是绑定完整中文消息，这样日志文案调整不会破坏协议测试。
+
+\label{lst:ch05-unit-service-test}
+\begin{lstlisting}[language=Java,caption={服务层单元测试：质量码与幂等决策}]
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.math.BigDecimal;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+class ReadingCommandServiceTest {
+    @Mock private ReadingRepository repository;
+    @Mock private IdempotencyStore idempotencyStore;
+    private ReadingCommandService service;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+        Clock clock = Clock.fixed(Instant.parse("2026-08-07T00:00:00Z"),
+                ZoneOffset.UTC);
+        service = new ReadingCommandService(repository, idempotencyStore, clock);
+    }
+
+    @Test
+    void rejectsMissingQualityReading() {
+        ReadingCommand command = new ReadingCommand("QY-001",
+                new BigDecimal("48.20"), Instant.parse("2026-08-06T23:59:00Z"),
+                "missing", "event-1");
+        assertThatThrownBy(() -> service.save(command))
+                .isInstanceOf(DomainValidationException.class)
+                .hasMessageContaining("QUALITY_NOT_USABLE");
+    }
+
+    @Test
+    void storesValidReadingOnceForAnIdempotencyKey() {
+        ReadingCommand command = new ReadingCommand("QY-001",
+                new BigDecimal("48.20"), Instant.parse("2026-08-06T23:59:00Z"),
+                "valid", "event-2");
+        when(idempotencyStore.claim("event-2")).thenReturn(true);
+        service.save(command);
+        verify(repository).save(any(Reading.class));
+    }
+}
+\end{lstlisting}
+
+接口集成测试使用\texttt{@SpringBootTest}加载真实配置和安全过滤链，再用\texttt{MockMvc}发出 HTTP 请求。测试配置应使用专门的 Profile，令牌签名密钥、数据库 URL 和 Kafka 地址全部由测试环境注入，禁止读取开发机的生产变量。清单\ref{lst:ch05-mockmvc-test}把四种最小场景写成独立测试方法，并验证响应体中的错误码；无权限场景必须真的经过过滤链，不能只调用控制器方法绕过授权。
+
+\label{lst:ch05-mockmvc-test}
+\begin{lstlisting}[language=Java,caption={MockMvc 接口测试：四种基础场景},breaklines=true]
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.http.MediaType;
+import org.springframework.security.test.web.servlet.request.
+        SecurityMockMvcRequestPostProcessors;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.web.servlet.MockMvc;
+
+@SpringBootTest
+@AutoConfigureMockMvc
+@ActiveProfiles("test")
+class ReadingControllerIT {
+    @Autowired private MockMvc mockMvc;
+
+    @Test
+    void returnsLatestReadingForAnAuthorizedUser() throws Exception {
+        mockMvc.perform(get("/api/v1/readings/latest")
+                .param("stationId", "QY-001")
+                .with(SecurityMockMvcRequestPostProcessors.user("analyst")
+                        .roles("ANALYST")))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.stationId").value("QY-001"));
+    }
+
+    @Test
+    void rejectsInvalidParameter() throws Exception {
+        mockMvc.perform(get("/api/v1/readings/latest")
+                .param("stationId", "")
+                .with(SecurityMockMvcRequestPostProcessors.user("analyst")
+                        .roles("ANALYST")))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.errorCode").value("VALIDATION_ERROR"));
+    }
+
+    @Test
+    void rejectsUserWithoutReadPermission() throws Exception {
+        mockMvc.perform(get("/api/v1/readings/latest")
+                .param("stationId", "QY-001")
+                .with(SecurityMockMvcRequestPostProcessors.user("operator")))
+            .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void returnsNotFoundForUnknownStation() throws Exception {
+        mockMvc.perform(get("/api/v1/readings/latest")
+                .param("stationId", "QY-999")
+                .with(SecurityMockMvcRequestPostProcessors.user("analyst")
+                        .roles("ANALYST")))
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.errorCode").value("STATION_NOT_FOUND"));
+    }
+}
+\end{lstlisting}
+
+Testcontainers 用一次性容器提供接近生产版本的 PostgreSQL、Redis 或 Kafka，避免开发机服务残留造成“本地通过、流水线失败”。容器启动后先执行版本化迁移，再插入最小数据集；每个测试用例使用事务回滚或唯一的测试批次 ID 清理数据，不能依赖测试执行顺序。清单\ref{lst:ch05-testcontainers}展示 PostgreSQL 容器与 Spring 测试属性的绑定；CI 应缓存镜像层但不缓存业务数据，容器退出时收集日志和数据库诊断信息。
+
+\label{lst:ch05-testcontainers}
+\begin{lstlisting}[language=Java,caption={Testcontainers：隔离 PostgreSQL 集成环境}]
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+
+@Testcontainers
+@SpringBootTest
+class ReadingRepositoryIT {
+    @Container
+    static final PostgreSQLContainer<?> POSTGRES =
+            new PostgreSQLContainer<>("postgres:16-alpine")
+                    .withDatabaseName("textbook_test")
+                    .withUsername("test")
+                    .withPassword("test");
+
+    @Autowired private ReadingRepository repository;
+
+    @DynamicPropertySource
+    static void databaseProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.url", POSTGRES::getJdbcUrl);
+        registry.add("spring.datasource.username", POSTGRES::getUsername);
+        registry.add("spring.datasource.password", POSTGRES::getPassword);
+        registry.add("spring.jpa.hibernate.ddl-auto", () -> "validate");
+    }
+
+    @AfterEach
+    void cleanTestRows() {
+        repository.deleteByStationIdStartingWith("TEST-");
+    }
+
+    @Test
+    void readsTheSameOrderingAsProduction() {
+        // 先由迁移脚本建立表，再插入 TEST- 前缀的数据并断言游标顺序。
+    }
+}
+\end{lstlisting}
+
+测试数据准备要区分“固定基准数据”和“用例临时数据”。测站元数据、单位和质量码字典属于基准数据，使用版本化 SQL 或\texttt{@Sql}在套件启动时加载，并在测试中只读；读数、告警事件和撤销令牌属于临时数据，使用工厂方法按用例生成，包含明确的事件 ID 和时间窗口。清理应覆盖数据库行、Redis 键、Kafka 测试主题和审计日志，失败时保留失败用例的样本快照而不是静默吞掉异常。对并发测试还应为每个线程分配独立测站或批次，避免清理线程删除另一个用例尚未断言的数据。
+
+四场景覆盖表\ref{tab:ch05-test-scenarios}把题目要求落实到测试层次。正常场景验证业务结果和审计字段；参数错误验证字段级错误码以及不产生副作用；无权限验证401/403与敏感字段不泄露；资源不存在验证404并确认没有创建缓存或事件。每个新增接口都至少登记一行覆盖矩阵，变更权限、质量码或事务边界时重新执行全表，而不是只运行“绿色”的正常用例。
+
+\begin{table}[htbp]
+\centering
+\caption{读数接口四场景测试覆盖}
+\label{tab:ch05-test-scenarios}
+\begin{tabular}{p{0.16\textwidth}p{0.22\textwidth}p{0.28\textwidth}p{0.22\textwidth}}
+\hline
+场景 & 测试层次 & 关键断言 & 数据与清理 \\
+\hline
+正常 & MockMvc + Repository & 200/201、质量码、审计人、事件 ID & 使用 TEST- 测站，事务后删除 \\
+参数错误 & Controller 单元 + MockMvc & 400、字段级错误码、仓储未被调用 & 不写数据库，不写缓存或发件箱 \\
+无权限 & Spring Security 集成 & 未认证为401，缺少角色为403，响应不含令牌细节 & 使用短期测试主体，测试后撤销 \\
+资源不存在 & Service + MockMvc & 404、稳定的 NOT\_FOUND 错误码、无副作用 & 读取不存在 ID，确认无缓存键和事件 \\
+\hline
+\end{tabular}
+\end{table}
+
+测试运行顺序应由构建工具统一管理，并行执行时隔离数据库 Schema 或测试批次。失败重试只能用于标记为瞬态的基础设施错误，业务断言失败不得自动重试掩盖缺陷。覆盖率数字只是信号：一段错误的权限判断可以被“执行过”却没有被有效断言。发布门禁至少包括编译、迁移、单元测试、集成测试、静态检查和关键接口的契约测试；长时间的 Testcontainers 套件可放在合并分支，但每次提交仍运行快速的 MockMvc 和服务单元测试。
+
+测试的输出还应能回答“哪一条证据证明这次变更安全”。每个失败用例保存请求摘要、用户角色、traceId、迁移版本和相关事件 ID；密码、JWT、连接串和完整测站坐标等敏感字段在报告中脱敏。接口契约测试把路径、方法、必填字段、响应状态和错误码固化为版本化文件，前后端在合并前共同校验，避免只改了 DTO 就悄悄改变客户端可见结构。数据库迁移测试先在空库执行全部版本，再从最近生产快照升级，分别检查索引、约束、TimescaleDB 超表和回滚脚本。
+
+质量码和预警判定需要专门的性质测试。对同一事件重复投递，业务状态只能改变一次；对时间逆序或缺测记录，系统必须写入相应质量码，并且不可进入风险打分；当数据恢复为 valid 时，后续事件可以重新评估，但不能修改已经归档的原始值。可以用参数化测试生成边界水位、边界时间和四种权限组合，再用随机顺序检验幂等性与事务隔离。这样测试关注的是协议性质，而不是某个偶然样本的输出。
+
+上线前的回归清单按风险排序：先跑认证和撤销，再跑质量码、事务和消息幂等，最后跑报表与大范围分页。任何一个关键套件失败都阻断发布；非关键外部依赖不可用时，测试应验证受控降级和明确的503，而不是把异常吞掉后返回空数组。值班员看到的告警必须能反查到失败测试、发布版本和责任人，修复后再用同一数据集重跑，形成“发现—定位—修复—复验”的闭环。
+
+\begin{tipbox}
+\textbf{选学：Python Web 框架的场景化比较。} 主线后端采用 Spring Boot；若读者在数据分析服务中遇到 Python，可用表\ref{tab:ch05-python-frameworks}建立边界意识。这里比较的是适用场景、生态与部署约束，不构成对某一框架的统一推荐，也不替代本章 Java 示例。
+\end{tipbox}
+
+\begin{table}[htbp]
+\centering
+\caption{Python Web 框架的场景、生态与部署约束}
+\label{tab:ch05-python-frameworks}
+\begin{tabular}{p{0.18\textwidth}p{0.30\textwidth}p{0.36\textwidth}}
+\hline
+框架 & 适用场景与生态 & 部署约束 \\
+\hline
+Flask & 轻量 API、数据处理微服务；扩展生态可按需组合，团队需自行约定目录、认证与错误格式。 & 需要明确 WSGI/ASGI 服务器、配置加载、迁移、监控和安全扩展；依赖越多，升级责任越集中在项目团队。 \\
+Django & 需要管理后台、成熟 ORM 和约定式项目结构的既有系统；生态覆盖认证、后台与迁移。 & 运行时组件较完整，部署需管理静态资源、数据库迁移和进程模型；若只提供小型 API，需评估框架边界。 \\
+FastAPI & 类型提示驱动的 API、异步 I/O 或需要自动 OpenAPI 文档的服务；适合与 Python 数据处理库衔接。 & 以 ASGI 服务器、异步依赖和类型校验为基础；阻塞式科学计算必须移入任务队列或线程池，并补齐认证、限流和观测。 \\
+\hline
+\end{tabular}
+\end{table}
 
 \paragraph{后端代码清单导读}
 代码清单\ref{lst:ch05-http}至\ref{lst:ch05-metrics}依次覆盖HTTP语义、应用入口、控制器、实体映射、事务、校验、认证、消息消费、缓存和指标记录；读者应从请求进入控制器开始，沿事务与安全边界追踪到数据访问和异步事件。
@@ -2147,7 +2359,7 @@ Flask适合轻量服务和原型，Django提供ORM、管理后台等完整能力
 \item 解释为什么同Bean事务自调用可能失效，并给出两种改进思路。
 \item 设计测站最新水位查询与监测值写入接口，列出方法、路径和主要状态码。
 \item 比较\texttt{@TransactionalEventListener(AFTER\_COMMIT)}与Kafka监听器的适用范围。
-\item 设计JWT密钥管理和刷新流程，说明如何处理过期刷新令牌与服务端撤销。
+\item 设计JWT密钥管理和刷新流程，说明如何在验证\texttt{type=refresh}、\texttt{issuer}和\texttt{jti}后处理过期刷新令牌，并用 Redis TTL 撤销记录与令牌轮换防止重放。
 
 \item[\textbf{实践题}]
 \item 使用Spring Boot实现本章章末交付物；所有单元测试和接口测试均须包含正常、参数错误、无权限和资源不存在场景。
