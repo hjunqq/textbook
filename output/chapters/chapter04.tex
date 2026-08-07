@@ -1788,7 +1788,66 @@ createApp(App).use(createPinia()).use(router).mount('#app');
 
 \section{Vite工程化与性能优化}
 
-推荐目录按职责组织为\texttt{views/}、\texttt{components/}、\texttt{stores/}、\texttt{router/}和\texttt{api/}。开发阶段使用ESLint、格式化工具和单元测试；生产构建使用\texttt{vite build}生成带内容哈希的静态资源。
+推荐目录按职责组织为\texttt{views/}、\texttt{components/}、\texttt{stores/}、\texttt{router/}和\texttt{api/}。Vite 在开发阶段启动原生 ES 模块服务器，浏览器按需请求被修改的模块，依赖预构建和热更新让反馈很快；生产阶段则从入口出发构建依赖图，执行 Tree Shaking、压缩、资源指纹和代码分割，输出可以被静态服务器缓存的文件。开发服务器的代理、源码地图和错误覆盖层服务于调试，不能直接当成生产部署方案。
+
+路径别名把深层相对路径转换为稳定的业务语义，例如用\texttt{@/}指向\texttt{src/}，用\texttt{@api/}指向接口封装目录。别名必须同时配置在 Vite 和编辑器/类型检查器中，否则构建能通过但 IDE 无法跳转，或者测试环境解析失败。环境变量按模式加载：\texttt{.env}提供公共默认值，\texttt{.env.development}和\texttt{.env.production}覆盖对应模式，只有以\texttt{VITE\_}开头的变量会注入浏览器。令牌密钥、数据库密码和内部服务地址不能写入这类变量，前端只保存公开的 API 前缀和功能开关。
+
+\label{lst:ch04-a48-vite-config}
+\begin{lstlisting}[language=JavaScript,caption={Vite 5 路径别名与 manualChunks 分包}]
+import { defineConfig, loadEnv } from 'vite';
+import vue from '@vitejs/plugin-vue';
+import { fileURLToPath, URL } from 'node:url';
+
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), '');
+  return {
+    plugins: [vue()],
+    resolve: {
+      alias: {
+        '@': fileURLToPath(new URL('./src', import.meta.url)),
+        '@api': fileURLToPath(new URL('./src/api', import.meta.url))
+      }
+    },
+    server: { port: Number(env.VITE_DEV_PORT || 5173), strictPort: true },
+    build: {
+      target: 'es2020', sourcemap: mode !== 'production',
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            'vue-core': ['vue', 'vue-router', 'pinia'],
+            'charts': ['echarts']
+          }
+        }
+      }
+    }
+  };
+});
+\end{lstlisting}
+
+清单\ref{lst:ch04-a48-vite-config}中的\texttt{manualChunks}把变化频率相近的依赖放到同一文件，页面业务代码变化时不会迫使浏览器重新下载 Vue 核心和图表库。分包不是越多越好：每个额外文件都增加请求和调度成本，应该结合首屏性能、缓存命中率和真实网络条件测量。\texttt{loadEnv}用于读取配置并传给 Vite 配置本身，模板代码仍通过\texttt{import.meta.env}读取经过筛选的公开变量。
+
+\label{lst:ch04-a48-env}
+\begin{lstlisting}[language=JavaScript,caption={Vite 多环境变量与 API 客户端}]
+// .env.development
+VITE_API_BASE=/api
+VITE_FEATURE_TIMESERIES=true
+
+// .env.production
+VITE_API_BASE=https://water.example/api
+VITE_FEATURE_TIMESERIES=true
+
+// src/api/client.js
+const baseURL = import.meta.env.VITE_API_BASE;
+export async function getJson(path, options = {}) {
+  const response = await fetch(`${baseURL}${path}`, {
+    ...options, headers: { Accept: 'application/json', ...options.headers }
+  });
+  if (!response.ok) throw new Error(`HTTP_${response.status}`);
+  return response.status === 204 ? null : response.json();
+}
+\end{lstlisting}
+
+环境变量的值会在构建时替换进静态 JavaScript，修改生产服务器上的\texttt{.env}并不会改变已经构建的文件。因此部署流水线应为目标环境重新执行\texttt{vite build --mode production}，或把 API 前缀设计为同源相对路径，由反向代理在运行时转发。构建产物发布前要检查是否意外包含令牌、私钥、内部域名和调试日志，可用字符串扫描和源代码地图访问控制作为门禁。
 
 性能优化应先测量再行动：
 \begin{itemize}
@@ -1799,18 +1858,51 @@ createApp(App).use(createPinia()).use(router).mount('#app');
 \end{itemize}
 
 \label{lst:ch04-js-http}
-\begin{lstlisting}[language=JavaScript,caption={HTTP错误处理封装}]
-// vite.config.js：明确生产构建目标并保留可追踪的分包名称
-import { defineConfig } from 'vite';
-import vue from '@vitejs/plugin-vue';
+\begin{lstlisting}[language=JavaScript,caption={生产构建、体积分析与部署前检查}]
+// package.json scripts
+{
+  "scripts": {
+    "dev": "vite --mode development",
+    "build": "vite build --mode production",
+    "analyze": "vite build --mode production --reportCompressedSize"
+  }
+}
 
-export default defineConfig({
-  plugins: [vue()],
-  build: { target: 'es2020', sourcemap: true }
-});
+// 构建完成后检查 dist/，再交给静态服务器
+// docker compose 中由 nginx 容器挂载 dist/，/api 转发到后端服务
+const required = ['index.html', 'assets'];
+for (const name of required) {
+  if (!existsSync(join('dist', name))) throw new Error(`缺少产物：${name}`);
+}
 \end{lstlisting}
 
-交付前至少验证：主要浏览器中的页面布局、接口失败与空数据状态、路由刷新、权限绕过、移动端触控、构建产物及控制台错误。
+产物体积分析要同时看原始体积和 gzip/brotli 体积，重点关注首屏入口、路由异步块和第三方依赖。若图表库占据大部分首屏，可以把图表页改为动态导入；若某个公共块被所有页面引用，则让它进入稳定的 vendor 分包。分析结果应记录在构建流水线中，超过预算时阻断发布，而不是上线后才凭感觉优化。
+
+\label{lst:ch04-a48-deploy}
+\begin{lstlisting}[language=JavaScript,caption={Vite 产物与 Docker Compose 部署契约}]
+# 构建阶段：在固定 Node 版本中生成 dist/
+docker build --target build -t water-web-build .
+# 运行阶段：静态服务器只读挂载产物，API 由反向代理转发
+docker compose up -d water-web nginx
+
+# nginx 关键规则（伪配置，部署时写入站点配置）
+location /api/ { proxy_pass http://water-api:8080/; }
+location / { try_files $uri $uri/ /index.html; }
+\end{lstlisting}
+
+与 S2 的\texttt{docker-compose}部署呼应时，前端容器只提供静态文件，后端容器负责鉴权和水利接口，反向代理负责同源路径、压缩、缓存头和 SPA 回退。带内容哈希的\texttt{assets/}可以设置长期缓存，\texttt{index.html}使用较短缓存或重新验证，避免用户拿到旧入口而请求已删除的代码块。每次发布保留上一个可用版本，回滚只切换静态目录和镜像标签，不修改监测数据。
+
+开发与生产的验收要覆盖主要浏览器中的布局、接口失败与空数据状态、路由刷新、权限绕过、移动端触控、构建产物、缓存头和控制台错误。流水线还应验证健康检查、API 代理连通性、静态资源 404、SPA 深链接和压缩响应；这些检查把“本机能运行”转化为可重复的发布契约。
+
+构建流水线可以分为依赖安装、静态检查、单元测试、生产构建、产物审计和发布六个阶段。依赖安装使用锁文件并缓存包管理器目录，确保不同执行器得到相同版本；静态检查关注未使用变量、可访问性和路径别名解析；测试阶段至少覆盖路由守卫、筛选计算和请求错误分类。生产构建只接受干净工作区生成的产物，构建日志记录 Node、Vite 和插件版本，出现警告时由负责人判断是否需要升级或建立例外清单。
+
+发布采用不可变目录更安全。每次构建把\texttt{dist/}复制为带提交号的版本目录，生成一份包含入口哈希、资源清单和构建时间的 manifest；反向代理通过符号链接或配置项指向当前版本。切换后先执行首页、登录、测站详情和 API 健康检查，再逐步放量。若发现路由 404、资源加载失败或数据接口异常，切换回上一个 manifest 即可恢复，原版本保留到确认监测业务稳定后再清理。回滚只改变静态文件指向，不删除数据库和时序数据。
+
+SPA 的深链接是部署验收的重点。浏览器直接打开\texttt{/stations/ST-01}时，静态服务器先寻找同名文件，找不到后必须回退到\texttt{index.html}，再由 Vue Router 渲染详情页；\texttt{/api/}则必须优先匹配反向代理规则，不能被 SPA 回退吞掉。缓存头也要分层设置：\texttt{index.html}短缓存并要求重新验证，带内容哈希的脚本和样式长期缓存，地图配置和监测接口依据数据时效使用禁止缓存或短 TTL。部署检查应使用真实浏览器和命令行各验证一次，避免只测服务器状态码。
+
+安全审计包括源代码、产物和运行时三个面。源代码扫描禁止把令牌、私钥和内部密码提交到仓库；产物扫描检查压缩后的 JavaScript 是否残留调试开关、源地图是否公开内部路径；运行时检查 CSP、HTTPS、跨域策略、响应头和错误页面是否泄露堆栈。环境变量的公开前缀不是保密机制，任何进入前端 bundle 的值都应视为公开信息。对水利平台而言，还要记录发布人、构建提交号、镜像摘要和回滚操作，保证出现异常时可以追溯到具体版本。发布说明还应给出变更范围、影响页面、接口兼容性、验证结果和回滚入口，值班员据此可以在交接班时快速判断版本状态。
+
+发布说明同时注明构建时间、版本标签和责任人，便于审计、交接和追踪。
 
 \paragraph{组件生命周期导读}
 图\ref{fig:vue-lifecycle}把创建、挂载、更新和卸载阶段与水利仪表盘的请求、订阅和资源清理对应起来；编写组件时应在卸载阶段取消定时器和事件监听，避免离开页面后仍然更新已失效的测站视图。
