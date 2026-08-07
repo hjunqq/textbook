@@ -429,6 +429,254 @@ CSS 单位应与测量对象和缩放目标相匹配。\texttt{px}适合边框�
 
 盒模型、优先级、单位和定位需要一起调试。先在 Elements 面板确认元素是否处于预期的文档流，再在 Computed 面板核对最终的\texttt{box-sizing}、尺寸和来源，最后用不同字体缩放、窗口宽度和键盘操作验证。对于清源水库安全监测平台的卡片，推荐先确定结构尺寸和层叠边界，再添加颜色与动画；这样即使浏览器禁用动画或值班员放大字体，关键水位、预警等级和更新时间仍然可读。CSS 规则的教学目标不是记住属性清单，而是能够从布局现象反推盒模型、层叠和参照系。
 
+\subsection{Flexbox：一维的告警工具栏}
+
+Flexbox 为一个容器建立主轴和交叉轴。\texttt{flex-direction}决定主轴方向，\texttt{justify-content}在主轴上分配剩余空间，\texttt{align-items}在交叉轴上对齐项目，\texttt{flex-wrap}允许项目换行，\texttt{gap}提供不依赖相邻选择器的间距。项目的\texttt{flex}缩写由增长因子、收缩因子和基准尺寸组成；把\texttt{flex: 1}写在按钮上，表示它可以分享剩余空间，但不等同于“固定等宽”，因为内容最小尺寸和\texttt{min-width}仍会参与计算。
+
+告警工具栏是一维布局的典型场景：左侧放当前测站和筛选条件，中间放状态摘要，右侧放刷新、导出和确认按钮。桌面宽度足够时，项目沿行方向排列；窄屏时让工具栏换行或改为列方向，按钮仍保持可触控的最小高度。工具栏中的文字应允许缩放，不能通过\texttt{white-space: nowrap}把所有控件锁在一行，否则翻译、放大字体和小屏设备都会造成横向滚动。清单\ref{lst:ch04-a43-flex-toolbar}是一个可直接打开的完整页面，演示主轴、交叉轴、换行和状态颜色的配合。
+
+\label{lst:ch04-a43-flex-toolbar}
+\begin{lstlisting}[language=html,caption={告警工具栏 Flex 完整实例}]
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>告警工具栏</title>
+  <style>
+    :root { --normal: #1677ff; --warning: #d46b08; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font: 16px system-ui, sans-serif; }
+    .alert-toolbar {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: .75rem 1rem;
+      padding: .75rem 1rem;
+      border-block-end: 1px solid #d9e2ec;
+    }
+    .alert-toolbar__station { flex: 1 1 12rem; min-width: 10rem; }
+    .alert-toolbar__summary { flex: 2 1 16rem; }
+    .alert-toolbar__actions {
+      display: flex; align-items: center; flex-wrap: wrap; gap: .5rem;
+    }
+    .alert-toolbar button {
+      min-height: 2.75rem; padding: .55em 1em; border: 1px solid #b0bec5;
+      border-radius: .35rem; background: #fff; color: #263238;
+    }
+    .alert-toolbar button.primary {
+      border-color: var(--normal); background: var(--normal); color: #fff;
+    }
+    @media (max-width: 44rem) {
+      .alert-toolbar { align-items: stretch; }
+      .alert-toolbar__station, .alert-toolbar__summary,
+      .alert-toolbar__actions { flex-basis: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <header class="alert-toolbar" aria-label="告警工具栏">
+    <strong class="alert-toolbar__station">清源水库·测站筛选</strong>
+    <span class="alert-toolbar__summary" role="status">当前有 2 条待确认事件</span>
+    <span class="alert-toolbar__actions">
+      <button type="button">刷新</button>
+      <button type="button">导出</button>
+      <button class="primary" type="button">确认事件</button>
+    </span>
+  </header>
+</body>
+</html>
+\end{lstlisting}
+
+阅读清单时要区分容器属性与项目属性。\texttt{display:flex}、\texttt{flex-direction}、\texttt{justify-content}和\texttt{align-items}作用于容器；\texttt{flex-grow}、\texttt{flex-shrink}、\texttt{flex-basis}、\texttt{align-self}和\texttt{order}作用于项目。\texttt{order}会改变视觉顺序，却不会改变 DOM 和屏幕阅读器顺序，除非业务明确允许，否则不要用它来弥补 HTML 结构错误。对于告警操作，DOM 顺序应保持“查看—确认—导出”的逻辑，视觉对齐通过轴属性完成。
+
+\subsection{Grid：二维的监测仪表盘}
+
+Grid 同时管理行和列，适合把侧栏、地图、曲线、告警列表和底部状态栏组合成二维区域。\texttt{grid-template-columns}描述列轨道，\texttt{grid-template-rows}描述行轨道，\texttt{grid-template-areas}用名字表达区域关系；\texttt{minmax()}给出最小和最大轨道尺寸，\texttt{repeat(auto-fit, minmax(...))}能够在可用宽度变化时自动调整卡片列数。与 Flexbox 不同，Grid 的项目可以跨越多行或多列，但内容溢出仍需通过最小尺寸和滚动策略处理。
+
+图\ref{fig:ch04-layout-choice}把两种布局的决策边界画成“轴”与“平面”：工具栏只需要沿一条轴分配空间时用 Flexbox；页面骨架要同时控制行列时用 Grid；Grid 区域内部的按钮组仍可继续使用 Flexbox。混用不是问题，关键是每一层只承担一种几何职责，避免在同一个元素上堆叠互相冲突的定位规则。
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[>=Stealth,thick,node distance=0.7cm and 1.2cm]
+  \tikzset{choice/.style={draw=Primary,rounded corners=2pt,minimum width=3.5cm,minimum height=1.0cm,align=center,fill=PrimaryLight,text=PrimaryDark,font=\small},
+    detail/.style={draw=Accent,rounded corners=2pt,minimum width=3.5cm,minimum height=0.75cm,align=center,fill=white,text=PrimaryDark,font=\small}}
+  \node[choice] (flex) {Flexbox\\一维主轴};
+  \node[choice,right=of flex] (grid) {Grid\\二维行列};
+  \node[detail,below=of flex] (toolbar) {工具栏、按钮组、状态摘要};
+  \node[detail,below=of grid] (dashboard) {侧栏、地图、曲线、告警区};
+  \draw[->,draw=Primary] (flex)--(toolbar);
+  \draw[->,draw=Primary] (grid)--(dashboard);
+  \draw[<->,draw=Accent] (flex.east)--node[above,font=\scriptsize]{按层组合}(grid.west);
+\end{tikzpicture}
+\caption{Flexbox 与 Grid 的布局职责边界}
+\label{fig:ch04-layout-choice}
+\end{figure}
+
+清单\ref{lst:ch04-a43-grid-dashboard}把区域命名、自动列数和最小卡片宽度组合为完整页面。页面在宽屏时显示侧栏、主图区和告警栏，在窄屏时通过媒体查询重新排列区域；HTML 顺序仍然遵循标题、主数据、事件和状态说明的阅读顺序，Grid 只改变视觉布局。
+
+\label{lst:ch04-a43-grid-dashboard}
+\begin{lstlisting}[language=html,caption={监测仪表盘 Grid 完整实例}]
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>监测仪表盘 Grid</title>
+  <style>
+    * { box-sizing: border-box; }
+    .dashboard {
+      display: grid;
+      grid-template-areas:
+        "header header header"
+        "side main alerts"
+        "footer footer footer";
+      grid-template-columns: minmax(12rem, 18rem) minmax(0, 1fr) minmax(14rem, 22rem);
+      grid-template-rows: auto minmax(20rem, 1fr) auto;
+      gap: 1rem;
+      min-height: 100vh;
+      padding: 1rem;
+      background: #f5f9ff;
+    }
+    .dashboard > * { min-width: 0; padding: 1rem; background: #fff; }
+    .dashboard__header { grid-area: header; }
+    .dashboard__side { grid-area: side; }
+    .dashboard__main { grid-area: main; }
+    .dashboard__alerts { grid-area: alerts; }
+    .dashboard__footer { grid-area: footer; }
+    .metric-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+      gap: .75rem;
+    }
+    @media (max-width: 62rem) {
+      .dashboard {
+        grid-template-areas: "header" "main" "alerts" "side" "footer";
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="dashboard">
+    <header class="dashboard__header"><h1>清源水库安全监测</h1></header>
+    <aside class="dashboard__side"><h2>测站</h2><p>站点列表</p></aside>
+    <section class="dashboard__main" aria-labelledby="metrics-title">
+      <h2 id="metrics-title">实时指标</h2>
+      <div class="metric-cards">
+        <article><h3>水位</h3><p>—</p></article>
+        <article><h3>流量</h3><p>—</p></article>
+      </div>
+    </section>
+    <aside class="dashboard__alerts"><h2>预警事件</h2><p>暂无</p></aside>
+    <footer class="dashboard__footer">数据更新时间：—</footer>
+  </main>
+</body>
+</html>
+\end{lstlisting}
+
+\subsection{响应式断点与大屏适配}
+
+媒体查询不是按设备品牌写出的清单，而是当内容无法保持可读和可操作时切换布局。移动优先策略先写单列、可滚动和大触控目标，再用\texttt{min-width}逐步增加列数；桌面优先策略先写宽屏区域，再用\texttt{max-width}收拢内容。对监测平台而言，断点应通过真实数据卡片、表格和按钮的最小宽度推导，而不是直接复制某个手机型号的像素值。一个断点只解决一个可观察问题，例如导航换行、侧栏折叠或图表从并排改为上下排列。
+
+图\ref{fig:ch04-responsive-breakpoints}用内容状态标出三个大屏档位和一个移动档位。1920 宽度可以容纳侧栏、主图和告警栏，2560 与 3840 主要增加留白和信息密度，而不是把同一张卡片无限拉宽；移动端则优先保留水位、预警和更新时间，将次要筛选条件折叠。断点之间采用流式尺寸，避免窗口略微变化就出现跳跃。
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[>=Stealth,thick]
+  \draw[->,draw=Primary] (0,0)--(12,0);
+  \foreach \x/\labeltext/\mode in {0/移动/单列,3.2/1920/三栏,7.0/2560/扩展留白,10.2/3840/多区联屏} {
+    \draw[draw=Primary] (\x,0.12)--(\x,-0.12);
+    \node[align=center,font=\small,text=PrimaryDark] at (\x,0.52) {\labeltext};
+    \node[align=center,font=\scriptsize,text=TextGray] at (\x,-0.48) {\mode};
+  }
+  \node[align=center,font=\small,text=PrimaryDark] at (6,1.15) {同一数据优先级\\随可用空间调整布局密度};
+\end{tikzpicture}
+\caption{监测平台的响应式断点与大屏适配思路}
+\label{fig:ch04-responsive-breakpoints}
+\end{figure}
+
+大屏适配常见两种方案。\texttt{rem}方案以根字号为缩放基准，组件的间距和字体随设计令牌成比例增长，适合不同浏览器窗口和需要清晰文字的值班室；\texttt{transform: scale()}方案把已经排好的固定画布整体缩放，适合必须保持像素坐标一致的演示大屏，但会同时缩放字体、边框和交互命中区，且可能产生模糊或滚动条。生产页面可以用\texttt{rem}和 Grid 做流式布局，再只在特定的只读大屏容器上使用缩放，不能把缩放当成所有终端的通用方案。
+
+清单\ref{lst:ch04-a43-breakpoints}把移动优先、三个宽屏档位和大屏画布对比放在一个样式表中。\texttt{--normal}在按钮和状态徽标中实际使用，避免主题变量成为没有消费者的死代码；\texttt{clamp()}控制字号和间距的上下限，\texttt{aspect-ratio}保证图表容器在重排时不发生高度跳动。
+
+\label{lst:ch04-a43-breakpoints}
+\begin{lstlisting}[language=CSS,caption={移动优先与 1920/2560/3840 大屏断点}]
+:root {
+  --normal: #1677ff;
+  --page-gap: clamp(.75rem, 1vw, 2rem);
+  --content-max: 120rem;
+}
+
+.water-dashboard {
+  width: min(100%, var(--content-max));
+  margin-inline: auto;
+  padding: var(--page-gap);
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--page-gap);
+}
+.water-dashboard__chart { aspect-ratio: 16 / 9; min-height: 16rem; }
+.water-dashboard__normal { color: var(--normal); }
+
+@media (min-width: 120rem) { /* 1920 CSS 像素附近的宽屏 */
+  .water-dashboard { grid-template-columns: 18rem minmax(0, 1fr) 22rem; }
+}
+@media (min-width: 160rem) { /* 2560 CSS 像素附近的宽屏 */
+  .water-dashboard { --page-gap: 2rem; grid-template-columns: 22rem minmax(0, 1fr) 28rem; }
+}
+@media (min-width: 200rem) { /* 3840 CSS 像素附近的联屏 */
+  .water-dashboard { --page-gap: 2.5rem; grid-template-columns: 26rem minmax(0, 1fr) 32rem; }
+}
+\end{lstlisting}
+
+\subsection{CSS 变量与暗色主题}
+
+CSS 自定义属性是运行时可继承的设计令牌。主题色、背景色、文字色、边框色和间距应集中定义在\texttt{:root}或页面容器中，组件通过\texttt{var()}读取；当值班室降低环境亮度时，只需替换一组变量，地图、卡片和表格就能保持同一对比关系。暗色主题不能简单地把白色替换成黑色，还要重新检查文字与背景的对比度、曲线颜色的区分度、预警颜色在暗底上的可见性和焦点环的边界。
+
+用户选择的主题应通过按钮或系统偏好决定，而不是根据业务预警等级自动切换。\texttt{prefers-color-scheme}可作为初始值，用户显式选择后应存储在本地并覆盖系统偏好；主题切换不会改变 DOM 顺序和语义，只改变呈现令牌。对于截图、打印和投影场景，还要提供高对比度的后备色，不能只依靠颜色传递“正常”或“预警”含义。
+
+清单\ref{lst:ch04-a43-dark-theme}给出明暗主题和高对比度状态样式。\texttt{data-theme}由应用状态控制，变量的后备值保证旧浏览器或组件脱离主题容器时仍有可读颜色；\texttt{forced-colors}分支让操作系统的高对比度模式接管边框和文本。将这段样式与 A4-1 的语义页面骨架组合后，键盘、读屏和主题切换可以分别验收。
+
+\label{lst:ch04-a43-dark-theme}
+\begin{lstlisting}[language=CSS,caption={监测页面的明暗主题与高对比度}]
+:root {
+  --surface: #ffffff;
+  --surface-raised: #f5f9ff;
+  --ink: #263238;
+  --border: #b0bec5;
+  --normal: #1565c0;
+  --warning: #d46b08;
+}
+
+[data-theme="dark"] {
+  --surface: #17212b;
+  --surface-raised: #0f151b;
+  --ink: #f5f7fa;
+  --border: #607d8b;
+  --normal: #90caf9;
+  --warning: #ffb74d;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { color-scheme: dark; }
+}
+
+.monitor-panel {
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+.monitor-panel.is-warning {
+  outline: .2rem solid var(--warning);
+}
+@media (forced-colors: active) {
+  .monitor-panel.is-warning { outline: 2px solid CanvasText; }
+}
+\end{lstlisting}
+
+Flexbox 和 Grid 的选择、断点的推导、大屏的缩放策略以及暗色主题都应通过可观察的验收条件闭环。先用窄屏和键盘完成基本任务，再逐步扩展到 1920、2560 和 3840 的画布；检查每个断点是否保留水位、预警和时间信息，检查图表是否保持纵横比，检查按钮是否仍有足够命中区，最后切换暗色和高对比度模式。这样，响应式 CSS 服务的是数据优先级和操作路径，而不是单纯追求某一张截图与设计稿完全重合。
+
 \section{JavaScript基础编程}
 
 现代JavaScript使用\texttt{const}声明不重新赋值的绑定，使用\texttt{let}声明需要变化的绑定。基本类型包括数字、字符串、布尔值、\texttt{null}、\texttt{undefined}、\texttt{bigint}与\texttt{symbol}；对象、数组和函数属于引用类型。
