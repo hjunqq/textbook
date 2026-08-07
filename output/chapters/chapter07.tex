@@ -94,6 +94,203 @@ A=\frac{1}{2}\left|
 
 LTTB适合视觉浏览，不应用其结果替代原始数据计算统计指标。缺测区间应断线或用明确的虚线/阴影表示；插值只用于允许插值的连续物理量，并在提示中给出原始与插值标记。降雨累计量、设备开关状态等数据不能套用相同插值规则。
 
+\subsection{实时流、历史回放与时间对齐}
+
+实时展示和历史分析面对的是同一组观测记录，但它们的时间窗口、容错方式和计算目标不同。实时流关注“最近一段时间是否出现变化”，需要在数据到达后尽快更新；历史回放关注“某次过程的演变是否可复核”，必须保留原始时间戳、质量码、修订记录和当时使用的规则版本。若把实时缓存直接当作历史库，迟到消息会悄悄改写已经发布的图形；若把多年原始序列直接交给浏览器，渲染线程又会被大量点位阻塞。因此服务端应同时提供原始查询、按时间桶聚合和带版本的回放接口，前端只负责窗口内的可视化。
+
+清源水库的三类主要测项采样周期不同：渗压每1\,h一条，水位每5\,min一条，雨量每5\,min一条。对齐时先选定展示时间格网，再把每个测项映射到格网而不是简单地按数组下标拼接。5\,min格网可以保留水位和雨量的短时响应，渗压在其余时间格中保持空值或沿用“最近观测时间”标记；1\,h格网适合趋势比较，此时雨量应按小时累计，水位应取末值或平均值并注明聚合规则，渗压通常取小时末值。表\ref{tab:ch7-time-alignment}把采样周期、默认聚合和禁用操作列出，读者可以据此检查接口契约是否把瞬时量与累计量混在一起。
+
+\begin{table}[htbp]
+\centering
+\caption{清源水库测项的采样周期与时间对齐规则}
+\label{tab:ch7-time-alignment}
+\begin{tabular}{p{2.4cm}p{2.5cm}p{4.2cm}p{3.5cm}}
+\toprule
+测项 & 原始周期 & 5\,min格网 & 1\,h格网与禁用操作 \\
+\midrule
+渗压 & 1\,h & 最近观测并保留年龄标记 & 取末值或均值；禁止线性插值伪造峰值 \\
+水位 & 5\,min & 原值 & 末值、均值或极值，必须写入聚合规则 \\
+雨量 & 5\,min & 时段量 & 求和形成小时累计；禁止对累计量做线性插值 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+实现重采样时要区分瞬时量、区间量和状态量。水位和渗压是近似瞬时量，短时间缺一两个点可以标记为缺测，只有在业务规则允许时才可插值；雨量记录常常表示一个区间内的增量，重采样应求和，不能把两个累计端点的差值再次求和；网关在线状态是离散状态，只能采用前值保持并记录状态持续时间。任何插值都必须在结果中保留\texttt{derived=true}、原始点范围和算法版本，以便历史回放时区分原始观测与推算值。
+
+\label{lst:ch07-resample-align}
+\begin{lstlisting}[language=JavaScript,breaklines=true,caption={按采样周期对齐水位、渗压与雨量记录}]
+const FIVE_MIN = 5 * 60 * 1000;
+const HOUR = 60 * 60 * 1000;
+
+function floorToGrid(iso, gridMs) {
+  const ms = Date.parse(iso);
+  return new Date(Math.floor(ms / gridMs) * gridMs).toISOString();
+}
+
+function alignReadings(readings, gridMs, kind) {
+  const buckets = new Map();
+  for (const r of readings) {
+    const t = floorToGrid(r.occurredAt, gridMs);
+    const row = buckets.get(t) ?? {time: t, values: [], quality: 'valid'};
+    row.values.push(r);
+    if (r.quality !== 'valid') row.quality = r.quality;
+    buckets.set(t, row);
+  }
+  return [...buckets.values()].sort((a, b) => a.time.localeCompare(b.time))
+    .map(row => {
+      const values = row.values.map(v => v.value).filter(Number.isFinite);
+      if (values.length === 0) return {...row, value: null, quality: 'missing'};
+      const value = kind === 'rainfall'
+        ? values.reduce((sum, v) => sum + v, 0)
+        : kind === 'state' ? row.values.at(-1).value
+        : row.values.at(-1).value;
+      return {...row, value, derived: values.length > 1, gridMs};
+    });
+}
+
+const level5m = alignReadings(levelReadings, FIVE_MIN, 'level');
+const rain1h = alignReadings(rainReadings, HOUR, 'rainfall');
+const pore1h = alignReadings(poreReadings, HOUR, 'porePressure');
+\end{lstlisting}
+
+清单\ref{lst:ch07-resample-align}只演示格网与聚合的最小闭环，生产实现还应把单位、时区、传感器时钟偏差和来源版本写入结果。若某小时只有一条雨量增量，不能把它当作整小时完整累计；若渗压在5\,min格网中重复显示，图例应标注“最近观测”，并显示观测年龄。这样读者看到一条平直的渗压曲线时，知道它可能是采样周期造成的保持值，而不是传感器在每5\,min都真的采集了新值。
+
+事件时间\texttt{occurredAt}表示传感器实际观测时间，处理时间\texttt{ingestTime}表示平台收到消息的时间。网络抖动、网关缓存和重试会使二者相差数分钟甚至更久，排序和绘图必须使用事件时间；处理延迟监控则使用处理时间。流处理器可以设置水印，表示在水印之前到达的记录可以参与当前窗口，超过水印的迟到记录进入修订队列，不直接覆盖已经确认的预警。修订后的图形要显示“迟到修订”标记并保留前后版本，避免值班员误以为系统曾经实时看到过后来补传的数据。
+
+\label{lst:ch07-event-time-window}
+\begin{lstlisting}[language=JavaScript,breaklines=true,caption={按事件时间维护带水印的滑动窗口}]
+function acceptEvent(state, reading, nowMs, allowedLatenessMs) {
+  const eventMs = Date.parse(reading.occurredAt);
+  const ingestMs = Date.parse(reading.ingestTime);
+  const watermark = nowMs - allowedLatenessMs;
+  const item = {...reading, eventMs, ingestMs, late: eventMs < watermark};
+  if (item.late) state.revisions.push(item);
+  else state.events.push(item);
+  state.events.sort((a, b) => a.eventMs - b.eventMs);
+  const start = watermark - state.windowMs;
+  state.events = state.events.filter(e => e.eventMs >= start);
+  return {events: state.events, revisions: state.revisions};
+}
+
+const streamState = {windowMs: 25 * 60 * 60 * 1000, events: [], revisions: []};
+const view = acceptEvent(streamState, reading, Date.now(), 10 * 60 * 1000);
+\end{lstlisting}
+
+清单\ref{lst:ch07-event-time-window}中的25\,h窗口来自“300个水位点×5\,min”的教学约定。它是计数窗口与时间窗口恰好接近的示例，不代表所有测项都可照抄：渗压每1\,h采样时，300点约等于12.5天；若需求是“最近24小时”，就必须按时间戳裁剪，而不能只写\texttt{slice(-300)}。接口应同时声明\texttt{windowType=count|duration}、窗口长度、时区和迟到容忍度，前端据此在标题中显示“300点（约25小时）”或“24小时”。
+
+跨日和夏令时会使本地时间的“当天”不等于固定的24小时。平台内部统一使用带时区的ISO 8601时间，存储和比较使用UTC毫秒；界面按照工程所在时区格式化，并把时区名称写在坐标轴或导出文件头。日统计先按本地日历边界切桶，再将桶边界转换成UTC查询，不能直接对UTC的零点切桶后声称那是当地日。遇到闰秒或设备时钟回拨，应保留原始字符串和解析状态，并用单调递增的接收序号辅助排序，不能静默丢弃重复的本地时间。
+
+\subsection{数据质量检验、缺测断线与异常处理}
+
+质量检验不是在图表画完后加一层颜色，而是决定记录能否进入后续计算的门。格式检查确认时间、数值和单位可解析；范围检查使用测项配置的工程上下限；时序检查识别时间倒退、重复事件和过长间隔；一致性检查比较同一测点相邻记录与关联测项。检查结果按缺测、无效、可疑的优先级合并：缺测表示没有可用观测，优先级最高；无效表示记录违反格式或物理约束；可疑表示记录可以展示但需要复核。一次记录同时出现单位错误和超范围时，应先标为无效并保留全部问题，而不是用最后一次检查结果覆盖前面的证据。
+
+本书在前端示例中使用valid、suspect、missing三个值，是为了让学生看清“是否参与计算”和“如何显示”的关系，属于教学简化。工程落地时应将这三个值映射到水利行业标准规定的质量标识、检验方法和审核状态，并在数据字典中记录映射版本；可参考《水利水电工程测量规范》相关质量标识要求\cite{slt6512014}，不能把教学枚举直接当作行业标准原码。质量码改变时要产生审计事件，记录操作者、规则版本、原始值和修订值，原始观测永远只读。
+
+缺测断线的关键是把“没有点”与“数值为零”区分开。对每个时间格网先生成完整的时间轴，再按时间轴左连接观测记录；找不到记录或质量为missing时写入\texttt{null}，而不是写入0。ECharts折线配置保持\texttt{connectNulls:false}，必要时用\texttt{markArea}在缺测区间加灰色阴影；空值区间的起止时间和缺测原因放入详情表。若产品要求显示估算趋势，应另建一条带虚线的derived序列，不能把估算值填回原始序列，否则用户无法判断风险计算用了哪一种值。
+
+\label{lst:ch07-missing-disconnect}
+\begin{lstlisting}[language=JavaScript,breaklines=true,caption={质量码驱动的缺测断线与阴影区间}]
+function toSeriesPoint(reading, time) {
+  const value = reading?.value;
+  const quality = reading?.quality ?? 'missing';
+  return quality === 'missing' ? [time, null] : [time, value];
+}
+
+function buildSeries(times, byTime) {
+  const data = times.map(t => toSeriesPoint(byTime.get(t), t));
+  const gaps = [];
+  let start = null;
+  for (let i = 0; i < times.length; i += 1) {
+    if (data[i][1] === null && start === null) start = times[i];
+    if (data[i][1] !== null && start !== null) {
+      gaps.push([{xAxis: start}, {xAxis: times[i - 1]}]);
+      start = null;
+    }
+  }
+  if (start !== null) gaps.push([{xAxis: start}, {xAxis: times.at(-1)}]);
+  return {data, gaps};
+}
+
+const {data, gaps} = buildSeries(gridTimes, readingByTime);
+chart.setOption({series: [{id: 'level', data, connectNulls: false,
+  markArea: {itemStyle: {color: 'rgba(120,120,120,.12)'}, data: gaps}}]});
+\end{lstlisting}
+
+清单\ref{lst:ch07-missing-disconnect}明确实现了实践题要求的表达式\texttt{quality === 'missing' ? [t, null] : [t, v]}。它使用固定格网后再生成阴影区间，因此缺测长度与坐标轴一致；如果只过滤掉缺测记录，图表会把相邻有效点直接连线，制造“期间一直有观测”的错误印象。对设备离线造成的长缺测，还应在图上显示网关状态和最后一次有效时间，帮助值班员区分通信故障与传感器静默。
+
+异常值处理应保守。突跳检测可以用相邻差值、局部中位数或物理变化速率做候选筛选，但候选异常不能直接删除；系统先写入suspect，保留原值并通知复核。若专家确认是设备故障，质量服务记录拒收标记或missing并记录原因；对外展示仍映射为三值质量码。若确认是洪峰、地震或闸门操作造成的真实突变，则保留valid并关联事件。图表同时显示原始点和修订点时，采用不同形状或线型，不用“修订后颜色更鲜艳”暗示哪个值一定正确。
+
+\label{lst:ch07-quality-check}
+\begin{lstlisting}[language=JavaScript,breaklines=true,caption={展示前的质量检验与优先级合并}]
+function inspectReading(r, rules, previous) {
+  const issues = [];
+  let quality = r.value == null ? 'missing' : 'valid';
+  let rejected = false;
+  if (r.unit !== rules.unit) { issues.push('unit'); rejected = true; quality = 'suspect'; }
+  if (Number.isFinite(r.value) && (r.value < rules.min || r.value > rules.max)) {
+    issues.push('range'); rejected = true; quality = 'suspect';
+  }
+  if (previous && r.occurredAt <= previous.occurredAt) {
+    issues.push('time-order'); rejected = true; quality = 'suspect';
+  }
+  if (issues.length > 0 && quality === 'valid') quality = 'suspect';
+  return {...r, quality, issues, rejected, participates: quality === 'valid' && !rejected};
+}
+
+const checked = inspectReading(reading, {unit: 'm', min: 130, max: 180}, previous);
+\end{lstlisting}
+
+清单\ref{lst:ch07-quality-check}展示了优先级合并的一个直观实现：缺测先得到missing，单位、范围和时序错误把记录降为suspect并设置拒收标记，其他无法确认但仍可展示的情况也使用suspect。具体工程可根据行业字典把拒收标记映射到后端的无效分支，但对外展示契约仍保持valid、suspect、missing三值，避免第7章和第8章出现两套枚举。必须保留问题数组，便于在详情卡中解释为什么一条记录没有参与打分。质量码在前端只读，修订由后端质量服务完成并通过版本号推送，避免浏览器各自采用不同的阈值。
+
+质量结果还要进入统计口径。日均值、最大值和超阈次数应分别给出“仅valid”“valid+suspect”和“全部到达记录”三种选择，默认统计只使用valid；suspect值可以在趋势图中显示，却不能悄悄混入风险评分。报表页要显示有效率、缺测率、可疑率、迟到率和修订次数，并把分母写清楚。例如某天有288个5\,min格网，若其中24格missing，完整率是264/288，而不是用264个有效点的平均值冒充完整率。跨测项比较时还要统一时间格网和过滤条件，否则水位的288个点与渗压的24个点会产生看似可比、实则分母不同的曲线。质量指标本身也应带时间窗和规则版本，方便在规则调整后复算历史报表。
+
+\subsection{多源异构数据的标准化与融合}
+
+同一个测点可能同时来自串口网关、HTTP适配器和人工录入，字段命名、单位、坐标和精度都可能不同。标准化流程应先建立来源适配器，再转换为统一展示记录，最后才进行融合；不能把三个来源的数组按位置拼在一起。最小标准化契约包括\texttt{assetId}、\texttt{occurredAt}、\texttt{ingestTime}、\texttt{value}、\texttt{unit}、\texttt{quality}、\texttt{source}和\texttt{schemaVersion}。单位转换要写出换算因子和偏置，坐标转换要写出源坐标系、目标坐标系与轴序，编码映射要保留源系统的原始编号。
+
+融合前还要做实体对齐。同一设备在不同系统中可能被写成“PZ07”“DAM-A-PZ-07”或一串厂商序列号，平台应使用受控映射表生成稳定的\texttt{assetId}，并把映射生效时间纳入版本。时间融合以事件时间为主，若两条记录落在同一时间桶，应按照来源优先级、质量码和时间距离选取代表值，同时保留被合并记录的数量和来源列表。雨量的多源融合可以求和前先确认各来源是否已经是累计量；水位的多源融合则通常取质量较高且时间更近的观测，不能把两个传感器的读数相加。
+
+\label{lst:ch07-standardize-readings}
+\begin{lstlisting}[language=JavaScript,breaklines=true,caption={多源测点记录标准化与单位转换}]
+const assetMap = new Map([['PZ07', 'DAM-A-PZ-07'], ['pore-07', 'DAM-A-PZ-07']]);
+const unitFactor = {kPa: {kPa: 1}, Pa: {kPa: 0.001}, m: {m: 1}, cm: {m: 0.01}};
+
+function standardize(raw, source, schemaVersion) {
+  const assetId = assetMap.get(raw.sensorId) ?? `UNMAPPED:${raw.sensorId}`;
+  const targetUnit = raw.kind === 'pore' ? 'kPa' : 'm';
+  const factor = unitFactor[raw.unit]?.[targetUnit];
+  const value = factor == null ? null : Number(raw.value) * factor;
+  const quality = value == null ? 'missing' : raw.quality ?? 'valid';
+  return {assetId, occurredAt: new Date(raw.time).toISOString(),
+    ingestTime: new Date().toISOString(), value, unit: targetUnit,
+    quality, source, schemaVersion, sourceId: raw.sensorId,
+    conversion: {from: raw.unit, to: targetUnit, factor}};
+}
+
+const normalized = standardize(message, 'gateway-02', 'v3');
+\end{lstlisting}
+
+清单\ref{lst:ch07-standardize-readings}对未映射设备使用明显的占位标识，迫使运维人员补齐数据字典，而不是把不同设备误合并。生产实现还要拒绝未知单位、检查时间解析和记录轴序；示例中的\texttt{Date}只用于说明字段流向，水利平台应在服务端使用带时区的时间库并把转换规则纳入配置版本。标准化后的记录才可以进入\texttt{assetId}维度的滑动窗口和图表联动。
+
+图\ref{fig:ch07-time-quality-pipeline}把实时流和历史回放共用的处理边界画出来：来源适配器负责字段和单位，时间服务负责格网与水印，质量服务负责码值和问题，窗口服务保留原始与聚合序列，展示层最后才决定颜色、断线和交互。任何一层都不能用“显示方便”作为理由改写原始观测。
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=5mm and 5mm,
+  flowstep/.style={draw=Primary,rounded corners,fill=PrimaryLight,align=center,
+    minimum width=2.35cm,minimum height=.8cm,font=\small,text=PrimaryDark}]
+\node[flowstep] (adapter) {来源适配：单位/编码/坐标};
+\node[flowstep,right=of adapter] (time) {时间服务：格网/时区/水印};
+\node[flowstep,right=of time] (quality) {质量服务：缺测/异常/问题};
+\node[flowstep,below=of quality] (window) {窗口服务：原始/聚合/回放};
+\node[flowstep,below=of adapter] (view) {展示层：断线/颜色/联动};
+\draw[->,thick,draw=Primary] (adapter)--(time)--(quality)--(window)--(view);
+\draw[->,thick,dashed,draw=Accent] (view)-|(time);
+\end{tikzpicture}
+\caption{实时流与历史回放共用的数据质量边界}
+\label{fig:ch07-time-quality-pipeline}
+\end{figure}
+
 \subsection{案例的数据视图契约}
 
 清源水库页面使用统一的展示记录：表\ref{tab:ch7-view-contract}列出这条记录的最小字段。其中质量码与处理标记不是可选项：前端拿不到它们，就无法区分“这一段本来就没有观测”和“这一段的观测不可信”，只能把两种情况画成同一条断线。
