@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS asset (
 );
 CREATE TABLE IF NOT EXISTS reading (
   asset_id text NOT NULL REFERENCES asset(asset_id), occurred_at timestamptz NOT NULL,
-  version integer NOT NULL DEFAULT 1, reading_id bigserial, event_id text NOT NULL UNIQUE,
+  version integer NOT NULL DEFAULT 1, reading_id bigserial, event_id text NOT NULL,
   value numeric, unit text NOT NULL, quality text NOT NULL, source text NOT NULL,
   revision_reason text, received_at timestamptz NOT NULL DEFAULT now(),
   PRIMARY KEY (asset_id, occurred_at, version),
@@ -16,6 +16,8 @@ CREATE TABLE IF NOT EXISTS reading (
   CHECK (value IS NOT NULL OR quality = 'missing')
 );
 SELECT create_hypertable('reading', by_range('occurred_at'), if_not_exists => TRUE);
+-- 超表唯一索引必须包含分区列，幂等键用复合唯一索引表达
+CREATE UNIQUE INDEX IF NOT EXISTS reading_event_uidx ON reading(occurred_at, event_id);
 CREATE INDEX IF NOT EXISTS reading_asset_time_idx ON reading(asset_id, occurred_at DESC);
 CREATE TABLE IF NOT EXISTS warning (
   warning_id bigserial PRIMARY KEY, asset_id text NOT NULL REFERENCES asset(asset_id),

@@ -6,7 +6,7 @@
 
 ## 字段与单位
 
-- `stations`：`asset_id`、`asset_type`、`display_name`、`unit`、经纬度、`elevation_m`、量程、精度、阈值和投运日期。编码与 A8-1 的 `asset.asset_id` 一致，空间坐标为 EPSG:4490。
+- `stations`：`asset_id`、`asset_type`、`display_name`、`unit`、经纬度、`elevation_m`、量程、精度、阈值和投运日期。编码与第8章数据模型的 `asset.asset_id` 一致，空间坐标为 EPSG:4490。
 - 观测 CSV：`asset_id`、`occurred_at`（ISO 8601，UTC+8）、`version`、`event_id`、`value`、`unit`、`quality`、`source`。质量码只取 `valid`、`suspect`、`missing`。
 - 水位物理范围为死水位 148.0 m 至校核洪水位 171.6 m；超量程和跳变样例明确标记为 `suspect`，缺测以空值和 `missing` 表示。
 - 测点数量为 12 个渗压、8 个位移、3 个库水位、5 个雨量，共 28 个；`DAM-A-PZ-07` 是贯穿案例测点。

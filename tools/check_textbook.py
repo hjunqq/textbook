@@ -186,7 +186,8 @@ def check_wordcount(texts, r, init):
 def check_refs(texts, r):
     labels, refs, dup = [], [], []
     for t in texts.values():
-        for l in re.findall(r"\\label\{([^}]*)\}", t):
+        for l in (re.findall(r"\\label\{([^}]*)\}", t)
+                  + re.findall(r"label=\{([^}]*)\}", t)):
             if l in labels:
                 dup.append(l)
             labels.append(l)

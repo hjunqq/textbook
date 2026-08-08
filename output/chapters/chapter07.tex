@@ -41,20 +41,22 @@
 \end{tabular}
 \end{table}
 
-质量码应先于颜色映射。有效数据可进入曲线和状态计算；可疑数据保留但降低视觉权重并提示复核；缺测不连接为连续曲线；人工修订值显示修订标识；设备故障数据不得参与风险判定。颜色只表达业务状态，不能掩盖数据质量。图\ref{fig:data-visualization-process}把这条顺序画成处理链：接入、质检、时间对齐、降采样、视觉映射、渲染，质量判定位于颜色映射之前。链路顺序一旦颠倒，界面就会先把可疑值涂成正常色，再指望人去发现它其实不可信。
+质量码应先于颜色映射。质量码本身只有 valid、suspect、missing 三个取值：有效数据可进入曲线和状态计算，可疑数据保留但降低视觉权重并提示复核，缺测不连接为连续曲线。人工修订与设备故障不是第四、第五个质量码——修订体现在与质量码并列的处理标记上，界面显示修订标识；设备故障属于设备状态维度，故障期间的数据不得参与风险判定。颜色只表达业务状态，不能掩盖数据质量。图\ref{fig:data-visualization-process}把这条顺序画成处理链：接入、质检、时间对齐、降采样、视觉映射、渲染，质量判定位于颜色映射之前。链路顺序一旦颠倒，界面就会先把可疑值涂成正常色，再指望人去发现它其实不可信。
 
 \begin{figure}[H]
 \centering
-\begin{tikzpicture}[node distance=8mm and 7mm,
+\begin{tikzpicture}[node distance=8mm and 4mm,
   dataflow/.style={draw=Primary,rounded corners,fill=PrimaryLight,align=center,
-    minimum width=2.35cm,minimum height=.9cm,text=PrimaryDark}]
+    minimum width=2.1cm,minimum height=.9cm,text=PrimaryDark,font=\small}]
 \node[dataflow] (source) {观测记录\\时间/单位/质量码};
 \node[dataflow,right=of source] (check) {展示前校验\\范围/时序/缺测};
-\node[dataflow,right=of check] (map) {视觉映射\\位置/颜色/图形};
+\node[dataflow,right=of check] (align) {时间对齐\\降采样};
+\node[dataflow,right=of align] (map) {视觉映射\\位置/颜色/图形};
 \node[dataflow,right=of map] (view) {图表与三维\\联动展示};
-\node[dataflow,below=of map] (feedback) {交互反馈\\查询/确认/追溯};
+\node[dataflow,below=of align] (feedback) {交互反馈\\查询/确认/追溯};
 \draw[->,draw=Primary,thick] (source)--(check);
-\draw[->,draw=Primary,thick] (check)--(map);
+\draw[->,draw=Primary,thick] (check)--(align);
+\draw[->,draw=Primary,thick] (align)--(map);
 \draw[->,draw=Primary,thick] (map)--(view);
 \draw[->,draw=Primary,thick] (view)|-(feedback);
 \draw[->,draw=Accent,dashed,thick] (feedback)-|(check);
@@ -104,8 +106,7 @@
 \label{fig:lttb-principle}
 \end{figure}
 
-\label{lst:ch07-lttb}
-\begin{lstlisting}[language=JavaScript,breaklines=true,caption={LTTB分桶与最大三角形选择}]
+\begin{lstlisting}[label={lst:ch07-lttb},language=JavaScript,breaklines=true,caption={LTTB分桶与最大三角形选择}]
 function lttb(points, threshold) {
   if (threshold >= points.length || threshold === 0) return points;
   const sampled = [points[0]];
@@ -156,8 +157,7 @@ LTTB适合视觉浏览，不应用其结果替代原始数据计算统计指标�
 
 实现重采样时要区分瞬时量、区间量和状态量。水位和渗压是近似瞬时量，短时间缺一两个点可以标记为缺测，只有在业务规则允许时才可插值；雨量记录常常表示一个区间内的增量，重采样应求和，不能把两个累计端点的差值再次求和；网关在线状态是离散状态，只能采用前值保持并记录状态持续时间。任何插值都必须在结果中保留\texttt{derived=true}、原始点范围和算法版本，以便历史回放时区分原始观测与推算值。
 
-\label{lst:ch07-resample-align}
-\begin{lstlisting}[language=JavaScript,breaklines=true,caption={按采样周期对齐水位、渗压与雨量记录}]
+\begin{lstlisting}[label={lst:ch07-resample-align},language=JavaScript,breaklines=true,caption={按采样周期对齐水位、渗压与雨量记录}]
 const FIVE_MIN = 5 * 60 * 1000;
 const HOUR = 60 * 60 * 1000;
 
@@ -172,18 +172,19 @@ function alignReadings(readings, gridMs, kind) {
     const t = floorToGrid(r.occurredAt, gridMs);
     const row = buckets.get(t) ?? {time: t, values: [], quality: 'valid'};
     row.values.push(r);
-    if (r.quality !== 'valid') row.quality = r.quality;
+    // 桶内质量按 suspect 优先合并；missing 是否成立要等取值后判断
+    if (r.quality === 'suspect') row.quality = 'suspect';
     buckets.set(t, row);
   }
   return [...buckets.values()].sort((a, b) => a.time.localeCompare(b.time))
     .map(row => {
       const values = row.values.map(v => v.value).filter(Number.isFinite);
+      // 桶内没有任何可用数值才是 missing；有值时质量取合并结果
       if (values.length === 0) return {...row, value: null, quality: 'missing'};
       const value = kind === 'rainfall'
         ? values.reduce((sum, v) => sum + v, 0)
-        : kind === 'state' ? row.values.at(-1).value
-        : row.values.at(-1).value;
-      return {...row, value, derived: values.length > 1, gridMs};
+        : values.at(-1);   // 状态量与连续量都取最近一条可用观测
+      return {...row, value, aggregated: values.length > 1, gridMs};
     });
 }
 
@@ -196,8 +197,7 @@ const pore1h = alignReadings(poreReadings, HOUR, 'porePressure');
 
 事件时间\texttt{occurredAt}表示传感器实际观测时间，处理时间\texttt{ingestTime}表示平台收到消息的时间。网络抖动、网关缓存和重试会使二者相差数分钟甚至更久，排序和绘图必须使用事件时间；处理延迟监控则使用处理时间。流处理器可以设置水印，表示在水印之前到达的记录可以参与当前窗口，超过水印的迟到记录进入修订队列，不直接覆盖已经确认的预警。修订后的图形要显示“迟到修订”标记并保留前后版本，避免值班员误以为系统曾经实时看到过后来补传的数据。
 
-\label{lst:ch07-event-time-window}
-\begin{lstlisting}[language=JavaScript,breaklines=true,caption={按事件时间维护带水印的滑动窗口}]
+\begin{lstlisting}[label={lst:ch07-event-time-window},language=JavaScript,breaklines=true,caption={按事件时间维护带水印的滑动窗口}]
 function acceptEvent(state, reading, nowMs, allowedLatenessMs) {
   const eventMs = Date.parse(reading.occurredAt);
   const ingestMs = Date.parse(reading.ingestTime);
@@ -223,12 +223,11 @@ const view = acceptEvent(streamState, reading, Date.now(), 10 * 60 * 1000);
 
 质量检验不是在图表画完后加一层颜色，而是决定记录能否进入后续计算的门。格式检查确认时间、数值和单位可解析；范围检查使用测项配置的工程上下限；时序检查识别时间倒退、重复事件和过长间隔；一致性检查比较同一测点相邻记录与关联测项。检查结果按缺测、无效、可疑的优先级合并：缺测表示没有可用观测，优先级最高；无效表示记录违反格式或物理约束；可疑表示记录可以展示但需要复核。一次记录同时出现单位错误和超范围时，应先标为无效并保留全部问题，而不是用最后一次检查结果覆盖前面的证据。
 
-本书在前端示例中使用valid、suspect、missing三个值，是为了让学生看清“是否参与计算”和“如何显示”的关系，属于教学简化。工程落地时应将这三个值映射到水利行业标准规定的质量标识、检验方法和审核状态，并在数据字典中记录映射版本；可参考《水利水电工程测量规范》相关质量标识要求\cite{slt6512014}，不能把教学枚举直接当作行业标准原码。质量码改变时要产生审计事件，记录操作者、规则版本、原始值和修订值，原始观测永远只读。
+本书在前端示例中使用valid、suspect、missing三个值，是为了让学生看清“是否参与计算”和“如何显示”的关系，属于教学简化。工程落地时应将这三个值映射到水利行业标准规定的质量标识、检验方法和审核状态，并在数据字典中记录映射版本；可参照水文资料整编与审核相关行业规范中的质量标识与检验规定执行，不能把教学枚举直接当作行业标准原码。质量码改变时要产生审计事件，记录操作者、规则版本、原始值和修订值，原始观测永远只读。
 
 缺测断线的关键是把“没有点”与“数值为零”区分开。对每个时间格网先生成完整的时间轴，再按时间轴左连接观测记录；找不到记录或质量为missing时写入\texttt{null}，而不是写入0。ECharts折线配置保持\texttt{connectNulls:false}，必要时用\texttt{markArea}在缺测区间加灰色阴影；空值区间的起止时间和缺测原因放入详情表。若产品要求显示估算趋势，应另建一条带虚线的derived序列，不能把估算值填回原始序列，否则用户无法判断风险计算用了哪一种值。
 
-\label{lst:ch07-missing-disconnect}
-\begin{lstlisting}[language=JavaScript,breaklines=true,caption={质量码驱动的缺测断线与阴影区间}]
+\begin{lstlisting}[label={lst:ch07-missing-disconnect},language=JavaScript,breaklines=true,caption={质量码驱动的缺测断线与阴影区间}]
 function toSeriesPoint(reading, time) {
   const value = reading?.value;
   const quality = reading?.quality ?? 'missing';
@@ -259,20 +258,20 @@ chart.setOption({series: [{id: 'level', data, connectNulls: false,
 
 异常值处理应保守。突跳检测可以用相邻差值、局部中位数或物理变化速率做候选筛选，但候选异常不能直接删除；系统先写入suspect，保留原值并通知复核。若专家确认是设备故障，质量服务记录拒收标记或missing并记录原因；对外展示仍映射为三值质量码。若确认是洪峰、地震或闸门操作造成的真实突变，则保留valid并关联事件。图表同时显示原始点和修订点时，采用不同形状或线型，不用“修订后颜色更鲜艳”暗示哪个值一定正确。
 
-\label{lst:ch07-quality-check}
-\begin{lstlisting}[language=JavaScript,breaklines=true,caption={展示前的质量检验与优先级合并}]
+\begin{lstlisting}[label={lst:ch07-quality-check},language=JavaScript,breaklines=true,caption={展示前的质量检验与优先级合并}]
 function inspectReading(r, rules, previous) {
   const issues = [];
   let quality = r.value == null ? 'missing' : 'valid';
   let rejected = false;
-  if (r.unit !== rules.unit) { issues.push('unit'); rejected = true; quality = 'suspect'; }
+  // 缺测优先级最高：后续检查只补充问题码，不把 missing 覆写成 suspect
+  const downgrade = () => { if (quality === 'valid') quality = 'suspect'; };
+  if (r.unit !== rules.unit) { issues.push('unit'); rejected = true; downgrade(); }
   if (Number.isFinite(r.value) && (r.value < rules.min || r.value > rules.max)) {
-    issues.push('range'); rejected = true; quality = 'suspect';
+    issues.push('range'); rejected = true; downgrade();
   }
   if (previous && r.occurredAt <= previous.occurredAt) {
-    issues.push('time-order'); rejected = true; quality = 'suspect';
+    issues.push('time-order'); rejected = true; downgrade();
   }
-  if (issues.length > 0 && quality === 'valid') quality = 'suspect';
   return {...r, quality, issues, rejected, participates: quality === 'valid' && !rejected};
 }
 
@@ -289,8 +288,7 @@ const checked = inspectReading(reading, {unit: 'm', min: 130, max: 180}, previou
 
 融合前还要做实体对齐。同一设备在不同系统中可能被写成“PZ07”“DAM-A-PZ-07”或一串厂商序列号，平台应使用受控映射表生成稳定的\texttt{assetId}，并把映射生效时间纳入版本。时间融合以事件时间为主，若两条记录落在同一时间桶，应按照来源优先级、质量码和时间距离选取代表值，同时保留被合并记录的数量和来源列表。雨量的多源融合可以求和前先确认各来源是否已经是累计量；水位的多源融合则通常取质量较高且时间更近的观测，不能把两个传感器的读数相加。
 
-\label{lst:ch07-standardize-readings}
-\begin{lstlisting}[language=JavaScript,breaklines=true,caption={多源测点记录标准化与单位转换}]
+\begin{lstlisting}[label={lst:ch07-standardize-readings},language=JavaScript,breaklines=true,caption={多源测点记录标准化与单位转换}]
 const assetMap = new Map([['PZ07', 'DAM-A-PZ-07'], ['pore-07', 'DAM-A-PZ-07']]);
 const unitFactor = {kPa: {kPa: 1}, Pa: {kPa: 0.001}, m: {m: 1}, cm: {m: 0.01}};
 
@@ -406,10 +404,9 @@ const normalized = standardize(message, 'gateway-02', 'v3');
 
 图\ref{fig:ch7-rain-level-combo}只展示编码关系，不替代工程分析。雨量柱从零基线向上绘制，水位线使用独立轴但共享时间索引；若为了突出“倒挂”效果将柱形向下绘制，也要在图例中说明向下方向代表降雨量而不是负值。真正的水位预警仍由第8章的规则、质量码和模型版本决定。
 
-下面的ECharts配置给出可运行的雨量倒挂柱与水位过程线组合。配置显式声明两个y轴、单位、tooltip格式和数据缩放；真实项目还要从服务端响应读取质量码并对缺测点设置空值，不把缺测当作零雨量或零水位。
+本章示例统一沿用第4章的 Vite 工程：ECharts 与坐标库通过 \texttt{npm install echarts proj4} 安装、以 \texttt{import * as echarts from 'echarts'} 与 \texttt{import proj4 from 'proj4'} 引入；Three.js 沿用第6章工程的安装与导入方式。无构建环境的课堂演示可改用官方 CDN 的全局构建，此时 \texttt{echarts}、\texttt{THREE}、\texttt{proj4} 为全局变量，后文清单不再逐个重复引入语句。下面的ECharts配置给出可运行的雨量倒挂柱与水位过程线组合。配置显式声明两个y轴、单位、tooltip格式和数据缩放；真实项目还要从服务端响应读取质量码并对缺测点设置空值，不把缺测当作零雨量或零水位。
 
-\label{lst:ch07-rain-level-dualaxis}
-\begin{lstlisting}[language=JavaScript,breaklines=true,caption={雨量倒挂柱与水位过程线ECharts配置}]
+\begin{lstlisting}[label={lst:ch07-rain-level-dualaxis},language=JavaScript,breaklines=true,caption={雨量倒挂柱与水位过程线ECharts配置}]
 const chart = echarts.init(document.querySelector('#rain-level'));
 const times = ['08:00', '10:00', '12:00', '14:00', '16:00'];
 const rain = [0, 8.4, 16.2, 4.8, 0];
@@ -457,7 +454,7 @@ chart.setOption({
 \label{fig:chart-technology-selection}
 \end{figure}
 
-状态颜色需兼顾可访问性：正常、关注、告警、离线不能只依赖红绿差异，还应配合形状、图标、线型和文字。阈值带要注明适用工况和版本，不能让一条没有来源的红线替代业务解释。
+页面使用“正常、关注、告警、离线”四种展示状态，它们与全书统一口径的对应关系是：正常对应无预警（NONE），关注对应蓝色预警，告警覆盖黄、橙、红三级（详情中展示具体等级），离线不是预警等级，它来自网关或设备状态维度，与质量码、预警级别并列存在。状态颜色需兼顾可访问性：四种状态不能只依赖红绿差异，还应配合形状、图标、线型和文字。阈值带要注明适用工况和版本，不能让一条没有来源的红线替代业务解释。
 
 \subsection{可运行的实时曲线}
 
@@ -480,8 +477,7 @@ ECharts的\texttt{setOption}不是“把新对象覆盖到旧对象”这么简�
 \end{tabular}
 \end{table}
 
-\label{lst:ch07-chart}
-\begin{lstlisting}[language=JavaScript,breaklines=true,caption={基于应用状态的实时水位曲线更新}]
+\begin{lstlisting}[label={lst:ch07-chart},language=JavaScript,breaklines=true,caption={基于应用状态的实时水位曲线更新}]
 const chart = echarts.init(document.querySelector('#level'));
 const state = {level: [], maxPoints: 300};
 
@@ -510,8 +506,7 @@ function appendReading(reading) {
 \paragraph{内置LTTB与历史浏览}
 本章前面推导的LTTB可以直接对应到ECharts的\texttt{sampling:'lttb'}。库在折线点数超过像素宽度时按桶保留峰谷，前端只需声明采样策略；原始数据仍保存在后端，统计和质量审计不能使用降采样后的视觉序列。初次加载历史曲线时可同时设置\texttt{sampling:'lttb'}、\texttt{showSymbol:false}和\texttt{progressive}，在不改变业务数值的前提下减少绘制压力。
 
-\label{lst:ch07-window-options}
-\begin{lstlisting}[language=JavaScript,breaklines=true,caption={历史曲线的降采样、缩放与阈值带}]
+\begin{lstlisting}[label={lst:ch07-window-options},language=JavaScript,breaklines=true,caption={历史曲线的降采样、缩放与阈值带}]
 const historyOption = {
   animation: false,
   dataZoom: [
@@ -537,12 +532,13 @@ chart.setOption(historyOption);
 \paragraph{追加接口与结构变更}
 当消息以严格递增的事件时间到达时，可以使用\texttt{appendData}追加尾部点；迟到消息、删除测项和改变时间窗则必须回到应用状态重建序列并调用\texttt{setOption}。\texttt{appendData}不会替你去重，也不会自动删除旧点，300点窗口仍由状态层或服务端维护。若同一图表从一条曲线切换为“水位+雨量+阈值带”，应在一次\texttt{replaceMerge}中提交完整序列集合，避免旧的图例项留在界面。
 
-\label{lst:ch07-append-data}
-\begin{lstlisting}[language=JavaScript,breaklines=true,caption={高频尾部数据的appendData与结构切换}]
+\begin{lstlisting}[label={lst:ch07-append-data},language=JavaScript,breaklines=true,caption={高频尾部数据的appendData与结构切换}]
 function appendTail(reading) {
-  if (reading.quality === 'missing') return;
+  // 缺测点以 null 保留时间位置，曲线在此断开而不是把两侧连起来；
+  // 序列不能设置 connectNulls
+  const value = reading.quality === 'missing' ? null : reading.value;
   chart.appendData({seriesIndex: 0,
-    data: [[reading.occurredAt, reading.value]]});
+    data: [[reading.occurredAt, value]]});
 }
 
 function replaceWithTwoSeries(level, rain) {
@@ -562,8 +558,7 @@ Canvas适合连续折线、数千个点和频繁刷新，绘制由一个位图�
 
 组件生命周期同样是性能的一部分。创建图表时保存实例，使用\texttt{ResizeObserver}监听容器尺寸并调用\texttt{chart.resize()}；组件卸载时解除观察器、消息订阅和事件监听，最后调用\texttt{chart.dispose()}。不销毁旧实例会让Canvas、定时器和闭包继续占用内存，切换测点几百次后才暴露为卡顿，难以从单次截图发现。
 
-\label{lst:ch07-responsive-dispose}
-\begin{lstlisting}[language=JavaScript,breaklines=true,caption={响应式尺寸与ECharts实例销毁}]
+\begin{lstlisting}[label={lst:ch07-responsive-dispose},language=JavaScript,breaklines=true,caption={响应式尺寸与ECharts实例销毁}]
 function mountChart(container, option, subscribe) {
   const chart = echarts.init(container, null, {renderer: 'canvas'});
   const observer = new ResizeObserver(() => chart.resize());
@@ -603,8 +598,7 @@ function mountChart(container, option, subscribe) {
 
 图表和三维场景联动的关键不是让两个库互相调用，而是共享稳定的对象标识和时间窗口。ECharts点击事件的\texttt{params.data}保存当前点的原始数组或对象，\texttt{params.seriesId}说明来自哪条序列，\texttt{params.dataIndex}用于定位应用状态中的索引；控制器据此取出\texttt{assetId}，再调用三维场景的高亮接口。反向点击三维对象时，从\texttt{object.userData.assetId}查找图表序列和数据索引，使用\texttt{dispatchAction}发送\texttt{highlight}与\texttt{showTip}。多张图表可通过\texttt{echarts.connect([a,b])}或相同的\texttt{group}共享缩放和提示，但对象定位仍由业务控制器完成。
 
-\label{lst:ch07-link-controller}
-\begin{lstlisting}[language=JavaScript,breaklines=true,caption={ECharts与Three.js对象的双向联动控制器}]
+\begin{lstlisting}[label={lst:ch07-link-controller},language=JavaScript,breaklines=true,caption={ECharts与Three.js对象的双向联动控制器}]
 function createLinkController(chart, scene, readings) {
   const byAsset = new Map(readings.map((r, i) => [r.assetId, {i, r}]));
   const onChartClick = params => {
@@ -621,6 +615,8 @@ function createLinkController(chart, scene, readings) {
     chart.dispatchAction({type: 'showTip', seriesId: 'level', dataIndex: hit.i});
   };
   chart.on('click', onChartClick);
+  // scene 是应用层的场景封装对象（带事件总线），
+  // 不是 THREE.Scene 本身——后者没有 on/off 接口
   scene.on('select', onSceneSelect);
   return () => {
     chart.off('click', onChartClick);
@@ -631,8 +627,7 @@ function createLinkController(chart, scene, readings) {
 
 清单\ref{lst:ch07-link-controller}没有把\texttt{assetId}写死在图表下标里：筛选、排序或插入阈值带后，控制器仍可通过应用状态查找对象。真实项目还要把时间窗口作为\texttt{focusAsset}的参数，三维场景显示同一时刻的质量码和预警等级；若该点是missing，图表应定位到空值区间并打开质量详情，而不是强行显示最近的有效点。解绑函数必须在组件卸载时执行，否则每次进入页面都会叠加一组点击处理器。
 
-\label{lst:ch07-connect-charts}
-\begin{lstlisting}[language=JavaScript,breaklines=true,caption={多图表缩放联动与组标识}]
+\begin{lstlisting}[label={lst:ch07-connect-charts},language=JavaScript,breaklines=true,caption={多图表缩放联动与组标识}]
 const levelChart = echarts.init(document.querySelector('#level'));
 const rainChart = echarts.init(document.querySelector('#rain'));
 levelChart.group = 'clearing-reservoir-time';
@@ -681,12 +676,12 @@ ECharts工程验收至少准备五组数据：单点连续到达、同一事件�
 
 交互事件可能很密集。指针移动使用节流，时间范围查询使用防抖，告警确认则不得被节流丢弃。触控长按必须在抬起或取消时清理定时器：
 
-\label{lst:ch07-vue-watch}
-\begin{lstlisting}[language=JavaScript,caption={实时观测联动}]
+\begin{lstlisting}[label={lst:ch07-long-press},language=JavaScript,caption={触控长按的定时器与取消}]
 let longPressTimer = null;
 const delayMs = 600;
 
 canvas.addEventListener('pointerdown', event => {
+  cancelLongPress();   // 多指按下时先清理前一个定时器
   longPressTimer = setTimeout(
     () => openPointMenu(event), delayMs);
 });
@@ -699,7 +694,7 @@ function cancelLongPress() {
   .forEach(type => canvas.addEventListener(type, cancelLongPress));
 \end{lstlisting}
 
-短按在\texttt{pointerup}前已经取消定时器，不会误触发长按；\texttt{pointercancel}覆盖系统手势或窗口切换导致的中断。
+短按时\texttt{pointerup}的处理器会先取消定时器，因此不会误触发长按；\texttt{pointercancel}覆盖系统手势或窗口切换导致的中断；\texttt{pointerdown}入口先清理旧定时器，保证多指按下时前一个定时器不会失控触发。
 
 \subsection{响应式与异常状态}
 
@@ -738,8 +733,7 @@ function cancelLongPress() {
 
 图\ref{fig:ch7-thematic-map}中的虚线表示等值线，底色表示分区或栅格，箭头表示流向，带字母的圆点表示站点。发布地图前，学生应检查底图、专题图层和测点是否使用同一CRS与时间窗；如果站点位置正确而色斑图整体偏移，优先检查栅格范围、轴序和瓦片矩阵，而不是在前端给点位增加固定偏移。
 
-\label{lst:ch07-thematic-layer}
-\begin{lstlisting}[language=JavaScript,breaklines=true,caption={专题地图图层与站点符号配置}]
+\begin{lstlisting}[label={lst:ch07-thematic-layer},language=JavaScript,breaklines=true,caption={专题地图图层与站点符号配置}]
 const stationLayer = readings
   .filter((item) => item.quality !== 'missing')
   .map((item) => ({
@@ -752,6 +746,10 @@ const stationLayer = readings
 
 const thematicOption = {
   tooltip: {trigger: 'item'},
+  // geo 组件是 coordinateSystem:'geo' 的前提：需先用
+  // echarts.registerMap('qingyuan', geoJson) 注册库区边界
+  geo: {map: 'qingyuan', roam: true,
+    itemStyle: {areaColor: '#f4f6f8', borderColor: '#9aa5b1'}},
   visualMap: {min: 0, max: 100, dimension: 2,
     text: ['高', '低'], calculable: true},
   series: [{type: 'scatter', coordinateSystem: 'geo',
@@ -761,8 +759,7 @@ const thematicOption = {
 
 清单\ref{lst:ch07-thematic-layer}把质量状态与业务预警分开：可疑点改变形状，预警等级改变颜色，缺测点从数值散点中排除但可在独立缺测图层中显示。若底图服务返回的是WMS渲染图，专题数值仍应来自可查询的要素或覆盖服务，不能从图片像素反推原始监测值。
 
-\label{lst:ch07-visual-encoding}
-\begin{lstlisting}[language=JavaScript,breaklines=true,caption={按任务选择视觉变量}]
+\begin{lstlisting}[label={lst:ch07-visual-encoding},language=JavaScript,breaklines=true,caption={按任务选择视觉变量}]
 function encodeReading(reading, task) {
   if (reading.quality === 'missing') {
     return {value: null, texture: 'missing', text: '缺测'};
@@ -853,8 +850,7 @@ function encodeReading(reading, task) {
 
 图\ref{fig:ch7-color-accessibility}强调色彩设计不是调色板选择的单一步骤。先确定业务语义，再选色板和对比度，随后补充形状、纹理、文字与替代文本，最后在不同显示条件下验收；若验收发现红绿色差异在灰度打印中消失，应回到冗余编码环节补充图标或线型，而不是继续调换色相。
 
-\label{lst:ch07-warning-palette}
-\begin{lstlisting}[language=JavaScript,breaklines=true,caption={预警等级与质量状态的双维度色彩配置}]
+\begin{lstlisting}[label={lst:ch07-warning-palette},language=JavaScript,breaklines=true,caption={预警等级与质量状态的双维度色彩配置}]
 const warningPalette = {
   NONE:   {color: '#607D8B', icon: 'check', text: '无预警'},
   BLUE:   {color: '#1976D2', icon: 'info', text: '蓝色预警'},
@@ -875,10 +871,9 @@ function styleReading(reading) {
 }
 \end{lstlisting}
 
-清单\ref{lst:ch07-warning-palette}中的两套配置互不覆盖：预警等级提供业务颜色和图标，质量状态提供边框、纹理和文字。`styleReading`的标签把二者组合为可读短语，详情面板再展开规则版本、检查时刻和处置入口。若颜色加载失败，图标和文字仍能表达状态；若质量服务返回missing，界面不得把它回退为NONE。
+清单\ref{lst:ch07-warning-palette}中的两套配置互不覆盖：预警等级提供业务颜色和图标，质量状态提供边框、纹理和文字。\texttt{styleReading}的标签把二者组合为可读短语，详情面板再展开规则版本、检查时刻和处置入口。若颜色加载失败，图标和文字仍能表达状态；若质量服务返回missing，界面不得把它回退为NONE。
 
-\label{lst:ch07-aria-accessible}
-\begin{lstlisting}[language=JavaScript,breaklines=true,caption={ECharts图表的无障碍与替代文本配置}]
+\begin{lstlisting}[label={lst:ch07-aria-accessible},language=JavaScript,breaklines=true,caption={ECharts图表的无障碍与替代文本配置}]
 const option = {
   aria: {
     enabled: true,
@@ -904,11 +899,11 @@ chart.getDom().setAttribute('aria-label', option.aria.description);
 
 同一指标在不同时间尺度上可能需要不同图型。值班员查看最近两小时的水位变化时，过程线和阈值带最有效；专业分析员比较过去十场洪水时，应把过程线按事件对齐或使用峰值散点；管理人员查看年度供水结构时，堆叠条形或分面图更便于比较。前端切换时间窗时应同步更新标题、轴标签、样本数和质量分布，不能只替换数组而保留上一窗口的“最近两小时”说明。若数据经过聚合，要在tooltip或详情面板中说明聚合函数、窗口宽度和是否排除了suspect、missing记录。
 
-双轴图的误读控制可以通过三个反例教学。第一，把水位轴的最小值从160,m改为164,m会让曲线看起来波动很大，但实际变化量没有改变；因此轴范围和零点策略必须在图注中说明。第二，把雨量按小时聚合而水位按5分钟采样，会造成峰值错位；两条序列应在服务端统一时间桶，或在图例中标出不同采样周期。第三，把可疑数据用与有效数据相同的实线连接，会让用户误以为过程连续；可疑点至少使用虚线、边框或提示图标，缺测点则保留时间位置并断开连线。将这些反例写入验收用例，比单纯截图更能证明图表满足业务语义。
+双轴图的误读控制可以通过三个反例教学。第一，把水位轴的最小值从160\,m改为164\,m会让曲线看起来波动很大，但实际变化量没有改变；因此轴范围和零点策略必须在图注中说明。第二，把雨量按小时聚合而水位按5分钟采样，会造成峰值错位；两条序列应在服务端统一时间桶，或在图例中标出不同采样周期。第三，把可疑数据用与有效数据相同的实线连接，会让用户误以为过程连续；可疑点至少使用虚线、边框或提示图标，缺测点则保留时间位置并断开连线。将这些反例写入验收用例，比单纯截图更能证明图表满足业务语义。
 
 专题地图也要区分“空间位置正确”和“专题数值正确”。位置校验使用控制点、对象编码和坐标反算；数值校验则抽样读取栅格或要素属性，与生成地图使用的时间窗、单位和版本比较。等值线和色斑图的分级边界应固定在配置中，不能因浏览器窗口大小改变而重新分级；流向箭头应由矢量方向计算，箭头长度可随缩放调整但方向不能被屏幕坐标替代；站点符号的点击回传必须携带assetId，不能把显示标签当作数据库主键。地图服务发生超时或返回空图层时，界面应显示“图层不可用”和重试入口，不能留下没有图例的空白底图。
 
-地图和图表的联动需要一个明确的选择状态对象，例如`{assetId, timeRange, qualityFilter, scenarioVersion}`。图表点击测点后，地图只改变选中符号和视野，不重写原始数据；地图框选多个测点后，图表查询使用同一组assetId和时间窗，并在标题中显示样本数。用户切换场景版本时，选择状态应清空或重新校验，避免把上一版本的测点高亮到新模型。选择状态还要写入操作日志，便于复盘“用户当时看了哪些对象、使用哪一时间窗、是否过滤了可疑数据”。
+地图和图表的联动需要一个明确的选择状态对象，例如\texttt{\{assetId, timeRange, qualityFilter, scenarioVersion\}}。图表点击测点后，地图只改变选中符号和视野，不重写原始数据；地图框选多个测点后，图表查询使用同一组assetId和时间窗，并在标题中显示样本数。用户切换场景版本时，选择状态应清空或重新校验，避免把上一版本的测点高亮到新模型。选择状态还要写入操作日志，便于复盘“用户当时看了哪些对象、使用哪一时间窗、是否过滤了可疑数据”。
 
 可视化验收应覆盖感知、语义和性能三层。感知层检查文字、轴、颜色、形状和图例是否可读；语义层检查单位、时间、质量码、版本和对象编码是否一致；性能层检查首次渲染、增量更新、缩放、切换图层和失败重试的时间预算。测试数据至少包含正常、突变、缺测、可疑、重复和乱序记录，地图还要包含边界外点、跨瓦片点和坐标转换失败点。每个失败用例保存输入快照、预期图形、实际图形和修复提交号，防止后续优化又把质量提示或坐标边界删掉。
 
@@ -949,8 +944,7 @@ x=E-E_0,\qquad y=H-H_0,\qquad z=-(N-N_0).
 
 负号来自Three.js常用的相机与地面坐标约定，项目也可采用其他轴向，但数据、模型和交互必须统一。
 
-\label{lst:ch07-coordinate-transform}
-\begin{lstlisting}[language=JavaScript,breaklines=true,caption={坐标与单位转换}]
+\begin{lstlisting}[label={lst:ch07-coordinate-transform},language=JavaScript,breaklines=true,caption={坐标与单位转换}]
 const cgcs2000 = '+proj=longlat +ellps=GRS80 +no_defs +type=crs';
 const gauss = '+proj=tmerc +lat_0=0 +lon_0=117 '
   + '+k_0=1 +x_0=500000 +y_0=0 +ellps=GRS80 '
@@ -969,8 +963,7 @@ const world = {
 
 国内测绘成果有时把带号前缀拼接到东坐标左侧。例如3度带39号的成果可能写成\texttt{39500000.00}，其中前两位是带号，真正参与局部原点相减的东坐标是\texttt{500000.00}。如果把带号坐标直接送入场景，局部坐标会突然增加三千多万米，单精度顶点和相机裁剪都会失效。剥离带号必须依据元数据中的带宽和带号，不要按字符串长度盲切；剥离后的结果要与中央经线、\texttt{+x\_0=500000}和控制点复核。
 
-\label{lst:ch07-strip-zone-prefix}
-\begin{lstlisting}[language=JavaScript,breaklines=true,caption={剥离国内测绘成果的带号前缀}]
+\begin{lstlisting}[label={lst:ch07-strip-zone-prefix},language=JavaScript,breaklines=true,caption={剥离国内测绘成果的带号前缀}]
 function stripZonePrefix(easting, zoneWidth, zoneNumber) {
   const text = String(easting);
   const prefix = String(zoneNumber);
@@ -990,8 +983,7 @@ const east = stripZonePrefix('39500000.00', 3, 39);
 \]
 因此向北位移的$z$分量为负，向东位移的$x$分量为正。角度必须先由度转换为弧度，箭头长度还应设置可视化比例并在图例中标注真实位移，避免把放大的绘制长度误读成工程量。
 
-\label{lst:ch07-displacement-vector}
-\begin{lstlisting}[language=JavaScript,breaklines=true,caption={按北起顺时针方位角生成位移箭头向量}]
+\begin{lstlisting}[label={lst:ch07-displacement-vector},language=JavaScript,breaklines=true,caption={按北起顺时针方位角生成位移箭头向量}]
 function displacementVector(distance, azimuthDeg, displayScale = 1) {
   const alpha = azimuthDeg * Math.PI / 180;
   return new THREE.Vector3(
@@ -1041,8 +1033,7 @@ LOD不只是“近处多画、远处少画”，而是要为每一级定义可�
 
 性能预算可以用屏幕占用而不是固定米数表达。测点圆点直径低于3像素时，增加几何细节没有收益；文字标签低于8像素时，应隐藏文字并保留可访问的列表入口；聚合圆点达到20像素以上且重叠严重时，优先显示数量和最高风险。每一级记录对象数、三角形数、材质切换次数和帧时间，按普通笔记本、值班室大屏和移动设备分别验收。这样，LOD阈值来自任务和设备能力，而不是照抄某个项目的距离常数。
 
-\label{lst:ch07-world-radius}
-\begin{lstlisting}[language=JavaScript,breaklines=true,caption={按相机距离换算聚合与拾取世界半径}]
+\begin{lstlisting}[label={lst:ch07-world-radius},language=JavaScript,breaklines=true,caption={按相机距离换算聚合与拾取世界半径}]
 function distanceToPoint(camera, point) {
   return camera.position.distanceTo(point);
 }
@@ -1074,8 +1065,7 @@ function radiusForObject(camera, point, px, canvasHeight) {
 
 拾取测试要覆盖画布边缘、窄屏旋转、设备像素比为2的屏幕、对象被遮挡和相邻对象重叠。测试输入保存客户端坐标、画布矩形、相机参数和预期\texttt{assetId}，而不是只保存一张截图。若模型分块异步加载，点击发生在分块尚未到达时，界面应显示加载状态并允许重试；加载完成后用同一屏幕坐标重新计算射线，不要沿用旧的交点距离。
 
-\label{lst:ch07-lod-points}
-\begin{lstlisting}[language=JavaScript,caption={LOD监测点聚合}]
+\begin{lstlisting}[label={lst:ch07-point-picker},language=JavaScript,caption={PointPicker：射线拾取器}]
 class PointPicker {
   constructor(camera, scene, canvas) {
     this.camera = camera;
@@ -1117,8 +1107,7 @@ class PointPicker {
 
 若教学中手工实现M\"oller--Trumbore三角形求交，必须复制向量后再做减法、叉乘和缩放，避免破坏顶点与射线输入。函数返回的是交点的世界坐标，不是参数$t$；若\texttt{direction}没有归一化，$t$表示沿射线方向的缩放量而不等于米制距离，按交点远近排序时应使用\texttt{origin.distanceTo(point)}或先归一化方向向量：
 
-\label{lst:ch07-raycaster}
-\begin{lstlisting}[language=JavaScript,caption={射线拾取器定义}]
+\begin{lstlisting}[label={lst:ch07-triangle-intersect},language=JavaScript,caption={M\"oller--Trumbore 三角形求交}]
 function intersectTriangle(origin, direction, a, b, c) {
   const edge1 = b.clone().sub(a);
   const edge2 = c.clone().sub(a);
@@ -1143,12 +1132,9 @@ function intersectTriangle(origin, direction, a, b, c) {
 
 \texttt{raycaster.params.Points.threshold}使用世界单位，不是像素。触控目标希望具有20像素左右的可点范围时，先按相机距离和视场角换算：
 
-\label{lst:ch07-picker}
-\begin{lstlisting}[language=JavaScript,caption={拾取结果与业务对象绑定}]
-function pixelsToWorld(px, distance, fovRad, heightPx) {
-  return 2 * distance * Math.tan(fovRad / 2)
-    * px / heightPx;
-}
+\begin{lstlisting}[label={lst:ch07-pixels-to-world},language=JavaScript,caption={屏幕像素到世界长度的换算}]
+// 复用前文定义的 pixelsToWorld(px, distance, fovRad,
+// heightPx, zoom)；透视相机 zoom 取默认值 1
 const distance = distanceToPoint(camera, pointWorld);
 const pickingRadiusWorld = pixelsToWorld(
   20, distance, THREE.MathUtils.degToRad(camera.fov),
@@ -1236,7 +1222,7 @@ raycaster.params.Points.threshold = pickingRadiusWorld;
 \item 设计正常、关注、告警、离线和可疑数据的颜色、形状与文字组合。
 
 \item[\textbf{实践题}]
-\item 使用提供的1000条水位数据生成一张曲线，并在一课时内实现300点滑动窗口和缺测断线。
+\item 使用配套仓库\texttt{companion/datasets/}提供的1000条水位数据生成一张曲线，并在一课时内实现300点滑动窗口和缺测断线。
 \item 为清源水库28个观测点建立局部坐标映射，抽查5点并记录定位误差。
 \item 实现“点击曲线异常点—定位三维测点—打开同一时刻详情”的联动，并完成一条失败场景测试。
 \item 实现 LTTB 降采样，将同一组水位序列分别用等间隔抽样和 LTTB 抽样绘制，比较两种方法对峰值、谷值和突变点的保留率，并说明何时必须回看原始数据。

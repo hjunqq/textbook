@@ -32,7 +32,7 @@
 四章对应平台开发与可视化表达的核心技术链：
 \begin{itemize}
 \item \textbf{前端}（第4章）：HTML/CSS/JavaScript基础，Vue.js框架开发，重点是如何构建水情数据展示界面
-\item \textbf{后端}（第5章）：Spring Boot框架（Java 17 / Jakarta EE），RESTful API设计、JPA持久化、Spring Security与消息队列；Python生态（Flask/Django/FastAPI）作扩展阅读简介
+\item \textbf{后端}（第5章）：Spring Boot框架（Java 17 / Jakarta EE），RESTful API设计、JPA持久化、Spring Security与消息队列；Python生态（Flask/FastAPI）作扩展阅读简介
 \item \textbf{三维场景}（第6章）：WebGL/Three.js三维渲染，GIS地图服务，BIM建模与数字孪生技术
 \item \textbf{观测数据展示}（第7章）：监测数据面向三维场景的组织、可视化表达、交互与联动
 \end{itemize}
@@ -42,7 +42,7 @@
 \begin{tipbox}
 \paragraph{第三部分\quad 应用篇（第8--9章）}
 
-前两部分学到的方法与技术，在这里汇聚成完整的项目实践。第8章以\textbf{水利工程安全监测平台}为起点，从业务需求、总体架构和数据模型出发，完成前后端、三维场景、智能分析、部署与验收的完整链路；并在8.5节进一步演进到数字孪生水利平台，以流域、水网和工程三类入口贯通“预报、预警、预演、预案”。第9章回顾全书，并给出技术展望与后续学习指引。
+前两部分学到的方法与技术，在这里汇聚成完整的项目实践。第8章以\textbf{清源水库安全监测平台}为起点，从业务需求、总体架构和数据模型出发，完成前后端、三维场景、智能分析、部署与验收的完整链路；并在8.5节进一步演进到数字孪生水利平台，以流域、水网和工程三类入口贯通“预报、预警、预演、预案”。第9章回顾全书，并给出技术展望与后续学习指引。
 \end{tipbox}
 
 \section*{怎么使用这本书}
@@ -113,7 +113,7 @@
 
 \section*{配套资源}
 
-为了让“动手写代码”和“使用真实数据”能够落地，本书配套资源按可复现、可追踪、可反馈三个原则组织。资源目录与用途见表\ref{tab:preface-companion-resources}，当前仓库已归档代码、数据集和答案的提交版本，精确快照见表\ref{tab:preface-companion-versions}。各项资源将随教材配套仓库分批发布；在尚未发布前，读者可依据表中清单建立同名目录，不会影响章节概念学习。每次下载资源时请记录版本号与校验信息，课程报告应注明所用数据和代码版本，便于同伴复现实验结果。
+为了让“动手写代码”和“使用真实数据”能够落地，本书配套资源按可复现、可追踪、可反馈三个原则组织。资源目录与用途见表\ref{tab:preface-companion-resources}，当前仓库已归档代码、数据集和答案的提交版本，精确快照见表\ref{tab:preface-companion-versions}；公开发布渠道与时间以出版社配套资源页为准。若拿到教材时资源尚未上线，读者可依据表中清单建立同名目录，不影响章节概念学习。每次下载资源时请记录版本号与校验信息，课程报告应注明所用数据和代码版本，便于同伴复现实验结果。
 
 \begin{table}[htbp]
 \centering
@@ -133,9 +133,9 @@ Issues反馈渠道 & 勘误、环境问题和可复现实验报告 & 在配套�
 
 \paragraph{代码仓库结构。}配套代码的根目录为\texttt{companion/}\allowbreak\texttt{water-platform-}\allowbreak\texttt{demo/}（S2 提交\texttt{f71b52a}）。\texttt{frontend/}的可运行入口是\texttt{package.json}、\texttt{src/}\allowbreak\texttt{main.js}、\texttt{src/router/}\allowbreak\texttt{index.js}、\texttt{src/stores/}\allowbreak\texttt{monitoring.js}、\texttt{src/utils/}\allowbreak\texttt{request.js}和\texttt{src/components/}\allowbreak\texttt{MonitoringDashboard.vue}，并配有\texttt{vite.config.js}、\texttt{Dockerfile}和\texttt{nginx.conf}；\texttt{backend/}包含\texttt{pom.xml}、\texttt{src/main/java/}\allowbreak\texttt{edu/example/}\allowbreak\texttt{qingyuan/}下的实体、Repository、服务、JWT 过滤器和安全配置，以及\texttt{application.yml}和\texttt{Dockerfile}；\texttt{db/}包含\texttt{001\_init.sql}与\texttt{load-s3-data.sql}；根目录的\texttt{docker-compose.yml}负责编排前端、后端、PostgreSQL、Redis和Kafka，\texttt{secrets/}只提交\texttt{*.example}模板。目录中的每个服务都提供配置样例和健康检查说明，学生可以先运行最小链路，再逐个替换为章节中的实现。
 
-\paragraph{示例数据集。}\texttt{companion/datasets/}（S3 提交\texttt{4fed08e}）由\texttt{generate.py}生成，固定随机种子为\texttt{20260807}。\texttt{stations.csv/json}含28个测点元数据，字段为\texttt{asset\_id}、\texttt{asset\_type}、\texttt{display\_name}、单位、经纬度、\texttt{elevation\_m}、量程、精度、阈值和投运日期；\texttt{water\_level.csv}含3个库水位测点各1,200条、5分钟间隔的观测；\texttt{rainfall.csv}含5个雨量测点各288条，\texttt{piezometer.csv}含12个渗压测点各288条；三类观测共同使用\texttt{asset\_id}、\texttt{occurred\_at}、\texttt{version}、\texttt{event\_id}、\texttt{value}、\texttt{unit}、\texttt{quality}和\texttt{source}字段；\texttt{warnings.json}含蓝、黄、橙、红和缺测未评估样例。质量码只取\texttt{valid}、\texttt{suspect}、\texttt{missing}，文件中的缺测、超量程和跳变记录均保留原因。使用前应先阅读README中的字段说明，确认时间采用ISO 8601、时区采用UTC+8，并在报告中注明数据版本。
+\paragraph{示例数据集。}\texttt{companion/datasets/}（S3 提交\texttt{4fed08e}）由\texttt{generate.py}生成，固定随机种子为\texttt{20260807}。\texttt{stations.csv/json}含28个测点元数据，字段为\texttt{asset\_id}、\texttt{asset\_type}、\texttt{display\_name}、单位、经纬度、\texttt{elevation\_m}、量程、精度、阈值和投运日期；\texttt{water\_level.csv}含3个库水位测点各1,200条、5分钟间隔的观测；\texttt{rainfall.csv}含5个雨量测点各288条，\texttt{piezometer.csv}含12个渗压测点各288条；8个位移测点当前仅提供\texttt{stations}中的元数据与阈值，其观测序列留作第7章练习用\texttt{generate.py}扩展生成。三类已生成观测共同使用\texttt{asset\_id}、\texttt{occurred\_at}、\texttt{version}、\texttt{event\_id}、\texttt{value}、\texttt{unit}、\texttt{quality}和\texttt{source}字段；\texttt{warnings.json}含蓝、黄、橙、红、无预警（NONE）与未评估样例。质量码只取\texttt{valid}、\texttt{suspect}、\texttt{missing}，文件中的缺测、超量程和跳变记录均保留原因。使用前应先阅读README中的字段说明，确认时间采用ISO 8601、时区采用UTC+8，并在报告中注明数据版本。
 
-\paragraph{环境版本基线。}为避免“在我的电脑上可以运行”的差异，建议按表\ref{tab:preface-companion-versions}的主线配置准备环境；补丁版本可以在同一大版本内更新，但不得跨越书中API假设。仓库快照中前端实际锁定Vue 3.4.38、Vite 5.4.8、Pinia 2.1.7、Vue Router 4.4.5、ECharts 5.5.1、Three.js 0.160.1和\texttt{@vitejs/plugin-vue} 5.2.3；后端\texttt{pom.xml}锁定Java 17、Spring Boot 3.2.10，应用版本为0.1.0；Compose 使用\texttt{postgis/postgis:16-3.4}、\texttt{redis:7.2-alpine}和Bitnami Kafka 3.7。Python生成脚本只使用标准库，建议Python 3.11或更高版本；若操作系统或CPU架构不同，应在提交问题时同时附上版本输出和启动日志。
+\paragraph{环境版本基线。}为避免“在我的电脑上可以运行”的差异，建议按表\ref{tab:preface-companion-versions}的主线配置准备环境；补丁版本可以在同一大版本内更新，但不得跨越书中API假设。仓库快照中前端实际锁定Vue 3.4.38、Vite 5.4.8、Pinia 2.1.7、Vue Router 4.4.5、ECharts 5.5.1、Three.js 0.160.1和\texttt{@vitejs/plugin-vue} 5.2.3；后端\texttt{pom.xml}锁定Java 17、Spring Boot 3.2.10，应用版本为0.1.0；Compose 使用\texttt{timescale/timescaledb-ha:pg16}（同时含 PostGIS 与 TimescaleDB 扩展）、\texttt{redis:7.2-alpine}和Bitnami Kafka 3.7。Python生成脚本只使用标准库，建议Python 3.11或更高版本；若操作系统或CPU架构不同，应在提交问题时同时附上版本输出和启动日志。
 
 \begin{table}[htbp]
 \centering
@@ -157,9 +157,9 @@ Issues反馈渠道 & 勘误、环境问题和可复现实验报告 & 在配套�
 
 \section*{适用对象}
 
-\paragraph{本书以水利工程及相关专业高年级本科生为主要读者}，兼顾研究生，以及有志于从事水利信息化、智慧水利平台开发的技术人员。
+\paragraph{适用读者}本书以水利工程及相关专业高年级本科生为主要读者，兼顾研究生，以及有志于从事水利信息化、智慧水利平台开发的技术人员。
 
-\paragraph{先修知识依赖}：学习本书前，你需要具备以下基础：
+\paragraph{先修知识}学习本书前，你需要具备以下基础：
 
 \begin{itemize}
 \item 至少学过一门编程语言（C、Python或Java均可）

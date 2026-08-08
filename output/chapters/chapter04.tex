@@ -54,8 +54,7 @@ HTML描述内容的结构和语义。\texttt{header}、\texttt{nav}、\texttt{ma
 
 下面的页面骨架只负责内容组织，不在HTML中混入具体视觉样式。
 
-\label{lst:ch04-html-shell}
-\begin{lstlisting}[language=html,caption={水利平台页面骨架}]
+\begin{lstlisting}[label={lst:ch04-html-shell},language=html,caption={水利平台页面骨架}]
 <!doctype html>
 <html lang="zh-CN">
 <head>
@@ -113,10 +112,9 @@ HTML 文件被浏览器接收后，先经过字节解码和词法分析，再形
 
 语义标签不仅是代码风格。\texttt{header}表示页面或区域的引导信息，\texttt{nav}表示一组重要导航，\texttt{main}表示页面唯一的主要内容，\texttt{section}表示具有主题标题的内容组，\texttt{article}表示可以独立发布的报告或公告，\texttt{aside}放置辅助信息，\texttt{footer}承载来源与更新时间，\texttt{figure}与\texttt{figcaption}把图表和说明绑定。若只是为了布局而没有主题标题，应使用\texttt{div}，而不是滥用\texttt{section}。每个地标都应能由键盘到达，并通过标题或\texttt{aria-label}获得可理解的名称。
 
-清单\ref{lst:ch04-a41-landmarks}把地标、跳转链接和实时区域放在一个可直接打开的文件中。正文先用\texttt{href=\"\#monitor-main\"}提供“跳到主要内容”链接，再用\texttt{aria-labelledby}把区域标题与地标关联；这样，屏幕阅读器用户无需重复经过全局导航即可进入水位数据。代码中的\texttt{tabindex=\"-1\"}只用于让脚本把焦点移动到主要内容，不会把普通文本加入键盘遍历顺序。完整骨架见清单\ref{lst:ch04-a41-landmarks}。
+清单\ref{lst:ch04-a41-landmarks}把地标、跳转链接和实时区域放在一个可直接打开的文件中。正文先用\texttt{href="\#monitor-main"}提供“跳到主要内容”链接，再用\texttt{aria-labelledby}把区域标题与地标关联；这样，屏幕阅读器用户无需重复经过全局导航即可进入水位数据。代码中的\texttt{tabindex="-1"}只用于让脚本把焦点移动到主要内容，不会把普通文本加入键盘遍历顺序。完整骨架见清单\ref{lst:ch04-a41-landmarks}。
 
-\label{lst:ch04-a41-landmarks}
-\begin{lstlisting}[language=html,caption={带地标和跳转链接的监测页面骨架}]
+\begin{lstlisting}[label={lst:ch04-a41-landmarks},language=html,caption={带地标和跳转链接的监测页面骨架}]
 <!doctype html>
 <html lang="zh-CN">
 <head>
@@ -161,8 +159,7 @@ HTML 文件被浏览器接收后，先经过字节解码和词法分析，再形
 
 页面地标解决“我现在在哪里”的问题，表单控件则解决“我能提交什么”的问题。原生校验由浏览器在提交前执行，适合检查必填、格式和基本范围；\texttt{required}防止空值，\texttt{pattern}检查编码格式，\texttt{min}、\texttt{max}和\texttt{step}约束数值。校验消息应告诉用户如何修正，而不是只显示“输入错误”。清单\ref{lst:ch04-a41-form}用查询时段和测站编码说明这些属性的组合，并用\texttt{novalidate}保留自定义消息的控制权；实际项目也可以让浏览器显示默认消息，但提交到后端前必须再次校验。
 
-\label{lst:ch04-a41-form}
-\begin{lstlisting}[language=html,caption={监测查询表单的原生校验与可访问提示}]
+\begin{lstlisting}[label={lst:ch04-a41-form},language=html,caption={监测查询表单的原生校验与可访问提示}]
 <form id="query-form" novalidate>
   <fieldset>
     <legend>查询条件</legend>
@@ -189,12 +186,11 @@ HTML 文件被浏览器接收后，先经过字节解码和词法分析，再形
 
 \paragraph{键盘操作、焦点与动态内容}
 
-可访问页面需要一条可预测的键盘路径：跳转链接首先获得焦点，随后进入主导航，按 Tab 到达查询表单，再进入数据卡片和预警区域。不要用正整数\texttt{tabindex}人为重排顺序，因为 DOM 顺序才是屏幕阅读器和自动化测试能够稳定复现的顺序。弹出详情后，应把焦点移动到对话框标题，关闭时恢复到触发按钮；如果只是页面内提示，则用\texttt{role=\"status\"}表达普通更新，用\texttt{role=\"alert\"}表达需要立即处理的异常。
+可访问页面需要一条可预测的键盘路径：跳转链接首先获得焦点，随后进入主导航，按 Tab 到达查询表单，再进入数据卡片和预警区域。不要用正整数\texttt{tabindex}人为重排顺序，因为 DOM 顺序才是屏幕阅读器和自动化测试能够稳定复现的顺序。弹出详情后，应把焦点移动到对话框标题，关闭时恢复到触发按钮；如果只是页面内提示，则用\texttt{role="status"}表达普通更新，用\texttt{role="alert"}表达需要立即处理的异常。
 
 清单\ref{lst:ch04-a41-focus}展示一个不依赖框架的焦点恢复脚本。它只负责交互语义，视觉样式仍交给 CSS；后续换成 Vue 组件时，可以把\texttt{openDialog}和\texttt{closeDialog}放入组件方法，并在卸载时移除事件监听。这样既能保持原生 HTML 的可测试性，也能避免把键盘逻辑散落在多个点击回调中。
 
-\label{lst:ch04-a41-focus}
-\begin{lstlisting}[language=JavaScript,caption={监测详情对话框的焦点管理}]
+\begin{lstlisting}[label={lst:ch04-a41-focus},language=JavaScript,caption={监测详情对话框的焦点管理}]
 document.body.insertAdjacentHTML('beforeend', `
   <button id="open-station" type="button">查看测站详情</button>
   <dialog id="station-dialog">
@@ -248,8 +244,7 @@ dialog.addEventListener('cancel', closeDialog);
 
 CSS负责视觉呈现。规则由选择器和声明块组成，层叠结果主要受来源、优先级和出现顺序影响。工程中宜使用类选择器组织组件样式，避免依赖过深的DOM层级。
 
-\label{lst:ch04-css-responsive}
-\begin{lstlisting}[language=CSS,caption={监测卡片响应式样式}]
+\begin{lstlisting}[label={lst:ch04-css-responsive},language=CSS,caption={监测卡片响应式样式}]
 :root { --normal: #1677ff; --warning: #d46b08; }
 .monitor-grid {
   display: grid;
@@ -294,8 +289,7 @@ Grid适合仪表盘的二维区域布局，Flexbox适合工具栏等一维排列
 
 清单\ref{lst:ch04-css-box-sizing}用同一条规则把测站卡片、数值输出和图表容器纳入统一盒模型。选择器中的通配符会命中伪元素，因此\texttt{::before}和\texttt{::after}生成的装饰也不会把布局撑大。工程中仍应通过组件类限制样式范围，避免把第三方地图容器的内部计算误改为全局规则。
 
-\label{lst:ch04-css-box-sizing}
-\begin{lstlisting}[language=CSS,caption={监测卡片的 border-box 盒模型}]
+\begin{lstlisting}[label={lst:ch04-css-box-sizing},language=CSS,caption={监测卡片的 border-box 盒模型}]
 *, *::before, *::after {
   box-sizing: border-box;
 }
@@ -339,8 +333,7 @@ Grid适合仪表盘的二维区域布局，Flexbox适合工具栏等一维排列
 
 清单\ref{lst:ch04-css-cascade}把主题变量、继承和状态类放在一个可检查的层级中。\texttt{color}从\texttt{.dashboard}继承到输出文本，\texttt{border-color}由状态类显式覆盖；组件内部不需要知道页面使用的是哪一种蓝色，只依赖变量名。改变主题时只替换变量值，避免在几十个选择器中逐一寻找颜色常量。
 
-\label{lst:ch04-css-cascade}
-\begin{lstlisting}[language=CSS,caption={主题变量与状态层叠规则}]
+\begin{lstlisting}[label={lst:ch04-css-cascade},language=CSS,caption={主题变量与状态层叠规则}]
 :root {
   --water-primary: #1565c0;
   --water-warning: #d46b08;
@@ -370,8 +363,7 @@ CSS 单位应与测量对象和缩放目标相匹配。\texttt{px}适合边框�
 
 清单\ref{lst:ch04-css-units}展示同一监测面板中不同单位的职责。根字号是全站设计令牌，组件内的\texttt{em}保证按钮文本和内边距同步放大，\texttt{vw}只参与宽屏布局的上限计算；通过\texttt{clamp()}可以在最小、首选和最大值之间平滑过渡。
 
-\label{lst:ch04-css-units}
-\begin{lstlisting}[language=CSS,caption={监测面板的 CSS 单位策略}]
+\begin{lstlisting}[label={lst:ch04-css-units},language=CSS,caption={监测面板的 CSS 单位策略}]
 :root { font-size: 16px; }
 
 .monitor-shell {
@@ -399,8 +391,7 @@ CSS 单位应与测量对象和缩放目标相匹配。\texttt{px}适合边框�
 
 清单\ref{lst:ch04-css-position}给出一个独立的监测工具条和浮层样式。工具条使用\texttt{sticky}保留在滚动容器顶部，浮层使用相对定位的卡片作为参照；\texttt{isolation: isolate}明确创建上下文，使第三方地图的层级不会穿透到业务提示中。读者可以在浏览器中滚动长列表并切换状态类，观察定位和层叠的实际效果。
 
-\label{lst:ch04-css-position}
-\begin{lstlisting}[language=CSS,caption={监测工具条与预警浮层的定位}]
+\begin{lstlisting}[label={lst:ch04-css-position},language=CSS,caption={监测工具条与预警浮层的定位}]
 .monitor-page {
   position: relative;
   isolation: isolate;
@@ -435,8 +426,7 @@ Flexbox 为一个容器建立主轴和交叉轴。\texttt{flex-direction}决定�
 
 告警工具栏是一维布局的典型场景：左侧放当前测站和筛选条件，中间放状态摘要，右侧放刷新、导出和确认按钮。桌面宽度足够时，项目沿行方向排列；窄屏时让工具栏换行或改为列方向，按钮仍保持可触控的最小高度。工具栏中的文字应允许缩放，不能通过\texttt{white-space: nowrap}把所有控件锁在一行，否则翻译、放大字体和小屏设备都会造成横向滚动。清单\ref{lst:ch04-a43-flex-toolbar}是一个可直接打开的完整页面，演示主轴、交叉轴、换行和状态颜色的配合。
 
-\label{lst:ch04-a43-flex-toolbar}
-\begin{lstlisting}[language=html,caption={告警工具栏 Flex 完整实例}]
+\begin{lstlisting}[label={lst:ch04-a43-flex-toolbar},language=html,caption={告警工具栏 Flex 完整实例}]
 <!doctype html>
 <html lang="zh-CN">
 <head>
@@ -515,8 +505,7 @@ Grid 同时管理行和列，适合把侧栏、地图、曲线、告警列表和
 
 清单\ref{lst:ch04-a43-grid-dashboard}把区域命名、自动列数和最小卡片宽度组合为完整页面。页面在宽屏时显示侧栏、主图区和告警栏，在窄屏时通过媒体查询重新排列区域；HTML 顺序仍然遵循标题、主数据、事件和状态说明的阅读顺序，Grid 只改变视觉布局。
 
-\label{lst:ch04-a43-grid-dashboard}
-\begin{lstlisting}[language=html,caption={监测仪表盘 Grid 完整实例}]
+\begin{lstlisting}[label={lst:ch04-a43-grid-dashboard},language=html,caption={监测仪表盘 Grid 完整实例}]
 <!doctype html>
 <html lang="zh-CN">
 <head>
@@ -600,8 +589,7 @@ Grid 同时管理行和列，适合把侧栏、地图、曲线、告警列表和
 
 清单\ref{lst:ch04-a43-breakpoints}把移动优先、三个宽屏档位和大屏画布对比放在一个样式表中。\texttt{--normal}在按钮和状态徽标中实际使用，避免主题变量成为没有消费者的死代码；\texttt{clamp()}控制字号和间距的上下限，\texttt{aspect-ratio}保证图表容器在重排时不发生高度跳动。
 
-\label{lst:ch04-a43-breakpoints}
-\begin{lstlisting}[language=CSS,caption={移动优先与 1920/2560/3840 大屏断点}]
+\begin{lstlisting}[label={lst:ch04-a43-breakpoints},language=CSS,caption={移动优先与 1920/2560/3840 大屏断点}]
 :root {
   --normal: #1677ff;
   --page-gap: clamp(.75rem, 1vw, 2rem);
@@ -625,7 +613,7 @@ Grid 同时管理行和列，适合把侧栏、地图、曲线、告警列表和
 @media (min-width: 160rem) { /* 2560 CSS 像素附近的宽屏 */
   .water-dashboard { --page-gap: 2rem; grid-template-columns: 22rem minmax(0, 1fr) 28rem; }
 }
-@media (min-width: 200rem) { /* 3840 CSS 像素附近的联屏 */
+@media (min-width: 240rem) { /* 3840 CSS 像素附近的联屏 */
   .water-dashboard { --page-gap: 2.5rem; grid-template-columns: 26rem minmax(0, 1fr) 32rem; }
 }
 \end{lstlisting}
@@ -636,10 +624,9 @@ CSS 自定义属性是运行时可继承的设计令牌。主题色、背景色�
 
 用户选择的主题应通过按钮或系统偏好决定，而不是根据业务预警等级自动切换。\texttt{prefers-color-scheme}可作为初始值，用户显式选择后应存储在本地并覆盖系统偏好；主题切换不会改变 DOM 顺序和语义，只改变呈现令牌。对于截图、打印和投影场景，还要提供高对比度的后备色，不能只依靠颜色传递“正常”或“预警”含义。
 
-清单\ref{lst:ch04-a43-dark-theme}给出明暗主题和高对比度状态样式。\texttt{data-theme}由应用状态控制，变量的后备值保证旧浏览器或组件脱离主题容器时仍有可读颜色；\texttt{forced-colors}分支让操作系统的高对比度模式接管边框和文本。将这段样式与 A4-1 的语义页面骨架组合后，键盘、读屏和主题切换可以分别验收。
+清单\ref{lst:ch04-a43-dark-theme}给出明暗主题和高对比度状态样式。\texttt{data-theme}由应用状态控制，变量的后备值保证旧浏览器或组件脱离主题容器时仍有可读颜色；\texttt{forced-colors}分支让操作系统的高对比度模式接管边框和文本。将这段样式与清单\ref{lst:ch04-a41-landmarks}的语义页面骨架组合后，键盘、读屏和主题切换可以分别验收。
 
-\label{lst:ch04-a43-dark-theme}
-\begin{lstlisting}[language=CSS,caption={监测页面的明暗主题与高对比度}]
+\begin{lstlisting}[label={lst:ch04-a43-dark-theme},language=CSS,caption={监测页面的明暗主题与高对比度}]
 :root {
   --surface: #ffffff;
   --surface-raised: #f5f9ff;
@@ -683,8 +670,7 @@ Flexbox 和 Grid 的选择、断点的推导、大屏的缩放策略以及暗色
 
 清单\ref{lst:ch04-a49-flex-debug}把一个可诊断的告警摘要栏拆成三层。外层使用\texttt{display:flex}分配主轴空间，中间摘要允许收缩，右侧操作组再次使用\texttt{display:flex}组织按钮；\texttt{flex: 0 0 auto} 保证确认按钮不被压成不可点击的窄条，\texttt{flex: 1 1 18rem} 则让摘要在宽屏分享空间、窄屏主动换行。读者可以在开发者工具中逐项取消属性，观察“内容最小尺寸”“换行”和“按钮命中区”分别由哪条规则决定。
 
-\label{lst:ch04-a49-flex-debug}
-\begin{lstlisting}[language=CSS,caption={可诊断的告警摘要 Flex 样式}]
+\begin{lstlisting}[label={lst:ch04-a49-flex-debug},language=CSS,caption={可诊断的告警摘要 Flex 样式}]
 .alert-summary {
   display: flex;
   align-items: center;
@@ -754,9 +740,8 @@ Flex 的视觉顺序还涉及语义和键盘路径。\texttt{order}只改变绘�
 
 字符串可用模板字面量组合，也可通过\texttt{trim()}、\texttt{includes()}、\texttt{slice()}和\texttt{split()}完成常见处理。完成字符串处理后，再使用比较、逻辑和算术运算符表达业务规则。例如，某水库汛期警戒水位统一设为5.0米：
 
-\label{lst:ch04-js-basics}
-\begin{lstlisting}[language=JavaScript,caption={JavaScript基础变量与函数}]
-const stationName = "东湖水库";
+\begin{lstlisting}[label={lst:ch04-js-basics},language=JavaScript,caption={JavaScript基础变量与函数}]
+const stationName = "清源水库";
 const warningLevel = 5.0; // 单位：m，本章同一示例场景统一采用该阈值
 const reading = { stationId: "ST-01", level: 5.12, unit: "m" };
 const status = reading.level >= warningLevel ? "预警" : "正常";
@@ -766,8 +751,7 @@ console.log(message.trim());
 
 数组常用\texttt{map()}完成映射、\texttt{filter()}完成筛选、\texttt{reduce()}完成聚合；对象解构可以明确取出字段。函数应保持单一职责并显式返回结果。
 
-\label{lst:ch04-js-condition}
-\begin{lstlisting}[language=JavaScript,caption={监测值条件判断}]
+\begin{lstlisting}[label={lst:ch04-js-condition},language=JavaScript,caption={监测值条件判断}]
 const readings = [4.72, 5.12, 4.95];
 const alarms = readings
   .filter(level => level >= 5.0)
@@ -788,8 +772,7 @@ JavaScript 的类型分为原始值和对象引用。字符串、数字、布尔
 
 清单\ref{lst:ch04-a44-types}用类型守卫和显式转换建立一个可复用的读数解析函数。函数先检查对象结构，再将字符串转换为数字，最后区分“缺测”和“无效”；调用方可以根据返回的判别字段决定显示、统计或拒收，而不必在多个组件中重复一套隐式规则。
 
-\label{lst:ch04-a44-types}
-\begin{lstlisting}[language=JavaScript,caption={监测读数的类型守卫与严格比较}]
+\begin{lstlisting}[label={lst:ch04-a44-types},language=JavaScript,caption={监测读数的类型守卫与严格比较}]
 function parseLevel(raw) {
   if (raw === null || raw === undefined || raw === '') {
     return { kind: 'missing', value: null };
@@ -813,8 +796,7 @@ if (reading.kind === 'valid' && reading.value === 4.2) {
 
 清单\ref{lst:ch04-a44-closures}把闭包和高阶数组方法放在同一个水位摘要函数中。\texttt{makeRollingAverage}只暴露\texttt{push}和\texttt{value}两个操作，内部样本数组不能被调用方直接修改；摘要函数使用\texttt{filter}排除缺测，再用\texttt{reduce}求和，结果可以直接供卡片组件使用。
 
-\label{lst:ch04-a44-closures}
-\begin{lstlisting}[language=JavaScript,caption={闭包与数组高阶方法}]
+\begin{lstlisting}[label={lst:ch04-a44-closures},language=JavaScript,caption={闭包与数组高阶方法}]
 function makeRollingAverage(limit = 3) {
   const samples = [];
   return {
@@ -846,8 +828,7 @@ ES 模块用\texttt{export}声明公共接口，用\texttt{import}建立静态�
 
 清单\ref{lst:ch04-a44-modules}展示“定义模块—使用模块”的完整关系。两个文件都写在同一清单中，复制到 Vite 5 项目的\texttt{src/lib}目录后可直接改成对应路径；调用方拿到的是新对象，不会修改原始 API 响应。
 
-\label{lst:ch04-a44-modules}
-\begin{lstlisting}[language=JavaScript,caption={ES 模块、解构与展开}]
+\begin{lstlisting}[label={lst:ch04-a44-modules},language=JavaScript,caption={ES 模块、解构与展开}]
 // readings.js
 export function summarizeReading(reading) {
   const { stationId, level: rawLevel, quality = 'missing' } = reading;
@@ -870,8 +851,7 @@ DOM 是 HTML 文档在浏览器中的对象表示，节点之间形成父子和�
 
 DOM 操作还要考虑布局代价。循环中逐个读取布局尺寸、再逐个写入样式，可能在每次迭代之间强制浏览器重新计算布局。可以先把数据转换为文档片段，完成一次写入；高频图表则交给专用渲染层，DOM 只保留标题、单位和当前值。清单\ref{lst:ch04-a44-dom}先创建一个安全的测站列表，再用\texttt{textContent}更新一个条目，完整展示查询、增删和文本写入。
 
-\label{lst:ch04-a44-dom}
-\begin{lstlisting}[language=JavaScript,caption={安全创建和更新测站 DOM}]
+\begin{lstlisting}[label={lst:ch04-a44-dom},language=JavaScript,caption={安全创建和更新测站 DOM}]
 document.body.innerHTML = '<ul id="station-list"></ul>';
 const list = document.querySelector('#station-list');
 const stations = [
@@ -919,8 +899,7 @@ list.querySelector('[data-station-id="ST-02"]').textContent = '下游测站：�
 
 长列表的瓶颈不只在监听器数量，还在节点数量和布局计算。分页适合用户逐页查看，虚拟滚动只渲染可视区附近的窗口，并把滚动位置映射到数据索引。实现虚拟滚动时需要估计行高、保留上下占位空间、处理动态高度和键盘焦点；如果测站卡片高度差异很大，先采用分页或分组折叠，再在性能测量确认后引入更复杂的窗口化算法。清单\ref{lst:ch04-a44-events}展示固定父容器上的事件委托，清单\ref{lst:ch04-a44-virtual-list}进一步演示只渲染可视窗口的基本思路。
 
-\label{lst:ch04-a44-events}
-\begin{lstlisting}[language=JavaScript,caption={测站列表的事件委托与 preventDefault}]
+\begin{lstlisting}[label={lst:ch04-a44-events},language=JavaScript,caption={测站列表的事件委托与 preventDefault}]
 document.body.innerHTML = `
   <a id="station-link" href="/stations">测站列表</a>
   <ul id="delegated-list">
@@ -943,8 +922,7 @@ document.querySelector('#station-link').addEventListener('click', event => {
 });
 \end{lstlisting}
 
-\label{lst:ch04-a44-virtual-list}
-\begin{lstlisting}[language=JavaScript,caption={长测站列表的可视窗口渲染思路}]
+\begin{lstlisting}[label={lst:ch04-a44-virtual-list},language=JavaScript,caption={长测站列表的可视窗口渲染思路}]
 const root = document.createElement('div');
 root.innerHTML = '<div id="virtual-list" style="height:160px;overflow:auto"></div>';
 document.body.append(root);
@@ -954,13 +932,20 @@ const records = Array.from({ length: 1000 }, (_, index) => ({
   level: (4 + index / 100).toFixed(2)
 }));
 const rowHeight = 32;
+// 占位层把滚动条撑到全量高度，可见行再absolute定位到对应位置；
+// 没有它 scrollTop 永远到不了后面的行
+const spacer = document.createElement('div');
+spacer.style.cssText =
+  `position:relative;height:${records.length * rowHeight}px`;
+viewport.append(spacer);
 
 function renderWindow() {
   const first = Math.floor(viewport.scrollTop / rowHeight);
   const visible = records.slice(first, first + 8);
-  viewport.replaceChildren(...visible.map(record => {
+  spacer.replaceChildren(...visible.map((record, offset) => {
     const row = document.createElement('div');
-    row.style.height = `${rowHeight}px`;
+    row.style.cssText = `position:absolute;left:0;right:0;` +
+      `top:${(first + offset) * rowHeight}px;height:${rowHeight}px`;
     row.textContent = `${record.id}：${record.level} m`;
     return row;
   }));
@@ -975,8 +960,7 @@ renderWindow();
 
 \texttt{try}包围可能失败的操作，\texttt{catch}处理异常，\texttt{finally}执行清理。异常不能被静默吞掉，应在界面给出可理解提示，并把技术细节记录到日志系统。
 
-\label{lst:ch04-js-array}
-\begin{lstlisting}[language=JavaScript,caption={测站数组处理}]
+\begin{lstlisting}[label={lst:ch04-js-array},language=JavaScript,caption={监测报文解析的分类异常处理}]
 function parseReading(raw) {
   try {
     const reading = JSON.parse(raw);
@@ -998,10 +982,9 @@ function parseReading(raw) {
 
 \section{异步编程与Promise}
 
-Promise有pending、fulfilled和rejected三种状态。\texttt{then()}返回新的Promise，因此可把“取数—解析—呈现”组织成链；链末使用\texttt{catch()}集中处理失败。
+异步结果在 JavaScript 中由 Promise 表达。本节先讲清事件循环与任务调度，再给出 Promise 的状态机、\texttt{async/await} 写法和取消机制，最后把它们组装进统一的请求封装。
 
-\label{lst:ch04-js-fetch}
-\begin{lstlisting}[language=JavaScript,caption={前端数据请求示例}]
+\begin{lstlisting}[label={lst:ch04-js-fetch},language=JavaScript,caption={前端数据请求示例}]
 function loadLatestLevel(stationId) {
   return fetch(`/api/stations/${stationId}/latest`)
     .then(response => {
@@ -1021,8 +1004,7 @@ loadLatestLevel("ST-01")
 
 \texttt{async/await}用于以顺序形式表达同样的异步过程。彼此独立的请求应通过\texttt{Promise.all()}并发执行；有依赖关系的请求才顺序等待。
 
-\label{lst:ch04-js-debug}
-\begin{lstlisting}[language=JavaScript,caption={调试监测查询}]
+\begin{lstlisting}[label={lst:ch04-js-debug},language=JavaScript,caption={调试监测查询}]
 async function loadDashboard(stationId) {
   try {
     const [latest, alarms] = await Promise.all([
@@ -1046,8 +1028,7 @@ async function loadDashboard(stationId) {
 
 微任务适合完成同一任务内的短小收尾，例如把多个状态变化合并后再通知组件；长时间执行的微任务会阻塞绘制和用户输入，连续递归的\texttt{queueMicrotask}甚至会形成饥饿。处理大量测点时，应把计算分批放入任务队列或交给 Web Worker，并在动画帧中批量写入 DOM。清单\ref{lst:ch04-a45-event-loop}用日志顺序展示同步代码、微任务和宏任务的先后关系。
 
-\label{lst:ch04-a45-event-loop}
-\begin{lstlisting}[language=JavaScript,caption={事件循环中的同步、微任务与宏任务}]
+\begin{lstlisting}[label={lst:ch04-a45-event-loop},language=JavaScript,caption={事件循环中的同步、微任务与宏任务}]
 console.log('同步：开始读取');
 
 setTimeout(() => console.log('宏任务：定时刷新'), 0);
@@ -1066,8 +1047,7 @@ Promise 有 pending、fulfilled 和 rejected 三种状态。创建后处于 pend
 
 清单\ref{lst:ch04-a45-promise}用两个落定函数说明 Promise 的不可逆状态，并在调用方观察最终结果。它刻意多次调用\texttt{resolve}和\texttt{reject}，后续调用不会覆盖第一次落定的结果；这正是客观题和真实接口重试都要遵守的语义。
 
-\label{lst:ch04-a45-promise}
-\begin{lstlisting}[language=JavaScript,caption={Promise 状态一经落定不可再变}]
+\begin{lstlisting}[label={lst:ch04-a45-promise},language=JavaScript,caption={Promise 状态一经落定不可再变}]
 let resolveReading;
 let rejectReading;
 const readingPromise = new Promise((resolve, reject) => {
@@ -1092,8 +1072,7 @@ resolveReading({ level: 4.3 });
 
 清单\ref{lst:ch04-a45-abort}封装了一个带超时和手动取消的最新水位请求。控制器在\texttt{finally}前保持有效，计时器在成功、失败和取消三种路径上都会清理；用户快速切换时，调用方先取消旧控制器，再保存新控制器引用。
 
-\label{lst:ch04-a45-abort}
-\begin{lstlisting}[language=JavaScript,caption={带超时和手动取消的 fetch}]
+\begin{lstlisting}[label={lst:ch04-a45-abort},language=JavaScript,caption={带超时和手动取消的 fetch}]
 export async function fetchLatestLevel(stationId, signal) {
   const response = await fetch(`/api/stations/${stationId}/latest`, { signal });
   if (!response.ok) throw new Error(`HTTP_${response.status}`);
@@ -1124,13 +1103,15 @@ export async function refreshStation(stationId) {
 
 统一请求封装还应处理 JSON 解析、204 空响应、超时和错误代码，避免每个组件各自复制一套\texttt{fetch}。清单\ref{lst:ch04-a45-request}给出可直接放入 Vite 5 项目的\texttt{src/api/request.js}；请求函数只负责传输和认证，页面层根据错误代码决定显示“重新登录”“稍后重试”还是“检查测站输入”。
 
-\label{lst:ch04-a45-request}
-\begin{lstlisting}[language=JavaScript,caption={request.js：令牌注入、401 跳转与超时}]
-const API_BASE = import.meta.env.VITE_API_BASE_URL ?? '/api';
+\begin{lstlisting}[label={lst:ch04-a45-request},language=JavaScript,caption={request.js：令牌注入、401 跳转与超时}]
+const API_BASE = import.meta.env.VITE_API_BASE ?? '/api';
 const DEFAULT_TIMEOUT = 10_000;
+// 令牌键名是前端各模块的共同契约：请求封装、路由守卫、
+// 登录页都从这里导入，避免"登录成功却处处 401"的隐蔽错误
+export const TOKEN_KEY = 'access_token';
 
 function accessToken() {
-  return sessionStorage.getItem('token');
+  return sessionStorage.getItem(TOKEN_KEY);
 }
 
 export async function request(path, options = {}) {
@@ -1140,6 +1121,9 @@ export async function request(path, options = {}) {
   );
   const headers = new Headers(options.headers);
   headers.set('Accept', 'application/json');
+  if (options.body && !headers.has('Content-Type')) {
+    headers.set('Content-Type', 'application/json');
+  }
   const token = accessToken();
   if (token) headers.set('Authorization', `Bearer ${token}`);
 
@@ -1147,8 +1131,10 @@ export async function request(path, options = {}) {
     const response = await fetch(`${API_BASE}${path}`, {
       ...options, headers, signal: controller.signal
     });
-    if (response.status === 401) {
-      sessionStorage.removeItem('token');
+    if (response.status === 401 && !path.startsWith('/auth/')) {
+      // 业务请求的 401 才代表登录态失效；
+      // 登录接口自身的 401 是"密码错误"，交回页面层提示
+      sessionStorage.removeItem(TOKEN_KEY);
       const redirect = encodeURIComponent(location.pathname + location.search);
       location.assign(`/login?redirect=${redirect}`);
       throw new Error('UNAUTHORIZED');
@@ -1173,8 +1159,7 @@ export async function request(path, options = {}) {
 
 只有以\texttt{VITE\_}开头的变量会被暴露到客户端代码，变量值会在构建时静态替换，因此可以放 API 基地址、功能开关和代理地址，不能放数据库密码、JWT 签名密钥或内部网络凭据。开发、测试和生产应分别维护环境文件，并在 CI 中检查必需变量是否存在。清单\ref{lst:ch04-a45-vite}给出按模式读取环境变量的 Vite 5 配置，\texttt{loadEnv}只加载指定前缀，代理目标缺失时使用明确的本地默认值。
 
-\label{lst:ch04-a45-vite}
-\begin{lstlisting}[language=JavaScript,caption={Vite 5 的 server.proxy 与 import.meta.env}]
+\begin{lstlisting}[label={lst:ch04-a45-vite},language=JavaScript,caption={Vite 5 的 server.proxy 与 import.meta.env}]
 import { defineConfig, loadEnv } from 'vite';
 import vue from '@vitejs/plugin-vue';
 
@@ -1231,8 +1216,7 @@ export default defineConfig(({ mode }) => {
 
 下面的登录服务只负责调用接口和保存令牌，页面组件负责表单校验与导航。令牌键名必须和请求封装一致；本章前面的示例使用\texttt{token}，因此所有调用方都复用同一常量，避免登录成功却无法访问列表的隐蔽错误。清单\ref{lst:ch04-a49-auth-client}同时展示了 401、403 和网络错误的分流，可在浏览器 Network 面板中逐项模拟。
 
-\label{lst:ch04-a49-auth-client}
-\begin{lstlisting}[language=JavaScript,caption={前端登录与受保护请求的联调客户端}]
+\begin{lstlisting}[label={lst:ch04-a49-auth-client},language=JavaScript,caption={前端登录与受保护请求的联调客户端}]
 const TOKEN_KEY = 'token';
 
 export async function login(account, password) {
@@ -1300,8 +1284,7 @@ export async function loadStations() {
 
 请求并发时需要防止“竞态覆盖”。用户快速切换两个测站，先发出的请求可能后返回；如果直接把每个响应写入同一个状态变量，旧测站数据就会覆盖新测站。解决方法是给请求附带递增序号或\texttt{AbortController}，只有当前序号仍然有效的响应才能提交。清单\ref{lst:ch04-a49-race-test}用一个最小的加载器演示取消与序号双重保护，代码可在浏览器控制台中替换模拟的\texttt{fetcher}进行测试。
 
-\label{lst:ch04-a49-race-test}
-\begin{lstlisting}[language=JavaScript,caption={切换测站时防止旧请求覆盖新状态}]
+\begin{lstlisting}[label={lst:ch04-a49-race-test},language=JavaScript,caption={切换测站时防止旧请求覆盖新状态}]
 let sequence = 0;
 let controller = null;
 
@@ -1379,12 +1362,11 @@ export function resetRequests() {
 
 \section{DOM操作与事件处理}
 
-DOM是HTML文档在浏览器中的对象表示。优先使用\texttt{querySelector()}定位元素、\texttt{textContent}写入文本、\texttt{classList}切换状态。不要把未经转义的外部数据写入\texttt{innerHTML}。
+4.4 节已经分别讲过 DOM 查询、安全写入与事件模型，本节用一个最小的完整页面把它们串起来，作为进入 Vue 之前的收束练习：结构与行为分离、输入必须校验、更新走 \texttt{textContent} 而不是 \texttt{innerHTML}。
 
 下面示例完整展示事件绑定、输入校验和界面更新。警戒值仍为同一场景的5.0米。
 
-\label{lst:ch04-html-vue}
-\begin{lstlisting}[language=html,caption={测站输入 HTML 片段}]
+\begin{lstlisting}[label={lst:ch04-html-vue},language=html,caption={测站输入 HTML 片段}]
 <label for="level-input">水位（m）</label>
 <input id="level-input" type="number" step="0.01">
 <button id="check-level" type="button">判断状态</button>
@@ -1393,8 +1375,7 @@ DOM是HTML文档在浏览器中的对象表示。优先使用\texttt{querySelect
 
 清单\ref{lst:ch04-a44-dom-script}把同一页面的行为代码单独列出，使用 JavaScript 语言标注后，关键字、字符串和箭头函数能够正确高亮；HTML 清单只负责结构，脚本清单负责查询节点、转换输入和更新输出。
 
-\label{lst:ch04-a44-dom-script}
-\begin{lstlisting}[language=JavaScript,caption={测站输入 JavaScript 片段}]
+\begin{lstlisting}[label={lst:ch04-a44-dom-script},language=JavaScript,caption={测站输入 JavaScript 片段}]
 const input = document.querySelector('#level-input');
 const result = document.querySelector('#level-result');
 const button = document.querySelector('#check-level');
@@ -1415,8 +1396,7 @@ button.addEventListener('click', () => {
 
 ES模块通过\texttt{export}和\texttt{import}建立清晰依赖。接口访问、业务计算和视图组件应分层组织，避免在组件中散布重复的网络代码。
 
-\label{lst:ch04-js-lifecycle}
-\begin{lstlisting}[language=JavaScript,caption={组件生命周期清理}]
+\begin{lstlisting}[label={lst:ch04-js-lifecycle},language=JavaScript,caption={ES 模块的导出与导入}]
 // level.js
 export function levelStatus(level, warning = 5.0) {
   return level >= warning ? "warning" : "normal";
@@ -1435,8 +1415,7 @@ console.log(levelStatus(5.12));
 
 本章使用Vue 3.4+组合式API。\texttt{ref}适合基本值，\texttt{reactive}适合对象，\texttt{computed}表达派生状态；组件通过props接收数据，通过emit通知父组件。下面的单文件组件把状态声明、属性校验、模板绑定和事件发射放在同一示例中，便于沿着数据流理解组件边界。
 
-\label{lst:ch04-vue-component}
-\begin{lstlisting}[language=Vue,caption={测站卡片组合式组件}]
+\begin{lstlisting}[label={lst:ch04-vue-component},language=Vue,caption={测站卡片组合式组件}]
 <script setup>
 import { computed } from 'vue'
 const props = defineProps({
@@ -1489,8 +1468,7 @@ Vue 3.4 的组合式 API 把状态、派生值、监听器和生命周期放进�
 
 清单\ref{lst:ch04-a46-reactivity}展示五种 API 的职责和\texttt{.value}边界。代码中的\texttt{watch}只在站点编号变化时触发请求，\texttt{watchEffect}只记录当前筛选状态；真实项目中应给请求加取消信号，防止快速输入时旧响应覆盖新状态。
 
-\label{lst:ch04-a46-reactivity}
-\begin{lstlisting}[language=Vue,caption={Vue 3 响应式 API 与监听器}]
+\begin{lstlisting}[label={lst:ch04-a46-reactivity},language=Vue,caption={Vue 3 响应式 API 与监听器}]
 <script setup>
 import { computed, reactive, ref, watch, watchEffect } from 'vue';
 
@@ -1516,8 +1494,7 @@ watchEffect(() => console.log('筛选数量', visibleStations.value.length));
 
 清单\ref{lst:ch04-a46-directives}用同一页面展示这些指令。预警说明使用\texttt{v-if}避免给普通测站创建无用节点，帮助文字使用\texttt{v-show}保持布局稳定；输入框用\texttt{v-model.trim}去除首尾空白，按钮通过\texttt{@click}修改状态。模板只负责声明关系，复杂筛选仍放在\texttt{computed}中。
 
-\label{lst:ch04-a46-directives}
-\begin{lstlisting}[language=Vue,caption={Vue 模板指令与稳定 key}]
+\begin{lstlisting}[label={lst:ch04-a46-directives},language=Vue,caption={Vue 模板指令与稳定 key}]
 <template>
   <label>
     关键字
@@ -1544,8 +1521,7 @@ watchEffect(() => console.log('筛选数量', visibleStations.value.length));
 
 清单\ref{lst:ch04-a46-communication}把四种通信方式放在一个父子组件示例中。\texttt{StationCard}只接收\texttt{station}，点击按钮时发出\texttt{select}事件；父组件通过 slot 提供操作区，并用 provide/inject 传递单位文本。provide 的值在父组件中冻结，防止子组件意外篡改全局配置。
 
-\label{lst:ch04-a46-communication}
-\begin{lstlisting}[language=Vue,caption={Vue props、emit、slot 与 provide/inject}]
+\begin{lstlisting}[label={lst:ch04-a46-communication},language=Vue,caption={Vue props、emit、slot 与 provide/inject}]
 <!-- StationCard.vue -->
 <script setup>
 import { inject } from 'vue';
@@ -1594,8 +1570,7 @@ provide('levelUnit', readonly(levelUnit));
 
 清单\ref{lst:ch04-a46-lifecycle}演示一个完整的定时刷新组件。\texttt{onMounted}保存定时器句柄，\texttt{onUnmounted}清除它；请求函数收到\texttt{AbortSignal}后，组件离开页面可以立即取消未完成请求。这个模式也适用于图表实例、地图图层和事件总线订阅。
 
-\label{lst:ch04-a46-lifecycle}
-\begin{lstlisting}[language=Vue,caption={onMounted 与 onUnmounted 的清理模式}]
+\begin{lstlisting}[label={lst:ch04-a46-lifecycle},language=Vue,caption={onMounted 与 onUnmounted 的清理模式}]
 <script setup>
 import { onMounted, onUnmounted, ref } from 'vue';
 
@@ -1623,12 +1598,11 @@ onUnmounted(() => {
 
 \subsection{测站列表筛选页：从 SFC 到组件拆分}
 
-一个可交付的 Vue 页面至少包含数据来源、筛选状态、加载反馈和可操作的列表项。父组件负责获取测站、保存筛选条件并计算可见集合，子组件负责单行展示和发出选择事件；这样，筛选逻辑可以独立测试，行组件也能在地图侧栏复用。完整页面需要同时处理加载中、空结果和正常结果三种状态，不能只展示一张静态数组。
+一个可交付的 Vue 页面至少包含数据来源、筛选状态、加载反馈和可操作的列表项。父组件负责获取测站、保存筛选条件并计算可见集合，子组件负责单行展示和发出选择事件；这样，筛选逻辑可以独立测试，行组件也能在地图侧栏复用。完整页面需要同时处理加载中、空结果和正常结果三种状态，不能只展示一个静态数组。
 
-清单\ref{lst:ch04-a46-station-row}是可复用的行组件，清单\ref{lst:ch04-a46-station-filter}是使用它的完整筛选页。父组件使用\texttt{ref}保存原始数组，\texttt{reactive}保存表单，\texttt{computed}生成过滤结果，\texttt{v-for(:key)}渲染行，\texttt{v-model}接收输入，\texttt{v-if}表达加载和空状态，并在\texttt{onMounted}中加载数据。读者可以把 API 函数替换为 A4-5 的\texttt{request.js}，页面结构不需要改变。
+清单\ref{lst:ch04-a46-station-row}是可复用的行组件，清单\ref{lst:ch04-a46-station-filter}是使用它的完整筛选页。父组件使用\texttt{ref}保存原始数组，\texttt{reactive}保存表单，\texttt{computed}生成过滤结果，\texttt{v-for(:key)}渲染行，\texttt{v-model}接收输入，\texttt{v-if}表达加载和空状态，并在\texttt{onMounted}中加载数据。读者可以把 API 函数替换为清单\ref{lst:ch04-a45-request}的\texttt{request.js}，页面结构不需要改变。
 
-\label{lst:ch04-a46-station-row}
-\begin{lstlisting}[language=Vue,caption={测站列表行组件 StationRow.vue}]
+\begin{lstlisting}[label={lst:ch04-a46-station-row},language=Vue,caption={测站列表行组件 StationRow.vue}]
 <script setup>
 defineProps({
   station: { type: Object, required: true },
@@ -1648,8 +1622,7 @@ const emit = defineEmits(['select']);
 </template>
 \end{lstlisting}
 
-\label{lst:ch04-a46-station-filter}
-\begin{lstlisting}[language=Vue,caption={测站列表筛选页 StationFilterPage.vue}]
+\begin{lstlisting}[label={lst:ch04-a46-station-filter},language=Vue,caption={测站列表筛选页 StationFilterPage.vue}]
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue';
 import StationRow from './StationRow.vue';
@@ -1763,8 +1736,7 @@ Vue Router把 URL 映射到页面组件，\texttt{App.vue}中的\texttt{<router-
 
 清单\ref{lst:ch04-a47-app-shell}展示\texttt{App.vue}的最小骨架，清单\ref{lst:ch04-js-router}给出完整路由表。守卫返回一个带名称的目标对象，而不是拼接字符串；\texttt{redirect}查询参数保留用户原本想访问的路径，登录成功后可以跳回去。守卫必须识别当前是否已经在登录页，形成防环判断，否则匿名用户访问登录页也会再次被重定向。
 
-\label{lst:ch04-a47-app-shell}
-\begin{lstlisting}[language=Vue,caption={App.vue 根组件与 router-view}]
+\begin{lstlisting}[label={lst:ch04-a47-app-shell},language=Vue,caption={App.vue 根组件与 router-view}]
 <script setup>
 import { RouterLink, RouterView } from 'vue-router';
 </script>
@@ -1783,9 +1755,9 @@ import { RouterLink, RouterView } from 'vue-router';
 </template>
 \end{lstlisting}
 
-\label{lst:ch04-js-router}
-\begin{lstlisting}[language=JavaScript,caption={路由参数读取与跳转}]
+\begin{lstlisting}[label={lst:ch04-js-router},language=JavaScript,caption={路由表、登录守卫与重定向}]
 import { createRouter, createWebHistory } from 'vue-router';
+import { TOKEN_KEY } from './api/request.js';
 
 const router = createRouter({
   history: createWebHistory(),
@@ -1804,7 +1776,8 @@ const router = createRouter({
 });
 
 router.beforeEach(to => {
-  const hasToken = Boolean(sessionStorage.getItem('access_token'));
+  // TOKEN_KEY 从 request.js 导入，与请求封装保持同一契约
+  const hasToken = Boolean(sessionStorage.getItem(TOKEN_KEY));
   if (to.meta.requiresAuth && !hasToken && to.name !== 'login') {
     return { name: 'login', query: { redirect: to.fullPath } };
   }
@@ -1814,8 +1787,7 @@ export default router;
 
 嵌套路由要求父页面提供自己的\texttt{<router-view />}，否则子路由虽然匹配成功却没有渲染位置。测站列表可以在页头显示筛选器，在内容区域再放一个出口承载地图子页；动态详情则使用顶层路径，便于从地图标记和列表行直接跳转。\texttt{useRouter}用于发起导航，\texttt{useRoute}用于读取当前路径、查询参数和动态参数。编程式导航应使用路由名称和参数对象，避免把业务 ID 直接拼进未经编码的 URL。
 
-\label{lst:ch04-a47-navigation}
-\begin{lstlisting}[language=Vue,caption={useRouter、useRoute 与编程式导航}]
+\begin{lstlisting}[label={lst:ch04-a47-navigation},language=Vue,caption={useRouter、useRoute 与编程式导航}]
 <script setup>
 import { computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
@@ -1839,14 +1811,13 @@ function backToList() {
 </template>
 \end{lstlisting}
 
-登录页读取守卫写入的\texttt{redirect}，成功后只允许跳转到应用内部的路径，并对缺省值回退到测站首页。令牌写入和清理应复用 A4-5 的请求封装，页面只负责提交凭据和显示错误。后端仍要校验令牌和权限，前端守卫只是减少无意义的页面加载，不能作为安全边界。
+登录页读取守卫写入的\texttt{redirect}，成功后只允许跳转到应用内部的路径，并对缺省值回退到测站首页。令牌写入和清理应复用清单\ref{lst:ch04-a45-request}的请求封装，页面只负责提交凭据和显示错误。后端仍要校验令牌和权限，前端守卫只是减少无意义的页面加载，不能作为安全边界。
 
-\label{lst:ch04-a47-login}
-\begin{lstlisting}[language=Vue,caption={登录成功后的安全回跳}]
+\begin{lstlisting}[label={lst:ch04-a47-login},language=Vue,caption={登录成功后的安全回跳}]
 <script setup>
 import { ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { request } from '../api/request.js';
+import { request, TOKEN_KEY } from '../api/request.js';
 
 const route = useRoute();
 const router = useRouter();
@@ -1864,7 +1835,7 @@ async function submit() {
     const result = await request('/auth/login', {
       method: 'POST', body: JSON.stringify({ account: account.value, password: password.value })
     });
-    sessionStorage.setItem('access_token', result.accessToken);
+    sessionStorage.setItem(TOKEN_KEY, result.accessToken);
     await router.replace(safeRedirect(route.query.redirect));
   } catch (error) {
     errorMessage.value = error.message || '登录失败，请稍后重试';
@@ -1882,8 +1853,7 @@ async function submit() {
 </template>
 \end{lstlisting}
 
-\label{lst:ch04-js-pinia}
-\begin{lstlisting}[language=JavaScript,caption={Pinia测站状态管理}]
+\begin{lstlisting}[label={lst:ch04-js-pinia},language=JavaScript,caption={Pinia测站状态管理}]
 import { defineStore } from 'pinia';
 import { loadLatestLevel } from '../api/stations.js';
 
@@ -1913,8 +1883,7 @@ export const useStationStore = defineStore('station', {
 
 Pinia集中管理跨组件共享且具有业务含义的状态，如当前测站、实时读数和告警数量；只在单个组件内部使用的展开状态保留在组件中。组件调用\texttt{useStationStore()}得到的是一个带响应式属性的 store。直接写\texttt{const \{ latest, loading \} = store}会把属性值拷贝出来，后续更新无法驱动模板；需要使用\texttt{storeToRefs}保留响应式引用，动作方法则可以直接从 store 取出。
 
-\label{lst:ch04-a47-store-usage}
-\begin{lstlisting}[language=Vue,caption={组件内使用 Pinia 与 storeToRefs}]
+\begin{lstlisting}[label={lst:ch04-a47-store-usage},language=Vue,caption={组件内使用 Pinia 与 storeToRefs}]
 <script setup>
 import { onMounted } from 'vue';
 import { storeToRefs } from 'pinia';
@@ -1940,8 +1909,7 @@ onMounted(() => loadLatest('ST-01'));
 
 路由配置中的\texttt{props: true}会把\texttt{:id}动态段作为组件 prop 注入。这样，详情组件不必依赖全局路由对象，单元测试可以直接传入\texttt{id}；查询参数仍可通过\texttt{useRoute}读取。\texttt{defineProps}应明确类型和必填约束，收到参数后再调用 store 动作加载数据，并在参数变化时重新加载。组件卸载时沿用前面的取消信号和清理模式。
 
-\label{lst:ch04-a47-station-detail}
-\begin{lstlisting}[language=Vue,caption={StationDetail.vue 接收动态路由参数}]
+\begin{lstlisting}[label={lst:ch04-a47-station-detail},language=Vue,caption={StationDetail.vue 接收动态路由参数}]
 <script setup>
 import { watch } from 'vue';
 import { storeToRefs } from 'pinia';
@@ -1967,8 +1935,7 @@ watch(() => props.id, id => stationStore.loadLatest(id), { immediate: true });
 
 选项式 store 适合把状态、getter 和动作按对象分栏展示，便于刚接触 Pinia 的读者建立映射；setup 式 store 使用\texttt{ref}、\texttt{computed}和普通函数，适合复用组合式函数和精确控制公开成员。两种写法都通过\texttt{defineStore}注册，组件侧的\texttt{storeToRefs}用法一致。选择时以团队可读性和测试边界为依据，不要在同一个 store 中混用两套状态来源。
 
-\label{lst:ch04-a47-setup-store}
-\begin{lstlisting}[language=JavaScript,caption={Pinia setup 式 store 对照}]
+\begin{lstlisting}[label={lst:ch04-a47-setup-store},language=JavaScript,caption={Pinia setup 式 store 对照}]
 import { computed, ref } from 'vue';
 import { defineStore } from 'pinia';
 import { loadLatestLevel } from '../api/stations.js';
@@ -2024,8 +1991,7 @@ Pinia 动作可以返回领域结果，让调用方决定提示方式。比如\t
 
 应用入口依次注册Pinia和Router，再挂载根组件：
 
-\label{lst:ch04-js-event}
-\begin{lstlisting}[language=JavaScript,caption={事件委托与状态更新}]
+\begin{lstlisting}[label={lst:ch04-js-event},language=JavaScript,caption={应用入口：注册 Pinia 与路由}]
 import { createApp } from 'vue';
 import { createPinia } from 'pinia';
 import App from './App.vue';
@@ -2040,8 +2006,7 @@ createApp(App).use(createPinia()).use(router).mount('#app');
 
 路径别名把深层相对路径转换为稳定的业务语义，例如用\texttt{@/}指向\texttt{src/}，用\texttt{@api/}指向接口封装目录。别名必须同时配置在 Vite 和编辑器/类型检查器中，否则构建能通过但 IDE 无法跳转，或者测试环境解析失败。环境变量按模式加载：\texttt{.env}提供公共默认值，\texttt{.env.development}和\texttt{.env.production}覆盖对应模式，只有以\texttt{VITE\_}开头的变量会注入浏览器。令牌密钥、数据库密码和内部服务地址不能写入这类变量，前端只保存公开的 API 前缀和功能开关。
 
-\label{lst:ch04-a48-vite-config}
-\begin{lstlisting}[language=JavaScript,caption={Vite 5 路径别名与 manualChunks 分包}]
+\begin{lstlisting}[label={lst:ch04-a48-vite-config},language=JavaScript,caption={Vite 5 路径别名与 manualChunks 分包}]
 import { defineConfig, loadEnv } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import { fileURLToPath, URL } from 'node:url';
@@ -2074,17 +2039,17 @@ export default defineConfig(({ mode }) => {
 
 清单\ref{lst:ch04-a48-vite-config}中的\texttt{manualChunks}把变化频率相近的依赖放到同一文件，页面业务代码变化时不会迫使浏览器重新下载 Vue 核心和图表库。分包不是越多越好：每个额外文件都增加请求和调度成本，应该结合首屏性能、缓存命中率和真实网络条件测量。\texttt{loadEnv}用于读取配置并传给 Vite 配置本身，模板代码仍通过\texttt{import.meta.env}读取经过筛选的公开变量。
 
-\label{lst:ch04-a48-env}
-\begin{lstlisting}[language=JavaScript,caption={Vite 多环境变量与 API 客户端}]
-// .env.development
+\begin{lstlisting}[label={lst:ch04-a48-env},language=JavaScript,caption={Vite 多环境变量与 API 客户端}]
+# .env.development（.env 文件只支持 # 注释）
 VITE_API_BASE=/api
 VITE_FEATURE_TIMESERIES=true
 
-// .env.production
+# .env.production
 VITE_API_BASE=https://water.example/api
 VITE_FEATURE_TIMESERIES=true
 
-// src/api/client.js
+// src/api/client.js —— 用于演示环境变量注入的简化对照版；
+// 实际页面请统一使用清单 lst:ch04-a45-request 的 request.js
 const baseURL = import.meta.env.VITE_API_BASE;
 export async function getJson(path, options = {}) {
   const response = await fetch(`${baseURL}${path}`, {
@@ -2105,19 +2070,21 @@ export async function getJson(path, options = {}) {
 \item \textbf{运行时}：对高频输入防抖，对监测流批量刷新，避免无意义的深层监听。
 \end{itemize}
 
-\label{lst:ch04-js-http}
-\begin{lstlisting}[language=JavaScript,caption={生产构建、体积分析与部署前检查}]
+\begin{lstlisting}[label={lst:ch04-js-http},language=JavaScript,caption={生产构建、体积分析与部署前检查}]
 // package.json scripts
 {
   "scripts": {
     "dev": "vite --mode development",
     "build": "vite build --mode production",
-    "analyze": "vite build --mode production --reportCompressedSize"
+    "analyze": "vite build --mode production && npx vite-bundle-visualizer"
   }
 }
 
-// 构建完成后检查 dist/，再交给静态服务器
+// 构建完成后检查 dist/（保存为 scripts/check-dist.mjs 单独运行）
 // docker compose 中由 nginx 容器挂载 dist/，/api 转发到后端服务
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
+
 const required = ['index.html', 'assets'];
 for (const name of required) {
   if (!existsSync(join('dist', name))) throw new Error(`缺少产物：${name}`);
@@ -2126,8 +2093,7 @@ for (const name of required) {
 
 产物体积分析要同时看原始体积和 gzip/brotli 体积，重点关注首屏入口、路由异步块和第三方依赖。若图表库占据大部分首屏，可以把图表页改为动态导入；若某个公共块被所有页面引用，则让它进入稳定的 vendor 分包。分析结果应记录在构建流水线中，超过预算时阻断发布，而不是上线后才凭感觉优化。
 
-\label{lst:ch04-a48-deploy}
-\begin{lstlisting}[language=JavaScript,caption={Vite 产物与 Docker Compose 部署契约}]
+\begin{lstlisting}[label={lst:ch04-a48-deploy},language=bash,caption={Vite 产物与 Docker Compose 部署契约}]
 # 构建阶段：在固定 Node 版本中生成 dist/
 docker build --target build -t water-web-build .
 # 运行阶段：静态服务器只读挂载产物，API 由反向代理转发
@@ -2138,7 +2104,7 @@ location /api/ { proxy_pass http://water-api:8080/; }
 location / { try_files $uri $uri/ /index.html; }
 \end{lstlisting}
 
-与 S2 的\texttt{docker-compose}部署呼应时，前端容器只提供静态文件，后端容器负责鉴权和水利接口，反向代理负责同源路径、压缩、缓存头和 SPA 回退。带内容哈希的\texttt{assets/}可以设置长期缓存，\texttt{index.html}使用较短缓存或重新验证，避免用户拿到旧入口而请求已删除的代码块。每次发布保留上一个可用版本，回滚只切换静态目录和镜像标签，不修改监测数据。
+与配套仓库的\texttt{docker-compose}部署呼应时，前端容器只提供静态文件，后端容器负责鉴权和水利接口，反向代理负责同源路径、压缩、缓存头和 SPA 回退。带内容哈希的\texttt{assets/}可以设置长期缓存，\texttt{index.html}使用较短缓存或重新验证，避免用户拿到旧入口而请求已删除的代码块。每次发布保留上一个可用版本，回滚只切换静态目录和镜像标签，不修改监测数据。
 
 开发与生产的验收要覆盖主要浏览器中的布局、接口失败与空数据状态、路由刷新、权限绕过、移动端触控、构建产物、缓存头和控制台错误。流水线还应验证健康检查、API 代理连通性、静态资源 404、SPA 深链接和压缩响应；这些检查把“本机能运行”转化为可重复的发布契约。
 

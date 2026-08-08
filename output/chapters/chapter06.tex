@@ -13,7 +13,7 @@
 
 \paragraph*{引言}
 
-三维场景不是智慧水利平台的装饰层，而是空间基准、工程模型、监测数据和业务状态的综合表达。本章按照“浏览器三维渲染—GIS与坐标—实景/BIM模型—数字孪生平台”的顺序展开，技术基线为WebGL2、Three.js r160+、Cesium 1.11x、OGC服务与IFC 4.3。
+三维场景不是智慧水利平台的装饰层，而是空间基准、工程模型、监测数据和业务状态的综合表达。本章按照“浏览器三维渲染—GIS与坐标—实景/BIM模型—数字孪生平台”的顺序展开，技术基线为WebGL2、Three.js r160+、CesiumJS 1.12x+、OGC服务与IFC 4.3。
 
 \section{WebGL2与Three.js三维渲染基础}
 
@@ -21,7 +21,7 @@
 
 一个顶点通常依次经过模型坐标系、世界坐标系、观察坐标系、裁剪坐标系、规范化设备坐标和屏幕坐标。模型矩阵$M$把局部构件放入世界，观察矩阵$V$表示相机，投影矩阵$P$形成透视或正交投影，三者合称MVP矩阵：
 \[
-  \mathbf{p}_{clip}=PVM\mathbf{p}_{model}.
+  \mathbf{p}_{\mathrm{clip}}=PVM\,\mathbf{p}_{\mathrm{model}}.
 \]
 
 设垂直视场角为$\theta$、宽高比为$a$、近远裁剪面距离为$n$和$f$，OpenGL风格透视矩阵可写为
@@ -39,8 +39,7 @@ P=\begin{bmatrix}
 
 本章统一使用WebGL2，不提供名义上的WebGL1回退。WebGL1对顶点数组对象、32位索引和扩展支持的要求不同，若确需兼容，应单独实现并测试兼容分支。
 
-\label{lst:ch06-cesium-init}
-\begin{lstlisting}[language=JavaScript,breaklines=true,caption={Cesium地理场景初始化}]
+\begin{lstlisting}[label={lst:ch06-webgl2-context},language=JavaScript,breaklines=true,caption={WebGL2 上下文初始化与能力检测}]
 const canvas = document.querySelector('#scene');
 const gl = canvas.getContext('webgl2');
 if (!gl) throw new Error('当前浏览器不支持 WebGL2');
@@ -53,8 +52,7 @@ gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
 顶点着色器必须显式声明使用的uniform。下面的最小着色器把模型、观察和投影矩阵分开，便于定位坐标错误。
 
-\label{lst:ch06-three-scene}
-\begin{lstlisting}[language=GLSL,caption={三维对象属性读取}]
+\begin{lstlisting}[label={lst:ch06-glsl-vertex},language=GLSL,caption={GLSL 顶点着色器：模型—视图—投影变换}]
 #version 300 es
 layout(location = 0) in vec3 aPosition;
 uniform mat4 uModel;
@@ -90,8 +88,7 @@ void main() {
 
 Three.js r160+ 的最小可运行程序必须同时创建场景、相机、渲染器和渲染循环。只有把网格加入场景而没有渲染器，浏览器不会产生任何像素；只有相机而没有更新宽高比，窗口改变大小后会出现拉伸。清单\ref{lst:ch06-three-minimal}把这些职责放在一个模块中，并在每一帧读取渲染区域尺寸。\texttt{setAnimationLoop}由Three.js根据当前渲染器选择合适的动画调度方式，在支持 WebXR 的环境中也能复用。
 
-\label{lst:ch06-three-minimal}
-\begin{lstlisting}[language=JavaScript,breaklines=true,caption={Three.js r160+最小可运行渲染骨架}]
+\begin{lstlisting}[label={lst:ch06-three-minimal},language=JavaScript,breaklines=true,caption={Three.js r160+最小可运行渲染骨架}]
 import * as THREE from 'three';
 
 const canvas = document.querySelector('#scene');
@@ -129,8 +126,7 @@ renderer.setAnimationLoop(() => {
 
 颜色管理必须区分“纹理已经是 sRGB 编码”和“光照计算使用线性空间”。r152 以后，渲染器输出使用\texttt{outputColorSpace}，常见显示器输出设置为\texttt{THREE.SRGBColorSpace}；旧的\texttt{outputEncoding}与\texttt{sRGBEncoding}不应作为 r160+ 新代码。颜色贴图应标记为 sRGB，法线、粗糙度和金属度贴图保持线性数据。Three.js 当前默认启用\texttt{THREE.ColorManagement.enabled}，但项目仍应在初始化处写出假设并在截图回归测试中固定曝光和色调映射。
 
-\label{lst:ch06-color-space}
-\begin{lstlisting}[language=JavaScript,caption={Three.js色彩空间与纹理颜色标注}]
+\begin{lstlisting}[label={lst:ch06-color-space},language=JavaScript,caption={Three.js色彩空间与纹理颜色标注}]
 import * as THREE from 'three';
 
 THREE.ColorManagement.enabled = true;
@@ -170,8 +166,7 @@ const material = new THREE.MeshStandardMaterial({map: colorMap, normalMap});
 
 WebGL2 基于 OpenGL ES 3.0，提供顶点数组对象、32 位索引、实例化和多渲染目标等能力。若因旧设备必须使用 WebGL1，兼容范围要写成具体扩展：\texttt{OES\_vertex\_array\_object}提供顶点数组对象，\texttt{OES\_element\_index\_uint}允许 32 位索引，\texttt{WEBGL\_draw\_buffers}支持多渲染目标；WebGL1 不支持 GLSL ES 3.00、统一缓冲对象（UBO）、实例化内置支持和整型纹理。清单\ref{lst:ch06-webgl-capabilities}把能力探测集中在初始化阶段，缺失能力时给出可解释的降级，而不是运行到绘制阶段才出现黑屏。
 
-\label{lst:ch06-webgl-capabilities}
-\begin{lstlisting}[language=JavaScript,caption={WebGL能力探测与兼容性记录}]
+\begin{lstlisting}[label={lst:ch06-webgl-capabilities},language=JavaScript,caption={WebGL能力探测与兼容性记录}]
 function inspectWebGL(canvas) {
   const gl2 = canvas.getContext('webgl2');
   if (gl2) {
@@ -190,22 +185,21 @@ function inspectWebGL(canvas) {
 }
 \end{lstlisting}
 
-Three.js 的官方 addon 文档常把\texttt{three/addons/}作为 importmap 别名；它只有在浏览器 importmap 或构建工具显式配置别名时才有效。使用 npm 和 Vite 的工程，真实文件路径通常是\texttt{three/examples/jsm/...}，可以通过 Vite 的依赖解析或项目自己的别名映射为简短路径。学生应先确认运行方式，再选择导入语句；“文档示例能打开”不等于“直接粘贴到 Vite 就能编译”。清单\ref{lst:ch06-addon-import}列出两种环境的对应关系。
+Three.js 自 r156 起在 npm 包的 \texttt{exports} 字段中内置了\texttt{three/addons/*}到\texttt{examples/jsm/*}的映射，因此 Vite 等现代构建工具无需任何配置即可解析\texttt{three/addons/}导入；仍需手工声明别名的只剩“无构建工具、直接用浏览器 importmap”这一种运行方式。两条导入路径指向同一份文件，工程内应统一选用一种写法。清单\ref{lst:ch06-addon-import}列出两种环境的对应关系。
 
-\label{lst:ch06-addon-import}
-\begin{lstlisting}[language=JavaScript,caption={Three.js addon路径与构建环境对应}]
-// 浏览器 importmap：three/addons 必须在 importmap 中声明。
+\begin{lstlisting}[label={lst:ch06-addon-import},language=JavaScript,caption={Three.js addon路径与构建环境对应}]
+// npm + Vite（r156+）：包内置 exports 映射，直接可用
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-// npm + Vite：未配置别名时使用 examples/jsm 的真实路径。
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
+// 浏览器 importmap（无构建工具）：three/addons/ 必须在
+// importmap 的 imports 中显式声明后才可解析
+import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 \end{lstlisting}
 
 性能优化必须先建立预算。实例化适合大量共享几何和材质的护栏、植被或测点标记；LOD适合从远到近逐级替换模型；纹理压缩和最大尺寸控制显著影响显存；视锥裁剪、遮挡裁剪和按需加载减少 GPU 与网络工作量。清单\ref{lst:ch06-instancing-lod}用实例化绘制 28 个测点，并以距离切换高低细节模型。实际阈值要依据目标终端帧时间和交互任务测量，不能把“开启实例化”当成所有场景的万能优化。
 
-\label{lst:ch06-instancing-lod}
-\begin{lstlisting}[language=JavaScript,caption={实例化测点与距离驱动的LOD选择}]
+\begin{lstlisting}[label={lst:ch06-instancing-lod},language=JavaScript,caption={实例化测点与距离驱动的LOD选择}]
 const markerGeometry = new THREE.SphereGeometry(0.08, 8, 6);
 const markerMaterial = new THREE.MeshBasicMaterial({color: 0xffcc00});
 const markers = new THREE.InstancedMesh(markerGeometry, markerMaterial, 28);
@@ -233,8 +227,7 @@ Three.js封装了场景、相机、材质、灯光和渲染器。工程项目宜
 
 官方addon路径为\texttt{three/addons/loaders/GLTFLoader.js}\cite{threeGLTFLoader}。glTF/GLB适合Web交付；加载后仍需检查单位、坐标轴、材质色彩空间和包围盒。
 
-\label{lst:ch06-wmts-request}
-\begin{lstlisting}[language=JavaScript,breaklines=true,caption={WMTS地理瓦片请求}]
+\begin{lstlisting}[label={lst:ch06-gltf-load},language=JavaScript,breaklines=true,caption={Three.js 加载 GLTF 工程模型}]
 import * as THREE from 'three';
 import { GLTFLoader } from
   'three/addons/loaders/GLTFLoader.js';
@@ -252,7 +245,6 @@ scene.add(gltf.scene);
 
 \subsection{OGC地图与要素服务}
 
-WMS根据请求范围、尺寸、坐标参考系和样式动态渲染地图图像；WMTS按预定义瓦片矩阵提供地图瓦片，便于缓存和大规模浏览；WFS提供可查询的矢量要素。WMS不是“栅格瓦片服务”，WMTS才以预定义瓦片为核心\cite{ogcWMS,ogcWMTS}。表\ref{tab:ogc-services}把这几种服务按“返回什么”并列：WMS返回按请求参数渲染出来的图像，WMTS返回预先切好的瓦片，WFS返回可查询的矢量要素本身。选型时先确定业务需要的是图像、瓦片还是要素，再决定用哪一种；把三者当成同一件事的不同实现，是产生大量无效缓存与重复请求的根源。
 WMS根据请求范围、尺寸、坐标参考系和样式动态渲染地图图像；WMTS按预定义瓦片矩阵提供地图瓦片，便于缓存和大规模浏览；WFS提供可查询的矢量要素；WCS覆盖栅格数据本体，可按范围和波段取得原始像元值，适合DEM取值与淹没分析\cite{ogcWMS,ogcWMTS,ogcWCS}。3D Tiles是OGC社区标准，按层次细节（LOD）流式加载大规模三维对象，适合把BIM、倾斜摄影和点云交付到浏览器。表\ref{tab:ogc-services}把这些服务按“返回什么”并列：WMS返回按请求参数渲染出来的图像，WMTS返回预先切好的瓦片，WFS返回可查询的矢量要素本身，WCS返回可分析的栅格覆盖，3D Tiles返回带层次结构的三维内容。选型时先确定业务需要的是图像、瓦片、要素、原始像元还是三维流式内容，再决定服务路线。
 
 \begin{table}[htbp]
@@ -274,8 +266,7 @@ WCS & 栅格覆盖 & 返回原始像元与波段 & DEM取值、淹没分析 \\
 
 经典OGC服务常用KVP（Key-Value Pair）请求表达操作。下面三条最小请求分别展示图像、要素和覆盖数据的返回类型；实际项目还需加入认证、版本、异常格式和服务地址。WMS 1.3.0使用\texttt{CRS}参数而不是旧版本的\texttt{SRS}；当坐标系为EPSG:4490时，规范轴序是纬度在前、经度在后，\texttt{BBOX}应按该顺序填写。客户端若沿用“经度,纬度”的习惯，会得到空白图或位置偏移。
 
-\label{lst:ch06-wms-getmap}
-\begin{lstlisting}[language=HTTP,breaklines=true,caption={WMS 1.3.0 GetMap最小请求}]
+\begin{lstlisting}[label={lst:ch06-wms-getmap},language=HTTP,breaklines=true,caption={WMS 1.3.0 GetMap最小请求}]
 GET /geoserver/water/wms?SERVICE=WMS&VERSION=1.3.0
   &REQUEST=GetMap&LAYERS=water:reservoir
   &STYLES=&CRS=EPSG:4490
@@ -283,8 +274,7 @@ GET /geoserver/water/wms?SERVICE=WMS&VERSION=1.3.0
   &WIDTH=1024&HEIGHT=768&FORMAT=image/png
 \end{lstlisting}
 
-\label{lst:ch06-wfs-getfeature}
-\begin{lstlisting}[language=HTTP,breaklines=true,caption={WFS GetFeature最小请求}]
+\begin{lstlisting}[label={lst:ch06-wfs-getfeature},language=HTTP,breaklines=true,caption={WFS GetFeature最小请求}]
 GET /geoserver/water/ows?SERVICE=WFS&VERSION=2.0.0
   &REQUEST=GetFeature&TYPENAMES=water:station
   &SRSNAME=EPSG:4490&COUNT=100
@@ -292,8 +282,9 @@ GET /geoserver/water/ows?SERVICE=WFS&VERSION=2.0.0
   &OUTPUTFORMAT=application/json
 \end{lstlisting}
 
-\label{lst:ch06-wcs-getcoverage}
-\begin{lstlisting}[language=HTTP,breaklines=true,caption={WCS GetCoverage最小请求}]
+注意轴序：EPSG:4490 的官方定义是纬度在前，但 GeoServer 对简写\texttt{EPSG:4490}形式的\texttt{SRSNAME}默认按经度在前处理，本例即按此约定书写；若改用\texttt{urn:ogc:def:crs:EPSG::4490}形式，BBOX 必须交换为纬度在前，这是 WFS 联调中最常见的“查不到要素”原因。
+
+\begin{lstlisting}[label={lst:ch06-wcs-getcoverage},language=HTTP,breaklines=true,caption={WCS GetCoverage最小请求}]
 GET /geoserver/water/ows?SERVICE=WCS&VERSION=2.0.1
   &REQUEST=GetCoverage&COVERAGEID=water:dem
   &SUBSET=Long(113.70,113.85)&SUBSET=Lat(34.20,34.30)
@@ -339,8 +330,7 @@ GeoServer的样式、图层权限和GWC缓存配置应与数据版本一起纳�
 
 教学示例使用自建GeoServer，不依赖商业底图密钥：
 
-\label{lst:ch06-three-renderer}
-\begin{lstlisting}[language=JavaScript,breaklines=true,caption={Cesium无商业底图密钥的WMTS初始化}]
+\begin{lstlisting}[label={lst:ch06-cesium-wmts},language=JavaScript,breaklines=true,caption={Cesium 无商业底图密钥的 WMTS 初始化}]
 const viewer = new Cesium.Viewer('scene', {
   baseLayer: false,
   baseLayerPicker: false,
@@ -351,21 +341,24 @@ const viewer = new Cesium.Viewer('scene', {
 const imagery = new Cesium.WebMapTileServiceImageryProvider({
   url: 'https://gis.example.edu/geoserver/gwc/service/wmts',
   layer: 'water:cgcs2000_basemap',
-  style: '',
+  style: 'default',   // 与 GetCapabilities 中的样式标识一致
   format: 'image/png',
   tileMatrixSetID: 'EPSG:4490',
+  // GeoServer GWC 的矩阵标识形如 "EPSG:4490:0"，
+  // 不显式给出 labels 时 Cesium 按纯数字层级请求会全部 404
+  tileMatrixLabels: Array.from({ length: 19 },
+    (_, level) => `EPSG:4490:${level}`),
   tilingScheme: new Cesium.GeographicTilingScheme(),
   maximumLevel: 18
 });
 viewer.imageryLayers.addImageryProvider(imagery);
 \end{lstlisting}
 
-实际部署需要将示例域名替换为课程或项目服务器，并在服务端配置跨域、访问控制和缓存策略。Cesium示例关闭了Ion底图、地形、地理编码、时间轴和动画组件，因此不会隐式请求商业token；业务底图只来自自建GeoServer。由于EPSG:4490是地理坐标瓦片矩阵，必须使用\texttt{GeographicTilingScheme}，并把\texttt{maximumLevel}设置为GWC gridset实际提供的最大层级。GeoServer GWC默认内置EPSG:4326与EPSG:900913两个gridset，EPSG:4490需要手工创建并核对原点、瓦片宽高、比例尺和矩阵层级。
+实际部署需要将示例域名替换为课程或项目服务器，并在服务端配置跨域、访问控制和缓存策略。Cesium示例关闭了Ion底图、地形、地理编码、时间轴和动画组件，因此不会隐式请求商业token；业务底图只来自自建GeoServer。由于EPSG:4490是地理坐标瓦片矩阵，必须使用\texttt{GeographicTilingScheme}，并把\texttt{maximumLevel}设置为GWC gridset实际提供的最大层级；\texttt{tileMatrixLabels}必须与 GetCapabilities 报告的矩阵标识逐层对应，这是自建 gridset 最常见的联调故障点。GeoServer GWC默认内置EPSG:4326与EPSG:900913两个gridset，EPSG:4490需要手工创建并核对原点、瓦片宽高、比例尺和矩阵层级。
 
 GeoServer发布流程可以拆成四个可回滚步骤：先在工作区登记数据源和坐标元数据，再创建工作空间和图层，随后配置样式与访问权限，最后在GWC中创建或绑定gridset并预生成热点区域缓存。发布前用GetCapabilities确认服务版本、图层名和CRS，发布后用一条GetMap、一条GetFeature和一条GetCoverage请求做冒烟测试。缓存清理和重新切片要有任务 ID 与进度记录，不在高峰时段直接删除全部瓦片。
 
-\label{lst:ch06-geoserver-gridset}
-\begin{lstlisting}[language=YAML,breaklines=true,caption={GeoServer GWC EPSG:4490 gridset配置要点}]
+\begin{lstlisting}[label={lst:ch06-geoserver-gridset},language=YAML,breaklines=true,caption={GeoServer GWC EPSG:4490 gridset配置要点}]
 gridSet:
   name: EPSG:4490
   srs: 4490
@@ -374,8 +367,10 @@ gridSet:
   extent: [113.0, 34.0, 114.0, 35.0]
   metersPerUnit: 111319.490793
   levels:
-    - {level: 0, resolution: 0.703125}
-    - {level: 1, resolution: 0.3515625}
+    # 层 0 让 1°×1° 范围恰好落入一张 256×256 瓦片：
+    # 1/256 ≈ 0.00390625 度/像素，逐层减半
+    - {level: 0, resolution: 0.00390625}
+    - {level: 1, resolution: 0.001953125}
   cacheLayers:
     - water:cgcs2000_basemap
 \end{lstlisting}
@@ -386,7 +381,7 @@ gridSet:
 
 CGCS2000地理二维坐标系代码是EPSG:4490\cite{epsg4490}，EPSG:4326对应WGS 84。CGCS2000参考椭球长半轴为6378137米、扁率倒数为298.257222101；它与WGS 84椭球参数极为接近，但不能在坐标定义中直接写成\texttt{datum=WGS84}。
 
-我国6度高斯—克吕格分带约为13至23带。经度$\lambda$所在带号可按
+我国大陆范围的6度高斯—克吕格分带为13至23带。经度$\lambda$所在带号可按
 \[
   N=\left\lfloor\frac{\lambda}{6}\right\rfloor+1,
   \qquad \lambda_0=6N-3
@@ -438,8 +433,7 @@ CGCS2000的EPSG代码还要区分地理坐标、带号前缀和无前缀东坐�
 
 清单\ref{lst:ch06-zone-calc}用经度计算两种带宽的带号和中央经线，结果应和坐标数据的EPSG元数据交叉检查。浮点经度靠近分带边界时，要保留原始经度精度并由项目负责人确认是否采用邻带或统一工程坐标。
 
-\label{lst:ch06-zone-calc}
-\begin{lstlisting}[language=JavaScript,caption={3度带与6度带带号计算}]
+\begin{lstlisting}[label={lst:ch06-zone-calc},language=JavaScript,caption={3度带与6度带带号计算}]
 function gaussKrugerZone(longitude) {
   const sixDegree = Math.floor(longitude / 6) + 1;
   const threeDegree = Math.floor((longitude - 1.5) / 3) + 1;
@@ -453,8 +447,7 @@ console.log(gaussKrugerZone(113 + 42 / 60));
 
 下面示例把CGCS2000经纬度转换到中央经线111度的6度带（19带），采用无前缀东坐标。\texttt{tmerc}表示横轴墨卡托/高斯—克吕格计算；GRS80与CGCS2000椭球参数一致，\texttt{+k\_0}是PROJ 6+推荐写法，\texttt{+no\_defs +type=crs}用于明确坐标定义。带号写入元数据，交付系统若要求带号前缀，再按项目规范转换。
 
-\label{lst:ch06-three-camera}
-\begin{lstlisting}[language=JavaScript,caption={透视相机与场景}]
+\begin{lstlisting}[label={lst:ch06-proj4-convert},language=JavaScript,caption={proj4 定义 CGCS2000 与高斯——克吕格转换}]
 const CGCS2000 =
   '+proj=longlat +ellps=GRS80 +no_defs +type=crs';
 const GK19 =
@@ -484,12 +477,13 @@ GNSS通常给出椭球高$h$，水利工程常使用1985国家高程基准下的
 
 清单\ref{lst:ch06-height-convert}把高程转换写成显式函数，输入值和输出值都保留单位与基准标签；当缺少异常模型时，程序应拒绝静默换算。
 
-\label{lst:ch06-height-convert}
-\begin{lstlisting}[language=JavaScript,caption={椭球高到正常高与正高的转换}]
+\begin{lstlisting}[label={lst:ch06-height-convert},language=JavaScript,caption={椭球高到正常高与正高的转换}]
 function convertHeight({h, kind, anomaly}) {
   if (!Number.isFinite(h) || !Number.isFinite(anomaly)) {
     throw new Error('高程与异常值必须为有限数');
   }
+  // anomaly：正常高用高程异常ζ，正高用大地水准面差距N，
+  // 二者来自不同模型成果，调用方必须按 kind 传入对应值
   if (kind === 'normal') return {value: h - anomaly, datum: '1985-normal'};
   if (kind === 'orthometric') return {value: h - anomaly, datum: 'orthometric'};
   throw new Error('必须明确 normal 或 orthometric 高程类型');
@@ -512,8 +506,7 @@ const normal = convertHeight({h: 245.30, kind: 'normal', anomaly: -8.62});
 \paragraph{轴序、单位与序列化}
 EPSG定义的坐标轴顺序与许多Web API的习惯并不总是一致。GeoJSON通常以经度、纬度序列化，WMS 1.3.0在某些EPSG坐标系下按规范使用纬度、经度；工程接口应在契约中写明轴序，并使用带名称的对象字段或显式数组顺序。长度统一用米、角度统一用度，角度的度分秒输入必须先转换为十进制度再进行带号计算。数据库字段类型与精度也要与坐标用途匹配：经纬度保留足够小数位，工程平面坐标保留毫米或项目规定的精度，高程字段同时保存数值和基准枚举。
 
-\label{lst:ch06-coordinate-validate}
-\begin{lstlisting}[language=JavaScript,caption={坐标元数据校验与轴序显式化}]
+\begin{lstlisting}[label={lst:ch06-coordinate-validate},language=JavaScript,caption={坐标元数据校验与轴序显式化}]
 function validateCoordinate(point, metadata) {
   if (metadata.axisOrder !== 'lon-lat') {
     throw new Error('接口契约要求显式声明经度/纬度轴序');
@@ -534,8 +527,7 @@ function validateCoordinate(point, metadata) {
 
 当平面坐标进入Three.js时，通常要先减去局部原点$(E_0,N_0,H_0)$，再按米制缩放和场景轴约定旋转。局部变换的逆运算必须保留：点击场景中的测站后，系统先把局部坐标加回原点，再转换到EPSG:4490或工程平面坐标，最后调用后端查询。若只保存渲染后的浮点坐标，用户看到的构件无法与测量成果或监测数据库建立可复核关系。
 
-\label{lst:ch06-local-origin}
-\begin{lstlisting}[language=JavaScript,caption={工程坐标与三维局部原点互转}]
+\begin{lstlisting}[label={lst:ch06-local-origin},language=JavaScript,caption={工程坐标与三维局部原点互转}]
 function toLocal(enginePoint, origin) {
   return {x: enginePoint.east - origin.east,
     y: enginePoint.height - origin.height,
@@ -595,8 +587,7 @@ function toEngine(localPoint, origin) {
 
 Cesium的\texttt{Cesium3DTileset.fromUrl}返回Promise，应等待对象创建完成后再加入场景\cite{cesium3DTileset}：
 
-\label{lst:ch06-three-animation}
-\begin{lstlisting}[language=JavaScript,caption={三维渲染循环}]
+\begin{lstlisting}[label={lst:ch06-3dtiles-load},language=JavaScript,caption={Cesium 加载 3D Tiles 瓦片集}]
 try {
   const tileset = await Cesium.Cesium3DTileset.fromUrl(
     '/tiles/dam/tileset.json'
@@ -625,7 +616,7 @@ try {
 
 生产流程包括航线设计、影像采集、质量检查、空中三角测量、密集匹配、网格与纹理生成、坐标校核、切片和发布。Agisoft Metashape是PhotoScan更名后的现行名称；Bentley ContextCapture现已并入iTwin Capture Modeler产品线。项目文档应记录软件版本、产品名称、处理参数和名称沿革，便于学生按官方资料复现实验，也便于成果在多年运行后追溯。
 
-倾斜摄影的精度不是软件“自动生成”的属性，而是由任务设计、传感器标定、外业控制和内业检核共同决定。任务书首先写明成果用途、比例尺、覆盖范围、坐标和高程基准，再反推地面采样距离（GSD）、影像重叠度、飞行高度、相机曝光参数和控制点布设。以1:500地形图为例，GSD通常把目标设在不大于3\,cm的量级；这是任务设计的示例目标，平面和高程限差仍须按适用规范和项目合同查表确认（TODO-核对）。CH/Z 3004、CH/Z 3005分别约束低空数字航空摄影测量的外业与内业环节，GB/T 18314用于卫星定位测量成果的技术依据，三者应与项目适用的水利行业规范共同列入质量计划\cite{chz3004,chz3005,gbt18314}。
+倾斜摄影的精度不是软件“自动生成”的属性，而是由任务设计、传感器标定、外业控制和内业检核共同决定。任务书首先写明成果用途、比例尺、覆盖范围、坐标和高程基准，再反推地面采样距离（GSD）、影像重叠度、飞行高度、相机曝光参数和控制点布设。以1:500地形图为例，GSD通常把目标设在不大于3\,cm的量级；这是任务设计的示例目标，平面和高程限差仍须按项目适用规范与合同条款查表确认。CH/Z 3004与CH/Z 3003分别约束低空数字航空摄影测量的外业与内业环节，CH/Z 3005约束低空数字航空摄影的航摄实施，GB/T 18314用于卫星定位测量成果的技术依据，这些标准应与项目适用的水利行业规范共同列入质量计划\cite{chz3004,chz3005,gbt18314}。
 
 外业设计要把“看得到”和“量得准”分开讨论。影像覆盖应超过成果边界，航带端部和转弯区保留足够的缓冲；建筑物立面、坝肩和峡谷等遮挡严重的部位，应增加交叉航线或补拍方向，并在任务书中记录补拍原因。相机曝光时间、快门速度、光圈和感光度应与飞行速度、光照和地表反射率匹配，避免运动模糊和高光饱和。飞行日志至少保存航线版本、起降时间、设备编号、镜头组合、POS来源、坐标基准、天气和异常处置；日志与影像文件通过统一任务编号关联，不能只依赖操作员记忆。
 
@@ -664,7 +655,7 @@ ck/.style={diamond,draw=WarningColor,fill=WarningColor!20,minimum size=5mm,inner
 
 密集匹配前先冻结通过空三验收的相机和点云版本。匹配参数应随地物类型调整：水面、玻璃和植被边缘的纹理不足会造成空洞，坝体混凝土的重复纹理会产生条纹，狭窄廊道则可能因视角不足形成错误表面。处理报告中要记录点云密度、异常点剔除规则、空洞填补策略和人工修补区域；对用于变形监测的几何，不得用视觉平滑掩盖真实位移。网格和纹理生成后，再以检查点、剖面线和关键尺寸进行复核，合格成果才进入切片和服务发布。
 
-成果精度报告应按平面和高程分别给出统计量。现有式(\ref{eq:rmse-x})和式(\ref{eq:rmse-y})分别描述东、北分量，工程验收通常还需要平面点位均方根误差$ m_p $，其定义为
+成果精度报告应按平面和高程分别给出统计量。式(\ref{eq:rmse-x})和式(\ref{eq:rmse-y})分别描述东、北分量，工程验收通常还需要平面点位均方根误差$ m_p $，其定义为
 \begin{equation}
   m_p=\sqrt{m_x^2+m_y^2}.
   \label{eq:rmse-p}
@@ -680,21 +671,20 @@ ck/.style={diamond,draw=WarningColor,fill=WarningColor!20,minimum size=5mm,inner
 \toprule
 项目 & 任务设计或报告字段 & 验收统计与判定 & 依据与备注 \\
 \midrule
-1:500地形图示例 & GSD目标通常不大于3\,cm & 平面使用$m_p$，高程使用$m_h$；限差按适用条款查表 & 设计目标示例，具体限值 TODO-核对 \\
+1:500地形图示例 & GSD目标通常不大于3\,cm & 平面使用$m_p$，高程使用$m_h$；限差按适用条款查表 & 设计目标示例，限值以适用规范为准 \\
 平面检查点 & 点号、坐标基准、$\Delta X$、$\Delta Y$ & 报告$m_x$、$m_y$、$m_p$及最大绝对误差 & 不把分量误差替代平面点位指标 \\
 高程检查点 & 高程基准、$\Delta H$、测量方法 & 报告$m_h$及最大绝对误差 & 与平面统计分开，记录模型版本 \\
-异常点处理 & 残差、复核状态、处置人 & $|r|>2\,\mathrm{MSE}$进入复核；$|r|>3\,\mathrm{MSE}$判为粗差候选 & 删除或剔除必须记录原因和证据 \\
+异常点处理 & 残差、复核状态、处置人 & $|r|>2\,m$进入复核；$|r|>3\,m$判为粗差候选（$m$为中误差） & 删除或剔除必须记录原因和证据 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-粗差处理遵循“先复核、后判定、可追溯”的顺序。把残差绝对值超过2倍均方误差（MSE）的点列入复核清单，检查点位识别、坐标录入、时间同步和影像质量；超过3倍MSE的点可判为粗差候选，但仍需由测绘人员确认并记录剔除原因、原始残差、复核证据和重新计算结果。报告中应同时保留剔除前后的统计量，避免通过删除不利点“优化”数字。若多个异常点沿同一航带成带状分布，应优先调查系统误差；若单点异常且现场记录完整，才可能是点位识别或录入错误。
+粗差处理遵循“先复核、后判定、可追溯”的顺序。把残差绝对值超过2倍中误差（RMSE）的点列入复核清单，检查点位识别、坐标录入、时间同步和影像质量；超过3倍中误差的点可判为粗差候选，但仍需由测绘人员确认并记录剔除原因、原始残差、复核证据和重新计算结果。报告中应同时保留剔除前后的统计量，避免通过删除不利点“优化”数字。若多个异常点沿同一航带成带状分布，应优先调查系统误差；若单点异常且现场记录完整，才可能是点位识别或录入错误。
 
 下面的独立计算逻辑把分量误差、合成平面误差和粗差标记同时输出，学生可以用同一份检查点 CSV 复核软件报告。代码中的阈值只负责生成复核队列，最终限差仍由项目适用规范和验收文件决定。
 
-\label{lst:ch06-accuracy-check}
-\begin{lstlisting}[language=JavaScript,caption={检查点平面与高程精度计算及粗差复核}]
-function evaluateCheckPoints(points, mseThreshold) {
+\begin{lstlisting}[label={lst:ch06-accuracy-check},language=JavaScript,caption={检查点平面与高程精度计算及粗差复核}]
+function evaluateCheckPoints(points, rmse) {
   if (!Array.isArray(points) || points.length < 3) {
     throw new Error('独立检查点至少需要3个且必须是数组');
   }
@@ -709,15 +699,15 @@ function evaluateCheckPoints(points, mseThreshold) {
   const mp = Math.sqrt(mx * mx + my * my);
   const review = points.map((p) => {
     const residual = Math.max(Math.abs(p.dx), Math.abs(p.dy), Math.abs(p.dh));
-    const flag = residual > 3 * mseThreshold ? 'gross-error-candidate'
-      : residual > 2 * mseThreshold ? 'review' : 'pass';
+    const flag = residual > 3 * rmse ? 'gross-error-candidate'
+      : residual > 2 * rmse ? 'review' : 'pass';
     return {id: p.id, residual, flag};
   });
   return {mx, my, mp, mh, review};
 }
 \end{lstlisting}
 
-在成果交付单中，平面限差、高程限差、MSE计算口径和粗差处置规则应作为一个整体签字确认。若项目采用地方细化规范或合同中的更严要求，应在表\ref{tab:ch06-aerial-accuracy}对应行补充版本、条款和适用范围；若规范版本发生变化，重新计算检查点并保留旧版报告，确保三维模型、BIM构件和监测平台引用的是同一成果版本。
+在成果交付单中，平面限差、高程限差、中误差计算口径和粗差处置规则应作为一个整体签字确认。若项目采用地方细化规范或合同中的更严要求，应在表\ref{tab:ch06-aerial-accuracy}对应行补充版本、条款和适用范围；若规范版本发生变化，重新计算检查点并保留旧版报告，确保三维模型、BIM构件和监测平台引用的是同一成果版本。
 
 控制点布设还要考虑工程对象的几何层次。坝轴线两端控制整体方向，坝顶和坝脚控制高差与坡面，闸室、溢洪道和廊道出入口控制局部构件，场景边界控制模型裁切和瓦片范围。每一层至少保留一组独立检查点，使误差统计能够回答“整体是否平移”“局部是否变形”“边界是否翘曲”三个不同问题。若所有点只布在坝顶，平面指标可能很好看，但坝脚和峡谷侧壁的遮挡、纹理重复和高差变化仍可能导致模型失真。项目报告应把点位分层、点位数量和每层的最大残差列成表格，审查人员据此判断验收覆盖是否充分。
 
@@ -918,13 +908,7 @@ NASA文献强调物理模型、传感器更新和运行历史的综合映射\cit
 
 可以用一次“连续降雨后渗压变化”的演算检查双向闭环：雨量事件上行后，质量服务标记时间窗和数据完整性，模型服务根据水位与渗压快照计算趋势，预警服务给出带可信状态的结果；值班员确认后生成工单，若需要调度则由审批人选择方案并下发命令，设备回执和新的水位、流量又沿数据链上行。每一步都保留追踪号和版本，才能在复盘时回答“当时看到了什么、依据哪一版模型、谁作了决定、执行后发生了什么”。这个演算也说明五维模型中的连接维不是网络名词，而是把数据、模型、服务和物理对象串成可验证行动的机制。
 该闭环还可作为联调的最小验收用例：人为制造迟到观测、模型超时和审批拒绝，检查状态是否停在正确节点，并核对恢复后是否补齐证据。通过同一追踪号比较正常与失败两条路径，学生能够把抽象的五维关系落实为可观察的系统行为。
-验收报告应附状态转移、输入输出快照和责任签名，便于跨角色复核。
-复核记录同时写出模型版本、数据窗口和异常处置人。
-并注明复核时间与责任角色。
-若责任角色未签名，验收状态保持“待复核”，不进入正式发布。
-状态变更、签名和发布动作必须使用同一追踪号关联。
-只有证据链完整，系统结果才可进入正式业务处置。
-并由审计角色独立复核。
+验收报告应附状态转移、输入输出快照和责任签名，便于跨角色复核；复核记录写出模型版本、数据窗口、异常处置人、复核时间与责任角色。责任角色未签名时，验收状态保持“待复核”，不进入正式发布；状态变更、签名和发布动作使用同一追踪号关联，并由审计角色独立复核。证据链完整，系统结果才可进入正式业务处置。
 
 \subsection{业务场景与需求分解}
 
@@ -1096,10 +1080,9 @@ NASA文献强调物理模型、传感器更新和运行历史的综合映射\cit
 \label{fig:dt-closed-loop}
 \end{figure}
 
-下面的短伪代码只表达状态更新主线。每个函数均代表可测试的服务接口，不虚构十余个未定义类。
+下面的短伪代码只表达状态更新主线。每个函数均代表可测试的服务接口。
 
-\label{lst:ch06-python-model}
-\begin{lstlisting}[language=Python,caption={数字孪生模型计算接口}]
+\begin{lstlisting}[label={lst:ch06-python-model},language=Python,caption={数字孪生模型计算接口}]
 def update_twin(reading, repository, model, publisher):
     checked = validate_unit_time_quality(reading)
     repository.save_raw(checked)
@@ -1129,8 +1112,7 @@ def update_twin(reading, repository, model, publisher):
 
 状态更新事件至少包含事件标识、对象标识、发生时间、状态版本、模型版本和追踪标识：
 
-\label{lst:ch06-json-contract}
-\begin{lstlisting}[language=JSON,caption={模型事件契约示例}]
+\begin{lstlisting}[label={lst:ch06-json-contract},language=JSON,caption={模型事件契约示例}]
 {
   "eventId": "01J5...",
   "eventType": "twin.state.updated.v1",
@@ -1138,7 +1120,7 @@ def update_twin(reading, repository, model, publisher):
   "occurredAt": "2026-08-05T08:30:00+08:00",
   "stateVersion": 1842,
   "modelVersion": "seepage-2.3.1",
-  "risk": "warning",
+  "risk": "ORANGE",
   "traceId": "5d0e..."
 }
 \end{lstlisting}
@@ -1157,15 +1139,20 @@ def update_twin(reading, repository, model, publisher):
 \node[svc,right=of state] (model) {模型服务};
 \node[svc,right=of model] (alert) {告警服务};
 \node[svc,below=of model] (audit) {事件库与审计};
+\node[svc,below=of gateway] (cmd) {命令下发\\审批+幂等键};
+\node[svc,right=of cmd] (device) {设备执行\\回执状态};
 \draw[->,draw=Primary] (gateway)--node[above,font=\small]{观测事件}(state);
 \draw[->,draw=Primary] (state)--node[above,font=\small]{状态版本}(model);
 \draw[->,draw=Primary] (model)--node[above,font=\small]{模型结果}(alert);
+\draw[->,draw=Accent] (cmd)--node[above,font=\small]{受控命令}(device);
+\draw[->,draw=Accent] (device)--(audit);
+\draw[->,draw=Accent] (cmd)--(audit);
 \draw[->,draw=Accent] (gateway)--(audit);
 \draw[->,draw=Accent] (state)--(audit);
 \draw[->,draw=Accent] (model)--(audit);
 \draw[->,draw=Accent] (alert)--(audit);
 \end{tikzpicture}
-\caption{状态更新的事件契约与审计链}
+\caption{状态事件与控制命令两条链路及共同的审计落点}
 \label{fig:dt-event-contract}
 \end{figure}
 
@@ -1429,6 +1416,6 @@ def update_twin(reading, repository, model, publisher):
 
 \item[\textbf{实践题}]
 \item 在一课时内完成一个GLB模型加载、定位和业务标识绑定，并记录包围盒与加载错误处理。
-\item 使用5个以上独立检查点计算$m_x$、$m_y$、$m_p$和$m_h$，依据适用规范给出的平面点位与高程限差判断成果是否合格；对绝对残差超过$2\,\mathrm{MSE}$的点建立复核记录，对超过$3\,\mathrm{MSE}$的粗差候选说明复核、剔除理由及前后统计量。
+\item 使用5个以上独立检查点计算$m_x$、$m_y$、$m_p$和$m_h$，依据适用规范给出的平面点位与高程限差判断成果是否合格；对绝对残差超过2倍中误差的点建立复核记录，对超过3倍中误差的粗差候选说明复核、剔除理由及前后统计量。
 \item 以模板补全表\ref{tab:dt-acceptance}，为一个大坝渗压异常场景设计最小验收用例集。
 \end{enumerate}

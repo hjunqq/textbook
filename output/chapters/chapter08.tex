@@ -53,7 +53,7 @@
 
 值班员查看实时状态、确认告警并创建工单；专业分析员检查数据质量、模型结果和相邻测点；运维员处理设备与通信故障；审批人确认高风险处置或调度建议；审计员只读查询关键操作与证据链。角色不是菜单分组，而是权限与责任的边界。
 
-表\ref{tab:case-roles}把五类角色与其关键权限并列。注意审计员只有只读权限却不可省略：没有一个独立于处置链条之外的查询角色，事后复核就只能依赖处置者自己提供的记录。
+本书前几章统一使用值班员、专业分析员、审批人、运维员四种基本角色；本章在此基础上增加第五个只读扩展角色——审计员，它不参与任何处置动作，因此不改变四角色的职责边界。表\ref{tab:case-roles}把五类角色与其关键权限并列。注意审计员只有只读权限却不可省略：没有一个独立于处置链条之外的查询角色，事后复核就只能依赖处置者自己提供的记录。
 
 \begin{table}[htbp]
 \centering
@@ -159,8 +159,7 @@ Cesium & 流域/水网、地球与大范围地形浏览 & 坐标基准、瓦片�
 
 水体材质中的时间变量使用统一名\texttt{u\_time}，避免局部变量自引用：
 
-\label{lst:ch08-glsl}
-\begin{lstlisting}[language=GLSL,caption={水面波动着色器}]
+\begin{lstlisting}[label={lst:ch08-glsl},language=GLSL,caption={水面波动着色器}]
 uniform float u_time;
 uniform float speed;
 varying vec2 vUv;
@@ -177,8 +176,7 @@ void main() {
 数据点都调用同一定位桥接；\texttt{missing}使用断点，\texttt{suspect}使用半透明点，并在卡片上
 显示质量说明。组件卸载时释放 ECharts 实例，避免在路由切换后继续监听窗口尺寸。
 
-\label{lst:ch08-monitoring-sfc}
-\begin{lstlisting}[language=Vue,caption={测点筛选、ECharts 曲线与三维定位联动组件}]
+\begin{lstlisting}[label={lst:ch08-monitoring-sfc},language=Vue,caption={测点筛选、ECharts 曲线与三维定位联动组件}]
 <script setup>
 import { computed, inject, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';
@@ -233,15 +231,20 @@ async function refresh() {
   renderChart();
 }
 
+const onResize = () => chart?.resize();
+
 onMounted(async () => {
   await store.loadAssets();
   if (props.assetId) locate(props.assetId);
   await refresh();
-  window.addEventListener('resize', () => chart?.resize());
+  window.addEventListener('resize', onResize);
 });
 watch([selectedAssetId, () => range.value.from, () => range.value.to],
       refresh);
-onUnmounted(() => chart?.dispose());
+onUnmounted(() => {
+  window.removeEventListener('resize', onResize);
+  chart?.dispose();
+});
 </script>
 
 <template>
@@ -409,13 +412,12 @@ reading.version & integer & 非空、正数 & 无 & 同一事件的修订版本�
 \label{fig:ch08-database-er}
 \end{figure}
 
-下面三段 SQL 按“基础表—时序表—业务流程表”的顺序组织，构成 A8-2 实体代码和 S3 数据集的唯一
+下面三段 SQL 按“基础表—时序表—业务流程表”的顺序组织，构成本章后端实体代码和配套数据集的唯一
 字段来源。代码清单\ref{lst:ch08-sql-asset}先安装扩展并建立空间对象表；执行前应由迁移工具记录版本，
 而不是让应用启动时隐式建表。空间参考系、编码检查和 GiST 索引属于表的契约，缺一项都会让三维对象
 与监测数据发生难以定位的偏移。
 
-\label{lst:ch08-sql-asset}
-\begin{lstlisting}[language=SQL,caption={空间对象表与空间索引 DDL}]
+\begin{lstlisting}[label={lst:ch08-sql-asset},language=SQL,caption={空间对象表与空间索引 DDL}]
 CREATE EXTENSION IF NOT EXISTS postgis;
 CREATE EXTENSION IF NOT EXISTS timescaledb;
 
@@ -450,14 +452,13 @@ CREATE INDEX asset_type_active_idx
 还应根据写入峰值调整分区数，并为冷数据设置压缩和保留策略。连续聚合只读有效值，质量码和样本数
 仍然保留在结果中，便于界面解释“平均值为什么没有纳入某条数据”。
 
-\label{lst:ch08-sql-reading}
-\begin{lstlisting}[language=SQL,caption={时序观测表、分区与连续聚合 DDL}]
+\begin{lstlisting}[label={lst:ch08-sql-reading},language=SQL,caption={时序观测表、分区与连续聚合 DDL}]
 CREATE TABLE reading (
     asset_id         text NOT NULL REFERENCES asset(asset_id),
     occurred_at      timestamptz NOT NULL,
     version          integer NOT NULL DEFAULT 1,
     reading_id       bigserial,
-    event_id         text NOT NULL UNIQUE,
+    event_id         text NOT NULL,
     value            numeric,
     unit             text NOT NULL,
     quality          text NOT NULL,
@@ -473,9 +474,13 @@ CREATE TABLE reading (
 );
 
 SELECT create_hypertable(
-    'reading', by_range('occurred_at'),
-    by_hash('asset_id', 4), if_not_exists => TRUE
+    'reading', by_range('occurred_at'), if_not_exists => TRUE
 );
+
+-- 超表上的唯一索引必须包含分区列，
+-- 因此幂等键用 (occurred_at, event_id) 复合唯一索引表达
+CREATE UNIQUE INDEX reading_event_uidx
+    ON reading (occurred_at, event_id);
 
 CREATE INDEX reading_asset_time_idx
     ON reading (asset_id, occurred_at DESC);
@@ -503,8 +508,9 @@ SELECT add_continuous_aggregate_policy(
 
 主键包含时间列是时序表的工程折中：它满足超表分区键的唯一性要求，也允许同一时刻保存多个版本。
 跨测点查询使用\texttt{occurred\_at}范围条件，单测点查询使用\texttt{asset\_id}加时间降序索引；
-质量索引服务于统计任务和数据修复，但不能代替质量服务的优先级合并。\texttt{event\_id}的唯一约束
-是数据库级幂等保险，应用层仍要返回“重复事件已忽略”的可观察结果。若消息重复到达，不能把它当作
+质量索引服务于统计任务和数据修复，但不能代替质量服务的优先级合并。\texttt{(occurred\_at, event\_id)}的复合唯一索引
+是数据库级幂等保险——TimescaleDB 要求超表上的唯一索引必须包含分区列，这正是幂等键写成复合形式
+而不是单列 \texttt{UNIQUE(event\_id)} 的原因；应用层仍要返回“重复事件已忽略”的可观察结果。若消息重复到达，不能把它当作
 新版本；只有人工修订且带有不同版本号时，才允许保留相同业务时刻的另一行。
 
 预警、工单和模型运行表共享状态与证据约束，代码清单\ref{lst:ch08-sql-workflow}给出外键、检查条件
@@ -513,8 +519,7 @@ SELECT add_continuous_aggregate_policy(
 但只有\texttt{succeeded}状态才可被下游引用。这样的分层把“数据结构正确”和“业务流程合法”分开，
 便于在单元测试、集成测试和审计查询中分别验证。
 
-\label{lst:ch08-sql-workflow}
-\begin{lstlisting}[language=SQL,caption={预警、工单与模型运行表 DDL}]
+\begin{lstlisting}[label={lst:ch08-sql-workflow},language=SQL,caption={预警、工单与模型运行表 DDL}]
 CREATE TABLE warning (
     warning_id      bigserial PRIMARY KEY,
     asset_id        text NOT NULL REFERENCES asset(asset_id),
@@ -604,8 +609,7 @@ DDL 解决了“表能否创建”的问题，平台上线还需要回答“数�
 版本表记录迁移名称和校验摘要；真正的发布工具还应记录执行人、开始时间、结束时间和失败日志。若
 迁移中途失败，恢复脚本只回滚本次版本，不直接删除已有业务数据。
 
-\label{lst:ch08-sql-migration}
-\begin{lstlisting}[language=SQL,caption={可重复执行的迁移版本记录}]
+\begin{lstlisting}[label={lst:ch08-sql-migration},language=SQL,caption={可重复执行的迁移版本记录}]
 CREATE TABLE IF NOT EXISTS schema_migration (
     version      text PRIMARY KEY,
     description  text NOT NULL,
@@ -615,7 +619,7 @@ CREATE TABLE IF NOT EXISTS schema_migration (
 );
 
 INSERT INTO schema_migration(version, description, checksum, applied_by)
-VALUES ('A8-1-001', 'core asset reading warning ddl', 'sha256:TODO', current_user)
+VALUES ('QY-DDL-001', 'core asset reading warning ddl', 'sha256:TODO', current_user)
 ON CONFLICT (version) DO NOTHING;
 \end{lstlisting}
 
@@ -623,8 +627,7 @@ ON CONFLICT (version) DO NOTHING;
 并只取前端需要的列；不使用\texttt{SELECT *}可以避免新增列后无意扩大接口载荷，也能让数据库更容易
 复用覆盖索引。分页时应使用稳定的\texttt{asset\_id}游标，不能把页码当作长期一致性的依据。
 
-\label{lst:ch08-sql-asset-list}
-\begin{lstlisting}[language=SQL,caption={按类型和状态读取测点清单}]
+\begin{lstlisting}[label={lst:ch08-sql-asset-list},language=SQL,caption={按类型和状态读取测点清单}]
 SELECT asset_id, display_name, asset_type, unit,
        ST_X(geometry) AS longitude,
        ST_Y(geometry) AS latitude,
@@ -641,8 +644,7 @@ LIMIT :page_size;
 4490，再用 GiST 支持的包围盒过滤和精确谓词；若输入无效，接口应在参数校验阶段返回错误，而不是让
 数据库把空结果当作“区域内没有测点”。
 
-\label{lst:ch08-sql-spatial-query}
-\begin{lstlisting}[language=SQL,caption={影响区内测点的空间查询}]
+\begin{lstlisting}[label={lst:ch08-sql-spatial-query},language=SQL,caption={影响区内测点的空间查询}]
 WITH area AS (
     SELECT ST_Transform(
         ST_SetSRID(ST_GeomFromText(:wkt), :input_srid), 4490
@@ -660,8 +662,7 @@ ORDER BY a.asset_id;
 质量码为 valid 的观测；界面若要展示 suspect 或 missing，应另开一条明确的质量提示查询，避免把
 “没有合格数据”误画成一条平滑曲线。
 
-\label{lst:ch08-sql-recent-reading}
-\begin{lstlisting}[language=SQL,caption={按时间窗读取有效观测}]
+\begin{lstlisting}[label={lst:ch08-sql-recent-reading},language=SQL,caption={按时间窗读取有效观测}]
 SELECT occurred_at, value, unit, quality, event_id, version
 FROM reading
 WHERE asset_id = :asset_id
@@ -675,8 +676,7 @@ ORDER BY occurred_at, version;
 内的 valid、suspect、missing，统计结果附带窗口起止时间，便于跨班次比较。该查询不修改质量码，
 修正应由质量服务生成新版本并保留责任人。
 
-\label{lst:ch08-sql-quality-count}
-\begin{lstlisting}[language=SQL,caption={质量码分布统计查询}]
+\begin{lstlisting}[label={lst:ch08-sql-quality-count},language=SQL,caption={质量码分布统计查询}]
 SELECT asset_id,
        count(*) AS total_count,
        count(*) FILTER (WHERE quality = 'valid') AS valid_count,
@@ -692,21 +692,19 @@ ORDER BY asset_id;
 数据库兜底；应用收到 0 行影响时应记录重复事件并确认消息，而不是反复重试。若同一业务事件需要
 修订，必须生成新的版本并写明原因，不能利用冲突绕过审计规则。
 
-\label{lst:ch08-sql-idempotent-insert}
-\begin{lstlisting}[language=SQL,caption={基于事件 ID 的幂等写入}]
+\begin{lstlisting}[label={lst:ch08-sql-idempotent-insert},language=SQL,caption={基于事件 ID 的幂等写入}]
 INSERT INTO reading(asset_id, occurred_at, event_id, value,
                     unit, quality, source, version)
 VALUES (:asset_id, :occurred_at, :event_id, :value,
         :unit, :quality, :source, 1)
-ON CONFLICT (event_id) DO NOTHING;
+ON CONFLICT (occurred_at, event_id) DO NOTHING;
 \end{lstlisting}
 
 预警队列按等级和创建时间排序。代码清单\ref{lst:ch08-sql-warning-queue}明确排除已关闭状态，并把
 evaluable 标志作为结果列返回；这样界面可以同时显示“蓝色关注”“无预警”和“未评估”，而不是只依据
 颜色字段猜测业务状态。
 
-\label{lst:ch08-sql-warning-queue}
-\begin{lstlisting}[language=SQL,caption={待处理预警队列查询}]
+\begin{lstlisting}[label={lst:ch08-sql-warning-queue},language=SQL,caption={待处理预警队列查询}]
 SELECT warning_id, asset_id, level, evaluable, score,
        reason, rule_version, created_at
 FROM warning
@@ -722,8 +720,7 @@ ORDER BY CASE level
 取消或完成的工单排除，并返回预警等级，值班员可以先处理高等级且临近截止时间的事项。真正更新状态
 时还要携带版本号，防止两个角色互相覆盖。
 
-\label{lst:ch08-sql-due-work-order}
-\begin{lstlisting}[language=SQL,caption={即将到期工单查询}]
+\begin{lstlisting}[label={lst:ch08-sql-due-work-order},language=SQL,caption={即将到期工单查询}]
 SELECT w.work_order_id, w.warning_id, w.owner_role,
        w.due_at, w.action, p.level
 FROM work_order AS w
@@ -737,8 +734,7 @@ ORDER BY p.level DESC, w.due_at;
 筛选成功与失败运行，失败运行只用于故障定位，不能被下游当作可复现结果。若结果需要重新发布，应
 建立新的运行记录而不是覆盖旧结果。
 
-\label{lst:ch08-sql-model-audit}
-\begin{lstlisting}[language=SQL,caption={模型运行审计查询}]
+\begin{lstlisting}[label={lst:ch08-sql-model-audit},language=SQL,caption={模型运行审计查询}]
 SELECT run_id, model_name, model_version, status,
        started_at, finished_at, input_snapshot
 FROM model_run
@@ -752,8 +748,7 @@ ORDER BY started_at DESC;
 质量语义一起返回，前端可以在样本不足时显示“数据稀疏”而不绘制误导性的折线。对于跨越夏令时或
 多时区的部署，数据库统一使用 UTC，展示层再按用户时区转换。
 
-\label{lst:ch08-sql-aggregate-query}
-\begin{lstlisting}[language=SQL,caption={读取十五分钟连续聚合结果}]
+\begin{lstlisting}[label={lst:ch08-sql-aggregate-query},language=SQL,caption={读取十五分钟连续聚合结果}]
 SELECT bucket, value_avg, value_min, value_max, sample_count
 FROM reading_15m
 WHERE asset_id = :asset_id
@@ -766,8 +761,7 @@ ORDER BY bucket;
 语句；它只在运维员确认补传范围后执行，并在变更记录中写明起止时间。自动策略继续负责日常刷新，
 手工刷新不能成为绕过质量审核的常规写入口。
 
-\label{lst:ch08-sql-refresh-aggregate}
-\begin{lstlisting}[language=SQL,caption={补传后的连续聚合刷新}]
+\begin{lstlisting}[label={lst:ch08-sql-refresh-aggregate},language=SQL,caption={补传后的连续聚合刷新}]
 CALL refresh_continuous_aggregate(
     'reading_15m', :refresh_start, :refresh_end
 );
@@ -780,8 +774,7 @@ VALUES (:audit_version, 'late data aggregate refresh', :checksum, current_user);
 表达自动清理窗口；教学示例没有把窗口写死为工程参数，生产项目应从法规、合同和审计要求中取得批准
 值，并在删除前完成备份校验。若某段数据仍被未关闭工单引用，业务服务应先延长其保留期限。
 
-\label{lst:ch08-sql-retention}
-\begin{lstlisting}[language=SQL,caption={时序数据保留策略示例}]
+\begin{lstlisting}[label={lst:ch08-sql-retention},language=SQL,caption={时序数据保留策略示例}]
 SELECT add_retention_policy(
     'reading', drop_after => INTERVAL '730 days'
 );
@@ -796,8 +789,7 @@ WHERE hypertable_name = 'reading';
 并先查询压缩状态再决定是否执行；质量修订窗口没有关闭前，不应提前压缩。压缩不是删除，恢复演练
 仍需验证索引、连续聚合和原始版本都可读。
 
-\label{lst:ch08-sql-compression}
-\begin{lstlisting}[language=SQL,caption={按时间块配置时序压缩}]
+\begin{lstlisting}[label={lst:ch08-sql-compression},language=SQL,caption={按时间块配置时序压缩}]
 ALTER TABLE reading SET (
     timescaledb.compress,
     timescaledb.compress_segmentby = 'asset_id',
@@ -813,8 +805,7 @@ SELECT add_compression_policy(
 条件完成确认；若影响行数为 0，说明另一个角色已经处理，服务应返回最新状态而不是覆盖它。此规则
 也适用于工单完成和模型运行取消，避免前端的旧页面把新处置结果改回去。
 
-\label{lst:ch08-sql-warning-ack}
-\begin{lstlisting}[language=SQL,caption={带状态条件的预警确认}]
+\begin{lstlisting}[label={lst:ch08-sql-warning-ack},language=SQL,caption={带状态条件的预警确认}]
 UPDATE warning
 SET status = 'acknowledged'
 WHERE warning_id = :warning_id
@@ -826,8 +817,7 @@ RETURNING warning_id, status, created_at;
 完成时间和结果，空结果会被接口层拒绝。数据库层保留“已完成但没有结果”的异常查询入口，供运维
 人员在数据修复时补齐证据，而不是静默填入默认文字。
 
-\label{lst:ch08-sql-work-order-close}
-\begin{lstlisting}[language=SQL,caption={工单完成与回执写入}]
+\begin{lstlisting}[label={lst:ch08-sql-work-order-close},language=SQL,caption={工单完成与回执写入}]
 BEGIN;
 UPDATE work_order
 SET status = 'completed', completed_at = now(), result = :result
@@ -841,8 +831,7 @@ COMMIT;
 质量码和未来时间戳的记录；它不自动改数据，只产生检查报告。每日检查结果应和发布版本关联，才能在
 出现异常时判断是设备问题、迁移问题还是程序问题。
 
-\label{lst:ch08-sql-health-check}
-\begin{lstlisting}[language=SQL,caption={核心表健康检查}]
+\begin{lstlisting}[label={lst:ch08-sql-health-check},language=SQL,caption={核心表健康检查}]
 SELECT 'asset_without_geometry' AS check_name, count(*) AS failures
 FROM asset WHERE geometry IS NULL
 UNION ALL
@@ -857,8 +846,7 @@ FROM reading WHERE occurred_at > now();
 恢复演练所需的最小对象集合；实际备份工具负责导出数据和权限，SQL 只用于登记快照元信息。演练完成
 后要用一条事件 ID 串起测点、观测、预警、工单和模型运行，确认外键和 JSONB 证据均可读取。
 
-\label{lst:ch08-sql-backup-scope}
-\begin{lstlisting}[language=SQL,caption={备份快照登记}]
+\begin{lstlisting}[label={lst:ch08-sql-backup-scope},language=SQL,caption={备份快照登记}]
 CREATE TABLE IF NOT EXISTS backup_snapshot (
     snapshot_id  text PRIMARY KEY,
     started_at   timestamptz NOT NULL,
@@ -875,8 +863,7 @@ VALUES (:snapshot_id, now(), :object_count, :checksum);
 让报表用户看见编码、等级和统计结果，但看不到不必要的个人信息或完整设备密钥。生产环境还要结合
 应用层授权和数据库审计，视图本身不能替代角色管理。
 
-\label{lst:ch08-sql-role-view}
-\begin{lstlisting}[language=SQL,caption={面向报表角色的最小视图}]
+\begin{lstlisting}[label={lst:ch08-sql-role-view},language=SQL,caption={面向报表角色的最小视图}]
 CREATE OR REPLACE VIEW warning_report AS
 SELECT warning_id, asset_id, level, evaluable,
        score, reason, status, created_at
@@ -890,8 +877,7 @@ GRANT SELECT ON warning_report TO report_reader;
 并在写入新观测版本前生成审计行；如果修订没有批准号，接口应拒绝提交。审计表可以独立归档，不能
 因为前端只展示最新值就删除。
 
-\label{lst:ch08-sql-revision-audit}
-\begin{lstlisting}[language=SQL,caption={观测修订审计登记}]
+\begin{lstlisting}[label={lst:ch08-sql-revision-audit},language=SQL,caption={观测修订审计登记}]
 CREATE TABLE IF NOT EXISTS reading_revision_audit (
     audit_id       bigserial PRIMARY KEY,
     event_id       text NOT NULL,
@@ -909,8 +895,7 @@ CREATE TABLE IF NOT EXISTS reading_revision_audit (
 索引大小和最近数据时间；它不直接给出“系统健康”结论，而是为压测和运维看板提供证据。指标异常时
 应同时查看 Kafka 积压、质量码分布和工单延迟，不能只看数据库 CPU。
 
-\label{lst:ch08-sql-observability}
-\begin{lstlisting}[language=SQL,caption={数据库容量与新鲜度观察}]
+\begin{lstlisting}[label={lst:ch08-sql-observability},language=SQL,caption={数据库容量与新鲜度观察}]
 SELECT hypertable_name, table_bytes, index_bytes,
        total_bytes
 FROM hypertable_detailed_size('reading');
@@ -924,8 +909,7 @@ FROM reading;
 预警和工单，并把模型运行的输入快照作为独立结果返回。若某一步没有记录，报告应明确显示“链路缺口”，
 而不是用空字符串伪造闭环。这种查询是课程项目验收时最有价值的可复现证据之一。
 
-\label{lst:ch08-sql-trace-event}
-\begin{lstlisting}[language=SQL,caption={按事件标识追溯业务闭环}]
+\begin{lstlisting}[label={lst:ch08-sql-trace-event},language=SQL,caption={按事件标识追溯业务闭环}]
 SELECT r.event_id, r.asset_id, r.occurred_at, r.quality,
        w.warning_id, w.level, w.evaluable,
        o.work_order_id, o.status AS work_status,
@@ -1004,7 +988,7 @@ Kafka 消息、HTTP 请求和前端操作对应起来。
 
 模式演进要优先考虑兼容。增加可空列通常可以向后兼容，删除列和改变枚举则必须经过观察期；大表添加
 非空约束应先回填并验证，再分阶段切换。实体类和 DTO 不应复制一套互不相同的字段名，数据库字典是
-唯一来源，代码生成或手工实现都应在代码审查中逐列核对。若 A8-2 需要把\texttt{asset}映射为 Java
+唯一来源，代码生成或手工实现都应在代码审查中逐列核对。若后端需要把\texttt{asset}映射为 Java
 实体，应保留\texttt{asset\_id}、\texttt{geometry}和\texttt{metadata}的原语义，并对空间类型
 明确转换策略；若 S3 生成示例数据，应按照同一编码规则和质量码集合生成，不能为方便而使用随机中文键。
 
@@ -1053,11 +1037,8 @@ JSONB 证据、备份副本和压缩后的增长系数；写入峰值还要考�
 
 因此，数据库评审记录应成为发布包的一部分，与代码、配置和数据样例共同归档，并在每次迁移后更新。
 归档内容还应包含执行计划、失败重试记录和恢复演练的校验结果，保证后来接手系统的人员能够复现设计
-依据并判断一次变更是否真正达到了预期效果。
-这些材料也为课程答辩提供可核验的证据链。
-学生应在报告中引用对应的迁移版本和查询清单。
-并说明每条证据的生成时间。
-可供复核。
+依据并判断一次变更是否真正达到了预期效果。这些材料同时构成课程答辩的证据链：学生在报告中引用对应的
+迁移版本和查询清单，并注明每条证据的生成时间，评审者即可逐项复核。
 
 数据库设计还要考虑数据进入系统之前的契约校验。网关收到消息时先检查事件标识、测点编码、发生时间、
 单位和载荷格式；缺少任一必填项就进入拒收或隔离队列，并保留原始报文摘要。通过校验的消息再进入质量
@@ -1167,7 +1148,7 @@ items 和旧数组一段观察期；等客户端全部升级后再移除兼容�
 前端性能要以真实测点和时间窗测试。测点列表使用虚拟滚动或分页，曲线只保留当前窗口需要的点，三维
 场景按对象可见性和 LOD 控制绘制；ECharts 更新使用 setOption 的增量路径，窗口缩放和 resize 事件
 合并处理。性能报告记录首屏时间、接口等待、图表绘制、相机定位和内存增长，并把质量提示、错误提示和
-权限拒绝纳入可用性验收。这样，A8-3 的界面切片既能支撑两课时实践，也能作为完整平台的前端边界示例。
+权限拒绝纳入可用性验收。这样，本节的界面切片既能支撑两课时实践，也能作为完整平台的前端边界示例。
 
 实践验收还应覆盖键盘和触控操作。测点按钮需要可获得焦点，曲线点的详情不能只依赖鼠标悬停，颜色
 之外还要提供文字和图标说明；时间范围输入支持无障碍标签，错误提示通过 aria-live 告知屏幕阅读器。
@@ -1185,17 +1166,16 @@ POST 操作必须由用户确认。这样的错误分类让前端的“自动恢
 验收记录同时保留浏览器版本、构建版本和接口版本，便于复现跨端差异。
 验收人员还要把同一测点在列表、曲线和三维场景中的显示结果逐项核对：列表中的质量码应与曲线的断点标记一致，场景定位应落到该测点的空间坐标，切换时间窗后不能残留上一窗口的读数。对键盘操作、窄屏布局和网络抖动分别记录通过条件，形成可追踪的前端验收清单；只有接口契约、视觉提示和空间联动同时满足，页面才具备值班使用的可信度。
 
-本节把前端实现切片与 A8-2 的接口契约逐一对齐。API 层只负责把参数编码为 HTTP 请求，Pinia 保存跨
+本节把前端实现切片与 8.3 节的接口契约逐一对齐。API 层只负责把参数编码为 HTTP 请求，Pinia 保存跨
 组件共享的测点、时间窗和读数，页面组件负责筛选、图表和交互，三维桥接对象负责把选中的资产定位到
 Three.js 场景。数据流从“筛选条件”开始，经由请求层和后端接口返回观测，再以同一个\texttt{assetId}
 同时驱动 ECharts 曲线和三维相机；因此用户点击曲线或测点列表时，看到的是同一对象的两个视图。
 
-第4章 A4-5 已经提供带认证、超时和统一错误处理的\texttt{request.js}封装，A8-3 不重复实现 fetch
+第4章已经提供带认证、超时和统一错误处理的\texttt{request.js}封装，本节不重复实现 fetch
 或 axios。代码清单\ref{lst:ch08-frontend-api}只声明监测领域 API，并把时间、质量码和聚合粒度作为
-显式参数传给 A8-2 的接口。调用方可以在单元测试中替换这个模块，模拟 401、409、网络超时和空数据。
+显式参数传给后端接口。调用方可以在单元测试中替换这个模块，模拟 401、409、网络超时和空数据。
 
-\label{lst:ch08-frontend-api}
-\begin{lstlisting}[language=JavaScript,caption={监测主线 API 层}]
+\begin{lstlisting}[label={lst:ch08-frontend-api},language=JavaScript,caption={监测主线 API 层}]
 // api/monitoring.js
 import request from '@/utils/request';
 
@@ -1232,8 +1212,7 @@ Pinia store 只保存具有业务意义的共享状态，图表实例和 DOM 引
 后端返回的分页内容转换成只读数组。刷新读数前保留旧数据和 selected 状态，避免网络抖动时界面闪成
 空白；请求失败时保留最后一次成功结果并显示错误原因。
 
-\label{lst:ch08-monitoring-store}
-\begin{lstlisting}[language=JavaScript,caption={Pinia 监测状态仓库}]
+\begin{lstlisting}[label={lst:ch08-monitoring-store},language=JavaScript,caption={Pinia 监测状态仓库}]
 // stores/monitoring.js
 import { computed, ref } from 'vue';
 import { defineStore } from 'pinia';
@@ -1247,7 +1226,9 @@ export const useMonitoringStore = defineStore('monitoring', () => {
     from: new Date(Date.now() - 24 * 3600 * 1000).toISOString(),
     to: new Date().toISOString(),
     quality: 'valid',
-    agg: '15m'
+    // 页面组件按原始观测结构解析，默认取 raw；
+    // 切到 15m 等聚合档时需同时切换响应解析分支
+    agg: 'raw'
   });
   const loading = ref(false);
   const errorMessage = ref('');
@@ -1300,11 +1281,10 @@ export const useMonitoringStore = defineStore('monitoring', () => {
 
 路由把监测总览和测点详情映射到同一份 store。代码清单\ref{lst:ch08-monitoring-router}使用动态导入
 降低首屏体积，并在路由元数据中声明最小角色；路由守卫只负责登录态和粗粒度角色检查，具体工程范围、
-数据质量权限和预警操作仍由 A8-2 后端再次校验。URL 中的\texttt{assetId}可以被复制和恢复，刷新页面
+数据质量权限和预警操作仍由后端再次校验。URL 中的\texttt{assetId}可以被复制和恢复，刷新页面
 后 store 根据路由参数重新加载对象。
 
-\label{lst:ch08-monitoring-router}
-\begin{lstlisting}[language=JavaScript,caption={监测页面路由与角色守卫}]
+\begin{lstlisting}[label={lst:ch08-monitoring-router},language=JavaScript,caption={监测页面路由与角色守卫}]
 // router/index.js
 import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
@@ -1346,8 +1326,7 @@ export default router;
 用户选择测点时由\texttt{locateAsset}计算世界坐标、移动控制器目标并高亮对象。这个模块可以被
 Three.js r160+场景使用，也可以由 Cesium 1.12x+适配器实现相同的\texttt{locateAsset}接口。
 
-\label{lst:ch08-scene-bridge}
-\begin{lstlisting}[language=JavaScript,caption={三维场景测点定位桥接}]
+\begin{lstlisting}[label={lst:ch08-scene-bridge},language=JavaScript,caption={三维场景测点定位桥接}]
 // scene/sceneBridge.js
 import * as THREE from 'three';
 
@@ -1361,7 +1340,10 @@ export function createSceneBridge({ camera, controls }) {
   }
 
   function clearSelection() {
-    if (selected) selected.material.emissive?.setHex(0x000000);
+    if (selected) {
+      // 恢复选中前保存的原始自发光值，不覆盖模型原有材质
+      selected.material.emissive?.setHex(selected.userData.baseEmissive ?? 0x000000);
+    }
     selected = null;
   }
 
@@ -1388,8 +1370,7 @@ export function createSceneBridge({ camera, controls }) {
 \ref{lst:ch08-frontend-entry}补齐 Vite 应用入口、Pinia、Router 和场景桥接注入，形成从启动到页面的
 可运行链。Three.js 场景初始化可以替换为 Cesium 适配器，但桥接接口和 Pinia 数据契约保持不变。
 
-\label{lst:ch08-frontend-entry}
-\begin{lstlisting}[language=JavaScript,caption={Vue 应用入口与场景桥接注入}]
+\begin{lstlisting}[label={lst:ch08-frontend-entry},language=JavaScript,caption={Vue 应用入口与场景桥接注入}]
 // main.js
 import { createApp } from 'vue';
 import { createPinia } from 'pinia';
@@ -1430,8 +1411,7 @@ Pinia 状态快照、ECharts 数据数组、三维对象 ID 和后端 traceId，
 
 后端接口使用Spring Boot 3.2+与Java 17。质量服务对格式、单位、范围、时序和重复五项进行校验；只有明确规则允许时才生成修订值。时序检查要求\texttt{occurredAt}不晚于当前时间且不早于上一条记录，重复检查以\texttt{eventId}去重。下面的完整示例保留原始值，只更新质量标记并返回全部问题：
 
-\label{lst:ch08-quality-java}
-\begin{lstlisting}[language=Java,caption={质量检查服务实现}]
+\begin{lstlisting}[label={lst:ch08-quality-java},language=Java,caption={质量检查服务实现}]
 import java.time.Clock;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -1512,7 +1492,10 @@ public final class QualityService {
             qualityState = mergeQuality(qualityState, "suspect");
         }
 
-        if (r.eventId() == null || !seenEventIds.add(r.eventId())) {
+        if (r.eventId() == null) {
+            issues.add("missing_eventId");
+            qualityState = mergeQuality(qualityState, "suspect");
+        } else if (!seenEventIds.add(r.eventId())) {
             issues.add("duplicate_eventId");
             qualityState = mergeQuality(qualityState, "suspect");
         }
@@ -1581,18 +1564,17 @@ public final class QualityService {
 
 \subsection{监测主线后端实现}
 
-A8-1 的字段字典和 DDL 是后端实现的唯一来源。实体类只负责把持久化字段映射成有类型的对象，业务
+8.3 节的字段字典和 DDL 是后端实现的唯一来源。实体类只负责把持久化字段映射成有类型的对象，业务
 规则放在服务层，Controller 负责 HTTP 契约，Kafka 消费者负责把消息接入同一条事务链。四层职责不能
 互换：Controller 不直接拼接 SQL，实体类不调用消息客户端，消费者不绕开质量服务写入预警。这样做的
 好处是可以分别测试字段映射、事务边界、权限判定和消息重投。
 
 实体映射首先固定表名和列名，再处理空间类型、JSONB 和复合主键。\texttt{asset}的空间列使用 JTS
 \texttt{Point}承载 PointZ，坐标系约束仍由数据库保证；应用在写入前检查 SRID，读取时把坐标转换为
-前端约定的经纬度和高程。代码清单\ref{lst:ch08-entity-asset}展示与 A8-1 完全对应的资产实体，
+前端约定的经纬度和高程。代码清单\ref{lst:ch08-entity-asset}展示与 8.3 节 DDL 完全对应的资产实体，
 构造器只接受必填字段，更新时间由持久化回调维护。
 
-\label{lst:ch08-entity-asset}
-\begin{lstlisting}[language=Java,caption={AssetEntity 空间对象实体}]
+\begin{lstlisting}[label={lst:ch08-entity-asset},language=Java,caption={AssetEntity 空间对象实体}]
 package cn.example.water.monitoring.asset;
 
 import jakarta.persistence.Column;
@@ -1656,12 +1638,11 @@ public class AssetEntity {
 }
 \end{lstlisting}
 
-观测实体的主键由测点、发生时间和版本组成，正好对应 A8-1 的时序表约束。代码清单\ref{lst:ch08-entity-reading}
-把复合主键拆成\texttt{ReadingId}，并用\texttt{@EmbeddedId}保存；\texttt{eventId}仍然单独设置唯一
-约束，供 Kafka 幂等消费使用。实体不提供覆盖原始值的 setter，修订通过新版本构造，保证追加式审计。
+观测实体的主键由测点、发生时间和版本组成，正好对应 8.3 节的时序表约束。代码清单\ref{lst:ch08-entity-reading}
+把复合主键拆成\texttt{ReadingId}，并用\texttt{@EmbeddedId}保存；\texttt{eventId}与发生时间共同构成
+数据库侧的复合唯一索引（分区表的唯一索引必须包含分区列），供 Kafka 幂等消费兜底。实体不提供覆盖原始值的 setter，修订通过新版本构造，保证追加式审计。
 
-\label{lst:ch08-entity-reading}
-\begin{lstlisting}[language=Java,caption={ReadingEntity 与复合主键}]
+\begin{lstlisting}[label={lst:ch08-entity-reading},language=Java,caption={ReadingEntity 与复合主键}]
 package cn.example.water.monitoring.reading;
 
 import jakarta.persistence.Column;
@@ -1710,7 +1691,7 @@ public class ReadingEntity {
     private ReadingId id;
     @Column(name = "reading_id", insertable = false, updatable = false)
     private Long readingId;
-    @Column(name = "event_id", nullable = false, unique = true)
+    @Column(name = "event_id", nullable = false)
     private String eventId;
     @Column(name = "value")
     private Double value;
@@ -1739,6 +1720,7 @@ public class ReadingEntity {
     public ReadingId getId() { return id; }
     public String getEventId() { return eventId; }
     public Double getValue() { return value; }
+    public String getUnit() { return unit; }
     public String getQuality() { return quality; }
 }
 \end{lstlisting}
@@ -1748,14 +1730,15 @@ Hibernate 6 中可用\texttt{@JdbcTypeCode(SqlTypes.JSON)}映射为字符串或�
 JSON 字符串，以突出字段契约和审计快照。代码清单\ref{lst:ch08-entity-workflow}把三类过程对象放在
 同一份可读代码中，实际工程按类名拆分为三个 Java 文件。
 
-\label{lst:ch08-entity-workflow}
-\begin{lstlisting}[language=Java,caption={Warning、WorkOrder 与 ModelRun 实体}]
+\begin{lstlisting}[label={lst:ch08-entity-workflow},language=Java,caption={Warning、WorkOrder 与 ModelRun 实体}]
 package cn.example.water.monitoring.workflow;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
@@ -1765,7 +1748,8 @@ import java.util.UUID;
 @Entity
 @Table(name = "warning")
 public class WarningEntity {
-    @Id @Column(name = "warning_id")
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "warning_id")
     private Long warningId;
     @Column(name = "asset_id", nullable = false)
     private String assetId;
@@ -1806,7 +1790,8 @@ public class WarningEntity {
 @Entity
 @Table(name = "work_order")
 public class WorkOrderEntity {
-    @Id @Column(name = "work_order_id") private Long workOrderId;
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "work_order_id") private Long workOrderId;
     @Column(name = "warning_id", nullable = false) private Long warningId;
     @Column(name = "owner_role", nullable = false) private String ownerRole;
     @Column(name = "due_at", nullable = false) private Instant dueAt;
@@ -1825,6 +1810,11 @@ public class WorkOrderEntity {
     public Long getWorkOrderId() { return workOrderId; }
     public String getStatus() { return status; }
     public Instant getDueAt() { return dueAt; }
+    public void start() {
+        if (!"pending".equals(status))
+            throw new IllegalStateException("工单状态不允许开始处理");
+        this.status = "in_progress";
+    }
     public void complete(String result) {
         if (!"in_progress".equals(status))
             throw new IllegalStateException("工单状态不允许完成");
@@ -1865,8 +1855,7 @@ Repository 只表达查询意图，不把数据库连接细节泄漏到 Controll
 \texttt{ST\_Within}和 SRID，避免把经纬度当作平面坐标。观测查询以复合主键的测点和时间范围为条件，
 并保留质量码过滤参数，供服务层决定是否参与打分。
 
-\label{lst:ch08-repository}
-\begin{lstlisting}[language=Java,caption={监测主线 Repository 接口}]
+\begin{lstlisting}[label={lst:ch08-repository},language=Java,caption={监测主线 Repository 接口}]
 package cn.example.water.monitoring.persistence;
 
 import cn.example.water.monitoring.asset.AssetEntity;
@@ -1931,8 +1920,7 @@ public interface WarningRepository extends JpaRepository<WarningEntity, Long> {
 默认只取 valid，确认预警使用带状态条件的更新，创建工单要求调用者已经通过 Spring Security 6 的
 角色检查。服务返回 DTO 或领域结果，不把 JPA 实体直接暴露给前端，防止懒加载和内部审计字段泄漏。
 
-\label{lst:ch08-service}
-\begin{lstlisting}[language=Java,caption={监测主线事务服务}]
+\begin{lstlisting}[label={lst:ch08-service},language=Java,caption={监测主线事务服务}]
 package cn.example.water.monitoring.service;
 
 import cn.example.water.monitoring.persistence.AssetRepository;
@@ -2028,8 +2016,7 @@ Spring MVC 的完整入口和 DTO record；\texttt{@PreAuthorize}使用 Spring S
 不把角色判断散落在字符串比较中。Controller 只返回必要字段，证据快照和原始观测仍由专业接口按权限
 读取。
 
-\label{lst:ch08-controller}
-\begin{lstlisting}[language=Java,caption={监测主线 REST Controller 与 DTO}]
+\begin{lstlisting}[label={lst:ch08-controller},language=Java,caption={监测主线 REST Controller 与 DTO}]
 package cn.example.water.monitoring.web;
 
 import cn.example.water.monitoring.service.MonitoringService;
@@ -2059,6 +2046,15 @@ public record AckRequest(@NotBlank String requestId) { }
 public record WorkOrderRequest(long warningId, @NotBlank String ownerRole,
                                Instant dueAt, @NotBlank String action) { }
 
+public record ReadingDto(String assetId, Instant occurredAt, int version,
+                         Double value, String unit, String quality) {
+    static ReadingDto from(ReadingEntity entity) {
+        return new ReadingDto(entity.getId().getAssetId(),
+                entity.getId().getOccurredAt(), entity.getId().getVersion(),
+                entity.getValue(), entity.getUnit(), entity.getQuality());
+    }
+}
+
 @RestController
 @RequestMapping("/api")
 public class MonitoringController {
@@ -2069,10 +2065,11 @@ public class MonitoringController {
 
     @GetMapping("/assets/{assetId}/readings")
     @PreAuthorize("hasAnyRole('DUTY_OFFICER','ANALYST')")
-    public Page<?> readings(@PathVariable String assetId,
+    public Page<ReadingDto> readings(@PathVariable String assetId,
                             @Valid ReadingQuery query, Pageable pageable) {
         return service.readings(assetId, query.from(), query.to(),
-                                query.quality(), pageable);
+                                query.quality(), pageable)
+                      .map(ReadingDto::from);
     }
 
     @PostMapping("/warnings/{warningId}/ack")
@@ -2092,8 +2089,7 @@ Controller 的分页对象和日期格式由 Spring MVC 解析，统一异常处
 Repository、事务服务和 Controller 的创建/完成动作连成一条链；完成动作只允许 in\_progress 状态，
 并把回执写入同一个事务。实际工程可把状态转换抽成领域服务，但不能让 Controller 直接修改 status 字段。
 
-\label{lst:ch08-workorder-chain}
-\begin{lstlisting}[language=Java,caption={工单创建与完成的后端链}]
+\begin{lstlisting}[label={lst:ch08-workorder-chain},language=Java,caption={工单创建与完成的后端链}]
 package cn.example.water.monitoring.workorder;
 
 import cn.example.water.monitoring.workflow.WorkOrderEntity;
@@ -2161,6 +2157,12 @@ class WorkOrderController {
         return service.create(command);
     }
 
+    @PostMapping("/{id}/start")
+    @PreAuthorize("hasRole('DUTY_OFFICER')")
+    WorkOrderEntity start(@PathVariable long id) {
+        return service.start(id);
+    }
+
     @PostMapping("/{id}/complete")
     @PreAuthorize("hasRole('DUTY_OFFICER')")
     WorkOrderEntity complete(@PathVariable long id,
@@ -2172,16 +2174,15 @@ class WorkOrderController {
 
 上面清单中的\texttt{WarningLookup}是对预警服务的最小端口，真实项目由预警 Repository 适配器实现；
 这样工单服务不依赖预警表的全部字段。\texttt{WorkOrderEntity.complete}应检查当前状态并设置完成时间，
-此处与实体清单同样按独立文件组织。接口表中的 POST /work-orders 和 POST /work-orders/{id}/complete
-因此都有可追踪的实现入口，异常和审计日志再由统一 Web 层补充。
+此处与实体清单同样按独立文件组织。接口表中的 POST /work-orders、POST /work-orders/\{id\}/start 和 POST /work-orders/\{id\}/complete
+因此都有可追踪的实现入口（pending 经 start 进入 in\_progress，再由 complete 关闭），异常和审计日志再由统一 Web 层补充。
 
 Kafka 消费者必须在数据库唯一约束和业务去重之间形成双保险。代码清单\ref{lst:ch08-kafka-consumer}
 使用 Java 17 record 表达事件，监听器只负责反序列化和调用事务服务；事务服务先用\texttt{eventId}
 查询，再依赖数据库唯一键处理并发重投。重复事件被确认但不重复写入，质量服务失败则抛出异常让消息
 按照重试策略重新投递，不能在 catch 中静默吞掉错误。
 
-\label{lst:ch08-kafka-consumer}
-\begin{lstlisting}[language=Java,caption={Kafka 观测事件消费与幂等写入}]
+\begin{lstlisting}[label={lst:ch08-kafka-consumer},language=Java,caption={Kafka 观测事件消费与幂等写入}]
 package cn.example.water.monitoring.ingest;
 
 import cn.example.water.monitoring.persistence.ReadingRepository;
@@ -2207,10 +2208,15 @@ class ReadingKafkaConsumer {
         this.ingestion = ingestion;
     }
 
-    @KafkaListener(topics = "monitoring.readings",
+    @KafkaListener(topics = "qingyuan.reading.v1",
                    groupId = "monitoring-quality")
     public void onMessage(ReadingEvent event) {
-        ingestion.accept(event);
+        try {
+            ingestion.accept(event);
+        } catch (DataIntegrityViolationException duplicate) {
+            // 并发重投由唯一键裁决：事务已回滚，在事务边界之外
+            // 捕获并确认消息，避免无谓的重试循环
+        }
     }
 }
 
@@ -2229,17 +2235,15 @@ class ReadingIngestionService {
         ReadingEntity reading = new ReadingEntity(
                 id, event.eventId(), event.value(), event.unit(),
                 event.quality(), event.source());
-        try {
-            readings.saveAndFlush(reading);
-        } catch (DataIntegrityViolationException duplicate) {
-            // 并发重投由唯一键裁决，记录后确认消息即可
-        }
+        readings.saveAndFlush(reading);
     }
 }
 \end{lstlisting}
 
 监听器的消费组名称、Topic 和事件字段属于接口契约，应与 Kafka 管理配置和本章事件字段保持一致。
-教材示例使用\texttt{saveAndFlush}让唯一键冲突尽早暴露；生产环境还要配置退避重试、死信 Topic 和
+教材示例使用\texttt{saveAndFlush}让唯一键冲突尽早暴露。注意冲突异常必须在\texttt{@Transactional}
+方法之外捕获：约束冲突发生时当前事务已被标记为只能回滚，若在事务方法内部捕获并正常返回，提交时
+仍会抛出\texttt{UnexpectedRollbackException}，消息会被反复重投。生产环境还要配置退避重试、死信 Topic 和
 监控指标。若质量服务需要调用外部系统，先把观测写入数据库，再通过事务发件箱发布事件，避免数据库
 回滚后 Kafka 已经通知下游。
 
@@ -2289,7 +2293,7 @@ Mapper 明确转换。新增可选字段时，旧客户端仍能解析原有响�
 创建时间和主键组成稳定排序，避免新增预警导致第二页重复或跳过。性能优化不能删除质量码、版本和事件
 标识，因为这些字段是审计和解释所必需的。
 
-测试数据必须沿用 A8-1 的编码和质量口径。单元测试构造 valid、suspect、missing 三种观测，集成测试
+测试数据必须沿用 8.3 节的编码和质量口径。单元测试构造 valid、suspect、missing 三种观测，集成测试
 写入重复 eventId、未来时间和无效几何，端到端测试发送一条事件并验证观测、预警、工单和审计记录。测试
 夹具中的坐标系、时间精度和状态值写进数据字典，不能临时使用 MySQL 或 InfluxDB 的替代类型。若使用
 Testcontainers，容器镜像要包含 PostGIS 和 TimescaleDB 扩展，并在启动时执行同一套迁移脚本。
@@ -2308,7 +2312,7 @@ Controller。回滚时保留已经产生的预警和工单，不删除审计记�
 
 业务、权限和工单数据存入PostgreSQL；PostGIS保存空间点、工程范围和影响区；TimescaleDB扩展用于时序分区与聚合；Redis只保存可重建缓存，不作为唯一数据源。业务、空间与时序数据共用一套事务与备份体系，既便于按对象追溯证据，也降低多引擎部署带来的一致性与运维成本。
 
-Kafka事件至少包含\texttt{eventId}、\texttt{assetId}、\texttt{occurredAt}、\texttt{stateVersion}和\texttt{traceId}。消费者按事件ID去重，并在写入结果后提交消费位置。数据库事务与跨服务消息通过事务发件箱或可靠发布机制衔接，不宣称一次本地事务能够覆盖所有服务。
+Kafka事件至少包含\texttt{eventId}、\texttt{assetId}、\texttt{occurredAt}和版本号；\texttt{traceId}放在消息头而不是业务载荷里，本章 8.3 节的\texttt{ReadingEvent}即按此契约以\texttt{version}字段承载版本。消费者按事件ID去重，并在写入结果后提交消费位置。数据库事务与跨服务消息通过事务发件箱或可靠发布机制衔接，不宣称一次本地事务能够覆盖所有服务。
 
 \section{智能分析、预警与业务闭环}
 
@@ -2348,8 +2352,7 @@ w_i\ge 0,\quad \sum_{i=1}^{n}w_i=1,
 
 下面的单元测试把两个业务态固定成可执行的契约：低分且有效的数据是“无预警”，高分但质量不合格的数据是“未评估”，二者不能互换。
 
-\label{lst:ch08-classification-test}
-\begin{lstlisting}[language=Java,caption={质量码分类测试}]
+\begin{lstlisting}[label={lst:ch08-classification-test},language=Java,caption={质量码分类测试}]
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -2467,19 +2470,19 @@ public final class QualityClassificationTest {
 模型卡与场景版本、输入快照和人工审批绑定。只要改变初始水位、降雨情景、闸门约束或模型版本，就创建新的运行记录；只改变镜头和图层透明度，不产生新的计算版本。页面显示结果时同时显示“模拟”标签、模型版本和计算时刻，避免把预演动画误认为已经发生的观测。
 
 \subsubsection{闸门公式的代入与反算边界}
-清源水库的三孔弧形闸门参数来自表\ref{tab:case-parameters}。以单孔净宽$b=8.0\,m$、开度$a=3.0\,m$、闸底高程152.0\,m为例，若闸前水位168.0\,m且行近流速水头暂取0.2\,m，则$H=16.2\,m$。取教学系数$C_d=0.65$，自由出流条件$a/H=0.185<0.65$满足，单孔估算流量为$Q_1=0.65\times8.0\times3.0\times\sqrt{2\times9.81\times16.2}\approx226\,m^3/s$，三孔同步开度的估算总量约为$678\,m^3/s$。该数值只用于接口和量纲教学，真实工程必须由批准的水力曲线、上下游水位和淹没系数复核。
+清源水库的三孔弧形闸门参数来自表\ref{tab:case-parameters}。以单孔净宽$b=8.0\,m$、开度$a=3.0\,m$、闸底高程152.0\,m为例，若闸前水位168.0\,m且行近流速水头暂取0.2\,m，则$H=16.2\,m$。取教学系数$C_d=0.65$，自由出流条件$a/H=0.185<0.65$满足，单孔估算流量为$Q_1=0.65\times8.0\times3.0\times\sqrt{2\times9.81\times16.2}\approx278\,m^3/s$，三孔同步开度的估算总量约为$834\,m^3/s$。该数值只用于接口和量纲教学，真实工程必须由批准的水力曲线、上下游水位和淹没系数复核。
 
 当下游水位抬高导致淹没出流时，平台先判断自由出流条件是否失效，再使用带$\sigma$的关系或转交工程曲线服务。不能为了得到目标流量而强行把$C_d$调到范围之外。反算接口返回每孔开度、预测流量、约束余量、采用的公式版本和适用性结论；若多个组合都满足偏差，则按均衡启闭、设备可用性和操作次数排序，并让专业分析员选择。
 
 \subsubsection{计算题一：目标泄流的开度组合}
 给定表\ref{tab:case-parameters}中的3孔闸门，闸前水位168.0\,m、闸底152.0\,m、下游水位低于闸底板以上自由出流，$C_d=0.65$，目标总泄流量为$1200\,\mathrm{m^3/s}$。学生需要先检查$a/H<0.65$，再求三孔相同开度$a$，并说明若求得的开度超过6.0\,m应如何处理。答案应给出公式、单位换算、近似开度、每孔余量和“需要工程曲线复核”的边界说明，而不是只提交一个数字。若三孔不同步开启，还要列出至少两组满足目标偏差的组合并比较启闭次数。
 
-按教学简化式，三孔相同开度的反算为$a=Q/(3C_db\sqrt{2gH})$。代入$H=16.0\,m$得到的开度约为5.25\,m，低于6.0\,m上限且$a/H<0.65$，因此可作为接口层候选；但若考虑淹没系数、设备死区和下游回水，候选必须标记为“待工程复核”。流域面积320\,km$^2$和总库容0.85亿\,m$^3$为情景合理性约束，不能把1200\,m$^3$/s当作日常运行流量。
+按教学简化式，三孔相同开度的反算为$a=Q/(3C_db\sqrt{2gH})$。代入$H=16.0\,m$得到的开度约为4.34\,m，低于6.0\,m上限且$a/H\approx0.27<0.65$，因此可作为接口层候选；但若考虑淹没系数、设备死区和下游回水，候选必须标记为“待工程复核”。流域面积320\,km$^2$和总库容0.85亿\,m$^3$为情景合理性约束，不能把1200\,m$^3$/s当作日常运行流量。
 
 \subsubsection{计算题二：水量平衡闭合差}
-某调度时段输入供水$S_1=2.40$百万\,m$^3$、$S_2=0.60$百万\,m$^3$，需水分配$D_1=1.20$百万\,m$^3$、$D_2=1.00$百万\,m$^3$、$D_3=0.30$百万\,m$^3$，输水损失$L=0.10$百万\,m$^3$，调蓄放水$\Delta V=0.20$百万\,m$^3$。请按“放水为正、蓄水为负”的约定计算未满足需求$U$和闭合残差$\varepsilon$，并说明如果把调蓄量误写成库容末值减初值会出现什么符号错误。题目要求学生同时提交计算表、单位、舍入规则和审批判断。
+某调度时段输入供水$S_1=2.40$百万\,m$^3$、$S_2=0.60$百万\,m$^3$，需水分配$D_1=1.20$百万\,m$^3$、$D_2=1.00$百万\,m$^3$、$D_3=0.30$百万\,m$^3$，输水损失$L=0.10$百万\,m$^3$，调蓄放水$\Delta V=0.20$百万\,m$^3$。请按“放水为正、蓄水为负”的约定计算未分配水量$R$（或未满足需求$U$）和闭合残差$\varepsilon$，并说明如果把调蓄量误写成库容末值减初值会出现什么符号错误。题目要求学生同时提交计算表、单位、舍入规则和审批判断。
 
-本题的核对步骤是先计算供给侧$2.40+0.60+0.20=3.20$，需求与损失为$1.20+1.00+0.30+0.10=2.60$，因此在没有其他合法用途时可将差额记为未分配水量，而不是平衡误差。若调度目标把差额全部安排为生态补水，则应新增相应的需水单元；若存在未满足需求，则把$U$写入枯水结果。最后用原始精度计算$\varepsilon$，只因显示舍入产生的微小差异不能被当作缺水量。
+本题的核对步骤是先计算供给侧$2.40+0.60+0.20=3.20$，需求与损失为$1.20+1.00+0.30+0.10=2.60$，因此差额$0.60$应记入公式中的未分配水量$R$，而不是平衡误差$\varepsilon$。若调度目标把差额全部安排为生态补水，则应新增相应的需水单元；若存在未满足需求，则把$U$写入枯水结果。最后用原始精度计算$\varepsilon$，只因显示舍入产生的微小差异不能被当作缺水量。
 
 \subsubsection{水位包络、预警分级与参数一致性}
 特征水位把降雨情景和预警处置连接起来。正常蓄水位168.0\,m是日常运行参照，汛限水位165.5\,m用于汛期调度，设计洪水位170.2\,m对应P=1\%，校核洪水位171.6\,m对应P=0.1\%。水位达到设计洪水位并不自动等于红色预警，平台还要结合变化速率、闸门状态、下游影响和数据质量计算风险；超过校核洪水位则必须触发人工会商和工程规程。
@@ -2676,7 +2679,15 @@ public final class QualityClassificationTest {
 “四预”不是四个孤立菜单。预报产生未来状态，预警识别需要关注的风险，预演比较方案后果，预案把选择转化为责任、资源和动作；处置效果再反馈到数据与模型。公开的数字孪生黄河建设实践显示，跨流域平台需要把基础数据、模型计算、场景服务和治理流程组织成可持续运行的体系\cite{twinYellowRiver2024}。本节的水库矩阵沿用这一业务观察，但具体编码、接口和阈值仍以项目批准的参数表为准。
 
 \paragraph{不同技术路线对比}
-数字孪生平台可以从不同的工程起点形成技术路线。以厂商手册为参考的产品集成路线，通常先把流域、水网和工程入口组织成统一门户，再把模型运行、预演任务和工单闭环接到同一套权限与审计机制中。这种路线的优点是业务人员容易按照场景进入系统，适合在已有平台上快速建立可演示、可操作的流程；它的边界是产品中的对象编码、数据质量规则和模型适用范围仍需项目团队重新核验，手册中的示例数据也不能直接替代真实工程数据。以公开标准和数据底板为中心的路线，则先确定对象目录、时空基准、数据交换协议、元数据和版本规则，再把不同厂商或不同专业模型作为可替换服务接入。它有利于长期积累和跨系统交换，但前期需要投入更多的目录治理、接口设计和质量校验工作。以数字孪生流域或区域治理为牵引的路线，强调跨工程的联合预报、影响分析和调度协同，重点解决数据范围大、模型链条长和多部门协作的问题；其验收不能只看单个三维页面，而要检查情景输入、模型版本、结果证据和处置回执是否能够闭环。项目定制路线则围绕某一类水库、水闸或河段的规程和业务动作构建，能够精确贴合现场，但需要用清晰的扩展点避免把一次性约定固化为全行业标准。四类路线可以组合使用：厂商方案是其中一种实现的参考，公开政策和行业样本提供业务边界，标准化底板提供交换约束，项目规则负责把模型结果转成可审批、可追溯的行动。教学案例采用这种分层比较方式，目的在于训练方案选择和证据核验能力，而不是评价某个产品的优劣。
+数字孪生平台可以从不同的工程起点形成技术路线。以厂商手册为参考的产品集成路线，通常先把流域、水网和工程入口组织成统一门户，再把模型运行、预演任务和工单闭环接到同一套权限与审计机制中。这种路线的优点是业务人员容易按照场景进入系统，适合在已有平台上快速建立可演示、可操作的流程；它的边界是产品中的对象编码、数据质量规则和模型适用范围仍需项目团队重新核验，手册中的示例数据也不能直接替代真实工程数据。
+
+以公开标准和数据底板为中心的路线，则先确定对象目录、时空基准、数据交换协议、元数据和版本规则，再把不同厂商或不同专业模型作为可替换服务接入。它有利于长期积累和跨系统交换，但前期需要投入更多的目录治理、接口设计和质量校验工作。
+
+以数字孪生流域或区域治理为牵引的路线，强调跨工程的联合预报、影响分析和调度协同，重点解决数据范围大、模型链条长和多部门协作的问题；其验收不能只看单个三维页面，而要检查情景输入、模型版本、结果证据和处置回执是否能够闭环。
+
+项目定制路线则围绕某一类水库、水闸或河段的规程和业务动作构建，能够精确贴合现场，但需要用清晰的扩展点避免把一次性约定固化为全行业标准。
+
+四类路线可以组合使用：厂商方案是其中一种实现的参考，公开政策和行业样本提供业务边界，标准化底板提供交换约束，项目规则负责把模型结果转成可审批、可追溯的行动。教学案例采用这种分层比较方式，目的在于训练方案选择和证据核验能力，而不是评价某个产品的优劣。
 
 图\ref{fig:four-pre-loop}把预报、预警、预演、预案连成闭环，并标出四者之间的触发关系：预报驱动预警，预警触发预演，预演结果落到预案，预案执行后的实况又回到预报作为校正输入。
 
@@ -2865,7 +2876,7 @@ AI输出必须引用数据和模型证据。若工具失败、数据过期或权
 \label{fig:twin-decoupling}
 \end{figure}
 
-模拟标注规则规定模拟数据与结果的标注要求。演示环境的水位、流量必须带明确标记，否则截图一旦流出，很容易被当作真实工程结论引用，这类误用发生之后极难澄清。情景输入应标明观测、设定或插值来源与时间；模型结果标明“模拟”、版本和运行时间；推荐方案标明目标、约束、有效期和审批状态；演示数据注明单位和非工程结论；AI输出附工具证据、生成时间和复核状态。
+模拟数据与结果的标注要求可以归纳为一组规则。演示环境的水位、流量必须带明确标记，否则截图一旦流出，很容易被当作真实工程结论引用，这类误用发生之后极难澄清。情景输入应标明观测、设定或插值来源与时间；模型结果标明“模拟”、版本和运行时间；推荐方案标明目标、约束、有效期和审批状态；演示数据注明单位和非工程结论；AI输出附工具证据、生成时间和复核状态。
 
 权限应按对象、操作和场景状态共同判断。例如专业分析员可运行模型但不能批准控制；审批人可批准已复核方案但不能修改模型参数；演示账号不得访问真实工程数据。
 
@@ -2931,7 +2942,7 @@ AI输出必须引用数据和模型证据。若工具失败、数据过期或权
 
 模型平台不只是一个“运行”按钮。一次模型任务应经历草稿、校验、排队、运行、完成或失败、复核、发布和归档等状态。每次运行绑定场景版本、输入快照、模型镜像、参数集、算力规格和发起人，因而可以复现，也可以解释为什么两次结果不同。
 
-模型状态规则列出模型任务的各个状态及该状态下允许的动作。状态机的价值恰恰在于禁止某些动作：运行中的任务不允许修改参数，已发布的结果不允许原地覆盖，这些限制正是结果可复现的前提。草稿可编辑和删除，已校验状态检查单位、范围与适用性，排队或运行状态只允许查看日志或授权取消，完成状态核对产物清单与校验和，失败状态记录错误类别与重试次数，已发布状态绑定复核意见、审批人和有效期，归档状态只读查询和复现。
+模型任务的状态机列出各个状态及该状态下允许的动作。状态机的价值恰恰在于禁止某些动作：运行中的任务不允许修改参数，已发布的结果不允许原地覆盖，这些限制正是结果可复现的前提。草稿可编辑和删除，已校验状态检查单位、范围与适用性，排队或运行状态只允许查看日志或授权取消，完成状态核对产物清单与校验和，失败状态记录错误类别与重试次数，已发布状态绑定复核意见、审批人和有效期，归档状态只读查询和复现。
 
 图\ref{fig:model-run-lifecycle}把这些状态连成受控生命周期，并标出失败与复核两条回路。任务失败不是终点，而应回到校验环节并保留失败原因，否则同一类失败会反复出现却查不到记录。
 
@@ -2972,9 +2983,9 @@ AI输出必须引用数据和模型证据。若工具失败、数据过期或权
 对一个调度时段，可用简化平衡式检查结果：
 \[
 \sum_i S_i + \sum_k \Delta V_k
-=\sum_j D_j + L + U + \varepsilon,
+=\sum_j D_j + L + R - U + \varepsilon,
 \]
-其中$S_i$为各水源供水量，$D_j$为各需水单元分配量，$\Delta V_k$定义为调蓄补水量（放水为正、蓄水为负），$L$为输水损失，$U$为未满足需求量，$\varepsilon$为闭合残差。式中每一项必须采用同一时段和体积单位；枯水方案允许$U>0$，但审批门槛只检查$|\varepsilon|$，超过阈值不得进入审批。
+其中$S_i$为各水源供水量，$D_j$为各需水单元申请量，$\Delta V_k$定义为调蓄补水量（放水为正、蓄水为负），$L$为输水损失，$R$为未分配水量（供大于需时的盈余），$U$为未满足需求量（缺水时的缺口），$\varepsilon$为闭合残差。$R$与$U$至多一项为正：盈余与缺口不可能同时出现，缺口$U$是业务事实，残差$\varepsilon$是核算质量，二者绝不能混写为一项。式中每一项必须采用同一时段和体积单位；枯水方案允许$U>0$，但审批门槛只检查$|\varepsilon|$，超过阈值不得进入审批。
 
 表\ref{tab:water-network-dispatch}把水网联合调度的输入、约束与输出整理成清单。约束一列尤其要注意量纲与时段的统一：供水量、需水量与调蓄量必须落在同一时段、同一体积单位上，否则平衡式看起来成立，实际却在比较不同口径的数字。
 
@@ -3118,8 +3129,7 @@ AI输出必须引用数据和模型证据。若工具失败、数据过期或权
 
 清单\ref{lst:ch08-acceptance-assert}给出验收脚本的关键断言。注意断言不止检查返回值，还要检查用户提示、审计记录和降级页面：一个只验证正常路径返回200的脚本，无法证明系统在异常情况下仍然可用。
 
-\label{lst:ch08-acceptance-assert}
-\begin{lstlisting}[language=Java,caption={端到端切片的验收断言}]
+\begin{lstlisting}[label={lst:ch08-acceptance-assert},language=Java,caption={端到端切片的验收断言}]
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
 class ScenarioSliceAcceptanceTest {
@@ -3180,7 +3190,7 @@ class ScenarioSliceAcceptanceTest {
 
     /** 错误路径：模型超时后页面必须降级为“未评估”，不得给出颜色结论。 */
     @Test
-    @WithMockUser(username = "duty01", roles = {"DUTY"})
+    @WithMockUser(username = "duty01", roles = {"DUTY_OFFICER"})
     void modelTimeoutDegradesToNotAssessedInsteadOfAColor() throws Exception {
         mvc.perform(get("/api/scenarios/{id}/summary", timedOutScenarioId()))
            .andExpect(status().isOk())
@@ -3191,7 +3201,7 @@ class ScenarioSliceAcceptanceTest {
 
     /** 错误路径：值班员无权发布方案，拒绝后仍要留审计。 */
     @Test
-    @WithMockUser(username = "duty01", roles = {"DUTY"})
+    @WithMockUser(username = "duty01", roles = {"DUTY_OFFICER"})
     void dutyOfficerCannotPublishPlanButTheAttemptIsAudited() throws Exception {
         mvc.perform(post("/api/reviews/{id}/publish", pendingReviewId()))
            .andExpect(status().isForbidden())
@@ -3204,7 +3214,7 @@ class ScenarioSliceAcceptanceTest {
 }
 \end{lstlisting}
 
-最终由不同角色共同演示：场景编辑者准备输入，模型运行者启动计算，专业分析员比较结果，审批人确认方案，值班员查看执行回执。任何一人都不能独自完成从改参数到下发控制的全链路。教师依据接口契约、失败证据和审计记录评分，而不是依据固定演示路径是否顺利播放。
+最终由不同角色共同演示：专业分析员先以场景编辑身份准备输入、再以模型运行身份启动计算并比较结果（两个身份对应同一基本角色的不同操作面），审批人确认方案，值班员查看执行回执。任何一人都不能独自完成从改参数到下发控制的全链路。教师依据接口契约、失败证据和审计记录评分，而不是依据固定演示路径是否顺利播放。
 
 \subsection{会商时间线、值守交接与复盘}
 
@@ -3221,7 +3231,7 @@ class ScenarioSliceAcceptanceTest {
 相对时刻 & 事件 & 责任角色 & 形成证据 \\
 \midrule
 $T-60$ min & 降雨预报更新，创建情景 & 值班员 & 输入来源与场景版本 \\
-$T-45$ min & 洪水和淹没模型完成 & 模型运行者 & 运行日志与产物清单 \\
+$T-45$ min & 洪水和淹没模型完成 & 专业分析员 & 运行日志与产物清单 \\
 $T-30$ min & 比较闸门与疏散方案 & 专业分析员 & 指标、风险与推荐理由 \\
 $T-20$ min & 召开会商并补充约束 & 多专业角色 & 意见、异议与修订版本 \\
 $T-10$ min & 批准有有效期的方案 & 审批人 & 电子签名与控制边界 \\
@@ -3345,7 +3355,7 @@ AI工具调用失败 & 明确失败并回到手工流程 & 错误信息与人工
 开发、测试和生产环境使用相同的配置结构，差异通过外部参数和密钥管理注入。禁止把JWT密钥、数据库口令或地图令牌写入镜像和教材示例。发布流水线与配置项应分别受持续交付和配置管理约束\cite{humble2010,tichy1994}。
 \subsubsection{从部署图到可执行编排}
 部署图只有转换为可重复执行的配置才具有运维价值。清源水库平台的最小闭环由前端静态资源、Spring Boot API、PostgreSQL 及其 PostGIS 与 TimescaleDB 扩展、Redis、Kafka 五类运行单元组成。前端只依赖 API 入口，业务服务通过内部网络访问数据库、缓存和消息总线；数据库数据卷、Kafka 日志卷和备份卷与容器生命周期分离，重新创建容器不能丢失观测、预警、工单和审计证据。
-编排文件表达网络、卷、依赖和健康条件，而不是把参数硬编码在镜像里。数据库镜像明确包含 PostGIS 与 TimescaleDB 扩展，启动脚本执行与 A8-1 相同的迁移版本；Kafka 只有健康检查通过后才接收业务事件，Spring Boot 同时等待数据库和消息总线就绪。生产环境应把镜像标签、资源上限、节点亲和性和日志驱动器按压测结果替换。
+编排文件表达网络、卷、依赖和健康条件，而不是把参数硬编码在镜像里。数据库镜像明确包含 PostGIS 与 TimescaleDB 扩展，启动脚本执行与 8.3 节相同的迁移版本；Kafka 只有健康检查通过后才接收业务事件，Spring Boot 同时等待数据库和消息总线就绪。生产环境应把镜像标签、资源上限、节点亲和性和日志驱动器按压测结果替换。
 \begin{lstlisting}[language=YAML,caption={清源水库平台 Docker Compose 编排基线},label={lst:ch08-compose}]
 services:
   web: {image: registry.example.com/qingyuan-web:APP_VERSION, ports: ["8080:80"], depends_on: {api: {condition: service_healthy}}}
@@ -3355,13 +3365,12 @@ services:
     secrets: [db_password, kafka_password]
     depends_on: {postgres: {condition: service_healthy}, kafka: {condition: service_healthy}, redis: {condition: service_healthy}}
     healthcheck: {test: ["CMD-SHELL", "wget -qO- http://localhost:8080/actuator/health/readiness | grep -q UP"], interval: 10s, timeout: 3s, retries: 12}
-  postgres: {image: postgis/postgis:16-3.4, volumes: [pg-data:/var/lib/postgresql/data], healthcheck: {test: ["CMD-SHELL", "pg_isready -U qingyuan_app -d qingyuan"]}}
-  redis: {image: redis:7.2-alpine, command: ["redis-server", "--appendonly", "yes"], volumes: [redis-data:/data]}
-  kafka: {image: bitnami/kafka:3.7, volumes: [kafka-data:/bitnami/kafka]}
+  postgres: {image: timescale/timescaledb-ha:pg16, volumes: [pg-data:/var/lib/postgresql/data], healthcheck: {test: ["CMD-SHELL", "pg_isready -U qingyuan_app -d qingyuan"]}}
+  redis: {image: redis:7.2-alpine, command: ["redis-server", "--appendonly", "yes"], volumes: [redis-data:/data], healthcheck: {test: ["CMD", "redis-cli", "ping"], interval: 10s, timeout: 3s, retries: 5}}
+  kafka: {image: bitnami/kafka:3.7, volumes: [kafka-data:/bitnami/kafka], healthcheck: {test: ["CMD-SHELL", "kafka-topics.sh --bootstrap-server localhost:9092 --list >/dev/null 2>&1"], interval: 15s, timeout: 10s, retries: 8}}
 secrets: {db_password: {file: ./secrets/db_password.txt}, kafka_password: {file: ./secrets/kafka_password.txt}}
 volumes: {pg-data: {}, redis-data: {}, kafka-data: {}}
 \end{lstlisting}
-\label{lst:ch08-compose}
 代码清单\ref{lst:ch08-compose}中的 \texttt{depends\_on} 只保证启动顺序，真正的就绪判定由健康检查完成。\texttt{readiness}不能把数据库迁移、Kafka消费延迟或磁盘容量隐藏在一个布尔值里；运维看板仍需采集细分指标。内部网络使数据库和消息总线不直接暴露给浏览器，外部流量只进入 Nginx 和 API。
 \subsubsection{环境变量、密钥与版本回滚}
 配置分为非敏感默认值、部署环境变量和容器 secret 三层。教学仓库仅保留变量名与格式校验，不提交真实凭据。部署前把镜像版本、迁移版本、前端静态资源版本和配置清单写入同一个发布记录；回滚先判断迁移是否向后兼容，再回退无状态服务。
@@ -3375,7 +3384,6 @@ SECRETS: {DB_PASSWORD_FILE: "/run/secrets/db_password", JWT_SIGNING_KEY: "inject
 ROTATION: {password_days: 90, signing_key_overlap_hours: 24}
 VALIDATION: {require_non_empty: [DB_USER, DB_NAME], reject_default_password: true}
 \end{lstlisting}
-\label{lst:ch08-env-secrets}
 清单\ref{lst:ch08-env-secrets}中的轮换字段是运维约束而不是业务参数。轮换数据库口令先创建新凭据并验证连接池，再撤销旧凭据；轮换JWT密钥保留重叠窗口，使正在处理的请求完成。变量缺失、示例口令或 latest 标签都应在流水线门禁阶段失败。
 \subsubsection{Nginx 反向代理与静态资源}
 Nginx负责 TLS 终止、静态文件缓存和 API 反向代理，不承载权限判断。对象级授权仍由 Spring Security 6 执行；代理转发请求号、用户代理和真实 IP，把浏览器、API 与数据库审计串成证据链。上传报告或模型时设置大小和超时上限，避免大请求阻塞观测接口。
@@ -3388,14 +3396,15 @@ http {
     listen 80; server_name water.example.edu; root /usr/share/nginx/html;
     client_max_body_size 20m;
     location /assets/ { try_files $uri =404; }
+    # Vue Router history 模式：非资源路径回退到入口页
+    location / { try_files $uri $uri/ /index.html; }
     location /api/ { proxy_pass http://qingyuan_api; proxy_set_header Host $host; proxy_set_header X-Request-Id $request_id; proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for; proxy_read_timeout 30s; }
     location /healthz { proxy_pass http://qingyuan_api/actuator/health/liveness; access_log off; }
     location /readyz { proxy_pass http://qingyuan_api/actuator/health/readiness; access_log off; }
   }
 }
 \end{lstlisting}
-\label{lst:ch08-nginx}
-访问路径\ref{lst:ch08-nginx}按静态资源、API、探针分开，浏览器只需记住一个域名。\texttt{try\_files}不把错误静态路径转给后端；生产环境增加 TLS、安全响应头和连接排空，保证滚动发布不截断工单提交。
+代码清单\ref{lst:ch08-nginx}把访问路径按静态资源、API、探针分开，浏览器只需记住一个域名。\texttt{try\_files}不把错误静态路径转给后端；生产环境增加 TLS、安全响应头和连接排空，保证滚动发布不截断工单提交。
 \subsubsection{健康检查、告警与容量边界}
 健康检查分存活、就绪和业务烟测三层。存活探针只回答进程是否响应，失败时允许重启；就绪探针还检查数据库连接、迁移版本和 Kafka 生产者，失败时摘除流量但不立即重启；业务烟测用只读测点请求验证认证、查询和质量码字段，在发布后及每日交接时执行。三层探针不能共用一个返回 200 的接口，否则数据库故障会被误判为应用正常。
 \begin{lstlisting}[language=YAML,caption={监控指标与告警规则基线},label={lst:ch08-alert-rules}]
@@ -3420,8 +3429,7 @@ groups:
         for: 5m
         labels: {severity: warning, owner: duty}
 \end{lstlisting}
-\label{lst:ch08-alert-rules}
-告警规则\ref{lst:ch08-alert-rules}把基础设施、数据链路和业务闭环分开，每条告警都有责任角色与处置手册。阈值要结合补传最大重投周期、TimescaleDB压缩窗口和工单确认时限，再用历史分位数校准。告警和恢复都记录时间、规则版本、当前值和证据链接，同一根因的指标按服务和时间窗聚合，避免告警风暴。
+代码清单\ref{lst:ch08-alert-rules}把告警规则按基础设施、数据链路和业务闭环分开，每条告警都有责任角色与处置手册。阈值要结合补传最大重投周期、TimescaleDB压缩窗口和工单确认时限，再用历史分位数校准。告警和恢复都记录时间、规则版本、当前值和证据链接，同一根因的指标按服务和时间窗聚合，避免告警风暴。
 容量评估覆盖 API 并发、Kafka 分区、Redis 内存、数据库写入吞吐和时序增长。28 个测点的教学规模可以单节点运行，但不能推断生产容量；压测纳入补传、模型运行和备份并发。扩容前后使用同一场景复测，并记录消息最老年龄、WAL增长、磁盘剩余比例和查询P95，确保容量提升没有换来数据延迟或权限错误。
 \subsubsection{备份、恢复与演练记录}
 备份策略回答可接受的数据丢失窗口、一致性点和恢复验证方法。PostgreSQL使用全量加WAL归档，TimescaleDB压缩和分区策略与备份窗口错开；对象存储保存模型、纹理、报告和备份清单版本；Kafka保留足够日志以便重放，重放前依据 \texttt{event\_id} 幂等约束清理重复风险。Redis只保存可重建缓存，不进入唯一备份范围。
@@ -3434,10 +3442,9 @@ rehearsal:
   steps: [stop-writes, restore-postgres-and-wal, restore-object-manifest, start-api-readonly, verify-trace, replay-with-event-id-deduplication, run-smoke-test]
   pass_conditions: [latest_reading_within_rpo, api_readiness_up, no_duplicate_warning, audit_trace_continuous]
 \end{lstlisting}
-\label{lst:ch08-backup-rehearsal}
-演练清单\ref{lst:ch08-backup-rehearsal}把有备份改成可观察证据。开始前冻结变更窗口并记录最后一个观测、预警和工单 ID；恢复后先以只读模式校验对象关系、时序最新时间和审计链，再开放写入。Kafka只重放恢复点之后且数据库没有的事件，缓存由 API 根据数据库重建。任一条件失败，演练结果为不通过，并写明缺失备份、迁移错误或无法解释的事件。
+代码清单\ref{lst:ch08-backup-rehearsal}把“有备份”改成可观察证据。开始前冻结变更窗口并记录最后一个观测、预警和工单 ID；恢复后先以只读模式校验对象关系、时序最新时间和审计链，再开放写入。Kafka只重放恢复点之后且数据库没有的事件，缓存由 API 根据数据库重建。任一条件失败，演练结果为不通过，并写明缺失备份、迁移错误或无法解释的事件。
 生产故障处置遵循观测、隔离、恢复、复盘顺序。运维员先确认探针和指标是否同时异常，避免把单个浏览器问题误判为全局故障；再依据 runbook 摘除异常实例或暂停消费，保护数据库和消息证据；恢复后用业务烟测验证测点到工单链路，专业分析员复核质量码和预警是否重复计算。每次演练沉淀恢复时长、数据丢失窗口、告警命中率和人工确认点，反过来校准保留策略、探针阈值和容量预算。
-上述配置与部署图、接口契约、数据库 DDL 共同构成 A8-4 的可执行交付物。学生提交时应同时提供编排文件、反代配置、变量清单、健康检查结果和一次恢复演练记录；只截图容器已启动不能证明数据可用、权限有效或故障可恢复。
+上述配置与部署图、接口契约、数据库 DDL 共同构成部署交付物。学生提交时应同时提供编排文件、反代配置、变量清单、健康检查结果和一次恢复演练记录；只截图容器已启动不能证明数据可用、权限有效或故障可恢复。
 环境一致性还需要检查时区、字符集、容器用户和文件权限。数据库统一使用 UTC 保存发生时间，展示层按照值班员时区转换；所有容器以非 root 用户运行，备份目录只授予备份进程写权限。发布前用同一份配置渲染开发、测试和生产三套文件，比较渲染结果的键集合，发现多余或缺失变量就停止发布。配置差异要写入决策记录，不能靠运维员记忆。
 
 服务启动分为迁移、就绪和接流量三个阶段。迁移任务使用独立的一次性容器并记录版本，API 进程启动时只验证当前版本，不在多个副本中同时执行结构变更。就绪探针恢复后再逐步放量，先让一个实例接收只读查询，再开放观测写入和工单写入。若错误率或延迟超过发布阈值，立即停止放量并保留旧副本，回滚决策由值班员和审批人共同确认。
@@ -3483,7 +3490,7 @@ Kafka 重放和定时补传都可能造成重复事件。服务端以 \texttt{ev
 
 \subsection{阶段验收}
 
-案例做到什么程度算完成，需要在动手之前就写清楚。表\ref{tab:chapter8-acceptance}把需求、架构、数据、三维、预警、孪生和运维七个阶段各自要回答的问题与必须交出的证据并列。这张表的用法是自查而不是打分：每一行的「证据」列如果拿不出对应文件，说明那个阶段并未真正通过，无论页面看起来多完整。
+案例做到什么程度算完成，需要在动手之前就写清楚。表\ref{tab:chapter8-acceptance}把需求、架构、数据、三维、预警、孪生和运维七个阶段各自要回答的问题与必须交出的证据并列。这张表的用法是自查而不是打分：每一行的“证据”列如果拿不出对应文件，说明那个阶段并未真正通过，无论页面看起来多完整。
 
 \begin{table}[htbp]
 \centering
@@ -3546,7 +3553,7 @@ Kafka 重放和定时补传都可能造成重复事件。服务端以 \texttt{ev
 \item 设计AI会商助手的白名单工具、参数确认、专业复核和审批边界。
 
 \item[\textbf{实践题}]
-\item 在两课时内实现Vue页面对28个测点的筛选、曲线和三维定位联动。
+\item 在第7章场景与图表代码及本章前端切片的基础上，用两课时增量实现对28个测点的筛选、曲线和三维定位联动。
 \item 实现一条Spring Boot质量检查接口，验证格式、单位、范围、时序和重复五项，并提交缺测、可疑值与质量标记调整记录。
 \item 为自定义降雨场景编写输入契约、模型卡和$T+0$至$T+24\,h$结果元数据，不要求实现水动力算法。
 \item 用容器编排或等价环境部署前端、Spring Boot、PostgreSQL和Redis，并提交健康检查与配置说明。

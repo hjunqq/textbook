@@ -25,7 +25,7 @@ services:
       retries: 12
     networks: [app-net, data-net]
   postgres:
-    image: postgis/postgis:16-3.4
+    image: timescale/timescaledb-ha:pg16   # 同时含 PostGIS 与 TimescaleDB 扩展
     environment: {POSTGRES_DB: qingyuan, POSTGRES_USER: qingyuan_app, POSTGRES_PASSWORD_FILE: /run/secrets/db_password}
     volumes: [pg-data:/var/lib/postgresql/data, ./db:/docker-entrypoint-initdb.d:ro]
     secrets: [db_password]
