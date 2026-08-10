@@ -1,36 +1,60 @@
-# Qingyuan Water Platform Demo
+# 清源水库安全监测平台 · 最小可运行闭环
 
-This companion project is the executable counterpart of the Chapter 4, 5 and 8
-listings. It uses Vue 3.4 + Vite 5 + Pinia 2 + Vue Router 4 + ECharts +
-Three.js r160+, and Java 17 + Spring Boot 3.2 + Jakarta Persistence + Spring
-Security 6 + Kafka. PostgreSQL 16 with PostGIS and TimescaleDB, Redis 7 and
-Kafka 3.7 are started by `docker compose`.
+本仓库是《智慧水利平台架构与开发》的配套工程，提供一条**最小可运行闭环**：
+登录认证 → 测点/观测查询 → Kafka 消息消费入库 → 一条命令启动 → 前后端冒烟测试。
+它是练习的起点仓库；书中 200+ 代码清单是把它改造成完整平台的施工图（对应关系见 `MAPPING.md`）。
 
-## Start
+## 一条命令启动
 
-1. Run `python companion/datasets/generate.py` to create the deterministic S3 data.
-2. Copy `secrets/*.example` to files without the `.example` suffix and replace the teaching passwords.
-3. Run `docker compose up --build` in this directory.
-4. Open `http://localhost:8080/monitoring`; API readiness is at `/readyz` and liveness at `/healthz`.
-5. Load the CSV files with `db/load-s3-data.sql` after the migration has completed.
+```bash
+cp secrets/db_password.txt.example secrets/db_password.txt
+cp secrets/kafka_password.txt.example secrets/kafka_password.txt
+docker compose up -d --build
+./smoke.sh        # 启动—401拒绝—登录—取数—错误口令 五步验证
+```
 
-The Compose file is a single-node teaching baseline. Production deployment must
-replace image tags, credentials, resource limits, TLS and persistence according to
-the A8-4 runbook. Redis is a rebuildable cache, not the source of truth.
+启动后访问 http://localhost:8080 ，使用教学账号登录：
 
-## Layout and mapping
+| 账号 | 口令 | 角色 |
+|---|---|---|
+| duty01 | duty123 | 值班员（DUTY） |
+| analyst01 | analyst123 | 专业分析员（ANALYST） |
+| ops01 | ops123 | 运维员（OPS） |
 
-`frontend/src` contains the request layer, Pinia store, router guard, monitoring
-SFC and Three.js scene bridge shown in A8-3. `backend/src` contains the Java 17
-Spring Boot entry point, a read-only asset controller and Spring Security 6
-configuration; the full domain services follow the same package boundaries.
-`db/001_init.sql` is the A8-1 schema baseline. The field names `asset_id`,
-`occurred_at`, `event_id`, `value`, `unit`, `quality` and `version` are shared by
-the SQL, Java DTOs, Vue API and S3 CSV files.
+数据库初始化脚本自动建表（`db/001_init.sql`）并写入种子观测（`db/002_seed.sql`），
+页面开箱即有渗压曲线（含一段缺测断线与一条可疑值）。完整 28 测点数据集见
+`../datasets/`，可按 `db/load-s3-data.sql` 导入。
 
-## Verification
+## 正常链路与故障链路
 
-Run `mvn test` in `backend` and `npm run build` in `frontend` when the toolchains
-are installed. Check `/actuator/health/liveness` and `/actuator/health/readiness`,
-then execute the recovery rehearsal described in Chapter 8 before using the demo
-for a class. The data is synthetic teaching material, not real safety-monitoring data.
+正常链路：登录 → 选择测点 → 时间窗查询 → 曲线渲染（缺测断线、可疑标注）。
+故障链路（均可当场复现）：
+- 未登录访问 `/api/assets` → 401，前端跳转登录页并携带回跳地址；
+- 错误口令 → 401，登录页就地提示，不发生页面跳转；
+- 传入 `from >= to` 的时间窗 → 前端 `readingQuery` 直接拒绝，不发出请求；
+- Kafka 收到重复 `eventId` 事件 → 由 `(occurred_at, event_id)` 复合唯一索引裁决，
+  消费者在事务边界之外捕获冲突并确认消息（第8章 8.3 节的口径）。
+
+## 各自运行测试
+
+```bash
+cd frontend && npm ci && npm test     # vitest：6 个断言（缺测断线/时间窗/令牌契约）
+cd backend  && mvn -q test            # JUnit：JWT 签发/过期/篡改 + 事件契约反序列化
+```
+
+测试不依赖数据库与 Kafka，可在任何装有 Node 20+ 与 JDK 17 的机器上直接运行。
+
+## 目录
+
+```
+frontend/   Vue 3.4 + Pinia + Vue Router + ECharts；登录页、监测页、请求封装
+backend/    Spring Boot 3.2 + Security 6 + JPA + Kafka；JWT 过滤器、幂等消费
+db/         001 建表（TimescaleDB 超表 + 复合唯一索引）、002 种子数据
+secrets/    Docker secrets 模板（*.example，正式文件不入库）
+smoke.sh    端到端冒烟脚本
+```
+
+## 安全说明
+
+教学口令与 JWT 默认密钥仅用于课堂；部署到任何可被他人访问的环境前，
+必须替换 `secrets/` 与 `JWT_SECRET`，并按第5章的密钥轮换与撤销策略管理。

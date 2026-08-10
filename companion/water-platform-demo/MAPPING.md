@@ -1,13 +1,25 @@
-# 教材—工程核对表
+# 仓库文件与教材章节对应表
 
-| 教材内容 | 工程位置 |
-|---|---|
-| 第4章 `request.js`、Vue 3 SFC、Router、Pinia | `frontend/src/utils/request.js`, `frontend/src/components/MonitoringDashboard.vue`, `frontend/src/router/index.js`, `frontend/src/stores/monitoring.js` |
-| 第5章 Jakarta 实体、Repository、事务服务 | `backend/src/main/java/edu/example/qingyuan/AssetEntity.java`, `ReadingEntity.java`, `ReadingRepository.java`, `ReadingService.java` |
-| 第5章 SecurityFilterChain 与 JWT 过滤器 | `SecurityConfig.java`, `JwtAuthenticationFilter.java` |
-| 第5章 Kafka 生产/消费边界 | `ReadingConsumer.java`；生产者由事务发件箱服务接入同一 topic |
-| 第8章 A8-1 DDL 与质量码约束 | `db/001_init.sql`；初始化数据入口 `db/load-s3-data.sql` |
-| 第8章 A8-3 API、Vue 页面和场景桥接 | `frontend/src`；页面使用 S3 的 `asset_id/event_id/quality` 字段 |
-| 第8章 A8-4 Compose 与健康检查 | `docker-compose.yml`、`frontend/Dockerfile`、`backend/Dockerfile` |
-
-SQL 清单的字段名、Java DTO/实体和 Vue API 均以 `db/001_init.sql` 为准；新增字段必须先更新迁移、数据集和教材字典。工程只保留可独立运行的核心切片，教材中的查询练习在同一 schema 上执行。
+| 仓库文件 | 对应章节 | 说明 |
+|---|---|---|
+| frontend/src/utils/auth.js | 4.5 | TOKEN_KEY 单一契约 |
+| frontend/src/utils/request.js | 4.5 | 令牌注入、401 分流（认证端点豁免） |
+| frontend/src/utils/readings.js | 7.2 | 缺测断线、时间窗校验（纯函数，可测试） |
+| frontend/src/views/LoginView.vue | 4.7 | 登录与安全回跳 |
+| frontend/src/router/index.js | 4.7 | 路由守卫 |
+| frontend/src/stores/monitoring.js | 4.7 / 8.3 | Pinia 状态与查询参数 |
+| frontend/src/components/MonitoringDashboard.vue | 7.2 / 8.3 | ECharts 曲线、缺测与可疑呈现 |
+| frontend/tests/*.test.js | 4.8 | vitest 单元测试 |
+| backend/.../JwtService.java | 5.5 | jjwt 0.11.x 签发与校验 |
+| backend/.../JwtAuthenticationFilter.java | 5.5 | Bearer 解析入 SecurityContext |
+| backend/.../SecurityConfig.java | 5.5 | 无状态过滤链、CORS、教学账号 |
+| backend/.../AuthController.java | 5.5 | 登录端点（防账号枚举） |
+| backend/.../AssetController.java | 5.3 / 8.3 | DTO 映射，不暴露实体 |
+| backend/.../ReadingService.java | 5.4 / 8.3 | 事务边界、幂等预检 |
+| backend/.../ReadingConsumer.java | 5.6 / 8.3 | 事务边界外捕获冲突 |
+| backend/.../FileSecretsEnvironmentPostProcessor.java | 8.6 | Docker secrets 的 *_FILE 约定 |
+| backend/src/test/... | 5.8 | JUnit 单元测试（无外部依赖） |
+| db/001_init.sql | 8.3 | 超表 + (occurred_at,event_id) 复合唯一索引 |
+| db/002_seed.sql | 8.3 | 种子观测（含缺测与可疑样例） |
+| docker-compose.yml | 8.6 | 服务编排、healthcheck、secrets |
+| smoke.sh | 8.6 | 端到端冒烟验证 |

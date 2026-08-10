@@ -1,6 +1,7 @@
 import {computed, ref} from 'vue';
 import {defineStore} from 'pinia';
 import request from '../utils/request';
+import {readingQuery} from '../utils/readings';
 
 export const useMonitoringStore = defineStore('monitoring', () => {
   const assets = ref([]);
@@ -14,7 +15,7 @@ export const useMonitoringStore = defineStore('monitoring', () => {
   async function loadReadings() {
     if (!selectedAssetId.value) return;
     loading.value = true; error.value = '';
-    try { readings.value = await request.get(`/api/assets/${selectedAssetId.value}/readings`, range.value); }
+    try { readings.value = await request.get(`/api/assets/${selectedAssetId.value}/readings`, readingQuery(range.value)); }
     catch (e) { error.value = e.status === 403 ? '当前角色无权查看该测点' : '读取观测失败'; }
     finally { loading.value = false; }
   }

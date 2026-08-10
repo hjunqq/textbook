@@ -14,7 +14,7 @@
 
 \paragraph*{引言}
 
-智慧水利后端负责接入监测数据、执行业务规则、维护一致性并向前端提供接口。本章统一采用Java 17、Spring Boot 3.2+、Spring Security 6、Jakarta Persistence 3.1与Jakarta Servlet 6.x；JWT示例按jjwt 0.11.x接口编写。分布式事务和领域驱动设计作为选学内容，不作为首次后端课程的前置要求。
+智慧水利后端负责接入监测数据、执行业务规则、维护一致性并向前端提供接口。本章统一采用Java 17、Spring Boot 3.2+、Spring Security 6、Jakarta Persistence 3.1与Jakarta Servlet 6.x；JWT示例按jjwt 0.11.x接口编写。框架配置、注解语义与版本迁移细节，一律以官方参考文档为准\cite{springBootDocs,springSecurityDocs,jakartaPersistence}；书中给出的版本边界只描述编写时点的状态。分布式事务和领域驱动设计作为选学内容，不作为首次后端课程的前置要求。
 
 \section{后端服务与REST接口概述}
 
@@ -661,7 +661,7 @@ class StationConfigEntity extends AuditedEntity {
 
 \subsection{索引设计与 PostgreSQL 迁移}
 
-索引要由过滤、排序、连接和唯一性共同决定。测站读数列表通常先按\texttt{station\_id}过滤，再按\texttt{measured\_at}和\texttt{id}倒序，因此联合索引应保持相同的前缀顺序；质量码只有在选择性较高或统计查询频繁时才适合放入索引。索引不能替代时间分区、TimescaleDB 超表或 PostGIS 空间索引，创建后要用\texttt{EXPLAIN (ANALYZE, BUFFERS)}核对实际执行计划。
+索引要由过滤、排序、连接和唯一性共同决定。测站读数列表通常先按\texttt{station\_id}过滤，再按\texttt{measured\_at}和\texttt{id}倒序，因此联合索引应保持相同的前缀顺序；质量码只有在选择性较高或统计查询频繁时才适合放入索引。索引不能替代时间分区、TimescaleDB 超表或 PostGIS 空间索引，创建后要用\texttt{EXPLAIN (ANALYZE, BUFFERS)}核对实际执行计划；执行计划算子与代价模型的解释见 PostgreSQL 官方文档\cite{postgresDocs}，超表与连续聚合的行为约束见 TimescaleDB 官方文档\cite{timescaleDocs}。
 
 \begin{lstlisting}[label={lst:ch05-index-migration},language=SQL,caption={PostgreSQL 索引与扩展迁移}]
 -- V20260807_01__reading_indexes.sql
@@ -1520,7 +1520,7 @@ class RefreshService {
 }
 \end{lstlisting}
 
-刷新采用轮换策略：每次成功使用旧 refresh jti 后立即撤销，并生成新的 refresh jti；若同一旧令牌再次出现，系统可以判定重放并撤销整个会话族。解析过期刷新令牌时只允许捕获签名已验证的\texttt{ExpiredJwtException}，还要检查过期时间、issuer、type、jti 和服务端会话，不能使用\texttt{parseClaimsJwt}或手工拼接 Claims。
+JWT 的声明字段、签名与校验语义以 RFC 7519 为规范依据\cite{rfc7519}。刷新采用轮换策略：每次成功使用旧 refresh jti 后立即撤销，并生成新的 refresh jti；若同一旧令牌再次出现，系统可以判定重放并撤销整个会话族。解析过期刷新令牌时只允许捕获签名已验证的\texttt{ExpiredJwtException}，还要检查过期时间、issuer、type、jti 和服务端会话，不能使用\texttt{parseClaimsJwt}或手工拼接 Claims。
 
 \begin{lstlisting}[label={lst:ch05-revocation},language=Java,caption={基于 jti 与版本号的令牌撤销}]
 import java.time.Duration;
@@ -1935,7 +1935,7 @@ class OutboxService {
 }
 \end{lstlisting}
 
-发件箱表要有状态、尝试次数、最后错误、下次重试时间和创建时间索引；发布器用行锁或租约避免多实例重复领取，发送确认和状态更新采用幂等更新。对于高吞吐时序事件，可以按日期分区、批量发送并设置保留期限，历史成功记录归档而不是无限增长。发件箱解决的是“本地事务与消息之间的原子记录”，不能替代 Kafka 副本、TLS、消费者幂等和死信治理。
+发件箱表要有状态、尝试次数、最后错误、下次重试时间和创建时间索引；发布器用行锁或租约避免多实例重复领取，发送确认和状态更新采用幂等更新。对于高吞吐时序事件，可以按日期分区、批量发送并设置保留期限，历史成功记录归档而不是无限增长。发件箱解决的是“本地事务与消息之间的原子记录”，不能替代 Kafka 副本、TLS、消费者幂等和死信治理；分区、副本与消费组的语义以 Kafka 官方文档为准\cite{kafkaDocs}。
 
 消息安全还包括主题权限和数据脱敏。生产者只允许写入指定主题，消费者只允许读取所属组；不同环境使用不同集群凭据和主题前缀。事件中不放密码、JWT、个人信息或不必要的原始测点数据，日志使用事件 ID 和摘要定位。主题 ACL、Schema 版本、保留策略、灾备恢复和重放演练应纳入发布清单，确保异常时可以追踪“谁在何时向哪个主题写入了什么版本的事件”。
 

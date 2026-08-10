@@ -404,7 +404,7 @@ const normalized = standardize(message, 'gateway-02', 'v3');
 
 图\ref{fig:ch7-rain-level-combo}只展示编码关系，不替代工程分析。雨量柱从零基线向上绘制，水位线使用独立轴但共享时间索引；若为了突出“倒挂”效果将柱形向下绘制，也要在图例中说明向下方向代表降雨量而不是负值。真正的水位预警仍由第8章的规则、质量码和模型版本决定。
 
-本章示例统一沿用第4章的 Vite 工程：ECharts 与坐标库通过 \texttt{npm install echarts proj4} 安装、以 \texttt{import * as echarts from 'echarts'} 与 \texttt{import proj4 from 'proj4'} 引入；Three.js 沿用第6章工程的安装与导入方式。无构建环境的课堂演示可改用官方 CDN 的全局构建，此时 \texttt{echarts}、\texttt{THREE}、\texttt{proj4} 为全局变量，后文清单不再逐个重复引入语句。下面的ECharts配置给出可运行的雨量倒挂柱与水位过程线组合。配置显式声明两个y轴、单位、tooltip格式和数据缩放；真实项目还要从服务端响应读取质量码并对缺测点设置空值，不把缺测当作零雨量或零水位。
+ECharts 配置项与 API 随版本演进，本章写法以官方手册为准\cite{echartsDocs}。本章示例统一沿用第4章的 Vite 工程：ECharts 与坐标库通过 \texttt{npm install echarts proj4} 安装、以 \texttt{import * as echarts from 'echarts'} 与 \texttt{import proj4 from 'proj4'} 引入；Three.js 沿用第6章工程的安装与导入方式。无构建环境的课堂演示可改用官方 CDN 的全局构建，此时 \texttt{echarts}、\texttt{THREE}、\texttt{proj4} 为全局变量，后文清单不再逐个重复引入语句。下面的ECharts配置给出可运行的雨量倒挂柱与水位过程线组合。配置显式声明两个y轴、单位、tooltip格式和数据缩放；真实项目还要从服务端响应读取质量码并对缺测点设置空值，不把缺测当作零雨量或零水位。
 
 \begin{lstlisting}[label={lst:ch07-rain-level-dualaxis},language=JavaScript,breaklines=true,caption={雨量倒挂柱与水位过程线ECharts配置}]
 const chart = echarts.init(document.querySelector('#rain-level'));
@@ -454,7 +454,7 @@ chart.setOption({
 \label{fig:chart-technology-selection}
 \end{figure}
 
-页面使用“正常、关注、告警、离线”四种展示状态，它们与全书统一口径的对应关系是：正常对应无预警（NONE），关注对应蓝色预警，告警覆盖黄、橙、红三级（详情中展示具体等级），离线不是预警等级，它来自网关或设备状态维度，与质量码、预警级别并列存在。状态颜色需兼顾可访问性：四种状态不能只依赖红绿差异，还应配合形状、图标、线型和文字。阈值带要注明适用工况和版本，不能让一条没有来源的红线替代业务解释。
+视觉编码的对比度与非颜色冗余要求依据 WCAG 2.2\cite{wcag22}。页面使用“正常、关注、告警、离线”四种展示状态，它们与全书统一口径的对应关系是：正常对应无预警（NONE），关注对应蓝色预警，告警覆盖黄、橙、红三级（详情中展示具体等级），离线不是预警等级，它来自网关或设备状态维度，与质量码、预警级别并列存在。状态颜色需兼顾可访问性：四种状态不能只依赖红绿差异，还应配合形状、图标、线型和文字。阈值带要注明适用工况和版本，不能让一条没有来源的红线替代业务解释。
 
 \subsection{可运行的实时曲线}
 

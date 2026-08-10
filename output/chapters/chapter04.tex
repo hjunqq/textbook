@@ -13,7 +13,7 @@
 
 \paragraph*{引言}
 
-智慧水利平台的前端把测站、工程、告警和调度数据转化为可理解、可操作的界面。本章采用Vue 3.4+、Vue Router 4、Pinia 2与Vite 5作为教学基线；示例遵循HTML、CSS和ECMAScript标准，不依赖特定浏览器的私有能力。
+智慧水利平台的前端把测站、工程、告警和调度数据转化为可理解、可操作的界面。本章采用Vue 3.4+、Vue Router 4、Pinia 2与Vite 5作为教学基线；框架API与配置项随版本演进，遇到与书中示例不一致时，一律以各自官方文档为准\cite{vueDocs,vueRouterDocs,piniaDocs,viteDocs}。示例遵循HTML、CSS和ECMAScript标准，语言与平台特性可在MDN查证\cite{mdnWebDocs}，不依赖特定浏览器的私有能力。
 
 \section{Web基础概念与浏览器架构}
 
@@ -220,7 +220,7 @@ dialog.querySelector('[data-close]')
 dialog.addEventListener('cancel', closeDialog);
 \end{lstlisting}
 
-以上结构把“数据展示”“用户输入”“预警反馈”分成可命名的区域，后续添加 CSS 或 Vue 模板时仍然保留同一棵语义树。实践中应使用键盘、放大字体、屏幕阅读器和自动化检查至少各验证一次：键盘检查是否存在焦点陷阱，放大检查是否出现横向滚动，读屏检查是否能读出标题与单位，自动化检查则确认每个表单控件都有可计算名称。对于水利值班员这类需要连续操作的界面，可访问性不是额外装饰，而是减少误操作和漏读预警的工程要求。
+以上结构把“数据展示”“用户输入”“预警反馈”分成可命名的区域，后续添加 CSS 或 Vue 模板时仍然保留同一棵语义树。实践中应使用键盘、放大字体、屏幕阅读器和自动化检查至少各验证一次：键盘检查是否存在焦点陷阱，放大检查是否出现横向滚动，读屏检查是否能读出标题与单位，自动化检查则确认每个表单控件都有可计算名称。对于水利值班员这类需要连续操作的界面，可访问性不是额外装饰，而是减少误操作和漏读预警的工程要求；本章的键盘、对比度与状态编码要求均以WCAG 2.2为依据\cite{wcag22}。
 
 \paragraph{语义标签的选择决策}
 
@@ -1413,7 +1413,7 @@ console.log(levelStatus(5.12));
 
 传统命令式写法需要在数据变化后手动寻找并更新多个DOM节点。水利仪表盘一旦包含曲线、表格和告警标识，这些更新容易分散。Vue使用响应式状态和声明式模板：开发者描述“状态如何映射为界面”，框架负责同步DOM。组件化仍需遵循可理解反馈和一致交互等基本设计原则\cite{norman2013}。
 
-本章使用Vue 3.4+组合式API。\texttt{ref}适合基本值，\texttt{reactive}适合对象，\texttt{computed}表达派生状态；组件通过props接收数据，通过emit通知父组件。下面的单文件组件把状态声明、属性校验、模板绑定和事件发射放在同一示例中，便于沿着数据流理解组件边界。
+本章使用Vue 3.4+组合式API（响应式系统的完整语义见官方文档\cite{vueDocs}）。\texttt{ref}适合基本值，\texttt{reactive}适合对象，\texttt{computed}表达派生状态；组件通过props接收数据，通过emit通知父组件。下面的单文件组件把状态声明、属性校验、模板绑定和事件发射放在同一示例中，便于沿着数据流理解组件边界。
 
 \begin{lstlisting}[label={lst:ch04-vue-component},language=Vue,caption={测站卡片组合式组件}]
 <script setup>

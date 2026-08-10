@@ -12,6 +12,8 @@ services:
       DB_USER: qingyuan_app
       DB_PASSWORD_FILE: /run/secrets/db_password
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      # 生产环境改为 JWT_SECRET_FILE 指向 secret 文件并定期轮换
+      # JWT_SECRET: <base64-key>
       REDIS_URL: redis://redis:6379
     secrets: [db_password, kafka_password]
     depends_on:

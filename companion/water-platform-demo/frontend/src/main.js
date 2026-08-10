@@ -1,5 +1,6 @@
 import {createApp} from 'vue';
 import {createPinia} from 'pinia';
 import router from './router';
-import MonitoringDashboard from './components/MonitoringDashboard.vue';
-createApp(MonitoringDashboard).use(createPinia()).use(router).mount('#app');
+import App from './App.vue';
+
+createApp(App).use(createPinia()).use(router).mount('#app');

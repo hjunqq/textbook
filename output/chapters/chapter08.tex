@@ -619,7 +619,9 @@ CREATE TABLE IF NOT EXISTS schema_migration (
 );
 
 INSERT INTO schema_migration(version, description, checksum, applied_by)
-VALUES ('QY-DDL-001', 'core asset reading warning ddl', 'sha256:TODO', current_user)
+-- checksum 由发布流水线对迁移脚本正文计算后填入，禁止手工编造
+VALUES ('QY-DDL-001', 'core asset reading warning ddl',
+        'sha256:9f2d1c0a...(流水线填入)', current_user)
 ON CONFLICT (version) DO NOTHING;
 \end{lstlisting}
 

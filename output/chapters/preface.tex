@@ -110,6 +110,28 @@
 \item \textbf{课程设计方案：}以第8章贯穿案例为中心，要求学生分组完成需求说明、架构设计、前端页面、后端接口和三维场景集成，可与毕业设计或综合实训衔接。
 \end{itemize}
 
+\paragraph{核心内容与选学内容}全书内容量大于任何一种学时方案的课堂容量，这是有意为之：核心内容支撑课堂教学，选学内容服务课程设计、毕业设计与自学进阶。二者的边界见表\ref{tab:preface-core-optional}，任课教师可按此裁剪，学生自学时也应先走完核心主线再进入选学专题。
+
+\begin{table}[htbp]
+\centering
+\caption{核心内容与选学内容划分}
+\label{tab:preface-core-optional}
+\begin{tabular}{p{2.2cm}p{5.6cm}p{5.6cm}}
+\toprule
+部分 & 核心（课堂主线） & 选学（课程设计/进阶） \\
+\midrule
+方法基础 & 第1--3章：目标、需求、架构与一个ADR & 第3章架构评估细节、复杂度与风险分析 \\
+前端 & 第4章：HTML/CSS/JS基础、一个Vue监测页面、请求封装与登录守卫 & 虚拟滚动、暗色主题、构建流水线与发布审计 \\
+后端 & 第5章：REST、JPA、事务、统一异常、JWT认证 & 消息队列、事务发件箱、令牌轮换与撤销、可观测性、Testcontainers \\
+三维与展示 & 第6章6.1--6.2、第7章曲线与测点定位 & 倾斜摄影与BIM（6.3）、数字孪生架构（6.4）、LOD/聚合进阶 \\
+综合案例 & 第8章8.1--8.4：参数表、数据模型、预警与工单闭环 & 8.5数字孪生案例（预演、AI会商、值守复盘）、8.6生产运维 \\
+展望 & 第9章全书回顾与技术评估方法 & LoRaWAN/NB-IoT等延伸专题 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+32学时方案只覆盖核心列的方法基础与前后端主线；48学时方案覆盖核心列全部；选学列不进入闭卷考核，适合作为课程设计任务包或读者自学路线。
+
 \section*{配套资源}
 
 为了让“动手写代码”和“使用真实数据”能够落地，本书配套资源按可复现、可追踪、可反馈三个原则组织。资源目录与用途见表\ref{tab:preface-companion-resources}，当前仓库已归档代码、数据集和答案的提交版本，精确快照见表\ref{tab:preface-companion-versions}；公开发布渠道与时间以出版社配套资源页为准。若拿到教材时资源尚未上线，读者可依据表中清单建立同名目录，不影响章节概念学习。每次下载资源时请记录版本号与校验信息，课程报告应注明所用数据和代码版本，便于同伴复现实验结果。
@@ -130,9 +152,11 @@ Issues反馈渠道 & 勘误、环境问题和可复现实验报告 & 在配套�
 \end{tabular}
 \end{table}
 
-\paragraph{代码仓库结构。}配套代码的根目录为\texttt{companion/}\allowbreak\texttt{water-platform-}\allowbreak\texttt{demo/}（S2 提交\texttt{f71b52a}）。\texttt{frontend/}的可运行入口是\texttt{package.json}、\texttt{src/}\allowbreak\texttt{main.js}、\texttt{src/router/}\allowbreak\texttt{index.js}、\texttt{src/stores/}\allowbreak\texttt{monitoring.js}、\texttt{src/utils/}\allowbreak\texttt{request.js}和\texttt{src/components/}\allowbreak\texttt{MonitoringDashboard.vue}，并配有\texttt{vite.config.js}、\texttt{Dockerfile}和\texttt{nginx.conf}；\texttt{backend/}包含\texttt{pom.xml}、\texttt{src/main/java/}\allowbreak\texttt{edu/example/}\allowbreak\texttt{qingyuan/}下的实体、Repository、服务、JWT 过滤器和安全配置，以及\texttt{application.yml}和\texttt{Dockerfile}；\texttt{db/}包含\texttt{001\_init.sql}与\texttt{load-s3-data.sql}；根目录的\texttt{docker-compose.yml}负责编排前端、后端、PostgreSQL、Redis和Kafka，\texttt{secrets/}只提交\texttt{*.example}模板。目录中的每个服务都提供配置样例和健康检查说明，学生可以先运行最小链路，再逐个替换为章节中的实现。
+\paragraph{配套工程的定位。}\texttt{companion/water-platform-demo/}提供的是一条\textbf{最小可运行闭环}：登录认证、测点与观测查询、消息消费入库、一条命令启动和前后端各自的冒烟测试，用来证明全书技术栈能够协同工作，并作为练习的起点仓库。它不逐条收录书中203个代码清单——清单服务于讲解，仓库服务于运行，两者以文件路径和章节号互相索引（见仓库\texttt{MAPPING.md}）。读者应把书中清单视为“把仓库改造成完整平台”的施工图，而不是期待仓库已经包含成品。
 
-\paragraph{示例数据集。}\texttt{companion/datasets/}（S3 提交\texttt{4fed08e}）由\texttt{generate.py}生成，固定随机种子为\texttt{20260807}。\texttt{stations.csv/json}含28个测点元数据，字段为\texttt{asset\_id}、\texttt{asset\_type}、\texttt{display\_name}、单位、经纬度、\texttt{elevation\_m}、量程、精度、阈值和投运日期；\texttt{water\_level.csv}含3个库水位测点各1,200条、5分钟间隔的观测；\texttt{rainfall.csv}含5个雨量测点各288条，\texttt{piezometer.csv}含12个渗压测点各288条；8个位移测点当前仅提供\texttt{stations}中的元数据与阈值，其观测序列留作第7章练习用\texttt{generate.py}扩展生成。三类已生成观测共同使用\texttt{asset\_id}、\texttt{occurred\_at}、\texttt{version}、\texttt{event\_id}、\texttt{value}、\texttt{unit}、\texttt{quality}和\texttt{source}字段；\texttt{warnings.json}含蓝、黄、橙、红、无预警（NONE）与未评估样例。质量码只取\texttt{valid}、\texttt{suspect}、\texttt{missing}，文件中的缺测、超量程和跳变记录均保留原因。使用前应先阅读README中的字段说明，确认时间采用ISO 8601、时区采用UTC+8，并在报告中注明数据版本。
+\paragraph{代码仓库结构。}配套代码的根目录为\texttt{companion/}\allowbreak\texttt{water-platform-}\allowbreak\texttt{demo/}（仓库提交\texttt{f71b52a}）。\texttt{frontend/}的可运行入口是\texttt{package.json}、\texttt{src/}\allowbreak\texttt{main.js}、\texttt{src/router/}\allowbreak\texttt{index.js}、\texttt{src/stores/}\allowbreak\texttt{monitoring.js}、\texttt{src/utils/}\allowbreak\texttt{request.js}和\texttt{src/components/}\allowbreak\texttt{MonitoringDashboard.vue}，并配有\texttt{vite.config.js}、\texttt{Dockerfile}和\texttt{nginx.conf}；\texttt{backend/}包含\texttt{pom.xml}、\texttt{src/main/java/}\allowbreak\texttt{edu/example/}\allowbreak\texttt{qingyuan/}下的实体、Repository、服务、JWT 过滤器和安全配置，以及\texttt{application.yml}和\texttt{Dockerfile}；\texttt{db/}包含\texttt{001\_init.sql}与\texttt{load-s3-data.sql}；根目录的\texttt{docker-compose.yml}负责编排前端、后端、PostgreSQL、Redis和Kafka，\texttt{secrets/}只提交\texttt{*.example}模板。目录中的每个服务都提供配置样例和健康检查说明，学生可以先运行最小链路，再逐个替换为章节中的实现。
+
+\paragraph{示例数据集。}\texttt{companion/datasets/}（仓库提交\texttt{4fed08e}）由\texttt{generate.py}生成，固定随机种子为\texttt{20260807}。\texttt{stations.csv/json}含28个测点元数据，字段为\texttt{asset\_id}、\texttt{asset\_type}、\texttt{display\_name}、单位、经纬度、\texttt{elevation\_m}、量程、精度、阈值和投运日期；\texttt{water\_level.csv}含3个库水位测点各1,200条、5分钟间隔的观测；\texttt{rainfall.csv}含5个雨量测点各288条，\texttt{piezometer.csv}含12个渗压测点各288条；8个位移测点当前仅提供\texttt{stations}中的元数据与阈值，其观测序列留作第7章练习用\texttt{generate.py}扩展生成。三类已生成观测共同使用\texttt{asset\_id}、\texttt{occurred\_at}、\texttt{version}、\texttt{event\_id}、\texttt{value}、\texttt{unit}、\texttt{quality}和\texttt{source}字段；\texttt{warnings.json}含蓝、黄、橙、红、无预警（NONE）与未评估样例。质量码只取\texttt{valid}、\texttt{suspect}、\texttt{missing}，文件中的缺测、超量程和跳变记录均保留原因。使用前应先阅读README中的字段说明，确认时间采用ISO 8601、时区采用UTC+8，并在报告中注明数据版本。
 
 \paragraph{环境版本基线。}为避免“在我的电脑上可以运行”的差异，建议按表\ref{tab:preface-companion-versions}的主线配置准备环境；补丁版本可以在同一大版本内更新，但不得跨越书中API假设。仓库快照中前端实际锁定Vue 3.4.38、Vite 5.4.8、Pinia 2.1.7、Vue Router 4.4.5、ECharts 5.5.1、Three.js 0.160.1和\texttt{@vitejs/plugin-vue} 5.2.3；后端\texttt{pom.xml}锁定Java 17、Spring Boot 3.2.10，应用版本为0.1.0；Compose 使用\texttt{timescale/timescaledb-ha:pg16}（同时含 PostGIS 与 TimescaleDB 扩展）、\texttt{redis:7.2-alpine}和Bitnami Kafka 3.7。Python生成脚本只使用标准库，建议Python 3.11或更高版本；若操作系统或CPU架构不同，应在提交问题时同时附上版本输出和启动日志。
 
@@ -144,9 +168,9 @@ Issues反馈渠道 & 勘误、环境问题和可复现实验报告 & 在配套�
 \toprule
 资源 & 仓库中的确切入口与版本 & 用途 \\
 \midrule
-配套代码 & \texttt{companion/}\allowbreak\texttt{water-platform-}\allowbreak\texttt{demo/}；S2 提交 \texttt{f71b52a}；Vue 3.4.38、Vite 5.4.8、Spring Boot 3.2.10 & 第4、5、8章代码联调与容器启动 \\
-示例数据 & \texttt{companion/datasets/}；S3 提交 \texttt{4fed08e}；生成器种子 \texttt{20260807} & 第7章实践题和第8章验收测试 \\
-参考答案 & 编辑源 \texttt{appendix/}\allowbreak\texttt{appendixA.md}；编译入口 \texttt{output/appendix/}\allowbreak\texttt{answers.tex}；S1 提交 \texttt{5a3fb7b} & 按章节和题号核对评分要点、验收证据与延伸阅读 \\
+配套代码 & \texttt{companion/}\allowbreak\texttt{water-platform-}\allowbreak\texttt{demo/}；仓库提交 \texttt{f71b52a}；Vue 3.4.38、Vite 5.4.8、Spring Boot 3.2.10 & 第4、5、8章代码联调与容器启动 \\
+示例数据 & \texttt{companion/datasets/}；仓库提交 \texttt{4fed08e}；生成器种子 \texttt{20260807} & 第7章实践题和第8章验收测试 \\
+参考答案 & 编辑源 \texttt{appendix/}\allowbreak\texttt{appendixA.md}；编译入口 \texttt{output/appendix/}\allowbreak\texttt{answers.tex}；仓库提交 \texttt{5a3fb7b} & 按章节和题号核对评分要点、验收证据与延伸阅读 \\
 运行编排 & \texttt{docker-compose.yml}；PostGIS 16/3.4、Redis 7.2、Kafka 3.7；健康检查为 \texttt{/readyz} 与 \texttt{/healthz} & 启动前后端、数据库、缓存和消息服务 \\
 \bottomrule
 \end{tabular}

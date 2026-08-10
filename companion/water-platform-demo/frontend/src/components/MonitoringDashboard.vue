@@ -6,8 +6,8 @@ import {useMonitoringStore} from '../stores/monitoring';
 const store = useMonitoringStore();
 const chartElement = ref();
 let chart;
-const qualityText = {valid: '有效', suspect: '可疑', missing: '缺测'};
-const points = computed(() => store.readings.map(item => ({value: [item.occurredAt, item.quality === 'missing' ? null : item.value], quality: item.quality})));
+import {qualityText, toChartPoints} from '../utils/readings';
+const points = computed(() => toChartPoints(store.readings));
 function renderChart() {
   chart ??= echarts.init(chartElement.value);
   chart.setOption({tooltip: {trigger: 'axis'}, xAxis: {type: 'time'}, yAxis: {type: 'value', name: store.selectedAsset?.unit || ''}, series: [{type: 'line', connectNulls: false, data: points.value.map(p => p.value)}]});
