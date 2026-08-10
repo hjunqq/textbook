@@ -16,6 +16,10 @@
 
 智慧水利后端负责接入监测数据、执行业务规则、维护一致性并向前端提供接口。本章统一采用Java 17、Spring Boot 3.2+、Spring Security 6、Jakarta Persistence 3.1与Jakarta Servlet 6.x；JWT示例按jjwt 0.11.x接口编写。框架配置、注解语义与版本迁移细节，一律以官方参考文档为准\cite{springBootDocs,springSecurityDocs,jakartaPersistence}；书中给出的版本边界只描述编写时点的状态。分布式事务和领域驱动设计作为选学内容，不作为首次后端课程的前置要求。
 
+\begin{tipbox}
+\paragraph{工程版本线：v1（前端只读切片） $\rightarrow$ v2（认证与观测API）}起点是第4章交付的 v1 前端。本章结束时你应交付 \textbf{v2}：为 v1 提供真实数据的后端——登录签发 JWT、受保护的测点与观测查询、事务与幂等写入——对应仓库 \texttt{backend/} 的 \texttt{JwtService}、\texttt{JwtAuthenticationFilter}、\texttt{SecurityConfig}、\texttt{AuthController}、\texttt{AssetController}、\texttt{ReadingService}；验证命令 \texttt{mvn test}，联调后前端 401 分流与登录回跳应全部生效。
+\end{tipbox}
+
 \section{后端服务与REST接口概述}
 
 后端位于用户界面与数据资源之间，承担身份校验、业务计算、持久化、审计和系统集成。典型请求链路为“浏览器或设备网关—控制器—应用服务—Repository—数据库”。控制器只处理协议转换和输入校验，业务规则放在服务层，数据访问集中在Repository；若进一步拆分为微服务，还需显式管理边界、版本和分布式失败\cite{newman2021}。

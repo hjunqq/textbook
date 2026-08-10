@@ -18,6 +18,10 @@
 
 本章使用“清源水库”作为教学虚构案例。坝高设为52\,m，正常蓄水位168.0\,m；平台接入12个渗压测点、8个位移测点、3个库水位测点和5个雨量测点，共28个观测点，另展示6个采集网关的在线状态。所有数值仅用于教学练习，不代表真实工程。
 
+\begin{tipbox}
+\paragraph{工程版本线：v3（三维场景接入） $\rightarrow$ v4（观测展示与联动）}起点是 v3 的三维底座。本章结束时你应交付 \textbf{v4}：曲线与三维联动的观测展示——缺测断线、质量码视觉编码、图表点击定位三维测点；仓库 \texttt{frontend/src/utils/readings.js} 的纯函数（缺测保位、时间窗校验）是本章代码的最小起点，测试见 \texttt{frontend/tests/readings.test.js}。
+\end{tipbox}
+
 \section{面向可视化的数据准备}\label{sec:data-types-display}
 
 \subsection{从观测记录到视觉变量}

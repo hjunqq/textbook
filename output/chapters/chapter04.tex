@@ -15,6 +15,10 @@
 
 智慧水利平台的前端把测站、工程、告警和调度数据转化为可理解、可操作的界面。本章采用Vue 3.4+、Vue Router 4、Pinia 2与Vite 5作为教学基线；框架API与配置项随版本演进，遇到与书中示例不一致时，一律以各自官方文档为准\cite{vueDocs,vueRouterDocs,piniaDocs,viteDocs}。示例遵循HTML、CSS和ECMAScript标准，语言与平台特性可在MDN查证\cite{mdnWebDocs}，不依赖特定浏览器的私有能力。
 
+\begin{tipbox}
+\paragraph{工程版本线：v0（空仓库） $\rightarrow$ v1（前端只读切片）}起点是配套仓库的空前端骨架。本章结束时你应交付 \textbf{v1}：一个能登录、能按测点与时间窗查询并渲染曲线的只读监测页面——对应仓库 \texttt{frontend/} 的 \texttt{utils/auth.js}、\texttt{utils/request.js}、\texttt{views/LoginView.vue}、\texttt{router/index.js}、\texttt{stores/monitoring.js} 与 \texttt{components/MonitoringDashboard.vue}；验证命令 \texttt{npm ci \&\& npm test \&\& npm run build}。
+\end{tipbox}
+
 \section{Web基础概念与浏览器架构}
 
 浏览器通过HTTP或HTTPS请求资源，解析HTML形成DOM树，解析CSS形成CSSOM树，再计算布局并绘制页面；JavaScript通过事件循环处理用户操作、网络响应和定时任务。智慧水利页面常同时展示地图、曲线与告警，因此应避免在短时间内反复修改大量DOM节点。
