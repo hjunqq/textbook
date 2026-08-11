@@ -85,6 +85,9 @@
 
 - `pandoc/`、`build.bat` 是合法 GBK 编码，**不要动**。
 - 图全部用 TikZ，不得引入 `\includegraphics` 外部图片路径。
+  例外（第三方素材清单）：第8章8.5节6张51WIM产品截图（output/images/chapter08/51wim-*.jpg），
+  经北京五一视界书面授权，仅限纸质/PDF版刊出；线上站点(docs/)一律使用TikZ重绘示意图，
+  不得将授权截图加入网站或对外再许可（MIT不覆盖该组图片）。
 - 参考文献用 `biblatex + gb7714-2015 + sorting=none`，bib 条目必须全部被引用。
 - 新增 `\lstdefinelanguage` 一律写在 `output/main.tex` 导言区，不得写在章文件正文里。
 

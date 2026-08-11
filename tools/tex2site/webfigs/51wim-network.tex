@@ -1,0 +1,16 @@
+\begin{tikzpicture}[font=\small,>=Stealth,
+  src/.style={draw=Primary,fill=PrimaryLight,rounded corners=2pt,minimum width=2.1cm,minimum height=0.9cm,align=center,font=\scriptsize,text=PrimaryDark},
+  pump/.style={draw=Accent,fill=Accent!10,rounded corners=2pt,minimum width=2.1cm,minimum height=0.9cm,align=center,font=\scriptsize,text=Accent!70!black},
+  dem/.style={draw=Primary!60,fill=white,rounded corners=2pt,minimum width=2.3cm,minimum height=0.9cm,align=center,font=\scriptsize,text=TextGray}]
+  \node[src] (s1) at (-4.8,1.4) {水源:水库A};
+  \node[src] (s2) at (-4.8,-1.4) {水源:水库B};
+  \node[pump] (p1) at (-1.2,1.4) {泵站P1};
+  \node[pump] (p2) at (-1.2,-1.4) {泵站P2};
+  \node[dem] (d1) at (2.6,2.0) {城区供水};
+  \node[dem] (d2) at (2.6,0) {灌区用水};
+  \node[dem] (d3) at (2.6,-2.0) {生态流量};
+  \draw[->,thick,Primary] (s1)--(p1); \draw[->,thick,Primary] (s2)--(p2);
+  \draw[->,thick,Primary] (p1)--(d1); \draw[->,thick,Primary] (p1)--(d2);
+  \draw[->,thick,Primary] (p2)--(d2); \draw[->,thick,Primary] (p2)--(d3);
+  \node[font=\scriptsize,text=TextGray,align=center] at (0,-2.9) {连线为输水链路,线上标注能力与当前流量;\\调度方案改变泵站与闸门设定,拓扑同步反映供需平衡};
+\end{tikzpicture}

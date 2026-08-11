@@ -1,0 +1,12 @@
+\begin{tikzpicture}[font=\small,
+  entry/.style={draw=Primary,fill=PrimaryLight,rounded corners=3pt,minimum width=3.2cm,minimum height=1.5cm,align=center,text=PrimaryDark,font=\small\bfseries},
+  base/.style={draw=Primary!60,fill=white,rounded corners=2pt,minimum width=11.4cm,minimum height=0.7cm,align=center,text=TextGray}]
+  \node[draw=Primary!40,rounded corners=4pt,minimum width=12.2cm,minimum height=4.9cm] (frame) at (0,0) {};
+  \node[anchor=north west,font=\scriptsize\bfseries,text=Primary] at ($(frame.north west)+(.2,-.15)$) {一体化门户};
+  \node[entry] (a) at (-4,.7) {流域\\防洪调度与预演};
+  \node[entry] (b) at (0,.7) {水网\\供需平衡与联合调度};
+  \node[entry] (c) at (4,.7) {水利工程\\安全监测与运行};
+  \node[base] (d) at (0,-1) {统一数据底板};
+  \node[base] (e) at (0,-1.9) {统一对象编码 · 统一事件契约};
+  \foreach \x in {a,b,c} \draw[->,thick,Primary] (\x.south) -- ($(d.north)+(0,.05)$|-\x.south) -- (d.north -| \x.south);
+\end{tikzpicture}

@@ -1,0 +1,14 @@
+\begin{tikzpicture}[font=\small,>=Stealth,
+  box/.style={draw=Primary,fill=PrimaryLight,rounded corners=2pt,minimum width=3.0cm,minimum height=1.05cm,align=center,font=\scriptsize,text=PrimaryDark}]
+  \node[box] (plan) at (-4.4,1.2) {泄洪方案\\3孔开度组合};
+  \node[box] (gate) at (-4.4,-1.2) {闸门动作模拟\\按方案开启};
+  \node[draw=Primary!40,rounded corners=3pt,minimum width=6.3cm,minimum height=3.6cm] (v) at (2.6,0) {};
+  \node[anchor=north,font=\scriptsize,text=PrimaryDark] at ($(v.north)+(0,-.12)$) {三维泄流模拟};
+  \draw[Primary,thick] ($(v.center)+(-2.4,1.0)$) -- ($(v.center)+(-1.2,1.0)$) -- ($(v.center)+(-1.2,-.9)$);
+  \draw[Primary!60,thick,decorate,decoration={snake,amplitude=.5mm,segment length=3mm}]
+    ($(v.center)+(-1.15,.2)$) .. controls ($(v.center)+(-.2,-.4)$) .. ($(v.center)+(2.4,-1.0)$);
+  \node[font=\scriptsize,text=TextGray] at ($(v.center)+(.9,.75)$) {水流经溢洪道下泄};
+  \draw[->,thick,Primary] (plan)--(gate);
+  \draw[->,thick,Primary] (gate.east) -- (v.west|-gate.east);
+  \draw[->,thick,Primary] (plan.east) -- (v.west|-plan.east);
+\end{tikzpicture}

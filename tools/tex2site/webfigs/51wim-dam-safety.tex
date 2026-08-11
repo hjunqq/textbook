@@ -1,0 +1,8 @@
+\begin{tikzpicture}[font=\small,
+  card/.style={draw=Primary,fill=white,rounded corners=2pt,align=center,font=\scriptsize,text=PrimaryDark}]
+  \node[draw=Primary!40,rounded corners=4pt,minimum width=12.2cm,minimum height=5.2cm] (f) at (0,0) {};
+  \node[anchor=north west,font=\scriptsize\bfseries,text=Primary] at ($(f.north west)+(.2,-.15)$) {水库工程安全评估视图};
+  \node[card,minimum width=3.1cm,minimum height=1.6cm] (score) at (-4.1,1.1) {安全性态评分\\[1pt]{\normalsize\bfseries 87}/100};
+  \node[card,minimum width=3.1cm,minimum height=1.9cm] (alert) at (-4.1,-1.15) {预报预警面板\\渗压·位移·库水位\\越限与趋势提示};
+  \node[card,minimum width=7.3cm,minimum height=3.9cm] (dam) at (1.9,0) {坝体三维视图\\[2pt]评估范围高亮·测点定位标注\\(与监测平台共用对象编码)};
+\end{tikzpicture}

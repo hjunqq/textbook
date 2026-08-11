@@ -23,7 +23,12 @@ docker compose up -d --build
 
 数据库初始化脚本自动建表（`db/001_init.sql`）并写入种子观测（`db/002_seed.sql`），
 页面开箱即有渗压曲线（含一段缺测断线与一条可疑值）。完整 28 测点数据集见
-`../datasets/`，可按 `db/load-s3-data.sql` 导入。
+`../datasets/`，在本目录下执行一条命令即可导入（psql 客户端 `\copy`，CSV 相对路径按
+当前目录解析，坐标与种子数据一致）：
+
+```bash
+psql "postgresql://qingyuan_app:<密码>@localhost:5432/qingyuan" -f db/load-s3-data.sql
+```
 
 ## 正常链路与故障链路
 

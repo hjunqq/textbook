@@ -1,0 +1,9 @@
+\begin{tikzpicture}[font=\small,
+  panel/.style={draw=Primary,fill=white,rounded corners=2pt,align=center,font=\scriptsize,text=PrimaryDark}]
+  \node[draw=Primary!40,fill=PrimaryLight!40,rounded corners=4pt,minimum width=12.2cm,minimum height=5.4cm] (scene) at (0,0) {};
+  \node[anchor=south,font=\scriptsize,text=Primary!70] at ($(scene.south)+(4.4,.08)$) {三维流域场景(常驻底层)};
+  \node[panel,minimum width=2.9cm,minimum height=4.4cm] (l) at (-4.3,0) {雨水情\\[2pt]面雨量·水位\\过程线与统计};
+  \node[panel,minimum width=2.9cm,minimum height=4.4cm] (r) at (4.3,0) {工程要素\\[2pt]水库·闸坝·测站\\运行状态};
+  \node[panel,minimum width=5.4cm,minimum height=0.85cm] (t) at (0,2.0) {预警条:蓝/黄/橙/红事件与待确认数};
+  \node[panel,minimum width=5.4cm,minimum height=0.85cm] (b) at (0,-2.0) {时间轴:历史回放与预报时段切换};
+\end{tikzpicture}

@@ -1,0 +1,14 @@
+\begin{tikzpicture}[font=\small,>=Stealth,
+  box/.style={draw=Primary,fill=PrimaryLight,rounded corners=2pt,minimum width=2.9cm,minimum height=1.05cm,align=center,font=\scriptsize,text=PrimaryDark}]
+  \node[box] (p) at (-4.6,0) {暴雨情景参数\\雨量·历时·分布};
+  \node[box] (m) at (-1.2,0) {产汇流与\\淹没计算};
+  \node[draw=Primary!40,rounded corners=3pt,minimum width=4.6cm,minimum height=3.2cm] (v) at (3.4,0) {};
+  \node[anchor=north,font=\scriptsize,text=PrimaryDark] at ($(v.north)+(0,-.12)$) {淹没范围渲染};
+  \fill[Primary!15] ($(v.center)+(-1.7,-1.1)$) ellipse (1.9 and .75);
+  \fill[Primary!35] ($(v.center)+(-1.1,-.95)$) ellipse (1.25 and .55);
+  \fill[Primary!60] ($(v.center)+(-.6,-.8)$) ellipse (.7 and .35);
+  \node[font=\scriptsize,text=TextGray,anchor=south] at ($(v.south)+(1.15,.28)$) {深色=相对水深大};
+  \draw[->,thick,Primary] (p)--(m);
+  \draw[->,thick,Primary] (m)--(v);
+  \draw[->,thick,Accent,dashed] ($(v.south)+(0,0)$) to[bend right=20] node[below,font=\scriptsize]{调整参数再预演} (p.south);
+\end{tikzpicture}

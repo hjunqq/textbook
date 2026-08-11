@@ -22,6 +22,20 @@
 \paragraph{本章分为两篇}8.1--8.4为\textbf{核心案例篇}：把前七章的方法与技术落成一个可运行的安全监测平台，交付物是"观测入库—质量检查—预警评估—工单处置"的完整闭环，属于48学时方案的课堂内容。8.5--8.6为\textbf{数字孪生拓展篇（选学）}：在核心平台之上叠加预演、会商与生产运维能力，适合课程设计与自学进阶。两篇可独立验收，学生完成核心篇即达到本章的基本要求。
 \end{notebox}
 
+\begin{warningbox}
+\paragraph{课堂最小路径（4学时）}核心篇约2.5万字、41个代码清单，课堂内不可能也不需要逐个讲完。4学时的讲授只走下面8个清单构成的最小闭环，其余清单全部归入实验课任务包或自学材料，验收仍以8.4节验收表为准：
+\begin{enumerate}
+\item 数据模型：对象表与观测超表（清单\ref{lst:ch08-sql-asset}、\ref{lst:ch08-sql-reading}）——质量码与复合主键是后面一切环节的地基；
+\item 幂等写入（清单\ref{lst:ch08-sql-idempotent-insert}）——同一事件重复到达不产生重复观测；
+\item 消息消费（清单\ref{lst:ch08-kafka-consumer}）——观测从Kafka进入数据库的唯一入口；
+\item 质量检查（清单\ref{lst:ch08-quality-java}）——valid/suspect/missing 的判定落点；
+\item 预警队列（清单\ref{lst:ch08-sql-warning-queue}）——从观测异常到待确认预警；
+\item 工单闭环（清单\ref{lst:ch08-workorder-chain}）——预警确认后的处置与回执；
+\item 编排与冒烟（清单\ref{lst:ch08-compose}，配合仓库 \texttt{smoke.sh}）——一条命令验证"启动—登录—取数—拒绝"。
+\end{enumerate}
+按此路径讲完，学生即具备运行和检验 v5 骨架的能力；其余清单（空间查询、连续聚合、压缩保留、可观测性、备份演练等）在实验课或课程设计中按需展开。
+\end{warningbox}
+
 \begin{tipbox}
 \paragraph{工程版本线：v4（观测展示与联动） $\rightarrow$ v5（完整平台）}起点是 v4 的展示层。本章核心篇结束时你应交付 \textbf{v5}：加上质量检查、四级预警、工单闭环与部署编排的完整平台——仓库 \texttt{db/001\_init.sql}、\texttt{ReadingConsumer}、\texttt{docker-compose.yml} 与 \texttt{smoke.sh} 是 v5 的骨架，本章清单把它们扩展为完整实现；拓展篇（8.5起）在 v5 之上叠加预演与会商，不修改 v5 的既有契约。
 \end{tipbox}
@@ -42,13 +56,13 @@
 \toprule
 项目 & 教学设定 & 使用位置 \\
 \midrule
-工程对象 & 52\,m混凝土坝；坝基高程120.0\,m，坝顶高程172.0\,m，防浪墙顶173.2\,m & 三维场景、对象编码与空间定位 \\
-观测点 & 渗压12、位移8、水位3、雨量5 & 数据模型、图表、预警与质量检查 \\
-流域与库容 & 流域面积320\,km$^2$；总库容0.85亿\,m$^3$ & 降雨情景、水位包络与容量估算 \\
-特征水位 & 死水位148.0\,m；汛限水位165.5\,m；正常蓄水位168.0\,m & 水位越限、预警分级与调度约束 \\
-洪水控制水位 & 设计洪水位170.2\,m（P=1\%）；校核洪水位171.6\,m（P=0.1\%） & 洪水情景与安全校核 \\
-泄洪设施 & 3孔弧形闸门，单孔净宽8.0\,m，闸底高程152.0\,m，最大开度6.0\,m & 闸门正算、反算与方案编码 \\
-接入设备 & 6台采集网关 & 在线状态、断网缓存与补传 \\
+工程对象 & \cpDamHeight\,m混凝土坝；坝基高程\cpBaseElev\,m，坝顶高程\cpCrestElev\,m，防浪墙顶\cpWaveWallElev\,m & 三维场景、对象编码与空间定位 \\
+观测点 & 渗压\cpPzCount、位移\cpDispCount、水位\cpWlCount、雨量\cpRfCount（共\cpStationCount 个） & 数据模型、图表、预警与质量检查 \\
+流域与库容 & 流域面积\cpBasinArea\,km$^2$；总库容\cpTotalCapacity 亿\,m$^3$ & 降雨情景、水位包络与容量估算 \\
+特征水位 & 死水位\cpDeadLevel\,m；汛限水位\cpFloodLimitLevel\,m；正常蓄水位\cpNormalLevel\,m & 水位越限、预警分级与调度约束 \\
+洪水控制水位 & 设计洪水位\cpDesignFloodLevel\,m（P=1\%）；校核洪水位\cpCheckFloodLevel\,m（P=0.1\%） & 洪水情景与安全校核 \\
+泄洪设施 & \cpGateCount 孔弧形闸门，单孔净宽\cpGateWidth\,m，闸底高程\cpGateSillElev\,m，最大开度\cpGateMaxOpen\,m & 闸门正算、反算与方案编码 \\
+接入设备 & \cpGatewayCount 台采集网关 & 在线状态、断网缓存与补传 \\
 用户角色 & 值班员、专业分析员、运维员、审批人、审计员 & 权限、工单和职责分离 \\
 教学事件 & 连续降雨后PZ-07渗压变化异常 & 预警、会商、处置和复盘 \\
 \bottomrule

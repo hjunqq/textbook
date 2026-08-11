@@ -1,0 +1,84 @@
+# CI 严格构建配置:与 mkdocs.yml 一致但不加载 PDF/打印插件(其告警与耗时不适合门禁)
+site_name: 智慧水利平台架构与开发
+site_description: 智慧水利平台架构与开发教材
+site_author: 教材编写组
+
+# 使用docs目录，但我们会创建软链接
+docs_dir: 'docs'
+site_dir: 'site'
+
+# Configuration
+theme:
+  name: material
+  language: zh
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.highlight
+    - search.share
+    - toc.follow
+    - content.code.copy
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: blue
+      accent: blue
+      toggle:
+        icon: material/weather-sunny
+        name: 切换到深色模式
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: blue
+      accent: blue
+      toggle:
+        icon: material/weather-night
+        name: 切换到浅色模式
+
+# Plugins
+plugins:
+  - search:
+      lang: zh
+# CI 门禁使用本精简配置(见 mkdocs-ci.yml 头部注释)
+
+# Extensions
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - toc:
+      permalink: true
+  - tables
+  - footnotes
+  - attr_list
+  - md_in_html
+
+# Extra JavaScript for MathJax
+extra_javascript:
+  - https://polyfill.io/v3/polyfill.min.js?features=es6
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+
+# 简化导航结构
+nav:
+  - 首页: index.md
+  - 前言: 前言.md
+  - 第一章: chapters/chapter01/chapter01.md
+  - 第二章: chapters/chapter02/chapter02.md  
+  - 第三章: chapters/chapter03/chapter03.md
+  - 第四章: chapters/chapter04/chapter04.md
+  - 第五章: chapters/chapter05/chapter05.md
+  - 第六章: chapters/chapter06/chapter06.md
+  - 第七章: chapters/chapter07/chapter07.md
+  - 第八章: chapters/chapter08/chapter08.md
+  - 第九章: chapters/chapter09/chapter09.md
+  - 附录A 习题参考答案: appendix/answers.md
+  - 参考文献: references.md

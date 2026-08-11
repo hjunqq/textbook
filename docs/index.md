@@ -3,8 +3,6 @@
 > 基于现代软件工程方法论的智慧水利平台开发教材  
 > 面向水利工程专业大三年级学生的数字化教学资源
 
-![教材封面](assets/images/cover.png){ align=center }
-
 ## 🌟 教材简介
 
 随着信息技术与水利行业的深度融合，智慧水利已成为推动水利现代化的重要方向。本教材采用现代化数字出版技术，基于MkDocs + Material主题构建，为水利工程专业学生提供全面的智慧水利平台架构与开发知识体系。
@@ -47,7 +45,7 @@
 
 ```bash
 # 克隆教材仓库
-git clone [仓库地址]
+git clone https://github.com/hjunqq/-----------.git
 cd 智慧水利平台架构与开发
 
 # 使用uv包管理器安装依赖
@@ -242,7 +240,7 @@ CI/CD + Jenkins
 # 安装 Python 3.13+, Node.js 18+, Git
 
 # 2. 克隆教材仓库
-git clone [教材仓库地址]
+git clone https://github.com/hjunqq/-----------.git 智慧水利平台架构与开发
 cd 智慧水利平台架构与开发
 
 # 3. Python环境配置（使用uv包管理器）
@@ -277,17 +275,13 @@ code --install-extension bradlc.vscode-tailwindcss
 
 ### 📖 学习资源获取
 
-**完整源码与项目模板**：
-- 🗂️ 所有章节的完整源代码
-- 📋 项目模板和脚手架工具
-- 🎨 UI组件库和样式指南
-- 📊 真实的水利监测数据集
+**配套代码与数据**：
+- 🗂️ 可运行的最小闭环工程 `companion/water-platform-demo/`（前端+后端+数据库+消息队列）
+- 📊 可复现的28测点示例数据集 `companion/datasets/`（脚本生成，非真实工程数据）
 
 **实验指导与评估**：
-- 📝 详细的实验操作手册
-- 🎥 关键技术点的视频教程
-- 📋 自测题库和能力评估工具
-- 🏆 项目评分标准和优秀作品展示
+- 📝 各章实践任务与验收标准（见各章"交付物"与附录A分级评分）
+- 📋 附录A 习题参考答案与常见错误清单
 
 ## 🔄 PDF导出与离线学习
 
@@ -317,7 +311,7 @@ uv run mkdocs build
     
     - 💬 GitHub Discussions - 技术讨论和经验分享
     - 🐛 GitHub Issues - 问题反馈和建议提交
-    - 📧 邮件支持 - [编写组邮箱]
+    - 📧 邮件支持 - qhjun@live.com
     
     **资源更新**：
     
@@ -331,7 +325,7 @@ uv run mkdocs build
 
 ```bash
 # 1. Fork 教材仓库
-git clone [your-forked-repo]
+git clone <你的Fork仓库地址>
 
 # 2. 创建改进分支
 git checkout -b feature/your-improvement
@@ -353,13 +347,14 @@ git push origin feature/your-improvement
 
 ## 📄 版权与许可
 
-**开源协议**：本教材采用 **MIT License** 开源协议发布
+**分层许可**：本仓库内容按类型分别授权
 
-**使用条款**：
-- ✅ 支持教育用途的免费使用和分发
-- ✅ 允许基于教材进行二次开发
-- ✅ 鼓励学术研究和教学改进
-- ⚠️ 商业使用请联系编写组获得授权
+- **配套代码与示例数据集**（`companion/`）：**MIT License**，可自由使用、修改与再分发
+- **教材正文与插图**（`docs/`、`output/`）：版权归编写组所有，公开网站仅供在线学习浏览；
+  转载、印刷或商业使用需事先取得书面授权
+- **第三方素材**：纸质版第8章8.5节引用的51WIM产品截图经北京五一视界数字孪生科技股份
+  有限公司书面授权，仅限纸质/PDF版刊出，不随本仓库分发，也不适用MIT协议；
+  在线版对应插图为编写组重绘的教学示意图
 
 **数据说明**：教材中的案例数据均为教学示例，不代表真实的水利工程情况。
 
@@ -372,7 +367,7 @@ git push origin feature/your-improvement
     
     ```bash
     # 快速启动本地环境
-    git clone [仓库地址]
+    git clone https://github.com/hjunqq/-----------.git
     cd 智慧水利平台架构与开发
     uv sync && uv run mkdocs serve
     ```

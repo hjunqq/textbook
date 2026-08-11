@@ -7,7 +7,7 @@ API="${API:-http://localhost:8080}"   # 生产同源；本机联调可设 API=ht
 
 echo "[1/5] 等待后端就绪 ..."
 for i in $(seq 1 60); do
-  if curl -fsS "$API/actuator/health/readiness" | grep -q UP; then break; fi
+  if curl -fsS "$BASE/readyz" | grep -q UP; then break; fi
   sleep 5; [ "$i" = 60 ] && { echo "后端未就绪"; exit 1; }
 done
 
