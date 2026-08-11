@@ -1,288 +1,2426 @@
-## 第五章后端开发技术
+# 第5章 后端开发技术
 
-## 学习目标
+**学习目标**
 
 通过本章学习，学生应能够：
 
-1. 理解后端服务的基本概念、架构组成和在智慧水利平台中的核心作用
-2. 深入掌握HTTP协议、RESTful API设计原则和现代Web应用框架的特点
-3. 熟练运用Spring Boot框架进行企业级应用开发，包括依赖注入、数据持久化和安全认证
-4. 具备设计和实现智慧水利业务后台服务的能力，包括实时数据处理、预警服务和系统集成
-5. 了解Python Web框架的特点和优势，能够进行技术选型和架构设计决策
+1.  说明智慧水利后端的职责，设计符合HTTP语义的RESTful API；
 
-## 引言
+2.  使用Spring Boot组织配置、依赖注入、控制器与服务；
 
-后端开发技术是智慧水利平台的技术核心和业务支撑，承载着数据处理、业务逻辑、系统集成和服务提供等关键职能。在智慧水利这一复杂的信息化系统中，后端服务不仅要处理来自众多监测站点的海量实时数据，还要支持复杂的水文计算模型、多维度的数据分析、智能预警决策以及与传统水利业务系统的深度融合。
+3.  使用Jakarta Persistence完成实体映射、Repository访问和事务处理；
 
-从技术挑战来看，智慧水利后端开发面临着数据量大、计算复杂、实时性强、可靠性高等特殊要求。水利监测数据具有时序性强、精度要求高、关联关系复杂等特点，需要后端系统具备高效的数据存储和检索能力。同时，作为关键基础设施的信息系统，智慧水利平台对系统安全性、稳定性和可扩展性都提出了极高的标准。
+4.  使用Spring Security 6与JWT实现基本认证和授权；
 
-现代后端开发已经从传统的单体应用演进为微服务架构，从简单的数据库操作发展为复杂的分布式系统设计。在这个技术演进过程中，Spring Boot作为Java生态系统中的优秀框架，以其简化配置、自动装配、生产就绪等特性，成为企业级应用开发的首选技术。Python生态系统中的Django和Flask框架，则在数据科学、机器学习集成等方面展现出独特优势，为水利数据的深度分析提供了强大支撑。
+5.  区分进程内事件与跨服务消息，并使用消息队列实现可靠解耦；
 
-本章将系统深入地介绍后端开发的核心技术体系，从HTTP协议的深度理解开始，逐步构建现代企业级后端应用的完整知识架构。通过理论阐述、技术实践和项目驱动相结合的方式，帮助学生不仅掌握后端开发的基本技能，更要具备面向智慧水利行业的专业应用开发能力。
+6.  通过缓存、分页、日志与指标改善服务性能和可运维性。
 
-## 重要提示
+**引言**
 
-!!! warning "技术选型说明"
-    
-    本章采用多技术栈并重的教学方式，理由如下：
-    - **Java Spring Boot**：企业级应用开发的主流选择，适合大型系统
-    - **Python框架**：在水利数据分析和科学计算方面具有天然优势
-    - **技术选型原则**：根据项目规模、团队技能、业务需求综合考虑
-    - **实际应用**：水利行业中Java和Python都有广泛应用场景
+智慧水利后端负责接入监测数据、执行业务规则、维护一致性并向前端提供接口。本章统一采用Java 17、Spring Boot 3.2+、Spring Security 6、Jakarta Persistence 3.1与Jakarta Servlet 6.x；JWT示例按jjwt 0.11.x接口编写。框架配置、注解语义与版本迁移细节，一律以官方参考文档为准<sup>[[32]](../../references.md#ref32)[[33]](../../references.md#ref33)[[34]](../../references.md#ref34)</sup>；书中给出的版本边界只描述编写时点的状态。分布式事务和领域驱动设计作为选学内容，不作为首次后端课程的前置要求。本章延续第3章的架构决策：模块化单体内部按控制器、服务、数据访问分层，观测写入经Kafka削峰后进入TimescaleDB；案例水库峰值每秒10条观测、50并发查询的负载数字，是本章连接池、缓存与分页设计的直接依据。
 
-!!! info "水利行业后端特点"
-    
-    智慧水利平台的后端开发具有以下特点：
-    - 数据处理量大（实时监测数据、历史数据）
-    - 计算复杂度高（水文模型、预报算法）
-    - 安全要求严格（政府部门、关键基础设施）
-    - 稳定性要求高（7×24小时不间断服务）
-    - 集成需求多（与现有水利信息系统对接）
+!!! tip "提示"
 
-## 本章小节
+    **工程版本线：v1（前端只读切片） $\rightarrow$ v2（认证与观测API）**
 
-!!! info "章节结构"
-    
-    ### [第一节 后端服务概述](section05-01.md)
-    - 后端服务的定义与架构组成
-    - HTTP协议深入理解
-    - 静态网站与动态网站对比
-    - Web应用框架选择与Servlet基础
-    
-    ### [第二节 Spring Boot入门与实践](section05-02.md)
-    - Spring Boot框架介绍与优势
-    - Spring Boot基础
-    - 项目创建与结构解析
-    - 自动配置机制与Starter依赖
-    - 开发环境搭建与配置管理
-    
-    ### [第三节 依赖注入和控制反转](section05-03.md)
-    - IoC容器原理与Bean管理
-    - 依赖注入的多种实现方式
-    - 注解驱动开发与组件扫描
-    - AOP面向切面编程应用
-    
-    ### [第四节 数据库持久化技术](section05-04.md)
-    - 数据访问层设计模式
-    - Spring Data JPA实战应用
-    - 数据库操作与事务管理
-    - 水利业务数据建模实践
-    
-    ### [第五节 后台服务设计](section05-05.md)
-    - RESTful API设计原则与规范
-    - 服务层架构设计最佳实践
-    - Spring Security安全认证与授权
-    - 异常处理机制与日志记录策略
-    
-    ### [第六节 Django/Flask框架（Python选修内容）](section05-06.md)
-    - Flask轻量级框架特点与应用
-    - Django全栈框架架构与MTV模式
-    - Python在水利数据科学中的优势
-    - 框架技术选型对比分析
+    起点是第4章交付的 v1 前端。本章结束时你应交付 **v2**：为 v1 提供真实数据的后端——登录签发 JWT、受保护的测点与观测查询、事务与幂等写入——对应仓库 `backend/` 的 `JwtService`、`JwtAuthenticationFilter`、`SecurityConfig`、`AuthController`、`AssetController`、`ReadingService`；验证命令 `mvn test`，联调后前端 401 分流与登录回跳应全部生效。
 
-## 关键概念
+## 5.1 后端服务与REST接口概述
 
-| 概念 | 定义 | 在智慧水利中的应用 |
-|------|------|-------------------|
-| 控制反转(IoC) | 将对象的创建和依赖关系管理交给容器负责 | 管理水利监测设备连接和服务组件 |
-| RESTful API | 基于REST架构风格的Web API设计规范 | 提供标准化的水利数据访问接口 |
-| ORM映射 | 对象关系映射，将数据库表映射为程序对象 | 简化水利监测数据的存储和查询 |
-| 依赖注入 | 通过外部方式将依赖对象注入到目标对象中 | 实现水利业务组件的松耦合设计 |
-| 微服务架构 | 将应用拆分为多个独立的小型服务 | 支持水利平台的模块化和扩展性 |
+后端位于用户界面与数据资源之间，承担身份校验、业务计算、持久化、审计和系统集成。典型请求链路为“浏览器或设备网关—控制器—应用服务—Repository—数据库”。控制器只处理协议转换和输入校验，业务规则放在服务层，数据访问集中在Repository；若进一步拆分为微服务，还需显式管理边界、版本和分布式失败<sup>[[35]](../../references.md#ref35)</sup>。
 
-## 技术栈概览
+HTTP方法的基本语义见表5.1。接口设计不仅要返回数据，还要正确使用状态码：创建成功通常返回201，参数无效返回400，未认证返回401，无权限返回403，资源不存在返回404，服务器异常返回500。
 
-!!! note "后端技术栈"
-    
-    **Java技术栈**
-    - Spring Boot 2.7+: 企业级应用开发框架
-    - Spring Data JPA: 数据持久化解决方案
-    - Spring Security: 安全认证与授权框架
-    - MySQL 8.0: 关系型数据库
-    - Redis: 内存数据库与缓存
-    - Maven/Gradle: 项目构建和依赖管理
-    
-    **Python技术栈**
-    - Flask/Django: Web应用开发框架
-    - SQLAlchemy: Python ORM工具
-    - NumPy/Pandas: 数据科学计算库
-    - Celery: 分布式任务队列
-    - PostgreSQL: 企业级关系型数据库
-    
-    **开发工具**
-    - IntelliJ IDEA / Eclipse: Java开发环境
-    - PyCharm / VS Code: Python开发环境
-    - Postman: API测试工具
-    - Docker: 容器化部署
-    - Git: 版本控制系统
+**表 5.1  REST接口常用HTTP方法**
 
-## 智慧水利后端特色架构
+| 方法   | 典型语义           | 水利示例           | 是否幂等           |
+|:-------|:-------------------|:-------------------|:-------------------|
+| GET    | 查询资源           | 查询测站最新水位   | 是                 |
+| POST   | 创建资源或触发命令 | 创建告警处置单     | 否（需业务幂等键） |
+| PUT    | 整体替换资源       | 更新测站完整配置   | 是                 |
+| PATCH  | 局部修改资源       | 修改告警状态       | 取决于操作定义     |
+| DELETE | 删除资源           | 删除尚未发布的规则 | 是                 |
 
-!!! example "行业特色架构设计"
-    
-    **数据处理架构**
-    - 时序数据库（InfluxDB）存储监测数据
-    - 关系数据库（MySQL）存储业务数据
-    - Redis缓存提高查询性能
-    - 消息队列处理实时数据流
-    
-    **服务架构设计**
-    - 数据接入服务（设备数据收集）
-    - 数据处理服务（清洗、计算、存储）
-    - 业务服务层（用户、权限、配置管理）
-    - 对外API服务（数据查询、报表生成）
-    
-    **安全架构要求**
-    - 多层次的身份认证机制
-    - 细粒度的权限控制系统
-    - 数据传输和存储加密
-    - 审计日志和操作追踪
-    
-    **高可用架构**
-    - 服务集群部署和负载均衡
-    - 数据库主从复制和读写分离
-    - 分布式缓存和会话管理
-    - 监控告警和自动恢复机制
+表5.1中的幂等性描述的是同一请求重复执行后的资源最终状态，而不是网络层只发送一次。值班员在弱网环境下可能重复点击“提交处置”，客户端可以为一次业务操作生成`Idempotency-Key`，服务端以“用户+键+资源类型”建立唯一约束并缓存第一次响应；这样重试不会创建两条处置单。`POST`本身通常不是幂等的，只有把业务键、去重窗口和冲突响应写进契约，才能把它安全地用于设备重投。
 
-## 学习路径建议
+<figure markdown>
+![图5.1](images/chapter05_fig_5_1.svg)
+<figcaption>图 5.1  监测值写入分层链路</figcaption>
+</figure>
 
-!!! tip "系统化学习方案"
-    
-    **第一阶段：基础概念理解（1-2周）**
-    1. 深入理解HTTP协议和Web服务原理
-    2. 掌握后端服务的架构设计思想
-    3. 学习Spring框架的核心理念
-    4. 理解企业级应用的开发特点
-    
-    **第二阶段：框架技术掌握（3-4周）**
-    1. Spring Boot项目创建和配置管理
-    2. 依赖注入和IoC容器的使用
-    3. 数据持久化技术的实践应用
-    4. RESTful API的设计和实现
-    
-    **第三阶段：业务应用开发（2-3周）**
-    1. 水利业务数据模型设计
-    2. 完整的CRUD操作实现
-    3. 用户认证和权限控制开发
-    4. 异常处理和日志记录完善
-    
-    **第四阶段：高级特性应用（2-3周）**
-    1. 性能优化和缓存策略
-    2. 分布式架构和微服务设计
-    3. 监控体系和运维部署
-    4. 安全加固和防护机制
+图5.1把一次监测值写入拆成五个可测试边界：控制器负责把JSON转换为命令并拒绝格式错误，应用服务检查测站状态、质量码和时间窗口，Repository执行参数化查询，数据库保证约束与索引。任何一层都不应越过下一层直接修改另一层的内部状态；例如控制器不拼接SQL，Repository不决定预警业务规则。
 
-## 实践项目驱动
+资源路径使用名词，例如`/api/stations/ST-01/readings`；筛选条件放入查询参数，例如`?from=...&to=...`。设备协议接入属于边缘网关职责，本章不展开Modbus或MQTT细节。
 
-本章采用"智慧水利监测数据服务平台"作为驱动项目，通过完整的开发过程让学生掌握后端技术：
+资源建模先回答“系统管理的对象是什么”。测站是稳定资源，监测读数是按时间追加的子资源，告警处置单是具备状态迁移的业务资源。查询最新读数可以使用`GET /api/stations/ST-01/readings/latest`，查询时间范围使用`GET /api/stations/ST-01/readings?from=...&to=...`；创建一条读数使用`POST /api/readings`，请求体包含测站 ID、采样时间、数值、单位和质量码。路径表达资源层级，查询参数表达视图条件，业务动作只有在无法用资源状态表达时才使用动词，例如`POST /api/alerts/AL-01/acknowledge`。
 
-**阶段一：基础服务搭建**
-- Spring Boot项目初始化和基础配置
-- 简单RESTful API的设计和实现
-- 数据库连接和基础CRUD操作
+分层依赖方向应从外向内收敛：Controller 依赖 Application Service，Service 依赖领域对象和 Repository 接口，Repository 的具体实现依赖 PostgreSQL、PostGIS 或 TimescaleDB。领域对象不依赖 HTTP、JSON 和 Spring 注解，便于在单元测试中用内存对象验证规则。若把数据库实体直接作为响应体，内部字段、懒加载关系和审计信息可能泄露到外部契约；DTO 映射应在控制器或应用服务边界完成，并为时间、单位和质量码提供稳定格式。图5.2把“请求进入—校验—用例—响应”四个边界与失败返回位置标出，便于把接口测试从状态码断言扩展到字段、事务和审计证据。
 
-**阶段二：业务功能完善**
-- 用户管理和权限控制系统
-- 监测数据的接收、存储和查询
-- 数据验证和业务规则实现
+<figure markdown>
+![图5.2](images/chapter05_fig_5_2.svg)
+<figcaption>图 5.2  REST接口的契约边界与失败返回</figcaption>
+</figure>
 
-**阶段三：系统集成优化**
-- 缓存机制和性能优化
-- 异常处理和日志记录完善
-- API文档和测试用例编写
+**清单 5.1  分层 REST 查询：DTO、服务与仓储接口**
 
-**阶段四：部署和运维**
-- 生产环境配置和部署
-- 监控体系和告警机制
-- 安全加固和性能调优
+```java
+public record LatestReadingResponse(
+        String stationId, double level, String unit,
+        Instant measuredAt, String quality) {}
 
-通过这个系统化的项目实践，学生将全面掌握智慧水利平台后端开发的核心技术和最佳实践，具备独立开发和维护大型水利信息系统的能力。
+public interface ReadingQueryRepository {
+    Optional<WaterReading> findLatest(String stationId);
+}
 
-## 技术架构图
+@Service
+public class ReadingQueryService {
+    private final ReadingQueryRepository repository;
 
-```
-┌─────────────────────────────────────────────────┘
-│               前端应用层                       │
-│            Vue.js + Element UI                │
-└─────────────────┬───────────────────────────────┘
-                  │ HTTP/HTTPS
-┌─────────────────▼───────────────────────────────┘
-│               API网关层                        │
-│            Nginx + Spring Boot                │
-└─────────────────┬───────────────────────────────┘
-                  │ 内部调用
-┌─────────────────▼───────────────────────────────┘
-│             业务服务层                         │
-│   ┌─────────┬─────────┬─────────┬─────────┐     │
-│   │用户服务 │监测服务 │预警服务 │报表服务 │     │
-│   └─────────┴─────────┴─────────┴─────────┘     │
-└─────────────────┬───────────────────────────────┘
-                  │ JPA/JDBC
-┌─────────────────▼───────────────────────────────┘
-│             数据持久层                         │
-│     MySQL + Redis + InfluxDB（时序数据）       │
-└──────────────────────────────────────────────────
+    public ReadingQueryService(ReadingQueryRepository repository) {
+        this.repository = repository;
+    }
+
+    @Transactional(readOnly = true)
+    public LatestReadingResponse latest(String stationId) {
+        WaterReading reading = repository.findLatest(stationId)
+                .orElseThrow(() -> new EntityNotFoundException("测站无读数"));
+        return new LatestReadingResponse(reading.getStationId(),
+                reading.getLevel(), reading.getUnit(),
+                reading.getMeasuredAt(), reading.getQuality());
+    }
+}
 ```
 
-## 参考文献
+清单5.1用只读事务包住查询，并把实体转换为响应 DTO；它没有把数据库实现类型暴露给控制器。查询结果为空时抛出领域可识别的异常，由统一异常处理器转换为404，客户端可以据此显示“暂无读数”或提示测站编号，而不是把空对象误当作水位为零。
 
-[1] Fielding, R. T. Architectural Styles and the Design of Network-based Software Architectures[D]. University of California, 2000.
+写入接口要把协议校验、业务校验和持久化顺序写清。协议层检查必填字段、数值格式和时间字符串，应用服务检查测站是否存在、采样时间是否落在允许窗口、质量码是否允许参与计算，Repository 在事务中保存记录。创建成功返回`201 Created`并在`Location`头给出新资源地址；重复的幂等键返回第一次创建的响应或`409 Conflict`，不能静默创建第二条记录。
 
-[2] Spring Team. Spring Boot Reference Documentation[EB/OL]. [2024-01-15]. https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/.
+**清单 5.2  监测值写入：POST、校验与201 Location**
 
-[3] 中华人民共和国国家标准. GB/T 28449-2012 信息技术服务管理应用指南[S]. 北京: 中国标准出版社, 2012.
+```java
+public record CreateReadingRequest(
+        @NotBlank String stationId,
+        // 上下限为示例阈值，工程取值以第8章8.1参数表为唯一来源
+        @NotNull @DecimalMin("0.0") @DecimalMax("50.0") BigDecimal level,
+        @NotBlank String unit,
+        @NotNull Instant measuredAt,
+        @NotBlank String quality) {}
 
-[4] Martin, R. C. Clean Architecture: A Craftsman's Guide to Software Structure and Design[M]. Boston: Prentice Hall, 2017.
+@RestController
+@RequestMapping("/api/readings")
+public class ReadingCommandController {
+    private final ReadingCommandService service;
 
-[5] 水利部信息中心. 智慧水利总体技术方案[R]. 北京: 水利部, 2023.
+    public ReadingCommandController(ReadingCommandService service) {
+        this.service = service;
+    }
 
-[6] Richardson, C. Microservices Patterns: With examples in Java[M]. Manning Publications, 2018.
+    @PostMapping
+    ResponseEntity<ReadingResponse> create(
+            @Valid @RequestBody CreateReadingRequest request,
+            @RequestHeader(value = "Idempotency-Key", required = false) String key) {
+        WaterReading saved = service.create(request, key);
+        URI location = URI.create("/api/readings/" + saved.getId());
+        return ResponseEntity.created(location).body(ReadingResponse.from(saved));
+    }
+}
+```
 
-## 开发规范与最佳实践
+这里使用`BigDecimal`表达水位，避免用`double`承载边界校验时出现二进制浮点舍入误差；服务内部仍可按明确规则转换为数据库数值类型。`@Valid @RequestBody`只负责触发Bean Validation，诸如“测站属于当前工程”“时间不得早于上一条记录”等跨字段规则必须在服务层再次检查。控制器接收可选的幂等键，但不负责保存去重记录，去重状态由服务层和数据库唯一约束共同保证。
 
-### 代码规范
+分页、排序和过滤也要形成稳定的 URL 契约。`page`从0开始还是从1开始必须在全书统一；本章示例采用从0开始的`page`、正数`size`，排序使用`sort=measuredAt,desc`，过滤使用`stationId`、`quality`和时间范围。服务端限制`size`上限，拒绝未知排序字段，返回`content`、`page`、`size`、`totalElements`和`totalPages`，这样前端可以显示总页数而不是用当前页长度猜测。
 
-1. **命名规范**
-   - 类名：PascalCase（如 WaterLevelService）
-   - 方法名：camelCase（如 getUserById）
-   - 常量：UPPER_SNAKE_CASE（如 MAX_RETRY_COUNT）
-   - 包名：小写字母，以域名倒序开始
+游标分页适合持续追加的时序读数：客户端携带上一页最后一条记录的`measuredAt,id`，服务端按联合索引向后查找，避免高页码`OFFSET`扫描大量历史数据。游标应视为不透明字符串，不能让客户端自行修改时间边界；接口文档还要说明读数在分页期间追加时的排序稳定性。报表导出属于异步任务时，使用任务资源返回`202 Accepted`，由客户端轮询任务状态，而不是让一次 HTTP 请求长时间占用连接。
 
-2. **注释规范**
-   - 所有公共类和方法必须有Javadoc注释
-   - 复杂业务逻辑需要添加行内注释
-   - 使用@author、@since、@param、@return等标准注解
+服务发现与微服务边界必须以业务能力为中心。数据采集、读数查询、预警评估和通知可以是不同服务，但每个服务拥有明确的数据所有权和 API 契约；拆分不是把每个类都部署成独立进程。开发环境可用配置文件把逻辑服务名映射到固定地址，生产环境再接入服务注册与发现组件、健康检查和负载均衡。业务代码只依赖接口客户端，不能把某个注册中心的注解散落到领域层，这样更换实现时只需调整基础设施配置。
 
-3. **异常处理**
-   - 使用统一的异常处理机制
-   - 自定义业务异常类
-   - 避免吃掉异常，合理记录日志
+跨服务调用要显式处理超时、重试和降级。查询测站详情可以在短超时后返回缓存快照，并在界面标注数据时间；写入监测值则不能因为重试而重复落库，应把请求 ID 和幂等键贯穿网关、服务日志与数据库。链路追踪至少传递`traceId`和`requestId`，错误响应包含可定位的错误码而不暴露内部堆栈。服务之间若共享 PostgreSQL 表，边界会失去意义，应改为通过版本化 API 或消息事件交换数据。
 
-### 安全最佳实践
+API 版本化需要在兼容性和演进速度之间作出可审计的选择。对外公开的水利平台接口可以采用路径版本`/api/v1/stations`，在字段增加时保持旧字段语义不变；删除字段、改变单位或改变时间时区都属于破坏性变更，应发布`v2`并给出迁移窗口。版本号不应随着每次修复递增，补丁修复和兼容字段增加可以通过文档和变更日志说明。响应体可带`Deprecation`和`Sunset`提示，让调用方在停止旧版本前完成升级。
 
-1. **数据安全**
-   - 敏感数据加密存储
-   - SQL注入防护
-   - XSS攻击防护
+错误响应应同时满足机器可判断和人可理解。建议统一包含`type`、`title`、`status`、`code`、`detail`和`traceId`，其中`code`使用稳定枚举，`detail`只提供当前请求的上下文。参数错误可以按字段返回多个问题，资源不存在包含资源类型和业务 ID，权限失败不透露资源是否真实存在。日志中的`traceId`与响应中的值一致，运维人员可以从一次值班员操作追到网关、服务和数据库查询。
 
-2. **接口安全**
-   - 使用HTTPS传输
-   - 实施接口限流
-   - 添加请求签名验证
+幂等键的生命周期要覆盖消息最大重投和人工重试周期。服务端保存键、请求摘要、响应状态和过期时间；同一个键携带不同请求体时返回冲突，防止客户端误把一个键当作通用令牌。数据库唯一约束是最后一道防线，应用层缓存只用于快速返回，不能替代约束。处置单的状态迁移也要有唯一规则，例如只有`OPEN`可以变为`ACKNOWLEDGED`，重复确认返回当前状态而不是再次产生副作用。
 
-3. **认证授权**
-   - 实施最小权限原则
-   - 定期更新访问凭证
-   - 记录用户操作日志
+分页查询需要稳定排序，否则实时读数追加时会出现重复或漏项。排序字段后追加唯一 ID 作为 tie-breaker；服务端在响应中回显实际排序方向和时间区间，客户端翻页时携带同一条件。导出任务和大范围历史查询应限制最大时间跨度，超过阈值改为异步任务并在完成后提供下载地址。对外接口还应设置速率限制和请求体大小上限，避免错误客户端占满数据库连接。
 
-## 思考题
+服务发现的健康检查至少分为进程存活、依赖可达和业务可用三类。进程存活用于重启异常实例，依赖可达检查数据库、Redis 和 Kafka 连接，业务可用则验证关键表结构、时序写入权限和预警规则加载。网关路由切换时先摘除不健康实例，再等待正在处理的请求完成；客户端重试只针对明确的瞬态错误，写入请求必须携带幂等键。通过这些约束，微服务边界才能在故障时保持数据一致和可观察。 接口文档还应给出示例请求、示例响应、错误码和限流规则，并在每次版本发布时同步更新 OpenAPI 描述；值班员和前端开发者据此可以复现问题、核对字段单位并确认兼容范围。
 
-1. **架构设计题**：设计一个支持百万级监测点实时数据处理的后端架构，请从数据存储、计算处理、系统扩展三个方面进行分析。
+## 5.2 Spring Boot企业级开发基础
 
-2. **技术选型题**：对比Java Spring Boot和Python Django在智慧水利平台开发中的优缺点，并给出技术选型建议。
+Spring Boot通过约定、自动配置和Starter依赖减少基础配置。自动配置会依据类路径、配置属性和已有Bean选择合适组件，但开发者仍应理解其条件，避免把“自动”误解为“不可控”。推荐目录如下：
 
-3. **安全设计题**：智慧水利平台涉及关键基础设施数据，请设计一套完整的数据安全保护方案。
+### 5.2.1 起步依赖与自动配置的边界
 
-4. **性能优化题**：如何设计和实现一个高性能的水文数据查询API，支持复杂的时间范围和空间范围查询？
+起步依赖是一组经过验证的依赖坐标，目的是让项目以一致的版本组合获得 Web、验证、JPA、PostgreSQL 和 Actuator 能力。它不是一个运行时服务，也不会替业务代码决定领域规则；Maven 解析依赖树后，Spring Boot 才根据类路径中的类和配置条件创建自动配置 Bean。排查启动问题时，应先查看依赖树和条件评估报告，再决定是补充依赖、修改配置还是排除某项自动配置。
 
-5. **集成方案题**：如何设计后端服务与现有水利业务系统的集成方案，确保数据一致性和业务连续性？
+**清单 5.3  Spring Boot 3.2 起步依赖与版本管理**
+
+```xml
+<parent>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-starter-parent</artifactId>
+  <version>3.2.12</version>
+</parent>
+<properties>
+  <java.version>17</java.version>
+</properties>
+<dependencies>
+  <dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-web</artifactId>
+  </dependency>
+  <dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-validation</artifactId>
+  </dependency>
+  <dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-data-jpa</artifactId>
+  </dependency>
+  <dependency>
+    <groupId>org.postgresql</groupId>
+    <artifactId>postgresql</artifactId>
+    <scope>runtime</scope>
+  </dependency>
+</dependencies>
+```
+
+清单5.3锁定 Java 17 和 Spring Boot 3.2 基线，依赖版本由父 POM 的依赖管理统一维护。PostgreSQL 驱动只在运行时需要，编译阶段依赖 JDBC 抽象；若后续接入 PostGIS 或 TimescaleDB，仍以 PostgreSQL 连接为基础，在数据库迁移脚本中启用扩展。生产项目应提交锁定的 Maven Wrapper 版本，构建机使用`./mvnw`而不是依赖本地 Maven 的偶然版本。
+
+自动配置的关键是条件注解：类路径存在某个类、容器中尚未有同类型 Bean、配置属性满足条件时，配置类才会生效。自定义 Bean 会改变“缺少 Bean”条件的结果，因此添加一个数据源或消息转换器可能使默认配置退让。开发者应把覆盖点写成显式配置，并在启动日志中记录生效的 Profile 和关键连接信息（密码保持隐藏），避免把自动配置当作不可追踪的黑盒。
+
+### 5.2.2 application.yml 与 Profile 多环境
+
+配置文件按环境拆分，公共配置放在`application.yml`，开发、测试和生产差异分别放在`application-development.yml`、`application-test.yml`和`application-production.yml`。启动时使用`SPRING_PROFILES_ACTIVE`选择 Profile，敏感值通过环境变量或密钥管理器注入。Profile 只表达环境差异，不应把业务阈值复制成多套；案例水库的工程参数仍以第8章 8.1 参数表为唯一来源。
+
+**清单 5.4  多环境配置与外部化密钥**
+
+```yaml
+# application.yml：所有环境共享的安全默认值
+spring:
+  application:
+    name: water-reading-service
+  jpa:
+    open-in-view: false
+  profiles:
+    default: development
+
+# application-development.yml
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/water}
+    username: ${DB_USER:water_app}
+    password: ${DB_PASSWORD:}
+security:
+  jwt:
+    issuer: ${JWT_ISSUER:water-platform-dev}
+
+# application-production.yml
+spring:
+  config:
+    activate:
+      on-profile: production
+  jpa:
+    hibernate:
+      ddl-auto: validate
+security:
+  jwt:
+    secret: ${JWT_SECRET_BASE64}
+    issuer: ${JWT_ISSUER}
+```
+
+清单5.4把生产环境的 JWT 密钥和发行者设为必填外部变量，缺少变量时让应用在启动阶段失败，而不是运行到认证请求才发现`issuer`为空。生产环境使用`ddl-auto: validate`只校验表结构，建表和扩展由版本化迁移脚本完成；开发环境可以使用`update`辅助实验，但不得把它作为生产建表策略。配置审计应检查 Profile 是否被正确激活、数据库 URL 是否指向允许的网络段和日志是否遮蔽密码。
+
+### 5.2.3 依赖注入与 Bean 生命周期
+
+控制反转把对象创建、依赖组装和销毁交给 Spring 容器；依赖注入则描述组件如何获得所需协作者。构造器注入能保证对象创建后依赖完整，字段注入会隐藏依赖并增加测试难度。一个 Bean 通常经历实例化、依赖注入、`@PostConstruct`初始化、投入使用和`@PreDestroy`销毁阶段；连接池、线程池和订阅应在对应生命周期内建立和关闭。
+
+**清单 5.5  构造器注入与 Bean 生命周期**
+
+```java
+@Configuration
+class WaterInfrastructureConfig {
+    @Bean(destroyMethod = "close")
+    ScheduledExecutorService refreshExecutor() {
+        return Executors.newScheduledThreadPool(2);
+    }
+}
+
+@Service
+class StationRefreshService {
+    private final StationRepository repository;
+    private final ScheduledExecutorService executor;
+    private ScheduledFuture<?> task;
+
+    StationRefreshService(StationRepository repository,
+                          ScheduledExecutorService executor) {
+        this.repository = repository;
+        this.executor = executor;
+    }
+
+    @PostConstruct
+    void start() {
+        task = executor.scheduleAtFixedRate(
+                repository::refreshLatest, 0, 30, TimeUnit.SECONDS);
+    }
+
+    @PreDestroy
+    void stop() {
+        if (task != null) task.cancel(true);
+    }
+}
+```
+
+清单5.5展示了基础设施 Bean 与业务服务的依赖方向。调度器由配置类创建并统一销毁，服务只依赖接口和执行器；测试时可以注入假的`StationRepository`和单线程执行器，验证刷新是否按预期发生。定时任务中的异常要被捕获并记录，否则一次未处理异常可能停止后续刷新；任务间隔还要结合数据库连接池容量和监测数据的时效要求确定。
+
+Bean 的作用域也影响生命周期。单例适合无状态服务和连接池，原型适合每次创建独立对象，请求作用域只在 Web 请求中使用。把请求上下文注入单例时，要通过代理或显式参数传递，不能把上一次请求的测站 ID 保存到共享字段。配置属性 record 采用构造器绑定，必须通过`@EnableConfigurationProperties`或`@ConfigurationPropertiesScan`注册；仅在 record 上写注解而没有启用扫描，容器不会创建可注入的`JwtProperties`。
+
+工程目录应与依赖方向一致：`controller`只依赖`service`，`service`依赖领域对象和仓储接口，`repository`适配 PostgreSQL/PostGIS/TimescaleDB，`config`集中放安全、序列化和外部客户端。测试代码按同样的包结构组织，配置文件分为测试 Profile 和生产 Profile，避免在测试中意外连接真实案例水库数据库。
+
+### 5.2.4 自动配置诊断与启动契约
+
+当应用启动失败时，先区分“没有 Bean”“Bean 有多个候选”“配置属性缺失”和“外部依赖不可达”四类原因。开启条件评估报告后，可以看到某个自动配置类为何匹配或未匹配；例如缺少 PostgreSQL 驱动会使数据源自动配置跳过，存在两个相同类型的 Repository 实现会触发歧义。解决问题的顺序应是检查依赖树、读取有效 Profile、核对环境变量、最后才考虑排除自动配置。直接添加随机注解可能掩盖根因，使后续环境再次失败。
+
+启动日志是部署契约的一部分。应用应输出应用名、版本、激活的 Profile、数据库主机（不含密码）、消息主题和健康检查地址；配置值按敏感级别脱敏，JWT 密钥只输出长度或摘要。容器编排系统在收到健康检查前不应把实例加入负载均衡，数据库迁移完成后才允许读取和写入请求。启动阶段如果发现 issuer、数据库 URL 或关键业务参数缺失，应立即失败并给出变量名，而不是使用空字符串继续运行。
+
+配置属性 record 可以集中表达一组强相关参数，并通过 Bean Validation 在启动时校验。发行者不能为空，超时时间必须为正数，数据库连接池大小应有上限。校验失败时应用不会进入可服务状态，运维人员可以在部署日志中定位具体字段。配置对象只负责承载值，密钥轮换、令牌撤销和环境权限仍由安全组件完成，避免把认证逻辑塞进 YAML 解析器。
+
+**清单 5.6  配置属性注册与启动校验**
+
+```java
+@ConfigurationProperties(prefix = "security.jwt")
+@Validated
+public record JwtProperties(
+        @NotBlank String secret,
+        @NotBlank String issuer,
+        @Min(60) @Max(86_400) long accessSeconds,
+        @Min(300) @Max(2_592_000) long refreshSeconds) {}
+
+@Configuration
+@EnableConfigurationProperties(JwtProperties.class)
+class SecurityPropertiesConfig {}
+```
+
+清单5.6把配置错误前移到启动阶段，并明确访问令牌和刷新令牌的有效期范围。生产值由密钥管理器注入，配置文件只保留变量占位符；测试可以提供一组短有效期值验证刷新逻辑，但不应把测试密钥复制到生产 Profile。若项目使用`@ConfigurationPropertiesScan`，可以在启动类统一开启扫描；两种注册方式选择其一即可，重复注册会造成 Bean 名称冲突。
+
+### 5.2.5 Bean 作用域、代理与资源释放
+
+单例 Bean 在应用上下文中只有一个实例，适合无状态服务、Repository 和连接池；它的字段必须线程安全，不能保存某个请求的测站 ID 或当前用户。请求作用域 Bean 每次 HTTP 请求创建，适合请求追踪信息；原型 Bean 每次注入时创建，适合短生命周期的可变对象。把请求作用域对象注入单例时，Spring 使用代理延迟解析当前请求，测试时则要显式建立请求上下文。
+
+生命周期回调要与资源类型匹配。数据库连接池和线程池由配置类创建，使用`destroyMethod`或`@PreDestroy`关闭；消息消费者在应用停止时先停止接收，再等待正在处理的消息完成；WebSocket 和定时刷新在组件或服务销毁时取消。若把资源创建写在构造器里而没有对应释放，容器重启和测试重复启动会留下线程、文件句柄或网络连接。
+
+代理机制还影响`@Transactional`、`@Async`和`@Cacheable`。这些注解通过代理拦截外部调用，同类内部使用`this.method()`绕过代理，因此不会获得事务、异步或缓存行为。解决方案是把不同边界拆到另一个 Bean，或在确有必要时使用编程式模板；不要通过反射强行调用代理。代码评审应把注解所在方法的调用路径写进测试，确保“看起来有注解”与“运行时真的生效”一致。
+
+### 5.2.6 工程骨架的测试切片
+
+工程骨架搭好后，应尽早验证各层能否独立启动。`@WebMvcTest`只加载控制器和 MVC 基础设施，适合检查 JSON、状态码和参数校验；`@DataJpaTest`加载实体、Repository 和事务测试数据库，适合验证查询与索引；完整的`@SpringBootTest`才会装配安全、消息和外部客户端。测试 Profile 使用独立数据库或容器，禁止依赖开发机正在运行的 PostgreSQL 实例。
+
+配置测试至少覆盖三种情况：合法 Profile 能启动并读取 issuer；缺少 JWT 密钥时启动失败；生产 Profile 的`ddl-auto`为`validate`且不会自动改表。依赖注入测试用假的 Repository 和时钟替换真实实现，验证刷新任务、超时和资源释放；集成测试再验证真实 PostgreSQL、Redis 或 Kafka 的连接。这样的分层测试能在代码进入控制器之前发现配置绑定和 Bean 生命周期问题。
+
+目录结构还应服务于模块边界。`common`只放真正跨模块的值对象和错误码，不能把所有工具类都塞进去；`api`只放外部 DTO 和客户端契约，`domain`不依赖 Spring Web；数据库迁移文件按版本命名并与发布记录关联。新增预警服务时，先复制边界和测试结构，再决定是否拆分进程，避免目录先于业务边界膨胀。 每个模块还应提供自己的 README，写明启动 Profile、依赖的外部服务、健康检查和测试命令；新成员按文档即可在隔离环境复现启动过程，减少“只在某台机器上可用”的隐性配置。 文档还应列出本地开发所需的端口、初始化命令和清理方式，保证测试结束后不会遗留后台进程。
+
+**清单 5.7  按职责分层的工程目录**
+
+```bash
+src/main/java/com/example/water/
+  controller/   # HTTP适配
+  service/      # 用例与事务边界
+  repository/   # 数据访问
+  domain/       # 实体和值对象
+  config/       # 安全与基础设施配置
+src/main/resources/application.yml
+```
+
+配置应从代码中分离，并可被环境变量覆盖。密钥不得写入版本库。
+
+**清单 5.8  Spring Boot应用入口与JWT配置**
+
+```yaml
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/water}
+    username: ${DB_USER:water_app}
+    password: ${DB_PASSWORD}
+security:
+  jwt:
+    secret: ${JWT_SECRET_BASE64}
+    issuer: ${JWT_ISSUER:water-platform}
+```
+
+依赖注入优先使用构造器，使依赖明确并便于测试。控制器把DTO交给服务，不直接访问数据库。
+
+**清单 5.9  查询接口控制器**
+
+```java
+@RestController
+@RequestMapping("/api/stations")
+class StationController {
+    private final StationQueryService queryService;
+
+    StationController(StationQueryService queryService) {
+        this.queryService = queryService;
+    }
+
+    @GetMapping("/{id}/latest")
+    ReadingResponse latest(@PathVariable String id) {
+        return queryService.latest(id);
+    }
+}
+```
+
+Spring Boot 3使用`jakarta.servlet.*`命名空间。旧项目从`javax.servlet.*`迁移时，应同步检查依赖、过滤器、验证注解和JPA包名。Jakarta Servlet 6.x是本章基线；迁移完成后还应通过编译、集成测试和容器启动检查确认包路径与运行时容器一致。
+
+## 5.3 Jakarta Persistence与事务管理
+
+### 5.3.1 实体映射与Repository基础
+
+先建立实体映射与Repository，再讨论事务边界。实体标识应稳定；接口层DTO与持久化实体分离，避免数据库结构直接成为外部契约。
+
+**清单 5.10  Jakarta实体映射**
+
+```java
+import jakarta.persistence.*;
+import java.math.BigDecimal;
+import java.time.Instant;
+
+@Entity
+@Table(name = "water_reading")
+public class WaterReading {
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    @Column(name = "station_id", nullable = false, length = 32)
+    private String stationId;
+    @Column(nullable = false, precision = 12, scale = 4)
+    private BigDecimal level;
+    @Column(nullable = false, length = 12) private String unit;
+    @Column(nullable = false) private Instant measuredAt;
+    @Column(nullable = false, length = 16) private String quality;
+    @Version @Column(nullable = false) private long version;
+    @Column(nullable = false) private boolean archived;
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private Instant createdAt;
+    @Column(name = "updated_at", nullable = false)
+    private Instant updatedAt;
+
+    protected WaterReading() {}
+    public WaterReading(String stationId, BigDecimal level, String unit,
+                        Instant measuredAt, String quality, Instant now) {
+        this.stationId = stationId;
+        this.level = level;
+        this.unit = unit;
+        this.measuredAt = measuredAt;
+        this.quality = quality;
+        this.createdAt = now;
+        this.updatedAt = now;
+    }
+
+    public Long getId() { return id; }
+    public String getStationId() { return stationId; }
+    public BigDecimal getLevel() { return level; }
+    public String getUnit() { return unit; }
+    public Instant getMeasuredAt() { return measuredAt; }
+    public String getQuality() { return quality; }
+    public long getVersion() { return version; }
+    public Instant getCreatedAt() { return createdAt; }
+    public Instant getUpdatedAt() { return updatedAt; }
+    public void replace(BigDecimal level, String unit, Instant measuredAt,
+                        String quality, Instant now) {
+        this.level = level;
+        this.unit = unit;
+        this.measuredAt = measuredAt;
+        this.quality = quality;
+        this.updatedAt = now;
+    }
+
+    /** 工厂方法：由 DTO 映射层调用，统一填充服务器时间。 */
+    public static WaterReading create(String stationId, BigDecimal level,
+                                      String unit, Instant measuredAt,
+                                      String quality) {
+        return new WaterReading(stationId, level, unit,
+                measuredAt, quality, Instant.now());
+    }
+
+    /** 带版本校验的替换：客户端版本与当前版本不一致即视为并发冲突。 */
+    public void replaceIfVersion(BigDecimal level, String unit,
+                                 Instant measuredAt, String quality,
+                                 long expectedVersion) {
+        if (this.version != expectedVersion)
+            throw new OptimisticLockException("版本不一致，请重新读取");
+        replace(level, unit, measuredAt, quality, Instant.now());
+    }
+
+    public boolean isArchived() { return archived; }
+}
+
+interface WaterReadingRepository extends JpaRepository<WaterReading, Long> {
+    Optional<WaterReading> findFirstByStationIdOrderByMeasuredAtDesc(String id);
+}
+```
+
+Repository提供基本数据访问，服务层决定一次用例需要哪些读写。查询列表时应分页，避免把多年监测记录一次加载到内存。
+
+实体映射的关键不是把每一列机械地搬到 Java 字段，而是明确身份、精度、生命周期和并发语义。水位属于有单位的测量值，使用`BigDecimal`并设置数据库精度，避免在累计统计时把二进制浮点误差当作工程变化；`measuredAt`记录设备采样时间，`createdAt`和`updatedAt`记录服务器侧生命周期。`version`由 JPA 在更新时递增，控制器将它映射为响应中的版本，服务层在替换前比较客户端版本。清单5.10补齐了实体访问器，因而前面 DTO 的`ReadingResponse.from`能够通过公开的只读方法取值，而不会依赖反射或直接暴露字段。
+
+实体的无参构造器供 JPA 反射创建，业务构造器负责建立完整不变量；访问器默认只读，修改通过`replace`等有业务含义的方法完成。数据库列名、长度、精度和非空约束应与迁移脚本逐项对照，不能只相信 Java 类型。特别是字符串枚举要用稳定的代码值，展示文字由界面字典提供，这样新增中文名称不会破坏历史记录。
+
+### 5.3.2 关联关系与懒加载边界
+
+测站与读数是一对多关系，读数与测站是多对一关系。多对一侧通常使用懒加载，避免每读取一条读数都立即查询测站；一对多集合也使用懒加载，并通过专门的查询决定何时批量取出。清单5.11展示了维护双向关系的最小写法：只有聚合根方法可以建立关联，集合不直接暴露给控制器，序列化层使用 DTO 打断循环引用。
+
+**清单 5.11  测站与读数的懒加载关联**
+
+```java
+import jakarta.persistence.*;
+import java.time.Instant;
+import java.util.*;
+
+@Entity
+class StationEntity {
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    @Column(name = "station_id", nullable = false, unique = true)
+    private String stationId;
+    @OneToMany(mappedBy = "station", fetch = FetchType.LAZY)
+    private final Set<StationReadingEntity> readings = new LinkedHashSet<>();
+
+    protected StationEntity() {}
+    StationEntity(String stationId) { this.stationId = stationId; }
+    public String getStationId() { return stationId; }
+    public Set<StationReadingEntity> getReadings() {
+        return Collections.unmodifiableSet(readings);
+    }
+    public void attach(StationReadingEntity reading) {
+        readings.add(reading);
+        reading.attachTo(this);
+    }
+}
+
+@Entity
+class StationReadingEntity {
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "station_pk", nullable = false)
+    private StationEntity station;
+    @Column(nullable = false) private Instant measuredAt;
+
+    protected StationReadingEntity() {}
+    StationReadingEntity(Instant measuredAt) { this.measuredAt = measuredAt; }
+    void attachTo(StationEntity station) { this.station = station; }
+    public Long getId() { return id; }
+    public Instant getMeasuredAt() { return measuredAt; }
+    public StationEntity getStation() { return station; }
+}
+```
+
+懒加载不是“永远不加载”，而是把加载时机交给用例。若在事务外调用集合访问器，会出现`LazyInitializationException`；若为了避免异常把所有关系改成`EAGER`，列表接口又会产生大量无关数据和更大的连接结果集。更安全的做法是在服务层打开事务，在查询中声明需要的关联，随后立即映射成 DTO 并结束实体生命周期。日志、JSON 序列化和模板渲染都不应隐式触发懒加载。
+
+### 5.3.3 N+1 查询与 fetch join
+
+N+1 的典型形状是先查询 N 条读数，再对每条读数访问一次测站字段，数据库日志中会出现 1 条集合查询加 N 条单项查询。数据量小的时候不明显，到了案例水库的历史查询或报表导出就会耗尽连接池。修复前先用 SQL 日志、慢查询日志或测试断言确认问题，再选择 fetch join、`@EntityGraph`、批量大小或 DTO 投影；不能仅凭“加了索引”推断 N+1 已消失。
+
+**清单 5.12  用 fetch join 消除列表接口的 N+1**
+
+```java
+import org.springframework.data.jpa.repository.*;
+import org.springframework.data.repository.query.Param;
+import java.time.Instant;
+import java.util.List;
+
+public interface StationReadingQueryRepository
+        extends JpaRepository<StationReadingEntity, Long> {
+    @Query("select r from StationReadingEntity r "
+         + "join fetch r.station s "
+         + "where s.stationId = :stationId "
+         + "and r.measuredAt >= :from and r.measuredAt < :to "
+         + "order by r.measuredAt desc, r.id desc")
+    List<StationReadingEntity> findForReport(
+            @Param("stationId") String stationId,
+            @Param("from") Instant from,
+            @Param("to") Instant to);
+
+    @EntityGraph(attributePaths = "station")
+    List<StationReadingEntity> findTop100ByOrderByMeasuredAtDescIdDesc();
+}
+```
+
+清单5.12的`join fetch`适合有限时间窗的报表；它不适合直接套在带分页的多值集合上，因为连接后数据库先展开行，分页可能截断聚合结果。分页场景可以先按主键分页，再用第二次`where id in (...)`批量抓取关联，或改用只返回所需字段的 DTO 投影。`@EntityGraph`是声明式替代，优点是查询方法仍然可读，缺点是复杂条件下需要回到显式 JPQL 或原生 SQL。
+
+**表 5.2  JPA 查询策略与适用边界**
+
+| 策略            | 解决的问题                        | 使用边界与验证方式                                    |
+|:----------------|:----------------------------------|:------------------------------------------------------|
+| 派生查询        | 简单字段、排序和存在性判断        | 方法名必须可读；复杂条件拆成查询对象并用 SQL 日志核对 |
+| `@Query`        | 明确的 JPQL、fetch join 或聚合    | 参数命名一致；关联集合分页前先验证行数和重复          |
+| `Pageable/Page` | 列表分页、总数和排序              | 限制最大页大小；检查 count 查询是否走索引             |
+| DTO 投影        | 只取列表需要的列                  | 避免把实体关系带出事务；字段增加要同步契约测试        |
+| 原生 SQL        | PostGIS、TimescaleDB 等数据库特性 | 绑定参数、迁移脚本和方言版本必须一起评审              |
+
+选择策略时应先写出业务问题再选 API。表5.2中的派生查询适合“查某测站最新一条”，`Page`适合界面翻页，fetch join适合一次性生成小范围报告；三者都要以执行计划和集成测试确认，而不是把 Repository 方法数量当作性能指标。
+
+### 5.3.4 派生查询、Pageable 与稳定分页
+
+Spring Data 的派生查询名称按“动词 + 属性 + 条件 + 排序”组合，例如`findByStationIdAndQualityOrderByMeasuredAtDescIdDesc`。属性名必须与实体字段对应，重命名时编译器会提示错误；查询含义复杂或涉及时间半开区间时，优先使用`@Query`明确写出条件。所有列表接口都应限制`size`，默认排序追加唯一 ID 作为 tie-breaker，保证追加新读数时不会在页边界重复或漏掉记录。
+
+**清单 5.13  Pageable 分页查询与服务层上限**
+
+```java
+import org.springframework.data.domain.*;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+interface ReadingPageRepository extends JpaRepository<WaterReading, Long> {
+    Page<WaterReading> findByStationIdAndQuality(
+            String stationId, String quality, Pageable pageable);
+}
+
+@Service
+class ReadingPageService {
+    private static final int MAX_PAGE_SIZE = 200;
+    private final ReadingPageRepository repository;
+
+    ReadingPageService(ReadingPageRepository repository) {
+        this.repository = repository;
+    }
+
+    @Transactional(readOnly = true)
+    Page<ReadingResponse> page(String stationId, String quality,
+                               int page, int size) {
+        int bounded = Math.min(Math.max(size, 1), MAX_PAGE_SIZE);
+        Pageable request = PageRequest.of(page, bounded,
+                Sort.by(Sort.Order.desc("measuredAt"),
+                        Sort.Order.desc("id")));
+        return repository.findByStationIdAndQuality(stationId, quality, request)
+                .map(ReadingResponse::from);
+    }
+}
+```
+
+清单5.13返回的`Page`包含总元素数和总页数，适合需要页码跳转的管理界面；只需向后滚动时可以使用游标分页，避免高页码的`OFFSET`扫描。默认排序必须显式写出，不能依赖数据库自然顺序。查询服务只把实体映射成 DTO 后离开事务，避免序列化阶段再次访问懒加载关系。
+
+### 5.3.5 乐观锁与审计字段
+
+监测读数的修改通常不是高冲突写入，但测站配置、预警规则和人工订正可能被多个值班员同时编辑。`@Version`把冲突检测交给数据库更新条件：更新语句带上旧版本，影响行数为零就抛出乐观锁异常，异常处理器返回409，客户端重新读取后让用户决定是否合并。它不能替代权限检查，也不能保证跨表操作自动一致；跨聚合修改仍要由事务边界和约束共同保护。
+
+审计字段至少分为创建时间、更新时间、操作者和来源。创建/更新时间可以由 Spring Data Auditing 自动填充，操作者来自经过认证的主体；设备上报的`stationId`和采样时间属于业务字段，不能用服务器时间覆盖。对逻辑删除记录保留删除时间和原因，查询默认过滤，审计查询按权限开放。
+
+**清单 5.14  乐观锁与审计字段映射**
+
+```java
+import jakarta.persistence.*;
+import org.springframework.data.annotation.*;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import java.time.Instant;
+
+@MappedSuperclass
+@EntityListeners(AuditingEntityListener.class)
+abstract class AuditedEntity {
+    @CreatedDate @Column(nullable = false, updatable = false)
+    private Instant createdAt;
+    @LastModifiedDate @Column(nullable = false)
+    private Instant updatedAt;
+    @CreatedBy @Column(length = 64, updatable = false)
+    private String createdBy;
+    @LastModifiedBy @Column(length = 64)
+    private String updatedBy;
+    public Instant getCreatedAt() { return createdAt; }
+    public Instant getUpdatedAt() { return updatedAt; }
+    public String getUpdatedBy() { return updatedBy; }
+}
+
+@Entity
+@Table(name = "station_config")
+class StationConfigEntity extends AuditedEntity {
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    @Version @Column(nullable = false)
+    private long version;
+    @Column(name = "station_id", nullable = false, unique = true)
+    private String stationId;
+    @Column(nullable = false) private boolean archived;
+    public long getVersion() { return version; }
+    public String getStationId() { return stationId; }
+    public boolean isArchived() { return archived; }
+}
+```
+
+启用审计时要在配置类加入`@EnableJpaAuditing`并提供`AuditorAware<String>`，测试中用固定操作者替代真实登录主体。审计字段写入与业务更新必须属于同一事务；如果把审计写入另一个异步任务，主记录提交后任务失败会造成不可解释的缺口。清单5.14的版本列属于并发控制，审计人和时间属于追责信息，两者用途不同，不能用一个“更新时间”字段代替。
+
+### 5.3.6 索引设计与 PostgreSQL 迁移
+
+索引要由过滤、排序、连接和唯一性共同决定。测站读数列表通常先按`station_id`过滤，再按`measured_at`和`id`倒序，因此联合索引应保持相同的前缀顺序；质量码只有在选择性较高或统计查询频繁时才适合放入索引。索引不能替代时间分区、TimescaleDB 超表或 PostGIS 空间索引，创建后要用`EXPLAIN (ANALYZE, BUFFERS)`核对实际执行计划；执行计划算子与代价模型的解释见 PostgreSQL 官方文档<sup>[[36]](../../references.md#ref36)</sup>，超表与连续聚合的行为约束见 TimescaleDB 官方文档<sup>[[37]](../../references.md#ref37)</sup>。
+
+**清单 5.15  PostgreSQL 索引与扩展迁移**
+
+```sql
+-- V20260807_01__reading_indexes.sql
+CREATE EXTENSION IF NOT EXISTS postgis;
+CREATE EXTENSION IF NOT EXISTS timescaledb;
+
+CREATE INDEX IF NOT EXISTS idx_reading_station_time
+    ON water_reading (station_id, measured_at DESC, id DESC);
+CREATE INDEX IF NOT EXISTS idx_reading_quality_time
+    ON water_reading (quality, measured_at DESC)
+    WHERE quality IN ('valid', 'suspect');
+CREATE TABLE IF NOT EXISTS reading_idempotency (
+    idempotency_key text PRIMARY KEY,
+    reading_id      bigint NOT NULL,
+    created_at      timestamptz NOT NULL DEFAULT now()
+);
+-- 主键即唯一约束；若采用独立索引写法，注意与建表语句同批迁移
+CREATE INDEX IF NOT EXISTS idx_reading_idem_created
+    ON reading_idempotency (created_at);
+
+-- 大表迁移时在低峰期执行，并在发布记录中保存执行耗时
+```
+
+清单5.15使用版本化迁移而不是让应用启动时猜测表结构。`ddl-auto: validate`只校验实体和数据库是否一致，生产环境的建表、扩展、索引和超表转换都应由迁移工具执行。索引创建会占用 I/O 和锁资源，大表可采用在线创建并单独观察；删除索引前先检查慢查询和回滚方案。迁移版本必须可重复检查，禁止把密码、真实连接串或未审计的临时 SQL 提交到教材仓库。
+
+建表策略要与发布流程绑定。开发 Profile 可以在一次性实验数据库上使用自动更新，帮助学生快速观察列映射；测试 Profile 使用迁移脚本建立干净数据库，确保约束、索引和扩展都经过验证；生产 Profile 只允许校验，迁移由发布流水线在备份和审批之后执行。这样，应用启动不会因为实体类的一个拼写变化而悄悄改写业务表，数据库变更也能在代码评审中看到完整差异。
+
+一次迁移应当有明确的前置条件、执行动作、验证查询和回滚策略。新增可空列通常可以先发布，再由后台任务填充，最后在下一版本加非空约束；直接把大表列改为非空可能长时间持锁。删除列则要先停止读写、确认日志和报表不再引用，保留一个可恢复窗口。对时序表，分区或超表转换还要评估历史数据规模、压缩策略和保留期限，避免一次性操作阻塞实时写入。
+
+索引列的顺序应由真实查询的选择性决定，而不是按字段名称排列。以测站和时间联合索引为例，先按`station_id`筛选能缩小扫描范围，再用时间倒序满足最新读数列表；若查询还经常过滤质量码，应通过执行计划判断把质量码放进联合索引还是建立部分索引。索引过多会拖慢写入、增加 vacuum 成本和备份体积，所以每个索引都要登记服务、查询模板、预计收益和删除条件。
+
+### 5.3.7 查询测试、执行计划与观测
+
+Repository 测试不能只验证返回了几条记录，还要验证查询语义和数据库行为。对最新读数测试“同一时间按 ID 取最大值”的稳定排序，对分页测试第一页、最后一页和空页，对时间范围测试左闭右开避免相邻窗口重复。对 fetch join 测试查询次数上限，使用 SQL 统计器或数据源代理确认没有 N+1；对乐观锁测试两个事务读取同一版本时只有一个更新成功。
+
+集成测试应使用独立的 PostgreSQL 数据库，并在测试开始时执行同一套迁移脚本。测试数据包含多个测站、相同时间戳的不同 ID、valid/suspect/missing 三种质量码以及跨月时间边界。这样既能验证索引前缀和排序，也能发现 DTO 映射把单位、时区或质量码丢失的问题。测试结束后回滚事务或销毁临时数据库，不能依赖开发机残留数据。
+
+执行计划是查询优化的证据。使用`EXPLAIN (ANALYZE, BUFFERS)`时记录规划时间、实际行数、共享命中率和是否发生顺序扫描；不要只看“用了索引”这一行。数据量变化后要重新分析统计信息，时间序列持续增长时还要观察分区裁剪和压缩段读取。优化目标是满足接口时延和数据库资源预算，而不是让每条 SQL 都套上索引。
+
+应用层也应暴露可观测指标：按查询名统计耗时分位数、返回行数、分页页大小、慢查询次数和锁等待；日志中记录`traceId`、测站和时间窗口，不记录完整 SQL 参数中的敏感信息。发现慢查询时，先从请求追踪定位到 Repository，再对照执行计划和数据库指标，最后决定改查询、改索引还是调整缓存。缓存只适合允许短暂陈旧的读模型，不能掩盖实体关系和事务边界设计错误。
+
+当时序数据达到保留期限，可以按业务规则归档或压缩，而不是直接删除在线表中的随机行。归档任务要记录批次号、时间窗口、行数和校验摘要，完成后再更新保留标记；查询服务默认只访问在线窗口，需要历史数据时走异步任务。任何清理操作都要经过审批、备份和演练，保证误删时能恢复并解释影响范围。
+
+分页接口的总数查询也可能成为瓶颈。管理界面需要精确总页数时使用`Page`，但在持续追加的时序流中可以返回“是否还有下一页”和游标，避免对数百万行执行`count(*)`。接口文档应说明两种模式的排序、最大窗口和一致性范围；客户端不能把游标解码后自行改写时间边界，否则会跳过记录或重复处理。服务端应对非法游标返回400，并在日志中保留解析失败的错误码。
+
+查询对象还要保护数据库资源。限制单次时间跨度、最大页大小、并发导出任务数和每个租户的速率；复杂统计超过预算就创建异步任务，返回任务 ID 和进度。取消任务时释放连接和临时表，失败时保留执行计划摘要和迁移版本，方便运维复盘。通过这些约束，JPA 不只是把 SQL 隐藏起来，而是把数据访问契约、性能预算和恢复路径一起交给应用设计。
+
+数据访问评审还应检查三个容易被忽略的边界。第一，实体的时间字段必须明确时区，数据库连接和应用 JVM 统一使用 UTC，展示层再转换为值班员时区；第二，单位换算应在进入实体前完成并保存单位代码，不能让查询层猜测“米”或“毫米”；第三，删除和归档要区分业务证据与缓存数据，水位原始记录通常只允许追加订正，不允许物理覆盖。把这些边界写进实体约束、Repository 方法名和集成测试，才能让后续的事务、消息和预警计算建立在可信数据上。
+
+还要把数据访问失败设计成可恢复的运维事件。连接池耗尽、锁等待超时、违反唯一约束和迁移版本不匹配分别对应不同的处理路径：前两者需要限流、重试或降级，唯一约束通常提示客户端重复提交，版本不匹配则应阻止实例加入流量并触发发布告警。异常日志记录 SQL 操作名、迁移版本、追踪 ID 和安全的参数摘要，响应只返回稳定错误码。值班员据此可以区分“请求需要修改”“稍后重试”和“发布需要回滚”，而不是面对一条无法行动的数据库异常文本。
+
+最后，查询契约应写入接口文档和回归测试：字段名称、单位、时区、排序、分页边界及错误码都要有固定示例。数据库优化只有在契约不变、结果可复现、故障可定位的前提下才有意义。 发布前还应由应用、数据库和运维共同复核迁移窗口、备份点与回滚责任人。
+
+### 5.3.8 统计服务中的数值稳定性
+
+`WaterDataSummary`是服务层的内存统计对象，不是 JPA 实体，也不承担 Repository 或事务职责。它适合在一次批处理用例内聚合读数，完成后由服务决定是否持久化汇总表。这个对象不是线程安全的：两个线程同时更新可能读到相同的`dataCount`并覆盖结果；并且直接累加大量`double`会积累舍入误差。并发场景应按测站分片、在服务层串行处理，或使用数据库聚合与明确的锁策略。
+
+Welford 增量算法把新值与当前均值的差作为修正量，数值稳定性优于反复计算“总和除以计数”。本章示例用`averageLevel += (newLevel - averageLevel) / (dataCount + 1)`表达核心步骤；若业务要求厘米级可追溯，应把输入规范化为`BigDecimal`，并在批量汇总结束时统一舍入，而不是每条记录都截断。
+
+### 5.3.9 事务边界与传播
+
+`@Transactional`通常标注在公开服务方法上。Spring默认通过代理拦截外部调用；同一Bean内部用`this.method()`自调用不会经过代理，因此方法上的新事务注解不会生效。需要`REQUIRES_NEW`时，应把该职责放到另一Bean。
+
+**清单 5.16  事务代理、审计传播与提交后事件**
+
+```java
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.*;
+import java.time.Instant;
+
+record ReadingSavedEvent(Long readingId, String stationId) {}
+
+@Service
+class AuditService {
+    private final AuditRepository auditRepository;
+    AuditService(AuditRepository auditRepository) {
+        this.auditRepository = auditRepository;
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void record(String action) {
+        auditRepository.save(new AuditLog(action, Instant.now()));
+    }
+}
+
+@Service
+class ReadingCommandService {
+    private final WaterReadingRepository repository;
+    private final AuditService auditService;
+    private final ApplicationEventPublisher eventPublisher;
+
+    ReadingCommandService(WaterReadingRepository repository,
+            AuditService auditService,
+            ApplicationEventPublisher eventPublisher) {
+        this.repository = repository;
+        this.auditService = auditService;
+        this.eventPublisher = eventPublisher;
+    }
+
+    @Transactional
+    public void save(WaterReading reading) {
+        WaterReading saved = repository.save(reading);
+        auditService.record("SAVE_READING"); // 经另一Bean代理调用
+        eventPublisher.publishEvent(
+                new ReadingSavedEvent(saved.getId(), saved.getStationId()));
+    }
+}
+```
+
+主业务是否应与审计记录使用不同事务，取决于失败语义；不能只为展示传播行为而滥用新事务。首次后端课程重点掌握默认传播、回滚规则和事务边界即可。清单5.16还把领域事件发布放在保存之后，但事件处理器要等主事务提交成功才执行；如果保存回滚，提交后监听器不会收到该事件，从而避免把未落库的读数传播给下游。
+
+### 5.3.10 事务的 ACID 契约与边界
+
+事务不是“把几行代码包起来”的装饰，而是数据库为一个业务用例提供的契约。原子性要求保存读数、更新最新值和写入审计要么全部成功、要么全部回滚；一致性要求外键、唯一键、非空和业务检查在提交点成立；隔离性控制并发事务之间能看到哪些中间状态；持久性要求提交后的数据在进程重启后仍可恢复。应用服务应围绕一个可说明的业务结果划定边界，例如“接收一个测站读数并生成审计事件”，而不是让控制器、Repository 和异步线程各自开启一段互不相干的事务。
+
+清单5.16中的`save`由外部调用进入事务代理，Repository 写入和审计调用共享默认事务；`AuditService.record`使用`REQUIRES_NEW`时会挂起外层事务，形成独立审计提交。图5.3把代理边界、挂起和提交后事件画成一条时序，读者可以据此判断“代码出现了注解”是否真的意味着运行时开启了新事务。
+
+<figure markdown>
+![图5.3](images/chapter05_fig_5_3.svg)
+<figcaption>图 5.3  事务代理、自调用与提交后事件的边界</figcaption>
+</figure>
+
+如果控制器在同一个 Bean 中用`this.save()`调用另一个带事务注解的方法，调用不会穿过代理，传播属性、只读标志和回滚规则都不会被重新评估。解决办法是把用例拆到另一个 Spring Bean，通过构造器注入调用；或者在确实需要动态边界时使用`TransactionTemplate`。把代理对象注入自己、依靠反射或强制打开全局事务都会增加理解成本，教材示例优先采用清晰的 Bean 边界。
+
+事务边界还应考虑外部调用。数据库事务中不应等待慢 HTTP 请求、文件上传或人工确认；这些动作应先提交本地状态，再由事务发件箱或消息队列异步推进。若外部系统必须参与一致性，需要明确超时、补偿、幂等和人工处置，不要假定数据库回滚可以撤销已经发出的网络请求。
+
+### 5.3.11 七种传播行为与使用场景
+
+Spring 的传播行为描述“已有事务到达一个方法时怎么办”。`REQUIRED`是默认值：有事务就加入，没有就创建，适合一个用例内的普通读写；`REQUIRES_NEW`挂起外层并创建独立事务，适合必须独立保留的审计或失败记录，但会增加连接占用；`NESTED`在支持保存点的资源上建立嵌套边界，局部回滚不必撤销外层已完成的步骤，适合批次中允许单行失败的场景，使用前要确认数据库和事务管理器支持保存点。
+
+`SUPPORTS`有事务就加入、没有就以非事务方式执行，适合可选的一致性读取；`NOT_SUPPORTED`会挂起外层并以非事务方式执行，适合不应锁住数据库的轻量指标采集，但它不能读取未提交状态；`MANDATORY`要求调用方已有事务，没有则立即失败，适合只能作为事务内部步骤的约束检查；`NEVER`要求调用方没有事务，发现事务就失败，适合明确禁止持有数据库锁的外部适配器。七种行为不是性能开关，选择时要从失败语义、锁持有时间和恢复方式解释原因。
+
+**清单 5.17  事务传播行为的服务边界示例**
+
+```java
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.*;
+
+@Service
+class ReadingBatchService {
+    private final ReadingRepository readings;
+    private final AuditService audit;
+    private final MetricService metrics;
+
+    ReadingBatchService(ReadingRepository readings, AuditService audit,
+                        MetricService metrics) {
+        this.readings = readings;
+        this.audit = audit;
+        this.metrics = metrics;
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void saveBatch(List<WaterReading> batch) {
+        readings.saveAll(batch);
+        audit.record("BATCH_SAVED");
+        metrics.sample(batch.size());
+    }
+}
+
+@Service
+class MetricService {
+    @Transactional(propagation = Propagation.NOT_SUPPORTED,
+                   readOnly = true)
+    public void sample(int count) {
+        // 只记录内存指标，不延长写事务的锁持有时间
+    }
+}
+```
+
+清单5.17刻意把主写入、独立审计和不参与事务的指标分开。批次写入失败时，主事务回滚；审计是否保留失败事实由`AuditService`的传播属性决定；指标采集不应因为数据库回滚而伪装成已处理。实践中应在集成测试中记录事务状态和连接数，防止把`REQUIRES_NEW`放进大循环导致连接池耗尽。
+
+### 5.3.12 隔离级别与并发异常
+
+隔离级别回答“一个事务能看到其他事务的哪些变化”。READ UNCOMMITTED 允许脏读，在 PostgreSQL 中通常按 READ COMMITTED 处理，不能把它当作真正的脏读实验；READ COMMITTED 是 PostgreSQL 默认值，每条语句看到一个新的已提交快照，适合大多数读写接口，但同一事务两次查询可能看到不同结果；REPEATABLE READ 固定事务快照，能避免不可重复读，但写入冲突会在提交时失败；SERIALIZABLE 进一步要求并发执行结果等价于串行执行，冲突时需要重试，吞吐和锁等待成本也更高。
+
+脏读是读取到尚未提交的数据，读到回滚值会使预警计算产生错误；不可重复读是同一事务两次读取同一行得到不同版本；幻读是两次范围查询返回的行集合变化；丢失更新是两个写者基于旧值覆盖彼此结果。`@Version`可以发现实体级丢失更新，唯一约束和检查约束负责拒绝非法状态，隔离级别则决定范围读取和并发写入之间的可见性。提升隔离级别不是万能修复，必须配合重试上限、退避和可观测告警。
+
+**清单 5.18  隔离级别与乐观锁的集成测试思路**
+
+```java
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+@SpringBootTest
+@ActiveProfiles("test")
+class ReadingConcurrencyTest {
+    // JUnit 5 的构造器注入需要 @Autowired，否则参数无法解析
+    private final ReadingCommandService service;
+    private final WaterReadingRepository repository;
+
+    @Autowired
+    ReadingConcurrencyTest(ReadingCommandService service,
+                           WaterReadingRepository repository) {
+        this.service = service;
+        this.repository = repository;
+    }
+
+    @Test
+    @Transactional(readOnly = true)
+    void repeatedReadUsesDeclaredSnapshot() {
+        // 测试中配合两个事务和 SQL 日志观察快照，而不是只断言返回值
+    }
+
+    @Test
+    void staleVersionIsConflict() {
+        WaterReading first = repository.findById(1L).orElseThrow();
+        WaterReading second = repository.findById(1L).orElseThrow();
+        service.replace(first, new BigDecimal("1.20"));
+        assertThatThrownBy(() -> service.replace(second, new BigDecimal("1.30")))
+                .isInstanceOf(OptimisticLockingFailureException.class);
+    }
+}
+```
+
+清单5.18强调测试应验证并发协议而非依赖线程睡眠。真实测试使用两个事务、屏障或数据库锁制造可重复的交错顺序，记录隔离级别、SQL 和回滚结果；随机压测则用于发现长尾锁等待。服务层把乐观锁异常转换为409，客户端重新读取后由专业分析员决定保留哪一个订正值，不能自动覆盖另一人的修改。
+
+回滚规则也属于事务契约。Spring 默认对未检查异常和`Error`回滚，对受检异常提交；业务服务若把受检异常作为“数据拒收”信号，就应明确使用`rollbackFor`，或者把异常转换为领域运行时异常。相反，某些可预期的通知失败可能允许主记录提交，此时使用`noRollbackFor`还不够，还要把失败原因写入重试表或事务发件箱。代码评审应逐个列出异常类型、数据库状态和补偿动作，避免 catch 后只打印日志导致半完成状态。
+
+批量导入的事务边界取决于业务语义。全批次原子提交能保证“全部成功或全部失败”，但一条坏数据会让整批回滚，并长时间占用锁；按测站或固定数量分块可以缩短事务，却必须返回每块的批次号、成功数和失败行号。无论选择哪一种，重复提交都要靠幂等键或唯一约束处理，重试不能依赖“上次大概执行到哪里”的内存变量。事务日志、审计记录和补发任务应能通过同一个追踪 ID 关联起来。
+
+数据库事务提交后，缓存刷新、指标增加和消息发布都可能失败。`AFTER_COMMIT`监听器不能把异常传回已经完成的主事务，因此处理器要采用幂等键、有限重试和死信记录；对关键跨服务事件，应由事务发件箱表保存事件内容和状态，再由独立发布器投递 Kafka，发布成功后更新状态。这样即使应用在提交后立刻崩溃，事件仍能从数据库恢复，而不是依赖进程内队列的偶然顺序。
+
+只读事务适合查询和报表，但它不会自动限制数据库用户写权限，也不会阻止代码调用`save`。服务层仍应通过接口设计避免写入，数据库账号可以在只读副本上使用更小权限；如果查询需要锁定行，应明确使用带锁查询而不是把`readOnly=true`当作锁。读写分离时要说明复制延迟，刚写入的读数不能立刻从滞后的副本读取，否则值班员会看到旧状态。
+
+事务测试至少包含：成功提交后事件被处理；主事务回滚时事件不被处理；审计独立事务在主事务失败时仍保留失败事实；两个版本同时更新时只有一个成功；死锁或序列化冲突按上限重试后返回稳定错误码。测试数据使用固定时钟和固定操作者，日志保存事务 ID、连接线程和隔离级别，避免用不可重复的 sleep 掩盖竞态。 测试报告还应保存数据库版本、迁移版本和测试用例的追踪标识，便于在不同环境复核相同结论。
+
+### 5.3.13 只读事务与事件发布闭环
+
+查询方法可以标注`@Transactional(readOnly = true)`，让连接驱动和 ORM 知道该事务不应执行写入；这不是数据库权限替代品，也不保证所有数据库都自动获得更高性能。只读方法仍需限制结果集、关闭懒加载泄漏并在事务内完成 DTO 映射。写方法则应在一个事务中完成状态检查、实体保存、审计和领域事件发布，事件处理器使用`AFTER_COMMIT`把指标或缓存刷新放到提交之后。
+
+**清单 5.19  只读查询与提交后事件的完整调用**
+
+```java
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.*;
+
+@Service
+class ReadingUseCase {
+    private final WaterReadingRepository repository;
+    private final ApplicationEventPublisher publisher;
+
+    ReadingUseCase(WaterReadingRepository repository,
+                   ApplicationEventPublisher publisher) {
+        this.repository = repository;
+        this.publisher = publisher;
+    }
+
+    @Transactional(readOnly = true)
+    ReadingResponse latest(String stationId) {
+        return repository.findFirstByStationIdOrderByMeasuredAtDesc(stationId)
+                .map(ReadingResponse::from)
+                .orElseThrow(() -> new EntityNotFoundException("测站无读数"));
+    }
+
+    @Transactional
+    ReadingResponse save(WaterReading reading) {
+        WaterReading saved = repository.save(reading);
+        publisher.publishEvent(
+                new ReadingSavedEvent(saved.getId(), saved.getStationId()));
+        return ReadingResponse.from(saved);
+    }
+}
+```
+
+清单5.19中的查询在事务内完成实体到 DTO 的转换，写入则在保存后发布事件。若主事务回滚，`AFTER_COMMIT`监听器不执行；若监听器自身失败，主事务也不会被重新回滚，因此监听器必须具备幂等、重试和失败告警。跨进程通知不能只依靠进程内事件，应把事件写入事务发件箱，再由可靠发布器投递 Kafka。
+
+### 5.3.14 统计量更新
+
+增量平均值在已有样本数为$n$、均值为$\bar{x}_n$时加入新值$x$，应计算 $$\bar{x}_{n+1}=\frac{\bar{x}_n n+x}{n+1}.$$ 计数和均值必须初始化，并在计算后再更新计数。
+
+**清单 5.20  增量统计的数值稳定实现**
+
+```java
+class WaterDataSummary {
+    private long dataCount = 0L;
+    private double averageLevel = 0.0;
+
+    public void updateStatistics(double newLevel) {
+        averageLevel += (newLevel - averageLevel)
+                / (dataCount + 1);
+        dataCount++;
+    }
+
+    public long getDataCount() { return dataCount; }
+    public double getAverageLevel() { return averageLevel; }
+}
+```
+
+!!! tip "提示"
+
+    选学：跨服务一致性可使用事务消息、Saga或补偿流程；DDD聚合可帮助表达复杂一致性边界。这些方法需要结合业务失败语义、幂等和可观测性学习，不作为本章基础代码的必要组成。
+
+## 5.4 服务层与异常处理
+
+服务层按用例组织方法，例如“保存监测值”“确认告警”“查询测站详情”。输入DTO先通过Bean Validation完成格式校验，领域规则仍由服务或领域对象校验。统一响应不应把所有结果都包装成HTTP 200；HTTP状态码仍须表达协议层结果。
+
+**清单 5.21  参数校验异常处理**
+
+```java
+// 与 5.1 节的 CreateReadingRequest 相比省略了 unit 和 quality，
+// 用最小字段演示校验异常的响应结构，故单独命名
+record ReadingValidationPayload(
+        @NotBlank String stationId,
+        // 上下限为示例阈值，工程取值以第8章8.1参数表为唯一来源
+        @NotNull @DecimalMin("0.0") @DecimalMax("50.0") BigDecimal level,
+        @NotNull Instant measuredAt) {}
+
+@RestControllerAdvice
+class GlobalExceptionHandler {
+    @ExceptionHandler(EntityNotFoundException.class)
+    ResponseEntity<ProblemDetail> notFound(EntityNotFoundException ex) {
+        ProblemDetail problem = ProblemDetail.forStatus(404);
+        problem.setTitle("资源不存在");
+        problem.setDetail(ex.getMessage());
+        return ResponseEntity.status(404).body(problem);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    ResponseEntity<ProblemDetail> invalid(MethodArgumentNotValidException ex) {
+        ProblemDetail problem = ProblemDetail.forStatus(400);
+        problem.setTitle("请求参数无效");
+        return ResponseEntity.badRequest().body(problem);
+    }
+}
+```
+
+异常处理器把可预期错误转换为稳定契约；意外异常只向客户端返回通用信息，详细堆栈写入受控日志。日志应包含请求标识、测站标识和事件类型，但不得记录密码、完整令牌或敏感个人信息。
+
+### 5.4.1 读写接口的完整闭环
+
+一个可交付的 REST 资源至少要说明集合查询、单项查询、创建、整体更新和删除的语义。以监测读数为例，`GET /api/readings/``id`返回单条记录，`GET /api/readings`支持分页与过滤，`POST /api/readings`创建新记录，`PUT /api/readings/``id`替换可编辑字段，`DELETE /api/readings/``id`删除尚未归档的记录。更新和删除前要检查资源版本、用户权限和业务状态；已进入审计归档的读数应采用逻辑失效或拒绝删除，而不是直接破坏时序证据。
+
+**清单 5.22  监测读数 GET/POST/PUT/DELETE 控制器**
+
+```java
+@RestController
+@RequestMapping("/api/readings")
+class ReadingCrudController {
+    private final ReadingApplicationService service;
+
+    ReadingCrudController(ReadingApplicationService service) {
+        this.service = service;
+    }
+
+    @GetMapping
+    Page<ReadingResponse> list(@PageableDefault(size = 20) Pageable pageable,
+                               @RequestParam(required = false) String stationId,
+                               @RequestParam(required = false) String quality) {
+        return service.list(pageable, stationId, quality);
+    }
+
+    @GetMapping("/{id}")
+    ReadingResponse get(@PathVariable long id) {
+        return service.get(id);
+    }
+
+    @PostMapping
+    ResponseEntity<ReadingResponse> create(@Valid @RequestBody CreateReadingRequest request,
+                                           UriComponentsBuilder builder) {
+        ReadingResponse created = service.create(request);
+        URI location = builder.path("/api/readings/{id}")
+                .buildAndExpand(created.id()).toUri();
+        return ResponseEntity.created(location).body(created);
+    }
+
+    @PutMapping("/{id}")
+    ReadingResponse replace(@PathVariable long id,
+                            @Valid @RequestBody ReplaceReadingRequest request) {
+        return service.replace(id, request);
+    }
+
+    @DeleteMapping("/{id}")
+    ResponseEntity<Void> delete(@PathVariable long id) {
+        service.delete(id);
+        return ResponseEntity.noContent().build();
+    }
+}
+```
+
+清单5.22把协议层的五个入口连接到同一个应用服务。集合查询返回`Page`并由`Pageable`限制页大小，创建成功返回201和`Location`，删除成功返回204；异常由统一处理器转换为400、404或409。控制器没有直接访问 Repository，也没有把数据库实体作为响应体，因而可以独立替换持久化实现。
+
+**清单 5.23  DTO 与实体的双向映射**
+
+```java
+record ReplaceReadingRequest(
+        @NotNull BigDecimal level,
+        @NotBlank String unit,
+        @NotNull Instant measuredAt,
+        @NotBlank String quality,
+        @NotNull Long version) {}
+
+record ReadingResponse(long id, String stationId, BigDecimal level,
+                       String unit, Instant measuredAt, String quality,
+                       long version) {
+    static ReadingResponse from(WaterReading entity) {
+        return new ReadingResponse(entity.getId(), entity.getStationId(),
+                entity.getLevel(), entity.getUnit(), entity.getMeasuredAt(),
+                entity.getQuality(), entity.getVersion());
+    }
+}
+
+final class ReadingMapper {
+    private ReadingMapper() {}
+
+    static WaterReading toEntity(CreateReadingRequest request) {
+        return WaterReading.create(request.stationId(), request.level(),
+                request.unit(), request.measuredAt(), request.quality());
+    }
+}
+```
+
+清单5.23把外部字段转换集中在映射边界，单位、质量码和版本号不会因为数据库字段改名而泄露到 API。`version`为后续的乐观锁校验预留位置；更新请求携带旧版本时，服务层可以在保存前检查版本是否仍然匹配，冲突返回409并提示客户端重新读取，而不是覆盖另一个值班员刚提交的数据。
+
+**清单 5.24  应用服务中的写入、更新与删除规则**
+
+```java
+@Service
+class ReadingApplicationService {
+    private final WaterReadingRepository repository;
+    private final StationRepository stations;
+
+    ReadingApplicationService(WaterReadingRepository repository,
+                              StationRepository stations) {
+        this.repository = repository;
+        this.stations = stations;
+    }
+
+    @Transactional
+    ReadingResponse create(CreateReadingRequest request) {
+        if (!stations.existsById(request.stationId()))
+            throw new EntityNotFoundException("测站不存在");
+        WaterReading entity = ReadingMapper.toEntity(request);
+        return ReadingResponse.from(repository.save(entity));
+    }
+
+    @Transactional
+    ReadingResponse replace(long id, ReplaceReadingRequest request) {
+        WaterReading entity = repository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("读数不存在"));
+        entity.replaceIfVersion(request.level(), request.unit(),
+                request.measuredAt(), request.quality(), request.version());
+        return ReadingResponse.from(repository.save(entity));
+    }
+
+    @Transactional
+    void delete(long id) {
+        WaterReading entity = repository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("读数不存在"));
+        if (entity.isArchived()) throw new ConflictException("归档读数不可删除");
+        repository.delete(entity);
+    }
+}
+```
+
+服务层同时承担跨字段业务规则和事务边界。测站存在性、采样时间窗口、质量码取值域和归档状态都不能只依赖注解；它们需要读取当前领域状态并在同一事务中决定是否保存。更新使用版本号防止丢失写入，删除先检查归档标记，所有分支都能映射到明确的领域异常。
+
+### 5.4.2 统一错误响应与参数校验
+
+Spring Boot 3提供的`ProblemDetail`可以承载标准状态、标题、详情和扩展字段。参数缺失或格式错误返回400，权限不足返回403，资源不存在返回404，版本冲突或状态不允许返回409，未认证由安全过滤链返回401。错误响应不应把 Java 异常类名、SQL 片段和堆栈发给客户端；服务端日志通过`traceId`保留诊断信息，前端只根据稳定错误码显示可行动提示。
+
+**清单 5.25  RestControllerAdvice 统一错误响应**
+
+```java
+@RestControllerAdvice
+class ReadingProblemAdvice {
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    ResponseEntity<ProblemDetail> invalid(MethodArgumentNotValidException ex) {
+        ProblemDetail problem = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+        problem.setTitle("请求参数无效");
+        problem.setProperty("code", "VALIDATION_ERROR");
+        problem.setProperty("fields", ex.getBindingResult().getFieldErrors()
+                .stream().map(FieldError::getField).distinct().toList());
+        return ResponseEntity.badRequest().body(problem);
+    }
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    ResponseEntity<ProblemDetail> notFound(EntityNotFoundException ex) {
+        ProblemDetail problem = ProblemDetail.forStatus(HttpStatus.NOT_FOUND);
+        problem.setTitle("资源不存在");
+        problem.setProperty("code", "READING_NOT_FOUND");
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(problem);
+    }
+
+    @ExceptionHandler(ConflictException.class)
+    ResponseEntity<ProblemDetail> conflict(ConflictException ex) {
+        ProblemDetail problem = ProblemDetail.forStatus(HttpStatus.CONFLICT);
+        problem.setTitle("资源状态冲突");
+        problem.setProperty("code", "READING_CONFLICT");
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(problem);
+    }
+}
+```
+
+清单5.25只把字段名和稳定错误码放入响应，具体原因留在受控日志。校验字段列表可以帮助前端逐项标记输入框；对跨字段错误，服务层抛出带业务码的异常。异常处理器本身也应有测试，确保新异常不会意外回落到500，并验证响应的`Content-Type`为`application/problem+json`。
+
+浮点边界是参数校验的常见陷阱。Jakarta Bean Validation 对`double`和`float`不保证`@DecimalMin`与`@DecimalMax`的十进制精确语义，二进制舍入可能让边界值在比较时偏离预期；水位、雨量等带单位的小数应使用`BigDecimal`或整数最小单位，并在转换时指定舍入模式。校验通过后仍要执行物理范围、单位换算和质量码优先级检查，避免“格式合法”被误解为“业务可信”。
+
+### 5.4.3 三层校验与错误定位
+
+参数校验可以分为表示层、领域层和持久化层三道闸。表示层验证 JSON 是否完整、类型是否正确、字符串长度和枚举值是否落在公开契约内；领域层验证测站是否存在、单位是否与测点配置匹配、采样时间是否满足时序顺序、质量码是否允许进入计算；持久化层通过非空约束、唯一约束、外键和检查约束保证最后一道数据完整性。三层校验不是重复劳动，而是分别面对不同入口：HTTP 请求、内部消息和数据库脚本都可能绕过其中一层。
+
+同一字段的错误要有稳定的错误码。`stationId`为空属于`FIELD_REQUIRED`，测站不存在属于`STATION_NOT_FOUND`，水位超出批准范围属于`LEVEL_OUT_OF_RANGE`，采样时间倒退属于`MEASURED_AT_ORDER`。错误码与 HTTP 状态码分离：字段错误和业务规则错误都可以返回400，但前端通过错误码决定提示文本和是否允许重试。错误详情不要包含数据库列名、SQL 或内部堆栈，以免把实现细节暴露给外部调用者。
+
+校验分组适合处理创建和更新的差异。创建读数要求`stationId`、`measuredAt`、`level`和`quality`全部提供；更新读数可能只允许修改订正值和质量码，同时必须携带版本号；删除请求不需要读取体，但要检查资源状态和操作者权限。把三种请求复用为一个“万能 DTO”会产生大量可选字段，容易出现“字段缺失却被当作清空”的歧义。为每种用例定义独立 record，能让 OpenAPI 文档、测试和错误提示保持一致。
+
+### 5.4.4 HTTP 状态转换与事务语义
+
+HTTP 状态码应与业务结果一一对应。查询成功返回200，集合为空仍返回200并给出空的`content`；创建成功返回201和`Location`，异步导入返回202并给出任务地址；替换成功返回200或204，删除成功返回204；参数解析失败返回400，缺少身份返回401，身份存在但权限不足返回403，资源找不到返回404，版本或状态冲突返回409，服务器暂时不可用返回503。不要把所有异常包装成200再在响应体中写一个`success=false`，这样会让网关、监控和浏览器缓存失去判断依据。
+
+创建接口的事务边界应覆盖“验证测站—生成实体—保存读数—写入审计”的完整用例。若数据库保存成功而审计失败，系统需要依据业务要求回滚主记录或将审计事件写入事务发件箱；不能在控制器中先保存实体、再用另一个连接写日志。更新接口在同一事务中读取版本、执行状态检查和写入新值，数据库的唯一约束与版本列负责处理并发竞争。删除接口若采用逻辑删除，应把删除时间、操作者和原因写入审计字段，查询默认过滤已删除记录，但管理员接口仍可按权限恢复或查看。
+
+幂等请求与重试的关系也要写进接口说明。客户端在连接超时后重试`POST`时，服务端先查询幂等键；如果已有相同请求摘要，则返回原响应和同一`Location`；如果摘要不同，返回409并要求客户端生成新键。幂等记录应保存到与业务写入同一事务的表中，过期时间覆盖网关重试、消息重投和人工补发的最大窗口。只放在内存 Map 中会在服务重启后丢失，无法保证关键基础设施数据的唯一性。
+
+### 5.4.5 DTO 契约与单位转换
+
+DTO 是接口版本和领域模型之间的缓冲层。后端内部可以把水位存为米制`BigDecimal`，外部请求允许厘米或毫米，但转换必须依据显式单位字段和工程配置完成，并在响应中返回统一单位。未知单位返回400，单位缺失不能默认为米；同一测站的历史数据应在存储层使用统一单位，避免查询时把不同量纲相加。时间字段统一使用带时区的 ISO 8601 字符串，服务层转换为`Instant`后再比较，展示时由前端选择值班员时区。
+
+响应 DTO 只输出读者需要的字段：资源 ID、测站 ID、数值、单位、采样时间、质量码、版本和更新时间。数据库主键、内部租户标识、软删除标记和审计人不应因为实体序列化而意外暴露。对枚举新增值时，服务端可以先在响应中保留未知值的兼容处理，客户端显示“未知状态”而不是解析失败；删除或重命名枚举则必须通过新 API 版本完成。
+
+### 5.4.6 测试矩阵与接口可观测性
+
+每个端点至少覆盖正常、参数错误、未认证、无权限、资源不存在、版本冲突和重复请求七类场景。正常场景验证状态码、响应体和`Location`；参数错误验证字段列表和错误码；未认证与无权限验证401/403的区别；资源不存在验证404不泄露其他资源信息；版本冲突验证409并保留数据库原值；重复请求验证幂等键返回同一资源。测试还要确认异常日志包含`traceId`，但不含完整 JWT、密码和个人信息。
+
+MockMvc 或 WebTestClient 可以在没有真实网络的情况下验证控制器协议，服务层单元测试使用假的 Repository 和时钟验证业务规则，PostgreSQL 集成测试验证唯一约束、检查约束和事务回滚。测试数据应在每个用例开始时明确准备，在结束时清理或使用独立事务回滚；不要依赖测试执行顺序。对于时间窗口和质量码，测试数据要覆盖边界值、闰秒处理约定和 missing/suspect/valid 三种质量状态。
+
+参数校验和异常处理的价值在于让失败尽早、信息稳定、恢复可行。失败响应告诉客户端应该修正输入、重新认证、重新读取资源还是稍后重试；服务端指标则按错误码统计参数错误率、冲突率和资源缺失率，帮助运维区分客户端缺陷与数据库故障。这样，接口设计就从“能返回 JSON”提升为可测试、可观测、可演进的后端契约。 接口文档应把这些约定转换为可执行示例：为每个端点列出请求头、路径参数、查询参数、请求体、成功响应、错误响应和重试建议。示例数据使用测站编号、采样时间和质量码的真实组合，避免只展示抽象的“foo/bar”。前端联调时先依据文档生成契约测试，后端发布时再用同一组样例验证字段名称、单位和状态码，发现不一致就阻断版本发布。
+
+对于批量写入，接口还要说明部分成功语义。可以把每条读数放入独立结果数组，返回成功、重复、参数错误和业务拒收四种结果，并给出批次追踪 ID；也可以采用全批次原子事务，但要限制批量大小和锁持有时间。无论选择哪种方案，都必须记录每条测站 ID 和错误码，使值班员能够补发失败记录而不重复提交已经成功的读数。
+
+批次接口还应限制单次记录数量、请求体大小和处理时长，并在响应中返回可检索的批次号。异步导入使用任务资源和进度状态，客户端轮询任务而不是长时间占用连接；任务失败时保留失败行号和错误码，便于只补发有问题的测点。这样既保护数据库连接池，也让数据修复过程可审计。
+
+写入接口的审计字段还应记录采集来源、操作者、设备时间与服务器接收时间，并明确时钟偏差处理策略；当设备时间超出允许窗口时，服务端应保留原始值和拒收原因，便于后续核查而不是静默修正。接口响应中的`traceId`、批次号与幂等键关联后，值班员可以从一次补发操作追踪到数据库事务和审计事件。对于修改和删除操作，审计记录还应保存变更前后的关键字段、授权角色及审批依据，避免只留下“操作成功”而无法解释业务状态为何改变。
+
+## 5.5 Spring Security 6与JWT
+
+认证回答“用户是谁”，授权回答“允许做什么”。Spring Security 6使用`@EnableMethodSecurity`启用方法授权，并采用Lambda DSL配置过滤链。无状态API关闭服务器会话并在JWT过滤器中建立认证上下文。
+
+图5.4把一次受保护请求经过过滤器链的决策点展开。认证过滤器只负责从 Bearer 令牌得到可信主体和权限，授权规则再决定该主体能否访问具体方法；两者分开后，过期令牌应得到 401，权限不足应得到 403，业务方法不必重复解析令牌。图中的“拒绝”分支还提醒读者：过滤器不能把异常吞掉后继续当作匿名用户执行写操作，审计日志要记录拒绝原因和请求追踪 ID。
+
+<figure markdown>
+![图5.4](images/chapter05_fig_5_4.svg)
+<figcaption>图 5.4  Spring Security 6 的 JWT 认证与方法授权边界</figcaption>
+</figure>
+
+**清单 5.26  Spring Security过滤链**
+
+```java
+import org.springframework.context.annotation.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.config.annotation.method.configuration.*;
+import org.springframework.security.config.annotation.web.builders.*;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.*;
+import org.springframework.security.web.authentication.*;
+
+@Configuration
+@EnableMethodSecurity
+@EnableConfigurationProperties(JwtProperties.class)
+class SecurityConfig {
+    @Bean
+    SecurityFilterChain securityFilterChain(HttpSecurity http,
+            JwtAuthenticationFilter jwtFilter) throws Exception {
+        return http
+            .csrf(AbstractHttpConfigurer::disable)
+            // 接入下文的 corsConfigurationSource Bean；
+            // 只定义 Bean 而不调用 .cors() 时该配置不会生效
+            .cors(Customizer.withDefaults())
+            .sessionManagement(s -> s.sessionCreationPolicy(
+                    SessionCreationPolicy.STATELESS))
+            .exceptionHandling(e -> e
+                    .authenticationEntryPoint((request, response, ex) ->
+                            response.sendError(HttpStatus.UNAUTHORIZED.value()))
+                    .accessDeniedHandler((request, response, ex) ->
+                            response.sendError(HttpStatus.FORBIDDEN.value())))
+            .authorizeHttpRequests(a -> a
+                    .requestMatchers("/actuator/health", "/api/auth/**").permitAll()
+                    .anyRequest().authenticated())
+            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+            .build();
+    }
+}
+```
+
+浏览器若使用Cookie携带凭据，不能机械关闭CSRF防护；上例适用于只从Authorization头读取Bearer令牌的API。权限只使用一个枚举，避免名称和取值漂移。
+
+**清单 5.27  JWT认证过滤器**
+
+```java
+import jakarta.servlet.*;
+import jakarta.servlet.http.*;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.web.filter.OncePerRequestFilter;
+import java.io.IOException;
+import java.util.stream.Collectors;
+
+enum WaterSystemPermission {
+    STATION_READ, READING_WRITE, ALERT_ACKNOWLEDGE
+}
+
+class JwtAuthenticationFilter extends OncePerRequestFilter {
+    private final JwtService jwtService;
+    private final TokenRevocationService revocations;
+
+    JwtAuthenticationFilter(JwtService jwtService,
+                            TokenRevocationService revocations) {
+        this.jwtService = jwtService;
+        this.revocations = revocations;
+    }
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain chain)
+            throws ServletException, IOException {
+        String header = request.getHeader("Authorization");
+        if (header != null && header.startsWith("Bearer ")) {
+            String token = header.substring("Bearer ".length());
+            try {
+                Claims claims = jwtService.parseAccess(token);
+                String jti = claims.getId();
+                if (jti != null && !revocations.isRevoked(jti)) {
+                    var authorities = jwtService.permissions(claims).stream()
+                            .map(SimpleGrantedAuthority::new)
+                            .collect(Collectors.toUnmodifiableSet());
+                    var authentication = new UsernamePasswordAuthenticationToken(
+                            claims.getSubject(), null, authorities);
+                    authentication.setDetails(new WebAuthenticationDetailsSource()
+                            .buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                }
+            } catch (JwtException ex) {
+                SecurityContextHolder.clearContext();
+            }
+        }
+        chain.doFilter(request, response);
+    }
+}
+```
+
+JWT 密钥通过配置注入并以足够长度的 Base64 值提供。本章示例锁定 jjwt 0.11.x：`parseClaimsJws` 返回 Claims 之前已经完成签名验证，签名不合法会抛出异常，应用不能先手工解码 Base64 再“验证”字段。刷新流程若需要接受已过期的刷新令牌，只能在捕获`ExpiredJwtException`后读取其 Claims；由于解析器已经验证签名，随后还要检查`type=refresh`、issuer、audience、subject、jti 和服务端撤销状态，绝不能把过期 access token 当作刷新凭据。
+
+**清单 5.28  jjwt 0.11.x 签名验证与访问令牌解析**
+
+```java
+import io.jsonwebtoken.*;
+import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.io.Decoders;
+import javax.crypto.SecretKey;
+import java.util.List;
+
+// JwtProperties 复用清单 lst:ch05-config-validation 中带
+// @Validated 启动校验的定义，此处不再重复声明
+
+@Service
+class JwtService {
+    private final SecretKey key;
+    private final JwtProperties properties;
+
+    JwtService(JwtProperties properties) {
+        this.properties = properties;
+        this.key = Keys.hmacShaKeyFor(
+                Decoders.BASE64.decode(properties.secret()));
+    }
+
+    Claims parseAccess(String token) {
+        Claims claims = Jwts.parserBuilder().setSigningKey(key)
+                .requireIssuer(properties.issuer()).build()
+                .parseClaimsJws(token).getBody();
+        if (!"access".equals(claims.get("type", String.class)))
+            throw new JwtException("token type is not access");
+        return claims;
+    }
+
+    List<String> permissions(Claims claims) {
+        return claims.get("permissions", List.class);
+    }
+
+    /** 解析刷新令牌：签名必须有效，但允许令牌已过期（用于轮换）。 */
+    Claims parseRefreshAllowExpired(String token) {
+        Claims claims;
+        try {
+            claims = Jwts.parserBuilder().setSigningKey(key)
+                    .requireIssuer(properties.issuer()).build()
+                    .parseClaimsJws(token).getBody();
+        } catch (ExpiredJwtException expired) {
+            // 签名校验已通过才会走到过期分支，Claims 仍可信
+            claims = expired.getClaims();
+        }
+        if (!"refresh".equals(claims.get("type", String.class)))
+            throw new JwtException("token type is not refresh");
+        return claims;
+    }
+}
+```
+
+刷新服务必须进一步确认Claims中的`type=refresh`、签发者和服务端撤销状态，才可签发新令牌对。配置常量由`JwtProperties`共享，不跨类访问私有常量。
+
+!!! tip "提示"
+
+    版本迁移提示：jjwt 0.12.x 将解析器接口拆为`Jwts.parser().verifyWith(key).build()`与`parseSignedClaims(token).getPayload()`两步，对应本章 0.11.x 的`parserBuilder().setSigningKey(key).build()`和`parseClaimsJws(token).getBody()`。迁移时逐项核对签名算法、issuer、type、过期处理和异常类型，不能只做方法名替换。
+
+认证链路可以拆成“凭据校验—令牌签发—请求认证—权限决策—撤销与轮换”五个环节。图5.5把访问令牌和刷新令牌的边界画出：访问令牌短期有效，携带权限进入过滤器；刷新令牌只发送到刷新端点，服务端验证类型和撤销状态后签发新的令牌对。前端不能把刷新令牌当作普通 API 凭据，也不能在浏览器日志、URL 或错误消息中输出完整令牌。
+
+<figure markdown>
+![图5.5](images/chapter05_fig_5_5.svg)
+<figcaption>图 5.5  Spring Security 6 与 JWT 的认证授权时序</figcaption>
+</figure>
+
+令牌的声明应最小化。`sub`标识用户或服务主体，`iss`限制签发者，`aud`限制使用方，`iat`和`exp`描述有效时间，`jti`用于撤销和审计，`type`区分 access 与 refresh，权限集合只携带授权决策需要的稳定代码。不要把身份证号、手机号、设备密钥或完整业务对象放入 JWT；JWT 是带签名的可读载荷，不是加密容器。
+
+**清单 5.29  jjwt 0.11.x 签发访问与刷新令牌**
+
+```java
+import io.jsonwebtoken.Jwts;
+import java.time.Instant;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
+
+record TokenPair(String accessToken, String refreshToken,
+                 Instant accessExpiresAt, Instant refreshExpiresAt) {}
+
+class TokenIssuer {
+    private final JwtProperties properties;
+    private final SecretKey key;
+
+    TokenIssuer(JwtProperties properties, SecretKey key) {
+        this.properties = properties;
+        this.key = key;
+    }
+
+    TokenPair issue(String subject, List<String> permissions, Instant now) {
+        Instant accessExp = now.plusSeconds(properties.accessSeconds());
+        Instant refreshExp = now.plusSeconds(properties.refreshSeconds());
+        String access = build(subject, permissions, "access", now, accessExp);
+        String refresh = build(subject, List.of(), "refresh", now, refreshExp);
+        return new TokenPair(access, refresh, accessExp, refreshExp);
+    }
+
+    private String build(String subject, List<String> permissions, String type,
+                         Instant issuedAt, Instant expiresAt) {
+        return Jwts.builder().setId(UUID.randomUUID().toString())
+                .setSubject(subject).setIssuer(properties.issuer())
+                .setIssuedAt(Date.from(issuedAt)).setExpiration(Date.from(expiresAt))
+                .claim("type", type).claim("permissions", permissions)
+                .signWith(key).compact();
+    }
+}
+```
+
+清单5.29用不同的 jti 生成访问与刷新令牌，刷新令牌不携带业务权限，减少权限变更后的残留窗口。签发时间由注入的时钟提供，测试可以固定`Instant`验证过期边界；生产环境要考虑设备与服务器时钟偏差，允许的时钟容差必须写入安全配置并监控。密钥轮换时保留短暂的旧密钥验证窗口，并给每个密钥版本设置撤销和淘汰日期。
+
+**清单 5.30  登录端点、密码校验与令牌签发**
+
+```java
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
+
+record LoginRequest(String username, String password) {}
+record LoginResponse(String accessToken, String refreshToken,
+                     Instant accessExpiresAt, Instant refreshExpiresAt) {}
+
+@RestController
+@RequestMapping("/api/auth")
+class LoginController {
+    private final UserAccountService accounts;
+    private final PasswordEncoder passwordEncoder;
+    private final TokenIssuer issuer;
+    private final Clock clock;
+
+    LoginController(UserAccountService accounts, PasswordEncoder passwordEncoder,
+                    TokenIssuer issuer, Clock clock) {
+        this.accounts = accounts;
+        this.passwordEncoder = passwordEncoder;
+        this.issuer = issuer;
+        this.clock = clock;
+    }
+
+    @PostMapping("/login")
+    LoginResponse login(@Valid @RequestBody LoginRequest request) {
+        UserAccount account = accounts.findEnabled(request.username())
+                .orElseThrow(() -> new BadCredentialsException("用户名或密码错误"));
+        if (!passwordEncoder.matches(request.password(), account.passwordHash()))
+            throw new BadCredentialsException("用户名或密码错误");
+        TokenPair pair = issuer.issue(account.id(), account.permissions(),
+                Instant.now(clock));
+        return new LoginResponse(pair.accessToken(), pair.refreshToken(),
+                pair.accessExpiresAt(), pair.refreshExpiresAt());
+    }
+}
+```
+
+密码只保存经过适当成本因子哈希后的结果，登录错误统一返回“凭据无效”，不区分用户名不存在还是密码错误，避免账号枚举。登录端点应有速率限制、失败计数和审计事件；密码重置、二次认证和设备绑定属于更高层的身份系统，不能用把字段塞进 JWT 的方式替代。
+
+**清单 5.31  刷新令牌的签名、类型和轮换检查**
+
+```java
+import io.jsonwebtoken.*;
+import java.time.Instant;
+
+class RefreshService {
+    private final JwtService jwtService;
+    private final TokenIssuer issuer;
+    private final TokenRevocationService revocations;
+    private final RefreshSessionRepository sessions;
+    private final Clock clock;
+
+    RefreshService(JwtService jwtService, TokenIssuer issuer,
+                   TokenRevocationService revocations,
+                   RefreshSessionRepository sessions, Clock clock) {
+        this.jwtService = jwtService;
+        this.issuer = issuer;
+        this.revocations = revocations;
+        this.sessions = sessions;
+        this.clock = clock;
+    }
+
+    TokenPair refresh(String token) {
+        Claims claims = jwtService.parseRefreshAllowExpired(token);
+        String jti = claims.getId();
+        if (jti == null || revocations.isRevoked(jti))
+            throw new BadCredentialsException("刷新会话已撤销");
+        RefreshSession session = sessions.findActive(jti)
+                .orElseThrow(() -> new BadCredentialsException("刷新会话不存在"));
+        revocations.revoke(jti, claims.getExpiration().toInstant());
+        return issuer.issue(session.subject(), session.permissions(),
+                Instant.now(clock));
+    }
+}
+```
+
+JWT 的声明字段、签名与校验语义以 RFC 7519 为规范依据<sup>[[38]](../../references.md#ref38)</sup>。刷新采用轮换策略：每次成功使用旧 refresh jti 后立即撤销，并生成新的 refresh jti；若同一旧令牌再次出现，系统可以判定重放并撤销整个会话族。解析过期刷新令牌时只允许捕获签名已验证的`ExpiredJwtException`，还要检查过期时间、issuer、type、jti 和服务端会话，不能使用`parseClaimsJwt`或手工拼接 Claims。
+
+**清单 5.32  基于 jti 与版本号的令牌撤销**
+
+```java
+import java.time.Duration;
+import java.time.Instant;
+import org.springframework.data.redis.core.StringRedisTemplate;
+
+interface TokenRevocationService {
+    boolean isRevoked(String jti);
+    void revoke(String jti, Instant expiresAt);
+}
+
+@Service
+class RedisTokenRevocationService implements TokenRevocationService {
+    private final StringRedisTemplate redis;
+
+    RedisTokenRevocationService(StringRedisTemplate redis) {
+        this.redis = redis;
+    }
+
+    public boolean isRevoked(String jti) {
+        return Boolean.TRUE.equals(redis.hasKey("jwt:revoked:" + jti));
+    }
+
+    public void revoke(String jti, Instant expiresAt) {
+        long seconds = Math.max(1, Duration.between(
+                Instant.now(), expiresAt).getSeconds());
+        redis.opsForValue().set("jwt:revoked:" + jti, "1",
+                Duration.ofSeconds(seconds));
+    }
+}
+```
+
+清单5.32让撤销记录的 TTL 不超过原令牌剩余寿命，避免黑名单永久增长。高并发平台还可以使用用户令牌版本号：用户注销或改密时递增版本，过滤器比较令牌中的版本与当前账户版本；jti 黑名单适合撤销单个设备，版本号适合撤销用户全部会话，两者可以组合。撤销状态读取失败时要按安全策略拒绝请求或进入受限降级，不能把 Redis 不可达默认为“令牌有效”。
+
+**清单 5.33  方法级权限与跨域策略**
+
+```java
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+class StationWriteController {
+    @PreAuthorize("hasAuthority('READING_WRITE')")
+    @PostMapping("/api/readings")
+    ReadingResponse create(@Valid @RequestBody CreateReadingRequest request) {
+        return service.create(request);
+    }
+
+    private final ReadingApplicationService service;
+    StationWriteController(ReadingApplicationService service) {
+        this.service = service;
+    }
+}
+
+@Configuration
+class CorsConfig {
+    @Bean
+    CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration c = new CorsConfiguration();
+        c.setAllowedOrigins(List.of("https://water.example.edu"));
+        c.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
+        c.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/api/**", c);
+        return source;
+    }
+}
+```
+
+方法级权限是控制器之后的第二道边界，不能只依赖前端按钮隐藏。CORS 只约束浏览器跨源读取，不等于身份认证；允许来源、方法和请求头要使用明确白名单，不能在携带凭据时使用任意来源。系统还应区分未认证的401和已认证但无权限的403，日志记录权限代码和追踪 ID，不回显完整 JWT。
+
+认证与授权测试要覆盖：合法访问令牌、签名错误、issuer 错误、type 错误、过期令牌、撤销 jti、权限不足、无 Authorization 头、CORS 预检和密钥轮换窗口。测试不应把真实密钥写进源码，使用测试专用随机密钥和固定时钟；集成测试验证过滤器确实建立`SecurityContext`，方法授权验证权限缺失时返回403。刷新测试还要验证旧 refresh jti 不能重复使用，并检查 Redis 过期后黑名单自动清理。
+
+### 5.5.1 威胁模型与认证边界
+
+安全设计先描述需要保护的对象和攻击路径。案例水库平台至少要保护值班员身份、测站写入权限、预警处置记录、设备上报密钥和审计日志；攻击者可能伪造 Bearer 令牌、重放被窃取的刷新令牌、利用错误码枚举账号、通过跨源页面诱导请求，或在日志和备份中搜寻长期有效的密钥。JWT 只解决“令牌由谁签发、内容是否被篡改”，不能解决令牌被复制后的重放，也不能代替传输层加密、账户生命周期和数据库权限。
+
+访问令牌的有效期应短于一次值班班次中可接受的暴露窗口，刷新令牌的寿命则受设备风险、撤销能力和人工换班流程约束。有效期不是越长越方便：时间越长，泄露后的可利用窗口越大；时间越短，客户端刷新和故障恢复越频繁。工程上要结合网关超时、Redis 可用性、时钟偏差和移动网络重连确定数值，并把这些配置写入安全评审记录，而不是在代码中散落魔法数字。
+
+### 5.5.2 密钥生命周期与配置管理
+
+HMAC 密钥必须来自受控密钥管理器或部署平台的机密变量，应用配置只保存变量名和密钥版本。启动时校验 Base64 可解码、长度满足算法要求、issuer 非空且当前版本处于有效窗口；校验失败立即阻止实例接收流量。日志只能输出密钥版本和摘要，不能输出密钥本身、完整 JWT 或配置对象的`toString`。
+
+密钥轮换分为准备、双读、切换和退役四步。准备阶段生成新密钥并登记版本；双读阶段验证器按令牌头部的`kid`选择旧或新密钥，但签发只使用新密钥；切换阶段撤销异常版本并观察认证失败率；退役阶段等待最长刷新令牌寿命加时钟容差后删除旧密钥。若令牌没有`kid`，轮换时只能按时间窗口尝试有限的候选密钥，并应在下一次签发中补上版本标识。
+
+### 5.5.3 密码、账户与登录防护
+
+密码存储使用 Spring Security 的`PasswordEncoder`，例如 BCrypt 或 Argon2，并由安全基线规定成本因子。数据库只保存哈希、算法版本、修改时间和失败计数，不保存明文或可逆加密后的密码。登录成功后清零失败计数并记录设备和追踪 ID；连续失败触发指数退避或临时锁定，解锁由风险策略决定。管理员重置密码时应递增账户令牌版本，使旧访问和刷新令牌全部失效。
+
+认证异常的外部表现要统一。用户名不存在、密码错误、账户停用和二次认证失败都返回相同的401描述，详细原因只写入受控审计；资源存在性检查在权限判断之后执行，避免未授权用户通过404/403差异推测测站编号。审计事件记录主体、客户端、时间、结果码和关联的`jti`，但不记录密码、Authorization 头或完整刷新令牌。
+
+### 5.5.4 CSRF、CORS 与浏览器存储
+
+本章过滤链关闭 CSRF 的前提是 API 只从 Authorization 头读取 Bearer 令牌，且访问令牌不由浏览器自动附带。如果改用 HttpOnly Cookie 保存凭据，浏览器会自动发送 Cookie，必须启用 CSRF 令牌或采用双重提交方案；把 Cookie 标记为 HttpOnly 只能降低脚本读取风险，不能阻止跨站请求本身。SameSite、Secure、过期时间和域路径应与部署拓扑一起评审。
+
+CORS 预检请求只是在浏览器侧询问“是否允许这个源访问”，服务端仍要执行身份认证和方法授权。生产环境把来源列入白名单，明确允许的方法、请求头、暴露头和缓存时长；不能因为预检失败就放开`*`，也不能把 CORS 当作防火墙。非浏览器设备、Kafka 消费者和内部任务不受 CORS 保护，仍需使用服务身份和网络策略。
+
+前端存储策略要根据威胁模型选择。内存存储能缩短刷新后的暴露时间但页面刷新会丢失；`sessionStorage`限定标签页生命周期，却仍可能被同源脚本读取；`localStorage`便于持久登录但一旦发生 XSS 会长期暴露。更高要求的系统可以把刷新凭据放入受保护 Cookie，将短期访问令牌保存在内存，并配合 CSP、依赖审计和严格的 DOM 写入规则。无论选择哪种方案，网络日志、错误监控和浏览器历史都不应包含令牌。
+
+### 5.5.5 权限建模与最小授权
+
+权限代码要表达稳定能力而不是界面按钮。例如`STATION_READ`允许读取测站，`READING_WRITE`允许写入读数，`ALERT_ACKNOWLEDGE`允许确认预警；“值班员”“专业分析员”“审批人”和“运维员”是角色，角色到权限的映射由服务端配置管理。资源范围还要单独检查：拥有读数写入权限不代表可以修改所有工程或归档记录。
+
+方法级注解适合表达粗粒度能力，细粒度的测站归属、时间窗口和状态迁移放在应用服务。授权判断失败应保持无副作用，不能先保存实体再检查权限；批量接口要逐条验证资源范围，避免一条请求越权覆盖其他测站。权限增加采用向后兼容策略，权限删除或含义改变则发布版本化变更，并在审计中记录授权策略版本。
+
+### 5.5.6 撤销、重放与故障降级
+
+撤销服务不可达时，系统必须事先确定“安全失败”还是“可用优先”。对写入、密码修改和预警处置等高风险操作应拒绝请求并返回503，读取公开状态可以使用短时间缓存但要标记缓存时间。Redis 黑名单记录应带 TTL，TTL 至少覆盖令牌剩余寿命；用户版本号变更要通过事务更新并在缓存失效后最终一致。撤销接口本身需要认证、幂等和审计，不能让任意客户端提交 jti 即可封禁其他用户。
+
+重放检测不仅适用于刷新令牌，也适用于一次性登录链接、密码重置链接和设备注册码。服务端保存随机值的哈希、主体、用途、首次使用时间和过期时间；第一次消费后原子地标记已用，重复消费返回统一错误。消息或 HTTP 重试必须携带请求 ID，不能通过比较请求到达时间猜测是否重复。检测到同一刷新会话族的异常重放时，可撤销该用户全部会话并通知运维复核。
+
+### 5.5.7 认证链路的可观测性与演练
+
+安全指标包括401/403比率、签名失败、issuer/type 不匹配、刷新成功率、撤销查询延迟、Redis 错误、密钥版本分布和账户锁定次数。指标标签不能使用完整用户名、令牌或高基数的原始 URL，避免监控系统本身泄露隐私。日志采用结构化字段记录`traceId`、主体哈希、jti 哈希、权限结果和策略版本；审计日志单独存储并设置保留和访问权限。
+
+演练应覆盖密钥误配、Redis 故障、旧密钥退役过早、时钟漂移、刷新令牌重放和网关错误转码。每次演练记录检测时间、拒绝比例、恢复步骤和未覆盖的请求类型；恢复后检查旧令牌是否仍能访问、黑名单是否增长异常、缓存是否持有过期权限。安全控制只有在故障状态下仍然可解释，才算完成工程闭环。
+
+接口契约中还应明确 Authorization 头的大小上限、令牌格式、401/403/429/503 的响应结构和重试建议。网关负责基础限流，应用服务负责账户和 jti 级别的风控，数据库负责审计唯一性；三层职责不能互相假定。发布前使用自动化扫描检查依赖漏洞、弱密钥、调试端点和错误日志，人工复核权限矩阵与数据范围。这样，学生可以把安全实现从一段过滤器代码扩展为可部署、可轮换、可审计的系统能力。
+
+### 5.5.8 令牌失效与会话迁移
+
+用户退出登录不等于浏览器立即忘记令牌。客户端应清除内存中的访问令牌、撤销当前 refresh jti，并在下一次请求收到401时停止自动重试，避免失败请求形成循环。服务端注销接口验证当前 refresh 会话的主体和设备范围，再写入撤销记录；管理员强制下线则递增账户版本并记录原因。多个终端同时在线时，注销一个设备不应误伤其他设备，除非操作明确选择“退出全部会话”。
+
+会话迁移要考虑密钥轮换和权限变更。权限从“可写入”降为“只读”后，已签发的短期 access token 仍可能在剩余寿命内携带旧权限；高风险权限可以采用更短的 access 有效期、实时版本检查或敏感接口再次查询账户状态。普通读取允许短暂使用令牌声明以降低延迟，但预警确认、规则发布和测站配置修改应在服务层执行最新权限检查。
+
+令牌解析失败的错误分类只用于内部指标，不直接返回给客户端。签名失败、过期、issuer 不匹配、type 错误和撤销状态分别计数，响应统一为401；权限不足返回403；触发账户或 IP 限流返回429并给出重试时间；密钥服务或撤销存储不可用返回503。这样既不给攻击者提供试错反馈，又让运维能从指标判断是密钥配置错误、时钟漂移还是恶意重放。
+
+刷新端点要限制调用频率和来源，不能接受跨域任意站点的请求体。客户端只在访问令牌临近过期或收到明确的401时刷新一次，使用互斥锁合并并发刷新，避免多个请求同时消费同一个旧 refresh jti。服务端轮换成功后返回新令牌对和过期时间，客户端只保留最新一对；如果轮换失败，清除本地凭据并要求重新登录，不能继续使用已经被撤销的旧令牌。
+
+审计数据要区分“认证事件”和“业务操作”。登录成功、登录失败、刷新、撤销、密钥切换属于认证事件；创建读数、确认预警、修改配置属于业务操作。两类事件共享 traceId 和主体，但保留不同的保留期限、访问角色和脱敏规则。审计表设置事件 ID 唯一约束，写入失败时按照 5.4 节确立的事务边界决定回滚主操作、写入发件箱或进入人工补偿，不能静默丢失。
+
+安全配置应在启动检查和运行检查中分别验证。启动检查确认 issuer、密钥版本、撤销存储地址和 CORS 白名单存在；运行检查周期性验证密钥即将过期、Redis 延迟、刷新失败率和时间同步偏差。健康端点可以报告“认证依赖不可用”，但不能在响应中泄露密钥版本之外的敏感配置。发布流水线在切换流量前先调用认证探针，验证合法令牌、非法签名和撤销令牌的三条路径。
+
+在多服务部署中，不同服务是否共享 JWT 签名密钥要有明确决策。共享密钥便于验证但扩大泄露影响，任一服务都能伪造其他服务信任的令牌；公钥验证和集中签发可以缩小签名权限，服务只持有验证公钥，签发服务通过安全通道保护私钥。无论采用 HMAC 还是非对称算法，issuer、audience、算法白名单和密钥版本都写入契约，禁止根据令牌头部的算法字段动态信任未知算法。
+
+最后，教材示例中的安全代码必须配套“不能做什么”的检查清单：不手工 Base64 解码后信任 Claims，不使用未验签的解析 API，不把 refresh 当 access，不把密钥放在前端变量或 Git，不在异常中回显完整令牌，不用 CORS 放宽替代权限，不在过滤器里执行数据库写事务。代码审查、自动化测试和部署演练共同覆盖这些边界，学生才不会把一个能运行的 Demo 误当作生产级认证系统。
+
+## 5.6 事务事件与消息队列
+
+同一应用进程内的领域事件可降低模块耦合。若处理必须在数据库事务成功后执行，应使用`@TransactionalEventListener`并指定`AFTER_COMMIT`，不能用普通`@EventListener`声称“提交后执行”。
+
+**清单 5.34  事务提交后的指标事件监听**
+
+```java
+import org.springframework.context.event.EventListener;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.event.*;
+
+interface MetricsCounter {
+    void increment(String stationId);
+}
+
+@Component
+class ReadingEventHandler {
+    private final MetricsCounter metricsCounter;
+
+    ReadingEventHandler(MetricsCounter metricsCounter) {
+        this.metricsCounter = metricsCounter;
+    }
+
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    void afterCommit(ReadingSavedEvent event) {
+        metricsCounter.increment(event.stationId());
+    }
+}
+```
+
+跨服务通信必须使用网络可达的消息基础设施。下面的Kafka监听器位于告警服务，消费数据服务发布的事件；它不是进程内事件监听器。
+
+**清单 5.35  Kafka 消息监听与告警评估**
+
+```java
+record ReadingMessage(String eventId, String stationId,
+                      BigDecimal level, Instant measuredAt) {}
+
+@Component
+class AlertMessageListener {
+    private final AlertApplicationService alertService;
+
+    AlertMessageListener(AlertApplicationService alertService) {
+        this.alertService = alertService;
+    }
+
+    // 与后文幂等消费者分属不同消费组：两组各自独立消费同一主题
+    @KafkaListener(topics = "water.reading.saved", groupId = "alert-basic-v1")
+    void onReading(ReadingMessage message) {
+        alertService.evaluateIdempotently(message.eventId(), message.stationId(),
+                message.level(), message.measuredAt());
+    }
+}
+```
+
+消息系统不能自动保证业务恰好执行一次。生产者应考虑事务发件箱（outbox）或可靠发布；消费者用`eventId`去重，并配置有限重试、死信队列和监控。消息模式适合告警评估、通知和异步统计，不适合需要立即返回结果的简单查询。
+
+在分布式部署中，服务发现负责把逻辑服务名解析为可用实例，配置中心负责管理环境参数，网关负责认证、限流与路由。Spring Boot应用应通过明确的Starter和配置文件接入这些基础设施，并在健康检查中验证注册状态、心跳超时和实例摘除；业务代码只依赖稳定的服务接口，不把具体注册中心的客户端注解扩散到领域层。这样的边界便于在开发、测试和生产环境切换实现。
+
+### 5.6.1 为什么引入消息队列
+
+同步调用把生产者、消费者和网络故障绑在同一个请求里。写入服务保存读数后同步调用预警服务，若预警服务重启、网络抖动或处理变慢，写入请求就会超时；客户端重试又可能造成重复保存。同步链路还会把峰值流量直接传给下游，多个消费者同时扩容时难以平滑。Kafka 把事件写入持久化主题，生产者与消费者通过分区和偏移量解耦，消费者可以按自己的速度追赶积压。
+
+消息队列不是“异步就一定可靠”。生产者要处理发送失败、确认超时和序列化异常，消费者要处理重复投递、处理失败、顺序和重平衡；主题还要设置副本、保留时间、分区数和消费者组。事件体必须包含事件 ID、主体 ID、发生时间、模式版本和追踪 ID，不能只发送一个无法解释的数值。事件版本向后兼容时新增可选字段，破坏性变更发布新主题或新版本。
+
+**清单 5.36  Spring Kafka 生产与消费配置**
+
+```yaml
+spring:
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all
+      enable-idempotence: true
+      properties:
+        spring.json.add.type.headers: false
+    consumer:
+      group-id: reading-alert-v1
+      enable-auto-commit: false
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: com.example.water.events
+        spring.json.value.default.type: com.example.water.events.ReadingSavedMessage
+    listener:
+      ack-mode: record
+      concurrency: 3
+```
+
+清单5.36把生产者确认设为`acks=all`并打开 Kafka 的幂等生产者，减少网络重试造成的重复记录；消费者关闭自动提交，让业务处理成功后再提交偏移量。`spring.json.trusted.packages`只允许教材事件包，不能为了省事写`*`，否则恶意消息可能诱导反序列化不应实例化的类型。生产配置还应通过机密变量注入 SASL、TLS 和凭据，日志不得输出连接密码。
+
+### 5.6.2 生产者、事件模式与发送确认
+
+生产者把领域对象转换为事件 DTO，再通过`KafkaTemplate`发送。发送成功只表示 broker 接受并按确认策略写入，不表示消费者已经处理；因此接口若需要立即反馈，只返回本地保存结果和事件 ID，消费者处理状态通过状态查询或通知接口提供。发送回调记录分区、偏移量和耗时，失败进入重试或发件箱，而不是在 HTTP 线程中无限阻塞。
+
+**清单 5.37  KafkaTemplate 生产者与发送回调**
+
+```java
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.stereotype.Service;
+import java.time.Instant;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+
+record ReadingSavedMessage(String eventId, String stationId,
+                           String quality, Instant measuredAt,
+                           String schemaVersion, String traceId) {}
+
+@Service
+class ReadingEventPublisher {
+    private final KafkaTemplate<String, ReadingSavedMessage> kafka;
+    private final EventPublishFailureStore failures;
+
+    ReadingEventPublisher(KafkaTemplate<String, ReadingSavedMessage> kafka,
+                          EventPublishFailureStore failures) {
+        this.kafka = kafka;
+        this.failures = failures;
+    }
+
+    void publish(String stationId, String quality, Instant measuredAt,
+                 String traceId) {
+        String eventId = UUID.randomUUID().toString();
+        ReadingSavedMessage message = new ReadingSavedMessage(
+                eventId, stationId, quality, measuredAt, "v1", traceId);
+        CompletableFuture<?> future = kafka.send("water.reading.saved",
+                stationId, message);
+        future.whenComplete((result, error) -> {
+            if (error != null) failures.record(eventId, message, error);
+        });
+    }
+}
+```
+
+清单5.37使用测站 ID 作为消息键，使同一测站的事件在同一分区内保持顺序；分区数量和热点测站要通过压测评估。生产者不能在回调里直接修改主业务记录，因为回调可能在另一个线程执行且原事务早已结束；发送失败应写入可重试存储，后台任务按照退避策略再次发送。事件 ID 在数据库和消息体中保持一致，便于消费者去重和运维追踪。
+
+### 5.6.3 消费者幂等与去重约束
+
+Kafka 至少一次投递意味着消费者可能在业务提交后、偏移量提交前崩溃，重启后再次收到同一消息。幂等处理要把“是否处理过”与业务写入放进同一个数据库事务，并用事件 ID 唯一约束作为并发闸门。先插入去重表，若违反唯一约束则返回“已处理”；插入成功后执行预警评估和状态更新，事务提交后再提交偏移量。只在内存 Set 中去重会在重启或多实例之间失效。
+
+**清单 5.38  事件去重表与消费者事务**
+
+```java
+import jakarta.persistence.*;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import java.time.Instant;
+
+@Entity
+@Table(name = "consumed_event",
+       uniqueConstraints = @UniqueConstraint(name = "uk_event_id",
+                                              columnNames = "eventId"))
+class ConsumedEvent {
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    @Column(nullable = false, length = 64) private String eventId;
+    @Column(nullable = false) private Instant consumedAt;
+    protected ConsumedEvent() {}
+    ConsumedEvent(String eventId, Instant consumedAt) {
+        this.eventId = eventId; this.consumedAt = consumedAt;
+    }
+}
+
+@Service
+class ReadingAlertConsumer {
+    private final ConsumedEventRepository consumed;
+    private final AlertApplicationService alerts;
+
+    ReadingAlertConsumer(ConsumedEventRepository consumed,
+                         AlertApplicationService alerts) {
+        this.consumed = consumed; this.alerts = alerts;
+    }
+
+    @Transactional
+    @KafkaListener(topics = "water.reading.saved", groupId = "alert-v1")
+    void onMessage(ReadingSavedMessage message) {
+        try {
+            consumed.saveAndFlush(new ConsumedEvent(
+                    message.eventId(), Instant.now()));
+        } catch (DataIntegrityViolationException duplicate) {
+            return; // 唯一约束表明该事件已成功处理
+        }
+        alerts.evaluate(message.stationId(), message.measuredAt(),
+                        message.quality(), message.traceId());
+    }
+}
+```
+
+清单5.38的去重表应设置保留窗口，覆盖消息最大重投和人工补发周期；过期清理必须与审计要求协调，不能在仍可能重投时删除记录。若业务更新跨越多个数据库或调用外部系统，去重记录、状态更新和外部副作用需要事务发件箱、幂等 API 或补偿流程共同保证。消费者组扩容只改变分区分配，不会自动消除重复消息。
+
+### 5.6.4 重试、退避与死信队列
+
+失败要先分类。网络瞬断、数据库连接暂时耗尽和下游503属于可重试错误，应使用有限次数、指数退避和抖动；JSON 格式错误、未知事件版本、违反业务约束属于不可重试错误，应立即进入死信并通知值班员。无限重试会让一个坏消息长期阻塞分区，重试主题或死信主题要保留原事件、异常类型、首次失败时间、重试次数和原始追踪 ID。
+
+**清单 5.39  DefaultErrorHandler 与死信发布**
+
+```java
+import org.apache.kafka.common.TopicPartition;
+import org.springframework.context.annotation.*;
+import org.springframework.kafka.core.*;
+import org.springframework.kafka.listener.*;
+import org.springframework.util.backoff.ExponentialBackOff;
+
+@Configuration
+class KafkaErrorHandlingConfig {
+    @Bean
+    DeadLetterPublishingRecoverer deadLetterPublishingRecoverer(
+            KafkaOperations<Object, Object> template) {
+        return new DeadLetterPublishingRecoverer(template,
+                (record, error) -> new TopicPartition(
+                        record.topic() + ".DLT", record.partition()));
+    }
+
+    @Bean
+    DefaultErrorHandler kafkaErrorHandler(
+            DeadLetterPublishingRecoverer recoverer) {
+        ExponentialBackOff backOff = new ExponentialBackOff(1000L, 2.0);
+        backOff.setMaxElapsedTime(30_000L);
+        DefaultErrorHandler handler = new DefaultErrorHandler(recoverer, backOff);
+        handler.addNotRetryableExceptions(
+                IllegalArgumentException.class, JsonParseException.class);
+        return handler;
+    }
+}
+```
+
+清单5.39把不可重试异常直接送入死信，把瞬态异常限制在30秒窗口内。生产环境还要监控重试次数、死信增长、消费延迟和分区积压；死信处理界面允许专业分析员查看原因、修复数据后按原事件 ID 补发，补发仍经过去重约束。重试任务不能绕过认证和审计，也不能把死信内容原样展示给无权限用户。
+
+### 5.6.5 事务发件箱与可靠发布
+
+数据库提交和 Kafka 发送是两个资源，直接在事务中先保存再发送可能出现“数据库已提交、消息发送失败”，先发送再提交则可能出现“消息已消费、数据库回滚”。事务发件箱把待发送事件作为业务事务的一部分写入`outbox_event`表，提交后由发布器轮询或使用 CDC 读取，发送成功后更新状态。发布器崩溃可以从状态为 pending 的记录继续，消费者仍需幂等，因为发送确认和状态更新之间也可能重试。
+
+**清单 5.40  事务发件箱写入与发布任务**
+
+```java
+import jakarta.persistence.*;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.*;
+import org.springframework.transaction.annotation.Transactional;
+import java.time.Instant;
+
+@Entity
+@Table(name = "outbox_event")
+class OutboxEvent {
+    @Id @Column(length = 64) private String eventId;
+    @Column(nullable = false, length = 120) private String topic;
+    @Column(nullable = false, columnDefinition = "text") private String payload;
+    @Column(nullable = false, length = 16) private String status;
+    @Column(nullable = false) private Instant createdAt;
+    protected OutboxEvent() {}
+    OutboxEvent(String id, String topic, String payload, Instant now) {
+        eventId = id; this.topic = topic; this.payload = payload;
+        status = "PENDING"; createdAt = now;
+    }
+}
+
+@Service
+class OutboxService {
+    private final OutboxRepository outbox;
+    private final KafkaTemplate<String, String> kafka;
+
+    OutboxService(OutboxRepository outbox, KafkaTemplate<String, String> kafka) {
+        this.outbox = outbox; this.kafka = kafka;
+    }
+
+    @Scheduled(fixedDelay = 1000)
+    @Transactional
+    void publishPending() {
+        // 在事务内同步等待发送结果：whenComplete 回调运行在
+        // Kafka 客户端线程上，届时本事务早已提交，状态更新会
+        // 脱离事务；同步 get 换来的是"锁批次—发送—记结果"同事务
+        for (OutboxEvent event : outbox.lockNextBatch(100)) {
+            boolean ok;
+            try {
+                kafka.send(event.topic(), event.getEventId(),
+                           event.getPayload()).get(5, TimeUnit.SECONDS);
+                ok = true;
+            } catch (InterruptedException interrupted) {
+                Thread.currentThread().interrupt();
+                ok = false;
+            } catch (Exception sendFailure) {
+                ok = false;
+            }
+            outbox.markResult(event.getEventId(), ok);
+        }
+    }
+}
+```
+
+发件箱表要有状态、尝试次数、最后错误、下次重试时间和创建时间索引；发布器用行锁或租约避免多实例重复领取，发送确认和状态更新采用幂等更新。对于高吞吐时序事件，可以按日期分区、批量发送并设置保留期限，历史成功记录归档而不是无限增长。发件箱解决的是“本地事务与消息之间的原子记录”，不能替代 Kafka 副本、TLS、消费者幂等和死信治理；分区、副本与消费组的语义以 Kafka 官方文档为准<sup>[[39]](../../references.md#ref39)</sup>。
+
+消息安全还包括主题权限和数据脱敏。生产者只允许写入指定主题，消费者只允许读取所属组；不同环境使用不同集群凭据和主题前缀。事件中不放密码、JWT、个人信息或不必要的原始测点数据，日志使用事件 ID 和摘要定位。主题 ACL、Schema 版本、保留策略、灾备恢复和重放演练应纳入发布清单，确保异常时可以追踪“谁在何时向哪个主题写入了什么版本的事件”。
+
+### 5.6.6 分区、顺序与消费者组
+
+Kafka 主题由多个分区组成，分区是并行度和顺序边界。同一测站使用同一消息键时，事件在该分区内按偏移量有序；不同测站可以并行处理。分区数增加后不能保证跨分区全局顺序，预警规则若需要跨测站比较，应在应用层按时间窗口重新排序，或把比较任务建模为独立的聚合流。消费者组中的每个分区同一时刻只分配给一个消费者，但重平衡会暂停处理并重新分配，代码必须能安全重启。
+
+消费者提交偏移量的时机决定交付语义。先提交再执行业务可能丢失事件，处理成功再提交可能重复但可通过去重保证最终效果；长时间处理时要延长会话和最大轮询间隔，或把耗时任务转成任务表并快速确认消息。消费者处理线程不应执行无界的外部调用，数据库、HTTP 和模型推理都设置超时，失败交给错误处理器。积压指标按主题、分区和消费者组观察，不能只看应用实例 CPU。
+
+事件模式要有注册和兼容策略。生产者在消息中带模式版本，消费者对未知可选字段忽略，对未知必需字段进入死信；发布新版本前先运行旧消费者的契约测试。JSON 序列化默认的类型头可能泄露实现包名，配置中关闭类型头并使用受控的默认类型；跨服务使用明确的 DTO，不把 JPA 实体直接序列化。事件字段单位、时间时区、质量码和追踪 ID 在文档中固定，变化时附带迁移说明。
+
+批量发送和批量消费要控制资源。生产者可以按字节大小或时间窗口聚合，但必须设置最大等待时间，避免低流量时延迟无限增长；消费者批量拉取后逐条执行，部分失败记录每条事件 ID 和错误原因，不能把整批成功标记掩盖了坏行。发件箱发布器按状态和下次重试时间领取小批次，使用数据库行锁或租约避免多个实例重复发布。归档和清理任务保留失败记录及审计摘要，满足故障追溯与合规要求。
+
+消息链路的端到端测试从数据库事务开始：创建读数、写入发件箱、发布 Kafka、消费者去重、预警服务更新和死信补偿都使用固定事件 ID 和追踪 ID。测试模拟 broker 暂停、网络超时、消费者崩溃、重平衡、重复投递和未知模式，检查主记录是否重复、偏移量是否前进、死信是否可重放。压测记录生产吞吐、消费者延迟、数据库锁等待和 Redis/Kafka 连接数，容量结论以测量数据为依据。
+
+当 Kafka 集群不可用时，写入接口要依据业务级别选择策略：关键监测原始记录仍可先落库并由发件箱延迟发布，实时预警状态则返回“暂未评估”并在界面显示数据时间；不应为了保持 HTTP 200 而假装告警已完成。恢复后发布器按创建时间和优先级追赶积压，并限制重放速率，避免恢复瞬间再次冲击下游。运维手册记录暂停消费、扩容分区、迁移死信和回滚模式版本的步骤。
+
+## 5.7 性能优化与可观测性
+
+性能优化先测量再修改。数据库查询应建立与查询模式匹配的索引并使用分页；热点且允许短暂陈旧的数据可缓存；外部调用设置连接、读取和总超时；线程池与数据库连接池容量应依据压测结果配置。
+
+可观测性包括日志、指标和追踪。关键指标可包含请求延迟、错误率、数据库连接使用率、Kafka消费积压和告警处理时延。健康检查只说明实例可服务，不等同于业务正确。
+
+### 5.7.1 缓存与 Redis 一致性
+
+缓存的目标是减少重复读取和下游压力，而不是把数据库当作可选项。测站最新状态、权限字典和短期统计适合缓存；原始监测记录、审计日志和需要强一致的版本检查仍以 PostgreSQL 为准。缓存键要包含租户、测站、查询版本和单位，值中带生成时间与数据版本，界面显示缓存时间，避免把陈旧快照误当作实时水位。
+
+**清单 5.41  Spring Cache 与 Redis 缓存读写**
+
+```java
+import org.springframework.cache.annotation.*;
+import org.springframework.stereotype.Service;
+import java.time.Duration;
+
+@Service
+class LatestReadingCache {
+    private final ReadingQueryRepository repository;
+
+    LatestReadingCache(ReadingQueryRepository repository) {
+        this.repository = repository;
+    }
+
+    @Cacheable(cacheNames = "latest-reading", key = "#stationId",
+               unless = "#result == null")
+    public ReadingResponse get(String stationId) {
+        return repository.findLatest(stationId)
+                .map(ReadingResponse::from)
+                .orElseThrow(() -> new EntityNotFoundException("测站无读数"));
+    }
+
+    @CacheEvict(cacheNames = "latest-reading", key = "#stationId")
+    public void evictAfterWrite(String stationId) {
+        // 由提交后事件调用，避免事务回滚时清错缓存
+    }
+}
+
+@Configuration
+class RedisCacheConfig {
+    @Bean
+    RedisCacheConfiguration cacheDefaults() {
+        return RedisCacheConfiguration.defaultCacheConfig()
+                .entryTtl(Duration.ofSeconds(30))
+                .disableCachingNullValues();
+    }
+}
+```
+
+清单5.41把缓存失效挂到写入提交后的事件，而不是在事务中提前删除；如果写入回滚，旧缓存仍然有效。生产环境为不同缓存设置 TTL 和容量上限，序列化采用受控 JSON 类型，禁止把 JPA 实体和懒加载代理直接写入 Redis。缓存命中、未命中、序列化失败和驱逐次数都要有指标，才能判断缓存是否真正降低了数据库压力。
+
+缓存有三类常见风险。缓存穿透是大量请求查询不存在的测站，应用可以对空结果短暂缓存、校验 ID 格式并设置限流；缓存击穿是热门键在同一时刻过期，应用可以使用互斥锁、逻辑过期或预热任务；缓存雪崩是大量键同时过期或 Redis 集群故障，应用应加入随机 TTL、分批预热、熔断和数据库限流。降级读取旧快照时必须标注时间和可信等级，不能静默返回“最新”。
+
+### 5.7.2 分页、游标与查询预算
+
+页码分页适合需要跳转和精确总数的管理界面，游标分页适合不断追加的时序数据。游标由最后一条记录的时间和唯一 ID 组成，服务端签名或编码后返回不透明字符串；下一页使用`(measuredAt,id) < (cursorTime,cursorId)`的联合条件，避免高页码`OFFSET`扫描历史数据。游标必须绑定原查询过滤条件和过期时间，客户端不能自行修改边界。
+
+**清单 5.42  基于时间与 ID 的游标分页**
+
+```java
+import org.springframework.data.domain.*;
+import org.springframework.data.jpa.repository.*;
+import org.springframework.data.repository.query.Param;
+import java.time.Instant;
+import java.util.List;
+
+record ReadingCursor(Instant measuredAt, long id) {}
+record CursorPage<T>(List<T> content, String nextCursor,
+                     boolean hasNext) {}
+
+interface ReadingCursorRepository extends JpaRepository<WaterReading, Long> {
+    @Query("select r from WaterReading r "
+         + "where r.stationId = :stationId "
+         + "and (r.measuredAt < :time or "
+         + "(r.measuredAt = :time and r.id < :id)) "
+         + "order by r.measuredAt desc, r.id desc")
+    List<WaterReading> next(@Param("stationId") String stationId,
+                            @Param("time") Instant time,
+                            @Param("id") long id, Pageable limit);
+}
+
+@Service
+class CursorReadingService {
+    private final ReadingCursorRepository repository;
+    CursorReadingService(ReadingCursorRepository repository) {
+        this.repository = repository;
+    }
+
+    @Transactional(readOnly = true)
+    CursorPage<ReadingResponse> next(String stationId, ReadingCursor cursor) {
+        List<WaterReading> rows = repository.next(stationId,
+                cursor.measuredAt(), cursor.id(), PageRequest.of(0, 51));
+        boolean hasNext = rows.size() > 50;
+        List<WaterReading> page = hasNext ? rows.subList(0, 50) : rows;
+        String next = hasNext ? encode(page.get(page.size() - 1)) : null;
+        return new CursorPage<>(page.stream().map(ReadingResponse::from).toList(),
+                next, hasNext);
+    }
+
+    private String encode(WaterReading row) {
+        return row.getMeasuredAt().toString() + ":" + row.getId();
+    }
+}
+```
+
+清单5.42多取一条记录判断是否还有下一页，避免额外的`count(*)`；生产实现要对游标签名或使用服务器端存储，防止客户端篡改时间和测站。分页请求限制时间范围、单页大小和并发导出任务数，大范围报表转成异步任务并返回任务 ID。性能预算写在接口契约中，例如 P95 查询时延、最大返回字节数和连接占用上限。
+
+### 5.7.3 连接池与慢查询定位
+
+连接池容量不是越大越好。每个请求占用一个数据库连接，连接数过大会让 PostgreSQL 争抢 CPU 和内存；连接数过小则请求排队。初始值根据数据库最大连接数、服务实例数和其他后台任务估算，再通过压测调整。HikariCP 的连接超时、最大生命周期、空闲超时和泄漏检测应有明确单位，日志显示池中活动、空闲、等待连接数，不能只看 HTTP 线程数量。
+
+慢查询定位遵循“请求—Repository—SQL—执行计划”链路。结构化日志带 traceId 和查询名，Micrometer 记录耗时分位数；PostgreSQL 慢查询日志和`pg_stat_statements`提供 SQL 级证据；`EXPLAIN (ANALYZE, BUFFERS)`确认是否命中联合索引、是否发生 N+1 或大范围顺序扫描。优化后重新压测并比较 P95、锁等待、缓存命中和连接池排队，不能只凭一次本地运行下结论。
+
+**清单 5.43  连接池、超时与慢查询日志配置**
+
+```yaml
+spring:
+  datasource:
+    hikari:
+      maximum-pool-size: ${DB_POOL_MAX:20}
+      minimum-idle: ${DB_POOL_MIN:5}
+      connection-timeout: 2000
+      validation-timeout: 1000
+      max-lifetime: 1800000
+      leak-detection-threshold: 5000
+  jpa:
+    properties:
+      hibernate.generate_statistics: false
+logging:
+  level:
+    org.hibernate.SQL: INFO
+    com.zaxxer.hikari: INFO
+```
+
+配置中的默认值只用于开发验证，生产值由容量评估和压测报告确定。泄漏检测用于发现忘记关闭流或事务边界失控，不能长期替代正确的资源管理；SQL 日志在生产环境要脱敏并控制采样率，避免把测站数据和参数全部写入日志。连接池耗尽应触发告警和限流，服务返回503或可解释的降级结果，而不是无限等待。
+
+### 5.7.4 Actuator、Micrometer 与结构化日志
+
+Actuator 端点按暴露风险分组。健康检查可以公开进程存活和依赖状态，指标端点只允许运维角色访问，`env`、`configprops`和线程转储在生产环境默认关闭或经过严格授权。健康状态区分 liveness、readiness 和业务可用：数据库不可达时实例可能仍存活，但不应接收写入流量。
+
+**清单 5.44  Actuator 健康检查与 Micrometer 指标**
+
+```java
+import io.micrometer.core.instrument.*;
+import org.springframework.boot.actuate.health.*;
+import org.springframework.context.annotation.*;
+import org.springframework.stereotype.Component;
+
+@Component
+class ReadingHealthIndicator implements HealthIndicator {
+    private final ReadingRepository repository;
+    ReadingHealthIndicator(ReadingRepository repository) {
+        this.repository = repository;
+    }
+    public Health health() {
+        return repository.isAvailable()
+                ? Health.up().withDetail("store", "postgresql").build()
+                : Health.down().withDetail("store", "unavailable").build();
+    }
+}
+
+@Configuration
+class ReadingMetrics {
+    ReadingMetrics(MeterRegistry registry) {
+        Gauge.builder("water.reading.queue.depth", this,
+                metrics -> metrics.queueDepth())
+             .description("待处理读数队列深度").register(registry);
+        Counter.builder("water.reading.rejected")
+               .description("因质量或权限拒收的读数")
+               .register(registry);
+    }
+    double queueDepth() { return 0; }
+}
+```
+
+清单5.44把健康检查和业务指标分开：健康检查回答“实例是否能工作”，指标回答“处理质量和容量如何”。指标标签使用有限枚举，如质量码、结果类型和服务版本，不能把测站 ID、用户 ID 或完整 URL 作为高基数标签。告警阈值与案例水库 8.1 参数表中的工程阈值分离，运维告警不能修改业务预警标准。
+
+**表 5.3  后端性能与可运维关键指标**
+
+| 指标                | 采集位置               | 处置动作                         |
+|:--------------------|:-----------------------|:---------------------------------|
+| HTTP P95/P99 延迟   | Micrometer Timer、网关 | 按路由定位慢查询或下游超时       |
+| 连接池活动/等待数   | Hikari 指标            | 调整池大小、限流并检查事务泄漏   |
+| 缓存命中率/驱逐数   | Redis 客户端           | 调整 TTL、键设计和预热策略       |
+| Kafka 积压/死信数   | 消费者组、DLT          | 扩容消费者、修复模式或补发事件   |
+| 错误率与401/403/503 | 结构化日志、计数器     | 区分客户端、权限、依赖和发布故障 |
+
+表5.3中的指标必须能关联同一 traceId 和发布版本，值班员才能从告警跳到具体请求和日志。指标只做趋势和阈值判断，根因仍需结合日志、数据库执行计划和消息偏移量。告警规则设置冷却、恢复通知和责任角色，避免同一故障在网关、服务、数据库和 Kafka 层重复轰炸。
+
+**清单 5.45  traceId 贯穿请求与结构化日志**
+
+```java
+import jakarta.servlet.*;
+import jakarta.servlet.http.*;
+import org.slf4j.MDC;
+import org.springframework.web.filter.OncePerRequestFilter;
+import java.io.IOException;
+import java.util.UUID;
+
+class TraceIdFilter extends OncePerRequestFilter {
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain chain)
+            throws ServletException, IOException {
+        String traceId = request.getHeader("X-Trace-Id");
+        if (traceId == null || traceId.isBlank())
+            traceId = UUID.randomUUID().toString();
+        try (MDC.MDCCloseable ignored = MDC.putCloseable("traceId", traceId)) {
+            response.setHeader("X-Trace-Id", traceId);
+            chain.doFilter(request, response);
+        }
+    }
+}
+```
+
+清单5.45在请求进入时建立 traceId，在离开线程前清理 MDC，避免线程池复用造成串号。Kafka 事件、数据库审计、Redis 操作和异步任务要显式传递 traceId；跨服务只传递可追踪 ID，不把 Authorization 头写入日志。结构化日志字段固定为时间、级别、服务、版本、traceId、事件类型、耗时和结果码，中文描述作为补充，便于机器检索和人工复核。
+
+性能优化要与容量和恢复一起验收。一次压测至少记录并发请求、P95/P99、数据库连接、缓存命中、Kafka 积压、错误分类和 CPU/内存；故障演练再观察 Redis 不可用、数据库慢查询、Kafka 延迟和下游超时的降级结果。任何优化都保留开关、回滚配置和前后对比，避免为了追求单次吞吐牺牲数据可信度或审计完整性。
+
+### 5.7.5 性能故障的分层处置
+
+发现接口变慢时，先用 traceId 确认请求是否在网关排队、控制器参数校验、服务业务规则、数据库查询、Redis 访问还是 Kafka 发送阶段耗时。网关延迟高应检查连接和限流，服务耗时高应检查线程池和外部超时，数据库耗时高应查看执行计划、锁等待和连接池，缓存异常应查看命中率、序列化和网络延迟，消息积压则检查分区热点和消费者处理时间。分层诊断避免把所有问题都归结为“数据库不够快”。
+
+降级策略要保持业务语义。测站最新状态查询可以在短时间内返回标注时间的缓存快照；原始读数写入应优先保证落库，消息通知通过发件箱延迟；预警评估依赖数据质量不足时返回“未评估”，而不是生成一个看似正常的颜色；权限和审计服务不可用时，高风险写操作拒绝并返回503。每种降级都记录原因、开始时间、影响接口和恢复条件，恢复后自动清除或由运维确认。
+
+Actuator 与日志端点本身也是生产攻击面。只暴露健康和必要指标，端点路径放在独立管理网或由 Spring Security 保护；健康详情不显示数据库地址、用户名、异常堆栈和令牌配置。结构化日志采用 JSON 输出，敏感字段在进入 MDC 前脱敏，异常堆栈关联内部事件 ID 而不是回显给客户端。日志采样不能丢失安全失败、事务回滚、死信和数据拒收事件，这些事件需要完整审计。
+
+连接池和线程池必须共同估算。一个请求可能先占数据库连接，再等待 Kafka 回调或外部 HTTP，若线程数远大于连接池就会产生排队，若连接池远大于数据库容量则会放大锁竞争。使用压测数据设定最大并发、队列长度、拒绝策略和优雅停机时间；停机先停止接收新消息，再等待正在处理的事务提交或回滚，最后关闭连接池。健康检查只有在资源准备好后才报告 ready，滚动发布不会把半初始化实例加入流量。
+
+缓存、分页和指标的配置要纳入版本管理。每次改变 TTL、最大页大小、连接池或告警阈值，都在变更记录中说明预期收益、风险、验证查询和回滚值；环境变量覆盖只改变部署参数，不改变案例水库的工程参数。运维手册提供一条从指标告警到日志、SQL、Kafka 偏移量和发布版本的排查路径，值班员按步骤即可复现和升级问题。 每次演练结束后还要归档指标快照、关键日志、执行计划和责任人复盘结论，形成下一轮容量评估的可追溯基线。 复盘结论应同步到发布记录和运维知识库。 容量评估还应标注数据版本和运行环境，保证不同批次的结果可比较。
+
+## 5.8 测试策略与质量门禁
+
+测试不是在开发完成后“补一遍请求”，而是把接口契约、事务边界和安全策略转化为可以重复执行的证据。对水利工程安全监测平台而言，测试数据必须带有测站编号、采样时间、质量码和操作者上下文；只验证 HTTP 状态码而不检查质量码和审计字段，仍可能把无效读数送入风险计算。测试报告应记录代码版本、数据库迁移版本、配置 Profile、时区和数据集版本，便于值班员在故障复盘时重现同一条件。
+
+单元测试关注一个类在依赖替身下的决策：例如服务层收到越界水位时是否拒绝写入、重复的幂等键是否返回同一结果、乐观锁冲突是否转换为409。它不启动 Servlet 容器，也不依赖真实网络。集成测试则验证多个边界的协作，包括 Spring MVC 参数绑定、Spring Security 过滤链、JPA 事务和 PostgreSQL 约束；这类测试允许启动应用上下文，但必须明确清理数据。端到端测试再覆盖 Kafka、Redis 或反向代理等外部依赖，数量应少而稳定，不能把所有业务分支都塞进一条慢测试。
+
+服务层的单元测试可以用 Mockito 构造仓储和时钟替身，重点断言“调用了什么”以及“拒绝了什么”。清单5.46给出一个可独立阅读的例子：测试使用固定时钟和明确的质量码，避免依赖当前时间导致偶发失败。异常断言应检查稳定的领域错误码，而不是绑定完整中文消息，这样日志文案调整不会破坏协议测试。
+
+**清单 5.46  服务层单元测试：质量码与幂等决策**
+
+```java
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.math.BigDecimal;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+class ReadingCommandServiceTest {
+    @Mock private ReadingRepository repository;
+    @Mock private IdempotencyStore idempotencyStore;
+    private ReadingCommandService service;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+        Clock clock = Clock.fixed(Instant.parse("2026-08-07T00:00:00Z"),
+                ZoneOffset.UTC);
+        service = new ReadingCommandService(repository, idempotencyStore, clock);
+    }
+
+    @Test
+    void rejectsMissingQualityReading() {
+        ReadingCommand command = new ReadingCommand("QY-001",
+                new BigDecimal("48.20"), Instant.parse("2026-08-06T23:59:00Z"),
+                "missing", "event-1");
+        assertThatThrownBy(() -> service.save(command))
+                .isInstanceOf(DomainValidationException.class)
+                .hasMessageContaining("QUALITY_NOT_USABLE");
+    }
+
+    @Test
+    void storesValidReadingOnceForAnIdempotencyKey() {
+        ReadingCommand command = new ReadingCommand("QY-001",
+                new BigDecimal("48.20"), Instant.parse("2026-08-06T23:59:00Z"),
+                "valid", "event-2");
+        when(idempotencyStore.claim("event-2")).thenReturn(true);
+        service.save(command);
+        verify(repository).save(any(Reading.class));
+    }
+}
+```
+
+接口集成测试使用`@SpringBootTest`加载真实配置和安全过滤链，再用`MockMvc`发出 HTTP 请求。测试配置应使用专门的 Profile，令牌签名密钥、数据库 URL 和 Kafka 地址全部由测试环境注入，禁止读取开发机的生产变量。清单5.47把四种最小场景写成独立测试方法，并验证响应体中的错误码；无权限场景必须真的经过过滤链，不能只调用控制器方法绕过授权。
+
+**清单 5.47  MockMvc 接口测试：四种基础场景**
+
+```java
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.http.MediaType;
+import org.springframework.security.test.web.servlet.request.
+        SecurityMockMvcRequestPostProcessors;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.web.servlet.MockMvc;
+
+@SpringBootTest
+@AutoConfigureMockMvc
+@ActiveProfiles("test")
+class ReadingControllerIT {
+    @Autowired private MockMvc mockMvc;
+
+    @Test
+    void returnsLatestReadingForAnAuthorizedUser() throws Exception {
+        mockMvc.perform(get("/api/readings/latest")
+                .param("stationId", "QY-001")
+                .with(SecurityMockMvcRequestPostProcessors.user("analyst")
+                        .roles("ANALYST")))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.stationId").value("QY-001"));
+    }
+
+    @Test
+    void rejectsInvalidParameter() throws Exception {
+        mockMvc.perform(get("/api/readings/latest")
+                .param("stationId", "")
+                .with(SecurityMockMvcRequestPostProcessors.user("analyst")
+                        .roles("ANALYST")))
+            .andExpect(status().isBadRequest())
+            // 错误响应采用 ProblemDetail 结构，稳定错误码放在扩展字段 code
+            .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+    }
+
+    @Test
+    void rejectsUserWithoutReadPermission() throws Exception {
+        mockMvc.perform(get("/api/readings/latest")
+                .param("stationId", "QY-001")
+                .with(SecurityMockMvcRequestPostProcessors.user("operator")))
+            .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void returnsNotFoundForUnknownStation() throws Exception {
+        mockMvc.perform(get("/api/readings/latest")
+                .param("stationId", "QY-999")
+                .with(SecurityMockMvcRequestPostProcessors.user("analyst")
+                        .roles("ANALYST")))
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.code").value("STATION_NOT_FOUND"));
+    }
+}
+```
+
+Testcontainers 用一次性容器提供接近生产版本的 PostgreSQL、Redis 或 Kafka，避免开发机服务残留造成“本地通过、流水线失败”。容器启动后先执行版本化迁移，再插入最小数据集；每个测试用例使用事务回滚或唯一的测试批次 ID 清理数据，不能依赖测试执行顺序。清单5.48展示 PostgreSQL 容器与 Spring 测试属性的绑定；CI 应缓存镜像层但不缓存业务数据，容器退出时收集日志和数据库诊断信息。
+
+**清单 5.48  Testcontainers：隔离 PostgreSQL 集成环境**
+
+```java
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+
+@Testcontainers
+@SpringBootTest
+class ReadingRepositoryIT {
+    @Container
+    static final PostgreSQLContainer<?> POSTGRES =
+            new PostgreSQLContainer<>("postgres:16-alpine")
+                    .withDatabaseName("textbook_test")
+                    .withUsername("test")
+                    .withPassword("test");
+
+    @Autowired private ReadingRepository repository;
+
+    @DynamicPropertySource
+    static void databaseProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.url", POSTGRES::getJdbcUrl);
+        registry.add("spring.datasource.username", POSTGRES::getUsername);
+        registry.add("spring.datasource.password", POSTGRES::getPassword);
+        registry.add("spring.jpa.hibernate.ddl-auto", () -> "validate");
+    }
+
+    @AfterEach
+    void cleanTestRows() {
+        repository.deleteByStationIdStartingWith("TEST-");
+    }
+
+    @Test
+    void readsTheSameOrderingAsProduction() {
+        // 先由迁移脚本建立表，再插入 TEST- 前缀的数据并断言游标顺序。
+    }
+}
+```
+
+测试数据准备要区分“固定基准数据”和“用例临时数据”。测站元数据、单位和质量码字典属于基准数据，使用版本化 SQL 或`@Sql`在套件启动时加载，并在测试中只读；读数、告警事件和撤销令牌属于临时数据，使用工厂方法按用例生成，包含明确的事件 ID 和时间窗口。清理应覆盖数据库行、Redis 键、Kafka 测试主题和审计日志，失败时保留失败用例的样本快照而不是静默吞掉异常。对并发测试还应为每个线程分配独立测站或批次，避免清理线程删除另一个用例尚未断言的数据。
+
+四场景覆盖表5.4把题目要求落实到测试层次。正常场景验证业务结果和审计字段；参数错误验证字段级错误码以及不产生副作用；无权限验证401/403与敏感字段不泄露；资源不存在验证404并确认没有创建缓存或事件。每个新增接口都至少登记一行覆盖矩阵，变更权限、质量码或事务边界时重新执行全表，而不是只运行“绿色”的正常用例。
+
+**表 5.4  读数接口四场景测试覆盖**
+
+| 场景       | 测试层次                  | 关键断言                                     | 数据与清理                        |
+|:-----------|:--------------------------|:---------------------------------------------|:----------------------------------|
+| 正常       | MockMvc + Repository      | 200/201、质量码、审计人、事件 ID             | 使用 TEST- 测站，事务后删除       |
+| 参数错误   | Controller 单元 + MockMvc | 400、字段级错误码、仓储未被调用              | 不写数据库，不写缓存或发件箱      |
+| 无权限     | Spring Security 集成      | 未认证为401，缺少角色为403，响应不含令牌细节 | 使用短期测试主体，测试后撤销      |
+| 资源不存在 | Service + MockMvc         | 404、稳定的 NOT_FOUND 错误码、无副作用       | 读取不存在 ID，确认无缓存键和事件 |
+
+测试运行顺序应由构建工具统一管理，并行执行时隔离数据库 Schema 或测试批次。失败重试只能用于标记为瞬态的基础设施错误，业务断言失败不得自动重试掩盖缺陷。覆盖率数字只是信号：一段错误的权限判断可以被“执行过”却没有被有效断言。发布门禁至少包括编译、迁移、单元测试、集成测试、静态检查和关键接口的契约测试；长时间的 Testcontainers 套件可放在合并分支，但每次提交仍运行快速的 MockMvc 和服务单元测试。
+
+测试的输出还应能回答“哪一条证据证明这次变更安全”。每个失败用例保存请求摘要、用户角色、traceId、迁移版本和相关事件 ID；密码、JWT、连接串和完整测站坐标等敏感字段在报告中脱敏。接口契约测试把路径、方法、必填字段、响应状态和错误码固化为版本化文件，前后端在合并前共同校验，避免只改了 DTO 就悄悄改变客户端可见结构。数据库迁移测试先在空库执行全部版本，再从最近生产快照升级，分别检查索引、约束、TimescaleDB 超表和回滚脚本。
+
+质量码和预警判定需要专门的性质测试。对同一事件重复投递，业务状态只能改变一次；对时间逆序或缺测记录，系统必须写入相应质量码，并且不可进入风险打分；当数据恢复为 valid 时，后续事件可以重新评估，但不能修改已经归档的原始值。可以用参数化测试生成边界水位、边界时间和四种权限组合，再用随机顺序检验幂等性与事务隔离。这样测试关注的是协议性质，而不是某个偶然样本的输出。
+
+上线前的回归清单按风险排序：先跑认证和撤销，再跑质量码、事务和消息幂等，最后跑报表与大范围分页。任何一个关键套件失败都阻断发布；非关键外部依赖不可用时，测试应验证受控降级和明确的503，而不是把异常吞掉后返回空数组。值班员看到的告警必须能反查到失败测试、发布版本和责任人，修复后再用同一数据集重跑，形成“发现—定位—修复—复验”的闭环。
+
+!!! tip "提示"
+
+    **选学：Python Web 框架的场景化比较。**
+
+    主线后端采用 Spring Boot；若读者在数据分析服务中遇到 Python，可用表5.5建立边界意识。这里比较的是适用场景、生态与部署约束，不构成对某一框架的统一推荐，也不替代本章 Java 示例。
+
+**表 5.5  Python Web 框架的场景、生态与部署约束**
+
+| 框架    | 适用场景与生态                                                                             | 部署约束                                                                                                   |
+|:--------|:-------------------------------------------------------------------------------------------|:-----------------------------------------------------------------------------------------------------------|
+| Flask   | 轻量 API、数据处理微服务；扩展生态可按需组合，团队需自行约定目录、认证与错误格式。         | 需要明确 WSGI/ASGI 服务器、配置加载、迁移、监控和安全扩展；依赖越多，升级责任越集中在项目团队。            |
+| Django  | 需要管理后台、成熟 ORM 和约定式项目结构的既有系统；生态覆盖认证、后台与迁移。              | 运行时组件较完整，部署需管理静态资源、数据库迁移和进程模型；若只提供小型 API，需评估框架边界。             |
+| FastAPI | 类型提示驱动的 API、异步 I/O 或需要自动 OpenAPI 文档的服务；适合与 Python 数据处理库衔接。 | 以 ASGI 服务器、异步依赖和类型校验为基础；阻塞式科学计算必须移入任务队列或线程池，并补齐认证、限流和观测。 |
+
+## 5.9 小结
+
+把本章串起来的最好方式，是跟着一条写入请求走一遍。一次“提交观测读数”的调用先经过 Spring Security 6 的过滤器链验证 JWT 并解析权限，再进入控制器完成参数校验，然后由服务层开启事务、经 Repository 落库；事务提交后发布领域事件，事件由发件箱记录并异步投递到 Kafka，最后被消费者幂等处理。这条路径上的每一段，都对应本章的一节。
+
+每一层也都有各自最容易出错的地方。控制器层容易把校验只写在一处，而不是格式、业务规则、持久化约束三层都设卡；服务层容易在同类内部调用中丢掉事务代理，让 `@Transactional` 悄悄失效；持久化层容易踩 N+1 查询和懒加载边界；事件如果在事务提交之前发布，回滚后消息已经发了出去；消费者若没有去重的唯一约束，一次重试就会变成一次重复入库。密钥硬编码、Actuator 端点全量暴露、日志回显异常堆栈，则是把安全问题留到了上线之后。
+
+因此本章的验收标准不是接口返回 200，而是能不能拿出证据：事务边界的测试、幂等键的唯一约束、慢查询的执行计划、traceId 串起来的分层耗时，以及降级时“未评估”与“正常”之间的明确区分。示例统一采用 Java 17 与 Jakarta 命名空间，配置按 Profile 分环境外部化，都是为了让这些证据能在不同环境里重复得到。
+
+## 5.10 章末交付物
+
+提交一个最小后端原型：测站最新水位查询与监测值写入接口；JPA实体和Repository；一项具有明确事务边界的服务；认证与权限说明；一条提交后事件或Kafka消费链路；以及接口测试和运行日志。
+
+## 5.11 思考题与练习题
+
+1.  
+
+2.  创建新资源最常使用（）。A. GETB. POSTC. PATCHD. DELETE
+
+3.  Spring同一Bean内部自调用一定会触发方法上的事务代理。（判断：对／错）
+
+4.  加入第$n+1$个样本时，增量均值的分母应为（）。A. $n-1$B. $n$C. $n+1$D. $2n$
+
+5.  Spring Security 6启用方法授权使用（）。A. `@EnableMethodSecurity`B. `@EnableGlobalMethodSecurity`C. `@EnableEurekaClient`D. `@Async`
+
+6.  跨服务告警事件适合使用（）。A. 进程内普通事件B. Kafka主题C. 浏览器DOM事件D. CSS媒体查询
+
+7.  消费者记录并检查`eventId`有助于实现幂等处理。（判断：对／错）
+
+8.  
+
+9.  说明控制器、应用服务、Repository和数据库之间的职责边界。
+
+10. 解释为什么同Bean事务自调用可能失效，并给出两种改进思路。
+
+11. 设计测站最新水位查询与监测值写入接口，列出方法、路径和主要状态码。
+
+12. 比较`@TransactionalEventListener(AFTER_COMMIT)`与Kafka监听器的适用范围。
+
+13. 设计JWT密钥管理和刷新流程，说明如何在验证`type=refresh`、`issuer`和`jti`后处理过期刷新令牌，并用 Redis TTL 撤销记录与令牌轮换防止重放。
+
+14. 
+
+15. 使用Spring Boot实现本章章末交付物；所有单元测试和接口测试均须包含正常、参数错误、无权限和资源不存在场景。

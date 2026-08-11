@@ -1,269 +1,2911 @@
-## 第八章典型应用
+# 第8章 智慧水利平台典型应用
 
-## 学习目标
+**学习目标**
 
 通过本章学习，学生应能够：
 
-1. 理解智慧水利平台的整体架构设计原理和技术选型考虑
-2. 掌握三维场景建模的基本流程，包括CAD数据处理和模型优化技术
-3. 熟练运用数据处理技术，实现实时数据采集、质量控制和可视化展示
-4. 能够设计和实现完整的水利工程安全监测平台
+1.  把水利工程安全监测需求转化为角色、业务闭环、模块边界和验收条件；
 
-## 引言
+2.  复用第4–7章技术，设计Vue 3前端、Spring Boot后端、PostgreSQL数据底座与Three.js三维场景；
 
-本章通过一个完整的水利工程安全监测平台案例，将前面各章的技术知识进行综合应用。该平台集成了数据采集、三维建模、实时监测、智能分析等多种技术，为水利工程的安全运行提供全面的技术支撑。
+3.  建立数据质量、蓝黄橙红预警、工单处置和审计追踪的一致链路；
 
-## 本章结构
+4.  说明监测平台向数字孪生平台演进时，预报、预警、预演、预案如何由数据与模型支撑；
 
-!!! info "章节安排"
-    
-    ### [第一节 水利工程安全监测平台概述](section08-01.md)
-    - 平台整体架构设计
-    - 技术选型与系统集成
-    - 业务流程与数据流设计
-    
-    ### [第二节 场景设置与模型制作](section08-02.md)
-    - 水利工程三维建模流程
-    - CAD数据处理与转换
-    - 模型优化与LOD分级
-    
-    ### [第三节 数据处理与展示模块](section08-03.md)
-    - 实时数据采集系统
-    - 数据质量控制算法
-    - 多维数据可视化实现
-    
-    ### [第四节 监控模型与综合评价模块](section08-04.md)
-    - 安全评价指标体系
-    - 多参数融合预警算法
-    - 风险等级评估与决策支持
-    
-    ### [第五节 系统集成与运维管理](section08-05.md)
-    - 微服务架构设计
-    - 自动化运维与监控
-    - 故障处理与恢复机制
+5.  完成部署、降级、运维监控和阶段验收设计。
 
-## 架构设计原理
+**引言**
 
-### 分层架构设计
+本章以“水利工程安全监测平台”为贯穿教学案例，并在8.5节扩展到数字孪生水利平台。案例水库是教学虚构工程：坝高52 m，正常蓄水位168.0 m，设置12个渗压测点、8个位移测点、3个库水位测点、5个雨量测点和6台采集网关，与第7章保持一致。
 
-智慧水利安全监测平台采用分层架构，包括：
+全章按“需求与闭环—总体架构与三维底座—数据和前后端—智能分析与预警—数字孪生演进—部署运维与验收”组织。技术基线统一为Vue 3.4+、Vue Router 4、Pinia 2、Vite 5、Java 17、Spring Boot 3.2+、Spring Security 6、Kafka、Redis、PostgreSQL/PostGIS与TimescaleDB扩展；三维主线使用Three.js r160+，流域级地球与大范围地形浏览可选Cesium 1.12x+。
 
-**数据层**：负责数据存储和管理，包括监测数据、配置信息、用户数据等。采用关系型数据库存储结构化数据，时序数据库处理实时监测数据。
+!!! note "说明"
 
-**业务逻辑层**：实现核心业务功能，包括数据采集、处理、分析和预警。通过模块化设计实现功能的灵活组合和扩展。
+    **本章分为两篇**
 
-**表示层**：提供用户界面和数据展示，包括三维场景、数据图表和管理界面。支持多种访问方式，包括Web端和移动端。
+    8.1–8.4为**核心案例篇**：把前七章的方法与技术落成一个可运行的安全监测平台，交付物是"观测入库—质量检查—预警评估—工单处置"的完整闭环，属于48学时方案的课堂内容。8.5–8.6为**数字孪生拓展篇（选学）**：在核心平台之上叠加预演、会商与生产运维能力，适合课程设计与自学进阶。两篇可独立验收，学生完成核心篇即达到本章的基本要求。
 
-### 技术选型考虑
+!!! tip "提示"
 
-基于水利行业的特点和需求，平台的技术选型遵循以下原则：
+    **工程版本线：v4（观测展示与联动） $\rightarrow$ v5（完整平台）**
 
-- **稳定性优先**：选择成熟稳定的技术框架，确保系统长期可靠运行
-- **扩展性考虑**：支持横向和纵向扩展，适应业务增长和功能升级
-- **性能保障**：满足实时监测和大数据量处理的性能要求
-- **标准兼容**：遵循水利行业标准和相关规范
+    起点是 v4 的展示层。本章核心篇结束时你应交付 **v5**：加上质量检查、四级预警、工单闭环与部署编排的完整平台——仓库 `db/001_init.sql`、`ReadingConsumer`、`docker-compose.yml` 与 `smoke.sh` 是 v5 的骨架，本章清单把它们扩展为完整实现；拓展篇（8.5起）在 v5 之上叠加预演与会商，不修改 v5 的既有契约。
 
-### 数据处理流水线
+## 8.1 需求分析与业务闭环
 
-平台采用流式数据处理架构，实现从数据采集到分析结果输出的全流程处理：
+### 8.1.1 案例边界与工程参数
+
+安全监测平台服务于观测、分析、预警和处置，不直接替代工程运行规程。教学案例只模拟信息流程，不连接真实控制设备。监测点布设和数据使用应参考适用的工程设计与监测规范<sup>[[59]](../../references.md#ref59)[[60]](../../references.md#ref60)</sup>。
+
+表8.1给出本案例的全部教学参数。这张表是全书引用案例水库数据的唯一来源：后续章节出现的坝高、蓄水位、测点数量和网关数量都应回到这里核对，案例参数在不同章节各说各话是同类教材最常见的硬伤。
+
+**表 8.1  案例水库教学案例设定**
+
+| 项目         | 教学设定                                                        | 使用位置                       |
+|:-------------|:----------------------------------------------------------------|:-------------------------------|
+| 工程对象     | 52 m混凝土坝；坝基高程120.0 m，坝顶高程172.0 m，防浪墙顶173.2 m | 三维场景、对象编码与空间定位   |
+| 观测点       | 渗压12、位移8、水位3、雨量5                                     | 数据模型、图表、预警与质量检查 |
+| 流域与库容   | 流域面积320 km$^2$；总库容0.85亿 m$^3$                          | 降雨情景、水位包络与容量估算   |
+| 特征水位     | 死水位148.0 m；汛限水位165.5 m；正常蓄水位168.0 m               | 水位越限、预警分级与调度约束   |
+| 洪水控制水位 | 设计洪水位170.2 m（P=1%）；校核洪水位171.6 m（P=0.1%）          | 洪水情景与安全校核             |
+| 泄洪设施     | 3孔弧形闸门，单孔净宽8.0 m，闸底高程152.0 m，最大开度6.0 m      | 闸门正算、反算与方案编码       |
+| 接入设备     | 6台采集网关                                                     | 在线状态、断网缓存与补传       |
+| 用户角色     | 值班员、专业分析员、运维员、审批人、审计员                      | 权限、工单和职责分离           |
+| 教学事件     | 连续降雨后PZ-07渗压变化异常                                     | 预警、会商、处置和复盘         |
+
+案例参数必须在需求、数据库、页面、三维对象和测试数据中复用。若数据库出现`PZ-07`，三维模型和告警事件也应使用同一对象编码；不能在不同章节随意更换测点数量或阈值。
+
+### 8.1.2 角色、用例与权限边界
+
+值班员查看实时状态、确认告警并创建工单；专业分析员检查数据质量、模型结果和相邻测点；运维员处理设备与通信故障；审批人确认高风险处置或调度建议；审计员只读查询关键操作与证据链。角色不是菜单分组，而是权限与责任的边界。
+
+本书前几章统一使用值班员、专业分析员、审批人、运维员四种基本角色；本章在此基础上增加第五个只读扩展角色——审计员，它不参与任何处置动作，因此不改变四角色的职责边界。表8.2把五类角色与其关键权限并列。注意审计员只有只读权限却不可省略：没有一个独立于处置链条之外的查询角色，事后复核就只能依赖处置者自己提供的记录。
+
+**表 8.2  角色与关键权限**
+
+| 角色       | 允许操作                     | 受限操作             |
+|:-----------|:-----------------------------|:---------------------|
+| 值班员     | 查看、确认告警、发起工单     | 不修改模型与全局阈值 |
+| 专业分析员 | 复核数据、运行分析、提出建议 | 不直接执行控制命令   |
+| 运维员     | 设备维护、网关配置、补传检查 | 不关闭业务告警证据   |
+| 审批人     | 审批高风险处置、确认有效期   | 不绕过设备状态校验   |
+| 审计员     | 查询事件、审批、配置和回执   | 全部只读             |
+
+权限校验同时发生在前端路由、后端方法和数据查询层。前端隐藏按钮只能改善体验，不能代替后端授权；敏感字段不应先发送到浏览器再依靠CSS隐藏。
+
+### 8.1.3 端到端业务闭环
+
+业务闭环从观测开始，经质量检查、状态估计、规则/模型分析、预警确认、工单处置和效果复核回到模型与规则改进。现场设备不能绕过接入和质量检查直接触发预警。
+
+图8.1把这条闭环画了出来。图中没有从现场设备直接指向预警的边，这是刻意的：任何绕过接入与质量检查的告警，都无法说明自己依据的数据是否可信。
+
+<figure markdown>
+![图8.1](images/chapter08_fig_8_1.svg)
+<figcaption>图 8.1  水利工程安全监测业务闭环</figcaption>
+</figure>
+
+验收用例要覆盖正常流和失败流。正常流验证PZ-07异常能够定位、确认、派单和闭环；失败流至少验证网关断线、时间戳倒退、单位错误、模型不可用、重复消息和无权限操作。
+
+## 8.2 总体架构与三维场景设计
+
+### 8.2.1 统一技术栈与分层架构
+
+案例水库采用一套可追踪技术栈。浏览器端由Vue组件、Router路由、Pinia状态和Three.js场景组成；后端由Spring Boot接口、领域服务、质量与预警服务组成；Kafka传递跨服务事件；Redis存放短期缓存；PostgreSQL承担业务数据，PostGIS存放空间对象，TimescaleDB扩展管理时序观测。
+
+图8.2把这套技术栈按层画开，并标出各层之间的调用方向。本章后面的代码清单都能在这张图上找到位置，读代码时先确认它属于哪一层，比逐行理解语法更重要。
+
+<figure markdown>
+![图8.2](images/chapter08_fig_8_2.svg)
+<figcaption>图 8.2  案例水库平台统一技术架构</figcaption>
+</figure>
+
+本章示例采用Java 17与Spring Boot 3.2实现服务端，Vue 3.4负责前端；业务、空间和时序数据统一落在PostgreSQL、PostGIS与TimescaleDB组合中，Redis用于可重建缓存。技术替换可以发生，但必须通过架构决策记录说明原因、迁移范围和验证结果。
+
+### 8.2.2 Three.js主线与Cesium扩展
+
+工程级坝体、廊道、测点和设备交互沿用第6、7章的Three.js主线。若案例扩展到流域或跨区域水网，需要地球、全球地形和大范围3D Tiles时，可在门户层引入Cesium；二者通过统一对象编码、坐标基准和事件契约共享业务状态，而不是把同一模型重复维护两套。
+
+表8.3给出两种三维引擎的适用边界。判断依据是场景尺度而不是功能多少：工程级交互用Three.js，跨流域大范围地形用Cesium；二者共享对象编码与坐标基准，因此可以在同一平台内并存，而不是二选一。
+
+**表 8.3  三维引擎选型边界**
+
+| 引擎     | 优先场景                           | 设计注意                                 |
+|:---------|:-----------------------------------|:-----------------------------------------|
+| Three.js | 单工程精细模型、设备交互、定制材质 | 局部原点、GLB/3D Tiles加载、对象索引     |
+| Cesium   | 流域/水网、地球与大范围地形浏览    | 坐标基准、瓦片服务、异步加载与令牌配置   |
+| 组合方案 | 门户在流域级定位后进入工程级场景   | 统一对象ID、时间窗与权限，不复制业务数据 |
+
+### 8.2.3 场景组织、材质与交互
+
+三维对象按工程—坝段—构件—测点组织，业务标识写入`userData.assetId`。模型文件只负责几何和材质，测点状态由后端事件驱动；数据更新时修改颜色、标签和详情，不重复加载整个坝体。
+
+水体材质中的时间变量使用统一名`u_time`，避免局部变量自引用：
+
+**清单 8.1  水面波动着色器**
+
+```glsl
+uniform float u_time;
+uniform float speed;
+varying vec2 vUv;
+
+void main() {
+    float t = u_time * speed;
+    float wave = sin(vUv.x * 20.0 + t) * 0.03;
+    gl_FragColor = vec4(0.10, 0.48 + wave, 0.72, 0.78);
+}
+```
+
+完整页面需要同时处理筛选、加载、空状态、质量码和三维定位。代码清单8.2 给出一个 Vue 3.4+ 单文件组件：左侧选择测点和时间范围，中部绘制 ECharts 曲线，点击列表或曲线 数据点都调用同一定位桥接；`missing`使用断点，`suspect`使用半透明点，并在卡片上 显示质量说明。组件卸载时释放 ECharts 实例，避免在路由切换后继续监听窗口尺寸。
+
+**清单 8.2  测点筛选、ECharts 曲线与三维定位联动组件**
+
+```vue
+<script setup>
+import { computed, inject, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
+import { storeToRefs } from 'pinia';
+import * as echarts from 'echarts';
+import { useMonitoringStore } from '@/stores/monitoring';
+
+const props = defineProps({ assetId: { type: String, default: '' } });
+const store = useMonitoringStore();
+const { assets, readings, selectedAssetId, selectedAsset,
+        range, loading, errorMessage } = storeToRefs(store);
+const chartElement = ref(null);
+let chart = null;
+const sceneBridge = inject('sceneBridge', null);
+
+const qualityText = computed(() => ({
+  valid: '有效数据', suspect: '可疑数据', missing: '缺测'
+}));
+
+function locate(assetId) {
+  store.selectAsset(assetId);
+  sceneBridge?.locateAsset(assetId);
+}
+
+function chartData() {
+  return readings.value.map(item => ({
+    value: [item.occurredAt, item.quality === 'missing' ? null : item.value],
+    quality: item.quality
+  }));
+}
+
+function renderChart() {
+  if (!chartElement.value) return;
+  if (!chart) chart = echarts.init(chartElement.value);
+  chart.setOption({
+    animation: false,
+    tooltip: { trigger: 'axis' },
+    xAxis: { type: 'time' },
+    yAxis: { type: 'value', name: selectedAsset.value?.unit || '' },
+    series: [{
+      type: 'line',
+      connectNulls: false,
+      showSymbol: true,
+      data: chartData(),
+      encode: { x: 0, y: 1 }
+    }]
+  });
+}
+
+async function refresh() {
+  await store.loadReadings();
+  await nextTick();
+  renderChart();
+}
+
+const onResize = () => chart?.resize();
+
+onMounted(async () => {
+  await store.loadAssets();
+  if (props.assetId) locate(props.assetId);
+  await refresh();
+  window.addEventListener('resize', onResize);
+});
+watch([selectedAssetId, () => range.value.from, () => range.value.to],
+      refresh);
+onUnmounted(() => {
+  window.removeEventListener('resize', onResize);
+  chart?.dispose();
+});
+</script>
+
+<template>
+  <section class="monitoring-dashboard" aria-live="polite">
+    <header>
+      <h2>案例水库监测总览</h2>
+      <p v-if="selectedAsset">当前测点：{{ selectedAsset.displayName }}</p>
+    </header>
+    <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
+    <p v-if="loading">正在读取观测数据……</p>
+    <div class="asset-list">
+      <button v-for="asset in assets" :key="asset.assetId"
+              :class="{ active: asset.assetId === selectedAssetId }"
+              type="button" @click="locate(asset.assetId)">
+        {{ asset.displayName }}（{{ asset.assetType }}）
+      </button>
+    </div>
+    <div ref="chartElement" class="reading-chart"></div>
+    <ul class="quality-list">
+      <li v-for="item in readings.slice(-10)" :key="item.eventId">
+        {{ item.occurredAt }}：{{ item.value ?? '—' }}
+        <span>{{ qualityText[item.quality] || item.quality }}</span>
+      </li>
+    </ul>
+  </section>
+</template>
+
+<style scoped>
+.monitoring-dashboard { display: grid; gap: 0.75rem; }
+.asset-list { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.asset-list button.active { outline: 2px solid #1565c0; }
+.reading-chart { min-height: 20rem; }
+.error { color: #b71c1c; }
+</style>
+```
+
+渲染优化按测量结果实施：先记录帧时间、绘制调用和显存，再选择实例化、LOD、按需加载与纹理压缩。交互延续第7章的射线拾取与像素/世界单位换算，并为键盘和移动端提供等价入口。
+
+## 8.3 数据模型、前端展示与后端处理
+
+### 8.3.1 数据模型与事件契约
+
+测点、观测、质量、预警和工单是五类核心实体。观测值不可原地覆盖；人工修订作为新版本保存，并记录修订原因和责任人。空间对象与观测对象通过稳定编码关联。
+
+表8.4列出五类核心实体及其关键字段。其中“观测值不可原地覆盖”会直接决定表结构：人工修订必须作为新版本追加，因此观测表需要版本字段与修订原因字段，而不是只保留一行最新值。
+
+**表 8.4  核心数据实体**
+
+| 实体     | 关键字段                             | 约束                         |
+|:---------|:-------------------------------------|:-----------------------------|
+| 测点     | assetId、类型、单位、空间位置        | 编码唯一，单位与监测项匹配   |
+| 观测     | occurredAt、value、quality、source   | 事件时间排序，原始值不可覆盖 |
+| 预警     | level、ruleVersion、evidence、status | 蓝黄橙红四级，证据可追溯     |
+| 工单     | owner、deadline、action、result      | 与预警关联，完成需回执       |
+| 模型运行 | modelVersion、inputSnapshot、result  | 适用范围与输入快照完整       |
+
+### 8.3.2 关系模型、空间索引与时序分区
+
+上一张表描述的是业务实体，真正落地时还必须回答三个问题：一条观测由谁产生、在什么时刻产生， 它的空间位置如何检索；一条预警如何追溯到证据，并在处置后形成可审计的工单；一次模型运行使用了 哪一批输入，结果是否可以复现。为此，本节采用“关系主表保存事实、PostGIS 保存空间、TimescaleDB 管理时间分区、JSONB 保存可演化证据”的组合。关系主表中的稳定字段承担约束和连接职责，JSONB 只承载 版本化的扩展属性，不能把核心字段全部塞进无结构文档。这样既能让 SQL 查询得到类型检查，也能让 新传感器的附加元数据在不频繁改表的情况下演进。
+
+`asset` 是工程对象和测点的主索引。`asset_id` 使用业务编码而不是数据库自增号， 因为网关、三维模型、工单和报表都要用同一个编码关联对象；`geometry` 使用带高程的 `PointZ`，坐标系固定为案例水库项目约定的 EPSG:4490，避免平面距离和经纬度混用。空间 检索通过 GiST 索引完成，例如“查询某个影响区内的测点”可以由`ST_Within` 使用索引候选集， 再对候选集做精确判断。若测点迁移，不覆盖原几何，而是新增版本或写入变更审计表；本包的五张核心表 先保存当前有效对象，历史版本通过`metadata`中的`validFrom`、`validTo` 和变更事件追溯。
+
+`reading` 是高频追加表。主键包含`asset_id`、`occurred_at`和版本号， 保证同一测点同一时刻的修订值可以共存；`event_id`具有唯一约束，用于消费者幂等。缺测 记录允许`value`为空，但必须把质量码写为`missing`；单位不匹配、时间倒序和重复 事件由质量服务标记为`suspect`。这一约束将第7章的三值质量码落实到了数据库层，而不是只靠 Java 代码约定。原始记录只追加不更新，修订操作产生新版本并写入`revision_reason`， 因此任何一条报表数值都可以回到原始事件和修订责任人。
+
+`reading`按`occurred_at`做时间维度切块，并按`asset_id`配置哈希分区。 时间切块让近时查询只扫描少量块，哈希分区把高并发写入分散到多个块；分区数不是教材中的固定工程 参数，部署时应根据测点规模、写入峰值和节点数量通过压测确定。切块大小也要与保留策略一起决定： 太小会增加目录和合并开销，太大又会让单次聚合扫描过多冷数据。迁移脚本应在测试环境先创建一个 时间块，写入代表性的一天数据后观察写入延迟、压缩比例和查询计划，再确定生产配置。
+
+`reading_15m`连续聚合视图只纳入`valid`观测，并保留样本数、最小值、最大值和平均值。 这样，预警服务可以快速读取趋势，而审计人员仍可回查所有原始值。连续聚合不是“把原表删掉”，而是 在原始数据之上维护可重建的派生结果。刷新策略设置一个覆盖迟到消息的时间回看窗口，例中回看 30 天、 延迟 5 分钟只是教学参数；实际窗口应覆盖通信补传和消息重投的最大时长。若补传超出窗口，运维员应 手工触发一次重算，并在模型运行记录中写明重算范围。
+
+预警、工单和模型运行表都保存业务过程，而不是把过程状态写在测点行上。预警保存评分、规则版本、 证据快照和可评估标志；工单以预警外键关联，并保存责任角色、时限、动作和回执；模型运行保存输入 快照、版本、状态和结果。三类表均设置状态检查约束和时间索引，使“待确认预警”“即将到期工单”“近 期失败运行”成为可解释的查询。对于跨服务事件，事务发件箱记录发布意图，消费者以`event_id` 去重；本节的数据库约束与本章质量服务共同构成一致性边界。
+
+表8.5给出字段、类型、约束、单位和教学含义的最小字典。实施时可以 增加字段，但不能改变这些字段的语义；若必须调整类型，应先增加兼容列、完成双写和回填，再切换读路径。 字典中的“无”表示该字段是离散状态或标识，不代表可以省略校验。特别是`quality`、`level` 和`status`三类枚举都需要在接口契约、数据库检查约束和前端显示文案中保持相同大小写。
+
+**表 8.5  第8章核心数据库字段字典**
+
+| 字段            | 类型                  | 约束                   | 单位         | 说明                               |
+|:----------------|:----------------------|:-----------------------|:-------------|:-----------------------------------|
+|                 |                       |                        |              |                                    |
+| asset_id        | text                  | 主键、唯一             | 无           | 工程对象和测点的稳定业务编码       |
+|                 |                       |                        |              |                                    |
+| asset_type      | text                  | 非空                   | 无           | 测点、闸门、坝段等项目分类         |
+| asset.geometry  | geometry(PointZ,4490) | 非空、GiST 索引        | 度、米       | 测点经纬度与高程位置               |
+| asset.metadata  | jsonb                 | 可为空                 | 无           | 厂商标识、量程和扩展属性           |
+|                 |                       |                        |              |                                    |
+| event_id        | text                  | 非空、唯一             | 无           | 消息幂等键，跨服务保持不变         |
+|                 |                       |                        |              |                                    |
+| occurred_at     | timestamptz           | 主键组成               | UTC          | 观测发生时间，不得晚于当前时间     |
+| reading.value   | numeric               | 缺测时为空             | 由监测项定义 | 原始数值，数据库不覆盖历史版本     |
+| reading.quality | text                  | valid/suspect/missing  | 无           | 第7章统一的三值质量码              |
+| reading.version | integer               | 非空、正数             | 无           | 同一事件的修订版本序号             |
+|                 |                       |                        |              |                                    |
+| level           | text                  |                        |              |                                    |
+| YELLOW/         |                       |                        |              |                                    |
+| ORANGE/RED      | 无                    | 规则评估得到的预警等级 |              |                                    |
+|                 |                       |                        |              |                                    |
+| evaluable       | boolean               | 非空                   | 无           | false 表示“未评估”而非无预警       |
+|                 |                       |                        |              |                                    |
+| evidence        | jsonb                 | 非空                   | 无           | 指标、阈值、规则版本组成的证据快照 |
+|                 |                       |                        |              |                                    |
+| warning_id      | bigint                | 外键、非空             | 无           | 对应的预警事件                     |
+|                 |                       |                        |              |                                    |
+| due_at          | timestamptz           | 非空                   | UTC          | 处置时限，供到期查询               |
+|                 |                       |                        |              |                                    |
+| input_snapshot  | jsonb                 | 非空                   | 无           | 可复现的输入范围与版本摘要         |
+|                 |                       |                        |              |                                    |
+| status          | text                  | 状态检查               | 无           | queued/running/succeeded/failed    |
+
+图8.3用实体关系图呈现外键方向和审计边界。图中的箭头表示数据库中的 可追溯关系，不表示消息一定同步到达；异步事件仍需通过事件标识和状态版本处理乱序。阅读图时先从 `asset`向下追踪观测，再从观测和规则证据进入预警，最后沿工单回执闭合业务链；模型运行则以 输入快照和结果独立留痕，避免把模型输出误当作原始观测。
+
+<figure markdown>
+![图8.3](images/chapter08_fig_8_3.svg)
+<figcaption>图 8.3  第8章核心实体关系与追溯路径</figcaption>
+</figure>
+
+下面三段 SQL 按“基础表—时序表—业务流程表”的顺序组织，构成本章后端实体代码和配套数据集的唯一 字段来源。代码清单8.3先安装扩展并建立空间对象表；执行前应由迁移工具记录版本， 而不是让应用启动时隐式建表。空间参考系、编码检查和 GiST 索引属于表的契约，缺一项都会让三维对象 与监测数据发生难以定位的偏移。
+
+**清单 8.3  空间对象表与空间索引 DDL**
+
+```sql
+CREATE EXTENSION IF NOT EXISTS postgis;
+CREATE EXTENSION IF NOT EXISTS timescaledb;
+
+CREATE TABLE asset (
+    asset_id       text PRIMARY KEY,
+    asset_type     text NOT NULL,
+    display_name   text NOT NULL,
+    unit           text,
+    geometry       geometry(PointZ, 4490) NOT NULL,
+    elevation_m    numeric,
+    active         boolean NOT NULL DEFAULT true,
+    metadata       jsonb NOT NULL DEFAULT '{}'::jsonb,
+    created_at     timestamptz NOT NULL DEFAULT now(),
+    updated_at     timestamptz NOT NULL DEFAULT now(),
+    CONSTRAINT asset_id_format
+        CHECK (asset_id ~ '^[A-Z0-9-]+$')
+);
+
+CREATE INDEX asset_geometry_gist_idx
+    ON asset USING GIST (geometry);
+CREATE INDEX asset_type_active_idx
+    ON asset (asset_type, active);
+```
+
+空间索引只负责缩小候选集，业务仍要在查询中写明坐标系和边界条件；例如影响区查询应先将输入多边形 转换为 4490，再调用空间谓词。`asset_type`与`active`的组合索引服务于“当前有效的 某类对象”列表，避免把已退役测点传给实时订阅。`updated_at`由应用或数据库触发器维护， 用于缓存失效和三维模型刷新，而不能被前端任意修改。
+
+代码清单8.4把高频观测表转换为 TimescaleDB 超表，并给出时间块、哈希分区和 连续聚合的策略。迁移时先建普通表再执行转换，能让外键和检查约束在同一个事务脚本中审查；生产环境 还应根据写入峰值调整分区数，并为冷数据设置压缩和保留策略。连续聚合只读有效值，质量码和样本数 仍然保留在结果中，便于界面解释“平均值为什么没有纳入某条数据”。
+
+**清单 8.4  时序观测表、分区与连续聚合 DDL**
+
+```sql
+CREATE TABLE reading (
+    asset_id         text NOT NULL REFERENCES asset(asset_id),
+    occurred_at      timestamptz NOT NULL,
+    version          integer NOT NULL DEFAULT 1,
+    reading_id       bigserial,
+    event_id         text NOT NULL,
+    value            numeric,
+    unit             text NOT NULL,
+    quality          text NOT NULL,
+    source           text NOT NULL,
+    revision_reason  text,
+    received_at      timestamptz NOT NULL DEFAULT now(),
+    PRIMARY KEY (asset_id, occurred_at, version),
+    CONSTRAINT reading_version_positive CHECK (version > 0),
+    CONSTRAINT reading_quality_check
+        CHECK (quality IN ('valid','suspect','missing')),
+    CONSTRAINT missing_value_check
+        CHECK (value IS NOT NULL OR quality = 'missing')
+);
+
+SELECT create_hypertable(
+    'reading', by_range('occurred_at'), if_not_exists => TRUE
+);
+
+-- 超表上的唯一索引必须包含分区列，
+-- 因此幂等键用 (occurred_at, event_id) 复合唯一索引表达
+CREATE UNIQUE INDEX reading_event_uidx
+    ON reading (occurred_at, event_id);
+
+CREATE INDEX reading_asset_time_idx
+    ON reading (asset_id, occurred_at DESC);
+CREATE INDEX reading_quality_time_idx
+    ON reading (quality, occurred_at DESC);
+
+CREATE MATERIALIZED VIEW reading_15m
+WITH (timescaledb.continuous) AS
+SELECT asset_id,
+       time_bucket('15 minutes', occurred_at) AS bucket,
+       avg(value) AS value_avg, min(value) AS value_min,
+       max(value) AS value_max, count(*) AS sample_count
+FROM reading
+WHERE quality = 'valid'
+GROUP BY asset_id, bucket
+WITH NO DATA;
+
+SELECT add_continuous_aggregate_policy(
+    'reading_15m',
+    start_offset => INTERVAL '30 days',
+    end_offset => INTERVAL '5 minutes',
+    schedule_interval => INTERVAL '5 minutes'
+);
+```
+
+主键包含时间列是时序表的工程折中：它满足超表分区键的唯一性要求，也允许同一时刻保存多个版本。 跨测点查询使用`occurred_at`范围条件，单测点查询使用`asset_id`加时间降序索引； 质量索引服务于统计任务和数据修复，但不能代替质量服务的优先级合并。`(occurred_at, event_id)`的复合唯一索引 是数据库级幂等保险——TimescaleDB 要求超表上的唯一索引必须包含分区列，这正是幂等键写成复合形式 而不是单列 `UNIQUE(event_id)` 的原因；应用层仍要返回“重复事件已忽略”的可观察结果。若消息重复到达，不能把它当作 新版本；只有人工修订且带有不同版本号时，才允许保留相同业务时刻的另一行。
+
+预警、工单和模型运行表共享状态与证据约束，代码清单8.5给出外键、检查条件 和面向队列查询的索引。预警的`evaluable=false`允许等级保持 NONE，但界面必须显示“未评估”及 原因；工单的状态转换由后端服务控制，数据库检查约束只负责拒绝拼写错误；模型运行结果允许为空， 但只有`succeeded`状态才可被下游引用。这样的分层把“数据结构正确”和“业务流程合法”分开， 便于在单元测试、集成测试和审计查询中分别验证。
+
+**清单 8.5  预警、工单与模型运行表 DDL**
+
+```sql
+CREATE TABLE warning (
+    warning_id      bigserial PRIMARY KEY,
+    asset_id        text NOT NULL REFERENCES asset(asset_id),
+    source_event_id text NOT NULL,
+    level           text NOT NULL,
+    evaluable       boolean NOT NULL,
+    score           numeric,
+    reason          text NOT NULL,
+    rule_version    text NOT NULL,
+    evidence        jsonb NOT NULL,
+    status          text NOT NULL DEFAULT 'open',
+    created_at      timestamptz NOT NULL DEFAULT now(),
+    CONSTRAINT warning_level_check
+        CHECK (level IN ('NONE','BLUE','YELLOW','ORANGE','RED')),
+    CONSTRAINT warning_status_check
+        CHECK (status IN ('open','acknowledged','closed'))
+);
+
+CREATE INDEX warning_open_queue_idx
+    ON warning (status, level, created_at DESC);
+
+CREATE TABLE work_order (
+    work_order_id  bigserial PRIMARY KEY,
+    warning_id     bigint NOT NULL REFERENCES warning(warning_id),
+    owner_role     text NOT NULL,
+    due_at         timestamptz NOT NULL,
+    action         text NOT NULL,
+    result         text,
+    status         text NOT NULL DEFAULT 'pending',
+    created_at     timestamptz NOT NULL DEFAULT now(),
+    completed_at   timestamptz,
+    CONSTRAINT work_order_status_check
+        CHECK (status IN ('pending','in_progress','completed','cancelled'))
+);
+
+CREATE INDEX work_order_due_idx
+    ON work_order (status, due_at);
+
+CREATE TABLE model_run (
+    run_id             uuid PRIMARY KEY,
+    model_name         text NOT NULL,
+    model_version      text NOT NULL,
+    input_snapshot     jsonb NOT NULL,
+    started_at         timestamptz NOT NULL,
+    finished_at        timestamptz,
+    status             text NOT NULL,
+    result             jsonb,
+    error_message      text,
+    requested_by       text NOT NULL,
+    CONSTRAINT model_run_status_check
+        CHECK (status IN ('queued','running','succeeded','failed')),
+    CONSTRAINT model_run_finish_check
+        CHECK (finished_at IS NULL OR finished_at >= started_at)
+);
+
+CREATE INDEX model_run_status_time_idx
+    ON model_run (status, started_at DESC);
+```
+
+这些索引对应三类典型查询：值班员按等级和时间查看未关闭预警，运维员按时限查看即将到期工单， 专业分析员按模型版本和运行状态筛选可复现结果。索引不是越多越好；每增加一个索引都会增加写入、 备份和压缩成本，因此应在压测报告中记录命中率、写入延迟和索引体积。对于`evidence`、 `input_snapshot`等 JSONB 字段，先以整对象审计和版本追溯为主，只有查询频率稳定后才考虑 建立表达式索引；否则容易把临时查询固化为难以迁移的结构。
+
+DDL 的执行顺序也属于系统设计的一部分。部署脚本先安装扩展，再创建`asset`，随后创建引用它 的`reading`和`warning`，最后创建`work_order`与`model_run`。回滚 不能直接删除已经产生证据的表，而应先停止写入、导出审计快照并把迁移标记为失效。升级时采用“增加 列—双写—回填—切换—观察—清理”的六步流程；观察期内保留旧列，直到连续两个备份周期和一次恢复演练 均成功。对于时间分区和连续聚合，回滚还要清理策略对象并保留原始观测，绝不能只删除聚合结果而让 报表失去可解释性。
+
+本节的字段字典、实体关系图和三段 DDL 共同构成数据库契约。后续实体类、接口 DTO、前端表格和示例 数据必须逐列对照该契约；如果业务需要增加“巡检照片”或“会商结论”等信息，应作为版本化扩展属性或 新增业务表，并在数据字典中登记来源、权限、保留期限和脱敏规则。通过这种方式，空间位置、原始观测、 质量状态、风险证据、处置回执和模型结果形成闭环，学生可以从一条事件 ID 走完从采集到复核的追溯路径， 也能理解为什么数据库设计是平台架构的约束，而不是编码完成后的附属文档。
+
+### 8.3.3 数据库迁移、查询与运行维护练习
+
+DDL 解决了“表能否创建”的问题，平台上线还需要回答“数据能否安全地进入、查询和恢复”。本小节把 常用操作拆成短小而完整的 SQL 练习，所有语句都假定在只读副本或隔离的迁移事务中执行。练习的目的 不是让应用直接拼接字符串，而是让学生看懂索引、约束和查询条件之间的因果关系。每段语句都配有 输入前提、结果解释和回滚边界，后续 Java Repository 可以把它们转成参数化查询。
+
+迁移脚本必须可重复执行，并把版本写入数据库。代码清单8.6示例用一个轻量 版本表记录迁移名称和校验摘要；真正的发布工具还应记录执行人、开始时间、结束时间和失败日志。若 迁移中途失败，恢复脚本只回滚本次版本，不直接删除已有业务数据。
+
+**清单 8.6  可重复执行的迁移版本记录**
+
+```sql
+CREATE TABLE IF NOT EXISTS schema_migration (
+    version      text PRIMARY KEY,
+    description  text NOT NULL,
+    checksum     text NOT NULL,
+    applied_at   timestamptz NOT NULL DEFAULT now(),
+    applied_by   text NOT NULL
+);
+
+INSERT INTO schema_migration(version, description, checksum, applied_by)
+-- checksum 由发布流水线对迁移脚本正文计算后填入，禁止手工编造
+VALUES ('QY-DDL-001', 'core asset reading warning ddl',
+        'sha256:9f2d1c0a...(流水线填入)', current_user)
+ON CONFLICT (version) DO NOTHING;
+```
+
+对象清单是最频繁的读路径之一。代码清单8.7用状态和类型过滤有效测点， 并只取前端需要的列；不使用`SELECT *`可以避免新增列后无意扩大接口载荷，也能让数据库更容易 复用覆盖索引。分页时应使用稳定的`asset_id`游标，不能把页码当作长期一致性的依据。
+
+**清单 8.7  按类型和状态读取测点清单**
+
+```sql
+SELECT asset_id, display_name, asset_type, unit,
+       ST_X(geometry) AS longitude,
+       ST_Y(geometry) AS latitude,
+       elevation_m
+FROM asset
+WHERE active = true
+  AND asset_type = :asset_type
+  AND (:after_id IS NULL OR asset_id > :after_id)
+ORDER BY asset_id
+LIMIT :page_size;
+```
+
+空间查询必须明确输入多边形的坐标系。代码清单8.8先把外部边界转换到 4490，再用 GiST 支持的包围盒过滤和精确谓词；若输入无效，接口应在参数校验阶段返回错误，而不是让 数据库把空结果当作“区域内没有测点”。
+
+**清单 8.8  影响区内测点的空间查询**
+
+```sql
+WITH area AS (
+    SELECT ST_Transform(
+        ST_SetSRID(ST_GeomFromText(:wkt), :input_srid), 4490
+    ) AS boundary
+)
+SELECT a.asset_id, a.display_name, a.asset_type
+FROM asset AS a CROSS JOIN area
+WHERE a.active
+  AND a.geometry && area.boundary
+  AND ST_Within(a.geometry, area.boundary)
+ORDER BY a.asset_id;
+```
+
+实时曲线应按测点和时间窗读取，而不是扫描整个超表。代码清单8.9只返回 质量码为 valid 的观测；界面若要展示 suspect 或 missing，应另开一条明确的质量提示查询，避免把 “没有合格数据”误画成一条平滑曲线。
+
+**清单 8.9  按时间窗读取有效观测**
+
+```sql
+SELECT occurred_at, value, unit, quality, event_id, version
+FROM reading
+WHERE asset_id = :asset_id
+  AND occurred_at >= :start_at
+  AND occurred_at < :end_at
+  AND quality = 'valid'
+ORDER BY occurred_at, version;
+```
+
+质量统计要同时显示总量和分码数量。代码清单8.10用条件聚合统计一个时间窗 内的 valid、suspect、missing，统计结果附带窗口起止时间，便于跨班次比较。该查询不修改质量码， 修正应由质量服务生成新版本并保留责任人。
+
+**清单 8.10  质量码分布统计查询**
+
+```sql
+SELECT asset_id,
+       count(*) AS total_count,
+       count(*) FILTER (WHERE quality = 'valid') AS valid_count,
+       count(*) FILTER (WHERE quality = 'suspect') AS suspect_count,
+       count(*) FILTER (WHERE quality = 'missing') AS missing_count
+FROM reading
+WHERE occurred_at >= :start_at AND occurred_at < :end_at
+GROUP BY asset_id
+ORDER BY asset_id;
+```
+
+消息重投是流式系统的常态。代码清单8.11展示“先插入、冲突即忽略”的 数据库兜底；应用收到 0 行影响时应记录重复事件并确认消息，而不是反复重试。若同一业务事件需要 修订，必须生成新的版本并写明原因，不能利用冲突绕过审计规则。
+
+**清单 8.11  基于事件 ID 的幂等写入**
+
+```sql
+INSERT INTO reading(asset_id, occurred_at, event_id, value,
+                    unit, quality, source, version)
+VALUES (:asset_id, :occurred_at, :event_id, :value,
+        :unit, :quality, :source, 1)
+ON CONFLICT (occurred_at, event_id) DO NOTHING;
+```
+
+预警队列按等级和创建时间排序。代码清单8.12明确排除已关闭状态，并把 evaluable 标志作为结果列返回；这样界面可以同时显示“蓝色关注”“无预警”和“未评估”，而不是只依据 颜色字段猜测业务状态。
+
+**清单 8.12  待处理预警队列查询**
+
+```sql
+SELECT warning_id, asset_id, level, evaluable, score,
+       reason, rule_version, created_at
+FROM warning
+WHERE status IN ('open', 'acknowledged')
+ORDER BY CASE level
+           WHEN 'RED' THEN 1 WHEN 'ORANGE' THEN 2
+           WHEN 'YELLOW' THEN 3 WHEN 'BLUE' THEN 4 ELSE 5
+         END,
+         created_at;
+```
+
+工单到期查询需要使用数据库当前时间和明确的状态集合。代码清单8.13把已经 取消或完成的工单排除，并返回预警等级，值班员可以先处理高等级且临近截止时间的事项。真正更新状态 时还要携带版本号，防止两个角色互相覆盖。
+
+**清单 8.13  即将到期工单查询**
+
+```sql
+SELECT w.work_order_id, w.warning_id, w.owner_role,
+       w.due_at, w.action, p.level
+FROM work_order AS w
+JOIN warning AS p ON p.warning_id = w.warning_id
+WHERE w.status IN ('pending', 'in_progress')
+  AND w.due_at <= now() + INTERVAL '2 hours'
+ORDER BY p.level DESC, w.due_at;
+```
+
+模型运行审计必须把版本和输入快照一起返回。代码清单8.14按模型名称和时间窗 筛选成功与失败运行，失败运行只用于故障定位，不能被下游当作可复现结果。若结果需要重新发布，应 建立新的运行记录而不是覆盖旧结果。
+
+**清单 8.14  模型运行审计查询**
+
+```sql
+SELECT run_id, model_name, model_version, status,
+       started_at, finished_at, input_snapshot
+FROM model_run
+WHERE model_name = :model_name
+  AND started_at >= :start_at
+  AND started_at < :end_at
+ORDER BY started_at DESC;
+```
+
+连续聚合查询只读取已物化的时间桶。代码清单8.15把桶边界、样本数和 质量语义一起返回，前端可以在样本不足时显示“数据稀疏”而不绘制误导性的折线。对于跨越夏令时或 多时区的部署，数据库统一使用 UTC，展示层再按用户时区转换。
+
+**清单 8.15  读取十五分钟连续聚合结果**
+
+```sql
+SELECT bucket, value_avg, value_min, value_max, sample_count
+FROM reading_15m
+WHERE asset_id = :asset_id
+  AND bucket >= :start_at
+  AND bucket < :end_at
+ORDER BY bucket;
+```
+
+迟到消息会让最近的聚合桶需要重算。代码清单8.16展示手工刷新窗口的 语句；它只在运维员确认补传范围后执行，并在变更记录中写明起止时间。自动策略继续负责日常刷新， 手工刷新不能成为绕过质量审核的常规写入口。
+
+**清单 8.16  补传后的连续聚合刷新**
+
+```sql
+CALL refresh_continuous_aggregate(
+    'reading_15m', :refresh_start, :refresh_end
+);
+
+INSERT INTO schema_migration(version, description, checksum, applied_by)
+VALUES (:audit_version, 'late data aggregate refresh', :checksum, current_user);
+```
+
+冷数据保留策略必须服从证据保留期限。代码清单8.17用 TimescaleDB 策略对象 表达自动清理窗口；教学示例没有把窗口写死为工程参数，生产项目应从法规、合同和审计要求中取得批准 值，并在删除前完成备份校验。若某段数据仍被未关闭工单引用，业务服务应先延长其保留期限。
+
+**清单 8.17  时序数据保留策略示例**
+
+```sql
+SELECT add_retention_policy(
+    'reading', drop_after => INTERVAL '730 days'
+);
+
+-- 发布前由项目配置替换保留窗口，并核对审计与备份要求
+SELECT hypertable_name, num_chunks, compression_enabled
+FROM timescaledb_information.hypertables
+WHERE hypertable_name = 'reading';
+```
+
+压缩策略要避开仍在频繁更新的热数据。代码清单8.18把压缩按时间列组织， 并先查询压缩状态再决定是否执行；质量修订窗口没有关闭前，不应提前压缩。压缩不是删除，恢复演练 仍需验证索引、连续聚合和原始版本都可读。
+
+**清单 8.18  按时间块配置时序压缩**
+
+```sql
+ALTER TABLE reading SET (
+    timescaledb.compress,
+    timescaledb.compress_segmentby = 'asset_id',
+    timescaledb.compress_orderby = 'occurred_at DESC'
+);
+
+SELECT add_compression_policy(
+    'reading', compress_after => INTERVAL '30 days'
+);
+```
+
+状态更新必须包含并发控制条件。代码清单8.19用“当前状态仍为 open”的 条件完成确认；若影响行数为 0，说明另一个角色已经处理，服务应返回最新状态而不是覆盖它。此规则 也适用于工单完成和模型运行取消，避免前端的旧页面把新处置结果改回去。
+
+**清单 8.19  带状态条件的预警确认**
+
+```sql
+UPDATE warning
+SET status = 'acknowledged'
+WHERE warning_id = :warning_id
+  AND status = 'open'
+RETURNING warning_id, status, created_at;
+```
+
+工单回执必须与处置结果一起提交。代码清单8.20在一个事务中写入 完成时间和结果，空结果会被接口层拒绝。数据库层保留“已完成但没有结果”的异常查询入口，供运维 人员在数据修复时补齐证据，而不是静默填入默认文字。
+
+**清单 8.20  工单完成与回执写入**
+
+```sql
+BEGIN;
+UPDATE work_order
+SET status = 'completed', completed_at = now(), result = :result
+WHERE work_order_id = :work_order_id
+  AND status = 'in_progress';
+SELECT warning_id FROM work_order WHERE work_order_id = :work_order_id;
+COMMIT;
+```
+
+数据库健康检查关注约束违反的前兆。代码清单8.21统计缺少有效坐标、异常 质量码和未来时间戳的记录；它不自动改数据，只产生检查报告。每日检查结果应和发布版本关联，才能在 出现异常时判断是设备问题、迁移问题还是程序问题。
+
+**清单 8.21  核心表健康检查**
+
+```sql
+SELECT 'asset_without_geometry' AS check_name, count(*) AS failures
+FROM asset WHERE geometry IS NULL
+UNION ALL
+SELECT 'reading_bad_quality', count(*)
+FROM reading WHERE quality NOT IN ('valid','suspect','missing')
+UNION ALL
+SELECT 'reading_in_future', count(*)
+FROM reading WHERE occurred_at > now();
+```
+
+备份恢复演练需要验证“能否恢复业务链”而不只是“文件存在”。代码清单8.22列出 恢复演练所需的最小对象集合；实际备份工具负责导出数据和权限，SQL 只用于登记快照元信息。演练完成 后要用一条事件 ID 串起测点、观测、预警、工单和模型运行，确认外键和 JSONB 证据均可读取。
+
+**清单 8.22  备份快照登记**
+
+```sql
+CREATE TABLE IF NOT EXISTS backup_snapshot (
+    snapshot_id  text PRIMARY KEY,
+    started_at   timestamptz NOT NULL,
+    finished_at  timestamptz,
+    object_count integer NOT NULL,
+    checksum     text NOT NULL,
+    verified     boolean NOT NULL DEFAULT false
+);
+INSERT INTO backup_snapshot(snapshot_id, started_at, object_count, checksum)
+VALUES (:snapshot_id, now(), :object_count, :checksum);
+```
+
+权限查询只返回当前角色可见的对象。代码清单8.23采用视图封装敏感字段， 让报表用户看见编码、等级和统计结果，但看不到不必要的个人信息或完整设备密钥。生产环境还要结合 应用层授权和数据库审计，视图本身不能替代角色管理。
+
+**清单 8.23  面向报表角色的最小视图**
+
+```sql
+CREATE OR REPLACE VIEW warning_report AS
+SELECT warning_id, asset_id, level, evaluable,
+       score, reason, status, created_at
+FROM warning
+WHERE status <> 'closed' OR created_at >= now() - INTERVAL '90 days';
+
+GRANT SELECT ON warning_report TO report_reader;
+```
+
+异常数据修复必须可审计。代码清单8.24把修订前后的值登记为 JSONB， 并在写入新观测版本前生成审计行；如果修订没有批准号，接口应拒绝提交。审计表可以独立归档，不能 因为前端只展示最新值就删除。
+
+**清单 8.24  观测修订审计登记**
+
+```sql
+CREATE TABLE IF NOT EXISTS reading_revision_audit (
+    audit_id       bigserial PRIMARY KEY,
+    event_id       text NOT NULL,
+    old_value      numeric,
+    new_value      numeric,
+    old_quality    text NOT NULL,
+    new_quality    text NOT NULL,
+    reason         text NOT NULL,
+    approved_by    text NOT NULL,
+    audited_at     timestamptz NOT NULL DEFAULT now()
+);
+```
+
+数据库观察指标要与业务指标对应。代码清单8.25从系统视图读取超表大小、 索引大小和最近数据时间；它不直接给出“系统健康”结论，而是为压测和运维看板提供证据。指标异常时 应同时查看 Kafka 积压、质量码分布和工单延迟，不能只看数据库 CPU。
+
+**清单 8.25  数据库容量与新鲜度观察**
+
+```sql
+SELECT hypertable_name, table_bytes, index_bytes,
+       total_bytes
+FROM hypertable_detailed_size('reading');
+
+SELECT max(occurred_at) AS latest_reading,
+       now() - max(occurred_at) AS data_lag
+FROM reading;
+```
+
+最后一个练习把事件链完整串起来。代码清单8.26使用同一事件标识关联观测、 预警和工单，并把模型运行的输入快照作为独立结果返回。若某一步没有记录，报告应明确显示“链路缺口”， 而不是用空字符串伪造闭环。这种查询是课程项目验收时最有价值的可复现证据之一。
+
+**清单 8.26  按事件标识追溯业务闭环**
+
+```sql
+SELECT r.event_id, r.asset_id, r.occurred_at, r.quality,
+       w.warning_id, w.level, w.evaluable,
+       o.work_order_id, o.status AS work_status,
+       m.run_id, m.model_version, m.status AS run_status
+FROM reading AS r
+LEFT JOIN warning AS w ON w.source_event_id = r.event_id
+LEFT JOIN work_order AS o ON o.warning_id = w.warning_id
+LEFT JOIN model_run AS m
+  ON m.input_snapshot ->> 'eventId' = r.event_id
+WHERE r.event_id = :event_id;
+```
+
+以上练习覆盖迁移、空间检索、时序读取、质量统计、幂等写入、预警处置、聚合刷新、生命周期管理、 并发控制、备份恢复、权限隔离、修订审计和链路追溯。它们与三段基础 DDL 形成由“结构—查询—运维” 组成的最小闭环。教学时可以先让学生阅读执行计划，再让学生改变时间窗、质量码或状态条件，观察 结果如何变化；只有能够解释每个条件为什么存在，才算真正掌握数据库设计，而不是记住几条 SQL。
+
+### 8.3.4 从业务约束到物理设计的推导
+
+数据库设计的起点不是“选哪一种数据库”，而是列出业务事实、事实发生的时间、事实的责任边界以及 事实被谁查询。以水利工程安全监测平台为例，测点编码是跨系统共享的事实，不能因为前端换了树形目录 就改写；观测时间是设备事件的事实，不能用服务器接收时间替代；质量码是校验结论，不能与原始数值 混为一列；预警等级是规则输出，必须携带规则版本和证据；工单是处置过程，需要责任人和回执；模型 运行是一次可复现计算，需要输入快照和版本。把这些事实逐一写成字段，才会得到本节的五张核心表。
+
+实体边界还决定事务边界。采集服务接收一条观测时，应该在同一个本地事务中写入`reading`和 质量处理结果，再通过事务发件箱发布“观测已接收”事件；它不能把预警、工单和模型运行也强行放入 一个跨服务事务。预警服务收到事件后依据规则版本计算，若结果不可评估，则落表为`evaluable` 为 false 并保留原因。工单服务只消费已经落库的预警事件，生成处置任务并等待回执。每个服务都能 独立重试，因为状态和事件标识已经落在数据库中。
+
+外键是数据库层最直接的业务保证。`warning.asset_id`要求预警必须指向仍可识别的工程对象； `work_order.warning_id`要求工单不能脱离预警凭空出现；模型运行不直接外键到每一条观测， 而是保存输入快照，因为一次运行可能读取聚合结果、多个测点和一组规则参数。若把模型输入硬编码成 若干外键，后续版本的输入范围难以重现。快照中的事件范围、质量过滤条件和查询版本必须写入可审计字段， 并在模型日志中登记哈希摘要。
+
+枚举约束的价值在于让错误尽早暴露。质量码只允许 valid、suspect、missing，预警等级只允许 NONE、 BLUE、YELLOW、ORANGE、RED，工单和模型运行也各自拥有有限状态集合。前端可以提供友好文案，但不能 向数据库写入“正常”“蓝色预警中”等自由文本。新增状态先扩展接口契约、迁移脚本和统计口径，再修改 显示层；如果只改显示层，历史报表会出现同义词，统计无法按状态合并。
+
+数值约束必须与测量物理意义相符。观测值允许为空只在质量码为 missing 时成立；温度、位移、渗压等 监测项的合理范围由测点类型和项目规则提供，通用表只负责保留数值和质量结论，不把某个工程的阈值 硬编码到所有测点。单位字段保留在观测行中，是因为设备更换或校准可能改变单位；单位注册表负责检查 一致性，历史数据不能因为后来修改注册表就失去原来的解释。修订时新增版本并携带原因，审计可以看出 从何值改到何值、谁批准、何时生效。
+
+索引设计也应从查询场景倒推。空间看板需要“影响区内的有效测点”，因此选择 GiST 空间索引；实时曲线 需要“某测点最近一段时间的观测”，因此选择测点加时间的降序 B-tree；预警中心需要“未关闭且等级高的 事件”，因此建立状态、等级、创建时间的组合索引；工单看板需要“按时限排序的未完成任务”，因此 索引状态和截止时间；模型审计需要“某版本的最近运行”，因此索引模型状态和开始时间。索引列的顺序 必须与过滤和排序相配，不能因为字段名称重要就盲目建索引。
+
+时序分区的核心是把时间局部性转化为物理局部性。查询最近一小时的测点，不应触碰数年前的块；归档 两年前的数据，不应锁住实时写入块。切块大小需要用代表性写入压测确定：块太小会让规划器管理大量 对象，块太大则使压缩和备份粒度变粗。哈希分区解决的是热点测点写入集中问题，不能代替时间维度；两者 同时使用时，要观察单测点查询是否因为跨分区而退化。生产配置和压测结果必须写入部署文档，不把例题 中的四个分区误当作全书固定参数。
+
+连续聚合适合重复读取的统计结果，但不适合替换证据。预警计算可以读取十五分钟平均值以降低延迟， 但触发处置前要保留对应的原始窗口、样本数和质量分布。聚合刷新存在迟到数据，因此策略需要保留一段 回看窗口；通信链路补传超过窗口时，运维员应运行一次受控重算，并在`model_run`或变更日志中 注明时间范围。任何人都不能直接编辑聚合表来“修正报表”，修正应回到原始观测或重新运行聚合策略。
+
+备份策略要同时覆盖结构、数据、权限和扩展。PostGIS 的空间列、TimescaleDB 的超表元数据、连续 聚合策略和角色授权缺一项都可能导致恢复后查询失败。全量备份之外还要保留增量或归档日志，并定期在 隔离环境恢复。恢复演练的验收不是“服务能启动”，而是能否用一条事件标识查到测点、原始观测、质量 结论、预警证据、工单回执和模型输入；能否按角色隐藏不应查看的字段；能否在恢复后继续写入新的时间块。
+
+权限设计遵循最小必要原则。采集角色只写观测和发件箱，质量角色可更新质量标记但不能修改原始值， 预警角色可创建和关闭预警，值班员可确认工单并提交回执，分析员可读取脱敏的历史数据，运维员才可 执行分区、压缩和恢复操作。数据库角色与应用角色一一对应，凭据存放在密钥服务中，代码和教材示例不 出现真实口令。审计日志至少保留角色、对象、操作、时间、请求追踪号和结果摘要，便于把数据库行为与 Kafka 消息、HTTP 请求和前端操作对应起来。
+
+模式演进要优先考虑兼容。增加可空列通常可以向后兼容，删除列和改变枚举则必须经过观察期；大表添加 非空约束应先回填并验证，再分阶段切换。实体类和 DTO 不应复制一套互不相同的字段名，数据库字典是 唯一来源，代码生成或手工实现都应在代码审查中逐列核对。若后端需要把`asset`映射为 Java 实体，应保留`asset_id`、`geometry`和`metadata`的原语义，并对空间类型 明确转换策略；若 S3 生成示例数据，应按照同一编码规则和质量码集合生成，不能为方便而使用随机中文键。
+
+测试要覆盖约束、查询计划和故障恢复三个层次。单元测试验证质量优先级和分类结果，集成测试验证外键、 唯一键、空间坐标系、超表写入和连续聚合，端到端测试验证从事件接入到工单回执的链路。性能测试使用 与目标测点规模相近的数据分布，分别记录高峰写入、最近查询、空间查询、预警队列和聚合刷新延迟。 故障测试包括消息重复、乱序、数据库短暂不可用、超表块压缩失败和恢复后重放；每个故障都要说明预期 质量码、状态转移和用户可见提示。
+
+最后，数据库文档必须让不在场的同学也能复现。字段字典说明类型、单位、约束和示例值，迁移脚本说明 版本顺序和回滚边界，ER 图说明关系方向，查询练习说明输入参数和结果含义，运维手册说明备份、恢复、 压缩、保留和监控。课程项目验收时，学生提交一份从`event_id`出发的追溯报告，附执行计划、 质量统计、预警证据、工单回执和模型运行快照。报告中若出现“数据库里有记录但无法解释来源”，就说明 数据契约尚未闭合；若出现“界面显示正常但质量码为 missing”，就说明展示层没有尊重数据库语义。
+
+通过以上推导，数据库设计和 DDL 不再是孤立的 SQL 片段，而是从业务事实、质量口径、空间关系、时序 性能、权限边界、审计要求和运维生命周期共同推导出的可验证契约。后续章节可以在此基础上讨论实体 映射、接口实现和示例数据，而不必重新发明字段或偷偷改变工程参数。
+
+在课堂演练中，可以把一次数据异常拆成四个观察窗口。第一窗口查看接入消息，确认事件 ID、测点编码 和发生时间是否完整；第二窗口查看质量服务，确认缺测、单位错误、范围异常、时序倒置和重复事件是否 分别留下原因；第三窗口查看数据库，确认原始观测只追加、预警证据包含规则版本、工单具有责任角色和 时限；第四窗口查看前端，确认“无预警”“蓝色关注”和“未评估”使用不同文案和颜色。四个窗口的记录 必须能够用追踪号互相定位，单独看某一层的截图不能代替链路证据。
+
+数据库容量规划也应从测点数量、采样周期和保留期限推导。估算时先计算每天的事件行数，再加入索引、 JSONB 证据、备份副本和压缩后的增长系数；写入峰值还要考虑设备同时上线、补传和消息重投。估算结果 只用于容量初始值，最终仍要用接近生产分布的回放数据压测。压测不仅看平均吞吐，还要记录第九十五和 第九十九百分位延迟、锁等待、超表块数量、连续聚合刷新滞后以及故障重试后的积压恢复时间。
+
+当项目需要接入新的监测项时，先在数据字典登记名称、单位、精度、采样周期和质量规则，再创建或复用 测点类型；不要直接在 JSONB 中写一个未经登记的键。新增字段若会参与预警、统计或模型输入，必须同步 更新接口契约、索引评估、备份清单和验收查询。这样做虽然增加了前期沟通，却能避免后期出现“报表有一 列、接口没有一列、模型又按另一列计算”的隐性分叉。
+
+数据库契约还应服务于教学复盘。学生可以从事件追溯查询出发，逐个删除或改变查询条件，观察外键、质量 码、状态和索引如何影响结果；也可以故意发送重复事件、未来时间戳和缺少单位的记录，验证系统是否在 正确的位置拒绝或标记。实验报告要写清“哪一层发现问题、哪一层保存证据、哪一层向用户解释”，而不 只是贴出一条 SQL 的执行结果。能够回答这些问题，才说明学生理解了关系模型与水利业务之间的映射。
+
+工程交付时还要把数据库契约交给不同角色共同评审：业务人员检查字段是否能表达处置流程，测量人员 检查单位和精度，开发人员检查实体与 DTO 映射，运维人员检查分区、备份和恢复，安全人员检查角色与 审计范围。评审结论写入版本记录，后续修改沿用同一流程。这样，DDL 既是可执行的初始化脚本，也是 业务、技术和运维之间的共同语言；当教材示例迁移到真实项目时，读者知道哪些内容可以复用，哪些内容 必须经过项目审批和压测后才能确定。
+
+因此，数据库评审记录应成为发布包的一部分，与代码、配置和数据样例共同归档，并在每次迁移后更新。 归档内容还应包含执行计划、失败重试记录和恢复演练的校验结果，保证后来接手系统的人员能够复现设计 依据并判断一次变更是否真正达到了预期效果。这些材料同时构成课程答辩的证据链：学生在报告中引用对应的 迁移版本和查询清单，并注明每条证据的生成时间，评审者即可逐项复核。
+
+数据库设计还要考虑数据进入系统之前的契约校验。网关收到消息时先检查事件标识、测点编码、发生时间、 单位和载荷格式；缺少任一必填项就进入拒收或隔离队列，并保留原始报文摘要。通过校验的消息再进入质量 服务，质量服务依据测点类型读取量程和单位注册表，生成 valid、suspect 或 missing 质量码。这个顺序 可以把“消息格式错误”和“数值虽然可解析但不可信”区分开，后续统计和预警才不会把两类问题混为一谈。
+
+观测写入采用追加式版本模型，会牺牲少量存储空间，却换来清晰的审计边界。设备重传同一事件时，唯一 事件键保证幂等；人工确认量程或修复时间戳时，新增版本并在修订原因中说明依据。查询最新值必须明确 按版本和事件时间排序，报表若要重现过去状态，则读取指定版本快照。这样既能支持现场快速纠错，也不会 让“修正后的数字”覆盖掉审计人员需要的原始事实。
+
+空间数据的精度需要与业务用途匹配。点位用于测点定位和影响区筛选时，使用带高程的 PointZ 能够同时 满足平面地图和剖面分析；如果某个业务需要线或面，应在项目扩展表中登记几何类型、坐标系和精度要求， 不要把线面强行塞进点字段。三维模型中的局部坐标、工程坐标与经纬度之间要保留转换参数，并在模型 运行输入快照中登记版本，避免相同测点在不同软件中出现肉眼难以发现的偏移。
+
+时间数据的准确性也不能只看时间戳格式。设备时钟漂移、网关缓存和消息重投都会造成到达顺序与发生顺序 不一致。数据库同时保存 `occurred_at`、`received_at` 和事件 ID，质量服务依据当前时间与上一条观测检查 未来时间、倒序和重复；流式消费者按发生时间排序时必须设置允许迟到窗口。窗口外的补传进入人工复核， 而不是静默插入实时曲线。通过把三个时间概念分别保存，系统可以解释“数据什么时候发生、什么时候到达、 什么时候被平台处理”。
+
+预警表的证据字段应能让专业分析员复算当时的判定。证据至少包括归一化指标、权重、阈值、规则版本、 参与计算的数据窗口和质量统计；只保存一个分数会使处置过程无法复核。无预警意味着规则已经成功计算 且没有触发阈值，未评估意味着质量条件不足，蓝色则表示指标出现需要关注的变化。三者在数据库中分别 由等级、evaluable 和 reason 表达，前端不得把空 reason 当作正常状态。
+
+工单与预警的关联不是简单的“多一张表”。预警可能被多次确认、转派和补充回执，工单需要记录责任角色、 截止时间、动作、结果和完成时间。状态更新必须使用当前状态条件和追踪号，若并发更新失败则返回最新状态 供用户刷新。处置结果应包含测点、时间、操作前后状态和依据，不能只写“已处理”。这些字段支持事后 统计处置时延和重复工单，也能帮助模型评估哪些预警经常被人工驳回。
+
+模型运行记录把算法版本和输入快照固定下来，解决“同样的代码为什么结果不同”的问题。输入快照包括 测点集合、时间范围、质量过滤条件、特征版本和规则参数；结果字段存储摘要，完整输出可存入版本化对象 存储并在表中保存地址和校验和。运行失败时记录错误类别和重试次数，成功后才能被预警或报表引用。模型 升级必须创建新版本并进行对照运行，旧版本结果继续保留，直到审批人确认迁移完成。
+
+最后，数据库指标应反映用户关心的业务体验。除了写入吞吐和查询延迟，还要观察最近数据滞后、合格数据 比例、未评估预警数量、待处理工单时长、连续聚合刷新延迟和恢复演练成功率。监控看板把这些指标按测点、 工程和时间窗分组，运维员可以区分“设备没有上报”“数据到达但质量不合格”“规则未运行”和“工单没有 及时关闭”。只有把技术指标与业务状态连起来，数据库设计才真正支撑安全监测平台的运行闭环。
+
+图8.4把这些字段串成一条流水线：接入、质量检查、存储、聚合、展示，并标出每一段落地的关键字段。沿这条线可以回答一个常被问到的问题——界面上的某个数值究竟是原始观测、聚合结果还是模型输出。
+
+<figure markdown>
+![图8.4](images/chapter08_fig_8_4.svg)
+<figcaption>图 8.4  监测数据接入、质量检查与展示流水线</figcaption>
+</figure>
+
+### 8.3.5 Vue前端页面组织
+
+前端按路由组织“监测总览、三维场景、预警中心、工单、数字孪生预演、系统管理”。Pinia保存当前工程、时间窗、选中对象和权限摘要；图表和Three.js场景订阅同一状态。页面组件不直接拼接数据库字段，而通过后端提供的视图契约读取。
+
+前端需要处理加载中、无数据、质量可疑、接口失败和无权限五种状态。告警确认使用幂等请求并显示服务器返回的状态版本；若其他用户已处理，界面提示刷新而不是覆盖。
+
+页面筛选条件要与后端查询条件一一对应。测点类型过滤只改变 GET /assets 的参数，时间范围和质量码 过滤只改变 GET /assets/id/readings 的参数，聚合粒度决定读取原始观测还是连续聚合视图。组件不在 浏览器中重新计算平均值，也不把 missing 当作零值参与计算；前端展示的样本数、质量码和时间桶都来自 服务端响应。这样，用户可以把页面上的一根曲线追溯到数据库中的查询窗口和聚合策略。
+
+加载状态应按请求粒度组织。测点列表加载时显示列表骨架，曲线加载时保留已经选择的测点和上一份数据， 工单提交时只禁用对应按钮，不能把整个页面锁死。请求取消或组件卸载后，旧响应不得覆盖新测点的结果； 可以使用 AbortController 或请求序号实现“最后一次选择生效”。异常提示包含操作对象和追踪号，但不在 浏览器中展示堆栈和数据库细节，技术日志交给统一日志采集。
+
+ECharts 配置需要明确数据缺口的视觉语义。valid 值绘制连续线，missing 对应 null 并断开连线， suspect 保留点但使用醒目边框和透明度提示，不能用与红色预警相同的颜色掩盖质量问题。图例同时显示 单位、样本数和质量统计，时间轴使用服务端的 UTC 时间并在刻度格式化时转换为用户时区。用户放大或 缩小时间窗时，页面重新请求合适粒度的数据，而不是把少量点简单拉伸成高密度曲线。
+
+三维联动还要考虑坐标和模型生命周期。资产对象加载完成后注册业务编码，模型切换或场景卸载时注销 旧对象；定位失败时在页面显示“当前场景没有该测点模型”，不能把相机移动到原点造成误判。对象高亮 只改变临时材质或选择状态，不覆盖原模型材质中的工程颜色。三维拾取返回的业务编码经过校验后再交给 Pinia，页面不接受模型文件中的任意字符串作为数据库查询条件。
+
+路由参数恢复必须通过同一套 store 方法。用户从告警列表跳转到测点详情时，路由携带 assetId，页面 先选择对象再加载读数；用户返回总览时保留时间窗和质量过滤，避免每次导航都回到默认窗口。浏览器刷新 时 store 重新读取服务器状态，不能从 localStorage 恢复过期的预警或工单状态。需要缓存的只是筛选条件 和最近一次成功查询的时间，不缓存权限和审计结论。
+
+前端的 Pinia 状态应保持可序列化，避免把 ECharts 实例、Three.js Object3D 或 WebSocket 连接放进 store。组件通过 provide/inject 或 composable 使用这些运行时对象，store 只保存 assetId、时间窗、 读数数组、加载状态和服务器错误。这样可以在测试中用普通对象替换场景桥接，也可以在 SSR 或离线演示 环境中只渲染曲线和列表。
+
+接口版本升级时，API 层负责兼容字段变化。后端从单值响应改为分页响应时，store 同时兼容 content、 items 和旧数组一段观察期；等客户端全部升级后再移除兼容分支。质量码和预警等级不能在前端自行翻译 成数字，显示文案由枚举映射表统一提供。发现未知枚举时显示“未知状态”并记录日志，而不是默认成正常。
+
+前端性能要以真实测点和时间窗测试。测点列表使用虚拟滚动或分页，曲线只保留当前窗口需要的点，三维 场景按对象可见性和 LOD 控制绘制；ECharts 更新使用 setOption 的增量路径，窗口缩放和 resize 事件 合并处理。性能报告记录首屏时间、接口等待、图表绘制、相机定位和内存增长，并把质量提示、错误提示和 权限拒绝纳入可用性验收。这样，本节的界面切片既能支撑两课时实践，也能作为完整平台的前端边界示例。
+
+实践验收还应覆盖键盘和触控操作。测点按钮需要可获得焦点，曲线点的详情不能只依赖鼠标悬停，颜色 之外还要提供文字和图标说明；时间范围输入支持无障碍标签，错误提示通过 aria-live 告知屏幕阅读器。 在平板或值班室大屏上，列表、曲线和三维窗口的布局可以响应式调整，但同一个 assetId 和时间窗仍然 贯穿三种视图，避免移动端为了排版而改变业务语义。
+
+前端日志不记录完整观测值和权限信息，只记录请求路径、状态码、耗时、assetId 摘要和 traceId。性能 采样可以在开发环境打开，生产环境按比例采样并脱敏。发布前通过 source map 和版本号把浏览器错误 映射到构建产物，值班员看到的是可理解提示，开发人员则能从日志还原请求、状态和三维定位的先后顺序。
+
+当后端返回 409 时，组件先停止重复提交，再重新读取预警或工单状态；当返回 401 时清理过期会话并回到 登录页；当返回 403 时保留当前路由但显示权限边界；当网络恢复后，store 只重试可安全重试的 GET 请求， POST 操作必须由用户确认。这样的错误分类让前端的“自动恢复”不会意外重复创建工单或确认预警。 页面还要在错误恢复后保留原请求的追踪号和用户选择，便于值班员确认恢复是否真的生效。 验收记录同时保留浏览器版本、构建版本和接口版本，便于复现跨端差异。 验收人员还要把同一测点在列表、曲线和三维场景中的显示结果逐项核对：列表中的质量码应与曲线的断点标记一致，场景定位应落到该测点的空间坐标，切换时间窗后不能残留上一窗口的读数。对键盘操作、窄屏布局和网络抖动分别记录通过条件，形成可追踪的前端验收清单；只有接口契约、视觉提示和空间联动同时满足，页面才具备值班使用的可信度。
+
+本节把前端实现切片与 8.3 节的接口契约逐一对齐。API 层只负责把参数编码为 HTTP 请求，Pinia 保存跨 组件共享的测点、时间窗和读数，页面组件负责筛选、图表和交互，三维桥接对象负责把选中的资产定位到 Three.js 场景。数据流从“筛选条件”开始，经由请求层和后端接口返回观测，再以同一个`assetId` 同时驱动 ECharts 曲线和三维相机；因此用户点击曲线或测点列表时，看到的是同一对象的两个视图。
+
+第4章已经提供带认证、超时和统一错误处理的`request.js`封装，本节不重复实现 fetch 或 axios。代码清单8.27只声明监测领域 API，并把时间、质量码和聚合粒度作为 显式参数传给后端接口。调用方可以在单元测试中替换这个模块，模拟 401、409、网络超时和空数据。
+
+**清单 8.27  监测主线 API 层**
 
 ```javascript
-// 数据处理流水线核心实现
-class DataProcessingPipeline {
-    constructor() {
-        this.stages = [
-            new DataAcquisitionStage(),
-            new DataValidationStage(),
-            new DataProcessingStage(),
-            new DataAnalysisStage()
-        ];
+// api/monitoring.js
+import request from '@/utils/request';
+
+export function getAssets(params = {}) {
+  return request.get('/api/assets', {
+    params: {
+      assetType: params.assetType || undefined,
+      after: params.after || undefined,
+      limit: params.limit || 50
     }
-    
-    async process(inputData) {
-        let currentData = inputData;
-        
-        for (let stage of this.stages) {
-            currentData = await stage.execute(currentData);
-            if (currentData.error) {
-                throw new Error(`处理失败: ${currentData.error}`);
-            }
+  });
+}
+
+export function getReadings(assetId, { from, to, quality, agg }) {
+  if (!assetId || !from || !to) {
+    return Promise.reject(new Error('测点和时间范围不能为空'));
+  }
+  return request.get('/api/assets/' + encodeURIComponent(assetId) + '/readings', {
+    params: { from, to, quality: quality || 'valid', agg: agg || 'raw' }
+  });
+}
+
+export function acknowledgeWarning(warningId, requestId) {
+  return request.post('/api/warnings/' + warningId + '/ack', { requestId });
+}
+
+export function createWorkOrder(payload) {
+  return request.post('/api/work-orders', payload);
+}
+```
+
+Pinia store 只保存具有业务意义的共享状态，图表实例和 DOM 引用仍然属于页面组件。代码清单 8.28使用组合式 Store 管理当前测点、时间窗、质量过滤和加载错误，并将 后端返回的分页内容转换成只读数组。刷新读数前保留旧数据和 selected 状态，避免网络抖动时界面闪成 空白；请求失败时保留最后一次成功结果并显示错误原因。
+
+**清单 8.28  Pinia 监测状态仓库**
+
+```javascript
+// stores/monitoring.js
+import { computed, ref } from 'vue';
+import { defineStore } from 'pinia';
+import { getAssets, getReadings } from '@/api/monitoring';
+
+export const useMonitoringStore = defineStore('monitoring', () => {
+  const assets = ref([]);
+  const readings = ref([]);
+  const selectedAssetId = ref('');
+  const range = ref({
+    from: new Date(Date.now() - 24 * 3600 * 1000).toISOString(),
+    to: new Date().toISOString(),
+    quality: 'valid',
+    // 页面组件按原始观测结构解析，默认取 raw；
+    // 切到 15m 等聚合档时需同时切换响应解析分支
+    agg: 'raw'
+  });
+  const loading = ref(false);
+  const errorMessage = ref('');
+  const selectedAsset = computed(() =>
+    assets.value.find(item => item.assetId === selectedAssetId.value) || null
+  );
+
+  async function loadAssets(assetType) {
+    loading.value = true;
+    errorMessage.value = '';
+    try {
+      const response = await getAssets({ assetType, limit: 100 });
+      assets.value = response.data.items || response.data;
+      if (!selectedAssetId.value && assets.value.length) {
+        selectedAssetId.value = assets.value[0].assetId;
+      }
+    } catch (error) {
+      errorMessage.value = error.message || '测点列表加载失败';
+      throw error;
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  async function loadReadings() {
+    if (!selectedAssetId.value) return;
+    loading.value = true;
+    errorMessage.value = '';
+    try {
+      const response = await getReadings(selectedAssetId.value, range.value);
+      readings.value = response.data.content || response.data.items || response.data;
+    } catch (error) {
+      errorMessage.value = error.message || '观测曲线加载失败';
+      throw error;
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  function selectAsset(assetId) {
+    selectedAssetId.value = assetId;
+  }
+
+  return {
+    assets, readings, selectedAssetId, selectedAsset, range,
+    loading, errorMessage, loadAssets, loadReadings, selectAsset
+  };
+});
+```
+
+路由把监测总览和测点详情映射到同一份 store。代码清单8.29使用动态导入 降低首屏体积，并在路由元数据中声明最小角色；路由守卫只负责登录态和粗粒度角色检查，具体工程范围、 数据质量权限和预警操作仍由后端再次校验。URL 中的`assetId`可以被复制和恢复，刷新页面 后 store 根据路由参数重新加载对象。
+
+**清单 8.29  监测页面路由与角色守卫**
+
+```javascript
+// router/index.js
+import { createRouter, createWebHistory } from 'vue-router';
+import { useAuthStore } from '@/stores/auth';
+
+const router = createRouter({
+  history: createWebHistory(),
+  routes: [
+    {
+      path: '/monitoring',
+      name: 'monitoring',
+      component: () => import('@/views/MonitoringDashboard.vue'),
+      meta: { roles: ['DUTY_OFFICER', 'ANALYST'] }
+    },
+    {
+      path: '/monitoring/:assetId',
+      name: 'monitoring-detail',
+      component: () => import('@/views/MonitoringDashboard.vue'),
+      props: true,
+      meta: { roles: ['DUTY_OFFICER', 'ANALYST'] }
+    }
+  ]
+});
+
+router.beforeEach((to) => {
+  const auth = useAuthStore();
+  const required = to.meta.roles || [];
+  if (!auth.isAuthenticated) return { name: 'login', query: { redirect: to.fullPath } };
+  if (required.length && !required.some(role => auth.roles.includes(role))) {
+    return { name: 'forbidden' };
+  }
+  return true;
+});
+
+export default router;
+```
+
+三维定位不能让页面组件直接修改相机矩阵，否则图表和场景会形成双向耦合。代码清单 8.30定义一个小型桥接模块：场景初始化时注册`assetId`到对象的映射， 用户选择测点时由`locateAsset`计算世界坐标、移动控制器目标并高亮对象。这个模块可以被 Three.js r160+场景使用，也可以由 Cesium 1.12x+适配器实现相同的`locateAsset`接口。
+
+**清单 8.30  三维场景测点定位桥接**
+
+```javascript
+// scene/sceneBridge.js
+import * as THREE from 'three';
+
+export function createSceneBridge({ camera, controls }) {
+  const objects = new Map();
+  let selected = null;
+
+  function register(assetId, object3d) {
+    if (!assetId || !object3d) throw new Error('场景对象缺少 assetId');
+    objects.set(assetId, object3d);
+  }
+
+  function clearSelection() {
+    if (selected) {
+      // 恢复选中前保存的原始自发光值，不覆盖模型原有材质
+      selected.material.emissive?.setHex(selected.userData.baseEmissive ?? 0x000000);
+    }
+    selected = null;
+  }
+
+  function locateAsset(assetId) {
+    const object3d = objects.get(assetId);
+    if (!object3d) return false;
+    clearSelection();
+    selected = object3d;
+    selected.material.emissive?.setHex(0x1e88e5);
+    const target = new THREE.Vector3();
+    object3d.getWorldPosition(target);
+    controls.target.copy(target);
+    camera.position.copy(target.clone().add(new THREE.Vector3(12, 8, 12)));
+    controls.update();
+    return true;
+  }
+
+  return { register, locateAsset, clearSelection };
+}
+```
+
+这个单文件组件有两个需要在项目中补齐的依赖：一是应用入口通过`app.provide`注入名为 `sceneBridge`的桥接对象，二是组件从`vue`导入列表中包含`inject`。代码清单 8.31补齐 Vite 应用入口、Pinia、Router 和场景桥接注入，形成从启动到页面的 可运行链。Three.js 场景初始化可以替换为 Cesium 适配器，但桥接接口和 Pinia 数据契约保持不变。
+
+**清单 8.31  Vue 应用入口与场景桥接注入**
+
+```javascript
+// main.js
+import { createApp } from 'vue';
+import { createPinia } from 'pinia';
+import App from './App.vue';
+import router from './router';
+import { createSceneBridge } from './scene/sceneBridge';
+import { createThreeScene } from './scene/createThreeScene';
+
+const app = createApp(App);
+const scene = createThreeScene(document.querySelector('#scene'));
+const bridge = createSceneBridge(scene);
+app.provide('sceneBridge', bridge);
+app.use(createPinia()).use(router).mount('#app');
+```
+
+前端的错误处理要区分认证过期、权限不足、业务冲突和网络不可达。请求封装统一把 401 交给登录流程， 把 403 导向无权限页面，把 409 映射为“状态已被其他用户更新”的刷新提示；组件只负责展示面向学生和 值班员的可理解文案。对于空数据，曲线保留时间轴并显示“该窗口没有有效观测”，不能绘制一条从零开始 的假曲线。对于 suspect 数据，列表和图表都显示可疑标记，用户可以选择查看原始值和质量原因。
+
+ECharts 与三维场景的联动以标识和时间窗为中介，而不是直接互相调用。图表点击事件只把 `assetId`和发生时间交给 store，store 再通知桥接模块；三维拾取同样只更新 store，曲线根据 当前测点重新请求。这种单向数据流能避免两个组件各自维护“当前测点”，也能让键盘操作、URL 恢复和 自动刷新使用同一状态。如果未来将 Three.js 替换为 Cesium，页面不需要修改，只需实现相同的 `locateAsset`和`register`接口。
+
+前端安全边界与后端一致：路由守卫用于减少无权限页面的暴露，真正的数据范围由后端根据角色和工程关系 过滤；接口返回的 evidence、原始 JSON 和设备元数据按权限分层，不先发送到浏览器再隐藏。Pinia 中的 状态也不等于可信数据，页面显示的预警等级、质量码和工单状态都来自服务器响应，操作成功后重新读取 服务器状态而不是本地乐观修改。这样，多个值班员同时处理同一条预警时，第二个页面会得到 409 并提示刷新。
+
+前端验收可沿四条路径进行：先筛选测点并确认 GET /assets 参数正确，再改变时间范围并确认 GET /assets/id/readings 使用左闭右开窗口；随后点击曲线点和测点按钮，确认三维相机定位到同一个 对象；最后发送重复确认和工单请求，确认页面显示服务端返回的状态。验收记录应包含浏览器网络面板、 Pinia 状态快照、ECharts 数据数组、三维对象 ID 和后端 traceId，使问题能够从界面追到数据库事件。
+
+### 8.3.6 Spring Boot后端与数据质量
+
+后端接口使用Spring Boot 3.2+与Java 17。质量服务对格式、单位、范围、时序和重复五项进行校验；只有明确规则允许时才生成修订值。时序检查要求`occurredAt`不晚于当前时间且不早于上一条记录，重复检查以`eventId`去重。下面的完整示例保留原始值，只更新质量标记并返回全部问题：
+
+**清单 8.32  质量检查服务实现**
+
+```java
+import java.time.Clock;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+
+record Reading(String eventId, String item, Double value, String unit,
+               Instant occurredAt, String quality) {
+    Reading withQuality(String nextQuality) {
+        return new Reading(eventId, item, value, unit, occurredAt, nextQuality);
+    }
+}
+
+record QualityResult(Reading reading, List<String> issues,
+                     boolean qualityFlagAdjusted) {}
+
+interface UnitRegistry {
+    boolean matches(String item, String unit);
+}
+
+interface RangePolicy {
+    boolean isInvalid(Reading reading);
+}
+
+public final class QualityService {
+    public enum WarningLevel { NONE, BLUE, YELLOW, ORANGE, RED }
+
+    public record Classification(boolean evaluable,
+                                 WarningLevel level,
+                                 String reason) {}
+
+    private final UnitRegistry unitRegistry;
+    private final RangePolicy range;
+    private final Clock clock;
+    private final Set<String> seenEventIds =
+        ConcurrentHashMap.newKeySet();
+
+    public QualityService(UnitRegistry unitRegistry,
+                          RangePolicy range, Clock clock) {
+        this.unitRegistry = Objects.requireNonNull(unitRegistry);
+        this.range = Objects.requireNonNull(range);
+        this.clock = Objects.requireNonNull(clock);
+    }
+
+    public QualityResult inspect(Reading r, Reading previous) {
+        Objects.requireNonNull(r, "reading");
+        List<String> issues = new ArrayList<>();
+        String qualityState = normalizeQuality(r.quality());
+
+        if (r.value() == null) {
+            issues.add("missing_value");
+            qualityState = mergeQuality(qualityState, "missing");
+        } else if (!Double.isFinite(r.value())) {
+            issues.add("invalid_format");
+            qualityState = mergeQuality(qualityState, "invalid");
         }
-        
-        return currentData;
+
+        if (!unitRegistry.matches(r.item(), r.unit())) {
+            issues.add("unit_mismatch");
+            qualityState = mergeQuality(qualityState, "suspect");
+        }
+
+        if (r.value() != null && Double.isFinite(r.value())
+                && range.isInvalid(r)) {
+            issues.add("invalid_range");
+            qualityState = mergeQuality(qualityState, "invalid");
+        }
+
+        Instant now = clock.instant();
+        boolean timeError = r.occurredAt() == null
+                || r.occurredAt().isAfter(now)
+                || (previous != null && previous.occurredAt() != null
+                    && r.occurredAt().isBefore(previous.occurredAt()));
+        if (timeError) {
+            issues.add("occurredAt_order");
+            qualityState = mergeQuality(qualityState, "suspect");
+        }
+
+        if (r.eventId() == null) {
+            issues.add("missing_eventId");
+            qualityState = mergeQuality(qualityState, "suspect");
+        } else if (!seenEventIds.add(r.eventId())) {
+            issues.add("duplicate_eventId");
+            qualityState = mergeQuality(qualityState, "suspect");
+        }
+
+        // 对外质量码仍保持valid/suspect/missing三值口径；
+        // invalid作为内部校验结果，最终进入未评估分支。
+        String outputQuality = "invalid".equals(qualityState)
+                ? "suspect" : qualityState;
+        boolean qualityFlagAdjusted =
+                !Objects.equals(outputQuality, r.quality());
+        Reading output = r.withQuality(outputQuality);
+        return new QualityResult(output, List.copyOf(issues),
+                qualityFlagAdjusted);
+    }
+
+    public Classification classify(double score, String quality) {
+        if (!"valid".equals(quality)) {
+            return new Classification(false, WarningLevel.NONE,
+                    "未评估：质量码=" + quality);
+        }
+        if (!Double.isFinite(score)) {
+            return new Classification(false, WarningLevel.NONE,
+                    "未评估：评分不是有限值");
+        }
+        if (score >= 0.85) {
+            return new Classification(true, WarningLevel.RED, "达到红色阈值");
+        }
+        if (score >= 0.70) {
+            return new Classification(true, WarningLevel.ORANGE, "达到橙色阈值");
+        }
+        if (score >= 0.50) {
+            return new Classification(true, WarningLevel.YELLOW, "达到黄色阈值");
+        }
+        if (score >= 0.30) {
+            return new Classification(true, WarningLevel.BLUE, "达到蓝色关注阈值");
+        }
+        return new Classification(true, WarningLevel.NONE, "无预警");
+    }
+
+    private static String normalizeQuality(String quality) {
+        if (quality == null || quality.isBlank()) return "missing";
+        return switch (quality) {
+            case "valid", "suspect", "missing" -> quality;
+            default -> "suspect";
+        };
+    }
+
+    private static String mergeQuality(String current, String candidate) {
+        return priority(candidate) > priority(current) ? candidate : current;
+    }
+
+    private static int priority(String quality) {
+        return switch (quality) {
+            case "missing" -> 3;
+            case "invalid" -> 2;
+            case "suspect" -> 1;
+            default -> 0;
+        };
     }
 }
 ```
 
-**数据质量控制机制**
+质量状态合并遵循`missing > invalid > suspect > valid`的优先级：同一条记录同时缺测、单位错误、范围无效或事件重复时，`issues`保留全部原因，最终质量状态取最高优先级。这里的`invalid`是内部校验结论，对外仍映射为三值质量码中的`suspect`，从而既保留“明显无效”的语义，又与第7章的`valid/suspect/missing`口径一致。原始值从不被覆盖，`qualityFlagAdjusted`只表示质量标记发生了受控调整，原始记录与质量结果通过事件标识关联。
 
-实时监测数据需要经过多层次质量控制：
+示例中的`seenEventIds`只用内存集合演示幂等语义，生产环境应改用带过期时间的去重存储，例如 Redis 的 SETNX 加 TTL，或数据库唯一约束；去重窗口应覆盖消息系统可能出现的最大重投周期，窗口结束后才允许同一业务标识再次进入处理流程。
 
-- **范围检查**：验证数据值是否在合理范围内
-- **时间一致性**：检查数据的时间序列和变化率
-- **空间相关性**：验证相邻监测点数据的关联性
-- **统计异常**：通过统计方法检测异常值
-## 核心功能模块
+### 8.3.7 监测主线后端实现
 
-### 数据采集与预处理模块
+8.3 节的字段字典和 DDL 是后端实现的唯一来源。实体类只负责把持久化字段映射成有类型的对象，业务 规则放在服务层，Controller 负责 HTTP 契约，Kafka 消费者负责把消息接入同一条事务链。四层职责不能 互换：Controller 不直接拼接 SQL，实体类不调用消息客户端，消费者不绕开质量服务写入预警。这样做的 好处是可以分别测试字段映射、事务边界、权限判定和消息重投。
 
-该模块负责从各类传感器和监测设备中采集原始数据，并进行初步的预处理工作。主要功能包括：
+实体映射首先固定表名和列名，再处理空间类型、JSONB 和复合主键。`asset`的空间列使用 JTS `Point`承载 PointZ，坐标系约束仍由数据库保证；应用在写入前检查 SRID，读取时把坐标转换为 前端约定的经纬度和高程。代码清单8.33展示与 8.3 节 DDL 完全对应的资产实体， 构造器只接受必填字段，更新时间由持久化回调维护。
 
-- **多协议支持**：支持Modbus、MQTT、HTTP等常见协议
-- **设备管理**：设备注册、状态监控和故障处理
-- **数据预处理**：数据格式转换、单位统一和初步校验
-- **实时传输**：将处理后的数据实时传输到上层业务系统
+**清单 8.33  AssetEntity 空间对象实体**
 
-### 安全评价与预警模块
+```java
+package cn.example.water.monitoring.asset;
 
-该模块是系统的核心智能模块，负责对监测数据进行深度分析。主要功能包括：
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Table;
+import org.locationtech.jts.geom.Point;
 
-- **安全状态评估**：基于多参数的综合安全评价
-- **预警算法**：结合阈值判断、趋势分析和机器学习的多层次预警
-- **风险评估**：对潜在风险进行量化评估和级别划分
-- **决策支持**：为管理人员提供处理建议和操作指导
+import java.time.Instant;
+import java.util.Objects;
 
-### 三维可视化模块
+@Entity
+@Table(name = "asset")
+public class AssetEntity {
+    @Id
+    @Column(name = "asset_id", nullable = false, length = 64)
+    private String assetId;
 
-该模块提供直观的三维场景展示，将抽象的数据以立体形式呈现。主要功能包括：
+    @Column(name = "asset_type", nullable = false, length = 32)
+    private String assetType;
+    @Column(name = "display_name", nullable = false, length = 128)
+    private String displayName;
+    @Column(name = "unit", length = 32)
+    private String unit;
+    @Column(name = "geometry", nullable = false,
+            columnDefinition = "geometry(PointZ,4490)")
+    private Point geometry;
+    @Column(name = "elevation_m")
+    private Double elevationM;
+    @Column(name = "active", nullable = false)
+    private boolean active = true;
+    @Column(name = "metadata", nullable = false, columnDefinition = "jsonb")
+    private String metadata = "{}";
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private Instant createdAt;
+    @Column(name = "updated_at", nullable = false)
+    private Instant updatedAt;
 
-- **工程三维建模**：CAD图纸转换为三维模型
-- **监测点定位**：在三维场景中精确定位监测点
-- **状态可视化**：通过颜色、形状等视觉元素表示设备状态
-- **交互操作**：支持视角旋转、缩放和对象选中
+    protected AssetEntity() { }
 
-### 系统管理模块
+    public AssetEntity(String assetId, String assetType,
+                       String displayName, Point geometry) {
+        this.assetId = Objects.requireNonNull(assetId);
+        this.assetType = Objects.requireNonNull(assetType);
+        this.displayName = Objects.requireNonNull(displayName);
+        this.geometry = Objects.requireNonNull(geometry);
+        this.createdAt = Instant.now();
+        this.updatedAt = this.createdAt;
+    }
 
-该模块提供系统管理和维护功能，确保平台稳定运行。主要功能包括：
+    @PreUpdate
+    void touch() { updatedAt = Instant.now(); }
 
-- **用户管理**：用户注册、授权和权限控制
-- **系统配置**：参数设置、阈值配置和规则管理
-- **日志管理**：系统日志记录、存储和查询
-- **性能监控**：系统资源使用情况和性能指标监控
+    public String getAssetId() { return assetId; }
+    public String getAssetType() { return assetType; }
+    public String getDisplayName() { return displayName; }
+    public Point getGeometry() { return geometry; }
+    public boolean isActive() { return active; }
+    public void deactivate() { active = false; }
+}
 ```
 
-## 关键概念总结
+观测实体的主键由测点、发生时间和版本组成，正好对应 8.3 节的时序表约束。代码清单8.34 把复合主键拆成`ReadingId`，并用`@EmbeddedId`保存；`eventId`与发生时间共同构成 数据库侧的复合唯一索引（分区表的唯一索引必须包含分区列），供 Kafka 幂等消费兜底。实体不提供覆盖原始值的 setter，修订通过新版本构造，保证追加式审计。
 
-| 概念 | 定义 | 在智慧水利中的应用 |
-|------|------|-------------------|
-| 分层架构 | 将系统按功能职责分为数据层、业务层、表示层 | 实现系统模块的清晰分离和管理 |
-| 数据处理流水线 | 按阶段处理数据的串行处理模式 | 监测数据的采集、校验、处理和分析 |
-| 三维可视化 | 将抽象数据映射到三维空间进行展示 | 工程结构和监测点的直观展示 |
-| 安全预警系统 | 基于多参数分析的智能预警机制 | 水利工程安全状态的实时监控 |
-| 微服务架构 | 将单体应用拆分为多个独立服务 | 提高系统的可扩展性和可维护性 |
+**清单 8.34  ReadingEntity 与复合主键**
 
-## 实施效果展示
+```java
+package cn.example.water.monitoring.reading;
 
-!!! success "平台建设成果"
-    
-    **系统性能指标**
-    - 支持1000+监测点的实时数据处理
-    - 数据处理延迟控制在秒级以内
-    - 系统可用性达到99.9%以上
-    - 支持100+并发用户访问
-    
-    **业务应用效果**
-    - 提高监测效率60%以上
-    - 降低人工巡检成本40%
-    - 预警响应时间缩短至分钟级
-    - 决策支持准确率达到95%
-    
-    **技术创新亮点**
-    - 自主研发的数据质量控制算法
-    - 创新的三维可视化展示方案
-    - 智能化的多层次预警机制
-    - 完善的系统运维管理体系
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 
-## 本章小结
+import java.io.Serializable;
+import java.time.Instant;
+import java.util.Objects;
 
-本章通过完整的智慧水利平台综合应用案例，深入讲解了如何将前七章的技术知识进行系统整合和实际应用。
+@Embeddable
+public class ReadingId implements Serializable {
+    @Column(name = "asset_id", nullable = false, length = 64)
+    private String assetId;
+    @Column(name = "occurred_at", nullable = false)
+    private Instant occurredAt;
+    @Column(name = "version", nullable = false)
+    private int version;
 
-**核心技术深度掌握**：
+    protected ReadingId() { }
+    public ReadingId(String assetId, Instant occurredAt, int version) {
+        this.assetId = Objects.requireNonNull(assetId);
+        this.occurredAt = Objects.requireNonNull(occurredAt);
+        this.version = version;
+    }
+    public String getAssetId() { return assetId; }
+    public Instant getOccurredAt() { return occurredAt; }
+    public int getVersion() { return version; }
+    @Override public boolean equals(Object o) {
+        if (!(o instanceof ReadingId other)) return false;
+        return version == other.version
+            && assetId.equals(other.assetId)
+            && occurredAt.equals(other.occurredAt);
+    }
+    @Override public int hashCode() {
+        return Objects.hash(assetId, occurredAt, version);
+    }
+}
 
-1. **系统架构设计深度理解**：
-   - 掌握了企业级智慧水利平台的分层架构设计原理
-   - 理解了多业务系统集成的技术挑战和解决方案
-   - 学会了通过微服务架构实现系统整合
-   - 掌握了复杂权限控制和多用户访问管理的设计方法
+@Entity
+@Table(name = "reading")
+public class ReadingEntity {
+    @EmbeddedId
+    private ReadingId id;
+    @Column(name = "reading_id", insertable = false, updatable = false)
+    private Long readingId;
+    @Column(name = "event_id", nullable = false)
+    private String eventId;
+    @Column(name = "value")
+    private Double value;
+    @Column(name = "unit", nullable = false)
+    private String unit;
+    @Column(name = "quality", nullable = false)
+    private String quality;
+    @Column(name = "source", nullable = false)
+    private String source;
+    @Column(name = "revision_reason")
+    private String revisionReason;
+    @Column(name = "received_at", nullable = false)
+    private Instant receivedAt;
 
-2. **数据采集与处理技术专业化**：
-   - 深入理解了统一数据接入层的设计理念和实现方法
-   - 掌握了多协议设备适配器的设计模式
-   - 学会了数据质量控制的多维度评估和自动修复技术
-   - 理解了大规模实时数据处理的性能优化策略
+    protected ReadingEntity() { }
+    public ReadingEntity(ReadingId id, String eventId, Double value,
+                         String unit, String quality, String source) {
+        this.id = Objects.requireNonNull(id);
+        this.eventId = Objects.requireNonNull(eventId);
+        this.value = value;
+        this.unit = Objects.requireNonNull(unit);
+        this.quality = Objects.requireNonNull(quality);
+        this.source = Objects.requireNonNull(source);
+        this.receivedAt = Instant.now();
+    }
+    public ReadingId getId() { return id; }
+    public String getEventId() { return eventId; }
+    public Double getValue() { return value; }
+    public String getUnit() { return unit; }
+    public String getQuality() { return quality; }
+}
+```
 
-3. **智能预警算法系统化设计**：
-   - 掌握了多层次预警架构的设计思想和技术实现
-   - 理解了机器学习预测在水利监测中的应用
-   - 学会了多算法融合的预警决策机制
-   - 掌握了预警置信度计算和风险评估的方法
+预警、工单和模型运行实体共享“状态由数据库约束、业务转换由服务层执行”的边界。JSONB 字段在 Hibernate 6 中可用`@JdbcTypeCode(SqlTypes.JSON)`映射为字符串或专用 DTO；教材示例先保留原始 JSON 字符串，以突出字段契约和审计快照。代码清单8.35把三类过程对象放在 同一份可读代码中，实际工程按类名拆分为三个 Java 文件。
 
-4. **三维建模与可视化工程化能力**：
-   - 深入理解了CAD数据解析和几何重建的技术原理
-   - 掌握了从二维图纸到三维模型的完整转换流程
-   - 学会了LOD多精度模型的生成和优化策略
-   - 理解了大规模三维场景的渲染性能优化方法
+**清单 8.35  Warning、WorkOrder 与 ModelRun 实体**
 
-5. **综合工程实践能力**：
-   - 建立了企业级项目的完整开发思维
-   - 掌握了复杂系统的需求分析和架构设计方法
-   - 理解了系统可靠性和性能优化的工程实践
-   - 具备了主导智慧水利项目技术架构的能力
+```java
+package cn.example.water.monitoring.workflow;
 
-通过本章的深入学习，学生不仅掌握了智慧水利平台开发的核心技术，更重要的是培养了系统性思维和工程实践能力。这些能力使学生能够在水利信息化建设中承担重要的技术角色，为智慧水利事业的发展做出贡献。
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
-## 实践建议
+import java.time.Instant;
+import java.util.UUID;
 
-!!! tip "开发实践要点"
-    
-    **项目管理建议**
-    - 采用敏捷开发方法，分阶段实现功能模块
-    - 建立完善的代码审查和质量控制流程
-    - 重视文档编写，确保技术方案可传承
-    
-    **技术选型建议**
-    - 优先选择成熟稳定的技术框架
-    - 考虑技术的长期发展趋势和社区支持
-    - 平衡功能需求与维护成本
-    
-    **团队协作建议**
-    - 建立跨专业的开发团队
-    - 加强水利专业知识与技术知识的交流
-    - 定期进行技术分享和经验总结
+@Entity
+@Table(name = "warning")
+public class WarningEntity {
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "warning_id")
+    private Long warningId;
+    @Column(name = "asset_id", nullable = false)
+    private String assetId;
+    @Column(name = "source_event_id", nullable = false)
+    private String sourceEventId;
+    @Column(nullable = false) private String level;
+    @Column(nullable = false) private boolean evaluable;
+    private Double score;
+    @Column(nullable = false) private String reason;
+    @Column(name = "rule_version", nullable = false)
+    private String ruleVersion;
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(nullable = false, columnDefinition = "jsonb")
+    private String evidence;
+    @Column(nullable = false) private String status = "open";
+    @Column(name = "created_at", nullable = false)
+    private Instant createdAt;
+    protected WarningEntity() { }
+    public WarningEntity(String assetId, String eventId, String level,
+                         boolean evaluable, String reason,
+                         String ruleVersion, String evidence) {
+        this.assetId = assetId; this.sourceEventId = eventId;
+        this.level = level; this.evaluable = evaluable;
+        this.reason = reason; this.ruleVersion = ruleVersion;
+        this.evidence = evidence; this.createdAt = Instant.now();
+    }
+    public Long getWarningId() { return warningId; }
+    public String getAssetId() { return assetId; }
+    public String getLevel() { return level; }
+    public boolean isEvaluable() { return evaluable; }
+    public String getStatus() { return status; }
+    public void acknowledge() {
+        if (!"open".equals(status)) throw new IllegalStateException("状态已变化");
+        status = "acknowledged";
+    }
+}
 
-## 思考题与练习
+@Entity
+@Table(name = "work_order")
+public class WorkOrderEntity {
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "work_order_id") private Long workOrderId;
+    @Column(name = "warning_id", nullable = false) private Long warningId;
+    @Column(name = "owner_role", nullable = false) private String ownerRole;
+    @Column(name = "due_at", nullable = false) private Instant dueAt;
+    @Column(nullable = false) private String action;
+    private String result;
+    @Column(nullable = false) private String status = "pending";
+    @Column(name = "created_at", nullable = false) private Instant createdAt;
+    @Column(name = "completed_at") private Instant completedAt;
+    protected WorkOrderEntity() { }
+    public WorkOrderEntity(Long warningId, String ownerRole,
+                           Instant dueAt, String action) {
+        this.warningId = warningId; this.ownerRole = ownerRole;
+        this.dueAt = dueAt; this.action = action;
+        this.createdAt = Instant.now();
+    }
+    public Long getWorkOrderId() { return workOrderId; }
+    public String getStatus() { return status; }
+    public Instant getDueAt() { return dueAt; }
+    public void start() {
+        if (!"pending".equals(status))
+            throw new IllegalStateException("工单状态不允许开始处理");
+        this.status = "in_progress";
+    }
+    public void complete(String result) {
+        if (!"in_progress".equals(status))
+            throw new IllegalStateException("工单状态不允许完成");
+        this.result = result;
+        this.status = "completed";
+        this.completedAt = Instant.now();
+    }
+}
 
-### 基础题
+@Entity
+@Table(name = "model_run")
+public class ModelRunEntity {
+    @Id @Column(name = "run_id") private UUID runId;
+    @Column(name = "model_name", nullable = false) private String modelName;
+    @Column(name = "model_version", nullable = false) private String modelVersion;
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "input_snapshot", nullable = false, columnDefinition = "jsonb")
+    private String inputSnapshot;
+    @Column(name = "started_at", nullable = false) private Instant startedAt;
+    @Column(name = "finished_at") private Instant finishedAt;
+    @Column(nullable = false) private String status;
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "jsonb") private String result;
+    @Column(name = "error_message") private String errorMessage;
+    @Column(name = "requested_by", nullable = false) private String requestedBy;
+    protected ModelRunEntity() { }
+    public UUID getRunId() { return runId; }
+    public String getStatus() { return status; }
+}
+```
 
-1. **系统架构题**：分析智慧水利平台的分层架构设计，说明每一层的主要职责和相互关系。
+三类实体虽然在一个清单中并列，但生产代码应按文件拆分并使用包级访问控制；`WarningEntity` 的`acknowledge()`只允许从 open 转为 acknowledged，关闭和重新打开由服务层依据角色和审批记录 执行。实体层不自行发送 Kafka 事件，避免持久化回调在事务尚未提交时把“预警已生成”误发给下游。
 
-2. **数据处理题**：设计一个数据处理流水线，包括数据采集、校验、处理和存储四个阶段。
+Repository 只表达查询意图，不把数据库连接细节泄漏到 Controller。代码清单8.36 使用 Spring Data JPA 的方法查询和原生空间查询：普通列表由方法名生成 SQL，影响区查询明确写出 `ST_Within`和 SRID，避免把经纬度当作平面坐标。观测查询以复合主键的测点和时间范围为条件， 并保留质量码过滤参数，供服务层决定是否参与打分。
 
-3. **监测点题**：说明如何在三维场景中定位和展示水利工程的监测点信息。
+**清单 8.36  监测主线 Repository 接口**
 
-### 提高题
+```java
+package cn.example.water.monitoring.persistence;
 
-4. **集成设计题**：设计一个支持50个水库监测站点的集成平台，考虑性能优化和可靠性设计。
+import cn.example.water.monitoring.asset.AssetEntity;
+import cn.example.water.monitoring.reading.ReadingEntity;
+import cn.example.water.monitoring.reading.ReadingId;
+import cn.example.water.monitoring.workflow.WarningEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
-5. **预警系统题**：设计一个多层次的水利安全预警系统，包括阈值预警、趋势分析和智能预测。
+import java.time.Instant;
+import java.util.List;
 
-6. **性能优化题**：针对大量实时数据的处理和展示，提出具体的性能优化方案。
+public interface AssetRepository extends JpaRepository<AssetEntity, String> {
+    List<AssetEntity> findByActiveTrueAndAssetTypeOrderByAssetId(String assetType);
 
-### 综合题
+    @Query(value = """
+        SELECT * FROM asset
+        WHERE active = true
+          AND geometry && ST_Transform(
+              ST_SetSRID(ST_GeomFromText(:wkt), :inputSrid), 4490)
+          AND ST_Within(geometry, ST_Transform(
+              ST_SetSRID(ST_GeomFromText(:wkt), :inputSrid), 4490))
+        ORDER BY asset_id
+        """, nativeQuery = true)
+    List<AssetEntity> findInArea(@Param("wkt") String wkt,
+                                 @Param("inputSrid") int inputSrid);
+}
 
-7. **项目实践题**：基于本章所学知识，设计并实现一个完整的中小型水库安全监测平台原型。
+public interface ReadingRepository
+        extends JpaRepository<ReadingEntity, ReadingId> {
+    boolean existsByEventId(String eventId);
 
-8. **技术路线题**：分析当前智慧水利领域的技术发展趋势，提出未来技术升级的建议。
+    @Query("""
+        select r from ReadingEntity r
+        where r.id.assetId = :assetId
+          and r.id.occurredAt >= :fromAt
+          and r.id.occurredAt < :toAt
+          and (:quality is null or r.quality = :quality)
+        order by r.id.occurredAt asc, r.id.version asc
+        """)
+    Page<ReadingEntity> findWindow(@Param("assetId") String assetId,
+                                   @Param("fromAt") Instant fromAt,
+                                   @Param("toAt") Instant toAt,
+                                   @Param("quality") String quality,
+                                   Pageable pageable);
+}
 
-## 参考文献
+public interface WarningRepository extends JpaRepository<WarningEntity, Long> {
+    @Query("""
+        select w from WarningEntity w
+        where w.status in ('open', 'acknowledged')
+        order by w.createdAt asc
+        """)
+    List<WarningEntity> findOpenQueue(Pageable pageable);
+}
+```
 
-[1] 中华人民共和国水利部. 水利工程安全监测技术规范[S]. 北京: 中国水利水电出版社, 2022.
+服务层负责事务、质量语义和权限边界。代码清单8.37展示一个可注入的服务：读取曲线 默认只取 valid，确认预警使用带状态条件的更新，创建工单要求调用者已经通过 Spring Security 6 的 角色检查。服务返回 DTO 或领域结果，不把 JPA 实体直接暴露给前端，防止懒加载和内部审计字段泄漏。
 
-[2] Three.js Development Team. Three.js Documentation[EB/OL]. [2024-08-27]. https://threejs.org/docs/.
+**清单 8.37  监测主线事务服务**
 
-[3] Spring Boot Team. Spring Boot Reference Documentation[EB/OL]. [2024-08-27]. https://spring.io/projects/spring-boot.
+```java
+package cn.example.water.monitoring.service;
 
-[4] 张三丰, 李四. 智慧水利平台设计与实现[M]. 北京: 中国水利水电出版社, 2023.
+import cn.example.water.monitoring.persistence.AssetRepository;
+import cn.example.water.monitoring.persistence.ReadingRepository;
+import cn.example.water.monitoring.persistence.WarningRepository;
+import cn.example.water.monitoring.reading.ReadingEntity;
+import cn.example.water.monitoring.workflow.WarningEntity;
+import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
 
-[5] Docker Inc. Docker Documentation[EB/OL]. [2024-08-27]. https://docs.docker.com/.
+import java.time.Instant;
+import java.util.List;
+import java.util.Set;
 
-[6] Apache Software Foundation. Apache Kafka Documentation[EB/OL]. [2024-08-27]. https://kafka.apache.org/documentation/.
+@Service
+public class MonitoringService {
+    private final AssetRepository assets;
+    private final ReadingRepository readings;
+    private final WarningRepository warnings;
+
+    public MonitoringService(AssetRepository assets,
+                             ReadingRepository readings,
+                             WarningRepository warnings) {
+        this.assets = assets;
+        this.readings = readings;
+        this.warnings = warnings;
+    }
+
+    @Transactional
+    public Page<ReadingEntity> readings(String assetId, Instant fromAt,
+                                       Instant toAt, String quality,
+                                       Pageable pageable) {
+        if (!fromAt.isBefore(toAt)) {
+            throw new IllegalArgumentException("时间窗必须为正");
+        }
+        String filter = quality == null || quality.isBlank()
+                ? "valid" : quality;
+        if (!Set.of("valid", "suspect", "missing").contains(filter)) {
+            throw new IllegalArgumentException("质量码不在允许集合");
+        }
+        return readings.findWindow(assetId, fromAt, toAt, filter, pageable);
+    }
+
+    @Transactional
+    public WarningEntity acknowledge(long warningId) {
+        WarningEntity warning = warnings.findById(warningId)
+                .orElseThrow(() -> new IllegalArgumentException("预警不存在"));
+        warning.acknowledge();
+        return warning;
+    }
+
+    @Transactional(readOnly = true)
+    public List<WarningEntity> openWarnings(Pageable pageable) {
+        return warnings.findOpenQueue(pageable);
+    }
+}
+```
+
+Repository 接口在真实项目中分别保存为独立 Java 文件；清单8.36把它们并列展示，是为了看清查询方法与 实体的对应关系。服务层把质量码默认设为 valid 只是查询筛选的默认值， 不会改写数据库；当调用方显式查询 suspect 或 missing 时，界面必须展示相应质量提示。
+
+监测主线接口采用稳定路径和明确的请求响应。表8.6把测点、观测、预警 和工单四类接口列成契约，并注明角色和幂等要求。路径中的`from`、`to`和`agg` 均为查询参数，不改变本章8.1节参数表中的工程常数；分页、排序和质量过滤通过统一请求对象传递。
+
+**表 8.6  案例水库监测主线接口契约**
+
+| 方法与路径                    | 请求参数                            | 成功响应                 | 角色           | 关键约束                  |
+|:------------------------------|:------------------------------------|:-------------------------|:---------------|:--------------------------|
+| GET /assets                   | assetType、after、limit             | 测点摘要与经纬高         | 值班员、分析员 | 只返回 active 对象        |
+|                               |                                     |                          |                |                           |
+| `{id}/readings?`              |                                     |                          |                |                           |
+| `from=&to=&agg=`              | 时间窗、质量码、聚合粒度            | 时间桶、值、样本数、质量 | 值班员、分析员 | 时间窗左闭右开            |
+| GET /warnings                 | level、status、page                 | 预警证据摘要             | 值班员、分析员 | 未评估单独显示            |
+| POST /warnings/id/ack         | 请求追踪号、版本                    | 最新预警状态             | 值班员         | open 条件更新，重复可重试 |
+| POST /work-orders             | warningId、ownerRole、dueAt、action | 工单编号与状态           | 值班员、审批人 | 预警必须存在              |
+| POST /work-orders/id/complete | result、版本                        | 回执与完成时间           | 值班员         | 只允许 in_progress        |
+
+Controller 将 HTTP 类型转换为服务参数，并统一处理异常。代码清单8.38给出 Spring MVC 的完整入口和 DTO record；`@PreAuthorize`使用 Spring Security 6 的方法授权， 不把角色判断散落在字符串比较中。Controller 只返回必要字段，证据快照和原始观测仍由专业接口按权限 读取。
+
+**清单 8.38  监测主线 REST Controller 与 DTO**
+
+```java
+package cn.example.water.monitoring.web;
+
+import cn.example.water.monitoring.service.MonitoringService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.Instant;
+
+public record ReadingQuery(
+        @NotNull
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+        Instant from,
+        @NotNull
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+        Instant to,
+        String quality) { }
+
+public record AckRequest(@NotBlank String requestId) { }
+
+public record WorkOrderRequest(long warningId, @NotBlank String ownerRole,
+                               Instant dueAt, @NotBlank String action) { }
+
+public record ReadingDto(String assetId, Instant occurredAt, int version,
+                         Double value, String unit, String quality) {
+    static ReadingDto from(ReadingEntity entity) {
+        return new ReadingDto(entity.getId().getAssetId(),
+                entity.getId().getOccurredAt(), entity.getId().getVersion(),
+                entity.getValue(), entity.getUnit(), entity.getQuality());
+    }
+}
+
+@RestController
+@RequestMapping("/api")
+public class MonitoringController {
+    private final MonitoringService service;
+    public MonitoringController(MonitoringService service) {
+        this.service = service;
+    }
+
+    @GetMapping("/assets/{assetId}/readings")
+    @PreAuthorize("hasAnyRole('DUTY_OFFICER','ANALYST')")
+    public Page<ReadingDto> readings(@PathVariable String assetId,
+                            @Valid ReadingQuery query, Pageable pageable) {
+        return service.readings(assetId, query.from(), query.to(),
+                                query.quality(), pageable)
+                      .map(ReadingDto::from);
+    }
+
+    @PostMapping("/warnings/{warningId}/ack")
+    @PreAuthorize("hasRole('DUTY_OFFICER')")
+    public ResponseEntity<?> acknowledge(@PathVariable long warningId,
+                                         @Valid @RequestBody AckRequest request) {
+        return ResponseEntity.ok(service.acknowledge(warningId));
+    }
+}
+```
+
+Controller 的分页对象和日期格式由 Spring MVC 解析，统一异常处理器应把参数错误、权限错误、状态冲突 和数据库约束冲突转换为稳定的 HTTP 错误码。确认接口的`requestId`用于日志和链路追踪；真正 的幂等保证仍由 warning 的状态条件和客户端重复提交处理共同完成。
+
+工单写入需要同时检查预警存在性、责任角色和截止时间。代码清单8.39把 Repository、事务服务和 Controller 的创建/完成动作连成一条链；完成动作只允许 in_progress 状态， 并把回执写入同一个事务。实际工程可把状态转换抽成领域服务，但不能让 Controller 直接修改 status 字段。
+
+**清单 8.39  工单创建与完成的后端链**
+
+```java
+package cn.example.water.monitoring.workorder;
+
+import cn.example.water.monitoring.workflow.WorkOrderEntity;
+import jakarta.transaction.Transactional;
+import jakarta.validation.constraints.NotBlank;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.Instant;
+
+public interface WorkOrderRepository
+        extends JpaRepository<WorkOrderEntity, Long> {
+}
+
+public record CreateWorkOrder(long warningId,
+                              @NotBlank String ownerRole,
+                              Instant dueAt,
+                              @NotBlank String action) { }
+
+@Service
+class WorkOrderCommandService {
+    private final WorkOrderRepository orders;
+    private final WarningLookup warnings;
+    WorkOrderCommandService(WorkOrderRepository orders,
+                            WarningLookup warnings) {
+        this.orders = orders; this.warnings = warnings;
+    }
+
+    @Transactional
+    WorkOrderEntity create(CreateWorkOrder command) {
+        if (!warnings.exists(command.warningId()))
+            throw new IllegalArgumentException("预警不存在");
+        if (command.dueAt().isBefore(Instant.now()))
+            throw new IllegalArgumentException("截止时间必须在未来");
+        return orders.save(new WorkOrderEntity(command.warningId(),
+                command.ownerRole(), command.dueAt(), command.action()));
+    }
+
+    @Transactional
+    WorkOrderEntity complete(long orderId, String result) {
+        WorkOrderEntity order = orders.findById(orderId)
+                .orElseThrow(() -> new IllegalArgumentException("工单不存在"));
+        order.complete(result);
+        return order;
+    }
+}
+
+interface WarningLookup {
+    boolean exists(long warningId);
+}
+
+@RestController
+@RequestMapping("/api/work-orders")
+class WorkOrderController {
+    private final WorkOrderCommandService service;
+    WorkOrderController(WorkOrderCommandService service) {
+        this.service = service;
+    }
+
+    @PostMapping
+    @PreAuthorize("hasAnyRole('DUTY_OFFICER','APPROVER')")
+    WorkOrderEntity create(@RequestBody CreateWorkOrder command) {
+        return service.create(command);
+    }
+
+    @PostMapping("/{id}/start")
+    @PreAuthorize("hasRole('DUTY_OFFICER')")
+    WorkOrderEntity start(@PathVariable long id) {
+        return service.start(id);
+    }
+
+    @PostMapping("/{id}/complete")
+    @PreAuthorize("hasRole('DUTY_OFFICER')")
+    WorkOrderEntity complete(@PathVariable long id,
+                             @RequestParam String result) {
+        return service.complete(id, result);
+    }
+}
+```
+
+上面清单中的`WarningLookup`是对预警服务的最小端口，真实项目由预警 Repository 适配器实现； 这样工单服务不依赖预警表的全部字段。`WorkOrderEntity.complete`应检查当前状态并设置完成时间， 此处与实体清单同样按独立文件组织。接口表中的 POST /work-orders、POST /work-orders/{id}/start 和 POST /work-orders/{id}/complete 因此都有可追踪的实现入口（pending 经 start 进入 in_progress，再由 complete 关闭），异常和审计日志再由统一 Web 层补充。
+
+Kafka 消费者必须在数据库唯一约束和业务去重之间形成双保险。代码清单8.40 使用 Java 17 record 表达事件，监听器只负责反序列化和调用事务服务；事务服务先用`eventId` 查询，再依赖数据库唯一键处理并发重投。重复事件被确认但不重复写入，质量服务失败则抛出异常让消息 按照重试策略重新投递，不能在 catch 中静默吞掉错误。
+
+**清单 8.40  Kafka 观测事件消费与幂等写入**
+
+```java
+package cn.example.water.monitoring.ingest;
+
+import cn.example.water.monitoring.persistence.ReadingRepository;
+import cn.example.water.monitoring.reading.ReadingEntity;
+import cn.example.water.monitoring.reading.ReadingId;
+import jakarta.transaction.Transactional;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+
+import java.time.Instant;
+
+public record ReadingEvent(String eventId, String assetId,
+                           Instant occurredAt, int version,
+                           Double value, String unit,
+                           String quality, String source) { }
+
+@Component
+class ReadingKafkaConsumer {
+    private final ReadingIngestionService ingestion;
+    ReadingKafkaConsumer(ReadingIngestionService ingestion) {
+        this.ingestion = ingestion;
+    }
+
+    @KafkaListener(topics = "qingyuan.reading.v1",
+                   groupId = "monitoring-quality")
+    public void onMessage(ReadingEvent event) {
+        try {
+            ingestion.accept(event);
+        } catch (DataIntegrityViolationException duplicate) {
+            // 并发重投由唯一键裁决：事务已回滚，在事务边界之外
+            // 捕获并确认消息，避免无谓的重试循环
+        }
+    }
+}
+
+@Service
+class ReadingIngestionService {
+    private final ReadingRepository readings;
+    ReadingIngestionService(ReadingRepository readings) {
+        this.readings = readings;
+    }
+
+    @Transactional
+    public void accept(ReadingEvent event) {
+        if (readings.existsByEventId(event.eventId())) return;
+        ReadingId id = new ReadingId(event.assetId(),
+                event.occurredAt(), event.version());
+        ReadingEntity reading = new ReadingEntity(
+                id, event.eventId(), event.value(), event.unit(),
+                event.quality(), event.source());
+        readings.saveAndFlush(reading);
+    }
+}
+```
+
+监听器的消费组名称、Topic 和事件字段属于接口契约，应与 Kafka 管理配置和本章事件字段保持一致。 教材示例使用`saveAndFlush`让唯一键冲突尽早暴露。注意冲突异常必须在`@Transactional` 方法之外捕获：约束冲突发生时当前事务已被标记为只能回滚，若在事务方法内部捕获并正常返回，提交时 仍会抛出`UnexpectedRollbackException`，消息会被反复重投。生产环境还要配置退避重试、死信 Topic 和 监控指标。若质量服务需要调用外部系统，先把观测写入数据库，再通过事务发件箱发布事件，避免数据库 回滚后 Kafka 已经通知下游。
+
+后端实现还需要统一异常、审计和测试。参数错误返回 400，认证失败返回 401，角色不足返回 403，状态 冲突返回 409，数据库暂时不可用则由网关和消息重试策略处理。每次写操作携带`traceId`和 `requestId`，审计记录对象 ID、旧状态、新状态、操作者和原因。测试至少覆盖：复合主键版本追加、 重复事件、缺测质量码、空间 SRID 错误、open 预警重复确认、工单过期和 Kafka 重投。这样，代码清单中的 每个注解都能对应一个可观察的运行行为，而不是为了展示框架而堆叠注解。
+
+实体、Repository、服务和 Controller 之间还存在一条容易被忽视的生命周期关系。HTTP 请求开始时， Controller 创建参数对象并完成格式校验；服务层打开事务，读取实体并执行状态转换；Repository 在事务 提交前把变更写入数据库；事务成功后，发件箱发布后续事件。任何一步失败，用户都应得到明确的错误码， 而不是一个看似成功但下游永远收不到的 200 响应。把这一生命周期画出来，有助于学生理解为什么不能 在 Controller 中直接调用`repository.save()`后立即发送 Kafka 消息。
+
+DTO 与实体分离还解决了版本兼容问题。实体字段服从数据库契约，DTO 字段服从接口契约，二者之间由 Mapper 明确转换。新增可选字段时，旧客户端仍能解析原有响应；当数据库增加审计字段时，前端不会因为 序列化默认行为看到内部信息。对于空间对象，DTO 可以返回`longitude`、`latitude`、 `elevation`和坐标系标识，而实体继续保留 JTS PointZ。对于证据快照，DTO 返回摘要和哈希， 专业分析员按权限再请求完整 JSON，避免把大对象塞进列表接口。
+
+参数校验要分为语法、业务和数据库三层。语法层检查 UUID、时间格式、字符串长度和必填字段；业务层 检查时间窗左闭右开、质量码集合、截止时间和状态转移；数据库层通过主键、唯一键、外键和检查约束兜底。 三层校验不能互相替代：只做数据库约束会让错误在事务末尾才暴露，只有 Controller 校验又无法防止并发 写入绕过应用层。错误响应统一包含错误码、消息、字段路径和追踪号，值班员能据此修正输入，运维员能据 此定位服务日志。
+
+权限判定需要细到操作而不是只到页面。查看测点摘要可以授予值班员和专业分析员，读取原始 suspect 值 应额外要求数据质量权限，确认预警只授予值班员，关闭预警和修改规则版本则需要审批人。Controller 上的 `@PreAuthorize`是第一道门，服务层还要检查对象所属工程和当前状态，数据库角色负责限制表级 操作。这样即使有人绕过前端直接调用接口，也不能把别的工程的工单改为已完成。权限变化和委派都写入 审计事件，查询时按事件时间判断当时的有效角色。
+
+事务边界要与水利业务动作对应。写入观测和质量结果属于一个本地事务，生成预警和创建工单可以由不同 服务异步完成；预警确认和工单派发可以在同一服务事务中写状态与发件箱，但不应把外部短信、值班电话 或三维场景刷新强行放入数据库事务。外部动作失败时，发件箱事件可以重试，预警状态仍然可查询。通过 把本地事实和外部副作用分开，系统既能保证数据库一致，又能在消息系统短暂不可用时继续接收观测。
+
+消息幂等不仅是“检查 eventId”。消费者需要判断事件版本、发生时间和来源，拒绝同一事件的版本倒退； 不同来源但同一测点同一时刻的事件需要由质量服务标记冲突，而不是简单覆盖。数据库唯一键解决并发重 投，业务规则解决语义冲突，死信队列保存无法自动处理的消息。重试策略记录次数、最后错误和下一次重试 时间，运维看板显示积压和最老消息年龄。这样，28 个测点的补传不会因为一次网络抖动而形成无限重试。
+
+查询接口的性能也要与数据语义同时设计。实时曲线默认限制时间窗和返回点数，聚合参数决定读取连续 聚合视图还是原始表；当请求窗口过大时，服务返回提示并要求分段查询。预警列表使用状态和等级索引， 禁止把完整 evidence JSON 一次性返回给所有行；工单列表只读取未完成任务和必要字段。分页游标应以 创建时间和主键组成稳定排序，避免新增预警导致第二页重复或跳过。性能优化不能删除质量码、版本和事件 标识，因为这些字段是审计和解释所必需的。
+
+测试数据必须沿用 8.3 节的编码和质量口径。单元测试构造 valid、suspect、missing 三种观测，集成测试 写入重复 eventId、未来时间和无效几何，端到端测试发送一条事件并验证观测、预警、工单和审计记录。测试 夹具中的坐标系、时间精度和状态值写进数据字典，不能临时使用 MySQL 或 InfluxDB 的替代类型。若使用 Testcontainers，容器镜像要包含 PostGIS 和 TimescaleDB 扩展，并在启动时执行同一套迁移脚本。
+
+监测主线的可观测性包含四类指标：请求指标、数据库指标、消息指标和业务指标。请求指标记录接口耗时、 状态码和响应大小；数据库指标记录连接池等待、慢查询、超表块和索引膨胀；消息指标记录消费延迟、重试 次数和死信数量；业务指标记录合格观测比例、未评估预警、平均确认时延和逾期工单。四类指标通过 `traceId`或事件 ID 关联，值班员看业务看板，运维员看基础设施看板，专业分析员看质量和模型看板。
+
+版本发布时，先运行数据库迁移和实体映射测试，再启动只读实例验证查询计划，最后逐步放量消费者和 Controller。回滚时保留已经产生的预警和工单，不删除审计记录；若新版本增加字段，旧版本继续读取兼容 列，直到观察期结束。发布说明列出 API 版本、消息 schema、实体字段、数据库迁移号和回滚条件，确保 前端、后端、数据和运维能够同步升级。这样的发布流程把“代码能编译”提升为“业务链可恢复”。
+
+### 8.3.8 存储、缓存与一致性
+
+业务、权限和工单数据存入PostgreSQL；PostGIS保存空间点、工程范围和影响区；TimescaleDB扩展用于时序分区与聚合；Redis只保存可重建缓存，不作为唯一数据源。业务、空间与时序数据共用一套事务与备份体系，既便于按对象追溯证据，也降低多引擎部署带来的一致性与运维成本。
+
+Kafka事件至少包含`eventId`、`assetId`、`occurredAt`和版本号；`traceId`放在消息头而不是业务载荷里，本章 8.3 节的`ReadingEvent`即按此契约以`version`字段承载版本。消费者按事件ID去重，并在写入结果后提交消费位置。数据库事务与跨服务消息通过事务发件箱或可靠发布机制衔接，不宣称一次本地事务能够覆盖所有服务。
+
+## 8.4 智能分析、预警与业务闭环
+
+### 8.4.1 蓝黄橙红四级预警
+
+本章使用蓝、黄、橙、红四级预警，并用`WarningLevel.NONE`表示当前规则下的无预警状态。具体阈值由项目依据工程规程、监测设计和批准的模型确定；教材只规定一致的数据结构。质量不合格的记录进入“未评估”状态，不能借用`NONE`把“未评估”伪装成“无预警”。
+
+表8.7把四级预警连同“无预警”状态一并列出，并给出每一级的最小处置要求。注意“无预警”与“未评估”是两行不同的状态：前者表示规则已经算过且未触发，后者表示数据质量不足以支撑判定，二者在界面上必须能被区分。
+
+**表 8.7  统一预警等级与处置要求**
+
+| 等级   | 含义                 | 最小处置                     | 系统表达              |
+|:-------|:---------------------|:-----------------------------|:----------------------|
+| 无预警 | 当前规则下未触发预警 | 保持监测，保留质量与规则版本 | `NONE`+正常状态 /文字 |
+| 蓝色   | 指标出现需关注变化   | 值班员确认，检查数据质量     | 蓝色+信息图标+文字    |
+| 黄色   | 多指标或趋势提示异常 | 专业复核，创建工单           | 黄色+三角形+时限      |
+| 橙色   | 风险增大，需要会商   | 启动会商，评估预案           | 橙色+高亮+责任人      |
+| 红色   | 高风险或紧急状态     | 按批准规程处置并持续跟踪     | 红色+警示+审批链      |
+
+综合评分写为数学表达式
+
+$$S=\sum_{i=1}^{n} w_i f_i,\qquad
+w_i\ge 0,\quad \sum_{i=1}^{n}w_i=1,$$
+
+其中$f_i$为归一化指标，$w_i$为经批准的权重。评分只提供风险证据，不能脱离工况、数据质量和专业判断自动升级为控制命令。
+
+示例阈值仅用于单元测试。生产阈值应版本化，并记录适用工程、工况、审批人和生效时间。本例以$S\ge0.30$作为蓝色关注阈值：$0.30\le S<0.50$表示指标出现需关注变化，$S<0.30$才是当前规则下的无预警。蓝色不是“没有变化”，而是把轻度变化交给值班员确认。分类结果中的`evaluable=false`表示“未评估”，即质量不满足风险判定条件；`evaluable=true`且`level=NONE`才表示“无预警”。这两个业务态不能折叠进颜色维度，界面应分别显示质量原因和预警状态。
+
+下面的单元测试把两个业务态固定成可执行的契约：低分且有效的数据是“无预警”，高分但质量不合格的数据是“未评估”，二者不能互换。
+
+**清单 8.41  质量码分类测试**
+
+```java
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.time.Clock;
+import org.junit.jupiter.api.Test;
+
+public final class QualityClassificationTest {
+    private final QualityService service = new QualityService(
+        (item, unit) -> true,
+        reading -> false,
+        Clock.systemUTC());
+
+    @Test
+    void validLowScoreMeansNoWarning() {
+        QualityService.Classification result =
+            service.classify(0.01, "valid");
+
+        assertTrue(result.evaluable());
+        assertEquals(QualityService.WarningLevel.NONE, result.level());
+        assertEquals("无预警", result.reason());
+    }
+
+    @Test
+    void validAttentionScoreMeansBlue() {
+        QualityService.Classification result =
+            service.classify(0.30, "valid");
+
+        assertTrue(result.evaluable());
+        assertEquals(QualityService.WarningLevel.BLUE, result.level());
+        assertTrue(result.reason().contains("蓝色"));
+    }
+
+    @Test
+    void SuspectHighScoreMeansNotEvaluated() {
+        QualityService.Classification result =
+            service.classify(0.90, "suspect");
+
+        assertFalse(result.evaluable());
+        assertEquals(QualityService.WarningLevel.NONE, result.level());
+        assertTrue(result.reason().startsWith("未评估"));
+    }
+}
+```
+
+质量检查完成后，下游处理按表8.8执行。可疑记录可以保留用于追溯，但不能因为有数值就自动参与风险评分；缺测记录必须断开过程线并进入补测或数据修复流程。
+
+**表 8.8  质量码到下游处理的统一口径**
+
+| 质量码    | 含义                                         | 是否参与打分 | 界面表现                                 | 是否计入统计     |
+|:----------|:---------------------------------------------|:-------------|:-----------------------------------------|:-----------------|
+| `valid`   | 格式、单位、范围、时序和重复检查通过         | 是           | 正常颜色映射，可显示`NONE`或蓝黄橙红预警 | 是               |
+| `suspect` | 存在单位、范围、时序或重复问题，数值仅供复核 | 否           | 保留原值并加“可疑”标记，提示复核         | 否，单列质量统计 |
+| `missing` | 测点缺测或记录没有可用值                     | 否           | 过程线断点、灰色缺测标记，提示补测       | 否，计入缺测率   |
+
+质量接口的响应还应携带检查时刻、规则版本和问题列表，不能只返回一个颜色或一个布尔值。前端收到`missing`时保留时间轴位置但断开连线，收到`suspect`时允许查看原始值和复核记录，收到`valid`后才把数值送入评分组件。若`qualityFlagAdjusted=true`，页面要同时显示原始质量码、调整后的质量码和调整原因；这样运维人员可以区分传感器上送的问题与平台校验产生的问题，审计日志也能复现同一条记录为何没有进入风险判定。
+
+### 8.4.2 从预警到工单与复盘
+
+预警事件包含输入快照、规则或模型版本、质量状态和不确定性说明。值班员确认后进入工单，工单记录责任人、时限、措施和结果；关闭预警前必须校验关联工单状态。若预警被抑制或合并，也要保留操作者和理由。
+
+图8.5把预警到工单的状态流转画成受控流程，每条转移边都标注了触发条件与责任角色。图中没有从“已发出”直接指向“已关闭”的边——关闭预警必须经过工单校验，这条约束正是防止预警被随手清空的机制。
+
+<figure markdown>
+![图8.5](images/chapter08_fig_8_5.svg)
+<figcaption>图 8.5  预警与工单的受控状态流转</figcaption>
+</figure>
+
+### 8.4.3 模型可信度与人在回路
+
+模型卡记录身份、适用范围、输入输出、校准数据、误差、不确定性、负责人、版本和回滚方法。模型输入超出适用范围或数据质量不足时，平台应降低可信等级或停算，不得静默给出看似精确的结果。 表8.9给出本章模型卡的最小模板。九个字段不是形式化元数据，而是决定结果能否复现和能否进入审批的证据边界。模型名称和版本用于定位实现，适用范围与输入单位用于阻止越界调用，校准数据与误差指标用于说明可信度，不确定性和负责人用于安排人工复核，回滚方法用于在新版本异常时恢复上一版本。学生在实践题中至少填写一张完整模型卡，并为每个字段提供来源。
+
+**表 8.9  案例水库模型卡模板**
+
+| 字段       | 必填内容                       | 验收证据           |
+|:-----------|:-------------------------------|:-------------------|
+| 身份与版本 | 模型名称、版本号、代码提交号   | 可追溯构建产物     |
+| 适用范围   | 水位、降雨、流量、时间步长边界 | 输入契约与越界测试 |
+| 输入输出   | 字段、单位、坐标、时间基准     | 数据字典与样例     |
+| 校准数据   | 时段、样本来源、清洗规则       | 数据快照与质量报告 |
+| 误差指标   | 指标定义、统计区间、基准值     | 复核脚本与结果     |
+| 不确定性   | 参数敏感性、置信区间、缺测影响 | 风险说明与情景结果 |
+| 责任与审批 | 负责人、复核人、审批有效期     | 操作记录与电子签名 |
+| 发布与回滚 | 发布条件、兼容性、回退版本     | 发布单与回滚演练   |
+| 证据链接   | 日志、输入快照、输出清单位置   | 校验和与对象版本   |
+
+模型卡与场景版本、输入快照和人工审批绑定。只要改变初始水位、降雨情景、闸门约束或模型版本，就创建新的运行记录；只改变镜头和图层透明度，不产生新的计算版本。页面显示结果时同时显示“模拟”标签、模型版本和计算时刻，避免把预演动画误认为已经发生的观测。
+
+#### 8.4.3.1 闸门公式的代入与反算边界
+
+案例水库的三孔弧形闸门参数来自表8.1。以单孔净宽$b=8.0\,m$、开度$a=3.0\,m$、闸底高程152.0 m为例，若闸前水位168.0 m且行近流速水头暂取0.2 m，则$H=16.2\,m$。取教学系数$C_d=0.65$（弧形闸门常用范围约0.6～0.7）。$a/H=0.185<0.65$满足闸孔出流（孔流）判别条件；题设下游水位低于闸底板，属自由出流。单孔估算流量为$Q_1=0.65\times8.0\times3.0\times\sqrt{2\times9.81\times16.2}\approx278\,m^3/s$，三孔同步开度的估算总量约为$834\,m^3/s$。该数值只用于接口和量纲教学，真实工程必须由批准的水力曲线、上下游水位和淹没系数复核。
+
+当下游水位抬高导致淹没出流时，平台先按下游水位与收缩断面水深的关系判断自由出流是否失效，再使用带$\sigma$的关系或转交工程曲线服务。不能为了得到目标流量而强行把$C_d$调到范围之外。反算接口返回每孔开度、预测流量、约束余量、采用的公式版本和适用性结论；若多个组合都满足偏差，则按均衡启闭、设备可用性和操作次数排序，并让专业分析员选择。
+
+#### 8.4.3.2 计算题一：目标泄流的开度组合
+
+给定表8.1中的3孔闸门，闸前水位168.0 m、闸底152.0 m、下游水位低于闸底板以上自由出流，$C_d=0.65$，目标总泄流量为$1200\,\mathrm{m^3/s}$。学生需要先用$a/H<0.65$确认属于闸孔出流，再由题设下游水位条件确认自由出流，然后求三孔相同开度$a$，并说明若求得的开度超过6.0 m应如何处理。答案应给出公式、单位换算、近似开度、每孔余量和“需要工程曲线复核”的边界说明，而不是只提交一个数字。若三孔不同步开启，还要列出至少两组满足目标偏差的组合并比较启闭次数。
+
+按教学简化式，三孔相同开度的反算为$a=Q/(3C_db\sqrt{2gH})$。代入$H=16.0\,m$得到的开度约为4.34 m，低于6.0 m上限且$a/H\approx0.27<0.65$仍属闸孔出流，因此可作为接口层候选；但若考虑淹没系数、设备死区和下游回水，候选必须标记为“待工程复核”。流域面积320 km$^2$和总库容0.85亿 m$^3$为情景合理性约束，不能把1200 m$^3$/s当作日常运行流量。
+
+#### 8.4.3.3 计算题二：水量平衡闭合差
+
+某调度时段输入供水$S_1=2.40$百万 m$^3$、$S_2=0.60$百万 m$^3$，需水分配$D_1=1.20$百万 m$^3$、$D_2=1.00$百万 m$^3$、$D_3=0.30$百万 m$^3$，输水损失$L=0.10$百万 m$^3$，调蓄放水$\Delta V=0.20$百万 m$^3$。请按“放水为正、蓄水为负”的约定计算未分配水量$R$（或未满足需求$U$）和闭合残差$\varepsilon$，并说明如果把调蓄量误写成库容末值减初值会出现什么符号错误。题目要求学生同时提交计算表、单位、舍入规则和审批判断。
+
+本题的核对步骤是先计算供给侧$2.40+0.60+0.20=3.20$，需求与损失为$1.20+1.00+0.30+0.10=2.60$，因此差额$0.60$应记入公式中的未分配水量$R$，而不是平衡误差$\varepsilon$。若调度目标把差额全部安排为生态补水，则应新增相应的需水单元；若存在未满足需求，则把$U$写入枯水结果。最后用原始精度计算$\varepsilon$，只因显示舍入产生的微小差异不能被当作缺水量。
+
+#### 8.4.3.4 水位包络、预警分级与参数一致性
+
+特征水位把降雨情景和预警处置连接起来。正常蓄水位168.0 m是日常运行参照，汛限水位165.5 m用于汛期调度，设计洪水位170.2 m对应P=1%，校核洪水位171.6 m对应P=0.1%。水位达到设计洪水位并不自动等于红色预警，平台还要结合变化速率、闸门状态、下游影响和数据质量计算风险；超过校核洪水位则必须触发人工会商和工程规程。
+
+坝基120.0 m到坝顶172.0 m的高差为52.0 m，与案例的坝高自洽；防浪墙顶173.2 m提供坝顶以上1.2 m的防护余高。死水位148.0 m与闸底高程152.0 m不冲突：闸门用于泄洪时仍需依据上游水位和下游边界判断，不能把死水位直接当作闸前水头。所有水位在数据库、三维标注、图表和习题中都引用表8.1，避免不同章节出现第二套工程参数。
+
+#### 8.4.3.5 参数驱动的测试与审计
+
+参数补全后，测试数据应覆盖死水位、汛限水位、正常蓄水位、设计洪水位和校核洪水位附近的边界点，并同时覆盖闸门最小开度、最大开度、设备离线和下游淹没条件。每个边界用例保存输入快照、规则版本、预期约束和实际结果；失败用例不能只写“计算错误”，而要指出是水位越界、公式不适用、设备状态不允许还是权限不足。
+
+参数表不是让代码直接读取教材文本。工程配置服务应把表中的值转换为版本化参数集，接口返回参数集版本和生效时间，数据库保存运行时快照。审批人看到方案时能够确认使用的是哪一组水位和闸门参数；参数更新先在回放环境重算历史场景，确认预警与水量平衡没有异常，再进入生产。
+
+模型运行、闸门反算和水网平衡共享同一追踪号。追踪号串起输入水位、闸门开度、公式版本、输出流量、未满足需求、闭合残差和审批回执。这样即使后来替换了水力模型，审计人员仍可依据旧版本重现当时的计算，而不是用最新模型解释历史处置。参数、公式和证据一旦形成闭环，章节中的计算式才真正成为可执行的工程契约。 工程参数还要进入接口和前端的校验提示。用户输入闸门开度时，页面显示来自版本化参数集的最小值、最大值、单位和生效时间；输入水位时，页面同时显示死水位、汛限水位、正常蓄水位、设计洪水位和校核洪水位，避免只给一个“超限”布尔值。接口拒绝越界参数时返回字段路径、参数版本和建议动作，调用方可以把错误回显给专业人员，而不是把后端异常堆栈直接展示给值班员。测试夹具固定三类边界：刚好等于阈值、略低于阈值和略高于阈值，并验证蓝黄橙红分级、闸门公式适用性和水量闭合残差在同一版本下保持一致。
+
+对于降雨情景，平台把流域面积320 km$^2$作为输入范围与结果解释的背景，不把面积直接当作瞬时来水量。三种降雨情景共享同一初始水位和闸门设备参数，只改变降雨过程与不确定性说明；输出的水位包络线标注情景名、时间步长和模型版本。若情景结果超过校核洪水位，系统先生成会商任务，再允许专业人员比较提前泄洪、维持水位和分时调度等方案。这样，参数补全不只是增加表格行，而是把工程边界、算法调用和责任流程连成可审计的链路。 每次发布还应把参数快照和计算结果校验和写入审计日志，供恢复演练与课程验收复核。
+
+人在回路不是“模型算完后让人点确定”，而是把专业判断嵌入目标设定、边界条件、方案比选、审批与效果复核。红色预警和高风险调度建议必须由授权角色按照工程规程处置。
+
+## 8.5 数字孪生水利平台案例
+
+!!! note "说明"
+
+    **数字孪生拓展篇（选学）说明**
+
+    从本节起进入拓展篇。前提是核心篇的平台已经运行：对象编码、质量码、四级预警和工单闭环都是本篇的地基。拓展篇的交付物独立于核心篇——一个带模型卡、输入快照和人工审批的预演场景，以及8.6节的部署与恢复演练记录；不选学本篇不影响核心篇的完整性与验收。课堂时间有限时，教师可只讲8.5.1–8.5.2的概念边界，其余留作课程设计任务包。
+
+### 8.5.1 案例来源、边界与建设目标
+
+本节参考北京五一视界数字孪生科技股份有限公司提供的《51WIM数字孪生水利平台V1.0（DEMO）使用说明手册》[^1]，对其流域、水网和水利工程功能进行教学化重组<sup>[[61]](../../references.md#ref61)</sup>。本节示意图均按功能链路重新绘制；另经该公司书面授权，选用六幅平台界面截图（图8.6至图8.20），供读者对照真实产品的界面组织方式。手册中的水位、流量和场景名称属于演示环境，不作为真实工程结论。
+
+水利部关于智慧水利建设的指导文件把预报、预警、预演、预案作为面向业务闭环的能力组合，并要求建设过程围绕数据、模型、知识和业务协同展开<sup>[[2]](../../references.md#ref2)[[5]](../../references.md#ref5)</sup>。面向水库、水闸和蓄滞洪区的数字孪生运行管理指导意见进一步强调对象底账、运行场景、模型服务和过程留痕的衔接<sup>[[3]](../../references.md#ref3)</sup>。因此，本节把厂商手册中的功能链路放入公开政策与工程管理语境中讲解，读者应先理解业务目标和证据要求，再比较具体产品的界面组织方式。
+
+安全监测平台主要回答“当前是否异常、谁来处置”；数字孪生平台还要回答“未来可能怎样、不同方案后果如何、应准备什么预案”。新增能力不是一个三维门户，而是数据底板、模型平台、场景服务和业务闭环的组合。
+
+表8.10把流域、水网、工程三类入口的关注对象与典型任务并列。三者共享同一套底板与编码，区别在于聚合粒度：同一座水库在工程入口是完整的坝体与测点集合，在流域入口只是节点上的一组进出库流量。
+
+图8.6是平台一体化门户的实际界面。三个入口卡片与表8.10的三类业务视角一一对应；读者进入任一入口后看到的都是同一套数据底板，只是聚合粒度和默认视图不同。对照真实界面可以体会：门户设计传达的是业务组织方式，而不是功能清单。
+
+<figure markdown>
+![图8.6](images/51wim-portal.jpg)
+<figcaption>图 8.6  51WIM数字孪生水利平台一体化门户：流域、水网、水利工程三类业务入口（图片来源：51WIM数字孪生水利平台，经授权使用）</figcaption>
+</figure>
+
+**表 8.10  数字孪生水利平台的三类业务入口**
+
+| 入口     | 核心对象                             | 典型任务                           |
+|:---------|:-------------------------------------|:-----------------------------------|
+| 流域     | 河网、降雨、洪水过程、受影响对象     | 洪水预报、淹没预演、风险空间分析   |
+| 水网     | 水源、输配水工程、需水单元、调度规则 | 供需平衡、联合调度、应急供水       |
+| 水利工程 | 水库、闸门、泵站、堤防、监测点       | 工程安全、闸门推演、预案与运行复盘 |
+
+图8.7把这种共享关系画了出来：三类入口各有界面，但底板、对象编码和事件契约只有一套。如果三个入口各自维护一份工程台账，同一座水库的名称、编码和特征水位很快就会出现三个版本。
+
+<figure markdown>
+![图8.7](images/chapter08_fig_8_7.svg)
+<figcaption>图 8.7  流域、水网、工程三类入口共享同一套编码、底板与事件契约</figcaption>
+</figure>
+
+平台建设目标应写成可验收问题，例如“给定降雨情景后生成带版本的洪水过程与淹没结果”“给定目标泄流量后返回可解释的闸门方案并经人工确认”，而不是“打造行业领先数字大脑”。
+
+### 8.5.2 防台防洪预演的输入与输出
+
+防台防洪预演从场景定义开始。用户选择历史台风或自定义降雨，设置累计降雨、持续时间、雨型和初始水位；模型平台生成流域产汇流与洪水过程，水动力模型计算淹没范围和时序，空间分析服务统计受影响建筑、道路和重点对象。
+
+图8.8是预演所依托的数字孪生流域总览界面：三维地形场景常驻页面底层，雨水情、水库蓄水和预警信息以浮层面板覆盖在两侧。这正是第6章讨论过的“场景在底、业务在上”的界面架构——预演的每一步输入与输出，都会回到这类总览视图上定位与展示。
+
+<figure markdown>
+![图8.8](images/51wim-basin.jpg)
+<figcaption>图 8.8  数字孪生流域总览：三维场景常驻底层，雨水情与工程要素以浮层面板覆盖（图片来源：51WIM数字孪生水利平台，经授权使用）</figcaption>
+</figure>
+
+表8.11把这些输入固化为场景契约。契约化的意义在于可复现：只要契约字段完全相同，两次预演就应当得到相同结果；结果不同时，先查契约里哪一项被改动过，而不是先怀疑模型。
+
+**表 8.11  防台防洪预演场景契约**
+
+| 字段组   | 主要内容                          | 校验要求                 |
+|:---------|:----------------------------------|:-------------------------|
+| 场景身份 | scenarioId、名称、创建人、版本    | 不可用显示名称代替稳定ID |
+| 气象输入 | 累计降雨、时长、雨型、空间分布    | 单位、时间基准与来源完整 |
+| 水文初值 | 前期雨量、土壤状态、河道/水库水位 | 对应同一事件时间快照     |
+| 模型配置 | 模型版本、参数集、网格与时间步长  | 在模型卡适用范围内       |
+| 输出     | 洪水过程、淹没深度/时刻、风险对象 | 带质量与不确定性说明     |
+
+图8.9把从场景输入到结果反馈的计算链画了出来，并在每一步标出携带的不确定性说明。链条越往后不确定性累积越多，因此淹没范围的置信度总是低于降雨输入本身。
+
+<figure markdown>
+![图8.9](images/chapter08_fig_8_9.svg)
+<figcaption>图 8.9  防台防洪预演的计算与反馈链</figcaption>
+</figure>
+
+手册列出的历史台风和自定义降雨功能可用于理解“场景复用”与“参数试验”。教学时不要求复现特定台风结论，而要求学生说明：哪些输入来自观测，哪些是人为设定，哪些由模型推算，以及结果在哪些条件下有效。
+
+预演时间轴可从$T+0$推进到$T+24\,h$。每个时刻保存水位、流量、淹没深度和影响对象快照；播放只是结果浏览方式，不能代替模型版本与计算日志。若用户改变雨型，系统创建新场景版本，而不是覆盖上一轮结果。
+
+### 8.5.3 淹没影响、疏散路线与证据链
+
+空间分析把淹没栅格与建筑、道路、学校、医院和避险点叠加。受影响对象的判定必须记录空间数据版本、阈值和分析时间。疏散路线不仅要“最短”，还需避开预计淹没路段、容量不足道路和已封闭区域。
+
+图8.10是一次自定义暴雨情景的淹没仿真结果：绿色至红色的渐变表示淹没范围与相对水深，左侧面板保留了触发本次计算的降雨契约参数。读图时应带着证据链的眼光：画面本身只是结果的一帧，可复核的是它背后的输入快照、模型版本与空间数据版本。
+
+<figure markdown>
+![图8.10](images/51wim-flood.jpg)
+<figcaption>图 8.10  自定义暴雨情景的淹没仿真预演结果（颜色梯度表示淹没范围与相对水深）（图片来源：51WIM数字孪生水利平台，经授权使用）</figcaption>
+</figure>
+
+表8.12列出淹没影响分析必须留存的证据项。缺少“空间数据版本”这一项时，同一场预演在半年后重跑可能得到不同的受影响对象清单——不是模型变了，而是底图上的建筑和道路更新过。
+
+**表 8.12  淹没影响分析的证据项**
+
+| 证据     | 内容                           | 复核问题                   |
+|:---------|:-------------------------------|:---------------------------|
+| 输入快照 | 降雨、水位、边界条件、地形版本 | 是否来自同一场景与时间基准 |
+| 模型证据 | 模型卡、参数集、计算日志、残差 | 是否超出适用范围           |
+| 空间证据 | 淹没深度、到达时间、对象清单   | 坐标与数据版本是否一致     |
+| 路线证据 | 起终点、禁行区、容量、备选路线 | 约束变化后是否重新计算     |
+| 人工结论 | 采纳方案、责任人、理由、有效期 | 是否按权限审批             |
+
+结果界面应同时提供三维淹没播放、二维专题图、对象列表和表格导出。三维场景便于理解空间关系，表格便于核对数量和属性；任何一种界面失败时，其他表达仍应支持基本研判。
+
+图8.11把从情景输入到执行归档的证据串成一条链。这张图主要用于排查：会商结论受到质疑时沿链逐段回放，可以定位分歧究竟出在输入设定、模型版本、空间叠加还是人工判断上。
+
+<figure markdown>
+![图8.11](images/chapter08_fig_8_11.svg)
+<figcaption>图 8.11  从情景输入到执行归档的证据链及其回放方向</figcaption>
+</figure>
+
+### 8.5.4 数字孪生水库矩阵与“四预”
+
+水库矩阵把多个水库的实时水位、入库流量、出库流量、库容、闸门状态和预警放在统一视图中，支持按流域、行政区和风险等级筛选。矩阵不是简单表格汇总；它还要把每个水库连接到三维场景、模型运行、预演方案和预案。
+
+图8.12展示了从矩阵下钻到单座水库后的工程安全视图：左上角给出安全性态综合评分，坝体以网格高亮标出评估范围，右侧同屏呈现预报预警面板。这是“四预”中工程安全能力的典型界面组织——评分只是入口，点开每一项都应能追溯到测点数据、模型版本和评估依据。
+
+<figure markdown>
+![图8.12](images/51wim-dam-safety.jpg)
+<figcaption>图 8.12  水库工程安全评估视图：安全性态评分、坝体评估范围与预报预警面板同屏（图片来源：51WIM数字孪生水利平台，经授权使用）</figcaption>
+</figure>
+
+表8.13把安全监测平台与“四预”能力逐项对照。差别集中在时间方向上：监测回答已经发生了什么，四预要回答接下来可能发生什么、不同处置各有什么后果——后者需要模型、场景版本和预案库，不是给监测页面加一个三维视图就能得到。
+
+**表 8.13  安全监测与“四预”能力的差异**
+
+| 能力 | 安全监测平台             | 数字孪生“四预”扩展                   |
+|:-----|:-------------------------|:-------------------------------------|
+| 预报 | 当前值与趋势外推         | 多源输入、模型运行与不确定性         |
+| 预警 | 阈值/规则触发告警        | 结合预报结果和影响范围分级           |
+| 预演 | 通常不具备或只看历史回放 | 改变边界条件，比较多套方案后果       |
+| 预案 | 文档查询与工单处置       | 把责任、资源、路线和控制条件绑定场景 |
+
+“四预”不是四个孤立菜单。预报产生未来状态，预警识别需要关注的风险，预演比较方案后果，预案把选择转化为责任、资源和动作；处置效果再反馈到数据与模型。公开的数字孪生黄河建设实践显示，跨流域平台需要把基础数据、模型计算、场景服务和治理流程组织成可持续运行的体系<sup>[[62]](../../references.md#ref62)</sup>。本节的水库矩阵沿用这一业务观察，但具体编码、接口和阈值仍以项目批准的参数表为准。
+
+**不同技术路线对比**
+
+数字孪生平台可以从不同的工程起点形成技术路线。以厂商手册为参考的产品集成路线，通常先把流域、水网和工程入口组织成统一门户，再把模型运行、预演任务和工单闭环接到同一套权限与审计机制中。这种路线的优点是业务人员容易按照场景进入系统，适合在已有平台上快速建立可演示、可操作的流程；它的边界是产品中的对象编码、数据质量规则和模型适用范围仍需项目团队重新核验，手册中的示例数据也不能直接替代真实工程数据。
+
+以公开标准和数据底板为中心的路线，则先确定对象目录、时空基准、数据交换协议、元数据和版本规则，再把不同厂商或不同专业模型作为可替换服务接入。它有利于长期积累和跨系统交换，但前期需要投入更多的目录治理、接口设计和质量校验工作。
+
+以数字孪生流域或区域治理为牵引的路线，强调跨工程的联合预报、影响分析和调度协同，重点解决数据范围大、模型链条长和多部门协作的问题；其验收不能只看单个三维页面，而要检查情景输入、模型版本、结果证据和处置回执是否能够闭环。
+
+项目定制路线则围绕某一类水库、水闸或河段的规程和业务动作构建，能够精确贴合现场，但需要用清晰的扩展点避免把一次性约定固化为全行业标准。
+
+四类路线可以组合使用：厂商方案是其中一种实现的参考，公开政策和行业样本提供业务边界，标准化底板提供交换约束，项目规则负责把模型结果转成可审批、可追溯的行动。教学案例采用这种分层比较方式，目的在于训练方案选择和证据核验能力，而不是评价某个产品的优劣。
+
+图8.13把预报、预警、预演、预案连成闭环，并标出四者之间的触发关系：预报驱动预警，预警触发预演，预演结果落到预案，预案执行后的实况又回到预报作为校正输入。
+
+<figure markdown>
+![图8.13](images/chapter08_fig_8_13.svg)
+<figcaption>图 8.13  预报、预警、预演、预案的业务闭环</figcaption>
+</figure>
+
+### 8.5.5 闸门调度正算、反算与方案约束
+
+闸门正算回答“给定开度会产生多大泄流”，反算回答“给定目标泄流应采用怎样的闸门组合”。教材可使用简化孔流关系解释接口，但不能把简化式直接用于真实工程控制：
+
+$$Q=C_d\,b\,a\sqrt{2gH},$$
+
+其中$C_d$为流量系数，弧形闸门教学取值范围为$0.55\le C_d\le0.75$；$b$为单孔宽度，$a$为开度，$H$定义为自闸底板起算的闸前总水头，包含行近流速水头。自由出流简化式一般要求$a/H<0.65$；超过该范围应转用堰流或经批准的工程曲线。淹没出流还需引入淹没系数$\sigma$，将下游水位影响写入$Q=\sigma C_dba\sqrt{2gH}$。真实计算需考虑闸孔数量、启闭约束、下游水位和设备状态。
+
+图8.14是泄洪方案预演的三维模拟画面：闸门按方案开度开启，水流经溢洪道下泄。需要强调的是，水流动画只是计算结果的可视化表达，其背后是上文的孔流关系与约束校验；界面右侧面板中的开度与泄量数值必须与算法接口的返回值一致，否则画面越逼真，误导越严重。
+
+<figure markdown>
+![图8.14](images/51wim-spillway.jpg)
+<figcaption>图 8.14  泄洪方案预演的三维模拟：闸门按方案开度开启，水流经溢洪道下泄（图片来源：51WIM数字孪生水利平台，经授权使用）</figcaption>
+</figure>
+
+表8.14把闸门调度算法的输入、输出与约束固化为接口契约。把这些约束写进契约而不是写在文档里，是为了让越界调用在接口层就被拒绝，例如开度超过设备上限，或目标泄流对应的水头已经不在公式适用范围内。
+
+**表 8.14  闸门调度算法接口的最小契约**
+
+| 字段组   | 内容                             | 验证要求                 |
+|:---------|:---------------------------------|:-------------------------|
+| 工程参数 | 闸孔数、宽度、底高程、开度上下限 | 来自版本化工程档案       |
+| 水力参数 | 上下游水位、流量系数、约束曲线   | 单位与适用范围明确       |
+| 目标     | 目标泄流、允许偏差、计算时段     | 与调度任务和有效期关联   |
+| 输出     | 每孔推荐开度、预测流量、约束余量 | 提供可解释依据和备选方案 |
+| 控制边界 | 审批、设备状态、变化速率、回滚   | 算法无权绕过工程规程     |
+
+反算可能存在多组可行解，平台应按安全约束、均衡启闭、设备可用性和操作次数排序，不只返回一个“最优值”。专业人员可锁定某些闸门或修改目标，系统创建新方案版本并重新计算。
+
+图8.15把闸门方案从反算、排序、人工调整到模拟回执的过程画成受控链路。图中每一次人工修改都会分出新的方案版本而原方案保留，这样会商时才能把几组方案并排比较，而不是只剩最后一次修改的结果。
+
+<figure markdown>
+![图8.15](images/chapter08_fig_8_15.svg)
+<figcaption>图 8.15  闸门方案从反算到模拟回执的受控流程</figcaption>
+</figure>
+
+三维联动展示闸门开度、水流演进和水位变化，但动画必须标注“模拟”。若模型未完成或结果失效，界面不得继续播放上一方案并让用户误认为是当前计算。
+
+### 8.5.6 预警方案预演与角色协同
+
+本章已统一蓝黄橙红四级预警。预演可选择黄色、橙色或红色场景，加载相应责任人、资源和操作清单；蓝色通常以值守关注和数据复核为主。每次预演记录发起人、场景版本、参与角色、操作时间线和发现的问题。
+
+表8.15按预警等级列出预演的关注点差异。等级越高，预演要检验的越不是模型精度，而是人的动作：责任人是否在岗、资源是否到位、操作清单是否可执行。
+
+**表 8.15  不同预警等级的预演关注点**
+
+| 等级 | 预演目标                 | 关键角色                 | 证据                   |
+|:-----|:-------------------------|:-------------------------|:-----------------------|
+| 黄色 | 验证数据复核和工单响应   | 值班员、专业分析员       | 复核记录、工单时限     |
+| 橙色 | 验证会商、资源与方案比选 | 分析员、审批人、运维员   | 多方案、审批与资源清单 |
+| 红色 | 验证应急流程与职责衔接   | 指挥、工程、应急协同角色 | 时间线、回执、复盘报告 |
+
+预演可以展示“预警标签—闸门方案—泄洪过程—水位变化—风险对象”的完整动画，但教学重点是数据与责任链，而不是动画长度。没有输入快照、模型版本和审批记录的动画不能作为决策证据。
+
+### 8.5.7 AI助手驱动的调度会商
+
+AI助手可以把自然语言转为查询、页面导航和候选任务。例如“打开防洪预演页面”“查询目标泄流1200 m$^3$/s的闸门方案”“播放某场景的$T+6\,h$淹没结果”。它负责意图解析和工具编排，不直接拥有调度权限。
+
+表8.16把助手能做和不能做的事划分清楚。分界线是“是否产生外部效果”：查询、导航、生成候选方案都在界内；任何会改变设备状态或形成正式结论的动作，都必须转成待审批命令。
+
+**表 8.16  AI会商助手的请求与控制边界**
+
+| 阶段     | 系统动作                     | 安全控制                         |
+|:---------|:-----------------------------|:---------------------------------|
+| 意图解析 | 提取工程、场景、时段和目标   | 向用户回显歧义字段               |
+| 工具选择 | 查询数据、运行模型、切换镜头 | 只调用白名单接口并校验参数       |
+| 结果组织 | 汇总方案、风险和证据链接     | 标注数据龄期、模型版本和不确定性 |
+| 建议确认 | 生成候选方案与比较说明       | 必须由专业人员复核               |
+| 执行申请 | 创建待审批命令               | 权限、有效期、设备状态与双人审批 |
+
+图8.16把助手放回会商流程中：它位于人与工具之间，负责解析意图并编排调用，但每一条通向执行的路径都要穿过人工审批节点。
+
+<figure markdown>
+![图8.16](images/chapter08_fig_8_16.svg)
+<figcaption>图 8.16  AI会商助手位于人与工具之间，通向执行的每条路径都穿过人工审批</figcaption>
+</figure>
+
+AI输出必须引用数据和模型证据。若工具失败、数据过期或权限不足，助手应明确说明，不得用语言模型猜测填补。语音交互应提供文本回显，关键数字在提交前再次确认。
+
+### 8.5.8 底板与算法解耦、权限与模拟标注
+
+本节把6.4.14节的安全、权限和降级原则落到案例的数据底板、算法服务和模拟标注，任何高风险动作仍需授权角色确认并保留回滚证据。
+
+可复制的平台把空间底板、业务数据、模型算法和应用编排分开。更换洪水模型时，不应重新制作工程模型和用户体系；新增工程时，通过元数据和适配器接入，而不是复制一套源码。
+
+图8.17把四者的解耦关系画了出来。检验解耦是否成立有个简单办法：设想更换洪水模型，数一数需要改动的模块——如果空间底板和用户体系也要跟着改，说明分层只停留在文档里。
+
+<figure markdown>
+![图8.17](images/chapter08_fig_8_17.svg)
+<figcaption>图 8.17  数字孪生水利平台的解耦分层</figcaption>
+</figure>
+
+模拟数据与结果的标注要求可以归纳为一组规则。演示环境的水位、流量必须带明确标记，否则截图一旦流出，很容易被当作真实工程结论引用，这类误用发生之后极难澄清。情景输入应标明观测、设定或插值来源与时间；模型结果标明“模拟”、版本和运行时间；推荐方案标明目标、约束、有效期和审批状态；演示数据注明单位和非工程结论；AI输出附工具证据、生成时间和复核状态。
+
+权限应按对象、操作和场景状态共同判断。例如专业分析员可运行模型但不能批准控制；审批人可批准已复核方案但不能修改模型参数；演示账号不得访问真实工程数据。
+
+### 8.5.9 对象编码、时空基线与孪生状态
+
+本节把6.4.7节的事件时间、质量码和状态估计框架落到案例对象编码、时间基线和孪生状态快照，质量不合格的数据沿同一优先级进入隔离或降级流程。
+
+数字孪生首先要解决“现实对象、业务记录和三维对象是不是同一个对象”。案例水库为大坝、闸门、测点、摄像机、道路和避险点分配稳定编码；业务表、时序数据、空间要素和三维模型都保存该编码。对象改名不改变编码，对象拆分、合并或退役则形成新的版本关系。
+
+孪生状态不是数据库中某一行最新值，而是给定有效时刻和知识时刻后的可解释快照。有效时刻表示状态在现实世界中发生的时间，知识时刻表示平台何时获知该状态。迟到数据到达后，系统可以重建过去时刻的状态，但不得悄悄改写已经审批的预演结论。
+
+表8.17给出孪生对象的最小身份与状态字段，其中有效时刻与知识时刻必须同时保存。只留一个时间戳的系统无法回答“三小时前我们当时以为水位是多少”，也就无法解释当时为什么做出那个决定。
+
+**表 8.17  数字孪生对象的最小身份与状态字段**
+
+| 字段组   | 示例字段                             | 设计目的                       |
+|:---------|:-------------------------------------|:-------------------------------|
+| 稳定身份 | objectId、objectType、parentId       | 贯通业务、时序、空间和三维对象 |
+| 空间基线 | crs、geometryVersion、elevationDatum | 防止坐标系和高程基准混用       |
+| 状态时间 | validTime、ingestTime、knowledgeTime | 识别实时、迟到和回补数据       |
+| 质量证据 | qualityCode、sourceId、calibrationId | 说明状态是否适合进入模型       |
+| 版本关系 | version、effectiveFrom、effectiveTo  | 支持工程变更和历史重现         |
+| 显示映射 | sceneNodeId、symbolId、lodPolicy     | 将对象状态稳定映射到场景       |
+
+实时孪生视图以“观测状态”为主，预演视图以“场景状态”为主。两者必须使用不同颜色或边框并显示时间戳。用户从实时视图进入预演时，平台复制一份输入快照；后续实测数据继续更新实时视图，但不直接改变正在比较的方案。
+
+图8.18把观测状态、场景快照和推演状态三者分开画出，并标明各自的更新来源。三者混用是预演类平台最常见的错误：实测数据悄悄流进正在比较的方案，会让两个方案失去可比性。
+
+<figure markdown>
+![图8.18](images/chapter08_fig_8_18.svg)
+<figcaption>图 8.18  观测状态、场景快照与推演状态的分离</figcaption>
+</figure>
+
+课堂核验可以故意制造一条迟到水位数据：实时曲线应补入该点并标记回补，已经完成的场景仍引用原输入版本；只有用户复制场景并明确更新输入后，新方案才使用回补值。这个用例同时检验时间语义、版本管理和审计链。
+
+### 8.5.10 模型任务编排与运行生命周期
+
+本节把6.4.10节的事件与接口契约落到模型任务编排、输入快照、运行状态和结果回执，任务事件与控制命令分别保留幂等键、审批和审计字段。
+
+模型平台不只是一个“运行”按钮。一次模型任务应经历草稿、校验、排队、运行、完成或失败、复核、发布和归档等状态。每次运行绑定场景版本、输入快照、模型镜像、参数集、算力规格和发起人，因而可以复现，也可以解释为什么两次结果不同。
+
+模型任务的状态机列出各个状态及该状态下允许的动作。状态机的价值恰恰在于禁止某些动作：运行中的任务不允许修改参数，已发布的结果不允许原地覆盖，这些限制正是结果可复现的前提。草稿可编辑和删除，已校验状态检查单位、范围与适用性，排队或运行状态只允许查看日志或授权取消，完成状态核对产物清单与校验和，失败状态记录错误类别与重试次数，已发布状态绑定复核意见、审批人和有效期，归档状态只读查询和复现。
+
+图8.19把这些状态连成受控生命周期，并标出失败与复核两条回路。任务失败不是终点，而应回到校验环节并保留失败原因，否则同一类失败会反复出现却查不到记录。
+
+<figure markdown>
+![图8.19](images/chapter08_fig_8_19.svg)
+<figcaption>图 8.19  模型任务的受控生命周期</figcaption>
+</figure>
+
+运行失败应区分输入错误、模型错误、资源不足、超时和人工取消。平台只有在任务幂等且重试不会造成重复业务影响时才自动重试；参数越界或模型数值不稳定必须回到专业人员。成功也不等于可信，完成状态之后仍需检查水量平衡、边界连续性、残差和异常输出。
+
+模型产物采用清单管理，包括过程线、栅格、矢量、统计表、日志和预览文件。清单保存文件校验和与对象存储版本；页面只读取已完成且校验通过的产物。若某个栅格上传失败，整次运行不能被标为可发布。
+
+### 8.5.11 数字孪生水网的供需平衡与联合调度
+
+数字孪生水网把水库、取水口、泵站、输水线路、调蓄池和需水单元组织为有方向的网络。节点表达供水、用水和调蓄，边表达输水能力、损耗、能耗和运行状态。平台先计算基准方案，再对枯水、设备停运或需求增加等情景进行方案比较。
+
+图8.20是联合调度的网络拓扑视图：节点表示水库、泵站、水厂与需水单元，连线表达输水链路及其当前流量与能力。这张图与下文的平衡式逐项对应——每个节点就是式中的一项$S_i$、$D_j$或$\Delta V_k$，每条边的损耗计入$L$。拓扑视图的价值在于让平衡核算有了空间落点：缺口出现时能立即回答“缺在哪个节点、卡在哪条边”。
+
+<figure markdown>
+![图8.20](images/51wim-network.jpg)
+<figcaption>图 8.20  水网联合调度拓扑视图：节点为水源、泵站与需水单元，连线表达输水链路（图片来源：51WIM数字孪生水利平台，经授权使用）</figcaption>
+</figure>
+
+对一个调度时段，可用简化平衡式检查结果： $$\sum_i S_i + \sum_k \Delta V_k
+=\sum_j D_j + L + R - U + \varepsilon,$$ 其中$S_i$为各水源供水量，$D_j$为各需水单元申请量，$\Delta V_k$定义为调蓄补水量（放水为正、蓄水为负），$L$为输水损失，$R$为未分配水量（供大于需时的盈余），$U$为未满足需求量（缺水时的缺口），$\varepsilon$为闭合残差。$R$与$U$至多一项为正：盈余与缺口不可能同时出现，缺口$U$是业务事实，残差$\varepsilon$是核算质量，二者绝不能混写为一项。式中每一项必须采用同一时段和体积单位；枯水方案允许$U>0$，但审批门槛只检查$|\varepsilon|$，超过阈值不得进入审批。
+
+表8.18把水网联合调度的输入、约束与输出整理成清单。约束一列尤其要注意量纲与时段的统一：供水量、需水量与调蓄量必须落在同一时段、同一体积单位上，否则平衡式看起来成立，实际却在比较不同口径的数字。
+
+**表 8.18  水网联合调度的输入、约束与输出**
+
+| 类别     | 内容                                   | 检查重点             |
+|:---------|:---------------------------------------|:---------------------|
+| 供水能力 | 可供水量、水质、取水许可、设备状态     | 有效期与可用率       |
+| 需水预测 | 生活、生产、生态等分时需求             | 预测版本与优先级     |
+| 工程约束 | 管渠能力、泵站曲线、最小水位、检修     | 软硬约束是否区分     |
+| 调度目标 | 缺水最小、能耗较低、生态满足、平稳运行 | 目标权重和适用场景   |
+| 方案输出 | 节点分配、线路流量、设备计划、风险余量 | 水量平衡与可执行性   |
+| 人工调整 | 锁定设备、修改需求、设置应急水源       | 记录理由并生成新版本 |
+
+图8.21把供水、输配水、调蓄和需水单元表达成一张网络：节点是水源、调蓄工程与需水单元，边是输水通道并携带能力上限与损失率。调度问题因此转化为在这张网络上寻找满足全部约束的分配方案。
+
+<figure markdown>
+![图8.21](images/chapter08_fig_8_21.svg)
+<figcaption>图 8.21  供水、输配水、调蓄与需水单元的网络表达</figcaption>
+</figure>
+
+假设主泵站停运，平台首先冻结故障设备，再计算应急水源和调蓄池能够维持的供水时长。方案对每类用户给出供水量、缺口、恢复时间和约束余量，并列出未被满足的需求。教学评价不以求得复杂优化算法为前提，而以网络建模、平衡校验、约束解释和方案留痕为重点。
+
+方案发布后，执行回执持续进入平台。若实际流量与计划偏差超过容限，系统发出“方案偏离”事件，提示重新评估，而不是直接反复求解并自动改变控制指令。这样可以保持模型建议、批准计划和现场执行三者的边界。
+
+### 8.5.12 场景版本、方案比较与不确定性表达
+
+本节把6.4.6节的模型卡框架落到案例水库的场景版本、方案比较和不确定性表达，具体字段与审批证据按案例数据和模型运行记录生成。
+
+一个场景由输入版本、模型版本、参数集和评价指标共同标识。修改降雨、初始水位或闸门约束都会产生新版本；只改变镜头、图层透明度等显示设置不会产生计算版本。平台用父子关系保存分支，允许从同一基线形成“现状延续”“提前泄洪”“局地强降雨”等方案。
+
+表8.19说明方案比较为什么不能只给一个排名。不同方案往往在防洪安全、供水保证和下游影响之间各有取舍，压成一个总分会把这些取舍掩盖掉；平台应把各维度指标并列呈现，由具备决策权的人做最终选择。
+
+**表 8.19  方案比较不能只给一个排名**
+
+| 指标       | 表达方式                       | 解释要求                   |
+|:-----------|:-------------------------------|:---------------------------|
+| 工程风险   | 最高水位、超限时长、约束余量   | 给出位置、时刻和阈值来源   |
+| 影响范围   | 淹没面积、对象数量、到达时间   | 说明空间数据和模型分辨率   |
+| 调度代价   | 弃水、缺水、能耗、启闭次数     | 说明权重和不能量化的因素   |
+| 模型可信度 | 校准期误差、输入范围、运行状态 | 不得用单一百分数代替模型卡 |
+| 执行条件   | 设备可用、人员资源、审批时限   | 列出阻止执行的硬约束       |
+| 差异来源   | 输入、模型、参数或人工调整     | 支持逐项追溯而非只看结果差 |
+
+不确定性可以用情景区间、分位数、集合成员或可信等级表达。教材案例可用三种降雨情景形成水位包络线，并将中位过程与上下界同时显示。若只有单次确定性计算，也要明确其边界条件和敏感参数，避免把小数位很多的输出误认为高精度结论。
+
+模型校准与业务验收不是同一件事。校准检查模型能否合理复现历史过程；业务验收检查在当前平台内，输入是否正确、运行是否稳定、结果是否可解释、失败是否可降级、角色是否按权限完成任务。即使历史拟合良好，超出校准范围的极端情景仍应标记为低可信。
+
+图8.22把场景的分支关系与比较过程画了出来：多个方案从同一基线分出，在统一指标下并排比较，最终由人工选定并留下选择理由。
+
+<figure markdown>
+![图8.22](images/chapter08_fig_8_22.svg)
+<figcaption>图 8.22  方案分支从同一基线分出、并排比较到人工选定的过程</figcaption>
+</figure>
+
+会商报告应引用方案ID而非截图中的方案名称。报告至少记录选择理由、放弃其他方案的原因、关键不确定性、有效期和触发重新会商的条件。当降雨实况明显偏离情景、工程状态变化或模型失效时，原结论自动变为“需复核”，但保留历史记录。
+
+### 8.5.13 端到端实现切片与验收脚本
+
+本节把6.4.17节的课程迭代路线落到可运行的端到端切片和验收脚本，学生按对象编码、数据契约、模型卡和业务闭环逐轮提交证据。
+
+课程实现可选取“自定义降雨—洪水预报—淹没影响—橙色预演—会商归档”作为端到端切片。切片不要求完成整个平台，却必须跨越数据、模型、空间分析、权限、前端和审计，因而能够暴露只做页面或只写算法时看不到的接口问题。
+
+表8.20把这条切片涉及的接口与证据逐段列出。按表实现的好处是每一段都有明确的输入输出契约，小组分工时不会出现前端等后端、后端等模型的互相阻塞。
+
+**表 8.20  端到端切片的接口与证据**
+
+| 步骤     | 最小接口                       | 必须保存的证据                   |
+|:---------|:-------------------------------|:---------------------------------|
+| 创建场景 | POST /scenarios                | 场景ID、父版本、创建人和边界条件 |
+| 校验输入 | POST /scenarios/{id}/validate  | 单位、时间、范围和质量问题清单   |
+| 运行模型 | POST /model-runs               | 任务ID、模型与参数版本、状态日志 |
+| 查询结果 | GET /model-runs/{id}/artifacts | 产物清单、校验和、质量摘要       |
+| 影响分析 | POST /impact-analyses          | 空间版本、阈值、对象清单         |
+| 方案会商 | POST /reviews                  | 比较指标、意见、选择理由与权限   |
+| 归档报告 | POST /reports                  | 引用ID、生成版本、批准人与有效期 |
+
+验收脚本先走正常路径，再注入错误。正常路径验证同一场景ID能贯通页面、日志和报告；错误路径分别注入无单位降雨、过期初始水位、模型超时、损坏栅格、无权限审批和结果过期。每个错误都要观察状态码、用户提示、审计记录和降级页面。断言至少覆盖：缺少单位时不创建任务且定位字段；初始状态过期时显示数据龄期并绑定确认记录；模型超时时无旧模拟结果冒充新结果；产物校验失败时禁止发布；无权限审批时状态不变且不产生控制命令；实况偏离情景时原结论标记需复核但历史仍可查询。
+
+清单8.42给出验收脚本的关键断言。注意断言不止检查返回值，还要检查用户提示、审计记录和降级页面：一个只验证正常路径返回200的脚本，无法证明系统在异常情况下仍然可用。
+
+**清单 8.42  端到端切片的验收断言**
+
+```java
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@AutoConfigureMockMvc
+class ScenarioSliceAcceptanceTest {
+
+    @Autowired MockMvc mvc;
+    @Autowired AuditLogRepository auditLogs;
+
+    /** 正常路径：同一 scenarioId 必须贯通场景、模型任务与报告。 */
+    @Test
+    @WithMockUser(username = "analyst01", roles = {"ANALYST"})
+    void normalPathKeepsOneScenarioIdAcrossTheWholeSlice() throws Exception {
+        String scenarioId = JsonPath.read(
+            mvc.perform(post("/api/scenarios")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(payload("rain-200mm-24h.json")))
+               .andExpect(status().isCreated())
+               .andReturn().getResponse().getContentAsString(), "$.scenarioId");
+
+        String runId = JsonPath.read(
+            mvc.perform(post("/api/model-runs")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("{\"scenarioId\":\"" + scenarioId + "\"}"))
+               .andExpect(status().isAccepted())
+               .andReturn().getResponse().getContentAsString(), "$.runId");
+
+        // 产物必须带模型版本与校验和，否则结果无法追溯
+        mvc.perform(get("/api/model-runs/{id}/artifacts", runId))
+           .andExpect(status().isOk())
+           .andExpect(jsonPath("$.modelVersion").isNotEmpty())
+           .andExpect(jsonPath("$.checksum").isNotEmpty())
+           .andExpect(jsonPath("$.scenarioId").value(scenarioId));
+
+        // 报告引用方案ID而不是方案名称
+        mvc.perform(post("/api/reports")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"scenarioId\":\"" + scenarioId + "\"}"))
+           .andExpect(status().isCreated())
+           .andExpect(jsonPath("$.references[0].scenarioId").value(scenarioId));
+
+        // 断言三：审计记录必须落库，且能按 scenarioId 检索
+        assertThat(auditLogs.findByBusinessKey(scenarioId))
+            .as("端到端切片的每一步都要留下审计记录")
+            .hasSizeGreaterThanOrEqualTo(4);
+    }
+
+    /** 错误路径：缺单位的降雨必须被拒绝，并给出可读提示而不是 500。 */
+    @Test
+    @WithMockUser(username = "analyst01", roles = {"ANALYST"})
+    void rainfallWithoutUnitIsRejectedWithReadableMessage() throws Exception {
+        mvc.perform(post("/api/scenarios")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(payload("rain-missing-unit.json")))
+           .andExpect(status().isBadRequest())
+           .andExpect(jsonPath("$.code").value("INPUT_UNIT_MISSING"))
+           .andExpect(jsonPath("$.message").value(containsString("降雨量缺少单位")))
+           .andExpect(jsonPath("$.field").value("rainfall.unit"));
+    }
+
+    /** 错误路径：模型超时后页面必须降级为“未评估”，不得给出颜色结论。 */
+    @Test
+    @WithMockUser(username = "duty01", roles = {"DUTY_OFFICER"})
+    void modelTimeoutDegradesToNotAssessedInsteadOfAColor() throws Exception {
+        mvc.perform(get("/api/scenarios/{id}/summary", timedOutScenarioId()))
+           .andExpect(status().isOk())
+           .andExpect(jsonPath("$.classification").value("NOT_ASSESSED"))
+           .andExpect(jsonPath("$.warningLevel").doesNotExist())
+           .andExpect(jsonPath("$.degradedReason").value("MODEL_RUN_TIMEOUT"));
+    }
+
+    /** 错误路径：值班员无权发布方案，拒绝后仍要留审计。 */
+    @Test
+    @WithMockUser(username = "duty01", roles = {"DUTY_OFFICER"})
+    void dutyOfficerCannotPublishPlanButTheAttemptIsAudited() throws Exception {
+        mvc.perform(post("/api/reviews/{id}/publish", pendingReviewId()))
+           .andExpect(status().isForbidden())
+           .andExpect(jsonPath("$.code").value("ROLE_NOT_ALLOWED"));
+
+        assertThat(auditLogs.findByActionAndResult("REVIEW_PUBLISH", "DENIED"))
+            .as("被拒绝的高风险操作同样要留下审计")
+            .isNotEmpty();
+    }
+}
+```
+
+最终由不同角色共同演示：专业分析员先以场景编辑身份准备输入、再以模型运行身份启动计算并比较结果（两个身份对应同一基本角色的不同操作面），审批人确认方案，值班员查看执行回执。任何一人都不能独自完成从改参数到下发控制的全链路。教师依据接口契约、失败证据和审计记录评分，而不是依据固定演示路径是否顺利播放。
+
+### 8.5.14 会商时间线、值守交接与复盘
+
+数字孪生结果只有进入值守流程才形成业务价值。平台以事件时间线组织“数据异常、预报更新、预警升级、方案提交、会商意见、审批、执行回执和效果复核”，并把每个节点链接到原始证据。时间线中的人工意见不能被后续自动计算覆盖，撤回或修订必须保留前一版本。
+
+表8.21给出一次橙色预警会商的完整时间线示例。逐行看这张表会发现，从数据异常到效果复核之间的绝大多数节点都是人的动作，平台的作用是把这些动作固定下来并留下证据，而不是替人做决定。
+
+**表 8.21  一次橙色预警会商的时间线示例**
+
+| 相对时刻   | 事件                   | 责任角色         | 形成证据             |
+|:-----------|:-----------------------|:-----------------|:---------------------|
+| $T-60$ min | 降雨预报更新，创建情景 | 值班员           | 输入来源与场景版本   |
+| $T-45$ min | 洪水和淹没模型完成     | 专业分析员       | 运行日志与产物清单   |
+| $T-30$ min | 比较闸门与疏散方案     | 专业分析员       | 指标、风险与推荐理由 |
+| $T-20$ min | 召开会商并补充约束     | 多专业角色       | 意见、异议与修订版本 |
+| $T-10$ min | 批准有有效期的方案     | 审批人           | 电子签名与控制边界   |
+| $T+0$      | 执行并持续回传状态     | 值班员、现场人员 | 命令、回执与实际过程 |
+| $T+60$ min | 比较预测与实况并复核   | 专业分析员       | 偏差、结论和后续动作 |
+
+交接班不能只说“系统正常”。交班人应确认当前预警、未闭环工单、正在运行的模型任务、已批准方案及其有效期、失效服务、数据龄期和待复核结论；接班人逐项确认并签署。若方案将在下一班次到期，平台应在交接页面突出提示，避免把过期建议继续当作当前方案。
+
+图8.23把交接班要覆盖的四类内容画在一起：当前态势、未闭环任务、已批准方案及其有效期、失效服务与数据龄期。其中方案有效期最容易被漏掉——一份昨夜批准、今晨已经过期的调度建议，若没有在交接页面上突出提示，很可能被接班人继续当作当前方案执行。
+
+<figure markdown>
+![图8.23](images/chapter08_fig_8_23.svg)
+<figcaption>图 8.23  值守交接班必须覆盖的四类内容与双签确认</figcaption>
+</figure>
+
+事件结束后，复盘把预报与实况、建议与执行、计划与回执逐项对齐。偏差可能来自输入、模型、参数、工程状态、操作延迟或组织协同，不能把所有偏差都归因于算法。复盘产生模型校准任务、数据治理工单、预案修订和培训改进，并指定责任人与完成时限。
+
+### 8.5.15 失效降级、验收与课程实现
+
+本节把6.4.16节的六类验收框架落到案例的失效降级、阶段门禁和课程实现；端到端切片与脚本按同一组输入快照和追踪号复核。
+
+数字孪生平台失败时必须保留基本监测能力。模型服务不可用时仍展示经质检的实时数据；三维场景失败时降级到二维地图和表格；AI助手不可用时保留手工查询和会商；网络中断时边缘缓存并标记数据龄期。
+
+表8.22把失效场景与对应的验收要求配对。验收时应实际触发这些失效而不是查看设计文档：把模型服务停掉，看实时监测是否还在；把三维资源删掉，看二维地图和表格能否顶上。
+
+**表 8.22  数字孪生案例的失效与降级验收**
+
+| 失效场景         | 预期降级                         | 验收证据                         |
+|:-----------------|:---------------------------------|:---------------------------------|
+| 水文模型超时     | 保留实时监测，结果标记不可用     | 超时日志、界面状态、无旧结果冒充 |
+| 三维瓦片加载失败 | 二维地图、图表和对象列表可用     | 降级截图与操作记录               |
+| Kafka重复消息    | 预警和工单不重复创建             | eventId去重记录                  |
+| 现场网络中断     | 边缘缓存、数据龄期提示、恢复补传 | 缓存数量与补传顺序               |
+| AI工具调用失败   | 明确失败并回到手工流程           | 错误信息与人工操作记录           |
+
+课程项目可分六次迭代：需求与对象编码、数据契约、三维底座、监测预警、数字孪生预演、部署验收。每次迭代都提交可执行用例，避免到期末才拼接无法联调的页面。
+
+表8.23把课程项目拆成六次迭代并给出每次的可执行用例。这样安排是为了让联调风险前移：第三次迭代结束时三维底座就要能加载真实测点，而不是等到期末才发现坐标对不上。六次迭代依次交付需求与对象编码、数据与事件契约、三维场景与状态联动、预警和工单闭环、预演或闸门方案、部署降级与验收；每次都提交边界一致性、单位时间质量码、坐标定位、权限审计、模型卡证据或失败可降级的可执行用例。
+
+**表 8.23  课程项目六次迭代的交付物与可执行用例**
+
+| 迭代  | 交付物                 | 必须通过的可执行用例                                      |
+|:------|:-----------------------|:----------------------------------------------------------|
+| 第1次 | 需求说明与对象编码规则 | 同一工程在三个界面上的名称、编码与特征水位完全一致        |
+| 第2次 | 数据契约与事件契约     | 一条观测带单位、时间、质量码入库，并产生一条可订阅事件    |
+| 第3次 | 三维场景与状态联动     | 加载真实测点坐标，点击曲线异常点后相机定位到同一`assetId` |
+| 第4次 | 预警评估与工单闭环     | 黄色预警生成工单，值班员确认后回执可追溯到原始读数        |
+| 第5次 | 预演或闸门方案         | 模型运行留下模型卡、输入快照与人工确认记录                |
+| 第6次 | 部署、降级与验收       | 模型超时时页面显示“未评估”，无权限操作被拒绝且留审计      |
+
+最终演示至少包含正常监测、质量异常、黄色预警、橙色预演、模型失败和无权限操作六类场景。评价重点是链路是否可追溯、失败是否诚实可见、角色是否越权，而不是三维效果是否“炫酷”。
+
+## 8.6 系统部署、运维与验收
+
+### 8.6.1 部署架构与环境一致性
+
+部署图继续使用统一技术栈。浏览器访问Vue静态资源与API入口；Spring Boot服务通过Kafka协同；PostgreSQL/PostGIS/TimescaleDB作为主数据底座；Redis为缓存；对象存储保存模型、纹理和报告。数据库名称、代码和图示必须一致。
+
+图8.24把这些组件按部署单元画开，并标出对外暴露的入口。部署图与前面的技术架构图关注点不同：后者关心职责划分，前者关心进程、端口和数据卷，是运维交接时真正要用的那一张。
+
+<figure markdown>
+![图8.24](images/chapter08_fig_8_24.svg)
+<figcaption>图 8.24  案例水库平台部署架构</figcaption>
+</figure>
+
+开发、测试和生产环境使用相同的配置结构，差异通过外部参数和密钥管理注入。禁止把JWT密钥、数据库口令或地图令牌写入镜像和教材示例。发布流水线与配置项应分别受持续交付和配置管理约束<sup>[[63]](../../references.md#ref63)[[64]](../../references.md#ref64)</sup>。
+
+#### 8.6.1.1 从部署图到可执行编排
+
+部署图只有转换为可重复执行的配置才具有运维价值。案例水库平台的最小闭环由前端静态资源、Spring Boot API、PostgreSQL 及其 PostGIS 与 TimescaleDB 扩展、Redis、Kafka 五类运行单元组成。前端只依赖 API 入口，业务服务通过内部网络访问数据库、缓存和消息总线；数据库数据卷、Kafka 日志卷和备份卷与容器生命周期分离，重新创建容器不能丢失观测、预警、工单和审计证据。 编排文件表达网络、卷、依赖和健康条件，而不是把参数硬编码在镜像里。数据库镜像明确包含 PostGIS 与 TimescaleDB 扩展，启动脚本执行与 8.3 节相同的迁移版本；Kafka 只有健康检查通过后才接收业务事件，Spring Boot 同时等待数据库和消息总线就绪。生产环境应把镜像标签、资源上限、节点亲和性和日志驱动器按压测结果替换。
+
+**清单 8.43  案例水库平台 Docker Compose 编排基线**
+
+```yaml
+services:
+  web: {image: registry.example.com/qingyuan-web:APP_VERSION, ports: ["8080:80"], depends_on: {api: {condition: service_healthy}}}
+  api:
+    image: registry.example.com/qingyuan-api:APP_VERSION
+    environment: {SPRING_PROFILES_ACTIVE: production, DB_URL: jdbc:postgresql://postgres:5432/qingyuan, DB_PASSWORD_FILE: /run/secrets/db_password, KAFKA_BOOTSTRAP_SERVERS: kafka:9092, REDIS_URL: redis://redis:6379}
+    secrets: [db_password, kafka_password]
+    depends_on: {postgres: {condition: service_healthy}, kafka: {condition: service_healthy}, redis: {condition: service_healthy}}
+    healthcheck: {test: ["CMD-SHELL", "wget -qO- http://localhost:8080/actuator/health/readiness | grep -q UP"], interval: 10s, timeout: 3s, retries: 12}
+  postgres: {image: timescale/timescaledb-ha:pg16, volumes: [pg-data:/var/lib/postgresql/data], healthcheck: {test: ["CMD-SHELL", "pg_isready -U qingyuan_app -d qingyuan"]}}
+  redis: {image: redis:7.2-alpine, command: ["redis-server", "--appendonly", "yes"], volumes: [redis-data:/data], healthcheck: {test: ["CMD", "redis-cli", "ping"], interval: 10s, timeout: 3s, retries: 5}}
+  kafka: {image: bitnami/kafka:3.7, volumes: [kafka-data:/bitnami/kafka], healthcheck: {test: ["CMD-SHELL", "kafka-topics.sh --bootstrap-server localhost:9092 --list >/dev/null 2>&1"], interval: 15s, timeout: 10s, retries: 8}}
+secrets: {db_password: {file: ./secrets/db_password.txt}, kafka_password: {file: ./secrets/kafka_password.txt}}
+volumes: {pg-data: {}, redis-data: {}, kafka-data: {}}
+```
+
+代码清单8.43中的 `depends_on` 只保证启动顺序，真正的就绪判定由健康检查完成。`readiness`不能把数据库迁移、Kafka消费延迟或磁盘容量隐藏在一个布尔值里；运维看板仍需采集细分指标。内部网络使数据库和消息总线不直接暴露给浏览器，外部流量只进入 Nginx 和 API。
+
+#### 8.6.1.2 环境变量、密钥与版本回滚
+
+配置分为非敏感默认值、部署环境变量和容器 secret 三层。教学仓库仅保留变量名与格式校验，不提交真实凭据。部署前把镜像版本、迁移版本、前端静态资源版本和配置清单写入同一个发布记录；回滚先判断迁移是否向后兼容，再回退无状态服务。
+
+**清单 8.44  环境变量与密钥示例**
+
+```yaml
+APP_VERSION: "2026.08.07-rc1"
+SPRING_PROFILE: "production"
+DB_USER: "qingyuan_app"
+DB_NAME: "qingyuan"
+KAFKA_TOPIC_READING: "qingyuan.reading.v1"
+SECRETS: {DB_PASSWORD_FILE: "/run/secrets/db_password", JWT_SIGNING_KEY: "injected-by-secret-manager"}
+ROTATION: {password_days: 90, signing_key_overlap_hours: 24}
+VALIDATION: {require_non_empty: [DB_USER, DB_NAME], reject_default_password: true}
+```
+
+清单8.44中的轮换字段是运维约束而不是业务参数。轮换数据库口令先创建新凭据并验证连接池，再撤销旧凭据；轮换JWT密钥保留重叠窗口，使正在处理的请求完成。变量缺失、示例口令或 latest 标签都应在流水线门禁阶段失败。
+
+#### 8.6.1.3 Nginx 反向代理与静态资源
+
+Nginx负责 TLS 终止、静态文件缓存和 API 反向代理，不承载权限判断。对象级授权仍由 Spring Security 6 执行；代理转发请求号、用户代理和真实 IP，把浏览器、API 与数据库审计串成证据链。上传报告或模型时设置大小和超时上限，避免大请求阻塞观测接口。
+
+**清单 8.45  前端静态资源与 Spring Boot API 的 Nginx 配置**
+
+```nginx
+worker_processes auto;
+events { worker_connections 1024; }
+http {
+  upstream qingyuan_api { server api:8080; keepalive 32; }
+  server {
+    listen 80; server_name water.example.edu; root /usr/share/nginx/html;
+    client_max_body_size 20m;
+    location /assets/ { try_files $uri =404; }
+    # Vue Router history 模式：非资源路径回退到入口页
+    location / { try_files $uri $uri/ /index.html; }
+    location /api/ { proxy_pass http://qingyuan_api; proxy_set_header Host $host; proxy_set_header X-Request-Id $request_id; proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for; proxy_read_timeout 30s; }
+    location /healthz { proxy_pass http://qingyuan_api/actuator/health/liveness; access_log off; }
+    location /readyz { proxy_pass http://qingyuan_api/actuator/health/readiness; access_log off; }
+  }
+}
+```
+
+代码清单8.45把访问路径按静态资源、API、探针分开，浏览器只需记住一个域名。`try_files`不把错误静态路径转给后端；生产环境增加 TLS、安全响应头和连接排空，保证滚动发布不截断工单提交。
+
+#### 8.6.1.4 健康检查、告警与容量边界
+
+健康检查分存活、就绪和业务烟测三层。存活探针只回答进程是否响应，失败时允许重启；就绪探针还检查数据库连接、迁移版本和 Kafka 生产者，失败时摘除流量但不立即重启；业务烟测用只读测点请求验证认证、查询和质量码字段，在发布后及每日交接时执行。三层探针不能共用一个返回 200 的接口，否则数据库故障会被误判为应用正常。
+
+**清单 8.46  监控指标与告警规则基线**
+
+```yaml
+groups:
+  - name: qingyuan-platform
+    interval: 30s
+    rules:
+      - alert: ApiReadinessFailed
+        expr: api_readiness == 0
+        for: 2m
+        labels: {severity: critical, owner: ops}
+      - alert: ReadingIngestLag
+        expr: qingyuan_reading_ingest_lag_seconds > 300
+        for: 5m
+        labels: {severity: warning, owner: duty}
+      - alert: TimescaleDiskPressure
+        expr: qingyuan_db_free_bytes < 20000000000
+        for: 10m
+        labels: {severity: critical, owner: ops}
+      - alert: WarningAckTimeout
+        expr: qingyuan_warning_unacked_seconds > 900
+        for: 5m
+        labels: {severity: warning, owner: duty}
+```
+
+代码清单8.46把告警规则按基础设施、数据链路和业务闭环分开，每条告警都有责任角色与处置手册。阈值要结合补传最大重投周期、TimescaleDB压缩窗口和工单确认时限，再用历史分位数校准。告警和恢复都记录时间、规则版本、当前值和证据链接，同一根因的指标按服务和时间窗聚合，避免告警风暴。 容量评估覆盖 API 并发、Kafka 分区、Redis 内存、数据库写入吞吐和时序增长。28 个测点的教学规模可以单节点运行，但不能推断生产容量；压测纳入补传、模型运行和备份并发。扩容前后使用同一场景复测，并记录消息最老年龄、WAL增长、磁盘剩余比例和查询P95，确保容量提升没有换来数据延迟或权限错误。
+
+#### 8.6.1.5 备份、恢复与演练记录
+
+备份策略回答可接受的数据丢失窗口、一致性点和恢复验证方法。PostgreSQL使用全量加WAL归档，TimescaleDB压缩和分区策略与备份窗口错开；对象存储保存模型、纹理、报告和备份清单版本；Kafka保留足够日志以便重放，重放前依据 `event_id` 幂等约束清理重复风险。Redis只保存可重建缓存，不进入唯一备份范围。
+
+**清单 8.47  备份恢复演练与健康检查清单**
+
+```yaml
+backup: {schedule: "15 2 * * *", retention_days: 35, mode: "base-plus-wal", verify: [checksum, restore-schema, latest-reading-time]}
+object_store: {versioning: true, retention_days: 90}
+kafka: {topic: qingyuan.reading.v1, replay_window_hours: 72}
+rehearsal:
+  target: isolated-restore
+  steps: [stop-writes, restore-postgres-and-wal, restore-object-manifest, start-api-readonly, verify-trace, replay-with-event-id-deduplication, run-smoke-test]
+  pass_conditions: [latest_reading_within_rpo, api_readiness_up, no_duplicate_warning, audit_trace_continuous]
+```
+
+代码清单8.47把“有备份”改成可观察证据。开始前冻结变更窗口并记录最后一个观测、预警和工单 ID；恢复后先以只读模式校验对象关系、时序最新时间和审计链，再开放写入。Kafka只重放恢复点之后且数据库没有的事件，缓存由 API 根据数据库重建。任一条件失败，演练结果为不通过，并写明缺失备份、迁移错误或无法解释的事件。 生产故障处置遵循观测、隔离、恢复、复盘顺序。运维员先确认探针和指标是否同时异常，避免把单个浏览器问题误判为全局故障；再依据 runbook 摘除异常实例或暂停消费，保护数据库和消息证据；恢复后用业务烟测验证测点到工单链路，专业分析员复核质量码和预警是否重复计算。每次演练沉淀恢复时长、数据丢失窗口、告警命中率和人工确认点，反过来校准保留策略、探针阈值和容量预算。 上述配置与部署图、接口契约、数据库 DDL 共同构成部署交付物。学生提交时应同时提供编排文件、反代配置、变量清单、健康检查结果和一次恢复演练记录；只截图容器已启动不能证明数据可用、权限有效或故障可恢复。 环境一致性还需要检查时区、字符集、容器用户和文件权限。数据库统一使用 UTC 保存发生时间，展示层按照值班员时区转换；所有容器以非 root 用户运行，备份目录只授予备份进程写权限。发布前用同一份配置渲染开发、测试和生产三套文件，比较渲染结果的键集合，发现多余或缺失变量就停止发布。配置差异要写入决策记录，不能靠运维员记忆。
+
+服务启动分为迁移、就绪和接流量三个阶段。迁移任务使用独立的一次性容器并记录版本，API 进程启动时只验证当前版本，不在多个副本中同时执行结构变更。就绪探针恢复后再逐步放量，先让一个实例接收只读查询，再开放观测写入和工单写入。若错误率或延迟超过发布阈值，立即停止放量并保留旧副本，回滚决策由值班员和审批人共同确认。
+
+健康检查结果要区分“进程活着”“依赖可用”和“业务正确”。例如数据库连接池耗尽时，存活探针可以继续返回成功，但就绪探针应标记失败；Kafka 网络短暂抖动时，API 可以继续查询历史数据，却不能承诺新观测已经进入时序库。业务烟测不修改数据，使用固定测点和时间窗，并核对质量码、追踪号和权限字段，避免测试请求制造假预警。
+
+监控标签遵守最小维度原则。测点编号、工程编号、服务名和环境是稳定标签，用户姓名、完整请求参数和原始观测值不能直接写入指标，防止高基数和敏感信息泄露。日志记录请求号、状态码、耗时和错误类型，详细堆栈只进入受控日志库。运维看板同时展示基础设施、数据质量和业务闭环，值班员看到的是可行动的提示，而不是无法解释的技术计数。
+
+告警处理有确认、抑制、升级和恢复四个状态。值班员确认并不代表故障已解决，只有烟测和业务链路验证通过才能关闭事件；同一服务在维护窗口内产生的预期告警应被抑制，但抑制规则必须有开始和结束时间。关键告警超过确认时限自动升级给运维员，超过处置时限再通知审批人。每次升级都保留原始告警和责任转移记录，避免交接后丢失上下文。
+
+数据库和对象存储的恢复点要互相对应。只恢复数据库而没有模型卡、报告或场景版本，数字孪生预演就无法复现；只恢复对象文件而缺少审计和工单状态，也不能证明处置链完整。恢复演练先生成恢复点清单，列出数据库 WAL 位置、对象清单版本、Kafka 最老消息和配置摘要，再按清单逐项核对，最后由专业分析员签字确认业务结果。
+
+Kafka 重放和定时补传都可能造成重复事件。服务端以 `event_id` 唯一约束和事务处理保证幂等，运维员在演练中主动重放一条已经消费的消息，确认不会重复创建预警或工单。重放窗口必须覆盖消息最大重投周期，并把分区、偏移量和过滤条件写入演练记录。发现重复时先暂停消费者，保留现场，再由开发人员依据审计链修复，不能直接删除数据库记录。
+
+备份保留周期由恢复目标、法规要求和容量预算共同决定。保留时间过短会使长周期趋势无法复盘，保留时间过长则增加成本和恢复扫描时间。清理任务只删除已经通过校验且超出保留期的版本，删除前生成清单并等待审批。压缩、分区和归档策略每次变更都要先在恢复环境验证，避免线上压缩过程影响实时写入。
+
+部署验收应包含故障注入而不只是正常路径。可以暂时停止 Redis，观察 API 是否降级为数据库查询；暂停 Kafka 消费，观察积压告警和恢复后的幂等；限制数据库磁盘，观察容量告警和写入保护；撤销一个角色，观察 403 是否被正确展示。每项注入都设置最长持续时间和回滚动作，演练完成后确认没有遗留进程、临时密钥或未关闭的维护窗口。
+
+把这些步骤纳入课程项目后，学生提交的不是一张“容器已启动”的截图，而是一组可复核证据：编排文件的版本、渲染后的非敏感配置、探针响应、告警触发与恢复时间、备份校验摘要、恢复后的业务烟测和变更审批号。教师可以据此判断部署是否可重复、数据是否可恢复、权限是否有效以及运维责任是否清晰。生产系统也沿用同一证据链，只把单节点 Compose 替换为等价的编排环境。
+
+### 8.6.2 可观测性、备份与恢复
+
+本节把6.4.15节的可观测性、血缘和值守框架落到案例的备份、恢复、交接和复盘，恢复判断同时检查服务、数据、模型和业务闭环。
+
+恢复演练按“冻结—恢复—只读核验—重放—放开写入—复盘”推进，而不是只检查备份文件是否存在。图8.25用时间轴标出每个阶段的责任人与放行条件，学生可据此填写一次可复核的演练记录。
+
+<figure markdown>
+![图8.25](images/chapter08_fig_8_25.svg)
+<figcaption>图 8.25  备份恢复演练的阶段时间轴</figcaption>
+</figure>
+
+服务监控记录可用率、延迟、错误率和队列积压；数据监控记录到达延迟、完整率、质量码与时钟漂移；模型监控记录运行成功率、残差和输入越界；业务监控记录告警确认与工单闭环。
+
+备份要通过恢复演练验证。数据库备份、对象存储版本和配置清单需要匹配同一恢复点；恢复后检查消息消费位置、缓存重建、模型版本和审计链。测试既要证明正常功能，也要主动寻找失败路径<sup>[[65]](../../references.md#ref65)</sup>。自动恢复只执行预先批准的动作，例如重启无状态实例或切换健康副本；高风险数据库修复和控制操作必须人工确认。
+
+### 8.6.3 阶段验收
+
+案例做到什么程度算完成，需要在动手之前就写清楚。表8.24把需求、架构、数据、三维、预警、孪生和运维七个阶段各自要回答的问题与必须交出的证据并列。表中“证据”列的需求编号回指第3章登记的 REQ-MON 系列（编号规则源自第2章追踪矩阵），使“需求—架构—实现—验收”成为一条可回查的证据链。这张表的用法是自查而不是打分：每一行的“证据”列如果拿不出对应文件，说明那个阶段并未真正通过，无论页面看起来多完整。
+
+**表 8.24  第8章案例的阶段验收**
+
+| 阶段 | 验收问题                             | 证据                                                     |
+|:-----|:-------------------------------------|:---------------------------------------------------------|
+| 需求 | 角色、边界、业务闭环是否一致         | 用例、权限表、异常流；对应REQ-MON-01～04                 |
+| 架构 | 技术栈、模块和部署是否一致           | 架构图、决策记录（含ADR-003回指REQ-MON-03/04）、接口清单 |
+| 数据 | 时间、单位、质量和对象编码是否可追溯 | 样例、字典、质量日志；验证REQ-MON-01                     |
+| 三维 | 坐标、状态、交互和降级是否正确       | 映射表、页面与失败场景                                   |
+| 预警 | 四级口径、证据和工单是否闭环         | 事件、审批、回执与复盘；验证REQ-MON-02/04                |
+| 孪生 | 场景、模型、方案和人工确认是否受控   | 模型卡、输入快照、证据链                                 |
+| 运维 | 监控、备份、恢复和权限是否有效       | 演练、监控截图与审计记录                                 |
+
+最小可运行版本不要求实现所有模型，但必须完成一条真实可操作链：PZ-07观测进入平台，经质量检查触发黄色预警，值班员确认并创建工单，三维场景定位测点，处置结果回写并归档。数字孪生扩展至少完成一个带模型卡、场景版本和人工确认的预演任务。
+
+## 8.7 小结
+
+本章最容易踩的三个坑是：把设备故障值送入风险评分、把无预警和未评估折叠成同一个颜色、把模型或容器“运行成功”当成业务链路已经可靠。前一个坑会制造误报，第二个坑会掩盖缺测，第三个坑会让恢复演练只验证进程而没有验证数据。对应的修复路径是质量码门禁、显式 Classification 结果、模型卡与输入快照、健康探针和端到端烟测。
+
+本章最该记住的五个判断是：第一，参数表是案例唯一工程来源，代码、数据集和习题都要回指同一版本；第二，观测必须经过格式、单位、范围、时序和重复检查才可评分；第三，蓝黄橙红预警描述业务关注程度，NONE 与未评估分别表达正常和证据不足；第四，闸门和水量平衡公式必须给出适用条件、单位和残差；第五，数字孪生的价值在模型、权限、证据和人在回路的可复核闭环，而不在三维动画本身。
+
+一次演练中，某站点把 suspect 数据当 valid 参与评分，系统连续产生蓝色事件，值班员关闭推送后真正的黄色趋势无人确认；另一次恢复只启动了 API 容器，却没有恢复 TimescaleDB 的 WAL 和对象清单，页面显示“服务正常”但无法追溯工单证据。把失败路径写进测试、告警和复盘记录，才能让平台从“能启动”走向“可负责”。
+
+## 8.8 章末交付物
+
+提交一份《智慧水利平台典型应用设计与验收报告》，至少包含：
+
+- 案例水库参数、角色、对象编码和业务闭环；
+
+- 统一技术栈、模块架构、部署架构与关键接口；
+
+- 观测、质量、四级预警、工单和模型运行的数据样例；
+
+- Three.js工程场景与一个图表/测点联动页面；
+
+- 一个数字孪生预演或闸门方案场景，含模型卡、输入快照和人工确认；
+
+- 正常、失败、降级和无权限测试记录。
+
+## 8.9 思考题与练习题
+
+1.  
+
+2.  本章后端主线是（）。A. Node.jsB. Spring BootC. DjangoD. PHP
+
+3.  本章关系与空间数据主线是（）。A. MySQLB. MongoDBC. PostgreSQL/PostGISD. SQLite
+
+4.  红色预警可以由模型直接转换为控制命令，无需审批。（判断：对／错）
+
+5.  工程级精细交互通常优先采用 Three.js；跨流域大范围地形浏览可采用 Cesium，具体选择取决于场景尺度、数据组织和交互任务。（判断：对／错）
+
+6.  数字孪生预演结果应明确标记模型版本和“模拟”状态。（判断：对／错）
+
+7.  
+
+8.  说明案例水库中值班员、专业分析员、运维员和审批人的权限边界。
+
+9.  绘制PZ-07从观测、质量检查到黄色预警、工单和复盘的事件链。
+
+10. 比较安全监测平台与数字孪生“四预”平台的能力边界。
+
+11. 为某水库设计“四预”页面信息架构与算法接口清单。
+
+12. 说明闸门反算为什么可能产生多组可行方案，以及系统应如何支持人工比选。
+
+13. 设计AI会商助手的白名单工具、参数确认、专业复核和审批边界。
+
+14. 
+
+15. 在第7章场景与图表代码及本章前端切片的基础上，用两课时增量实现对28个测点的筛选、曲线和三维定位联动。
+
+16. 实现一条Spring Boot质量检查接口，验证格式、单位、范围、时序和重复五项，并提交缺测、可疑值与质量标记调整记录。
+
+17. 为自定义降雨场景编写输入契约、模型卡和$T+0$至$T+24\,h$结果元数据，不要求实现水动力算法。
+
+18. 用容器编排或等价环境部署前端、Spring Boot、PostgreSQL和Redis，并提交健康检查与配置说明。
+
+19. 设计一次模型服务超时和一次三维场景失败的降级演练，证明二维地图、图表和工单仍可使用。
+
+[^1]: 51WIM 及 51WORLD 为北京五一视界数字孪生科技股份有限公司的商标或注册商标，本书仅作技术说明性使用。

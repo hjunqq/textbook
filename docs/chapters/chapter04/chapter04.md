@@ -1,218 +1,2124 @@
-## 第四章前端开发技术
+# 第4章 前端开发技术
 
-## 学习目标
+**学习目标**
 
 通过本章学习，学生应能够：
 
-1. 理解前端开发的基本概念和Web技术标准，掌握浏览器工作原理和渲染机制
-2. 熟练运用HTML5、CSS3和JavaScript进行现代化前端开发，具备响应式设计和交互开发能力
-3. 深入掌握Vue.js框架的核心概念和开发方法，能够构建组件化的单页面应用
-4. 理解前端工程化开发流程，掌握脚手架工具、构建工具和部署策略的使用
-5. 能够结合智慧水利平台的业务特点，开发符合行业需求的前端应用系统
+1.  说明浏览器、HTML、CSS与JavaScript在Web应用中的职责及协作关系；
 
-## 引言
+2.  使用语义化HTML与响应式CSS构建水利业务页面；
 
-前端开发是智慧水利平台用户体验的直接体现，承担着将复杂的水利数据和业务逻辑以直观、友好的方式呈现给用户的重要职责。随着Web技术的快速发展，现代前端开发已从简单的静态页面制作演进为复杂的工程化开发体系。在智慧水利领域，前端技术需要处理大量的实时监测数据、复杂的地理信息展示、多维度的数据可视化以及移动端的适配需求。
+3.  使用现代JavaScript、Promise、async/await和DOM事件完成数据交互；
 
-从技术发展历程看，Web前端经历了从HTML静态页面到JavaScript动态交互，从jQuery库到现代框架（Angular、React、Vue）的演进过程。每一次技术革新都带来了开发效率的提升和用户体验的改善。Vue.js作为当前最受欢迎的前端框架之一，以其渐进式的设计理念和较低的学习曲线，特别适合智慧水利平台这类业务复杂、功能丰富的企业级应用开发。
+4.  使用Vue 3、Vue Router与Pinia组织单页面应用；
 
-现代前端开发不仅要求掌握基础的HTML、CSS、JavaScript技术，更需要理解组件化开发思想、模块化架构设计、工程化开发流程以及性能优化策略。在智慧水利平台开发中，前端技术还需要与GIS地图、实时数据推送、数据可视化、移动端适配等专业技术相结合，形成完整的技术解决方案。
+5.  使用Vite完成开发、调试、构建与基本性能优化。
 
-## 重要提示
+**引言**
 
-!!! warning "技术更新说明"
-    
-    前端技术发展迅速，本章内容基于2024年的技术标准编写。在实际开发中，请关注相关技术的最新发展动态，适时更新技术选型和开发方案。
+智慧水利平台的前端把测站、工程、告警和调度数据转化为可理解、可操作的界面。本章采用Vue 3.4+、Vue Router 4、Pinia 2与Vite 5作为教学基线；框架API与配置项随版本演进，遇到与书中示例不一致时，一律以各自官方文档为准<sup>[[25]](../../references.md#ref25)[[26]](../../references.md#ref26)[[27]](../../references.md#ref27)[[28]](../../references.md#ref28)</sup>。示例遵循HTML、CSS和ECMAScript标准，语言与平台特性可在MDN查证<sup>[[29]](../../references.md#ref29)</sup>，不依赖特定浏览器的私有能力。本章的页面都围绕水利工程安全监测平台展开：第3章为它选定的模块化单体与MVC分层，在前端对应视图、状态与请求的职责切分；页面中的测点与预警演示数字一律取自8.1节参数表。
 
-!!! info "水利行业特点"
-    
-    智慧水利平台的前端开发具有以下特点：
-    - 数据可视化需求强烈（图表、地图、仪表盘等）
-    - 实时性要求高（监测数据实时更新）
-    - 多设备适配需求（PC、平板、手机）
-    - 专业性强（水利专业术语和业务流程）
-    - 安全要求高（政府部门和关键基础设施）
+!!! tip "提示"
 
-## 本章小节
+    **工程版本线：v0（空仓库） $\rightarrow$ v1（前端只读切片）**
 
-!!! info "章节结构"
-    
-    ### [第一节 前端及前端开发工具](section04-01.md)
-    - Web基础概念与浏览器架构
-    - W3C标准与Web技术发展
-    - 渲染引擎与JavaScript引擎
-    - 现代前端开发工具链
-    
-    ### [第二节 HTML基础与实践](section04-02.md)
-    - HTML语义化标签基础
-    - HTML5语义化标签与新特性
-    - 表单设计与数据验证
-    - 水利平台页面结构设计
-    - 可访问性与SEO优化
-    
-    ### [第三节 CSS基础与样式设计](section04-03.md)
-    - CSS基础
-    - CSS3新特性与选择器
-    - Flexbox与Grid布局系统
-    - 响应式设计与移动端适配
-    - 水利平台UI设计规范
-    
-    ### [第四节 JavaScript基础编程](section04-04.md)
-    - JavaScript 基础
-    - ES6+新特性与现代语法
-    - 异步编程与Promise
-    - DOM操作与事件处理
-    - 模块化开发与调试技巧
-    
-    ### [第五节 Vue基础框架开发](section04-05.md)
-    - 前端框架演进与选择
-    - Vue.js核心概念与MVVM模式
-    - Vue 基础
-    - 组件化开发与单页面应用
-    - 路由管理与状态管理
-    
-    ### [第六节 前端脚手架与工程化](section04-06.md)
-    - Vue CLI脚手架工具
-    - Webpack与Vite构建工具
-    - 开发环境配置与热重载
-    - 代码规范与质量控制
-    
-    ### [第七节 前端部署与发布](section04-07.md)
-    - 生产环境构建优化
-    - 静态资源部署与CDN
-    - 性能监控与用户体验
-    - 版本控制与发布策略
+    起点是配套仓库的空前端骨架。本章结束时你应交付 **v1**：一个能登录、能按测点与时间窗查询并渲染曲线的只读监测页面——对应仓库 `frontend/` 的 `utils/auth.js`、`utils/request.js`、`views/LoginView.vue`、`router/index.js`、`stores/monitoring.js` 与 `components/MonitoringDashboard.vue`；验证命令 `npm ci && npm test && npm run build`。
 
-## 关键概念
+## 4.1 Web基础概念与浏览器架构
 
-| 概念 | 定义 | 在智慧水利中的应用 |
-|------|------|-------------------|
-| 组件化开发 | 将UI拆分为独立、可复用的组件，实现模块化开发 | 水利监测界面的标准化组件库 |
-| 响应式设计 | 页面在不同设备和屏幕尺寸下都能良好显示和交互 | 支持现场移动设备数据查看 |
-| 单页面应用(SPA) | 通过动态加载内容实现流畅的用户体验，无需页面刷新 | 水利数据实时监控界面 |
-| 虚拟DOM | 在内存中维护UI状态的抽象表示，提高渲染性能 | 大量水利数据的高效更新 |
-| 数据双向绑定 | 视图与数据模型之间的自动同步机制 | 水利参数的动态配置界面 |
+浏览器通过HTTP或HTTPS请求资源，解析HTML形成DOM树，解析CSS形成CSSOM树，再计算布局并绘制页面；JavaScript通过事件循环处理用户操作、网络响应和定时任务。智慧水利页面常同时展示地图、曲线与告警，因此应避免在短时间内反复修改大量DOM节点。
 
-## 技术栈概览
+现代浏览器通常采用多进程架构。图4.1强调各模块的协作关系：浏览器引擎负责协调，渲染引擎使用网络模块取得的资源，调用JavaScript引擎执行脚本，并通过UI后端绘制；存储模块为浏览器引擎及页面脚本提供受控的数据持久化能力。
 
-!!! note "前端技术栈"
-    
-    **基础技术**
-    - HTML5: 语义化标签、表单增强、多媒体支持
-    - CSS3: 新选择器、动画效果、布局系统
-    - JavaScript ES6+: 现代语法、异步编程、模块化
-    
-    **核心框架**
-    - Vue.js 3.x: 响应式框架、组合式API
-    - Vue Router: 单页面应用路由管理
-    - Vuex/Pinia: 状态管理解决方案
-    
-    **开发工具**
-    - Vue CLI / Vite: 项目脚手架和构建工具
-    - ESLint: 代码质量检查
-    - Prettier: 代码格式化工具
-    
-    **UI组件库**
-    - Element Plus: 基于Vue 3的桌面端组件库
-    - Ant Design Vue: 企业级UI设计语言
-    - Vant: 移动端Vue组件库
+<figure markdown>
+![图4.1](images/chapter04_fig_4_1.svg)
+<figcaption>图 4.1  浏览器主要模块及协作关系</figcaption>
+</figure>
 
-## 智慧水利前端特色需求
+浏览器兼容性应通过标准API、特性检测和自动化测试控制。例如，应检测`WebSocket`是否存在，再决定使用实时连接还是降级到轮询，而不能只依据浏览器名称。资源缓存则应由HTTP缓存头控制；监测实时值不宜与长期静态资源采用同一缓存策略。
 
-!!! example "行业特色功能"
-    
-    **数据可视化需求**
-    - 实时水位、流量数据图表展示
-    - 历史趋势分析和对比图表
-    - 多维度数据统计仪表盘
-    - 预警信息的可视化提醒
-    
-    **地理信息展示**
-    - GIS地图集成与标点展示
-    - 水利工程空间位置标注
-    - 流域范围和监测点分布
-    - 地形地貌三维可视化
-    
-    **实时数据处理**
-    - WebSocket实时数据推送
-    - 数据更新的平滑过渡动画
-    - 异常数据的及时预警提示
-    - 大数据量的分页和虚拟滚动
-    
-    **移动端适配**
-    - 响应式设计支持各种设备
-    - 现场工作的移动端优化
-    - 离线数据缓存和同步
-    - 触控操作的友好交互
+## 4.2 HTML基础与语义化
 
-## 学习路径建议
+HTML描述内容的结构和语义。`header`、`nav`、`main`、`section`、`article`与`footer`等元素能够表达区域含义，有助于无障碍工具、搜索引擎和开发者理解页面。标题级别应连续，表单控件应有`label`，图片应提供`alt`文本。
 
-!!! tip "循序渐进的学习方案"
-    
-    **第一阶段：基础技术掌握（1-2周）**
-    1. 深入理解Web标准和浏览器机制
-    2. 熟练掌握HTML5语义化标签
-    3. 掌握CSS3布局和动画技术
-    4. 学习JavaScript ES6+现代特性
-    
-    **第二阶段：框架学习与实践（2-3周）**
-    1. 理解Vue.js设计思想和核心概念
-    2. 掌握组件化开发和生命周期
-    3. 学习路由管理和状态管理
-    4. 完成简单的水利监测页面开发
-    
-    **第三阶段：工程化开发（1-2周）**
-    1. 掌握脚手架工具的使用
-    2. 理解构建流程和性能优化
-    3. 学习代码规范和团队协作
-    4. 完成完整项目的部署上线
-    
-    **第四阶段：行业应用深化（2-3周）**
-    1. 集成地图和数据可视化组件
-    2. 实现实时数据推送功能
-    3. 优化移动端用户体验
-    4. 完善错误处理和性能监控
+下面的页面骨架只负责内容组织，不在HTML中混入具体视觉样式。
 
-## 实践项目驱动
+**清单 4.1  水利平台页面骨架**
 
-本章采用项目驱动的教学方式，通过开发"智慧水利监测数据展示平台"这一完整案例，让学生在实践中掌握前端开发技术。项目将分为多个阶段：
+```html
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>水库监测</title>
+  <link rel="stylesheet" href="monitor.css">
+</head>
+<body>
+  <header><h1>水库监测</h1></header>
+  <nav aria-label="主导航"><a href="#level">实时水位</a></nav>
+  <main><section id="level" aria-labelledby="level-title">
+    <h2 id="level-title">实时水位</h2>
+    <output id="level-value">4.20 m</output>
+  </section></main>
+  <footer>数据更新时间：<time datetime="2026-08-05T08:00:00+08:00">08:00</time></footer>
+</body>
+</html>
+```
 
-**阶段一：静态页面开发**
-- 使用HTML/CSS构建水利数据展示页面
-- 实现响应式设计和基础交互效果
+表格适合表达二维数据，不应用于页面布局。水位表至少应包含表头、单位和测量时间；表单提交前还需结合业务规则校验站点、时间范围和数值边界。
 
-**阶段二：动态交互实现**
-- 使用JavaScript处理用户交互和数据操作
-- 集成图表库实现数据可视化
+### 4.2.1 文档流、渲染流程与页面地标
 
-**阶段三：Vue框架重构**
-- 将静态页面改造为Vue组件化应用
-- 实现路由管理和状态管理
+HTML 文件被浏览器接收后，先经过字节解码和词法分析，再形成 DOM 树；CSS 规则形成 CSSOM，二者合并为渲染树，随后经历样式计算、布局、绘制和合成。这个过程解释了为什么标签的先后顺序会影响页面的阅读顺序，也解释了为什么在首屏反复改动大量节点会触发重排和重绘。对监测页面而言，文档流首先保证“标题—导航—数据—说明”的阅读路径，然后再由 CSS 决定列数、间距和颜色。只有把结构和表现分开，地图、曲线等高频更新区域才不会破坏键盘操作和屏幕阅读器的上下文。
 
-**阶段四：工程化完善**
-- 使用构建工具优化开发流程
-- 实现自动化部署和性能监控
+图4.2把“源代码—浏览器处理—可访问页面”串成一条链：左侧是开发者写入的结构，中央是浏览器逐步生成的对象，右侧是值班员实际使用的地标区域。图中三个阶段并不是三个独立页面，而是同一份 HTML 在不同处理阶段的表示；调试时应先判断问题属于结构、样式还是脚本，再选择对应工具。
 
-通过这个完整的开发过程，学生将深入理解现代前端开发的完整技术栈，并具备开发智慧水利平台前端系统的实际能力。
+<figure markdown>
+![图4.2](images/chapter04_fig_4_2.svg)
+<figcaption>图 4.2  语义化文档从源文件到可访问页面的处理链</figcaption>
+</figure>
 
-## 参考文献
+**文档流的调试方法**
 
-[1] World Wide Web Consortium. Web Content Accessibility Guidelines (WCAG) 2.1[S]. 2018.
+浏览器默认按照文档流从上到下、从左到右排列块级内容。一个元素脱离文档流（例如绝对定位）后，后续元素不会为它保留原来的空间；如果把整个监测面板都用绝对坐标拼接，窗口尺寸、字体缩放或语言切换都会使内容互相遮挡。教学示例应先用正常流表达层次，再在确有叠加需求的局部使用定位。开发者工具中的 Elements 面板可以检查 DOM 层级和可访问名称，Computed 面板可以核对最终样式，Performance 面板则用来定位布局抖动。把这三个检查步骤对应到图4.2的三个处理阶段，能够比“盲目调像素”更快找到根因。
 
-[2] 中华人民共和国国家标准. GB/T 25000.51-2016 软件工程软件产品质量要求和评价（SQuaRE）商业现成软件（COTS）产品的质量要求和测试细则[S]. 北京: 中国标准出版社, 2016.
+渲染流程还决定了更新策略。水位数值每五分钟更新一次时，只需替换输出节点的文本；趋势图在一秒内收到多条消息时，应先在内存中合并，再在一个动画帧内刷新。若同时修改宽度、字体和位置，浏览器可能在一次任务中多次计算布局。将读操作（如`getBoundingClientRect`）集中在批次开头，将写操作集中在批次结尾，可以减少布局抖动。Vue 等框架会把这类批处理封装起来，但开发者仍需避免在循环中读取刚写入的布局属性。
 
-[3] Mozilla Developer Network. HTML Living Standard[EB/OL]. [2024-01-15]. https://developer.mozilla.org/en-US/docs/Web/HTML.
+**从地标到可访问名称**
 
-[4] Vue.js Team. Vue.js Guide[EB/OL]. [2024-01-15]. https://vuejs.org/guide/.
+语义标签不仅是代码风格。`header`表示页面或区域的引导信息，`nav`表示一组重要导航，`main`表示页面唯一的主要内容，`section`表示具有主题标题的内容组，`article`表示可以独立发布的报告或公告，`aside`放置辅助信息，`footer`承载来源与更新时间，`figure`与`figcaption`把图表和说明绑定。若只是为了布局而没有主题标题，应使用`div`，而不是滥用`section`。每个地标都应能由键盘到达，并通过标题或`aria-label`获得可理解的名称。
 
-[5] 水利部. 智慧水利建设顶层设计[R]. 北京: 水利部, 2023.
+清单4.2把地标、跳转链接和实时区域放在一个可直接打开的文件中。正文先用`href="#monitor-main"`提供“跳到主要内容”链接，再用`aria-labelledby`把区域标题与地标关联；这样，屏幕阅读器用户无需重复经过全局导航即可进入水位数据。代码中的`tabindex="-1"`只用于让脚本把焦点移动到主要内容，不会把普通文本加入键盘遍历顺序。完整骨架见清单4.2。
 
-## 思考题
+**清单 4.2  带地标和跳转链接的监测页面骨架**
 
-1. **分析题**：比较传统Web开发与现代前端框架开发的优缺点，结合智慧水利平台的特点，分析为什么选择Vue.js作为主要开发框架？
+```html
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>水利工程安全监测平台</title>
+</head>
+<body>
+  <a class="skip-link" href="#monitor-main">跳到主要内容</a>
+  <header>
+    <h1>水利工程安全监测平台</h1>
+    <p>面向值班员的实时监测工作台</p>
+  </header>
+  <nav aria-label="主导航">
+    <a href="#monitor-main">实时监测</a>
+    <a href="#warning-panel">预警事件</a>
+    <a href="#data-note">数据说明</a>
+  </nav>
+  <main id="monitor-main" tabindex="-1">
+    <h2>实时监测</h2>
+    <section aria-labelledby="level-title">
+      <h3 id="level-title">水位概览</h3>
+      <p>当前水位：<output id="level" aria-live="polite">--</output> m</p>
+      <figure>
+        <div id="level-chart" role="img"
+             aria-label="最近一小时水位趋势图"></div>
+        <figcaption>最近一小时水位趋势（示意）</figcaption>
+      </figure>
+    </section>
+    <aside id="warning-panel" aria-labelledby="warning-title">
+      <h3 id="warning-title">预警事件</h3>
+      <p id="warning-message" role="status">暂无需要处理的事件</p>
+    </aside>
+  </main>
+  <footer id="data-note">
+    <p>数据来源：水利工程安全监测平台；更新时间：
+      <time datetime="2026-08-07T08:00:00+08:00">08:00</time></p>
+  </footer>
+</body>
+</html>
+```
 
-2. **设计题**：设计一个智慧水利监测站点的数据展示界面，要求支持实时数据更新、历史数据查询和移动端适配，请画出页面布局和交互流程图。
+页面地标解决“我现在在哪里”的问题，表单控件则解决“我能提交什么”的问题。原生校验由浏览器在提交前执行，适合检查必填、格式和基本范围；`required`防止空值，`pattern`检查编码格式，`min`、`max`和`step`约束数值。校验消息应告诉用户如何修正，而不是只显示“输入错误”。清单4.3用查询时段和测站编码说明这些属性的组合，并用`novalidate`保留自定义消息的控制权；实际项目也可以让浏览器显示默认消息，但提交到后端前必须再次校验。
 
-3. **技术题**：在智慧水利平台中，如何处理大量实时监测数据的前端展示？请从性能优化、用户体验和技术实现三个角度进行分析。
+**清单 4.3  监测查询表单的原生校验与可访问提示**
 
-4. **综合题**：基于本章所学知识，设计一个完整的智慧水利平台前端技术架构方案，包括技术选型、模块划分、数据流设计和部署方案。
+```html
+<form id="query-form" novalidate>
+  <fieldset>
+    <legend>查询条件</legend>
+    <label for="station-code">测站编码</label>
+    <input id="station-code" name="stationCode" required
+           pattern="ST-[0-9]{2}" placeholder="ST-01"
+           aria-describedby="station-help">
+    <small id="station-help">格式：ST-加两位数字</small>
+
+    <label for="start-time">开始时间</label>
+    <input id="start-time" name="startTime" type="datetime-local"
+           required aria-describedby="time-help">
+    <label for="sample-step">采样间隔（分钟）</label>
+    <input id="sample-step" name="step" type="number"
+           min="5" max="60" step="5" value="5" required>
+    <small id="time-help">时间范围还需由服务端校验</small>
+  </fieldset>
+  <p id="query-error" role="alert" aria-live="assertive"></p>
+  <button type="submit">查询</button>
+</form>
+```
+
+前端校验不能替代后端校验：浏览器中的脚本可以被禁用、篡改或绕过，网络请求也可能被直接构造。第5章使用 Jakarta Validation 的`@Valid`在服务端重新检查 DTO；前端负责即时反馈，后端负责最终信任边界。两层校验的规则应来自同一份数据字典，例如测站编码的格式、时间范围的时区和采样间隔的允许集合必须保持一致。若后端拒绝请求，前端还要把字段级错误映射回`aria-describedby`指向的提示区域，而不是只在控制台记录异常。
+
+**键盘操作、焦点与动态内容**
+
+可访问页面需要一条可预测的键盘路径：跳转链接首先获得焦点，随后进入主导航，按 Tab 到达查询表单，再进入数据卡片和预警区域。不要用正整数`tabindex`人为重排顺序，因为 DOM 顺序才是屏幕阅读器和自动化测试能够稳定复现的顺序。弹出详情后，应把焦点移动到对话框标题，关闭时恢复到触发按钮；如果只是页面内提示，则用`role="status"`表达普通更新，用`role="alert"`表达需要立即处理的异常。
+
+清单4.4展示一个不依赖框架的焦点恢复脚本。它只负责交互语义，视觉样式仍交给 CSS；后续换成 Vue 组件时，可以把`openDialog`和`closeDialog`放入组件方法，并在卸载时移除事件监听。这样既能保持原生 HTML 的可测试性，也能避免把键盘逻辑散落在多个点击回调中。
+
+**清单 4.4  监测详情对话框的焦点管理**
+
+```javascript
+document.body.insertAdjacentHTML('beforeend', `
+  <button id="open-station" type="button">查看测站详情</button>
+  <dialog id="station-dialog">
+    <h2 autofocus>测站详情</h2>
+    <p>此处显示经过后端校验的测站信息。</p>
+    <button data-close type="button">关闭</button>
+  </dialog>`);
+
+const dialog = document.querySelector('#station-dialog');
+const openButton = document.querySelector('#open-station');
+let lastFocused = null;
+
+function openDialog() {
+  lastFocused = document.activeElement;
+  dialog.showModal();
+  dialog.querySelector('[autofocus]')?.focus();
+}
+
+function closeDialog() {
+  dialog.close();
+  lastFocused?.focus();
+}
+
+openButton.addEventListener('click', openDialog);
+dialog.querySelector('[data-close]')
+  .addEventListener('click', closeDialog);
+dialog.addEventListener('cancel', closeDialog);
+```
+
+以上结构把“数据展示”“用户输入”“预警反馈”分成可命名的区域，后续添加 CSS 或 Vue 模板时仍然保留同一棵语义树。实践中应使用键盘、放大字体、屏幕阅读器和自动化检查至少各验证一次：键盘检查是否存在焦点陷阱，放大检查是否出现横向滚动，读屏检查是否能读出标题与单位，自动化检查则确认每个表单控件都有可计算名称。对于水利值班员这类需要连续操作的界面，可访问性不是额外装饰，而是减少误操作和漏读预警的工程要求；本章的键盘、对比度与状态编码要求均以WCAG 2.2为依据<sup>[[30]](../../references.md#ref30)</sup>。
+
+**语义标签的选择决策**
+
+标签的选择应依据内容职责，而不是浏览器默认样式。若一段内容是全站导航，应使用`nav`并为多个导航分别命名；若它只是操作按钮旁的装饰性链接，普通`div`或`span`即可。`main`在一个文档中只能有一个，且不应嵌套在`header`、`nav`或`aside`中；`section`需要一个可见标题，标题层级应从`h1`逐级向下，不能为了字号跳过层级。把这些规则落实到监测页面后，读屏用户可以按地标列表直接跳到“实时监测”或“预警事件”，自动化测试也能用稳定的角色和名称定位元素。
+
+开发团队可以把页面结构当成接口来评审。提交一个新的监测卡片时，先回答三个问题：卡片是否有独立主题，是否能脱离周围内容被单独理解，是否包含需要实时播报的状态。如果卡片有标题且内容可独立解释，可使用`article`；如果只是多个指标的同类分组，使用带标题的`section`；如果仅用于栅格布局，使用`div`。实时水位数字本身使用`output`或普通文本即可，只有在数值变化需要立即通知时才增加`aria-live`，并设置合适的播报等级，避免每个传感器的细小波动同时打断值班员。
+
+**原生校验的边界与测试**
+
+原生校验不是一个“提交按钮上的开关”，而是一组浏览器约束的组合。`required`检查是否为空，`pattern`适合编码和格式，数值控件的`min`、`max`、`step`共同决定可接受的离散集合，日期控件的`min`与`max`表达时间窗口。以查询表单为例，采样间隔设为 5 分钟并不意味着后端可以相信任何来自浏览器的 5 的倍数；客户端脚本可以被绕过，攻击者也可以直接发送 HTTP 请求，所以服务器必须再次校验测站是否属于当前用户的权限范围、起止时间是否有序、时间跨度是否超过查询上限。前端收到 400 响应后，应把服务端返回的字段错误映射到对应`input`的描述节点，并保留用户已经填写的其他条件。
+
+校验的可测试性来自明确的状态转换。空测站编码应显示“请输入测站编码”，格式错误应显示示例“ST-01”，采样间隔超出范围应说明允许区间；三个错误同时存在时，页面可以在表单顶部汇总数量，同时在字段旁保留具体原因。提交成功后，焦点应移动到结果标题或第一个结果项，而不是留在已经失效的提交按钮上。这样，鼠标用户、键盘用户和辅助技术用户都能得到同等的反馈。第5章的`@Valid`负责服务端对象校验，本章的 HTML 约束负责尽早发现明显错误，两者的错误码和字段名应写入接口契约并由前后端共同测试。
+
+**从静态骨架到可维护组件**
+
+语义化骨架并不限制后续框架选型。迁移到 Vue 3 时，`header`、`nav`和`main`仍保留在模板中，数据变化只更新`output`、表格行或图表容器；迁移到服务端渲染时，标题、时间和数据来源仍以相同标签输出。组件边界应围绕业务职责划分，例如“测站概览”组件维护一个区域标题和一组指标，“预警事件”组件维护事件列表及其状态播报，父页面负责地标顺序和焦点移动。这样，组件替换不会破坏文档结构，CSS 重构也不会改变键盘路径。
+
+在验收阶段，可以把图4.2转化为一张检查清单：首先检查源文件是否有唯一的`main`、连续标题和可计算的表单名称；然后在 Elements 面板检查 DOM 是否与设计的地标一致；最后用 Performance 面板观察一次批量数据更新是否引起多次布局。对于动态预警，再用屏幕阅读器确认普通状态更新不会抢占焦点，真正需要值班员处理的事件才会进入`alert`区域。结构、渲染和交互三个层面都通过后，页面才算完成，而不是只看截图是否“像设计稿”。
+
+## 4.3 CSS样式与响应式布局
+
+CSS负责视觉呈现。规则由选择器和声明块组成，层叠结果主要受来源、优先级和出现顺序影响。工程中宜使用类选择器组织组件样式，避免依赖过深的DOM层级。
+
+**清单 4.5  监测卡片响应式样式**
+
+```css
+:root { --normal: #1677ff; --warning: #d46b08; }
+.monitor-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(12rem, 1fr));
+  gap: 1rem;
+}
+.monitor-card {
+  padding: 1rem;
+  border: 1px solid #d9e2ec;
+  border-radius: .5rem;
+  background: #fff;
+}
+.monitor-card--warning { border-left: .35rem solid var(--warning); }
+@media (max-width: 768px) {
+  .monitor-grid { grid-template-columns: 1fr; }
+}
+```
+
+Grid适合仪表盘的二维区域布局，Flexbox适合工具栏等一维排列。响应式设计不能只缩小字号，还应调整列数、触控目标和信息优先级。上例在窄屏上改为单列，读者可以进一步用浏览器的设备模拟器检查断点前后的卡片顺序、触控区域和滚动方向。
+
+### 4.3.1 盒模型与尺寸计算
+
+浏览器把每个元素视为一个矩形盒子。盒子从内到外依次由内容区、内边距（`padding`）、边框（`border`）和外边距（`margin`）组成。`width`和`height`默认只描述内容区，因此一个写成`width: 320px; padding: 16px; border: 1px solid`的监测卡片，水平方向实际占用的是 $320+16\times2+1\times2=354$ 像素；如果三个卡片放入宽度为 1024 像素的网格，间隙还要从可用空间中扣除。尺寸计算不清楚时，卡片会出现意外换行，图表也可能被挤出容器。
+
+工程中通常在全局使用`box-sizing: border-box`，让声明的宽高包含内边距和边框。这样设计稿给出的 320 像素就是盒子的外部尺寸，组件之间的对齐更容易推导；只有需要精确控制内容区的排版组件，才保留`content-box`并在接口文档中写明。图4.3从外到内标出四层区域，读者可以据此判断 DevTools 中高亮的颜色对应哪一个尺寸。
+
+<figure markdown>
+![图4.3](images/chapter04_fig_4_3.svg)
+<figcaption>图 4.3  CSS 盒模型的四层尺寸关系</figcaption>
+</figure>
+
+清单4.6用同一条规则把测站卡片、数值输出和图表容器纳入统一盒模型。选择器中的通配符会命中伪元素，因此`::before`和`::after`生成的装饰也不会把布局撑大。工程中仍应通过组件类限制样式范围，避免把第三方地图容器的内部计算误改为全局规则。
+
+**清单 4.6  监测卡片的 border-box 盒模型**
+
+```css
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+.station-card {
+  width: min(100%, 20rem);
+  padding: 1rem;
+  border: 1px solid #d9e2ec;
+  margin: 0;
+  background: #fff;
+}
+
+.station-card__value {
+  min-height: 2.5rem;
+  overflow-wrap: anywhere;
+}
+```
+
+**选择器、优先级与层叠**
+
+选择器优先级可以写成三元组 $(a,b,c)$：$a$ 统计 ID 选择器，$b$ 统计类、属性和伪类，$c$ 统计元素和伪元素。比较时先看 $a$，相同再看 $b$，最后比较 $c$；三元组都相同，后出现的声明覆盖先出现的声明。内联样式可以看作更高的来源层级，但它仍然应被限制在确有运行时主题需求的场景。优先级不是“数选择器字符个数”，例如一个 ID 的权重高于许多个类，类的权重也高于任意数量的元素选择器。
+
+表4.1用监测页面的选择器给出三条可计算的规则。遇到颜色或间距没有生效时，先在 DevTools 的 Styles 面板查看被划掉的声明，再按表中的三元组和来源层级定位冲突；直接追加`!important`只能隐藏原因，不能替代层叠设计。
+
+**表 4.1  CSS 选择器优先级三元组示例**
+
+| 选择器                  | $(a,b,c)$ | 计算与应用场景                               |
+|:------------------------|:----------|:---------------------------------------------|
+| `#monitor-main`         | (1,0,0)   | 页面主要区域的唯一标识，适合页面级布局边界   |
+| `.station-card.warning` | (0,2,0)   | 同时命中组件和状态类，用于预警卡片的局部样式 |
+| `section output`        | (0,0,2)   | 两个元素选择器，作为低优先级默认样式         |
+
+层叠还受来源、重要性和继承影响。用户代理样式提供浏览器默认值，作者样式提供项目规则，用户样式用于个性化设置；在同一来源内，再比较普通声明和`!important`声明。颜色、字体等属性通常会从父元素继承，盒模型尺寸、外边距和定位则不会自动继承。可以用 CSS 自定义属性把主题色和间距作为显式契约传递给组件，但应为变量提供合理的后备值。`!important`会打断这种层叠关系，导致后续维护者不得不增加更高优先级；只有无障碍用户样式覆盖或第三方组件无法修改时才考虑使用，并在注释中写明边界。
+
+清单4.7把主题变量、继承和状态类放在一个可检查的层级中。`color`从`.dashboard`继承到输出文本，`border-color`由状态类显式覆盖；组件内部不需要知道页面使用的是哪一种蓝色，只依赖变量名。改变主题时只替换变量值，避免在几十个选择器中逐一寻找颜色常量。
+
+**清单 4.7  主题变量与状态层叠规则**
+
+```css
+:root {
+  --water-primary: #1565c0;
+  --water-warning: #d46b08;
+  --panel-gap: 1rem;
+}
+
+.dashboard {
+  color: #263238;
+  background: #f5f9ff;
+}
+
+.dashboard .station-card {
+  border: 1px solid var(--water-primary, #1565c0);
+  margin-block-end: var(--panel-gap);
+}
+
+.station-card.is-warning {
+  border-color: var(--water-warning, #d46b08);
+}
+```
+
+### 4.3.2 单位体系与可伸缩界面
+
+CSS 单位应与测量对象和缩放目标相匹配。`px`适合边框、图标描边和需要稳定像素精度的细节；`em`相对于当前元素字体大小，适合让按钮内边距随文字一起放大；`rem`相对于根元素字体大小，适合全站间距和字号的统一刻度；`vw`、`vh`分别相对于视口宽度和高度，适合大屏容器的比例尺寸；百分比通常相对于父元素对应属性，适合网格列宽和进度条。长度单位混用并非错误，错误在于没有说明比例的参照物。
+
+水利值班室大屏可以让根字号作为缩放基准，用`rem`表达卡片间距，用`min()`和`max()`限制极端窗口；移动端查询表单则让宽度使用百分比或`min(100%, 28rem)`，保证输入框不会超出屏幕。`vh`用于整屏高度时要考虑移动浏览器地址栏变化，关键按钮不能只放在视口底部。长度选择还要与浏览器的字体放大设置一起测试，不能用固定像素锁死可读性。
+
+清单4.8展示同一监测面板中不同单位的职责。根字号是全站设计令牌，组件内的`em`保证按钮文本和内边距同步放大，`vw`只参与宽屏布局的上限计算；通过`clamp()`可以在最小、首选和最大值之间平滑过渡。
+
+**清单 4.8  监测面板的 CSS 单位策略**
+
+```css
+:root { font-size: 16px; }
+
+.monitor-shell {
+  width: min(100%, 92vw);
+  min-height: min(80vh, 48rem);
+  padding: clamp(1rem, 2vw, 2rem);
+  gap: clamp(.75rem, 1.5vw, 1.5rem);
+}
+
+.monitor-shell h2 {
+  font-size: clamp(1.25rem, 1rem + 1vw, 2rem);
+}
+
+.monitor-shell button {
+  padding: .6em 1em;
+  min-height: 2.75rem;
+}
+```
+
+### 4.3.3 定位、层叠上下文与覆盖关系
+
+`position`有五种常用取值。`static`是默认值，元素按普通文档流排列；`relative`仍保留原位置，只在需要时相对自身偏移，并可作为绝对定位后代的参照；`absolute`脱离文档流，参照最近的定位祖先；`fixed`相对视口固定，适合始终可见的工具条，但要考虑遮挡和移动端安全区域；`sticky`在滚动到阈值后暂时固定，适合表格表头或测站分组标题。定位不是布局的替代品，卡片网格仍应优先使用 Grid 或 Flexbox。
+
+`z-index`只在同一层叠上下文内比较。设置`transform`、`opacity`小于 1、`filter`或某些定位属性，可能创建新的层叠上下文；此时子元素即使写了很大的`z-index`，也不能越过父上下文与外部兄弟比较。监测地图上的预警浮层应有明确的上下文边界：地图图层、测站详情、全局键盘提示分别建立可解释的层级，避免为了“显示在最上面”把`z-index`写成无穷增长的数字。
+
+清单4.9给出一个独立的监测工具条和浮层样式。工具条使用`sticky`保留在滚动容器顶部，浮层使用相对定位的卡片作为参照；`isolation: isolate`明确创建上下文，使第三方地图的层级不会穿透到业务提示中。读者可以在浏览器中滚动长列表并切换状态类，观察定位和层叠的实际效果。
+
+**清单 4.9  监测工具条与预警浮层的定位**
+
+```css
+.monitor-page {
+  position: relative;
+  isolation: isolate;
+}
+
+.monitor-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  gap: .75rem;
+  padding: .75rem 1rem;
+  background: rgb(255 255 255 / .94);
+}
+
+.station-popover {
+  position: absolute;
+  inset: 3.5rem 1rem auto auto;
+  z-index: 20;
+  max-width: min(24rem, calc(100vw - 2rem));
+  padding: 1rem;
+  border: 1px solid #d46b08;
+  background: #fffaf0;
+}
+```
+
+盒模型、优先级、单位和定位需要一起调试。先在 Elements 面板确认元素是否处于预期的文档流，再在 Computed 面板核对最终的`box-sizing`、尺寸和来源，最后用不同字体缩放、窗口宽度和键盘操作验证。对于水利工程安全监测平台的卡片，推荐先确定结构尺寸和层叠边界，再添加颜色与动画；这样即使浏览器禁用动画或值班员放大字体，关键水位、预警等级和更新时间仍然可读。CSS 规则的教学目标不是记住属性清单，而是能够从布局现象反推盒模型、层叠和参照系。
+
+### 4.3.4 Flexbox：一维的告警工具栏
+
+Flexbox 为一个容器建立主轴和交叉轴。`flex-direction`决定主轴方向，`justify-content`在主轴上分配剩余空间，`align-items`在交叉轴上对齐项目，`flex-wrap`允许项目换行，`gap`提供不依赖相邻选择器的间距。项目的`flex`缩写由增长因子、收缩因子和基准尺寸组成；把`flex: 1`写在按钮上，表示它可以分享剩余空间，但不等同于“固定等宽”，因为内容最小尺寸和`min-width`仍会参与计算。
+
+告警工具栏是一维布局的典型场景：左侧放当前测站和筛选条件，中间放状态摘要，右侧放刷新、导出和确认按钮。桌面宽度足够时，项目沿行方向排列；窄屏时让工具栏换行或改为列方向，按钮仍保持可触控的最小高度。工具栏中的文字应允许缩放，不能通过`white-space: nowrap`把所有控件锁在一行，否则翻译、放大字体和小屏设备都会造成横向滚动。清单4.10是一个可直接打开的完整页面，演示主轴、交叉轴、换行和状态颜色的配合。
+
+**清单 4.10  告警工具栏 Flex 完整实例**
+
+```html
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>告警工具栏</title>
+  <style>
+    :root { --normal: #1677ff; --warning: #d46b08; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font: 16px system-ui, sans-serif; }
+    .alert-toolbar {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: .75rem 1rem;
+      padding: .75rem 1rem;
+      border-block-end: 1px solid #d9e2ec;
+    }
+    .alert-toolbar__station { flex: 1 1 12rem; min-width: 10rem; }
+    .alert-toolbar__summary { flex: 2 1 16rem; }
+    .alert-toolbar__actions {
+      display: flex; align-items: center; flex-wrap: wrap; gap: .5rem;
+    }
+    .alert-toolbar button {
+      min-height: 2.75rem; padding: .55em 1em; border: 1px solid #b0bec5;
+      border-radius: .35rem; background: #fff; color: #263238;
+    }
+    .alert-toolbar button.primary {
+      border-color: var(--normal); background: var(--normal); color: #fff;
+    }
+    @media (max-width: 44rem) {
+      .alert-toolbar { align-items: stretch; }
+      .alert-toolbar__station, .alert-toolbar__summary,
+      .alert-toolbar__actions { flex-basis: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <header class="alert-toolbar" aria-label="告警工具栏">
+    <strong class="alert-toolbar__station">案例水库·测站筛选</strong>
+    <span class="alert-toolbar__summary" role="status">当前有 2 条待确认事件</span>
+    <span class="alert-toolbar__actions">
+      <button type="button">刷新</button>
+      <button type="button">导出</button>
+      <button class="primary" type="button">确认事件</button>
+    </span>
+  </header>
+</body>
+</html>
+```
+
+阅读清单时要区分容器属性与项目属性。`display:flex`、`flex-direction`、`justify-content`和`align-items`作用于容器；`flex-grow`、`flex-shrink`、`flex-basis`、`align-self`和`order`作用于项目。`order`会改变视觉顺序，却不会改变 DOM 和屏幕阅读器顺序，除非业务明确允许，否则不要用它来弥补 HTML 结构错误。对于告警操作，DOM 顺序应保持“查看—确认—导出”的逻辑，视觉对齐通过轴属性完成。
+
+### 4.3.5 Grid：二维的监测仪表盘
+
+Grid 同时管理行和列，适合把侧栏、地图、曲线、告警列表和底部状态栏组合成二维区域。`grid-template-columns`描述列轨道，`grid-template-rows`描述行轨道，`grid-template-areas`用名字表达区域关系；`minmax()`给出最小和最大轨道尺寸，`repeat(auto-fit, minmax(...))`能够在可用宽度变化时自动调整卡片列数。与 Flexbox 不同，Grid 的项目可以跨越多行或多列，但内容溢出仍需通过最小尺寸和滚动策略处理。
+
+图4.4把两种布局的决策边界画成“轴”与“平面”：工具栏只需要沿一条轴分配空间时用 Flexbox；页面骨架要同时控制行列时用 Grid；Grid 区域内部的按钮组仍可继续使用 Flexbox。混用不是问题，关键是每一层只承担一种几何职责，避免在同一个元素上堆叠互相冲突的定位规则。
+
+<figure markdown>
+![图4.4](images/chapter04_fig_4_4.svg)
+<figcaption>图 4.4  Flexbox 与 Grid 的布局职责边界</figcaption>
+</figure>
+
+清单4.11把区域命名、自动列数和最小卡片宽度组合为完整页面。页面在宽屏时显示侧栏、主图区和告警栏，在窄屏时通过媒体查询重新排列区域；HTML 顺序仍然遵循标题、主数据、事件和状态说明的阅读顺序，Grid 只改变视觉布局。
+
+**清单 4.11  监测仪表盘 Grid 完整实例**
+
+```html
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>监测仪表盘 Grid</title>
+  <style>
+    * { box-sizing: border-box; }
+    .dashboard {
+      display: grid;
+      grid-template-areas:
+        "header header header"
+        "side main alerts"
+        "footer footer footer";
+      grid-template-columns: minmax(12rem, 18rem) minmax(0, 1fr) minmax(14rem, 22rem);
+      grid-template-rows: auto minmax(20rem, 1fr) auto;
+      gap: 1rem;
+      min-height: 100vh;
+      padding: 1rem;
+      background: #f5f9ff;
+    }
+    .dashboard > * { min-width: 0; padding: 1rem; background: #fff; }
+    .dashboard__header { grid-area: header; }
+    .dashboard__side { grid-area: side; }
+    .dashboard__main { grid-area: main; }
+    .dashboard__alerts { grid-area: alerts; }
+    .dashboard__footer { grid-area: footer; }
+    .metric-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+      gap: .75rem;
+    }
+    @media (max-width: 62rem) {
+      .dashboard {
+        grid-template-areas: "header" "main" "alerts" "side" "footer";
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="dashboard">
+    <header class="dashboard__header"><h1>水利工程安全监测</h1></header>
+    <aside class="dashboard__side"><h2>测站</h2><p>站点列表</p></aside>
+    <section class="dashboard__main" aria-labelledby="metrics-title">
+      <h2 id="metrics-title">实时指标</h2>
+      <div class="metric-cards">
+        <article><h3>水位</h3><p>—</p></article>
+        <article><h3>流量</h3><p>—</p></article>
+      </div>
+    </section>
+    <aside class="dashboard__alerts"><h2>预警事件</h2><p>暂无</p></aside>
+    <footer class="dashboard__footer">数据更新时间：—</footer>
+  </main>
+</body>
+</html>
+```
+
+### 4.3.6 响应式断点与大屏适配
+
+媒体查询不是按设备品牌写出的清单，而是当内容无法保持可读和可操作时切换布局。移动优先策略先写单列、可滚动和大触控目标，再用`min-width`逐步增加列数；桌面优先策略先写宽屏区域，再用`max-width`收拢内容。对监测平台而言，断点应通过真实数据卡片、表格和按钮的最小宽度推导，而不是直接复制某个手机型号的像素值。一个断点只解决一个可观察问题，例如导航换行、侧栏折叠或图表从并排改为上下排列。
+
+图4.5用内容状态标出三个大屏档位和一个移动档位。1920 宽度可以容纳侧栏、主图和告警栏，2560 与 3840 主要增加留白和信息密度，而不是把同一张卡片无限拉宽；移动端则优先保留水位、预警和更新时间，将次要筛选条件折叠。断点之间采用流式尺寸，避免窗口略微变化就出现跳跃。
+
+<figure markdown>
+![图4.5](images/chapter04_fig_4_5.svg)
+<figcaption>图 4.5  监测平台的响应式断点与大屏适配思路</figcaption>
+</figure>
+
+大屏适配常见两种方案。`rem`方案以根字号为缩放基准，组件的间距和字体随设计令牌成比例增长，适合不同浏览器窗口和需要清晰文字的值班室；`transform: scale()`方案把已经排好的固定画布整体缩放，适合必须保持像素坐标一致的演示大屏，但会同时缩放字体、边框和交互命中区，且可能产生模糊或滚动条。生产页面可以用`rem`和 Grid 做流式布局，再只在特定的只读大屏容器上使用缩放，不能把缩放当成所有终端的通用方案。
+
+清单4.12把移动优先、三个宽屏档位和大屏画布对比放在一个样式表中。`–normal`在按钮和状态徽标中实际使用，避免主题变量成为没有消费者的死代码；`clamp()`控制字号和间距的上下限，`aspect-ratio`保证图表容器在重排时不发生高度跳动。
+
+**清单 4.12  移动优先与 1920/2560/3840 大屏断点**
+
+```css
+:root {
+  --normal: #1677ff;
+  --page-gap: clamp(.75rem, 1vw, 2rem);
+  --content-max: 120rem;
+}
+
+.water-dashboard {
+  width: min(100%, var(--content-max));
+  margin-inline: auto;
+  padding: var(--page-gap);
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--page-gap);
+}
+.water-dashboard__chart { aspect-ratio: 16 / 9; min-height: 16rem; }
+.water-dashboard__normal { color: var(--normal); }
+
+@media (min-width: 120rem) { /* 1920 CSS 像素附近的宽屏 */
+  .water-dashboard { grid-template-columns: 18rem minmax(0, 1fr) 22rem; }
+}
+@media (min-width: 160rem) { /* 2560 CSS 像素附近的宽屏 */
+  .water-dashboard { --page-gap: 2rem; grid-template-columns: 22rem minmax(0, 1fr) 28rem; }
+}
+@media (min-width: 240rem) { /* 3840 CSS 像素附近的联屏 */
+  .water-dashboard { --page-gap: 2.5rem; grid-template-columns: 26rem minmax(0, 1fr) 32rem; }
+}
+```
+
+### 4.3.7 CSS 变量与暗色主题
+
+CSS 自定义属性是运行时可继承的设计令牌。主题色、背景色、文字色、边框色和间距应集中定义在`:root`或页面容器中，组件通过`var()`读取；当值班室降低环境亮度时，只需替换一组变量，地图、卡片和表格就能保持同一对比关系。暗色主题不能简单地把白色替换成黑色，还要重新检查文字与背景的对比度、曲线颜色的区分度、预警颜色在暗底上的可见性和焦点环的边界。
+
+用户选择的主题应通过按钮或系统偏好决定，而不是根据业务预警等级自动切换。`prefers-color-scheme`可作为初始值，用户显式选择后应存储在本地并覆盖系统偏好；主题切换不会改变 DOM 顺序和语义，只改变呈现令牌。对于截图、打印和投影场景，还要提供高对比度的后备色，不能只依靠颜色传递“正常”或“预警”含义。
+
+清单4.13给出明暗主题和高对比度状态样式。`data-theme`由应用状态控制，变量的后备值保证旧浏览器或组件脱离主题容器时仍有可读颜色；`forced-colors`分支让操作系统的高对比度模式接管边框和文本。将这段样式与清单4.2的语义页面骨架组合后，键盘、读屏和主题切换可以分别验收。
+
+**清单 4.13  监测页面的明暗主题与高对比度**
+
+```css
+:root {
+  --surface: #ffffff;
+  --surface-raised: #f5f9ff;
+  --ink: #263238;
+  --border: #b0bec5;
+  --normal: #1565c0;
+  --warning: #d46b08;
+}
+
+[data-theme="dark"] {
+  --surface: #17212b;
+  --surface-raised: #0f151b;
+  --ink: #f5f7fa;
+  --border: #607d8b;
+  --normal: #90caf9;
+  --warning: #ffb74d;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { color-scheme: dark; }
+}
+
+.monitor-panel {
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+.monitor-panel.is-warning {
+  outline: .2rem solid var(--warning);
+}
+@media (forced-colors: active) {
+  .monitor-panel.is-warning { outline: 2px solid CanvasText; }
+}
+```
+
+Flexbox 和 Grid 的选择、断点的推导、大屏的缩放策略以及暗色主题都应通过可观察的验收条件闭环。先用窄屏和键盘完成基本任务，再逐步扩展到 1920、2560 和 3840 的画布；检查每个断点是否保留水位、预警和时间信息，检查图表是否保持纵横比，检查按钮是否仍有足够命中区，最后切换暗色和高对比度模式。这样，响应式 CSS 服务的是数据优先级和操作路径，而不是单纯追求某一张截图与设计稿完全重合。
+
+### 4.3.8 Flex布局的故障定位与可访问性验收
+
+前端页面出现“按钮被挤出屏幕”“摘要文字遮住数值”或“窄屏时卡片突然变高”时，先不要随意增加媒体查询。应把问题还原为 Flex 容器和项目的尺寸计算：容器的可用主轴空间等于自身内容盒宽度减去内边距、边框和间隙；项目的基准尺寸由 `flex-basis` 或自身内容决定；增长和收缩因子再按剩余空间分配。若项目的最小内容尺寸大于分配结果，浏览器会保留最小尺寸，常见表现就是横向溢出。对长测站名、单位文本和操作按钮，通常需要在项目上显式写 `min-width: 0`，在确实允许截断的地方再配合 `overflow-wrap` 或省略号。
+
+清单4.14把一个可诊断的告警摘要栏拆成三层。外层使用`display:flex`分配主轴空间，中间摘要允许收缩，右侧操作组再次使用`display:flex`组织按钮；`flex: 0 0 auto` 保证确认按钮不被压成不可点击的窄条，`flex: 1 1 18rem` 则让摘要在宽屏分享空间、窄屏主动换行。读者可以在开发者工具中逐项取消属性，观察“内容最小尺寸”“换行”和“按钮命中区”分别由哪条规则决定。
+
+**清单 4.14  可诊断的告警摘要 Flex 样式**
+
+```css
+.alert-summary {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .75rem 1rem;
+  padding: .75rem 1rem;
+  border: 1px solid #b0bec5;
+}
+
+.alert-summary__reading {
+  flex: 1 1 18rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.alert-summary__reading strong {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.alert-summary__actions {
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  gap: .5rem;
+}
+
+.alert-summary button {
+  min-block-size: 2.75rem;
+  padding-inline: 1rem;
+}
+
+@media (max-width: 36rem) {
+  .alert-summary { align-items: stretch; }
+  .alert-summary__reading,
+  .alert-summary__actions { flex-basis: 100%; }
+}
+```
+
+Flex 的视觉顺序还涉及语义和键盘路径。`order`只改变绘制顺序，不改变 DOM 顺序、Tab 顺序和屏幕阅读器朗读顺序；如果把“确认”按钮视觉上移到“查看”之前，键盘用户仍会按 DOM 顺序获得焦点，容易产生误操作。因此正确做法是先按业务流程组织 HTML，再用对齐和间隙完成视觉呈现。告警条应为状态摘要使用`role=status`或明确的标题，为需要立即打断的异常使用`role=alert`，但不能把每次轮询都变成打断式播报。颜色只作辅助信息，蓝、黄、橙、红之外还应有文字、图标或数值阈值说明。
+
+复杂页面的验收可以分成四个可重复步骤。第一步在 320、768、1280 和联屏宽度下检查主轴是否出现溢出，记录发生溢出的具体项目和计算宽度；第二步用键盘从页面标题移动到筛选、查看、确认和导出，确认焦点环不被`overflow:hidden`裁切，且视觉顺序与操作顺序一致；第三步把浏览器字号放大到 200%，检查文字是否被固定高度遮挡；第四步切换高对比度和暗色主题，确认状态不仅由颜色传达。若问题只在某一测站名称出现，优先修复项目的最小尺寸和断词策略，不要把整个页面改成固定宽度。
+
+**表 4.2  Flex布局常见现象与定位路径**
+
+| 现象                     | 先检查                                             | 教学结论                           |
+|:-------------------------|:---------------------------------------------------|:-----------------------------------|
+| 右侧按钮被挤出           | 项目是否有`min-width:0`、按钮是否为`flex:0 0 auto` | 先保障操作命中区，再让摘要文本收缩 |
+| 窄屏出现横向滚动         | 容器的`flex-wrap`、长文本断词和固定宽度            | 换行是布局策略，不是异常补丁       |
+| 焦点顺序与视觉顺序不一致 | DOM 顺序、`order`和键盘 Tab 路径                   | 语义顺序优先于视觉排列             |
+| 放大字号后文字被遮挡     | 固定高度、`overflow:hidden`和行高                  | 组件高度应允许内容增长             |
+
+表4.2可作为联调记录模板：每次修改只改变一个影响因素，并在四种视口、两种主题和键盘操作下复测。这样，CSS 调试就从“调到看起来差不多”变成可以由同伴复核的工程过程。
+
+## 4.4 JavaScript基础编程
+
+现代JavaScript使用`const`声明不重新赋值的绑定，使用`let`声明需要变化的绑定。基本类型包括数字、字符串、布尔值、`null`、`undefined`、`bigint`与`symbol`；对象、数组和函数属于引用类型。
+
+字符串可用模板字面量组合，也可通过`trim()`、`includes()`、`slice()`和`split()`完成常见处理。完成字符串处理后，再使用比较、逻辑和算术运算符表达业务规则。例如，某水库汛期警戒水位统一设为5.0米：
+
+**清单 4.15  JavaScript基础变量与函数**
+
+```javascript
+const stationName = "案例水库";
+const warningLevel = 5.0; // 单位：m，本章同一示例场景统一采用该阈值
+const reading = { stationId: "ST-01", level: 5.12, unit: "m" };
+const status = reading.level >= warningLevel ? "预警" : "正常";
+const message = `${stationName}：${reading.level} ${reading.unit}，${status}`;
+console.log(message.trim());
+```
+
+数组常用`map()`完成映射、`filter()`完成筛选、`reduce()`完成聚合；对象解构可以明确取出字段。函数应保持单一职责并显式返回结果。
+
+**清单 4.16  监测值条件判断**
+
+```javascript
+const readings = [4.72, 5.12, 4.95];
+const alarms = readings
+  .filter(level => level >= 5.0)
+  .map(level => ({ level, severity: "warning" }));
+
+function validateLevel(level) {
+  if (!Number.isFinite(level)) throw new TypeError("水位必须是数字");
+  if (level < 0 || level > 50) throw new RangeError("水位超出测站量程");
+  return level;
+}
+```
+
+### 4.4.1 类型、相等性与可预测数据
+
+JavaScript 的类型分为原始值和对象引用。字符串、数字、布尔值、`null`、`undefined`、`bigint`和`symbol`是原始值；数组、普通对象、函数和日期对象通过引用访问。变量声明的是绑定，不是给值贴上的永久标签，因此同一个绑定在运行中可能先保存字符串、后保存数字。监测数据进入页面时应尽早完成解析和校验，把接口中的字符串数值转换为有限数字，把缺失值转换为明确的`null`或质量状态，避免在模板中依赖隐式类型转换。
+
+相等性判断优先使用严格相等`===`和严格不等`!==`，它们不会在比较前自动转换类型。`5 === "5"`为假，`null === undefined`也为假；如果业务确实要把空值视为同一类，应先写出显式的归一化函数，再比较归一化结果。抽象相等`==`会触发复杂的转换规则，容易把空字符串、零和`false`混为一谈，在水位、流量等数值字段中尤其危险。
+
+清单4.17用类型守卫和显式转换建立一个可复用的读数解析函数。函数先检查对象结构，再将字符串转换为数字，最后区分“缺测”和“无效”；调用方可以根据返回的判别字段决定显示、统计或拒收，而不必在多个组件中重复一套隐式规则。
+
+**清单 4.17  监测读数的类型守卫与严格比较**
+
+```javascript
+function parseLevel(raw) {
+  if (raw === null || raw === undefined || raw === '') {
+    return { kind: 'missing', value: null };
+  }
+  const value = typeof raw === 'number' ? raw : Number(raw);
+  if (!Number.isFinite(value)) return { kind: 'invalid', value: null };
+  return { kind: 'valid', value };
+}
+
+const reading = parseLevel('4.20');
+if (reading.kind === 'valid' && reading.value === 4.2) {
+  console.log('可以进入展示流程');
+}
+```
+
+### 4.4.2 函数、闭包与数组高阶方法
+
+函数是可以传递和返回的值。命名函数适合表达稳定的业务操作，箭头函数适合短小的映射和筛选；函数参数和返回值应当有明确含义，避免依赖外部可变变量。闭包是函数与其创建时词法环境的组合，常用于封装计数器、节流器和带配置的校验器。闭包并不会复制所有数据，若把很大的监测数组长期保存在闭包中，组件卸载后仍可能无法回收，因此要在生命周期结束时释放引用。
+
+数组的`map`、`filter`、`find`、`some`、`every`和`reduce`表达的是不同意图：映射改变每个元素的形状，筛选保留满足条件的元素，查找返回一个元素，`some`/`every`判断集合性质，归约把集合折叠成一个结果。它们通常比手写索引循环更容易测试，但要注意每次链式调用都可能创建新数组；高频数据流应在测量后决定是否批量处理或复用缓冲区。
+
+清单4.18把闭包和高阶数组方法放在同一个水位摘要函数中。`makeRollingAverage`只暴露`push`和`value`两个操作，内部样本数组不能被调用方直接修改；摘要函数使用`filter`排除缺测，再用`reduce`求和，结果可以直接供卡片组件使用。
+
+**清单 4.18  闭包与数组高阶方法**
+
+```javascript
+function makeRollingAverage(limit = 3) {
+  const samples = [];
+  return {
+    push(value) {
+      if (Number.isFinite(value)) samples.push(value);
+      if (samples.length > limit) samples.shift();
+    },
+    value() {
+      return samples.length === 0
+        ? null
+        : samples.reduce((sum, item) => sum + item, 0) / samples.length;
+    }
+  };
+}
+
+const readings = [{ level: 4.1 }, { level: null }, { level: 4.3 }];
+const validLevels = readings.map(item => item.level)
+  .filter(level => Number.isFinite(level));
+const average = validLevels.reduce((sum, level) => sum + level, 0)
+  / validLevels.length;
+console.log(average);
+```
+
+### 4.4.3 解构、展开与 ES 模块
+
+对象解构把接口返回的字段绑定到局部变量，数组解构适合处理有固定位置的结果；默认值可以覆盖字段缺失，重命名可以避免与外层变量冲突。展开语法用于复制浅层对象或拼接数组，但它不会深拷贝嵌套对象，不能用来伪造不可变数据。更新测站状态时，应创建新的顶层对象并保留未改变字段，避免一个组件修改对象后悄悄影响另一个组件。
+
+ES 模块用`export`声明公共接口，用`import`建立静态依赖。模块边界最好按业务职责划分：`readings.js`负责类型和计算，`api.js`负责请求，组件只组合这些接口。静态导入让构建工具能够分析依赖和做代码分割，动态`import()`则适合把不在首屏的地图或报表功能延迟加载。模块不应通过全局变量共享状态，测试时也不应依赖导入顺序。
+
+清单4.19展示“定义模块—使用模块”的完整关系。两个文件都写在同一清单中，复制到 Vite 5 项目的`src/lib`目录后可直接改成对应路径；调用方拿到的是新对象，不会修改原始 API 响应。
+
+**清单 4.19  ES 模块、解构与展开**
+
+```javascript
+// readings.js
+export function summarizeReading(reading) {
+  const { stationId, level: rawLevel, quality = 'missing' } = reading;
+  const level = rawLevel === null ? null : Number(rawLevel);
+  return { stationId, level, quality };
+}
+
+// station-panel.js
+import { summarizeReading } from './readings.js';
+
+const response = { stationId: 'ST-01', level: '4.20', quality: 'valid' };
+const summary = summarizeReading(response);
+const viewModel = { ...summary, updated: true };
+console.log(viewModel);
+```
+
+### 4.4.4 DOM 查询、增删改与安全写入
+
+DOM 是 HTML 文档在浏览器中的对象表示，节点之间形成父子和兄弟关系。`querySelector`和`querySelectorAll`适合按 CSS 选择器查找节点，`closest`适合从事件目标向上找到所属卡片，`matches`适合判断状态。新增节点使用`createElement`和`append`，删除使用`remove`，属性使用`setAttribute`或属性本身修改。外部数据写入文本时使用`textContent`，不要把未经转义的测站名称或事件说明拼接到`innerHTML`，否则数据可能被当成脚本执行。
+
+DOM 操作还要考虑布局代价。循环中逐个读取布局尺寸、再逐个写入样式，可能在每次迭代之间强制浏览器重新计算布局。可以先把数据转换为文档片段，完成一次写入；高频图表则交给专用渲染层，DOM 只保留标题、单位和当前值。清单4.20先创建一个安全的测站列表，再用`textContent`更新一个条目，完整展示查询、增删和文本写入。
+
+**清单 4.20  安全创建和更新测站 DOM**
+
+```javascript
+document.body.innerHTML = '<ul id="station-list"></ul>';
+const list = document.querySelector('#station-list');
+const stations = [
+  { id: 'ST-01', name: '上游测站', level: 4.2 },
+  { id: 'ST-02', name: '下游测站', level: 4.6 }
+];
+
+const fragment = document.createDocumentFragment();
+for (const station of stations) {
+  const item = document.createElement('li');
+  item.dataset.stationId = station.id;
+  item.textContent = `${station.name}：${station.level} m`;
+  fragment.append(item);
+}
+list.replaceChildren(fragment);
+list.querySelector('[data-station-id="ST-02"]').textContent = '下游测站：更新中';
+```
+
+### 4.4.5 事件对象、捕获与冒泡
+
+浏览器事件沿 DOM 树传播，通常分为捕获、目标和冒泡三个阶段。捕获从`window`向目标节点下行，目标阶段执行目标监听器，冒泡再从目标向祖先上行。监听器第二个参数可以使用`capture: true`参加捕获阶段；普通监听器默认在冒泡阶段执行。事件对象的`target`是最初触发的节点，`currentTarget`是当前正在执行监听器的节点，两者不同是理解事件委托的关键。
+
+`preventDefault()`阻止浏览器默认行为，例如阻止表单跳转或链接导航；`stopPropagation()`停止事件继续传播，但不应被当作解决所有重复触发的工具，因为它会让祖先组件失去观察事件的机会。业务代码应先判断是否真的需要阻止默认行为，再记录事件来源和用户操作，不能为了“让按钮不动”而无条件调用两个方法。
+
+图4.6展示一个测站列表项被点击时的三阶段路径。捕获监听器适合做全局审计或焦点准备，目标监听器处理当前控件，冒泡监听器适合事件委托；在同一元素上注册多个监听器时，还要注意注册顺序和是否调用了`stopImmediatePropagation`。
+
+<figure markdown>
+![图4.6](images/chapter04_fig_4_6.svg)
+<figcaption>图 4.6  DOM 事件传播的捕获、目标与冒泡三阶段</figcaption>
+</figure>
+
+### 4.4.6 事件委托与长列表
+
+事件委托把一个监听器放在稳定的父容器上，通过`event.target.closest()`判断用户点击的具体项目。它有两个好处：列表新增项目不必重复绑定监听器，监听器数量也不会随测点数增长。委托代码必须确认目标确实属于当前容器，避免点击嵌套按钮或其他区域时误触发；对于键盘操作，还要同时处理按钮的`click`事件和必要的键盘语义，不能只监听`mousedown`。
+
+长列表的瓶颈不只在监听器数量，还在节点数量和布局计算。分页适合用户逐页查看，虚拟滚动只渲染可视区附近的窗口，并把滚动位置映射到数据索引。实现虚拟滚动时需要估计行高、保留上下占位空间、处理动态高度和键盘焦点；如果测站卡片高度差异很大，先采用分页或分组折叠，再在性能测量确认后引入更复杂的窗口化算法。清单4.21展示固定父容器上的事件委托，清单4.22进一步演示只渲染可视窗口的基本思路。
+
+**清单 4.21  测站列表的事件委托与 preventDefault**
+
+```javascript
+document.body.innerHTML = `
+  <a id="station-link" href="/stations">测站列表</a>
+  <ul id="delegated-list">
+    <li><button data-station-id="ST-01">上游测站</button></li>
+    <li><button data-station-id="ST-02">下游测站</button></li>
+  </ul>
+  <output id="delegated-result" aria-live="polite"></output>`;
+
+const delegatedList = document.querySelector('#delegated-list');
+const output = document.querySelector('#delegated-result');
+delegatedList.addEventListener('click', event => {
+  const button = event.target.closest('button[data-station-id]');
+  if (!button || !delegatedList.contains(button)) return;
+  output.textContent = `选择了 ${button.dataset.stationId}`;
+});
+
+document.querySelector('#station-link').addEventListener('click', event => {
+  event.preventDefault();
+  output.textContent = '已在当前页面打开测站列表';
+});
+```
+
+**清单 4.22  长测站列表的可视窗口渲染思路**
+
+```javascript
+const root = document.createElement('div');
+root.innerHTML = '<div id="virtual-list" style="height:160px;overflow:auto"></div>';
+document.body.append(root);
+const viewport = root.querySelector('#virtual-list');
+const records = Array.from({ length: 1000 }, (_, index) => ({
+  id: `ST-${String(index + 1).padStart(4, '0')}`,
+  level: (4 + index / 100).toFixed(2)
+}));
+const rowHeight = 32;
+// 占位层把滚动条撑到全量高度，可见行再absolute定位到对应位置；
+// 没有它 scrollTop 永远到不了后面的行
+const spacer = document.createElement('div');
+spacer.style.cssText =
+  `position:relative;height:${records.length * rowHeight}px`;
+viewport.append(spacer);
+
+function renderWindow() {
+  const first = Math.floor(viewport.scrollTop / rowHeight);
+  const visible = records.slice(first, first + 8);
+  spacer.replaceChildren(...visible.map((record, offset) => {
+    const row = document.createElement('div');
+    row.style.cssText = `position:absolute;left:0;right:0;` +
+      `top:${(first + offset) * rowHeight}px;height:${rowHeight}px`;
+    row.textContent = `${record.id}：${record.level} m`;
+    return row;
+  }));
+}
+viewport.addEventListener('scroll', renderWindow, { passive: true });
+renderWindow();
+```
+
+事件、DOM 和数据结构应一起设计。点击预警按钮时，事件委托只负责识别测站和触发动作，业务函数负责校验状态，视图层负责更新`output`；如果接口请求尚未完成，按钮应显示忙碌状态而不是重复创建监听器。长列表采用窗口化后，仍要给屏幕阅读器提供当前项数量和位置说明，滚动时不要把焦点强行移到新节点。完成事件流、默认行为、委托边界和性能窗口的测试，JavaScript 才真正支撑了水利监测页面的可靠交互。
+
+### 4.4.7 异常处理
+
+`try`包围可能失败的操作，`catch`处理异常，`finally`执行清理。异常不能被静默吞掉，应在界面给出可理解提示，并把技术细节记录到日志系统。
+
+**清单 4.23  监测报文解析的分类异常处理**
+
+```javascript
+function parseReading(raw) {
+  try {
+    const reading = JSON.parse(raw);
+    return { ok: true, level: validateLevel(reading.level) };
+  } catch (error) {
+    if (error instanceof SyntaxError) {
+      console.error("监测报文格式错误", error);
+      return { ok: false, code: "MALFORMED_JSON", message: "数据格式无法解析" };
+    }
+    if (error instanceof RangeError) {
+      console.warn("监测值超出量程", error);
+      return { ok: false, code: "OUT_OF_RANGE", message: "数值超出测站量程" };
+    }
+    console.error("监测数据处理失败", error);
+    return { ok: false, code: "UNKNOWN", message: "数据暂不可用" };
+  }
+}
+```
+
+## 4.5 异步编程与Promise
+
+异步结果在 JavaScript 中由 Promise 表达。本节先讲清事件循环与任务调度，再给出 Promise 的状态机、`async/await` 写法和取消机制，最后把它们组装进统一的请求封装。
+
+**清单 4.24  前端数据请求示例**
+
+```javascript
+function loadLatestLevel(stationId) {
+  return fetch(`/api/stations/${stationId}/latest`)
+    .then(response => {
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      return response.json();
+    })
+    .then(data => ({
+      stationId: data.stationId,
+      level: validateLevel(data.level)
+    }));
+}
+
+loadLatestLevel("ST-01")
+  .then(reading => console.log("最新水位", reading.level))
+  .catch(error => console.error("加载失败", error));
+```
+
+`async/await`用于以顺序形式表达同样的异步过程。彼此独立的请求应通过`Promise.all()`并发执行；有依赖关系的请求才顺序等待。
+
+**清单 4.25  调试监测查询**
+
+```javascript
+async function loadDashboard(stationId) {
+  try {
+    const [latest, alarms] = await Promise.all([
+      fetch(`/api/stations/${stationId}/latest`),
+      fetch(`/api/stations/${stationId}/alarms`)
+    ]);
+    if (!latest.ok || !alarms.ok) throw new Error("接口响应异常");
+    return { latest: await latest.json(), alarms: await alarms.json() };
+  } catch (error) {
+    console.error("仪表盘加载失败", error);
+    throw error;
+  }
+}
+```
+
+需要取消过期请求时可使用`AbortController`。例如用户快速切换测站，应取消前一测站尚未完成的请求，避免旧响应覆盖新页面。
+
+### 4.5.1 事件循环与任务调度
+
+浏览器的 JavaScript 执行线程一次只处理一个同步任务。当前任务完成后，事件循环先清空微任务队列，再从任务队列取出下一个宏任务；网络回调、定时器和用户输入通常进入任务队列，`Promise.then`、`queueMicrotask`和`MutationObserver`回调进入微任务队列。因此，在一个同步函数里安排“同步日志—定时器—Promise 回调”时，Promise 回调会先于定时器执行。理解这个顺序能够解释为什么页面状态已经变了，但浏览器尚未绘制下一帧。
+
+微任务适合完成同一任务内的短小收尾，例如把多个状态变化合并后再通知组件；长时间执行的微任务会阻塞绘制和用户输入，连续递归的`queueMicrotask`甚至会形成饥饿。处理大量测点时，应把计算分批放入任务队列或交给 Web Worker，并在动画帧中批量写入 DOM。清单4.26用日志顺序展示同步代码、微任务和宏任务的先后关系。
+
+**清单 4.26  事件循环中的同步、微任务与宏任务**
+
+```javascript
+console.log('同步：开始读取');
+
+setTimeout(() => console.log('宏任务：定时刷新'), 0);
+queueMicrotask(() => console.log('微任务：合并状态'));
+Promise.resolve().then(() => console.log('微任务：更新摘要'));
+
+console.log('同步：结束读取');
+// 典型顺序：开始、结束、合并状态、更新摘要、定时刷新
+```
+
+### 4.5.2 Promise 状态与 async/await
+
+Promise 有 pending、fulfilled 和 rejected 三种状态。创建后处于 pending，调用`resolve`后进入 fulfilled，调用`reject`后进入 rejected；状态一旦落定就不可逆，也不能从 fulfilled 再变成 rejected。后续调用`then`或`catch`只是注册观察者，不会重新执行已经完成的异步操作。`then`返回新的 Promise，因此可以在链中把解析、校验和视图模型转换分成独立步骤。
+
+`async`函数总是返回 Promise，`await`只暂停当前 async 函数，不会阻塞浏览器线程。彼此独立的请求用`Promise.all`并发，任何一个失败时整体进入 rejected；如果希望部分结果仍然可用，可使用`Promise.allSettled`并逐项检查状态。对于监测页面，最新水位和告警事件可以并发读取，但告警确认必须等待权限校验完成，这种依赖关系要在代码中显式表达。
+
+清单4.27用两个落定函数说明 Promise 的不可逆状态，并在调用方观察最终结果。它刻意多次调用`resolve`和`reject`，后续调用不会覆盖第一次落定的结果；这正是客观题和真实接口重试都要遵守的语义。
+
+**清单 4.27  Promise 状态一经落定不可再变**
+
+```javascript
+let resolveReading;
+let rejectReading;
+const readingPromise = new Promise((resolve, reject) => {
+  resolveReading = resolve;
+  rejectReading = reject;
+});
+
+readingPromise
+  .then(value => console.log('fulfilled:', value))
+  .catch(error => console.error('rejected:', error));
+
+resolveReading({ level: 4.2 });
+rejectReading(new Error('这次调用不会改变状态'));
+resolveReading({ level: 4.3 });
+```
+
+异步错误应按来源分类。JSON 解析失败属于输入格式错误，量程校验失败属于业务数据错误，HTTP 401 表示登录状态失效，5xx 表示服务端暂时不可用，超时或网络断开则属于连接问题。每一类错误都应有稳定的内部代码和面向值班员的提示，日志中再保留请求路径、测站编号和关联事件 ID。把所有异常都写成“加载失败”会让重试、重新登录和人工核查无法区分。
+
+### 4.5.3 AbortController 与请求生命周期
+
+`AbortController`把取消信号传给`fetch`或其他支持`AbortSignal`的 API。用户切换测站、组件卸载或请求超过超时时间时，应调用`abort`；被取消的 Promise 会以`AbortError`拒绝，调用方要把它与服务器错误分开处理。取消并不等同于服务器已经撤销操作，涉及写入的接口仍需使用幂等键和后端事务保证一致性。
+
+清单4.28封装了一个带超时和手动取消的最新水位请求。控制器在`finally`前保持有效，计时器在成功、失败和取消三种路径上都会清理；用户快速切换时，调用方先取消旧控制器，再保存新控制器引用。
+
+**清单 4.28  带超时和手动取消的 fetch**
+
+```javascript
+export async function fetchLatestLevel(stationId, signal) {
+  const response = await fetch(`/api/stations/${stationId}/latest`, { signal });
+  if (!response.ok) throw new Error(`HTTP_${response.status}`);
+  return response.json();
+}
+
+let activeController = null;
+export async function refreshStation(stationId) {
+  activeController?.abort();
+  const controller = new AbortController();
+  activeController = controller;
+  const timeoutId = setTimeout(() => controller.abort(), 8000);
+  try {
+    return await fetchLatestLevel(stationId, controller.signal);
+  } catch (error) {
+    if (error.name === 'AbortError') return { cancelled: true };
+    throw error;
+  } finally {
+    clearTimeout(timeoutId);
+    if (activeController === controller) activeController = null;
+  }
+}
+```
+
+### 4.5.4 request.js：JWT、401 与超时的统一入口
+
+第5章后端签发的 JWT 必须在浏览器请求中形成闭环：登录接口成功后，前端保存短期访问令牌，后续请求在`Authorization: Bearer <token>`中携带它；收到 401 时清除令牌并跳转登录页，不能继续用旧令牌重试。教学示例把令牌放入`sessionStorage`，浏览器标签页关闭后令牌消失，代价是同源脚本若发生 XSS 可能读取它；生产系统应结合严格的 CSP、短过期时间、刷新策略和更安全的 HttpOnly Cookie 方案评估，绝不能把签名密钥放入以`VITE_`开头的前端变量。
+
+统一请求封装还应处理 JSON 解析、204 空响应、超时和错误代码，避免每个组件各自复制一套`fetch`。清单4.29给出可直接放入 Vite 5 项目的`src/api/request.js`；请求函数只负责传输和认证，页面层根据错误代码决定显示“重新登录”“稍后重试”还是“检查测站输入”。
+
+**清单 4.29  request.js：令牌注入、401 跳转与超时**
+
+```javascript
+const API_BASE = import.meta.env.VITE_API_BASE ?? '/api';
+const DEFAULT_TIMEOUT = 10_000;
+// 令牌键名是前端各模块的共同契约：请求封装、路由守卫、
+// 登录页都从这里导入，避免"登录成功却处处 401"的隐蔽错误
+export const TOKEN_KEY = 'access_token';
+
+function accessToken() {
+  return sessionStorage.getItem(TOKEN_KEY);
+}
+
+export async function request(path, options = {}) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(
+    () => controller.abort(), options.timeoutMs ?? DEFAULT_TIMEOUT
+  );
+  const headers = new Headers(options.headers);
+  headers.set('Accept', 'application/json');
+  if (options.body && !headers.has('Content-Type')) {
+    headers.set('Content-Type', 'application/json');
+  }
+  const token = accessToken();
+  if (token) headers.set('Authorization', `Bearer ${token}`);
+
+  try {
+    const response = await fetch(`${API_BASE}${path}`, {
+      ...options, headers, signal: controller.signal
+    });
+    if (response.status === 401 && !path.startsWith('/auth/')) {
+      // 业务请求的 401 才代表登录态失效；
+      // 登录接口自身的 401 是"密码错误"，交回页面层提示
+      sessionStorage.removeItem(TOKEN_KEY);
+      const redirect = encodeURIComponent(location.pathname + location.search);
+      location.assign(`/login?redirect=${redirect}`);
+      throw new Error('UNAUTHORIZED');
+    }
+    if (!response.ok) throw new Error(`HTTP_${response.status}`);
+    if (response.status === 204) return null;
+    return response.json();
+  } catch (error) {
+    if (error.name === 'AbortError') {
+      throw new Error('REQUEST_TIMEOUT', { cause: error });
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+```
+
+### 4.5.5 Vite 代理与环境变量
+
+开发环境中的浏览器页面通常运行在 Vite 的开发端口，后端运行在另一个端口；直接请求会触发跨域限制。Vite 的`server.proxy`可以把以`/api`开头的请求转发到后端，浏览器仍然看到同源路径，生产环境再由 Nginx 或网关完成同样的路径转发。代理只服务于开发过程，不能被误解为后端认证或网络隔离。
+
+只有以`VITE_`开头的变量会被暴露到客户端代码，变量值会在构建时静态替换，因此可以放 API 基地址、功能开关和代理地址，不能放数据库密码、JWT 签名密钥或内部网络凭据。开发、测试和生产应分别维护环境文件，并在 CI 中检查必需变量是否存在。清单4.30给出按模式读取环境变量的 Vite 5 配置，`loadEnv`只加载指定前缀，代理目标缺失时使用明确的本地默认值。
+
+**清单 4.30  Vite 5 的 server.proxy 与 import.meta.env**
+
+```javascript
+import { defineConfig, loadEnv } from 'vite';
+import vue from '@vitejs/plugin-vue';
+
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), 'VITE_');
+  return {
+    plugins: [vue()],
+    server: {
+      proxy: {
+        '/api': {
+          target: env.VITE_PROXY_TARGET ?? 'http://localhost:8080',
+          changeOrigin: true,
+          secure: false
+        }
+      }
+    },
+    define: {
+      __BUILD_MODE__: JSON.stringify(mode)
+    }
+  };
+});
+```
+
+异步页面的验收可以沿着一条证据链进行：先观察事件循环是否在绘制前合并状态，再用 Promise 状态确认一次请求不会被重复落定；切换测站时查看旧请求是否收到取消信号，模拟 401 和超时确认页面分别跳转登录或给出重试提示；最后在 Vite 开发环境检查`/api`代理和不同模式的`import.meta.env`值。这样，JWT 不再只是后端代码中的一段签名逻辑，而是贯穿登录、请求、错误处理和页面反馈的可验证流程。
+
+### 4.5.6 登录到受保护接口的前后端联调闭环
+
+前端能否显示测站列表，不应只看页面是否出现了加载动画，而要核对一条完整的认证契约。第5章的登录控制器返回访问令牌，令牌至少包含主体、发行者、有效期、令牌类型和权限代码；前端登录页保存访问令牌，`request.js`在每次受保护请求中注入 Bearer 头，后端的 `SecurityFilterChain` 和 JWT 过滤器验签后把主体放入安全上下文，控制器再依据方法权限决定是否执行。图4.7把这条链路与失败分支并列画出，调试时可逐段定位是凭据错误、令牌过期、权限不足还是网络转发问题。
+
+<figure markdown>
+![图4.7](images/chapter04_fig_4_7.svg)
+<figcaption>图 4.7  前端登录、JWT过滤器与受保护接口的联调链路</figcaption>
+</figure>
+
+联调第一步是建立最小契约表。登录请求的字段名、成功状态码、令牌字段和失败错误码必须与后端一致；访问测站列表时，前端不能把“没有令牌”和“令牌已过期”都当成空数组；收到 401 要清理本地令牌并保留原始路径，收到 403 则说明身份已经识别但权限不足，应显示明确的无权提示。后端返回 404 时，页面应说明测站不存在；返回 422 或业务校验错误时，应把字段级错误绑定到表单。只有把状态码和界面行为一一对应，值班员才不会通过反复刷新来猜测系统状态。
+
+下面的登录服务只负责调用接口和保存令牌，页面组件负责表单校验与导航。令牌键名必须和请求封装一致；本章前面的示例使用`token`，因此所有调用方都复用同一常量，避免登录成功却无法访问列表的隐蔽错误。清单4.31同时展示了 401、403 和网络错误的分流，可在浏览器 Network 面板中逐项模拟。
+
+**清单 4.31  前端登录与受保护请求的联调客户端**
+
+```javascript
+const TOKEN_KEY = 'token';
+
+export async function login(account, password) {
+  const response = await fetch('/api/auth/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    body: JSON.stringify({ account, password })
+  });
+  const body = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    const error = new Error(body.code ?? `HTTP_${response.status}`);
+    error.status = response.status;
+    throw error;
+  }
+  if (typeof body.accessToken !== 'string' || body.accessToken.length < 20) {
+    throw new Error('AUTH_CONTRACT_INVALID');
+  }
+  sessionStorage.setItem(TOKEN_KEY, body.accessToken);
+  return body;
+}
+
+export async function loadStations() {
+  const token = sessionStorage.getItem(TOKEN_KEY);
+  const response = await fetch('/api/stations', {
+    headers: { Accept: 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}) }
+  });
+  if (response.status === 401) {
+    sessionStorage.removeItem(TOKEN_KEY);
+    throw Object.assign(new Error('AUTH_EXPIRED'), { status: 401 });
+  }
+  if (response.status === 403) {
+    throw Object.assign(new Error('FORBIDDEN'), { status: 403 });
+  }
+  if (!response.ok) throw new Error(`HTTP_${response.status}`);
+  return response.json();
+}
+```
+
+联调第二步是检查时间和环境。浏览器与服务端时钟相差过大，会让刚签发的令牌立即被判定为尚未生效或已过期；测试环境应记录服务端当前时间、`iat`、`exp`和时区，不要直接放宽生产过期校验。Vite 开发代理的目标应指向第5章后端实际端口，生产环境则由网关转发同一`/api`前缀；若浏览器出现 CORS 错误，先确认请求是否绕过代理，再决定是否配置允许的来源、方法和请求头。允许任意来源并不能解决认证问题，反而会扩大令牌泄露面。
+
+联调第三步是观察重试和登出。网络超时可以重试幂等的 GET，但创建处置单等 POST 必须带业务幂等键，并在服务端确认重复请求的响应语义；401 只触发一次清理和跳转，不能让多个并发请求各自创建登录跳转；登出除了删除浏览器令牌，还应调用后端撤销接口或让短期令牌自然过期，多标签页则通过`storage`事件同步退出状态。刷新令牌若采用 HttpOnly Cookie，前端不能读取它，只能根据刷新接口结果更新内存中的访问令牌；若采用内存集合保存撤销状态，生产实现还要设置过期时间并监控容量。
+
+**表 4.3  前后端认证联调的证据清单**
+
+| 检查点   | 浏览器证据                                          | 服务端证据                                      |
+|:---------|:----------------------------------------------------|:------------------------------------------------|
+| 登录成功 | POST 返回 200，响应含 accessToken，未把密码写入日志 | issuer、subject、type 和 exp 校验通过           |
+| 访问列表 | 请求带 Authorization，响应 200 或明确的 401/403     | 过滤器写入 SecurityContext，权限方法给出决策    |
+| 令牌过期 | 收到一次 401，令牌被清理并回到原路径                | 记录 jti、失败原因和请求追踪 ID，不记录完整令牌 |
+| 网络异常 | 超时显示重试，幂等请求才自动重试                    | 网关和应用日志能按追踪 ID 对齐时间线            |
+
+表4.3中的每项都应在测试记录中附上请求时间、状态码和脱敏后的响应摘要。这样，前后端联调不依赖“我这边能打开”的口头判断，而是有一组可以重放、可以审计的证据。
+
+### 4.5.7 认证契约测试与故障复盘
+
+认证联调的难点往往不在“能否登录”，而在多个请求同时发生、页面刷新和网络抖动时是否仍然保持同一套状态语义。测试设计应先画出状态机：匿名、已登录、令牌即将过期、令牌已过期、权限不足和服务不可达是六种不同状态；每种状态都要规定界面文案、是否保留原路径、是否允许重试以及日志中应出现的事件。比如匿名用户访问测站详情，守卫保存`redirect=/stations/ST-02`并跳转登录；登录成功后只恢复一次导航；如果后端返回 403，则停留在业务页面并显示权限说明，而不是再次跳到登录页。
+
+请求并发时需要防止“竞态覆盖”。用户快速切换两个测站，先发出的请求可能后返回；如果直接把每个响应写入同一个状态变量，旧测站数据就会覆盖新测站。解决方法是给请求附带递增序号或`AbortController`，只有当前序号仍然有效的响应才能提交。清单4.32用一个最小的加载器演示取消与序号双重保护，代码可在浏览器控制台中替换模拟的`fetcher`进行测试。
+
+**清单 4.32  切换测站时防止旧请求覆盖新状态**
+
+```javascript
+let sequence = 0;
+let controller = null;
+
+export async function loadStation(stationId, fetcher = fetch) {
+  const current = ++sequence;
+  controller?.abort();
+  controller = new AbortController();
+  const response = await fetcher(`/api/stations/${encodeURIComponent(stationId)}`, {
+    headers: { Accept: 'application/json' },
+    signal: controller.signal
+  });
+  if (!response.ok) throw new Error(`HTTP_${response.status}`);
+  const result = await response.json();
+  if (current !== sequence) return { stale: true };
+  return { stale: false, station: result };
+}
+
+export function resetRequests() {
+  sequence += 1;
+  controller?.abort();
+  controller = null;
+}
+```
+
+测试这个加载器时，可以让第一个模拟请求延迟 200 毫秒、第二个只延迟 20 毫秒，再快速调用两次函数。预期结果是第二个测站先更新界面，第一个请求要么收到取消异常，要么返回`stale:true`而被丢弃。登出时调用`resetRequests()`，可以阻止已经在路上的响应把敏感数据重新写回页面。若采用集中式 Pinia store，应把序号和取消控制器放在动作内部，不要暴露给组件随意修改。
+
+错误提示也要区分可恢复性。401 通常要求重新认证，重试同一个请求没有意义；403 需要改变角色或联系审批人，自动重试只会制造日志噪声；404 应引导用户返回列表或刷新资源目录；409 表示幂等键或版本冲突，应显示“数据已被其他人修改”并提供重新读取；429 要遵守服务端的`Retry-After`；502、503 和网络超时可以指数退避，但要设置最大次数和总时长。前端不应依据错误文本猜测状态，应该读取稳定的`code`、`traceId`和可选字段错误列表。
+
+**表 4.4  认证及接口错误的前端处理矩阵**
+
+| 状态    | 业务含义             | 前端动作与验收证据                                         |
+|:--------|:---------------------|:-----------------------------------------------------------|
+| 401     | 未登录或访问令牌失效 | 清理令牌、保留原路径、只发起一次登录跳转；记录脱敏 traceId |
+| 403     | 已识别身份但权限不足 | 停留当前页面，展示所需权限和申请入口；不得循环登录         |
+| 404     | 测站或事件不存在     | 显示资源不存在并提供返回列表；不把空对象当作零值           |
+| 409     | 版本或幂等键冲突     | 重新读取资源并提示人工确认；保留冲突双方版本号             |
+| 429/503 | 限流或服务暂不可用   | 按 Retry-After 或退避重试，超过上限后提供手动重试          |
+
+表4.4还可以转化为端到端测试用例。每个用例至少包含初始路由、是否已有令牌、请求次数、最终 URL、页面可见文案和日志关联 ID；对于涉及权限的用例，测试账号的角色要固定并在用例说明中写明。这样，修复一次 401 跳转或 403 提示后，其他页面也能沿同一矩阵回归，而不是只验证当前开发者电脑上的一个按钮。
+
+前后端对字段的兼容要采用“先增加、后切换、再清理”的节奏。后端新增`qualityFlag`时，可以在一段时间同时返回旧字段和新字段，前端先读取新字段、缺失时回退旧字段，并在日志中统计回退次数；确认所有客户端已经升级后再删除旧字段。删除字段前要检查缓存、导出任务和消息消费者，不能只在 Swagger 页面中看到接口变更就直接发布。日期时间统一使用带时区的 ISO 8601 字符串，数值单位写进字段说明，枚举值变化则由版本化接口或兼容映射处理。
+
+本章的联调案例以水利工程安全监测平台为背景，但验收方法可以迁移到其他水利业务。无论是测站读数、告警处置还是工程巡检，均可沿“输入契约—认证上下文—业务状态—持久化结果—界面反馈”五个问题追踪。发生故障时先用`traceId`把浏览器 Network、网关访问日志、应用日志和数据库审计串起来，再判断属于前端状态、网络转发、认证授权还是领域规则；不要一看到页面空白就修改 CSS，也不要一看到 401 就延长令牌有效期。可复核的证据链比局部的临时修补更能降低值班系统的运行风险。
+
+跨域配置是联调中最容易被忽略的边界。开发代理把浏览器请求伪装成同源，只能解决开发端口不同的问题；生产环境的允许来源、允许方法、允许请求头和是否允许凭据必须由网关与后端共同约定。带 Authorization 头的请求会触发预检，服务端应正确响应`OPTIONS`，但不能因为预检通过就跳过真正请求的认证。`Access-Control-Allow-Origin:*`与带凭据请求不能同时使用，允许来源也应是配置白名单而不是反射任意`Origin`。发现“浏览器报跨域、curl 正常”时，应分别检查预检响应、实际响应和网关是否丢失认证头。
+
+令牌存储还要与页面威胁模型匹配。`sessionStorage`便于教学演示和标签页隔离，但同源脚本可以读取它；HttpOnly Cookie 能阻止脚本直接读取令牌，却要求服务端设置 SameSite、Secure 和 CSRF 防护。无论采用哪种方式，都不能把访问令牌放在 URL、页面标题或埋点参数中。浏览器控制台只输出状态码、错误码和追踪 ID，服务端日志对令牌做哈希或只记录 jti。前端构建产物中也不能出现 JWT 签名密钥、数据库连接串和内部网段。
+
+认证性能要从令牌解析、撤销查询和业务查询三个阶段测量。每次请求都访问远程撤销存储会增加延迟，完全不查撤销又无法快速吊销泄露令牌；可按风险把访问令牌设为短期，把 jti 撤销集合缓存到 Redis 并设置与令牌 exp 对齐的过期时间。权限代码应使用稳定枚举，角色展开在服务端完成，前端只用于隐藏不应操作的控件，不能以“按钮不可见”代替后端授权。批量读取测站时，后端还要限制单次资源数量和查询时间窗口，避免一个合法令牌成为高负载接口的放大器。
+
+发布前可以进行一次“故障注入式”验收：把响应状态依次改为 401、403、404、409、429 和 503；把响应延迟设置为 100 毫秒、超时阈值和超时阈值的两倍；将令牌的 exp 调整到过去、将 issuer 改成错误值、删掉 permissions 字段；再让代理返回无效 JSON。每个场景都要记录页面是否可操作、是否产生重复请求、是否保存了原路径、是否有泄露敏感信息和是否生成唯一 traceId。故障注入的目标不是让页面永不出错，而是让错误有边界、有提示、有恢复动作，并且不会把错误状态伪装成正常水位或空告警。
+
+当后端接口需要升级时，先在契约测试中锁定字段类型和枚举取值，再在前端适配层集中处理兼容逻辑。组件不要直接拼接 URL、读取 token 或解释状态码；它们调用经过封装的 API 函数，由适配层把后端错误转换为稳定的领域错误。这样，即使网关把路径从`/api`迁移到版本化前缀，或后端把分页字段从`total`扩展为`totalElements`，页面仍然只需替换一处适配代码。对案例水库这种值班系统，接口的可观测性和可回退性与视觉效果同样重要。
+
+为了让联调结果可复现，还应固定测试数据和时间窗口。每个测站至少准备一条 valid 读数、一条 suspect 读数和一条 missing 读数，分别验证正常展示、可信等级降低和停止打分；告警处置单准备“待确认—已确认—已关闭”三种状态，检查不同角色能执行的动作。测试请求携带固定的`X-Request-Id`，响应日志保留该值、测站 ID、质量码和耗时，数据库审计记录再补充操作者和事务结果。这样，页面截图只是结果的一部分，真正的验收依据还包括接口报文、日志和持久化状态。
+
+联调完成后要删除调试开关和临时账号，复查构建产物中是否残留测试地址、令牌样本或密码字段。代码评审重点看三处：所有受保护请求是否统一经过请求封装，所有失败分支是否保持稳定错误码，所有涉及权限的后端方法是否有独立测试。只有前端、网关、Spring Security 和数据库审计同时给出一致证据，才可以把“登录到看见数据”判定为闭环完成。
+
+最后应把联调证据归档到版本化测试记录：记录前端构建版本、后端 Git 提交、数据库迁移版本、代理目标和测试账号角色，附上脱敏请求样例及关键日志的 traceId。下一次升级依照同一记录重放，就能判断问题是新代码引入还是环境漂移；对于值班系统，这种可追溯性比临时把页面“调到能显示”更重要。
+
+在课堂练习中，学生可以先用浏览器开发者工具完成状态码和请求头观察，再用后端测试替身注入过期令牌、缺失字段和延迟响应，最后把结果写入联调表。练习评价不只看页面是否出现数据，还要检查是否正确区分认证、授权、网络和业务错误，是否保留了测站上下文，是否遵守令牌和个人信息的脱敏要求。
+
+练习报告还应说明一次失败请求如何从页面回溯到服务端：先记录用户动作和路由，再记录请求方法、路径、状态码、响应错误码和 traceId，最后核对过滤器日志、业务日志与审计表是否指向同一操作者和测站。若链路中任何一段缺失，系统就难以在值班交接时复原现场。
+
+当证据链完整时，团队可以在不复现全部现场的情况下定位问题：状态码说明协议边界，错误码说明领域原因，traceId 串起跨服务时间线，审计记录确认最终写入。前端课程至此不只是“把页面做出来”，而是把可操作、可解释、可审计的界面交付给真正承担值班责任的用户。
+
+在案例水库演练中，值班员先从测站列表打开详情，专业分析员随后提交处置意见，审批人确认后才允许关闭事件。三个角色看到的按钮、请求权限和审计结果必须一致；若任何一个角色在页面上看到可点击操作却收到 403，应回到路由元数据、后端方法授权和角色映射逐层核对。通过这种真实工作流走查，学生能把前端组件、JWT 权限和水利业务责任联系起来。
+
+## 4.6 DOM操作与事件处理
+
+4.4 节已经分别讲过 DOM 查询、安全写入与事件模型，本节用一个最小的完整页面把它们串起来，作为进入 Vue 之前的收束练习：结构与行为分离、输入必须校验、更新走 `textContent` 而不是 `innerHTML`。
+
+下面示例完整展示事件绑定、输入校验和界面更新。警戒值仍为同一场景的5.0米。
+
+**清单 4.33  测站输入 HTML 片段**
+
+```html
+<label for="level-input">水位（m）</label>
+<input id="level-input" type="number" step="0.01">
+<button id="check-level" type="button">判断状态</button>
+<output id="level-result" aria-live="polite"></output>
+```
+
+清单4.34把同一页面的行为代码单独列出，使用 JavaScript 语言标注后，关键字、字符串和箭头函数能够正确高亮；HTML 清单只负责结构，脚本清单负责查询节点、转换输入和更新输出。
+
+**清单 4.34  测站输入 JavaScript 片段**
+
+```javascript
+const input = document.querySelector('#level-input');
+const result = document.querySelector('#level-result');
+const button = document.querySelector('#check-level');
+
+button.addEventListener('click', () => {
+  const level = Number(input.value);
+  if (!Number.isFinite(level)) {
+    result.textContent = '请输入有效水位';
+    return;
+  }
+  result.textContent = level >= 5.0 ? '达到警戒水位' : '水位正常';
+});
+```
+
+高频监测数据不应逐条触发复杂布局。可以先把数据聚合到内存，再按固定帧率更新图表；列表较长时采用分页或虚拟滚动。
+
+## 4.7 模块化开发与调试技巧
+
+ES模块通过`export`和`import`建立清晰依赖。接口访问、业务计算和视图组件应分层组织，避免在组件中散布重复的网络代码。
+
+**清单 4.35  ES 模块的导出与导入**
+
+```javascript
+// level.js
+export function levelStatus(level, warning = 5.0) {
+  return level >= warning ? "warning" : "normal";
+}
+
+// panel.js
+import { levelStatus } from "./level.js";
+console.log(levelStatus(5.12));
+```
+
+调试遵循“复现—缩小范围—验证假设—回归测试”的顺序。浏览器开发者工具中，Network面板用于检查请求、状态码和缓存；Sources面板可设置断点并查看调用栈；Console用于查看结构化日志；Performance面板用于定位长任务和频繁重排。代码中的临时`console.log()`不应作为生产日志方案。
+
+## 4.8 Vue 3组件化开发
+
+传统命令式写法需要在数据变化后手动寻找并更新多个DOM节点。水利仪表盘一旦包含曲线、表格和告警标识，这些更新容易分散。Vue使用响应式状态和声明式模板：开发者描述“状态如何映射为界面”，框架负责同步DOM。组件化仍需遵循可理解反馈和一致交互等基本设计原则<sup>[[31]](../../references.md#ref31)</sup>。
+
+本章使用Vue 3.4+组合式API（响应式系统的完整语义见官方文档<sup>[[25]](../../references.md#ref25)</sup>）。`ref`适合基本值，`reactive`适合对象，`computed`表达派生状态；组件通过props接收数据，通过emit通知父组件。下面的单文件组件把状态声明、属性校验、模板绑定和事件发射放在同一示例中，便于沿着数据流理解组件边界。
+
+**清单 4.36  测站卡片组合式组件**
+
+```vue
+<script setup>
+import { computed } from 'vue'
+const props = defineProps({
+  name: { type: String, required: true },
+  level: { type: Number, required: true }
+})
+const emit = defineEmits(['open-detail'])
+const status = computed(() => props.level >= 5.0 ? 'warning' : 'normal')
+</script>
+
+<template>
+  <article :class="['station-card', `station-card--${status}`]">
+    <h3>{{ name }}</h3>
+    <p>水位：{{ level.toFixed(2) }} m</p>
+    <button type="button" @click="emit('open-detail')">查看详情</button>
+  </article>
+</template>
+```
+
+组件在创建、挂载、更新和卸载阶段提供生命周期钩子。Vue 3中卸载阶段使用`beforeUnmount`/`unmounted`或组合式API的`onBeforeUnmount`/`onUnmounted`，不使用Vue 2的`beforeDestroy`/`destroyed`。图4.8把这些钩子按创建、挂载、更新、卸载四个阶段串起来。需要在组件内启动的定时刷新、消息订阅和三维场景实例，都应在挂载阶段建立、在卸载阶段释放；忘记释放是监测页面反复切换之后内存持续增长的最常见原因。
+
+<figure markdown>
+![图4.8](images/chapter04_fig_4_8.svg)
+<figcaption>图 4.8  Vue 3组件生命周期主线</figcaption>
+</figure>
+
+定时器、WebSocket连接和第三方图表实例应在`onMounted`中创建，并在`onUnmounted`中释放，避免页面切换后的内存泄漏。
+
+### 4.8.1 Vue 3.4 组合式 API 与响应式状态
+
+Vue 3.4 的组合式 API 把状态、派生值、监听器和生命周期放进同一段`script setup`中。`ref`适合数字、字符串和布尔值等基本值，读写时在 JavaScript 中使用`.value`；模板会自动解包，不需要写`count.value`。`reactive`适合对象和数组，直接读写属性，不要把整个响应式对象重新赋值。两者混用时要保持边界清楚：表单字段可以用`reactive`，加载状态和选中的测站编号可以用`ref`。
+
+`computed`用于从已有状态推导出只读结果，并按依赖缓存；过滤后的测站列表、是否存在预警和格式化后的更新时间都适合用它表达。`watch`适合观察一个明确的源并执行副作用，例如筛选条件变化后重新请求；`watchEffect`会自动收集同步执行阶段访问的依赖，适合小范围联动，但依赖不透明时要注意误触发。监听器若创建了定时器、订阅或请求，必须返回清理函数或在组件卸载时终止。
+
+清单4.37展示五种 API 的职责和`.value`边界。代码中的`watch`只在站点编号变化时触发请求，`watchEffect`只记录当前筛选状态；真实项目中应给请求加取消信号，防止快速输入时旧响应覆盖新状态。
+
+**清单 4.37  Vue 3 响应式 API 与监听器**
+
+```vue
+<script setup>
+import { computed, reactive, ref, watch, watchEffect } from 'vue';
+
+const selectedId = ref('ST-01');
+const form = reactive({ keyword: '', onlyWarning: false });
+const stations = ref([
+  { id: 'ST-01', name: '上游测站', warning: false },
+  { id: 'ST-02', name: '下游测站', warning: true }
+]);
+const visibleStations = computed(() => stations.value.filter(station => {
+  const match = station.name.includes(form.keyword.trim());
+  return match && (!form.onlyWarning || station.warning);
+}));
+
+watch(selectedId, id => console.log('重新加载测站', id));
+watchEffect(() => console.log('筛选数量', visibleStations.value.length));
+</script>
+```
+
+### 4.8.2 模板指令与组件通信
+
+模板指令把状态映射成可读的 HTML。`v-if`按条件创建或销毁节点，适合权限区域和少量切换内容；`v-show`只切换`display`，适合频繁显示/隐藏且初始化代价较高的面板。`v-for`渲染集合时必须提供稳定的`:key`，应使用测站 ID 而不是数组索引；列表排序或插入时，稳定 key 能让 Vue 复用正确的节点。`v-model`把输入控件与状态双向同步，`v-bind`（简写为冒号）绑定属性，`v-on`（简写为`@`）绑定事件。
+
+清单4.38用同一页面展示这些指令。预警说明使用`v-if`避免给普通测站创建无用节点，帮助文字使用`v-show`保持布局稳定；输入框用`v-model.trim`去除首尾空白，按钮通过`@click`修改状态。模板只负责声明关系，复杂筛选仍放在`computed`中。
+
+**清单 4.38  Vue 模板指令与稳定 key**
+
+```vue
+<template>
+  <label>
+    关键字
+    <input v-model.trim="form.keyword" type="search">
+  </label>
+  <label>
+    <input v-model="form.onlyWarning" type="checkbox">
+    只看预警
+  </label>
+  <ul>
+    <li v-for="station in visibleStations" :key="station.id">
+      <button type="button" v-bind:aria-label="`打开${station.name}`"
+              v-on:click="selectedId = station.id">
+        {{ station.name }}
+      </button>
+      <span v-if="station.warning" class="warning">需要关注</span>
+      <span v-show="!station.warning" class="normal">正常</span>
+    </li>
+  </ul>
+</template>
+```
+
+父组件通过 props 向下传递只读数据，通过 emit 向上报告用户动作；子组件不应直接修改 prop，否则数据流会变成隐式双向绑定。slot 允许父组件注入一段带上下文的呈现内容，适合让“测站卡片”复用标题、操作区和空状态。provide/inject 适合跨越多层组件传递只读配置或服务，例如单位格式化器、主题令牌和请求客户端；共享的可变业务状态仍应交给 Pinia，不能把所有状态藏在依赖注入中。
+
+清单4.39把四种通信方式放在一个父子组件示例中。`StationCard`只接收`station`，点击按钮时发出`select`事件；父组件通过 slot 提供操作区，并用 provide/inject 传递单位文本。provide 的值在父组件中冻结，防止子组件意外篡改全局配置。
+
+**清单 4.39  Vue props、emit、slot 与 provide/inject**
+
+```vue
+<!-- StationCard.vue -->
+<script setup>
+import { inject } from 'vue';
+const props = defineProps({ station: { type: Object, required: true } });
+const emit = defineEmits(['select']);
+const levelUnit = inject('levelUnit', 'm');
+</script>
+<template>
+  <article>
+    <h3>{{ props.station.name }}</h3>
+    <p>水位：{{ props.station.level }} {{ levelUnit }}</p>
+    <slot name="actions">
+      <button type="button" @click="emit('select', props.station.id)">查看</button>
+    </slot>
+  </article>
+</template>
+
+<!-- StationPanel.vue 的 script setup 片段 -->
+<script setup>
+import { provide, readonly, ref } from 'vue';
+const levelUnit = ref('m');
+provide('levelUnit', readonly(levelUnit));
+</script>
+```
+
+### 4.8.3 生命周期与资源清理
+
+组件生命周期描述实例从建立到销毁的过程。`onMounted`适合访问已经挂载的 DOM、启动定时刷新、建立 WebSocket 或初始化图表；`onUpdated`只用于确有必要的 DOM 同步，不应在其中无条件修改响应式状态；`onUnmounted`负责清除定时器、移除监听器、取消请求和销毁第三方实例。开发者可以把资源创建与清理写在同一段组合式函数中，让调用方不容易漏掉释放逻辑。
+
+图4.9把“建立资源—使用资源—释放资源”与组件钩子对应起来。离开测站页面时，即使网络回调稍后到达，也不应再修改已卸载的组件；取消信号和布尔标记可以共同防止竞态。对于定时器，清理函数必须保存创建时返回的句柄，不能重新调用一个相同参数的`setInterval`来“猜测”旧句柄。
+
+<figure markdown>
+![图4.9](images/chapter04_fig_4_9.svg)
+<figcaption>图 4.9  Vue 3 组件资源的建立、使用与清理</figcaption>
+</figure>
+
+清单4.40演示一个完整的定时刷新组件。`onMounted`保存定时器句柄，`onUnmounted`清除它；请求函数收到`AbortSignal`后，组件离开页面可以立即取消未完成请求。这个模式也适用于图表实例、地图图层和事件总线订阅。
+
+**清单 4.40  onMounted 与 onUnmounted 的清理模式**
+
+```vue
+<script setup>
+import { onMounted, onUnmounted, ref } from 'vue';
+
+const latest = ref(null);
+const controller = new AbortController();
+let timerId;
+
+async function refresh() {
+  const response = await fetch('/api/stations/ST-01/latest', {
+    signal: controller.signal
+  });
+  if (response.ok) latest.value = await response.json();
+}
+
+onMounted(() => {
+  refresh();
+  timerId = window.setInterval(refresh, 30_000);
+});
+onUnmounted(() => {
+  window.clearInterval(timerId);
+  controller.abort();
+});
+</script>
+```
+
+### 4.8.4 测站列表筛选页：从 SFC 到组件拆分
+
+一个可交付的 Vue 页面至少包含数据来源、筛选状态、加载反馈和可操作的列表项。父组件负责获取测站、保存筛选条件并计算可见集合，子组件负责单行展示和发出选择事件；这样，筛选逻辑可以独立测试，行组件也能在地图侧栏复用。完整页面需要同时处理加载中、空结果和正常结果三种状态，不能只展示一个静态数组。
+
+清单4.41是可复用的行组件，清单4.42是使用它的完整筛选页。父组件使用`ref`保存原始数组，`reactive`保存表单，`computed`生成过滤结果，`v-for(:key)`渲染行，`v-model`接收输入，`v-if`表达加载和空状态，并在`onMounted`中加载数据。读者可以把 API 函数替换为清单4.29的`request.js`，页面结构不需要改变。
+
+**清单 4.41  测站列表行组件 StationRow.vue**
+
+```vue
+<script setup>
+defineProps({
+  station: { type: Object, required: true },
+  selected: { type: Boolean, default: false }
+});
+const emit = defineEmits(['select']);
+</script>
+
+<template>
+  <li :class="{ selected }">
+    <button type="button" @click="emit('select', station.id)">
+      <strong>{{ station.name }}</strong>
+      <span>{{ station.level ?? '—' }} m</span>
+      <span v-if="station.warning" class="warning">预警</span>
+    </button>
+  </li>
+</template>
+```
+
+**清单 4.42  测站列表筛选页 StationFilterPage.vue**
+
+```vue
+<script setup>
+import { computed, onMounted, reactive, ref } from 'vue';
+import StationRow from './StationRow.vue';
+import { request } from '../api/request.js';
+
+const stations = ref([]);
+const loading = ref(false);
+const selectedId = ref(null);
+const filters = reactive({ keyword: '', onlyWarning: false });
+const visibleStations = computed(() => stations.value.filter(station => {
+  const match = station.name.includes(filters.keyword);
+  return match && (!filters.onlyWarning || station.warning);
+}));
+
+async function loadStations() {
+  loading.value = true;
+  try {
+    stations.value = await request('/stations');
+  } finally {
+    loading.value = false;
+  }
+}
+function selectStation(id) { selectedId.value = id; }
+onMounted(loadStations);
+</script>
+
+<template>
+  <section aria-labelledby="station-title">
+    <h2 id="station-title">测站列表</h2>
+    <label>筛选
+      <input v-model.trim="filters.keyword" type="search">
+    </label>
+    <label><input v-model="filters.onlyWarning" type="checkbox">只看预警</label>
+    <p v-if="loading" role="status">正在加载测站……</p>
+    <p v-else-if="visibleStations.length === 0">没有符合条件的测站</p>
+    <ul v-else>
+      <StationRow v-for="station in visibleStations" :key="station.id"
+                  :station="station" :selected="station.id === selectedId"
+                  @select="selectStation" />
+    </ul>
+  </section>
+</template>
+```
+
+SFC 的`script setup`会在编译阶段生成组件上下文，顶层声明可以直接在模板中使用；它不是把模板当作一段 HTML 字符串拼接，因此类型、依赖和生命周期更容易被工具检查。组件拆分后要保持 props 的单向流动，子组件通过 emit 提交意图，父组件决定是否更新选中状态。对测站列表进行验收时，至少测试关键字大小写、预警筛选、空结果、加载失败、键盘焦点和卸载清理；每一项都应能在 Vue Devtools 或浏览器网络面板中找到证据。
+
+#### 4.8.4.1 响应式 API 的选择方法
+
+组合式 API 的价值不在于把所有逻辑都写进一个文件，而在于让“数据从哪里来、怎样变化、谁负责副作用”可以逐段阅读。设计测站页面时，先画出状态边界：服务器返回的测站数组属于原始状态，筛选关键字和复选框属于交互状态，过滤后的数组属于派生状态，加载请求、提示消息和日志属于副作用。原始状态使用`ref`或`reactive`保存，派生状态使用`computed`表达，副作用使用`watch`或`watchEffect`承载，这样一个函数只承担一种职责，调试时可以沿依赖链定位问题。
+
+`ref`返回一个带`value`属性的容器，替换基本值时必须写入`value`；将一个`ref`放进`reactive`对象后，模板可以自动解包，但在普通 JavaScript 代码中仍要留意引用层级。`reactive`使用代理追踪属性读写，适合表单和配置对象；如果需要把对象整体替换为接口的新结果，应使用`ref`包住对象，或逐项更新原代理。接口响应可以先映射为教材定义的字段，再交给模板，避免把后端的可选字段直接扩散到所有子组件。
+
+选择`computed`还是`watch`可以问两个问题：结果是否能由已有状态纯粹计算，是否需要调用网络、写入存储或操作 DOM。纯计算选择`computed`，它会缓存结果并在依赖改变时失效；需要副作用时选择`watch`，明确列出监听源、是否立即执行以及是否深度监听。`watchEffect`适合把多个轻量依赖组合成一个同步动作，例如更新页面标题或记录筛选统计；当副作用涉及请求、定时器或订阅时，优先使用带清理函数的`watch`，并让每一次异步任务携带自己的取消信号。
+
+**表 4.5  Vue 响应式 API 的职责边界与验收问题**
+
+| API           | 适合表达的内容                 | 代码评审时的核对问题                                       |
+|:--------------|:-------------------------------|:-----------------------------------------------------------|
+| `ref`         | 基本值、可整体替换的对象       | 是否在 JavaScript 中正确使用`.value`，模板是否依赖自动解包 |
+| `reactive`    | 表单、稳定结构的对象和数组     | 是否把代理对象整体替换，是否把深层可变状态暴露给子组件     |
+| `computed`    | 过滤、排序、格式化等纯派生值   | 函数是否无网络请求和写操作，依赖是否完整                   |
+| `watch`       | 具有明确来源的异步或外部副作用 | 是否处理竞态、错误和清理，是否设定合理的`flush`时机        |
+| `watchEffect` | 少量依赖的同步联动             | 自动收集的依赖是否稳定，是否会因隐式访问造成重复执行       |
+
+表4.5可以作为代码走查清单。若一个`computed`内部出现`fetch`，说明派生值与副作用发生了混合；若一个`watch`只做字符串拼接，说明它可以改写为`computed`。对监测数据而言，响应式 API 只负责界面状态，阈值计算和数据质量判定仍应由后端或领域服务提供，前端展示结果时保留测点编号、采样时间和质量码，方便值班员追溯。
+
+#### 4.8.4.2 模板指令的性能与可访问性
+
+`v-if`和`v-show`的差异可以从生命周期理解：`v-if`切换时会触发子树的创建和销毁，适合权限面板、错误提示和一次性弹窗；`v-show`保留节点并切换样式，适合值班员反复打开的筛选抽屉。切换地图图层或大型表格时，要把初始化成本、键盘焦点和屏幕阅读器行为一起评估。隐藏内容若仍能被辅助技术读取，应同步设置合适的语义属性，避免用户获得与视觉状态不一致的反馈。
+
+列表渲染的稳定`:key`不仅影响性能，也影响输入框的值和焦点。测站列表从“全部”切换到“仅预警”时，若使用数组索引作为 key，Vue 可能把旧行复用给另一测站，导致焦点和局部编辑值错位。使用后端分配的测站 ID 可以保持身份稳定；当接口暂时没有 ID 时，应在数据进入组件前生成生命周期内不变的客户端键，并在提交时仍使用业务主键。排序、分页和实时插入都要用同一条身份规则。
+
+`v-model`的修饰符是输入契约的一部分。`.trim`适合名称和编码搜索，`.number`只在输入内容确实是数值时使用，闸门开度等测量值还要在提交前进行单位和范围校验。对于时间字段，要把本地时区转换和展示格式分开，提交 ISO 时间戳，页面按值班员所在时区显示。`v-bind:aria-label`、`role=status`和`aria-live`可以让加载、空结果和预警变化被读屏软件感知；这些属性与 CSS 颜色共同构成信息表达，不能只依赖红黄蓝色块。
+
+#### 4.8.4.3 组件通信的测试边界
+
+props、emit、slot 和 provide/inject 形成四条不同的依赖路径。props 是父到子的输入，组件应把它当作只读快照；emit 是子到父的事件，事件名应描述意图而不是内部实现，例如`select`、`retry`和`update-filter`。slot 负责布局插槽，父组件可以替换操作区而不复制整张卡片；provide/inject 负责跨层配置，典型内容是单位、主题和请求客户端。把实时测站数组直接通过 provide 传到任意深层会隐藏数据流，应使用 Pinia 或显式 props 让业务状态的所有者清晰可见。
+
+组件测试可以从契约出发设计三组用例。第一组给定 props，检查标题、数值单位和质量码标签是否正确渲染；第二组触发按钮或键盘操作，断言 emit 的事件名和参数只包含业务主键；第三组替换 slot 内容，确认默认操作区和自定义操作区都保持可访问名称。provide/inject 的测试使用测试级容器提供只读单位和假的请求函数，避免依赖真实网络。这样既能验证组件自身，也能验证它与父页面之间的边界。
+
+#### 4.8.4.4 生命周期、竞态与数据刷新
+
+监测页面常见的竞态发生在“用户快速切换测站”或“离开页面后请求才返回”。每次加载都应生成一个请求控制器，并把当前请求的序号或测站 ID保存在闭包中；响应到达时，只有仍然匹配当前序号的结果才写入状态。`AbortController`可以释放网络资源，但取消并不保证所有中间层都立即停止，因此仍需在写入前检查`signal.aborted`。异常分类应区分网络不可达、权限过期、服务器错误和业务空结果，让界面给出可行动的提示。
+
+定时刷新要先定义业务窗口，再确定间隔。若案例水库的实时读数允许三十秒延迟，页面可以使用三十秒定时器；当浏览器标签页进入后台时，可以暂停刷新，回到前台再立即拉取一次。刷新函数不能因为上一次请求较慢而并发堆积，可以使用“正在加载”标志、队列或取消旧请求实现串行化。定时器、事件监听器、WebSocket 和图表实例都必须在`onUnmounted`中释放，资源的创建与释放最好位于同一组合式函数，便于复用和单元测试。
+
+可把生命周期验收写成可观察的步骤：挂载组件后检查只创建一个定时器；切换测站时确认旧请求被取消或其结果被丢弃；卸载组件后检查网络面板没有继续写入、控制台没有更新已销毁实例的警告；重新挂载时确认资源数量回到一个。对实时订阅还要验证断线重连、重复消息和权限失效，避免把连接重试当作无限循环。图4.9中的箭头代表这些可测试的资源边界，而不是抽象的装饰。
+
+#### 4.8.4.5 测站筛选页的交付检查
+
+完整页面的验收应覆盖数据、交互、错误和可访问性四个维度。数据维度检查接口字段映射、单位转换、时间格式和质量码；交互维度检查关键字、预警复选框、键盘选择和详情跳转；错误维度检查加载失败、权限过期、网络超时以及空结果；可访问性维度检查标题层级、表单标签、焦点可见性和状态播报。每个维度都应有可复现的输入和预期输出，不能用“页面看起来正常”代替证据。
+
+筛选条件最好在 URL 或路由状态中保存可分享的部分，例如关键字和当前页码；临时的展开状态留在组件内部。用户从详情页返回列表时，若希望恢复筛选条件，应通过`useRoute`读取查询参数，再用`router.replace`更新而不是不断新增历史记录。接口返回的分页总数应与后端口径一致，前端只负责展示和发起下一页请求，不能用当前页长度猜测全量数量。实时预警到达时，优先更新对应测站的行状态，并保留当前滚动位置和键盘焦点。
+
+组件拆分完成后，可以把列表页看成一条可替换的管线：`request.js`负责认证、超时和错误分类，页面负责状态编排，`StationRow`负责单行呈现，Pinia负责跨路由共享的当前测站。每个部分都能用假数据独立测试，再用一次端到端测试验证真实接口连接。这样的结构既适合本章的教学演示，也能平滑扩展到地图侧栏、移动端值班视图和大屏轮播，而不需要把所有逻辑重新复制一遍。
+
+## 4.9 Vue Router与Pinia应用组织
+
+Vue Router把 URL 映射到页面组件，`App.vue`中的`<router-view />`是路由组件真正出现的位置。路由表应包含稳定的路径、名称、组件和元数据；页面级组件使用动态导入可以把首屏代码与详情页代码分开下载。导航的职责边界要保持清楚：路由负责页面切换和参数解析，页面负责展示与交互，后端负责最终的身份和权限判定。
+
+### 4.9.1 根组件、路由表与登录守卫
+
+根组件通常只保留全局布局和路由出口。导航栏、全局提示和面包屑可以放在出口上下方；具体页面由路由决定。下面的骨架包含一个可跳过登录页、测站列表、动态测站详情和告警中心，读者可以直接放入 Vite 5 项目验证路径匹配。动态段`:id`会被解析为字符串参数，若业务要求数值或固定格式，应在页面或守卫中完成校验。
+
+清单4.43展示`App.vue`的最小骨架，清单4.44给出完整路由表。守卫返回一个带名称的目标对象，而不是拼接字符串；`redirect`查询参数保留用户原本想访问的路径，登录成功后可以跳回去。守卫必须识别当前是否已经在登录页，形成防环判断，否则匿名用户访问登录页也会再次被重定向。
+
+**清单 4.43  App.vue 根组件与 router-view**
+
+```vue
+<script setup>
+import { RouterLink, RouterView } from 'vue-router';
+</script>
+
+<template>
+  <header class="app-header">
+    <RouterLink to="/">水利工程安全监测平台</RouterLink>
+    <nav aria-label="主导航">
+      <RouterLink to="/stations">测站</RouterLink>
+      <RouterLink to="/alerts">告警中心</RouterLink>
+    </nav>
+  </header>
+  <main>
+    <RouterView />
+  </main>
+</template>
+```
+
+**清单 4.44  路由表、登录守卫与重定向**
+
+```javascript
+import { createRouter, createWebHistory } from 'vue-router';
+import { TOKEN_KEY } from './api/request.js';
+
+const router = createRouter({
+  history: createWebHistory(),
+  routes: [
+    { path: '/', name: 'home', redirect: { name: 'stations' } },
+    { path: '/login', name: 'login', component: () => import('./views/Login.vue') },
+    { path: '/stations', name: 'stations', component: () => import('./views/StationList.vue'),
+      meta: { requiresAuth: true },
+      children: [
+        { path: 'map', name: 'station-map', component: () => import('./views/StationMap.vue') }
+      ] },
+    { path: '/stations/:id', name: 'station-detail',
+      component: () => import('./views/StationDetail.vue'),
+      props: true, meta: { requiresAuth: true } }
+  ]
+});
+
+router.beforeEach(to => {
+  // TOKEN_KEY 从 request.js 导入，与请求封装保持同一契约
+  const hasToken = Boolean(sessionStorage.getItem(TOKEN_KEY));
+  if (to.meta.requiresAuth && !hasToken && to.name !== 'login') {
+    return { name: 'login', query: { redirect: to.fullPath } };
+  }
+});
+export default router;
+```
+
+嵌套路由要求父页面提供自己的`<router-view />`，否则子路由虽然匹配成功却没有渲染位置。测站列表可以在页头显示筛选器，在内容区域再放一个出口承载地图子页；动态详情则使用顶层路径，便于从地图标记和列表行直接跳转。`useRouter`用于发起导航，`useRoute`用于读取当前路径、查询参数和动态参数。编程式导航应使用路由名称和参数对象，避免把业务 ID 直接拼进未经编码的 URL。
+
+**清单 4.45  useRouter、useRoute 与编程式导航**
+
+```vue
+<script setup>
+import { computed } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+
+const route = useRoute();
+const router = useRouter();
+const stationId = computed(() => String(route.params.id ?? ''));
+const returnTo = computed(() => String(route.query.from ?? 'stations'));
+
+function openStation(id) {
+  router.push({ name: 'station-detail', params: { id }, query: { from: returnTo.value } });
+}
+function backToList() {
+  router.replace({ name: 'stations', query: { selected: stationId.value } });
+}
+</script>
+
+<template>
+  <button type="button" @click="backToList">返回测站列表</button>
+  <button type="button" @click="openStation('ST-02')">打开下游测站</button>
+</template>
+```
+
+登录页读取守卫写入的`redirect`，成功后只允许跳转到应用内部的路径，并对缺省值回退到测站首页。令牌写入和清理应复用清单4.29的请求封装，页面只负责提交凭据和显示错误。后端仍要校验令牌和权限，前端守卫只是减少无意义的页面加载，不能作为安全边界。
+
+**清单 4.46  登录成功后的安全回跳**
+
+```vue
+<script setup>
+import { ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { request, TOKEN_KEY } from '../api/request.js';
+
+const route = useRoute();
+const router = useRouter();
+const account = ref('');
+const password = ref('');
+const errorMessage = ref('');
+
+function safeRedirect(value) {
+  return typeof value === 'string' && value.startsWith('/') && !value.startsWith('//')
+    ? value : '/stations';
+}
+async function submit() {
+  errorMessage.value = '';
+  try {
+    const result = await request('/auth/login', {
+      method: 'POST', body: JSON.stringify({ account: account.value, password: password.value })
+    });
+    sessionStorage.setItem(TOKEN_KEY, result.accessToken);
+    await router.replace(safeRedirect(route.query.redirect));
+  } catch (error) {
+    errorMessage.value = error.message || '登录失败，请稍后重试';
+  }
+}
+</script>
+
+<template>
+  <form @submit.prevent="submit">
+    <label>账号<input v-model.trim="account" autocomplete="username" required></label>
+    <label>密码<input v-model="password" type="password" autocomplete="current-password" required></label>
+    <button type="submit">登录</button>
+    <p v-if="errorMessage" role="alert">{{ errorMessage }}</p>
+  </form>
+</template>
+```
+
+**清单 4.47  Pinia测站状态管理**
+
+```javascript
+import { defineStore } from 'pinia';
+import { loadLatestLevel } from '../api/stations.js';
+
+export const useStationStore = defineStore('station', {
+  state: () => ({ currentId: null, latest: null, loading: false, error: null }),
+  getters: {
+    isWarning: state => (state.latest?.level ?? 0) >= 5.0
+  },
+  actions: {
+    async loadLatest(id) {
+      this.loading = true;
+      this.error = null;
+      try {
+        this.latest = await loadLatestLevel(id);
+        this.currentId = id;
+      } catch (error) {
+        this.error = error;
+        this.latest = null;
+        throw error;
+      } finally {
+        this.loading = false;
+      }
+    }
+  }
+});
+```
+
+Pinia集中管理跨组件共享且具有业务含义的状态，如当前测站、实时读数和告警数量；只在单个组件内部使用的展开状态保留在组件中。组件调用`useStationStore()`得到的是一个带响应式属性的 store。直接写`const { latest, loading } = store`会把属性值拷贝出来，后续更新无法驱动模板；需要使用`storeToRefs`保留响应式引用，动作方法则可以直接从 store 取出。
+
+**清单 4.48  组件内使用 Pinia 与 storeToRefs**
+
+```vue
+<script setup>
+import { onMounted } from 'vue';
+import { storeToRefs } from 'pinia';
+import { useStationStore } from '../stores/station.js';
+
+const stationStore = useStationStore();
+const { latest, loading, isWarning } = storeToRefs(stationStore);
+const { loadLatest } = stationStore;
+
+onMounted(() => loadLatest('ST-01'));
+</script>
+
+<template>
+  <p v-if="loading" role="status">正在读取最新水位……</p>
+  <p v-else-if="latest">{{ latest.level }} m <strong v-if="isWarning">需要关注</strong></p>
+  <p v-else>暂无读数</p>
+</template>
+```
+
+清单4.48中，`storeToRefs`只处理状态和 getter，`loadLatest`仍保留为动作函数。若需要批量修改状态，可以调用 store 的动作；表单输入不应直接写入后端缓存字段，提交时由动作完成校验和请求。跨路由共享的当前测站、最新读数和告警计数放在 Pinia 后，列表、地图和详情页可以读取同一份状态，避免页面之间各自维护副本。
+
+### 4.9.2 StationDetail 的动态参数与数据加载
+
+路由配置中的`props: true`会把`:id`动态段作为组件 prop 注入。这样，详情组件不必依赖全局路由对象，单元测试可以直接传入`id`；查询参数仍可通过`useRoute`读取。`defineProps`应明确类型和必填约束，收到参数后再调用 store 动作加载数据，并在参数变化时重新加载。组件卸载时沿用前面的取消信号和清理模式。
+
+**清单 4.49  StationDetail.vue 接收动态路由参数**
+
+```vue
+<script setup>
+import { watch } from 'vue';
+import { storeToRefs } from 'pinia';
+import { useStationStore } from '../stores/station.js';
+
+const props = defineProps({ id: { type: String, required: true } });
+const stationStore = useStationStore();
+const { latest, loading, error } = storeToRefs(stationStore);
+
+watch(() => props.id, id => stationStore.loadLatest(id), { immediate: true });
+</script>
+
+<template>
+  <article aria-labelledby="station-detail-title">
+    <h1 id="station-detail-title">测站 {{ props.id }}</h1>
+    <p v-if="loading" role="status">正在加载……</p>
+    <p v-else-if="error" role="alert">{{ error.message }}</p>
+    <dl v-else-if="latest"><dt>最新水位</dt><dd>{{ latest.level }} m</dd></dl>
+    <p v-else>暂无有效读数</p>
+  </article>
+</template>
+```
+
+选项式 store 适合把状态、getter 和动作按对象分栏展示，便于刚接触 Pinia 的读者建立映射；setup 式 store 使用`ref`、`computed`和普通函数，适合复用组合式函数和精确控制公开成员。两种写法都通过`defineStore`注册，组件侧的`storeToRefs`用法一致。选择时以团队可读性和测试边界为依据，不要在同一个 store 中混用两套状态来源。
+
+**清单 4.50  Pinia setup 式 store 对照**
+
+```javascript
+import { computed, ref } from 'vue';
+import { defineStore } from 'pinia';
+import { loadLatestLevel } from '../api/stations.js';
+
+export const useStationSetupStore = defineStore('station-setup', () => {
+  const currentId = ref(null);
+  const latest = ref(null);
+  const loading = ref(false);
+  const error = ref(null);
+  const isWarning = computed(() => (latest.value?.level ?? 0) >= 5.0);
+
+  async function loadLatest(id) {
+    loading.value = true;
+    error.value = null;
+    try {
+      latest.value = await loadLatestLevel(id);
+      currentId.value = id;
+    } catch (cause) {
+      error.value = cause;
+      latest.value = null;
+      throw cause;
+    } finally {
+      loading.value = false;
+    }
+  }
+  return { currentId, latest, loading, error, isWarning, loadLatest };
+});
+```
+
+路由和状态仓库的联调可以按一条链路验收：从未登录状态访问详情，守卫应把路径保存到登录页；登录成功后回到原详情，`StationDetail`收到 ID 并触发加载；列表、地图和详情同时打开时，Pinia 的最新读数同步变化；刷新浏览器后，令牌和路由状态按约定恢复或清空。测试还要覆盖无效测站 ID、令牌过期、后端返回空读数和用户快速切换测站等情况。这样既验证了组件，又验证了路由、守卫和 store 之间的契约。
+
+### 4.9.3 路由参数、查询状态与可恢复导航
+
+路径参数、查询参数和元数据承担不同的业务含义。测站 ID 是资源身份，应放在动态路径中并参与后端权限校验；关键字、页码和排序方向是可分享的视图状态，适合放在查询参数中；“是否需要登录”和“允许哪些角色”属于路由元数据，由守卫读取。三类信息分开后，复制一个详情链接可以准确打开同一测站，复制列表链接可以恢复筛选条件，而权限规则仍由统一守卫维护。
+
+查询参数都是字符串，页面需要在入口处完成解析和默认值处理。例如页码应转换为大于零的整数，排序字段必须从白名单中选择，关键字要限制长度并进行编码。更新筛选条件时使用`router.replace`，这样值班员连续输入关键字不会产生几十条无意义的历史记录；选择一个测站进入详情时使用`router.push`，浏览器返回键才能回到原列表。路由变化后，页面应根据新参数重新计算请求键，避免沿用旧列表的缓存结果。
+
+守卫可以分成全局、路由级和组件级三个层次。全局守卫负责令牌存在性和登录回跳，路由级元数据表达某个页面的角色要求，组件级守卫只处理离开页面前的未保存编辑。守卫函数应保持短小，把令牌解析、用户资料和权限集合交给独立服务；异步守卫返回 Promise 时要有超时和失败分支，网络不可用不能让导航一直处于 pending 状态。权限不足应进入明确的 403 页面，不能把所有失败都送回登录页，否则用户无法区分“没有登录”和“已经登录但权限不足”。
+
+可恢复导航还要考虑浏览器刷新和多标签页。路由状态由 URL 承载，刷新后仍能重建页面；Pinia 内存状态刷新后会清空，因此需要在页面挂载时依据路由参数重新请求，而不是把测站读数永久写进本地存储。访问令牌的生命周期由第5章安全策略决定，前端只读取是否存在和请求返回的 401，不自行延长令牌有效期。多标签页同时退出时，应通过统一的登出入口清理令牌，并在下一次导航触发守卫，避免一个标签页还显示已失效的业务页面。
+
+### 4.9.4 Pinia 状态建模、错误恢复与持久化边界
+
+一个清晰的 store 至少区分四类字段：资源数据、请求状态、错误对象和用户选择。`latest`代表后端数据，`loading`代表当前请求，`error`说明失败原因，`currentId`表示用户正在查看的资源。动作负责改变这些字段的顺序：开始请求时清空旧错误并置为加载中，成功时一次性提交新数据，失败时保留可诊断错误并清理不再可信的旧数据，最后无论成功失败都恢复加载标志。这样的状态机可以直接映射到模板的加载、成功、空结果和错误四个分支。
+
+实时读数还需要定义“旧数据是否可见”的策略。短暂网络抖动时可以保留带时间戳的上一笔读数，同时在界面标注“数据更新时间”和“正在重试”；权限失败、测点被删除或质量码为 missing 时，旧读数不能继续伪装成当前值。store 可以保存`lastUpdatedAt`和`quality`，由计算属性决定是否允许展示趋势线。业务阈值和质量判定由后端服务给出，Pinia 只保存结果与请求上下文，避免前端和后端使用两套阈值。
+
+缓存策略要与路由粒度匹配。测站列表可以按筛选条件缓存短时间结果，详情页的实时读数应以测站 ID 和时间窗口组成缓存键；切换测站时清理与旧 ID 相关的请求控制器，登出时清理所有含敏感信息的 store。持久化插件只适合保存非敏感的界面偏好，例如列表列宽和主题；访问令牌、测站读数和告警详情不写入 localStorage。若确需跨刷新恢复筛选条件，优先使用 URL 查询参数，以便审计和复现。
+
+Pinia 动作可以返回领域结果，让调用方决定提示方式。比如`loadLatest`返回成功的读数或抛出带错误码的异常，详情页显示可读提示，后台轮询则记录指标并安排下一次重试。错误码应区分`AUTH_EXPIRED`、`NOT_FOUND`、`QUALITY_MISSING`和`NETWORK_TIMEOUT`，不要在 store 内把所有异常拼成一段不可检索的字符串。日志中只记录测站编号、请求追踪 ID 和错误类别，令牌与个人信息禁止进入浏览器控制台。
+
+组件、路由和 store 的职责可以用一次“故障演练”检验：先让列表请求超时，页面显示重试按钮且路由仍保持；点击重试后只发起一个新请求，旧请求的回调不会覆盖新结果；再让详情接口返回 404，页面显示资源不存在并提供回列表链接；最后让令牌失效，守卫带着原路径跳到登录页，登录完成后只恢复一次导航。演练记录请求时间线、路由变化和 store 状态变化，能把竞态问题从偶然现象变成可复核证据。
+
+应用入口依次注册Pinia和Router，再挂载根组件：
+
+**清单 4.51  应用入口：注册 Pinia 与路由**
+
+```javascript
+import { createApp } from 'vue';
+import { createPinia } from 'pinia';
+import App from './App.vue';
+import router from './router';
+
+createApp(App).use(createPinia()).use(router).mount('#app');
+```
+
+## 4.10 Vite工程化与性能优化
+
+推荐目录按职责组织为`views/`、`components/`、`stores/`、`router/`和`api/`。Vite 在开发阶段启动原生 ES 模块服务器，浏览器按需请求被修改的模块，依赖预构建和热更新让反馈很快；生产阶段则从入口出发构建依赖图，执行 Tree Shaking、压缩、资源指纹和代码分割，输出可以被静态服务器缓存的文件。开发服务器的代理、源码地图和错误覆盖层服务于调试，不能直接当成生产部署方案。
+
+路径别名把深层相对路径转换为稳定的业务语义，例如用`@/`指向`src/`，用`@api/`指向接口封装目录。别名必须同时配置在 Vite 和编辑器/类型检查器中，否则构建能通过但 IDE 无法跳转，或者测试环境解析失败。环境变量按模式加载：`.env`提供公共默认值，`.env.development`和`.env.production`覆盖对应模式，只有以`VITE_`开头的变量会注入浏览器。令牌密钥、数据库密码和内部服务地址不能写入这类变量，前端只保存公开的 API 前缀和功能开关。
+
+**清单 4.52  Vite 5 路径别名与 manualChunks 分包**
+
+```javascript
+import { defineConfig, loadEnv } from 'vite';
+import vue from '@vitejs/plugin-vue';
+import { fileURLToPath, URL } from 'node:url';
+
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), '');
+  return {
+    plugins: [vue()],
+    resolve: {
+      alias: {
+        '@': fileURLToPath(new URL('./src', import.meta.url)),
+        '@api': fileURLToPath(new URL('./src/api', import.meta.url))
+      }
+    },
+    server: { port: Number(env.VITE_DEV_PORT || 5173), strictPort: true },
+    build: {
+      target: 'es2020', sourcemap: mode !== 'production',
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            'vue-core': ['vue', 'vue-router', 'pinia'],
+            'charts': ['echarts']
+          }
+        }
+      }
+    }
+  };
+});
+```
+
+清单4.52中的`manualChunks`把变化频率相近的依赖放到同一文件，页面业务代码变化时不会迫使浏览器重新下载 Vue 核心和图表库。分包不是越多越好：每个额外文件都增加请求和调度成本，应该结合首屏性能、缓存命中率和真实网络条件测量。`loadEnv`用于读取配置并传给 Vite 配置本身，模板代码仍通过`import.meta.env`读取经过筛选的公开变量。
+
+**清单 4.53  Vite 多环境变量与 API 客户端**
+
+```javascript
+# .env.development（.env 文件只支持 # 注释）
+VITE_API_BASE=/api
+VITE_FEATURE_TIMESERIES=true
+
+# .env.production
+VITE_API_BASE=https://water.example/api
+VITE_FEATURE_TIMESERIES=true
+
+// src/api/client.js —— 用于演示环境变量注入的简化对照版；
+// 实际页面请统一使用清单 lst:ch04-a45-request 的 request.js
+const baseURL = import.meta.env.VITE_API_BASE;
+export async function getJson(path, options = {}) {
+  const response = await fetch(`${baseURL}${path}`, {
+    ...options, headers: { Accept: 'application/json', ...options.headers }
+  });
+  if (!response.ok) throw new Error(`HTTP_${response.status}`);
+  return response.status === 204 ? null : response.json();
+}
+```
+
+环境变量的值会在构建时替换进静态 JavaScript，修改生产服务器上的`.env`并不会改变已经构建的文件。因此部署流水线应为目标环境重新执行`vite build –mode production`，或把 API 前缀设计为同源相对路径，由反向代理在运行时转发。构建产物发布前要检查是否意外包含令牌、私钥、内部域名和调试日志，可用字符串扫描和源代码地图访问控制作为门禁。
+
+性能优化应先测量再行动：
+
+- **代码分割**：页面组件使用`import()`动态导入，避免首屏下载全部业务代码；
+
+- **缓存**：带内容哈希的JS/CSS可设置长期强缓存，入口HTML采用协商缓存，实时接口按业务时效设置；
+
+- **构建**：通过包体分析识别大型依赖，按需引入图表组件，并设置合理的浏览器目标；
+
+- **运行时**：对高频输入防抖，对监测流批量刷新，避免无意义的深层监听。
+
+**清单 4.54  生产构建、体积分析与部署前检查**
+
+```javascript
+// package.json scripts
+{
+  "scripts": {
+    "dev": "vite --mode development",
+    "build": "vite build --mode production",
+    "analyze": "vite build --mode production && npx vite-bundle-visualizer"
+  }
+}
+
+// 构建完成后检查 dist/（保存为 scripts/check-dist.mjs 单独运行）
+// docker compose 中由 nginx 容器挂载 dist/，/api 转发到后端服务
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
+
+const required = ['index.html', 'assets'];
+for (const name of required) {
+  if (!existsSync(join('dist', name))) throw new Error(`缺少产物：${name}`);
+}
+```
+
+产物体积分析要同时看原始体积和 gzip/brotli 体积，重点关注首屏入口、路由异步块和第三方依赖。若图表库占据大部分首屏，可以把图表页改为动态导入；若某个公共块被所有页面引用，则让它进入稳定的 vendor 分包。分析结果应记录在构建流水线中，超过预算时阻断发布，而不是上线后才凭感觉优化。
+
+**清单 4.55  Vite 产物与 Docker Compose 部署契约**
+
+```bash
+# 构建阶段：在固定 Node 版本中生成 dist/
+docker build --target build -t water-web-build .
+# 运行阶段：静态服务器只读挂载产物，API 由反向代理转发
+docker compose up -d water-web nginx
+
+# nginx 关键规则（伪配置，部署时写入站点配置）
+location /api/ { proxy_pass http://water-api:8080/; }
+location / { try_files $uri $uri/ /index.html; }
+```
+
+与配套仓库的`docker-compose`部署呼应时，前端容器只提供静态文件，后端容器负责鉴权和水利接口，反向代理负责同源路径、压缩、缓存头和 SPA 回退。带内容哈希的`assets/`可以设置长期缓存，`index.html`使用较短缓存或重新验证，避免用户拿到旧入口而请求已删除的代码块。每次发布保留上一个可用版本，回滚只切换静态目录和镜像标签，不修改监测数据。
+
+开发与生产的验收要覆盖主要浏览器中的布局、接口失败与空数据状态、路由刷新、权限绕过、移动端触控、构建产物、缓存头和控制台错误。流水线还应验证健康检查、API 代理连通性、静态资源 404、SPA 深链接和压缩响应；这些检查把“本机能运行”转化为可重复的发布契约。
+
+构建流水线可以分为依赖安装、静态检查、单元测试、生产构建、产物审计和发布六个阶段。依赖安装使用锁文件并缓存包管理器目录，确保不同执行器得到相同版本；静态检查关注未使用变量、可访问性和路径别名解析；测试阶段至少覆盖路由守卫、筛选计算和请求错误分类。生产构建只接受干净工作区生成的产物，构建日志记录 Node、Vite 和插件版本，出现警告时由负责人判断是否需要升级或建立例外清单。
+
+发布采用不可变目录更安全。每次构建把`dist/`复制为带提交号的版本目录，生成一份包含入口哈希、资源清单和构建时间的 manifest；反向代理通过符号链接或配置项指向当前版本。切换后先执行首页、登录、测站详情和 API 健康检查，再逐步放量。若发现路由 404、资源加载失败或数据接口异常，切换回上一个 manifest 即可恢复，原版本保留到确认监测业务稳定后再清理。回滚只改变静态文件指向，不删除数据库和时序数据。
+
+SPA 的深链接是部署验收的重点。浏览器直接打开`/stations/ST-01`时，静态服务器先寻找同名文件，找不到后必须回退到`index.html`，再由 Vue Router 渲染详情页；`/api/`则必须优先匹配反向代理规则，不能被 SPA 回退吞掉。缓存头也要分层设置：`index.html`短缓存并要求重新验证，带内容哈希的脚本和样式长期缓存，地图配置和监测接口依据数据时效使用禁止缓存或短 TTL。部署检查应使用真实浏览器和命令行各验证一次，避免只测服务器状态码。
+
+安全审计包括源代码、产物和运行时三个面。源代码扫描禁止把令牌、私钥和内部密码提交到仓库；产物扫描检查压缩后的 JavaScript 是否残留调试开关、源地图是否公开内部路径；运行时检查 CSP、HTTPS、跨域策略、响应头和错误页面是否泄露堆栈。环境变量的公开前缀不是保密机制，任何进入前端 bundle 的值都应视为公开信息。对水利平台而言，还要记录发布人、构建提交号、镜像摘要和回滚操作，保证出现异常时可以追溯到具体版本。发布说明还应给出变更范围、影响页面、接口兼容性、验证结果和回滚入口，值班员据此可以在交接班时快速判断版本状态。
+
+发布说明同时注明构建时间、版本标签和责任人，便于审计、交接和追踪。
+
+## 4.11 小结
+
+本章的技术清单很长：浏览器渲染机制、语义化 HTML、响应式 CSS、ES 模块与异步编程、Vue 3 组合式 API、Vue Router、Pinia 和 Vite 工程化。它们服务的却是同一件事——让界面的结构、状态和异常都能被追查。
+
+最能说明这一点的是四个典型故障。按钮被挤出屏幕，多半不是缺媒体查询，而是 Flex 项目的最小内容尺寸大于分配结果，需要在项目上显式写 `min-width: 0`，再决定哪里允许截断。快速切换两个测站时旧数据覆盖新数据，是并发响应的竞态，要用 `AbortController` 配合递增序号，让过期响应无法提交。令牌过期后页面在登录页和业务页之间反复跳转，是把“匿名、已登录、即将过期、已过期、权限不足、服务不可达”六种状态折叠成了两种；403 应当停留在业务页并说明权限，而不是再跳一次登录。离开页面后定时器仍在发请求，则是组件卸载时没有清理资源。四个故障都能在浏览器里当场复现，也都能用一条明确的规则修好。
+
+判断一段前端代码写得好不好，标准不在正常路径上——正常路径谁写都能跑通。标准在异常路径：界面告诉了用户什么，日志里留下了什么，下一个人能不能照着复现。
+
+## 4.12 章末交付物
+
+完成本章学习后，提交一套前端原型成果：平台首页、测站详情页与告警中心页；基于`Vue 3 + Vite + Vue Router + Pinia`的工程骨架；页面组件树和状态仓库说明；以及一个实时水位从接口到界面渲染的链路说明。
+
+## 4.13 思考题与练习题
+
+1.  
+
+2.  HTML的主要职责是（）。A. 表达内容结构与语义B. 管理数据库C. 编译Java代码D. 配置消息队列
+
+3.  CSS Grid最适合（）。A. 二维仪表盘布局B. 发送HTTP请求C. 解析JSOND. 定义路由守卫
+
+4.  Promise进入fulfilled状态后仍可再次变为rejected。（判断：对／错）
+
+5.  Vue 3组件卸载后的清理逻辑宜放在（）。A. onMountedB. onUnmountedC. computedD. defineProps
+
+6.  Pinia最适合保存（）。A. 跨页面共享的当前测站B. 单个按钮的悬停颜色C. HTML标题级别D. CSS媒体查询
+
+7.  使用动态`import()`可以支持页面级代码分割。（判断：对／错）
+
+8.  
+
+9.  说明DOM树、CSSOM树、JavaScript引擎与渲染过程之间的关系。
+
+10. 为水位、流量、雨量三类监测卡片设计语义化HTML和响应式Grid布局。
+
+11. 分别用Promise链和async/await实现测站最新水位加载，并处理HTTP错误。
+
+12. 设计“首页—测站详情—告警中心”的路由表，并说明哪些状态应放入Pinia。
+
+13. 使用浏览器开发者工具定位一次接口缓慢和一次页面频繁重排问题，记录证据与修复结果。
