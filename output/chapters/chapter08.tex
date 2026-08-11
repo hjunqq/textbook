@@ -14,7 +14,7 @@
 
 \paragraph*{引言}
 
-本章以“清源水库安全监测平台”为贯穿教学案例，并在8.5节扩展到数字孪生水利平台。清源水库是教学虚构工程：坝高52\,m，正常蓄水位168.0\,m，设置12个渗压测点、8个位移测点、3个库水位测点、5个雨量测点和6台采集网关，与第7章保持一致。
+本章以“水利工程安全监测平台”为贯穿教学案例，并在8.5节扩展到数字孪生水利平台。案例水库是教学虚构工程：坝高52\,m，正常蓄水位168.0\,m，设置12个渗压测点、8个位移测点、3个库水位测点、5个雨量测点和6台采集网关，与第7章保持一致。
 
 全章按“需求与闭环—总体架构与三维底座—数据和前后端—智能分析与预警—数字孪生演进—部署运维与验收”组织。技术基线统一为Vue 3.4+、Vue Router 4、Pinia 2、Vite 5、Java 17、Spring Boot 3.2+、Spring Security 6、Kafka、Redis、PostgreSQL/PostGIS与TimescaleDB扩展；三维主线使用Three.js r160+，流域级地球与大范围地形浏览可选Cesium 1.12x+。
 
@@ -32,11 +32,11 @@
 
 安全监测平台服务于观测、分析、预警和处置，不直接替代工程运行规程。教学案例只模拟信息流程，不连接真实控制设备。监测点布设和数据使用应参考适用的工程设计与监测规范\cite{sl6012013,slt7252016}。
 
-表\ref{tab:case-parameters}给出本案例的全部教学参数。这张表是全书引用清源水库数据的唯一来源：后续章节出现的坝高、蓄水位、测点数量和网关数量都应回到这里核对，案例参数在不同章节各说各话是同类教材最常见的硬伤。
+表\ref{tab:case-parameters}给出本案例的全部教学参数。这张表是全书引用案例水库数据的唯一来源：后续章节出现的坝高、蓄水位、测点数量和网关数量都应回到这里核对，案例参数在不同章节各说各话是同类教材最常见的硬伤。
 
 \begin{table}[htbp]
 \centering
-\caption{清源水库教学案例设定}
+\caption{案例水库教学案例设定}
 \label{tab:case-parameters}
 \begin{tabular}{p{2.8cm}p{3.5cm}p{6.0cm}}
 \toprule
@@ -108,7 +108,7 @@
 \draw[->,draw=Primary,thick] (ticket)--(review);
 \draw[->,draw=Accent,dashed,thick,bend left=25] (review) to node[below,font=\scriptsize]{改进规则/模型} (analysis);
 \end{tikzpicture}
-\caption{清源水库安全监测业务闭环}
+\caption{水利工程安全监测业务闭环}
 \label{fig:smart-water-monitoring-architecture}
 \end{figure}
 
@@ -118,7 +118,7 @@
 
 \subsection{统一技术栈与分层架构}
 
-清源水库案例采用一套可追踪技术栈。浏览器端由Vue组件、Router路由、Pinia状态和Three.js场景组成；后端由Spring Boot接口、领域服务、质量与预警服务组成；Kafka传递跨服务事件；Redis存放短期缓存；PostgreSQL承担业务数据，PostGIS存放空间对象，TimescaleDB扩展管理时序观测。
+案例水库采用一套可追踪技术栈。浏览器端由Vue组件、Router路由、Pinia状态和Three.js场景组成；后端由Spring Boot接口、领域服务、质量与预警服务组成；Kafka传递跨服务事件；Redis存放短期缓存；PostgreSQL承担业务数据，PostGIS存放空间对象，TimescaleDB扩展管理时序观测。
 
 图\ref{fig:case-layered-architecture}把这套技术栈按层画开，并标出各层之间的调用方向。本章后面的代码清单都能在这张图上找到位置，读代码时先确认它属于哪一层，比逐行理解语法更重要。
 
@@ -134,7 +134,7 @@
 \node[layer,below=of data] (edge) {边缘与现场：网关、协议适配、缓存补传、设备与传感器};
 \foreach \a/\b in {ui/api,api/domain,domain/data,data/edge}{\draw[<->,draw=Primary,thick] (\a)--(\b);}
 \end{tikzpicture}
-\caption{清源水库平台统一技术架构}
+\caption{案例水库平台统一技术架构}
 \label{fig:case-layered-architecture}
 \end{figure}
 
@@ -258,7 +258,7 @@ onUnmounted(() => {
 <template>
   <section class="monitoring-dashboard" aria-live="polite">
     <header>
-      <h2>清源水库监测总览</h2>
+      <h2>案例水库监测总览</h2>
       <p v-if="selectedAsset">当前测点：{{ selectedAsset.displayName }}</p>
     </header>
     <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
@@ -327,7 +327,7 @@ onUnmounted(() => {
 
 \texttt{asset} 是工程对象和测点的主索引。\texttt{asset\_id} 使用业务编码而不是数据库自增号，
 因为网关、三维模型、工单和报表都要用同一个编码关联对象；\texttt{geometry} 使用带高程的
-\texttt{PointZ}，坐标系固定为清源水库项目约定的 EPSG:4490，避免平面距离和经纬度混用。空间
+\texttt{PointZ}，坐标系固定为案例水库项目约定的 EPSG:4490，避免平面距离和经纬度混用。空间
 检索通过 GiST 索引完成，例如“查询某个影响区内的测点”可以由\texttt{ST\_Within} 使用索引候选集，
 再对候选集做精确判断。若测点迁移，不覆盖原几何，而是新增版本或写入变更审计表；本包的五张核心表
 先保存当前有效对象，历史版本通过\texttt{metadata}中的\texttt{validFrom}、\texttt{validTo}
@@ -940,7 +940,7 @@ WHERE r.event_id = :event_id;
 \subsection{从业务约束到物理设计的推导}
 
 数据库设计的起点不是“选哪一种数据库”，而是列出业务事实、事实发生的时间、事实的责任边界以及
-事实被谁查询。以清源水库安全监测平台为例，测点编码是跨系统共享的事实，不能因为前端换了树形目录
+事实被谁查询。以水利工程安全监测平台为例，测点编码是跨系统共享的事实，不能因为前端换了树形目录
 就改写；观测时间是设备事件的事实，不能用服务器接收时间替代；质量码是校验结论，不能与原始数值
 混为一列；预警等级是规则输出，必须携带规则版本和证据；工单是处置过程，需要责任人和回执；模型
 运行是一次可复现计算，需要输入快照和版本。把这些事实逐一写成字段，才会得到本节的五张核心表。
@@ -2003,7 +2003,7 @@ Repository 接口在真实项目中分别保存为独立 Java 文件；清单\re
 \centering
 \scriptsize
 \setlength{\tabcolsep}{3pt}
-\caption{清源水库监测主线接口契约}
+\caption{案例水库监测主线接口契约}
 \label{tab:monitoring-api-contract}
 \begin{tabular}{p{2.8cm}p{2.7cm}p{3.5cm}p{2.3cm}p{2.5cm}}
 \toprule
@@ -2459,7 +2459,7 @@ public final class QualityClassificationTest {
 表\ref{tab:ch08-model-card-template}给出本章模型卡的最小模板。九个字段不是形式化元数据，而是决定结果能否复现和能否进入审批的证据边界。模型名称和版本用于定位实现，适用范围与输入单位用于阻止越界调用，校准数据与误差指标用于说明可信度，不确定性和负责人用于安排人工复核，回滚方法用于在新版本异常时恢复上一版本。学生在实践题中至少填写一张完整模型卡，并为每个字段提供来源。
 \begin{table}[htbp]
 \centering
-\caption{清源水库模型卡模板}
+\caption{案例水库模型卡模板}
 \label{tab:ch08-model-card-template}
 \begin{tabular}{p{2.7cm}p{5.0cm}p{4.5cm}}
 \toprule
@@ -2480,7 +2480,7 @@ public final class QualityClassificationTest {
 模型卡与场景版本、输入快照和人工审批绑定。只要改变初始水位、降雨情景、闸门约束或模型版本，就创建新的运行记录；只改变镜头和图层透明度，不产生新的计算版本。页面显示结果时同时显示“模拟”标签、模型版本和计算时刻，避免把预演动画误认为已经发生的观测。
 
 \subsubsection{闸门公式的代入与反算边界}
-清源水库的三孔弧形闸门参数来自表\ref{tab:case-parameters}。以单孔净宽$b=8.0\,m$、开度$a=3.0\,m$、闸底高程152.0\,m为例，若闸前水位168.0\,m且行近流速水头暂取0.2\,m，则$H=16.2\,m$。取教学系数$C_d=0.65$（弧形闸门常用范围约0.6～0.7）。$a/H=0.185<0.65$满足闸孔出流（孔流）判别条件；题设下游水位低于闸底板，属自由出流。单孔估算流量为$Q_1=0.65\times8.0\times3.0\times\sqrt{2\times9.81\times16.2}\approx278\,m^3/s$，三孔同步开度的估算总量约为$834\,m^3/s$。该数值只用于接口和量纲教学，真实工程必须由批准的水力曲线、上下游水位和淹没系数复核。
+案例水库的三孔弧形闸门参数来自表\ref{tab:case-parameters}。以单孔净宽$b=8.0\,m$、开度$a=3.0\,m$、闸底高程152.0\,m为例，若闸前水位168.0\,m且行近流速水头暂取0.2\,m，则$H=16.2\,m$。取教学系数$C_d=0.65$（弧形闸门常用范围约0.6～0.7）。$a/H=0.185<0.65$满足闸孔出流（孔流）判别条件；题设下游水位低于闸底板，属自由出流。单孔估算流量为$Q_1=0.65\times8.0\times3.0\times\sqrt{2\times9.81\times16.2}\approx278\,m^3/s$，三孔同步开度的估算总量约为$834\,m^3/s$。该数值只用于接口和量纲教学，真实工程必须由批准的水力曲线、上下游水位和淹没系数复核。
 
 当下游水位抬高导致淹没出流时，平台先按下游水位与收缩断面水深的关系判断自由出流是否失效，再使用带$\sigma$的关系或转交工程曲线服务。不能为了得到目标流量而强行把$C_d$调到范围之外。反算接口返回每孔开度、预测流量、约束余量、采用的公式版本和适用性结论；若多个组合都满足偏差，则按均衡启闭、设备可用性和操作次数排序，并让专业分析员选择。
 
@@ -2519,13 +2519,22 @@ public final class QualityClassificationTest {
 
 \subsection{案例来源、边界与建设目标}
 
-本节参考北京五一视界数字孪生科技股份有限公司提供的《51WIM数字孪生水利平台V1.0（DEMO）使用说明手册》\footnote{51WIM 及 51WORLD 为北京五一视界数字孪生科技股份有限公司的商标或注册商标，本书仅作技术说明性使用。}，对其流域、水网和水利工程功能进行教学化重组\cite{wuyi2026wim}。本节图示均为按功能链路重新绘制的教学示意图，不复现产品界面。手册中的水位、流量和场景名称属于演示环境，不作为真实工程结论。
+本节参考北京五一视界数字孪生科技股份有限公司提供的《51WIM数字孪生水利平台V1.0（DEMO）使用说明手册》\footnote{51WIM 及 51WORLD 为北京五一视界数字孪生科技股份有限公司的商标或注册商标，本书仅作技术说明性使用。}，对其流域、水网和水利工程功能进行教学化重组\cite{wuyi2026wim}。本节示意图均按功能链路重新绘制；另经该公司书面授权，选用六幅平台界面截图（图\ref{fig:ch08-51wim-portal}至图\ref{fig:ch08-51wim-network}），供读者对照真实产品的界面组织方式。手册中的水位、流量和场景名称属于演示环境，不作为真实工程结论。
 
 水利部关于智慧水利建设的指导文件把预报、预警、预演、预案作为面向业务闭环的能力组合，并要求建设过程围绕数据、模型、知识和业务协同展开\cite{smartWaterGuidance2021,twinWater2023}。面向水库、水闸和蓄滞洪区的数字孪生运行管理指导意见进一步强调对象底账、运行场景、模型服务和过程留痕的衔接\cite{twinProject2024}。因此，本节把厂商手册中的功能链路放入公开政策与工程管理语境中讲解，读者应先理解业务目标和证据要求，再比较具体产品的界面组织方式。
 
 安全监测平台主要回答“当前是否异常、谁来处置”；数字孪生平台还要回答“未来可能怎样、不同方案后果如何、应准备什么预案”。新增能力不是一个三维门户，而是数据底板、模型平台、场景服务和业务闭环的组合。
 
 表\ref{tab:twin-three-portals}把流域、水网、工程三类入口的关注对象与典型任务并列。三者共享同一套底板与编码，区别在于聚合粒度：同一座水库在工程入口是完整的坝体与测点集合，在流域入口只是节点上的一组进出库流量。
+
+图\ref{fig:ch08-51wim-portal}是平台一体化门户的实际界面。三个入口卡片与表\ref{tab:twin-three-portals}的三类业务视角一一对应；读者进入任一入口后看到的都是同一套数据底板，只是聚合粒度和默认视图不同。对照真实界面可以体会：门户设计传达的是业务组织方式，而不是功能清单。
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{chapter08/51wim-portal.jpg}
+\caption{51WIM数字孪生水利平台一体化门户：流域、水网、水利工程三类业务入口（图片来源：51WIM数字孪生水利平台，经授权使用）}
+\label{fig:ch08-51wim-portal}
+\end{figure}
 
 \begin{table}[htbp]
 \centering
@@ -2573,6 +2582,15 @@ public final class QualityClassificationTest {
 \subsection{防台防洪预演的输入与输出}
 
 防台防洪预演从场景定义开始。用户选择历史台风或自定义降雨，设置累计降雨、持续时间、雨型和初始水位；模型平台生成流域产汇流与洪水过程，水动力模型计算淹没范围和时序，空间分析服务统计受影响建筑、道路和重点对象。
+
+图\ref{fig:ch08-51wim-basin}是预演所依托的数字孪生流域总览界面：三维地形场景常驻页面底层，雨水情、水库蓄水和预警信息以浮层面板覆盖在两侧。这正是第6章讨论过的“场景在底、业务在上”的界面架构——预演的每一步输入与输出，都会回到这类总览视图上定位与展示。
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{chapter08/51wim-basin.jpg}
+\caption{数字孪生流域总览：三维场景常驻底层，雨水情与工程要素以浮层面板覆盖（图片来源：51WIM数字孪生水利平台，经授权使用）}
+\label{fig:ch08-51wim-basin}
+\end{figure}
 
 表\ref{tab:typhoon-scenario-contract}把这些输入固化为场景契约。契约化的意义在于可复现：只要契约字段完全相同，两次预演就应当得到相同结果；结果不同时，先查契约里哪一项被改动过，而不是先怀疑模型。
 
@@ -2623,6 +2641,15 @@ public final class QualityClassificationTest {
 
 空间分析把淹没栅格与建筑、道路、学校、医院和避险点叠加。受影响对象的判定必须记录空间数据版本、阈值和分析时间。疏散路线不仅要“最短”，还需避开预计淹没路段、容量不足道路和已封闭区域。
 
+图\ref{fig:ch08-51wim-flood}是一次自定义暴雨情景的淹没仿真结果：绿色至红色的渐变表示淹没范围与相对水深，左侧面板保留了触发本次计算的降雨契约参数。读图时应带着证据链的眼光：画面本身只是结果的一帧，可复核的是它背后的输入快照、模型版本与空间数据版本。
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{chapter08/51wim-flood.jpg}
+\caption{自定义暴雨情景的淹没仿真预演结果（颜色梯度表示淹没范围与相对水深）（图片来源：51WIM数字孪生水利平台，经授权使用）}
+\label{fig:ch08-51wim-flood}
+\end{figure}
+
 表\ref{tab:inundation-evidence}列出淹没影响分析必须留存的证据项。缺少“空间数据版本”这一项时，同一场预演在半年后重跑可能得到不同的受影响对象清单——不是模型变了，而是底图上的建筑和道路更新过。
 
 \begin{table}[htbp]
@@ -2671,6 +2698,15 @@ public final class QualityClassificationTest {
 \subsection{数字孪生水库矩阵与“四预”}
 
 水库矩阵把多个水库的实时水位、入库流量、出库流量、库容、闸门状态和预警放在统一视图中，支持按流域、行政区和风险等级筛选。矩阵不是简单表格汇总；它还要把每个水库连接到三维场景、模型运行、预演方案和预案。
+
+图\ref{fig:ch08-51wim-dam-safety}展示了从矩阵下钻到单座水库后的工程安全视图：左上角给出安全性态综合评分，坝体以网格高亮标出评估范围，右侧同屏呈现预报预警面板。这是“四预”中工程安全能力的典型界面组织——评分只是入口，点开每一项都应能追溯到测点数据、模型版本和评估依据。
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{chapter08/51wim-dam-safety.jpg}
+\caption{水库工程安全评估视图：安全性态评分、坝体评估范围与预报预警面板同屏（图片来源：51WIM数字孪生水利平台，经授权使用）}
+\label{fig:ch08-51wim-dam-safety}
+\end{figure}
 
 表\ref{tab:monitoring-four-pre}把安全监测平台与“四预”能力逐项对照。差别集中在时间方向上：监测回答已经发生了什么，四预要回答接下来可能发生什么、不同处置各有什么后果——后者需要模型、场景版本和预案库，不是给监测页面加一个三维视图就能得到。
 
@@ -2734,6 +2770,15 @@ Q=C_d\,b\,a\sqrt{2gH},
 \]
 
 其中$C_d$为流量系数，弧形闸门教学取值范围为$0.55\le C_d\le0.75$；$b$为单孔宽度，$a$为开度，$H$定义为自闸底板起算的闸前总水头，包含行近流速水头。自由出流简化式一般要求$a/H<0.65$；超过该范围应转用堰流或经批准的工程曲线。淹没出流还需引入淹没系数$\sigma$，将下游水位影响写入$Q=\sigma C_dba\sqrt{2gH}$。真实计算需考虑闸孔数量、启闭约束、下游水位和设备状态。
+
+图\ref{fig:ch08-51wim-spillway}是泄洪方案预演的三维模拟画面：闸门按方案开度开启，水流经溢洪道下泄。需要强调的是，水流动画只是计算结果的可视化表达，其背后是上文的孔流关系与约束校验；界面右侧面板中的开度与泄量数值必须与算法接口的返回值一致，否则画面越逼真，误导越严重。
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{chapter08/51wim-spillway.jpg}
+\caption{泄洪方案预演的三维模拟：闸门按方案开度开启，水流经溢洪道下泄（图片来源：51WIM数字孪生水利平台，经授权使用）}
+\label{fig:ch08-51wim-spillway}
+\end{figure}
 
 表\ref{tab:gate-algorithm-contract}把闸门调度算法的输入、输出与约束固化为接口契约。把这些约束写进契约而不是写在文档里，是为了让越界调用在接口层就被拒绝，例如开度超过设备上限，或目标泄流对应的水头已经不在公式适用范围内。
 
@@ -2898,7 +2943,7 @@ AI输出必须引用数据和模型证据。若工具失败、数据过期或权
 
 本节把\ref{sec:ch06-twin-event-quality}节的事件时间、质量码和状态估计框架落到案例对象编码、时间基线和孪生状态快照，质量不合格的数据沿同一优先级进入隔离或降级流程。
 
-数字孪生首先要解决“现实对象、业务记录和三维对象是不是同一个对象”。清源水库为大坝、闸门、测点、摄像机、道路和避险点分配稳定编码；业务表、时序数据、空间要素和三维模型都保存该编码。对象改名不改变编码，对象拆分、合并或退役则形成新的版本关系。
+数字孪生首先要解决“现实对象、业务记录和三维对象是不是同一个对象”。案例水库为大坝、闸门、测点、摄像机、道路和避险点分配稳定编码；业务表、时序数据、空间要素和三维模型都保存该编码。对象改名不改变编码，对象拆分、合并或退役则形成新的版本关系。
 
 孪生状态不是数据库中某一行最新值，而是给定有效时刻和知识时刻后的可解释快照。有效时刻表示状态在现实世界中发生的时间，知识时刻表示平台何时获知该状态。迟到数据到达后，系统可以重建过去时刻的状态，但不得悄悄改写已经审批的预演结论。
 
@@ -2994,6 +3039,15 @@ AI输出必须引用数据和模型证据。若工具失败、数据过期或权
 
 数字孪生水网把水库、取水口、泵站、输水线路、调蓄池和需水单元组织为有方向的网络。节点表达供水、用水和调蓄，边表达输水能力、损耗、能耗和运行状态。平台先计算基准方案，再对枯水、设备停运或需求增加等情景进行方案比较。
 
+图\ref{fig:ch08-51wim-network}是联合调度的网络拓扑视图：节点表示水库、泵站、水厂与需水单元，连线表达输水链路及其当前流量与能力。这张图与下文的平衡式逐项对应——每个节点就是式中的一项$S_i$、$D_j$或$\Delta V_k$，每条边的损耗计入$L$。拓扑视图的价值在于让平衡核算有了空间落点：缺口出现时能立即回答“缺在哪个节点、卡在哪条边”。
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{chapter08/51wim-network.jpg}
+\caption{水网联合调度拓扑视图：节点为水源、泵站与需水单元，连线表达输水链路（图片来源：51WIM数字孪生水利平台，经授权使用）}
+\label{fig:ch08-51wim-network}
+\end{figure}
+
 对一个调度时段，可用简化平衡式检查结果：
 \[
 \sum_i S_i + \sum_k \Delta V_k
@@ -3052,7 +3106,7 @@ AI输出必须引用数据和模型证据。若工具失败、数据过期或权
 
 \subsection{场景版本、方案比较与不确定性表达}\label{sec:ch08-twin-model-card}
 
-本节把\ref{sec:ch06-twin-model-card}节的模型卡框架落到清源水库的场景版本、方案比较和不确定性表达，具体字段与审批证据按案例数据和模型运行记录生成。
+本节把\ref{sec:ch06-twin-model-card}节的模型卡框架落到案例水库的场景版本、方案比较和不确定性表达，具体字段与审批证据按案例数据和模型运行记录生成。
 
 一个场景由输入版本、模型版本、参数集和评价指标共同标识。修改降雨、初始水位或闸门约束都会产生新版本；只改变镜头、图层透明度等显示设置不会产生计算版本。平台用父子关系保存分支，允许从同一基线形成“现状延续”“提前泄洪”“局地强降雨”等方案。
 
@@ -3362,15 +3416,15 @@ AI工具调用失败 & 明确失败并回到手工流程 & 错误信息与人工
 \draw[<->,draw=Primary,thick] (service)--(db);
 \draw[<->,draw=Accent,thick] (service)--(object);
 \end{tikzpicture}
-\caption{清源水库平台部署架构}
+\caption{案例水库平台部署架构}
 \label{fig:system-deployment-architecture}
 \end{figure}
 
 开发、测试和生产环境使用相同的配置结构，差异通过外部参数和密钥管理注入。禁止把JWT密钥、数据库口令或地图令牌写入镜像和教材示例。发布流水线与配置项应分别受持续交付和配置管理约束\cite{humble2010,tichy1994}。
 \subsubsection{从部署图到可执行编排}
-部署图只有转换为可重复执行的配置才具有运维价值。清源水库平台的最小闭环由前端静态资源、Spring Boot API、PostgreSQL 及其 PostGIS 与 TimescaleDB 扩展、Redis、Kafka 五类运行单元组成。前端只依赖 API 入口，业务服务通过内部网络访问数据库、缓存和消息总线；数据库数据卷、Kafka 日志卷和备份卷与容器生命周期分离，重新创建容器不能丢失观测、预警、工单和审计证据。
+部署图只有转换为可重复执行的配置才具有运维价值。案例水库平台的最小闭环由前端静态资源、Spring Boot API、PostgreSQL 及其 PostGIS 与 TimescaleDB 扩展、Redis、Kafka 五类运行单元组成。前端只依赖 API 入口，业务服务通过内部网络访问数据库、缓存和消息总线；数据库数据卷、Kafka 日志卷和备份卷与容器生命周期分离，重新创建容器不能丢失观测、预警、工单和审计证据。
 编排文件表达网络、卷、依赖和健康条件，而不是把参数硬编码在镜像里。数据库镜像明确包含 PostGIS 与 TimescaleDB 扩展，启动脚本执行与 8.3 节相同的迁移版本；Kafka 只有健康检查通过后才接收业务事件，Spring Boot 同时等待数据库和消息总线就绪。生产环境应把镜像标签、资源上限、节点亲和性和日志驱动器按压测结果替换。
-\begin{lstlisting}[language=YAML,caption={清源水库平台 Docker Compose 编排基线},label={lst:ch08-compose}]
+\begin{lstlisting}[language=YAML,caption={案例水库平台 Docker Compose 编排基线},label={lst:ch08-compose}]
 services:
   web: {image: registry.example.com/qingyuan-web:APP_VERSION, ports: ["8080:80"], depends_on: {api: {condition: service_healthy}}}
   api:
@@ -3540,7 +3594,7 @@ Kafka 重放和定时补传都可能造成重复事件。服务端以 \texttt{ev
 提交一份《智慧水利平台典型应用设计与验收报告》，至少包含：
 
 \begin{itemize}
-\item 清源水库案例参数、角色、对象编码和业务闭环；
+\item 案例水库参数、角色、对象编码和业务闭环；
 \item 统一技术栈、模块架构、部署架构与关键接口；
 \item 观测、质量、四级预警、工单和模型运行的数据样例；
 \item Three.js工程场景与一个图表/测点联动页面；
@@ -3559,7 +3613,7 @@ Kafka 重放和定时补传都可能造成重复事件。服务端以 \texttt{ev
 \item 数字孪生预演结果应明确标记模型版本和“模拟”状态。（判断：对／错）
 
 \item[\textbf{简答与设计题}]
-\item 说明清源水库案例中值班员、专业分析员、运维员和审批人的权限边界。
+\item 说明案例水库中值班员、专业分析员、运维员和审批人的权限边界。
 \item 绘制PZ-07从观测、质量检查到黄色预警、工单和复盘的事件链。
 \item 比较安全监测平台与数字孪生“四预”平台的能力边界。
 \item 为某水库设计“四预”页面信息架构与算法接口清单。

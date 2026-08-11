@@ -30,7 +30,7 @@ async function submit() {
 
 <template>
   <main class="login">
-    <h1>清源水库安全监测平台</h1>
+    <h1>水利工程安全监测平台</h1>
     <form @submit.prevent="submit">
       <label>账号<input v-model.trim="username" autocomplete="username" required></label>
       <label>密码<input v-model="password" type="password" autocomplete="current-password" required></label>

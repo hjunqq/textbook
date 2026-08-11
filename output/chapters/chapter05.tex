@@ -14,7 +14,7 @@
 
 \paragraph*{引言}
 
-智慧水利后端负责接入监测数据、执行业务规则、维护一致性并向前端提供接口。本章统一采用Java 17、Spring Boot 3.2+、Spring Security 6、Jakarta Persistence 3.1与Jakarta Servlet 6.x；JWT示例按jjwt 0.11.x接口编写。框架配置、注解语义与版本迁移细节，一律以官方参考文档为准\cite{springBootDocs,springSecurityDocs,jakartaPersistence}；书中给出的版本边界只描述编写时点的状态。分布式事务和领域驱动设计作为选学内容，不作为首次后端课程的前置要求。
+智慧水利后端负责接入监测数据、执行业务规则、维护一致性并向前端提供接口。本章统一采用Java 17、Spring Boot 3.2+、Spring Security 6、Jakarta Persistence 3.1与Jakarta Servlet 6.x；JWT示例按jjwt 0.11.x接口编写。框架配置、注解语义与版本迁移细节，一律以官方参考文档为准\cite{springBootDocs,springSecurityDocs,jakartaPersistence}；书中给出的版本边界只描述编写时点的状态。分布式事务和领域驱动设计作为选学内容，不作为首次后端课程的前置要求。本章延续第3章的架构决策：模块化单体内部按控制器、服务、数据访问分层，观测写入经Kafka削峰后进入TimescaleDB；案例水库峰值每秒10条观测、50并发查询的负载数字，是本章连接池、缓存与分页设计的直接依据。
 
 \begin{tipbox}
 \paragraph{工程版本线：v1（前端只读切片） $\rightarrow$ v2（认证与观测API）}起点是第4章交付的 v1 前端。本章结束时你应交付 \textbf{v2}：为 v1 提供真实数据的后端——登录签发 JWT、受保护的测点与观测查询、事务与幂等写入——对应仓库 \texttt{backend/} 的 \texttt{JwtService}、\texttt{JwtAuthenticationFilter}、\texttt{SecurityConfig}、\texttt{AuthController}、\texttt{AssetController}、\texttt{ReadingService}；验证命令 \texttt{mvn test}，联调后前端 401 分流与登录回跳应全部生效。
@@ -221,7 +221,7 @@ Spring Boot通过约定、自动配置和Starter依赖减少基础配置。自�
 
 \subsection{application.yml 与 Profile 多环境}
 
-配置文件按环境拆分，公共配置放在\texttt{application.yml}，开发、测试和生产差异分别放在\texttt{application-development.yml}、\texttt{application-test.yml}和\texttt{application-production.yml}。启动时使用\texttt{SPRING\_PROFILES\_ACTIVE}选择 Profile，敏感值通过环境变量或密钥管理器注入。Profile 只表达环境差异，不应把业务阈值复制成多套；清源水库的工程参数仍以第8章 8.1 参数表为唯一来源。
+配置文件按环境拆分，公共配置放在\texttt{application.yml}，开发、测试和生产差异分别放在\texttt{application-development.yml}、\texttt{application-test.yml}和\texttt{application-production.yml}。启动时使用\texttt{SPRING\_PROFILES\_ACTIVE}选择 Profile，敏感值通过环境变量或密钥管理器注入。Profile 只表达环境差异，不应把业务阈值复制成多套；案例水库的工程参数仍以第8章 8.1 参数表为唯一来源。
 
 \begin{lstlisting}[label={lst:ch05-profile-config},language=YAML,caption={多环境配置与外部化密钥}]
 # application.yml：所有环境共享的安全默认值
@@ -301,7 +301,7 @@ class StationRefreshService {
 
 Bean 的作用域也影响生命周期。单例适合无状态服务和连接池，原型适合每次创建独立对象，请求作用域只在 Web 请求中使用。把请求上下文注入单例时，要通过代理或显式参数传递，不能把上一次请求的测站 ID 保存到共享字段。配置属性 record 采用构造器绑定，必须通过\texttt{@EnableConfigurationProperties}或\texttt{@ConfigurationPropertiesScan}注册；仅在 record 上写注解而没有启用扫描，容器不会创建可注入的\texttt{JwtProperties}。
 
-工程目录应与依赖方向一致：\texttt{controller}只依赖\texttt{service}，\texttt{service}依赖领域对象和仓储接口，\texttt{repository}适配 PostgreSQL/PostGIS/TimescaleDB，\texttt{config}集中放安全、序列化和外部客户端。测试代码按同样的包结构组织，配置文件分为测试 Profile 和生产 Profile，避免在测试中意外连接真实清源水库数据库。
+工程目录应与依赖方向一致：\texttt{controller}只依赖\texttt{service}，\texttt{service}依赖领域对象和仓储接口，\texttt{repository}适配 PostgreSQL/PostGIS/TimescaleDB，\texttt{config}集中放安全、序列化和外部客户端。测试代码按同样的包结构组织，配置文件分为测试 Profile 和生产 Profile，避免在测试中意外连接真实案例水库数据库。
 
 \subsection{自动配置诊断与启动契约}
 
@@ -533,7 +533,7 @@ class StationReadingEntity {
 
 \subsection{N+1 查询与 fetch join}
 
-N+1 的典型形状是先查询 N 条读数，再对每条读数访问一次测站字段，数据库日志中会出现 1 条集合查询加 N 条单项查询。数据量小的时候不明显，到了清源水库的历史查询或报表导出就会耗尽连接池。修复前先用 SQL 日志、慢查询日志或测试断言确认问题，再选择 fetch join、\texttt{@EntityGraph}、批量大小或 DTO 投影；不能仅凭“加了索引”推断 N+1 已消失。
+N+1 的典型形状是先查询 N 条读数，再对每条读数访问一次测站字段，数据库日志中会出现 1 条集合查询加 N 条单项查询。数据量小的时候不明显，到了案例水库的历史查询或报表导出就会耗尽连接池。修复前先用 SQL 日志、慢查询日志或测试断言确认问题，再选择 fetch join、\texttt{@EntityGraph}、批量大小或 DTO 投影；不能仅凭“加了索引”推断 N+1 已消失。
 
 \begin{lstlisting}[label={lst:ch05-fetch-join},language=Java,caption={用 fetch join 消除列表接口的 N+1}]
 import org.springframework.data.jpa.repository.*;
@@ -1598,7 +1598,7 @@ class CorsConfig {
 
 \subsection{威胁模型与认证边界}
 
-安全设计先描述需要保护的对象和攻击路径。清源水库平台至少要保护值班员身份、测站写入权限、预警处置记录、设备上报密钥和审计日志；攻击者可能伪造 Bearer 令牌、重放被窃取的刷新令牌、利用错误码枚举账号、通过跨源页面诱导请求，或在日志和备份中搜寻长期有效的密钥。JWT 只解决“令牌由谁签发、内容是否被篡改”，不能解决令牌被复制后的重放，也不能代替传输层加密、账户生命周期和数据库权限。
+安全设计先描述需要保护的对象和攻击路径。案例水库平台至少要保护值班员身份、测站写入权限、预警处置记录、设备上报密钥和审计日志；攻击者可能伪造 Bearer 令牌、重放被窃取的刷新令牌、利用错误码枚举账号、通过跨源页面诱导请求，或在日志和备份中搜寻长期有效的密钥。JWT 只解决“令牌由谁签发、内容是否被篡改”，不能解决令牌被复制后的重放，也不能代替传输层加密、账户生命周期和数据库权限。
 
 访问令牌的有效期应短于一次值班班次中可接受的暴露窗口，刷新令牌的寿命则受设备风险、撤销能力和人工换班流程约束。有效期不是越长越方便：时间越长，泄露后的可利用窗口越大；时间越短，客户端刷新和故障恢复越频繁。工程上要结合网关超时、Redis 可用性、时钟偏差和移动网络重连确定数值，并把这些配置写入安全评审记录，而不是在代码中散落魔法数字。
 
@@ -2125,7 +2125,7 @@ class ReadingMetrics {
 }
 \end{lstlisting}
 
-清单\ref{lst:ch05-actuator-metrics}把健康检查和业务指标分开：健康检查回答“实例是否能工作”，指标回答“处理质量和容量如何”。指标标签使用有限枚举，如质量码、结果类型和服务版本，不能把测站 ID、用户 ID 或完整 URL 作为高基数标签。告警阈值与清源水库 8.1 参数表中的工程阈值分离，运维告警不能修改业务预警标准。
+清单\ref{lst:ch05-actuator-metrics}把健康检查和业务指标分开：健康检查回答“实例是否能工作”，指标回答“处理质量和容量如何”。指标标签使用有限枚举，如质量码、结果类型和服务版本，不能把测站 ID、用户 ID 或完整 URL 作为高基数标签。告警阈值与案例水库 8.1 参数表中的工程阈值分离，运维告警不能修改业务预警标准。
 
 \begin{table}[htbp]
 \centering
@@ -2185,14 +2185,14 @@ Actuator 与日志端点本身也是生产攻击面。只暴露健康和必要�
 
 连接池和线程池必须共同估算。一个请求可能先占数据库连接，再等待 Kafka 回调或外部 HTTP，若线程数远大于连接池就会产生排队，若连接池远大于数据库容量则会放大锁竞争。使用压测数据设定最大并发、队列长度、拒绝策略和优雅停机时间；停机先停止接收新消息，再等待正在处理的事务提交或回滚，最后关闭连接池。健康检查只有在资源准备好后才报告 ready，滚动发布不会把半初始化实例加入流量。
 
-缓存、分页和指标的配置要纳入版本管理。每次改变 TTL、最大页大小、连接池或告警阈值，都在变更记录中说明预期收益、风险、验证查询和回滚值；环境变量覆盖只改变部署参数，不改变清源水库的工程参数。运维手册提供一条从指标告警到日志、SQL、Kafka 偏移量和发布版本的排查路径，值班员按步骤即可复现和升级问题。
+缓存、分页和指标的配置要纳入版本管理。每次改变 TTL、最大页大小、连接池或告警阈值，都在变更记录中说明预期收益、风险、验证查询和回滚值；环境变量覆盖只改变部署参数，不改变案例水库的工程参数。运维手册提供一条从指标告警到日志、SQL、Kafka 偏移量和发布版本的排查路径，值班员按步骤即可复现和升级问题。
 每次演练结束后还要归档指标快照、关键日志、执行计划和责任人复盘结论，形成下一轮容量评估的可追溯基线。
 复盘结论应同步到发布记录和运维知识库。
 容量评估还应标注数据版本和运行环境，保证不同批次的结果可比较。
 
 \section{测试策略与质量门禁}
 
-测试不是在开发完成后“补一遍请求”，而是把接口契约、事务边界和安全策略转化为可以重复执行的证据。对清源水库安全监测平台而言，测试数据必须带有测站编号、采样时间、质量码和操作者上下文；只验证 HTTP 状态码而不检查质量码和审计字段，仍可能把无效读数送入风险计算。测试报告应记录代码版本、数据库迁移版本、配置 Profile、时区和数据集版本，便于值班员在故障复盘时重现同一条件。
+测试不是在开发完成后“补一遍请求”，而是把接口契约、事务边界和安全策略转化为可以重复执行的证据。对水利工程安全监测平台而言，测试数据必须带有测站编号、采样时间、质量码和操作者上下文；只验证 HTTP 状态码而不检查质量码和审计字段，仍可能把无效读数送入风险计算。测试报告应记录代码版本、数据库迁移版本、配置 Profile、时区和数据集版本，便于值班员在故障复盘时重现同一条件。
 
 单元测试关注一个类在依赖替身下的决策：例如服务层收到越界水位时是否拒绝写入、重复的幂等键是否返回同一结果、乐观锁冲突是否转换为409。它不启动 Servlet 容器，也不依赖真实网络。集成测试则验证多个边界的协作，包括 Spring MVC 参数绑定、Spring Security 过滤链、JPA 事务和 PostgreSQL 约束；这类测试允许启动应用上下文，但必须明确清理数据。端到端测试再覆盖 Kafka、Redis 或反向代理等外部依赖，数量应少而稳定，不能把所有业务分支都塞进一条慢测试。
 

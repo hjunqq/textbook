@@ -35,7 +35,7 @@ def stations() -> list[dict[str, object]]:
             rows.append({
                 "asset_id": code,
                 "asset_type": kind,
-                "display_name": f"清源{kind}{idx:02d}",
+                "display_name": f"案例{kind}{idx:02d}",
                 "unit": unit,
                 "longitude": round(111.2000 + offset * 0.0012, 6),
                 "latitude": round(30.5000 + offset * 0.0009, 6),

@@ -13,7 +13,7 @@
 
 \paragraph*{引言}
 
-智慧水利平台的前端把测站、工程、告警和调度数据转化为可理解、可操作的界面。本章采用Vue 3.4+、Vue Router 4、Pinia 2与Vite 5作为教学基线；框架API与配置项随版本演进，遇到与书中示例不一致时，一律以各自官方文档为准\cite{vueDocs,vueRouterDocs,piniaDocs,viteDocs}。示例遵循HTML、CSS和ECMAScript标准，语言与平台特性可在MDN查证\cite{mdnWebDocs}，不依赖特定浏览器的私有能力。
+智慧水利平台的前端把测站、工程、告警和调度数据转化为可理解、可操作的界面。本章采用Vue 3.4+、Vue Router 4、Pinia 2与Vite 5作为教学基线；框架API与配置项随版本演进，遇到与书中示例不一致时，一律以各自官方文档为准\cite{vueDocs,vueRouterDocs,piniaDocs,viteDocs}。示例遵循HTML、CSS和ECMAScript标准，语言与平台特性可在MDN查证\cite{mdnWebDocs}，不依赖特定浏览器的私有能力。本章的页面都围绕水利工程安全监测平台展开：第3章为它选定的模块化单体与MVC分层，在前端对应视图、状态与请求的职责切分；页面中的测点与预警演示数字一律取自8.1节参数表。
 
 \begin{tipbox}
 \paragraph{工程版本线：v0（空仓库） $\rightarrow$ v1（前端只读切片）}起点是配套仓库的空前端骨架。本章结束时你应交付 \textbf{v1}：一个能登录、能按测点与时间窗查询并渲染曲线的只读监测页面——对应仓库 \texttt{frontend/} 的 \texttt{utils/auth.js}、\texttt{utils/request.js}、\texttt{views/LoginView.vue}、\texttt{router/index.js}、\texttt{stores/monitoring.js} 与 \texttt{components/MonitoringDashboard.vue}；验证命令 \texttt{npm ci \&\& npm test \&\& npm run build}。
@@ -124,12 +124,12 @@ HTML 文件被浏览器接收后，先经过字节解码和词法分析，再形
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>清源水库安全监测平台</title>
+  <title>水利工程安全监测平台</title>
 </head>
 <body>
   <a class="skip-link" href="#monitor-main">跳到主要内容</a>
   <header>
-    <h1>清源水库安全监测平台</h1>
+    <h1>水利工程安全监测平台</h1>
     <p>面向值班员的实时监测工作台</p>
   </header>
   <nav aria-label="主导航">
@@ -154,7 +154,7 @@ HTML 文件被浏览器接收后，先经过字节解码和词法分析，再形
     </aside>
   </main>
   <footer id="data-note">
-    <p>数据来源：清源水库安全监测平台；更新时间：
+    <p>数据来源：水利工程安全监测平台；更新时间：
       <time datetime="2026-08-07T08:00:00+08:00">08:00</time></p>
   </footer>
 </body>
@@ -422,7 +422,7 @@ CSS 单位应与测量对象和缩放目标相匹配。\texttt{px}适合边框�
 }
 \end{lstlisting}
 
-盒模型、优先级、单位和定位需要一起调试。先在 Elements 面板确认元素是否处于预期的文档流，再在 Computed 面板核对最终的\texttt{box-sizing}、尺寸和来源，最后用不同字体缩放、窗口宽度和键盘操作验证。对于清源水库安全监测平台的卡片，推荐先确定结构尺寸和层叠边界，再添加颜色与动画；这样即使浏览器禁用动画或值班员放大字体，关键水位、预警等级和更新时间仍然可读。CSS 规则的教学目标不是记住属性清单，而是能够从布局现象反推盒模型、层叠和参照系。
+盒模型、优先级、单位和定位需要一起调试。先在 Elements 面板确认元素是否处于预期的文档流，再在 Computed 面板核对最终的\texttt{box-sizing}、尺寸和来源，最后用不同字体缩放、窗口宽度和键盘操作验证。对于水利工程安全监测平台的卡片，推荐先确定结构尺寸和层叠边界，再添加颜色与动画；这样即使浏览器禁用动画或值班员放大字体，关键水位、预警等级和更新时间仍然可读。CSS 规则的教学目标不是记住属性清单，而是能够从布局现象反推盒模型、层叠和参照系。
 
 \subsection{Flexbox：一维的告警工具栏}
 
@@ -470,7 +470,7 @@ Flexbox 为一个容器建立主轴和交叉轴。\texttt{flex-direction}决定�
 </head>
 <body>
   <header class="alert-toolbar" aria-label="告警工具栏">
-    <strong class="alert-toolbar__station">清源水库·测站筛选</strong>
+    <strong class="alert-toolbar__station">案例水库·测站筛选</strong>
     <span class="alert-toolbar__summary" role="status">当前有 2 条待确认事件</span>
     <span class="alert-toolbar__actions">
       <button type="button">刷新</button>
@@ -552,7 +552,7 @@ Grid 同时管理行和列，适合把侧栏、地图、曲线、告警列表和
 </head>
 <body>
   <main class="dashboard">
-    <header class="dashboard__header"><h1>清源水库安全监测</h1></header>
+    <header class="dashboard__header"><h1>水利工程安全监测</h1></header>
     <aside class="dashboard__side"><h2>测站</h2><p>站点列表</p></aside>
     <section class="dashboard__main" aria-labelledby="metrics-title">
       <h2 id="metrics-title">实时指标</h2>
@@ -745,7 +745,7 @@ Flex 的视觉顺序还涉及语义和键盘路径。\texttt{order}只改变绘�
 字符串可用模板字面量组合，也可通过\texttt{trim()}、\texttt{includes()}、\texttt{slice()}和\texttt{split()}完成常见处理。完成字符串处理后，再使用比较、逻辑和算术运算符表达业务规则。例如，某水库汛期警戒水位统一设为5.0米：
 
 \begin{lstlisting}[label={lst:ch04-js-basics},language=JavaScript,caption={JavaScript基础变量与函数}]
-const stationName = "清源水库";
+const stationName = "案例水库";
 const warningLevel = 5.0; // 单位：m，本章同一示例场景统一采用该阈值
 const reading = { stationId: "ST-01", level: 5.12, unit: "m" };
 const status = reading.level >= warningLevel ? "预警" : "正常";
@@ -1338,7 +1338,7 @@ export function resetRequests() {
 
 前后端对字段的兼容要采用“先增加、后切换、再清理”的节奏。后端新增\texttt{qualityFlag}时，可以在一段时间同时返回旧字段和新字段，前端先读取新字段、缺失时回退旧字段，并在日志中统计回退次数；确认所有客户端已经升级后再删除旧字段。删除字段前要检查缓存、导出任务和消息消费者，不能只在 Swagger 页面中看到接口变更就直接发布。日期时间统一使用带时区的 ISO 8601 字符串，数值单位写进字段说明，枚举值变化则由版本化接口或兼容映射处理。
 
-本章的联调案例以清源水库安全监测平台为背景，但验收方法可以迁移到其他水利业务。无论是测站读数、告警处置还是工程巡检，均可沿“输入契约—认证上下文—业务状态—持久化结果—界面反馈”五个问题追踪。发生故障时先用\texttt{traceId}把浏览器 Network、网关访问日志、应用日志和数据库审计串起来，再判断属于前端状态、网络转发、认证授权还是领域规则；不要一看到页面空白就修改 CSS，也不要一看到 401 就延长令牌有效期。可复核的证据链比局部的临时修补更能降低值班系统的运行风险。
+本章的联调案例以水利工程安全监测平台为背景，但验收方法可以迁移到其他水利业务。无论是测站读数、告警处置还是工程巡检，均可沿“输入契约—认证上下文—业务状态—持久化结果—界面反馈”五个问题追踪。发生故障时先用\texttt{traceId}把浏览器 Network、网关访问日志、应用日志和数据库审计串起来，再判断属于前端状态、网络转发、认证授权还是领域规则；不要一看到页面空白就修改 CSS，也不要一看到 401 就延长令牌有效期。可复核的证据链比局部的临时修补更能降低值班系统的运行风险。
 
 跨域配置是联调中最容易被忽略的边界。开发代理把浏览器请求伪装成同源，只能解决开发端口不同的问题；生产环境的允许来源、允许方法、允许请求头和是否允许凭据必须由网关与后端共同约定。带 Authorization 头的请求会触发预检，服务端应正确响应\texttt{OPTIONS}，但不能因为预检通过就跳过真正请求的认证。\texttt{Access-Control-Allow-Origin:*}与带凭据请求不能同时使用，允许来源也应是配置白名单而不是反射任意\texttt{Origin}。发现“浏览器报跨域、curl 正常”时，应分别检查预检响应、实际响应和网关是否丢失认证头。
 
@@ -1348,7 +1348,7 @@ export function resetRequests() {
 
 发布前可以进行一次“故障注入式”验收：把响应状态依次改为 401、403、404、409、429 和 503；把响应延迟设置为 100 毫秒、超时阈值和超时阈值的两倍；将令牌的 exp 调整到过去、将 issuer 改成错误值、删掉 permissions 字段；再让代理返回无效 JSON。每个场景都要记录页面是否可操作、是否产生重复请求、是否保存了原路径、是否有泄露敏感信息和是否生成唯一 traceId。故障注入的目标不是让页面永不出错，而是让错误有边界、有提示、有恢复动作，并且不会把错误状态伪装成正常水位或空告警。
 
-当后端接口需要升级时，先在契约测试中锁定字段类型和枚举取值，再在前端适配层集中处理兼容逻辑。组件不要直接拼接 URL、读取 token 或解释状态码；它们调用经过封装的 API 函数，由适配层把后端错误转换为稳定的领域错误。这样，即使网关把路径从\texttt{/api}迁移到版本化前缀，或后端把分页字段从\texttt{total}扩展为\texttt{totalElements}，页面仍然只需替换一处适配代码。对清源水库这种值班系统，接口的可观测性和可回退性与视觉效果同样重要。
+当后端接口需要升级时，先在契约测试中锁定字段类型和枚举取值，再在前端适配层集中处理兼容逻辑。组件不要直接拼接 URL、读取 token 或解释状态码；它们调用经过封装的 API 函数，由适配层把后端错误转换为稳定的领域错误。这样，即使网关把路径从\texttt{/api}迁移到版本化前缀，或后端把分页字段从\texttt{total}扩展为\texttt{totalElements}，页面仍然只需替换一处适配代码。对案例水库这种值班系统，接口的可观测性和可回退性与视觉效果同样重要。
 
 为了让联调结果可复现，还应固定测试数据和时间窗口。每个测站至少准备一条 valid 读数、一条 suspect 读数和一条 missing 读数，分别验证正常展示、可信等级降低和停止打分；告警处置单准备“待确认—已确认—已关闭”三种状态，检查不同角色能执行的动作。测试请求携带固定的\texttt{X-Request-Id}，响应日志保留该值、测站 ID、质量码和耗时，数据库审计记录再补充操作者和事务结果。这样，页面截图只是结果的一部分，真正的验收依据还包括接口报文、日志和持久化状态。
 
@@ -1362,7 +1362,7 @@ export function resetRequests() {
 
 当证据链完整时，团队可以在不复现全部现场的情况下定位问题：状态码说明协议边界，错误码说明领域原因，traceId 串起跨服务时间线，审计记录确认最终写入。前端课程至此不只是“把页面做出来”，而是把可操作、可解释、可审计的界面交付给真正承担值班责任的用户。
 
-在清源水库演练中，值班员先从测站列表打开详情，专业分析员随后提交处置意见，审批人确认后才允许关闭事件。三个角色看到的按钮、请求权限和审计结果必须一致；若任何一个角色在页面上看到可点击操作却收到 403，应回到路由元数据、后端方法授权和角色映射逐层核对。通过这种真实工作流走查，学生能把前端组件、JWT 权限和水利业务责任联系起来。
+在案例水库演练中，值班员先从测站列表打开详情，专业分析员随后提交处置意见，审批人确认后才允许关闭事件。三个角色看到的按钮、请求权限和审计结果必须一致；若任何一个角色在页面上看到可点击操作却收到 403，应回到路由元数据、后端方法授权和角色映射逐层核对。通过这种真实工作流走查，学生能把前端组件、JWT 权限和水利业务责任联系起来。
 
 \section{DOM操作与事件处理}
 
@@ -1718,7 +1718,7 @@ props、emit、slot 和 provide/inject 形成四条不同的依赖路径。props
 
 监测页面常见的竞态发生在“用户快速切换测站”或“离开页面后请求才返回”。每次加载都应生成一个请求控制器，并把当前请求的序号或测站 ID保存在闭包中；响应到达时，只有仍然匹配当前序号的结果才写入状态。\texttt{AbortController}可以释放网络资源，但取消并不保证所有中间层都立即停止，因此仍需在写入前检查\texttt{signal.aborted}。异常分类应区分网络不可达、权限过期、服务器错误和业务空结果，让界面给出可行动的提示。
 
-定时刷新要先定义业务窗口，再确定间隔。若清源水库的实时读数允许三十秒延迟，页面可以使用三十秒定时器；当浏览器标签页进入后台时，可以暂停刷新，回到前台再立即拉取一次。刷新函数不能因为上一次请求较慢而并发堆积，可以使用“正在加载”标志、队列或取消旧请求实现串行化。定时器、事件监听器、WebSocket 和图表实例都必须在\texttt{onUnmounted}中释放，资源的创建与释放最好位于同一组合式函数，便于复用和单元测试。
+定时刷新要先定义业务窗口，再确定间隔。若案例水库的实时读数允许三十秒延迟，页面可以使用三十秒定时器；当浏览器标签页进入后台时，可以暂停刷新，回到前台再立即拉取一次。刷新函数不能因为上一次请求较慢而并发堆积，可以使用“正在加载”标志、队列或取消旧请求实现串行化。定时器、事件监听器、WebSocket 和图表实例都必须在\texttt{onUnmounted}中释放，资源的创建与释放最好位于同一组合式函数，便于复用和单元测试。
 
 可把生命周期验收写成可观察的步骤：挂载组件后检查只创建一个定时器；切换测站时确认旧请求被取消或其结果被丢弃；卸载组件后检查网络面板没有继续写入、控制台没有更新已销毁实例的警告；重新挂载时确认资源数量回到一个。对实时订阅还要验证断线重连、重复消息和权限失效，避免把连接重试当作无限循环。图\ref{fig:ch04-a46-lifecycle-cleanup}中的箭头代表这些可测试的资源边界，而不是抽象的装饰。
 
@@ -1747,7 +1747,7 @@ import { RouterLink, RouterView } from 'vue-router';
 
 <template>
   <header class="app-header">
-    <RouterLink to="/">清源水库安全监测平台</RouterLink>
+    <RouterLink to="/">水利工程安全监测平台</RouterLink>
     <nav aria-label="主导航">
       <RouterLink to="/stations">测站</RouterLink>
       <RouterLink to="/alerts">告警中心</RouterLink>

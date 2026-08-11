@@ -20,7 +20,7 @@ onUnmounted(() => { window.removeEventListener('resize', resize); chart?.dispose
 
 <template>
   <main class="monitoring-dashboard">
-    <h1>清源水库安全监测</h1>
+    <h1>水利工程安全监测</h1>
     <p v-if="store.error" role="alert">{{ store.error }}</p>
     <div class="asset-list"><button v-for="asset in store.assets" :key="asset.assetId" :class="{active: asset.assetId === store.selectedAssetId}" @click="store.selectedAssetId = asset.assetId">{{ asset.displayName }}</button></div>
     <div ref="chartElement" class="reading-chart" aria-label="测点观测曲线"></div>
