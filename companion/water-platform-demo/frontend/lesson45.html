@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><title>4.5 数据请求与页面状态</title>
+<style>
+  body { font-family: system-ui, sans-serif; margin: 2rem; }
+  #assets { columns: 3; list-style: none; padding: 0; } #assets li { break-inside: avoid; }
+  #assets button { width: 100%; margin: .15rem 0; text-align: left; }
+  #latest { margin-top: 1rem; padding: .6rem; border: 1px solid #999; min-height: 1.5rem; }
+  #latest[data-state="loading"] { color: #666; font-style: italic; }
+  #latest[data-state="error"] { color: #b00020; }
+  #latest[data-state="empty"] { color: #666; }
+</style></head>
+<body>
+<h1>测点详情（4.5 节阶段页）</h1>
+<p>先启动 <code>node teaching-api/server.mjs</code>，再 <code>npm run dev</code> 打开本页。故障注入约定见教材 8.1 节的“教学接口故障注入”表：在浏览器地址栏无法直接注入，请在 detail.js 的 <code>loadLatest</code> 路径后临时加 <code>?teach=delay:3000</code> 复现 4.5.4 节的故障。</p>
+<ul id="assets"></ul>
+<p id="latest"></p>
+<script type="module" src="/src/lesson45/main.js"></script>
+</body></html>

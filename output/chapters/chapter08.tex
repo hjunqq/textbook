@@ -110,7 +110,7 @@
 \texttt{GET /api/assets} & \texttt{assetType, after, limit} & \texttt{assetId, displayName, assetType, unit}（数组） & 值班员、分析员；只返回 active & 骨架 \\
 \shortstack[l]{\texttt{GET /api/assets/}\\ \texttt{\{id\}/readings}} & \texttt{from, to}（ISO-8601 带时区），可选 \texttt{agg} & \texttt{occurredAt, value, unit, quality, eventId, version}（数组）；\texttt{quality} 取 valid/suspect/missing & 值班员、分析员；时间窗左闭右开；400 参数非法 & 骨架 \\
 \shortstack[l]{\texttt{GET /api/assets/}\\ \texttt{\{id\}/readings/latest}} & 无 & 单个观测；尚无观测时 204 & 值班员、分析员；404 对象不存在 & 教学接口；第5章实现 \\
-\texttt{GET /api/warnings} & \texttt{level, status, page} & 预警证据摘要；\texttt{level} 取 NONE/BLUE/YELLOW/ORANGE/RED & 值班员、分析员；未评估单独显示 & 第8章 \\
+\texttt{GET /api/warnings} & \texttt{level, status, assetId, page} & 预警证据摘要；\texttt{level} 取 NONE/BLUE/YELLOW/ORANGE/RED & 值班员、分析员；未评估单独显示 & 第8章 \\
 \texttt{POST /api/warnings/\{id\}/ack} & 请求追踪号、版本 & 最新预警状态 & 值班员；open 条件更新，重复可重试 & 第8章 \\
 \texttt{POST /api/work-orders} & \texttt{warningId, ownerRole, dueAt, action} & 工单编号与状态 & 值班员、审批人；预警必须存在 & 第8章 \\
 \shortstack[l]{\texttt{POST /api/work-orders/}\\ \texttt{\{id\}/complete}} & \texttt{result}、版本 & 回执与完成时间 & 值班员；只允许 in\_progress & 第8章 \\
@@ -2053,7 +2053,7 @@ Repository 接口在真实项目中分别保存为独立 Java 文件；清单\re
 实体的对应关系。服务层把质量码默认设为 valid 只是查询筛选的默认值，
 不会改写数据库；当调用方显式查询 suspect 或 missing 时，界面必须展示相应质量提示。
 
-监测主线接口按表\ref{tab:api-contract}（8.1节）实现，本节不再另列一套路径：路径中的\texttt{from}、\texttt{to}和\texttt{agg}均为查询参数，不改变8.1节参数表中的工程常数；分页、排序和质量过滤通过统一请求对象传递。契约表的“角色与约束”列就是本节各 Controller 方法上\texttt{@PreAuthorize}与条件更新的依据。
+监测主线接口按表\ref{tab:api-contract}（8.1节）实现，本节直接实现该表，不另列路径：路径中的\texttt{from}、\texttt{to}和\texttt{agg}均为查询参数，不改变8.1节参数表中的工程常数；分页、排序和质量过滤通过统一请求对象传递。契约表的“角色与约束”列就是本节各 Controller 方法上\texttt{@PreAuthorize}与条件更新的依据。
 
 Controller 将 HTTP 类型转换为服务参数，并统一处理异常。代码清单\ref{lst:ch08-controller}给出
 Spring MVC 的完整入口和 DTO record；\texttt{@PreAuthorize}使用 Spring Security 6 的方法授权，

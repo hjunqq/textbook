@@ -63,3 +63,8 @@ smoke.sh    端到端冒烟脚本
 
 教学口令与 JWT 默认密钥仅用于课堂；部署到任何可被他人访问的环境前，
 必须替换 `secrets/` 与 `JWT_SECRET`，并按第5章的密钥轮换与撤销策略管理。
+
+
+## 没有后端也能上第4章：教学接口
+
+`node teaching-api/server.mjs` 按教材 8.1 节接口契约用 `../datasets` 固定数据应答（端口 8080，与真实后端互换），支持 `teach=` 故障注入；详见 teaching-api/README.md。
