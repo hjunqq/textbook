@@ -22,6 +22,10 @@
 
 ## 3.1 软件架构概述
 
+**本节层次**
+
+核心：3.1.2；指导实践：3.1.1、3.1.3。核心路线只要求读完核心小节。
+
 ### 3.1.1 软件架构的定义与重要性
 
 软件架构是一个系统的“结构或结构集合，包括软件构件、构件间的关系以及构件与环境的关系”。它定义了系统的整体框架，决定了系统如何实现功能、处理数据以及与外部交互。架构设计是软件工程的核心活动之一，对系统的质量、可维护性和扩展性有重要影响<sup>[[15]](../../references.md#ref15)[[16]](../../references.md#ref16)[[17]](../../references.md#ref17)[[18]](../../references.md#ref18)</sup>。
@@ -301,6 +305,10 @@ ADR 的评审顺序是先确认上下文和需求，再比较备选方案的质�
 
 ## 3.2 架构设计原则
 
+**本节层次**
+
+核心：3.2.1、3.2.2、3.2.3；指导实践：3.2.4。核心路线只要求读完核心小节。
+
 软件架构设计需要遵循一系列基本原则，这些原则指导我们构建高质量、可维护、可扩展的软件系统。主要原则包括模块化与关注点分离、抽象与信息隐藏、功能独立性与复用性等；模式文献则为反复出现的设计问题提供可复用词汇<sup>[[21]](../../references.md#ref21)[[22]](../../references.md#ref22)</sup>。下面将逐一介绍这些核心原则。
 
 ### 3.2.1 模块化与关注点分离原则
@@ -508,7 +516,7 @@ public interface MonitoringDataProvider {
 ```java
 import java.math.BigDecimal;
 import java.time.Instant;
-public record MonitoringDataDto(String pointId,
+public record MonitoringDataDto(String assetId,
         Instant occurredAt, BigDecimal value,
         String qualityCode, String ruleVersion) {
 }
@@ -522,7 +530,7 @@ public record MonitoringDataDto(String pointId,
 import java.util.Optional;
 public interface MonitoringRecordPort {
     MonitoringRecord save(MonitoringRecord record);
-    Optional<MonitoringRecord> findLatest(String pointId);
+    Optional<MonitoringRecord> findLatest(String assetId);
 }
 ```
 
@@ -547,7 +555,7 @@ public final class ReceiveMonitoringUseCase {
 }
 ```
 
-控制器只负责协议转换和参数校验，不把预警规则写在 Web 层。代码清单3.5以 Spring MVC 的构造器注入保持依赖显式。
+控制器只负责协议转换和参数校验，不把预警规则写在 Web 层。代码清单3.5以 Spring MVC 的构造器注入保持依赖显式；它暴露的路径就是表8.3中的“最新观测”端点，第4章的页面和第5章的实现都对着同一条路径。
 
 **清单 3.5  监测数据查询控制器**
 
@@ -557,13 +565,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 @RestController
-@RequestMapping("/api/monitoring")
+@RequestMapping("/api/assets")   // 路径与第8章 8.1 节接口契约一致
 public class MonitoringController {
     private final MonitoringQuery query;
     public MonitoringController(MonitoringQuery query) { this.query = query; }
-    @GetMapping("/{pointId}/latest")
-    public MonitoringDataDto latest(@PathVariable String pointId) {
-        return query.readLatest(pointId);
+    @GetMapping("/{assetId}/readings/latest")
+    public MonitoringDataDto latest(@PathVariable String assetId) {
+        return query.readLatest(assetId);
     }
 }
 ```
@@ -575,7 +583,7 @@ public class MonitoringController {
 ```java
 import java.math.BigDecimal;
 import java.time.Instant;
-public record AnomalyEvent(String eventId, String pointId,
+public record AnomalyEvent(String eventId, String assetId,
         Instant occurredAt, String qualityCode,
         String ruleVersion, BigDecimal score) {
 }
@@ -603,7 +611,7 @@ public record AnomalyEvent(String eventId, String pointId,
 
 **接口封装**
 
-定义`MonitoringAcquisitionService`接口，暴露`pauseAcquisition(pointId, reason, until)`和`resumeAcquisition(pointId)`方法，隐藏设备协议、采样调度和断线重传逻辑。暂停只用于设备检修等受控场景，必须校验授权、记录原因和到期时间，并自动恢复单个测点采集，不中断整站运行。
+定义`MonitoringAcquisitionService`接口，暴露`pauseAcquisition(assetId, reason, until)`和`resumeAcquisition(assetId)`方法，隐藏设备协议、采样调度和断线重传逻辑。暂停只用于设备检修等受控场景，必须校验授权、记录原因和到期时间，并自动恢复单个测点采集，不中断整站运行。
 
 抽象与信息隐藏沿用本节前述“识别关注点—划分模块—定义接口—评估优化”步骤，但评审重点转为两项：接口是否泄露设备协议、存储结构等实现细节，以及替换实现后调用方测试是否仍能通过。这样避免重复一套流程，同时把原则落实为可检验条件。
 
@@ -681,6 +689,10 @@ public record AnomalyEvent(String eventId, String pointId,
 监测接入模块通过标准数据契约把采集结果发送给数据处理服务；数据处理服务完成质量检查和标准化后，分别写入数据存储服务并向告警服务发布可分析事件。告警服务依据已批准规则判断是否触发预警。反向配置由平台通过受控接口下发到监测接入模块，例如调整采样频率或传输参数，并记录操作者、版本和生效时间。这样的职责划分边界明确，也使各服务能够独立测试和升级。
 
 ## 3.3 架构类型与常见模式
+
+**本节层次**
+
+核心：3.3.1、3.3.2、3.3.5；拓展：3.3.3、3.3.4、3.3.6、3.3.7。核心路线只要求读完核心小节。
 
 ### 3.3.1 常见架构类型
 
@@ -874,6 +886,10 @@ Web 应用还有导航与内容组织问题：监测总览、测点详情、告�
 
 ## 3.4 架构设计过程
 
+**本节层次**
+
+核心：3.4.1；指导实践：3.4.2、3.4.3。核心路线只要求读完核心小节。
+
 ### 3.4.1 系统环境表示
 
 系统环境表示是架构设计的起点：先画清系统与外部世界的边界，再谈内部分解。边界上的交互归为四类接口。用户接口面向值班员、专业分析员、审批人和运维员，形态包括监测大屏、Web 页面与移动端；硬件接口面向渗压计、GNSS 站、雨量站等设备及其遥测终端，协议与报文格式由第1章的通信规约约束；软件接口面向上级监管平台、短信网关、气象服务等外部系统，通常以 REST API 或消息队列对接；通信接口约定网络链路、带宽与安全传输要求。每类接口都要写明方向、协议、频率与失败处理，否则边界就只是一条画在图上的虚线。
@@ -982,6 +998,10 @@ Web 应用还有导航与内容组织问题：监测总览、测点详情、告�
 
 ## 3.5 案例研究：水利工程安全监测平台架构
 
+**本节层次**
+
+核心：3.5.1；指导实践：3.5.2、3.5.3。核心路线只要求读完核心小节。
+
 ### 3.5.1 需求分析和用例建模
 
 需求分析与用例建模是系统架构设计的第一步，其目标是准确理解水利业务需求，明确平台需要支撑的监测、分析、预警和处置能力。
@@ -1063,6 +1083,10 @@ Web 应用还有导航与内容组织问题：监测总览、测点详情、告�
 一个失败的评审长什么样也值得知道。某届课程小组的评审记录只有一句“与会人员一致同意通过”，附一张架构图。追问之下暴露出三件事：性能场景没有度量值，“响应快”无法验证；ADR只有结论没有备选方案，无从判断是否真的比较过；风险清单为空——不是没有风险，是没人愿意在通过前夜提出来。这份“通过”的评审在第8章验收时全数返工：压测发现告警链路超时，才补做了消息队列决策，此时前端联调已经开始，返工成本是评审当时的数倍。评审的作用不是仪式，而是把返工从实现期提前到纸面期；一场没有产生任何修改项和风险项的评审，几乎可以断定没有起作用。
 
 ## 3.6 架构评估与ATAM迷你演练
+
+**本节层次**
+
+拓展：3.6.1、3.6.2、3.6.3。本节没有核心小节，课堂核心路线可整体跳过。
 
 ### 3.6.1 评估方法
 

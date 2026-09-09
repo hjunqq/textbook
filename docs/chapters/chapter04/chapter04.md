@@ -26,6 +26,10 @@
 
 ## 4.1 Web基础概念与浏览器架构
 
+**本节层次**
+
+核心。
+
 浏览器通过HTTP或HTTPS请求资源，解析HTML形成DOM树，解析CSS形成CSSOM树，再计算布局并绘制页面；JavaScript通过事件循环处理用户操作、网络响应和定时任务。智慧水利页面常同时展示地图、曲线与告警，因此应避免在短时间内反复修改大量DOM节点。
 
 现代浏览器通常采用多进程架构。图4.1强调各模块的协作关系：浏览器引擎负责协调，渲染引擎使用网络模块取得的资源，调用JavaScript引擎执行脚本，并通过UI后端绘制；存储模块为浏览器引擎及页面脚本提供受控的数据持久化能力。
@@ -38,6 +42,10 @@
 浏览器兼容性应通过标准API、特性检测和自动化测试控制。例如，应检测`WebSocket`是否存在，再决定使用实时连接还是降级到轮询，而不能只依据浏览器名称。资源缓存则应由HTTP缓存头控制；监测实时值不宜与长期静态资源采用同一缓存策略。
 
 ## 4.2 HTML基础与语义化
+
+**本节层次**
+
+核心：4.2.1。
 
 HTML描述内容的结构和语义。`header`、`nav`、`main`、`section`、`article`与`footer`等元素能够表达区域含义，有助于无障碍工具、搜索引擎和开发者理解页面。标题级别应连续，表单控件应有`label`，图片应提供`alt`文本。
 
@@ -146,9 +154,9 @@ HTML 文件被浏览器接收后，先经过字节解码和词法分析，再形
     <legend>查询条件</legend>
     <label for="station-code">测站编码</label>
     <input id="station-code" name="stationCode" required
-           pattern="ST-[0-9]{2}" placeholder="ST-01"
+           pattern="DAM-[A-Z]-[A-Z]{2}-[0-9]{2}" placeholder="DAM-A-PZ-07"
            aria-describedby="station-help">
-    <small id="station-help">格式：ST-加两位数字</small>
+    <small id="station-help">格式：工程-分区-类型-序号，如 DAM-A-PZ-07</small>
 
     <label for="start-time">开始时间</label>
     <input id="start-time" name="startTime" type="datetime-local"
@@ -215,7 +223,7 @@ dialog.addEventListener('cancel', closeDialog);
 
 原生校验不是一个“提交按钮上的开关”，而是一组浏览器约束的组合。`required`检查是否为空，`pattern`适合编码和格式，数值控件的`min`、`max`、`step`共同决定可接受的离散集合，日期控件的`min`与`max`表达时间窗口。以查询表单为例，采样间隔设为 5 分钟并不意味着后端可以相信任何来自浏览器的 5 的倍数；客户端脚本可以被绕过，攻击者也可以直接发送 HTTP 请求，所以服务器必须再次校验测站是否属于当前用户的权限范围、起止时间是否有序、时间跨度是否超过查询上限。前端收到 400 响应后，应把服务端返回的字段错误映射到对应`input`的描述节点，并保留用户已经填写的其他条件。
 
-校验的可测试性来自明确的状态转换。空测站编码应显示“请输入测站编码”，格式错误应显示示例“ST-01”，采样间隔超出范围应说明允许区间；三个错误同时存在时，页面可以在表单顶部汇总数量，同时在字段旁保留具体原因。提交成功后，焦点应移动到结果标题或第一个结果项，而不是留在已经失效的提交按钮上。这样，鼠标用户、键盘用户和辅助技术用户都能得到同等的反馈。第5章的`@Valid`负责服务端对象校验，本章的 HTML 约束负责尽早发现明显错误，两者的错误码和字段名应写入接口契约并由前后端共同测试。
+校验的可测试性来自明确的状态转换。空测站编码应显示“请输入测站编码”，格式错误应显示示例“DAM-A-PZ-07”，采样间隔超出范围应说明允许区间；三个错误同时存在时，页面可以在表单顶部汇总数量，同时在字段旁保留具体原因。提交成功后，焦点应移动到结果标题或第一个结果项，而不是留在已经失效的提交按钮上。这样，鼠标用户、键盘用户和辅助技术用户都能得到同等的反馈。第5章的`@Valid`负责服务端对象校验，本章的 HTML 约束负责尽早发现明显错误，两者的错误码和字段名应写入接口契约并由前后端共同测试。
 
 **从静态骨架到可维护组件**
 
@@ -224,6 +232,10 @@ dialog.addEventListener('cancel', closeDialog);
 在验收阶段，可以把图4.2转化为一张检查清单：首先检查源文件是否有唯一的`main`、连续标题和可计算的表单名称；然后在 Elements 面板检查 DOM 是否与设计的地标一致；最后用 Performance 面板观察一次批量数据更新是否引起多次布局。对于动态预警，再用屏幕阅读器确认普通状态更新不会抢占焦点，真正需要值班员处理的事件才会进入`alert`区域。结构、渲染和交互三个层面都通过后，页面才算完成，而不是只看截图是否“像设计稿”。
 
 ## 4.3 CSS样式与响应式布局
+
+**本节层次**
+
+核心：4.3.1、4.3.2；指导实践：4.3.4、4.3.5、4.3.6、4.3.8；拓展：4.3.3、4.3.7。核心路线只要求读完核心小节。
 
 CSS负责视觉呈现。规则由选择器和声明块组成，层叠结果主要受来源、优先级和出现顺序影响。工程中宜使用类选择器组织组件样式，避免依赖过深的DOM层级。
 
@@ -692,6 +704,10 @@ Flex 的视觉顺序还涉及语义和键盘路径。`order`只改变绘制顺�
 
 ## 4.4 JavaScript基础编程
 
+**本节层次**
+
+核心：4.4.1、4.4.2、4.4.3、4.4.4、4.4.5、4.4.7；指导实践：4.4.6。核心路线只要求读完核心小节。
+
 现代JavaScript使用`const`声明不重新赋值的绑定，使用`let`声明需要变化的绑定。基本类型包括数字、字符串、布尔值、`null`、`undefined`、`bigint`与`symbol`；对象、数组和函数属于引用类型。
 
 字符串可用模板字面量组合，也可通过`trim()`、`includes()`、`slice()`和`split()`完成常见处理。完成字符串处理后，再使用比较、逻辑和算术运算符表达业务规则。例如，某水库汛期警戒水位统一设为5.0米：
@@ -699,11 +715,11 @@ Flex 的视觉顺序还涉及语义和键盘路径。`order`只改变绘制顺�
 **清单 4.15  JavaScript基础变量与函数**
 
 ```javascript
-const stationName = "案例水库";
-const warningLevel = 5.0; // 单位：m，本章同一示例场景统一采用该阈值
-const reading = { stationId: "ST-01", level: 5.12, unit: "m" };
-const status = reading.level >= warningLevel ? "预警" : "正常";
-const message = `${stationName}：${reading.level} ${reading.unit}，${status}`;
+const stationName = "案例库水位01";
+const warningLevel = 165.5; // 单位：m，案例水库汛限水位（8.1 节参数表）
+const reading = { assetId: "DAM-A-WL-01", value: 166.84, unit: "m" };
+const status = reading.value >= warningLevel ? "预警" : "正常";
+const message = `${stationName}：${reading.value} ${reading.unit}，${status}`;
 console.log(message.trim());
 ```
 
@@ -712,14 +728,16 @@ console.log(message.trim());
 **清单 4.16  监测值条件判断**
 
 ```javascript
-const readings = [4.72, 5.12, 4.95];
+const readings = [165.12, 166.84, 165.37];          // 案例库水位01 三次观测，单位 m
+const floodLimit = 165.5;                            // 汛限水位，见 8.1 节参数表
 const alarms = readings
-  .filter(level => level >= 5.0)
+  .filter(level => level >= floodLimit)
   .map(level => ({ level, severity: "warning" }));
 
 function validateLevel(level) {
   if (!Number.isFinite(level)) throw new TypeError("水位必须是数字");
-  if (level < 0 || level > 50) throw new RangeError("水位超出测站量程");
+  // 量程取自测点台账（配套数据集 stations.csv）：148.0–171.6 m，即死水位到校核洪水位
+  if (level < 148 || level > 171.6) throw new RangeError("水位超出测点量程");
   return level;
 }
 ```
@@ -776,8 +794,8 @@ function makeRollingAverage(limit = 3) {
   };
 }
 
-const readings = [{ level: 4.1 }, { level: null }, { level: 4.3 }];
-const validLevels = readings.map(item => item.level)
+const readings = [{ value: 166.1 }, { value: null }, { value: 166.3 }];
+const validLevels = readings.map(item => item.value)
   .filter(level => Number.isFinite(level));
 const average = validLevels.reduce((sum, level) => sum + level, 0)
   / validLevels.length;
@@ -797,15 +815,15 @@ ES 模块用`export`声明公共接口，用`import`建立静态依赖。模块�
 ```javascript
 // readings.js
 export function summarizeReading(reading) {
-  const { stationId, level: rawLevel, quality = 'missing' } = reading;
+  const { assetId, value: rawValue, quality = 'missing' } = reading;
   const level = rawLevel === null ? null : Number(rawLevel);
-  return { stationId, level, quality };
+  return { assetId, value, quality };
 }
 
 // station-panel.js
 import { summarizeReading } from './readings.js';
 
-const response = { stationId: 'ST-01', level: '4.20', quality: 'valid' };
+const response = { assetId: 'DAM-A-WL-01', value: '166.84', quality: 'valid' };
 const summary = summarizeReading(response);
 const viewModel = { ...summary, updated: true };
 console.log(viewModel);
@@ -822,20 +840,20 @@ DOM 操作还要考虑布局代价。循环中逐个读取布局尺寸、再逐�
 ```javascript
 document.body.innerHTML = '<ul id="station-list"></ul>';
 const list = document.querySelector('#station-list');
-const stations = [
-  { id: 'ST-01', name: '上游测站', level: 4.2 },
-  { id: 'ST-02', name: '下游测站', level: 4.6 }
+const assets = [
+  { assetId: 'DAM-A-WL-01', displayName: '案例库水位01', value: 166.84, unit: 'm' },
+  { assetId: 'DAM-A-PZ-07', displayName: '案例渗压07', value: 185.09, unit: 'kPa' }
 ];
 
 const fragment = document.createDocumentFragment();
-for (const station of stations) {
+for (const asset of assets) {
   const item = document.createElement('li');
-  item.dataset.stationId = station.id;
-  item.textContent = `${station.name}：${station.level} m`;
+  item.dataset.assetId = asset.assetId;
+  item.textContent = `${asset.displayName}：${asset.value} ${asset.unit}`;
   fragment.append(item);
 }
 list.replaceChildren(fragment);
-list.querySelector('[data-station-id="ST-02"]').textContent = '下游测站：更新中';
+list.querySelector('[data-asset-id="DAM-A-PZ-07"]').textContent = '案例渗压07：更新中';
 ```
 
 ### 4.4.5 事件对象、捕获与冒泡
@@ -861,19 +879,19 @@ list.querySelector('[data-station-id="ST-02"]').textContent = '下游测站：�
 
 ```javascript
 document.body.innerHTML = `
-  <a id="station-link" href="/stations">测站列表</a>
+  <a id="station-link" href="/assets">测站列表</a>
   <ul id="delegated-list">
-    <li><button data-station-id="ST-01">上游测站</button></li>
-    <li><button data-station-id="ST-02">下游测站</button></li>
+    <li><button data-asset-id="DAM-A-WL-01">案例库水位01</button></li>
+    <li><button data-asset-id="DAM-A-PZ-07">案例渗压07</button></li>
   </ul>
   <output id="delegated-result" aria-live="polite"></output>`;
 
 const delegatedList = document.querySelector('#delegated-list');
 const output = document.querySelector('#delegated-result');
 delegatedList.addEventListener('click', event => {
-  const button = event.target.closest('button[data-station-id]');
+  const button = event.target.closest('button[data-asset-id]');
   if (!button || !delegatedList.contains(button)) return;
-  output.textContent = `选择了 ${button.dataset.stationId}`;
+  output.textContent = `选择了 ${button.dataset.assetId}`;
 });
 
 document.querySelector('#station-link').addEventListener('click', event => {
@@ -890,8 +908,8 @@ root.innerHTML = '<div id="virtual-list" style="height:160px;overflow:auto"></di
 document.body.append(root);
 const viewport = root.querySelector('#virtual-list');
 const records = Array.from({ length: 1000 }, (_, index) => ({
-  id: `ST-${String(index + 1).padStart(4, '0')}`,
-  level: (4 + index / 100).toFixed(2)
+  assetId: `DAM-A-PZ-${String(index + 1).padStart(4, '0')}`,
+  value: (180 + index / 100).toFixed(2)
 }));
 const rowHeight = 32;
 // 占位层把滚动条撑到全量高度，可见行再absolute定位到对应位置；
@@ -908,7 +926,7 @@ function renderWindow() {
     const row = document.createElement('div');
     row.style.cssText = `position:absolute;left:0;right:0;` +
       `top:${(first + offset) * rowHeight}px;height:${rowHeight}px`;
-    row.textContent = `${record.id}：${record.level} m`;
+    row.textContent = `${record.assetId}：${record.value} kPa`;
     return row;
   }));
 }
@@ -928,7 +946,7 @@ renderWindow();
 function parseReading(raw) {
   try {
     const reading = JSON.parse(raw);
-    return { ok: true, level: validateLevel(reading.level) };
+    return { ok: true, value: validateLevel(reading.value) };
   } catch (error) {
     if (error instanceof SyntaxError) {
       console.error("监测报文格式错误", error);
@@ -944,80 +962,27 @@ function parseReading(raw) {
 }
 ```
 
-## 4.5 异步编程与Promise
+## 4.5 数据请求与页面状态
 
-异步结果在 JavaScript 中由 Promise 表达。本节先讲清事件循环与任务调度，再给出 Promise 的状态机、`async/await` 写法和取消机制，最后把它们组装进统一的请求封装。
+**本节层次**
 
-**清单 4.24  前端数据请求示例**
+核心。其中 4.5.5–4.5.7 为指导实践，4.5.8 与 4.5.9 为拓展；核心路线只要求读完 4.5.1–4.5.4 并完成 4.5.10 的自测。
 
-```javascript
-function loadLatestLevel(stationId) {
-  return fetch(`/api/stations/${stationId}/latest`)
-    .then(response => {
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      return response.json();
-    })
-    .then(data => ({
-      stationId: data.stationId,
-      level: validateLevel(data.level)
-    }));
-}
+**进入本节所需知识**
 
-loadLatestLevel("ST-01")
-  .then(reading => console.log("最新水位", reading.level))
-  .catch(error => console.error("加载失败", error));
-```
+4.4 节的函数、数组方法与 DOM 写入；能打开浏览器开发者工具的“网络”面板，看到一次请求的状态码与耗时（终端、端口与开发者工具的用法见附录B的 P0 单元）；表8.3中“对象列表”与“最新观测”两个端点的字段。本节不需要后端：教学接口（配套工程 `teaching-api`）按同一契约用固定数据集应答，第5章写出自己的后端后直接替换，前端代码一行不改。
 
-`async/await`用于以顺序形式表达同样的异步过程。彼此独立的请求应通过`Promise.all()`并发执行；有依赖关系的请求才顺序等待。
+**业务问题**
 
-**清单 4.25  调试监测查询**
+值班员打开测点详情页，要看到该测点的最新观测值、时间和质量码。页面必须先显示“正在读取”，再显示数据或“暂无观测”，请求失败时说明原因；值班员连续点击两个测点时，最后显示的必须是最后点击的那个。本节最后交付的是一个能在教学接口上运行、四种状态都能观察到的详情页脚本，它也是第 4.7 节 Vue 组件和第 4.9 节 Pinia 仓库的前身。
 
-```javascript
-async function loadDashboard(stationId) {
-  try {
-    const [latest, alarms] = await Promise.all([
-      fetch(`/api/stations/${stationId}/latest`),
-      fetch(`/api/stations/${stationId}/alarms`)
-    ]);
-    if (!latest.ok || !alarms.ok) throw new Error("接口响应异常");
-    return { latest: await latest.json(), alarms: await alarms.json() };
-  } catch (error) {
-    console.error("仪表盘加载失败", error);
-    throw error;
-  }
-}
-```
+### 4.5.1 原理：一次请求从发出到页面更新
 
-需要取消过期请求时可使用`AbortController`。例如用户快速切换测站，应取消前一测站尚未完成的请求，避免旧响应覆盖新页面。
+浏览器发出请求后不会停下来等待，JavaScript 用 Promise 表示“将来才有的结果”。Promise 有 pending、fulfilled 和 rejected 三种状态。创建后处于 pending，调用`resolve`后进入 fulfilled，调用`reject`后进入 rejected；状态一旦落定就不可逆，也不能从 fulfilled 再变成 rejected。后续调用`then`或`catch`只是注册观察者，不会重新执行已经完成的异步操作。`then`返回新的 Promise，因此可以链式处理“取响应→解析 JSON→校验字段”。
 
-### 4.5.1 事件循环与任务调度
+清单4.24用两个落定函数说明 Promise 的不可逆状态，并在调用方观察最终结果。它刻意多次调用`resolve`和`reject`，后续调用不会覆盖第一次落定的结果；这正是 4.5.4 节处理迟到响应时要依赖的语义。
 
-浏览器的 JavaScript 执行线程一次只处理一个同步任务。当前任务完成后，事件循环先清空微任务队列，再从任务队列取出下一个宏任务；网络回调、定时器和用户输入通常进入任务队列，`Promise.then`、`queueMicrotask`和`MutationObserver`回调进入微任务队列。因此，在一个同步函数里安排“同步日志—定时器—Promise 回调”时，Promise 回调会先于定时器执行。理解这个顺序能够解释为什么页面状态已经变了，但浏览器尚未绘制下一帧。
-
-微任务适合完成同一任务内的短小收尾，例如把多个状态变化合并后再通知组件；长时间执行的微任务会阻塞绘制和用户输入，连续递归的`queueMicrotask`甚至会形成饥饿。处理大量测点时，应把计算分批放入任务队列或交给 Web Worker，并在动画帧中批量写入 DOM。清单4.26用日志顺序展示同步代码、微任务和宏任务的先后关系。
-
-**清单 4.26  事件循环中的同步、微任务与宏任务**
-
-```javascript
-console.log('同步：开始读取');
-
-setTimeout(() => console.log('宏任务：定时刷新'), 0);
-queueMicrotask(() => console.log('微任务：合并状态'));
-Promise.resolve().then(() => console.log('微任务：更新摘要'));
-
-console.log('同步：结束读取');
-// 典型顺序：开始、结束、合并状态、更新摘要、定时刷新
-```
-
-### 4.5.2 Promise 状态与 async/await
-
-Promise 有 pending、fulfilled 和 rejected 三种状态。创建后处于 pending，调用`resolve`后进入 fulfilled，调用`reject`后进入 rejected；状态一旦落定就不可逆，也不能从 fulfilled 再变成 rejected。后续调用`then`或`catch`只是注册观察者，不会重新执行已经完成的异步操作。`then`返回新的 Promise，因此可以在链中把解析、校验和视图模型转换分成独立步骤。
-
-`async`函数总是返回 Promise，`await`只暂停当前 async 函数，不会阻塞浏览器线程。彼此独立的请求用`Promise.all`并发，任何一个失败时整体进入 rejected；如果希望部分结果仍然可用，可使用`Promise.allSettled`并逐项检查状态。对于监测页面，最新水位和告警事件可以并发读取，但告警确认必须等待权限校验完成，这种依赖关系要在代码中显式表达。
-
-清单4.27用两个落定函数说明 Promise 的不可逆状态，并在调用方观察最终结果。它刻意多次调用`resolve`和`reject`，后续调用不会覆盖第一次落定的结果；这正是客观题和真实接口重试都要遵守的语义。
-
-**清单 4.27  Promise 状态一经落定不可再变**
+**清单 4.24  Promise 状态一经落定不可再变**
 
 ```javascript
 let resolveReading;
@@ -1031,56 +996,260 @@ readingPromise
   .then(value => console.log('fulfilled:', value))
   .catch(error => console.error('rejected:', error));
 
-resolveReading({ level: 4.2 });
+resolveReading({ value: 185.091, unit: 'kPa' });
 rejectReading(new Error('这次调用不会改变状态'));
-resolveReading({ level: 4.3 });
+resolveReading({ value: 185.2, unit: 'kPa' });
+// 控制台只输出一行：fulfilled: { value: 185.091, unit: 'kPa' }
 ```
 
-异步错误应按来源分类。JSON 解析失败属于输入格式错误，量程校验失败属于业务数据错误，HTTP 401 表示登录状态失效，5xx 表示服务端暂时不可用，超时或网络断开则属于连接问题。每一类错误都应有稳定的内部代码和面向值班员的提示，日志中再保留请求路径、测站编号和关联事件 ID。把所有异常都写成“加载失败”会让重试、重新登录和人工核查无法区分。
+`async`函数总是返回 Promise，`await`只暂停当前 async 函数，不会阻塞浏览器线程，因此可以用顺序的写法表达同样的异步过程。彼此独立的请求用`Promise.all`并发，任何一个失败时整体进入 rejected；如果希望部分结果仍然可用，可使用`Promise.allSettled`并逐项检查状态。清单4.25与清单4.26分别给出`then`链和`async/await`两种写法读取同一个端点，路径来自表8.3。
 
-### 4.5.3 AbortController 与请求生命周期
-
-`AbortController`把取消信号传给`fetch`或其他支持`AbortSignal`的 API。用户切换测站、组件卸载或请求超过超时时间时，应调用`abort`；被取消的 Promise 会以`AbortError`拒绝，调用方要把它与服务器错误分开处理。取消并不等同于服务器已经撤销操作，涉及写入的接口仍需使用幂等键和后端事务保证一致性。
-
-清单4.28封装了一个带超时和手动取消的最新水位请求。控制器在`finally`前保持有效，计时器在成功、失败和取消三种路径上都会清理；用户快速切换时，调用方先取消旧控制器，再保存新控制器引用。
-
-**清单 4.28  带超时和手动取消的 fetch**
+**清单 4.25  then 链写法：读取一个对象的最新观测**
 
 ```javascript
-export async function fetchLatestLevel(stationId, signal) {
-  const response = await fetch(`/api/stations/${stationId}/latest`, { signal });
-  if (!response.ok) throw new Error(`HTTP_${response.status}`);
-  return response.json();
+function loadLatest(assetId) {
+  return fetch(`/api/assets/${assetId}/readings/latest`)
+    .then(response => {
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      return response.status === 204 ? null : response.json();
+    });
 }
 
-let activeController = null;
-export async function refreshStation(stationId) {
-  activeController?.abort();
-  const controller = new AbortController();
-  activeController = controller;
-  const timeoutId = setTimeout(() => controller.abort(), 8000);
+loadLatest('DAM-A-PZ-07')
+  .then(reading => console.log('最新观测', reading?.value, reading?.unit))
+  .catch(error => console.error('加载失败', error));
+```
+
+**清单 4.26  async/await 写法：并发读取最新观测与该对象的预警**
+
+```javascript
+async function loadDetail(assetId) {
   try {
-    return await fetchLatestLevel(stationId, controller.signal);
+    const [latest, warnings] = await Promise.all([
+      fetch(`/api/assets/${assetId}/readings/latest`),
+      fetch(`/api/warnings?assetId=${assetId}`)
+    ]);
+    if (!latest.ok || !warnings.ok) throw new Error('接口响应异常');
+    return { latest: latest.status === 204 ? null : await latest.json(),
+             warnings: await warnings.json() };
   } catch (error) {
-    if (error.name === 'AbortError') return { cancelled: true };
+    console.error('详情加载失败', error);
     throw error;
-  } finally {
-    clearTimeout(timeoutId);
-    if (activeController === controller) activeController = null;
   }
 }
 ```
 
-### 4.5.4 request.js：JWT、401 与超时的统一入口
+异步错误应按来源分类。JSON 解析失败属于输入格式错误，量程校验失败属于业务数据错误，HTTP 401 表示登录状态失效，5xx 表示服务端暂时不可用，超时或网络断开则属于连接问题。每一类错误都应有稳定的内部代码和面向值班员的提示，日志中再保留请求路径、对象编码和关联事件 ID。契约把错误体统一为`{code, message, field}`，页面只需按`code`和状态码分流，不必解析自然语言文案。
+
+### 4.5.2 完整例子：读取对象列表与最新观测
+
+清单4.27是本节的起点包：登录取得令牌，读取对象列表，找到渗压计 `DAM-A-PZ-07`，把它的最新观测写进页面。它只用到浏览器自带的`fetch`，没有任何框架；`getJson`集中处理了契约规定的 204（尚无观测）与错误体，页面层不再各自解析响应。
+
+**清单 4.27  detail.js：登录、对象列表与最新观测（S2 阶段起点）**
+
+```javascript
+// 开发时由 Vite 代理把 /api 转发到教学接口或真实后端（见 4.5.6）
+let token = null;
+
+export async function login(username, password) {
+  const res = await fetch('/api/auth/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    body: JSON.stringify({ username, password })
+  });
+  if (!res.ok) throw new Error(`LOGIN_${res.status}`);
+  token = (await res.json()).accessToken;
+}
+
+async function getJson(path, signal) {
+  const res = await fetch(path, {
+    headers: { Accept: 'application/json', Authorization: `Bearer ${token}` },
+    signal
+  });
+  if (res.status === 204) return null;                // 契约：尚无观测
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));  // 契约：{code, message, field?}
+    throw Object.assign(new Error(body.code ?? `HTTP_${res.status}`),
+                        { status: res.status, body });
+  }
+  return res.json();
+}
+
+export const loadAssets = () => getJson('/api/assets');
+export const loadLatest = (assetId, signal) =>
+  getJson(`/api/assets/${encodeURIComponent(assetId)}/readings/latest`, signal);
+
+export function renderLatest(el, asset, reading) {
+  if (!reading) { el.textContent = `${asset.displayName}：暂无观测`; return; }
+  el.textContent = `${asset.displayName}：${reading.value} ${reading.unit}`
+    + `（${reading.occurredAt}，质量 ${reading.quality}）`;
+}
+
+// 页面入口（index.html 中 <p id="latest"></p> 与 <script type="module" src="/src/detail.js">）
+const output = document.querySelector('#latest');
+await login('duty01', 'duty123');
+const assets = await loadAssets();
+const pz07 = assets.find(a => a.assetId === 'DAM-A-PZ-07');
+renderLatest(output, pz07, await loadLatest(pz07.assetId));
+```
+
+**运行方式**
+
+在配套工程目录执行`node teaching-api/server.mjs`启动教学接口（默认 8080 端口），再在`frontend`目录执行`npm run dev`启动 Vite 开发服务器，浏览器打开它给出的地址。Vite 的代理把`/api`转发到 8080，因此脚本里只写相对路径。
+
+**可观察结果**
+
+页面出现一行文字：“案例渗压07：185.091 kPa（2026-07-01T23:55:00+08:00，质量 valid）”。开发者工具“网络”面板依次出现三条请求：`POST /api/auth/login` 返回 200，`GET /api/assets` 返回 200 且响应体是 28 个对象的数组，`GET /api/assets/DAM-A-PZ-07/readings/latest` 返回 200。把最后一条的地址复制到新标签页直接打开，得到的是 401——因为地址栏访问不带`Authorization`头，这就是契约中“未登录一律 401”的直观体现。表4.3把这三条请求与页面结果对应起来，课堂验收以它为准。
+
+**表 4.3  清单4.27的预期运行记录（教学接口 + 固定数据集）**
+
+| 请求                                        | 状态码 | 响应要点 / 页面变化                                      |
+|:--------------------------------------------|:-------|:---------------------------------------------------------|
+| POST /api/auth/login                        | 200    | 响应含 accessToken，authorities 为 DUTY；页面无变化      |
+| GET /api/assets                             | 200    | 数组长度 28（表8.1的测点总数）；页面无变化               |
+| GET /api/assets/DAM-A-PZ-07/readings/latest | 200    | value 185.091、unit kPa、quality valid；页面写入一行文字 |
+| 同一地址在新标签页打开                      | 401    | 错误体 code 为 UNAUTHORIZED；说明令牌只存在于脚本变量中  |
+
+### 4.5.3 页面的四种状态：加载、空数据、错误与过期
+
+清单4.27只处理了“成功”这一条路。真实页面在任一时刻只能处于一种状态：正在加载、有数据、没有数据、出了错。把状态显式写成一个对象，渲染函数只看状态不看网络，是后面 Vue 组件与 Pinia 仓库的共同做法。表4.4列出四种状态、用教学接口触发它的方式（参数含义见表8.4）和页面应有的表现；“过期”不是第五种状态，而是一个到达时已经不该被采纳的响应，4.5.4 节专门处理。
+
+**表 4.4  详情页的状态模型与教学接口触发方式**
+
+| 状态    | 触发方式                                                                                          | 页面应有表现                                                                       |
+|:--------|:--------------------------------------------------------------------------------------------------|:-----------------------------------------------------------------------------------|
+| loading | 任一请求发出后、响应到达前；用`?teach=delay:3000`拉长                                             | 显示“正在读取 案例渗压07…”；不能显示上一个对象的数据                               |
+| ready   | 正常响应 200                                                                                      | 值、单位、时间、质量码；quality 为 suspect 时加提示，为 missing 时不显示数值       |
+| empty   | `?teach=empty`（或该对象确实没有观测，204）                                                       | 显示“暂无观测”，不是空白，也不是错误                                               |
+| error   | `?teach=invalid`（400）、`?teach=unauthorized`（401）、`?teach=error`（503）、不存在的对象（404） | 400 提示到字段并保留输入；401 清除令牌回到登录页；404 建议返回列表；503 给重试按钮 |
+
+清单4.28实现这个状态模型。`render`把状态写进`data-state`属性，CSS 与测试都可以直接断言它；`messageFor`只依赖契约中的状态码与`code`，不解析文案。
+
+**清单 4.28  state.js：页面状态模型与渲染**
+
+```javascript
+// 同一时刻只处于一种状态，渲染函数只看状态不看网络
+export const State = { LOADING: 'loading', READY: 'ready', EMPTY: 'empty', ERROR: 'error' };
+
+export function render(el, view) {
+  el.dataset.state = view.state;              // 便于 CSS 与测试断言
+  const name = view.asset.displayName;
+  switch (view.state) {
+    case State.LOADING: el.textContent = `正在读取 ${name}…`; break;
+    case State.EMPTY:   el.textContent = `${name}：暂无观测`; break;
+    case State.READY: {
+      const r = view.reading;
+      el.textContent = r.quality === 'missing'
+        ? `${name}：该时刻缺测`
+        : `${name}：${r.value} ${r.unit}（质量 ${r.quality}）`;
+      break;
+    }
+    case State.ERROR:   el.textContent = messageFor(view.error); break;
+  }
+}
+
+export function messageFor(error) {
+  switch (error.status) {
+    case 400: return `参数有误：${error.body.field ?? ''} ${error.body.message ?? ''}`.trim();
+    case 401: return '登录已失效，请重新登录';
+    case 403: return '当前角色无权查看该对象';
+    case 404: return '对象不存在，请返回列表';
+    default:  return '服务暂时不可用，请稍后重试';
+  }
+}
+```
+
+### 4.5.4 故障单元：切换测点时旧数据覆盖新数据
+
+**现象**
+
+把清单4.27改成“点击列表中的对象就读取它的最新观测”后，做如下操作：先点击 `DAM-A-PZ-07`，并让教学接口对它延迟 3 秒（请求地址加`?teach=delay:3000`）；不等结果出来，立即点击 `DAM-A-WL-01`。页面先正确显示“案例库水位01：166.837 m”，约 3 秒后却变成“案例渗压07：185.091 kPa”——值班员看着水位计的标题，读到的是渗压计的数。
+
+**时序**
+
+图4.7把两次请求画在同一条时间轴上。第二次请求后发先至，第一次请求的响应迟到，但代码没有任何机制知道它“已经过期”，于是照常写入页面。
+
+<figure markdown>
+![图4.7](images/chapter04_fig_4_7.svg)
+<figcaption>图 4.7  切换对象时迟到的旧响应覆盖新页面</figcaption>
+</figure>
+
+**原因**
+
+每次点击都发出一个独立的请求，每个响应回来都无条件调用`render`。页面状态与“当前用户想看哪个对象”之间没有绑定，谁最后返回谁就赢。这不是网络问题，网络慢只是让它容易复现；只要两次请求的耗时不同，问题就存在。
+
+**处理方案**
+
+两道防线一起用。第一道：切换对象时用`AbortController`取消上一个请求，让浏览器不再等它，被取消的`fetch`以`AbortError`拒绝，调用方要把它与服务器错误分开。第二道：给每次切换分配递增序号，响应回来时核对“我的序号是否仍是最新”，不是就丢弃——取消只是通知，已经在途的响应仍可能到达，序号才是最终裁判。清单4.29给出完整代码，它复用清单4.27的`loadLatest`（已接收`signal`参数）和清单4.28的`render`。
+
+**清单 4.29  controller.js：取消旧请求并丢弃迟到响应**
+
+```javascript
+import { loadLatest } from './detail.js';
+import { State, render } from './state.js';
+
+let sequence = 0;       // 每次切换递增；只有最新序号的响应才允许写入页面
+let controller = null;  // 上一次请求的取消句柄
+
+export async function showAsset(el, asset) {
+  const mine = ++sequence;
+  controller?.abort();                        // 第一道防线：通知旧请求结果不再需要
+  controller = new AbortController();
+  render(el, { state: State.LOADING, asset });
+  try {
+    const reading = await loadLatest(asset.assetId, controller.signal);
+    if (mine !== sequence) return;            // 第二道防线：迟到的旧响应静默丢弃
+    render(el, reading ? { state: State.READY, asset, reading }
+                       : { state: State.EMPTY, asset });
+  } catch (error) {
+    if (error.name === 'AbortError') return;  // 被自己取消的不是故障
+    if (mine !== sequence) return;
+    render(el, { state: State.ERROR, asset, error });
+  }
+}
+
+// 列表点击：<button data-asset-id="DAM-A-PZ-07">…</button>
+export function bindList(listEl, outputEl, assets) {
+  listEl.addEventListener('click', event => {
+    const id = event.target.closest('button')?.dataset.assetId;
+    const asset = assets.find(a => a.assetId === id);
+    if (asset) showAsset(outputEl, asset);
+  });
+}
+```
+
+**验证记录**
+
+重复“现象”中的操作，表4.5是修复前后应当观察到的差别。验收时以“网络”面板中请求1 的状态是否为“已取消”、页面最终文字是否与最后点击一致为准；只看页面最终结果不够，因为在网络很快的机器上修复前也可能碰巧正确。
+
+**表 4.5  故障单元的验证记录**
+
+| 观察点              | 修复前                   | 修复后                                           |
+|:--------------------|:-------------------------|:-------------------------------------------------|
+| 点击 WL-01 后的页面 | 立即显示 166.837 m       | 先显示“正在读取 案例库水位01…”，再显示 166.837 m |
+| 约 3 秒后的页面     | 变为 185.091 kPa（错误） | 保持 166.837 m                                   |
+| “网络”面板中请求1   | 200，耗时约 3 s          | 状态“已取消”（canceled）                         |
+| 控制台              | 无输出                   | 无输出：AbortError 被识别为正常路径，不打印      |
+| 再点击一次 PZ-07    | 显示 185.091 kPa         | 显示 185.091 kPa（序号已更新，新请求正常写入）   |
+
+**延伸**
+
+同一个模式在本书后面反复出现：4.9 节 Pinia 仓库的`loadReadings`要加同样的序号校验，否则切换测点时曲线会闪回；7.4 节切换三维对象时，详情面板也不能显示上一个对象的观测；第8章预警确认属于写操作，取消请求并不能撤销服务端已完成的确认，那里要靠幂等键而不是序号。
+
+### 4.5.5 request.js：JWT、401 与超时的统一入口
+
+**本节层次**
+
+指导实践。清单4.27的`getJson`放大成整个应用共用的入口；配套工程里的`request.js`（位于 frontend/src/utils 目录）就是它的精简版。
 
 第5章后端签发的 JWT 必须在浏览器请求中形成闭环：登录接口成功后，前端保存短期访问令牌，后续请求在`Authorization: Bearer <token>`中携带它；收到 401 时清除令牌并跳转登录页，不能继续用旧令牌重试。教学示例把令牌放入`sessionStorage`，浏览器标签页关闭后令牌消失，代价是同源脚本若发生 XSS 可能读取它；生产系统应结合严格的 CSP、短过期时间、刷新策略和更安全的 HttpOnly Cookie 方案评估，绝不能把签名密钥放入以`VITE_`开头的前端变量。
 
-统一请求封装还应处理 JSON 解析、204 空响应、超时和错误代码，避免每个组件各自复制一套`fetch`。清单4.29给出可直接放入 Vite 5 项目的`src/api/request.js`；请求函数只负责传输和认证，页面层根据错误代码决定显示“重新登录”“稍后重试”还是“检查测站输入”。
+统一请求封装还应处理 JSON 解析、204 空响应、超时和错误代码，避免每个组件各自复制一套`fetch`。清单4.30给出可直接放入 Vite 5 项目的`src/utils/request.js`；请求函数只负责传输和认证，页面层根据错误代码决定显示“重新登录”“稍后重试”还是“检查测站输入”。
 
-**清单 4.29  request.js：令牌注入、401 跳转与超时**
+**清单 4.30  request.js：令牌注入、401 跳转与超时**
 
 ```javascript
-const API_BASE = import.meta.env.VITE_API_BASE ?? '/api';
+const API_BASE = import.meta.env.VITE_API_ORIGIN ?? '';   // 契约路径已含 /api 前缀
 const DEFAULT_TIMEOUT = 10_000;
 // 令牌键名是前端各模块的共同契约：请求封装、路由守卫、
 // 登录页都从这里导入，避免"登录成功却处处 401"的隐蔽错误
@@ -1107,7 +1276,7 @@ export async function request(path, options = {}) {
     const response = await fetch(`${API_BASE}${path}`, {
       ...options, headers, signal: controller.signal
     });
-    if (response.status === 401 && !path.startsWith('/auth/')) {
+    if (response.status === 401 && !path.startsWith('/api/auth/')) {
       // 业务请求的 401 才代表登录态失效；
       // 登录接口自身的 401 是"密码错误"，交回页面层提示
       sessionStorage.removeItem(TOKEN_KEY);
@@ -1129,13 +1298,17 @@ export async function request(path, options = {}) {
 }
 ```
 
-### 4.5.5 Vite 代理与环境变量
+### 4.5.6 Vite 代理与环境变量
+
+**本节层次**
+
+指导实践。
 
 开发环境中的浏览器页面通常运行在 Vite 的开发端口，后端运行在另一个端口；直接请求会触发跨域限制。Vite 的`server.proxy`可以把以`/api`开头的请求转发到后端，浏览器仍然看到同源路径，生产环境再由 Nginx 或网关完成同样的路径转发。代理只服务于开发过程，不能被误解为后端认证或网络隔离。
 
-只有以`VITE_`开头的变量会被暴露到客户端代码，变量值会在构建时静态替换，因此可以放 API 基地址、功能开关和代理地址，不能放数据库密码、JWT 签名密钥或内部网络凭据。开发、测试和生产应分别维护环境文件，并在 CI 中检查必需变量是否存在。清单4.30给出按模式读取环境变量的 Vite 5 配置，`loadEnv`只加载指定前缀，代理目标缺失时使用明确的本地默认值。
+只有以`VITE_`开头的变量会被暴露到客户端代码，变量值会在构建时静态替换，因此可以放 API 基地址、功能开关和代理地址，不能放数据库密码、JWT 签名密钥或内部网络凭据。开发、测试和生产应分别维护环境文件，并在 CI 中检查必需变量是否存在。清单4.31给出按模式读取环境变量的 Vite 5 配置，`loadEnv`只加载指定前缀，代理目标缺失时使用明确的本地默认值。
 
-**清单 4.30  Vite 5 的 server.proxy 与 import.meta.env**
+**清单 4.31  Vite 5 的 server.proxy 与 import.meta.env**
 
 ```javascript
 import { defineConfig, loadEnv } from 'vite';
@@ -1163,29 +1336,33 @@ export default defineConfig(({ mode }) => {
 
 异步页面的验收可以沿着一条证据链进行：先观察事件循环是否在绘制前合并状态，再用 Promise 状态确认一次请求不会被重复落定；切换测站时查看旧请求是否收到取消信号，模拟 401 和超时确认页面分别跳转登录或给出重试提示；最后在 Vite 开发环境检查`/api`代理和不同模式的`import.meta.env`值。这样，JWT 不再只是后端代码中的一段签名逻辑，而是贯穿登录、请求、错误处理和页面反馈的可验证流程。
 
-### 4.5.6 登录到受保护接口的前后端联调闭环
+### 4.5.7 登录到受保护接口的前后端联调闭环
 
-前端能否显示测站列表，不应只看页面是否出现了加载动画，而要核对一条完整的认证契约。第5章的登录控制器返回访问令牌，令牌至少包含主体、发行者、有效期、令牌类型和权限代码；前端登录页保存访问令牌，`request.js`在每次受保护请求中注入 Bearer 头，后端的 `SecurityFilterChain` 和 JWT 过滤器验签后把主体放入安全上下文，控制器再依据方法权限决定是否执行。图4.7把这条链路与失败分支并列画出，调试时可逐段定位是凭据错误、令牌过期、权限不足还是网络转发问题。
+**本节层次**
+
+指导实践。教学接口与第5章后端使用同一份登录契约（表8.3第一行），本小节的联调步骤对两者都成立。
+
+前端能否显示测站列表，不应只看页面是否出现了加载动画，而要核对一条完整的认证契约。第5章的登录控制器返回访问令牌，令牌至少包含主体、发行者、有效期、令牌类型和权限代码；前端登录页保存访问令牌，`request.js`在每次受保护请求中注入 Bearer 头，后端的 `SecurityFilterChain` 和 JWT 过滤器验签后把主体放入安全上下文，控制器再依据方法权限决定是否执行。图4.8把这条链路与失败分支并列画出，调试时可逐段定位是凭据错误、令牌过期、权限不足还是网络转发问题。
 
 <figure markdown>
-![图4.7](images/chapter04_fig_4_7.svg)
-<figcaption>图 4.7  前端登录、JWT过滤器与受保护接口的联调链路</figcaption>
+![图4.8](images/chapter04_fig_4_8.svg)
+<figcaption>图 4.8  前端登录、JWT过滤器与受保护接口的联调链路</figcaption>
 </figure>
 
 联调第一步是建立最小契约表。登录请求的字段名、成功状态码、令牌字段和失败错误码必须与后端一致；访问测站列表时，前端不能把“没有令牌”和“令牌已过期”都当成空数组；收到 401 要清理本地令牌并保留原始路径，收到 403 则说明身份已经识别但权限不足，应显示明确的无权提示。后端返回 404 时，页面应说明测站不存在；返回 422 或业务校验错误时，应把字段级错误绑定到表单。只有把状态码和界面行为一一对应，值班员才不会通过反复刷新来猜测系统状态。
 
-下面的登录服务只负责调用接口和保存令牌，页面组件负责表单校验与导航。令牌键名必须和请求封装一致；本章前面的示例使用`token`，因此所有调用方都复用同一常量，避免登录成功却无法访问列表的隐蔽错误。清单4.31同时展示了 401、403 和网络错误的分流，可在浏览器 Network 面板中逐项模拟。
+下面的登录服务只负责调用接口和保存令牌，页面组件负责表单校验与导航。令牌键名必须和请求封装一致：所有调用方都从清单4.30导入同一个`TOKEN_KEY`常量，避免登录成功却处处 401 的隐蔽错误。清单4.32同时展示了 401、403 和网络错误的分流，可在浏览器 Network 面板中逐项模拟。
 
-**清单 4.31  前端登录与受保护请求的联调客户端**
+**清单 4.32  前端登录与受保护请求的联调客户端**
 
 ```javascript
-const TOKEN_KEY = 'token';
+import { TOKEN_KEY } from './request.js';   // 与清单 4.5.5 共用同一键名
 
-export async function login(account, password) {
+export async function login(username, password) {
   const response = await fetch('/api/auth/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-    body: JSON.stringify({ account, password })
+    body: JSON.stringify({ username, password })
   });
   const body = await response.json().catch(() => ({}));
   if (!response.ok) {
@@ -1200,9 +1377,9 @@ export async function login(account, password) {
   return body;
 }
 
-export async function loadStations() {
+export async function loadAssets() {
   const token = sessionStorage.getItem(TOKEN_KEY);
-  const response = await fetch('/api/stations', {
+  const response = await fetch('/api/assets', {
     headers: { Accept: 'application/json',
       ...(token ? { Authorization: `Bearer ${token}` } : {}) }
   });
@@ -1222,7 +1399,7 @@ export async function loadStations() {
 
 联调第三步是观察重试和登出。网络超时可以重试幂等的 GET，但创建处置单等 POST 必须带业务幂等键，并在服务端确认重复请求的响应语义；401 只触发一次清理和跳转，不能让多个并发请求各自创建登录跳转；登出除了删除浏览器令牌，还应调用后端撤销接口或让短期令牌自然过期，多标签页则通过`storage`事件同步退出状态。刷新令牌若采用 HttpOnly Cookie，前端不能读取它，只能根据刷新接口结果更新内存中的访问令牌；若采用内存集合保存撤销状态，生产实现还要设置过期时间并监控容量。
 
-**表 4.3  前后端认证联调的证据清单**
+**表 4.6  前后端认证联调的证据清单**
 
 | 检查点   | 浏览器证据                                          | 服务端证据                                      |
 |:---------|:----------------------------------------------------|:------------------------------------------------|
@@ -1231,46 +1408,21 @@ export async function loadStations() {
 | 令牌过期 | 收到一次 401，令牌被清理并回到原路径                | 记录 jti、失败原因和请求追踪 ID，不记录完整令牌 |
 | 网络异常 | 超时显示重试，幂等请求才自动重试                    | 网关和应用日志能按追踪 ID 对齐时间线            |
 
-表4.3中的每项都应在测试记录中附上请求时间、状态码和脱敏后的响应摘要。这样，前后端联调不依赖“我这边能打开”的口头判断，而是有一组可以重放、可以审计的证据。
+表4.6中的每项都应在测试记录中附上请求时间、状态码和脱敏后的响应摘要。这样，前后端联调不依赖“我这边能打开”的口头判断，而是有一组可以重放、可以审计的证据。
 
-### 4.5.7 认证契约测试与故障复盘
+### 4.5.8 拓展：认证契约测试与故障复盘
+
+**本节层次**
+
+拓展。面向要把联调做成自动化测试与上线检查单的读者；课堂核心路线可以跳过。
 
 认证联调的难点往往不在“能否登录”，而在多个请求同时发生、页面刷新和网络抖动时是否仍然保持同一套状态语义。测试设计应先画出状态机：匿名、已登录、令牌即将过期、令牌已过期、权限不足和服务不可达是六种不同状态；每种状态都要规定界面文案、是否保留原路径、是否允许重试以及日志中应出现的事件。比如匿名用户访问测站详情，守卫保存`redirect=/stations/ST-02`并跳转登录；登录成功后只恢复一次导航；如果后端返回 403，则停留在业务页面并显示权限说明，而不是再次跳到登录页。
 
-请求并发时需要防止“竞态覆盖”。用户快速切换两个测站，先发出的请求可能后返回；如果直接把每个响应写入同一个状态变量，旧测站数据就会覆盖新测站。解决方法是给请求附带递增序号或`AbortController`，只有当前序号仍然有效的响应才能提交。清单4.32用一个最小的加载器演示取消与序号双重保护，代码可在浏览器控制台中替换模拟的`fetcher`进行测试。
-
-**清单 4.32  切换测站时防止旧请求覆盖新状态**
-
-```javascript
-let sequence = 0;
-let controller = null;
-
-export async function loadStation(stationId, fetcher = fetch) {
-  const current = ++sequence;
-  controller?.abort();
-  controller = new AbortController();
-  const response = await fetcher(`/api/stations/${encodeURIComponent(stationId)}`, {
-    headers: { Accept: 'application/json' },
-    signal: controller.signal
-  });
-  if (!response.ok) throw new Error(`HTTP_${response.status}`);
-  const result = await response.json();
-  if (current !== sequence) return { stale: true };
-  return { stale: false, station: result };
-}
-
-export function resetRequests() {
-  sequence += 1;
-  controller?.abort();
-  controller = null;
-}
-```
-
-测试这个加载器时，可以让第一个模拟请求延迟 200 毫秒、第二个只延迟 20 毫秒，再快速调用两次函数。预期结果是第二个测站先更新界面，第一个请求要么收到取消异常，要么返回`stale:true`而被丢弃。登出时调用`resetRequests()`，可以阻止已经在路上的响应把敏感数据重新写回页面。若采用集中式 Pinia store，应把序号和取消控制器放在动作内部，不要暴露给组件随意修改。
+请求并发时的“竞态覆盖”已在 4.5.4 节用清单4.29处理；自动化测试可以让第一个模拟请求延迟 200 毫秒、第二个只延迟 20 毫秒，再快速调用两次`showAsset`，断言页面最终文字属于第二个对象、第一个请求收到取消信号。
 
 错误提示也要区分可恢复性。401 通常要求重新认证，重试同一个请求没有意义；403 需要改变角色或联系审批人，自动重试只会制造日志噪声；404 应引导用户返回列表或刷新资源目录；409 表示幂等键或版本冲突，应显示“数据已被其他人修改”并提供重新读取；429 要遵守服务端的`Retry-After`；502、503 和网络超时可以指数退避，但要设置最大次数和总时长。前端不应依据错误文本猜测状态，应该读取稳定的`code`、`traceId`和可选字段错误列表。
 
-**表 4.4  认证及接口错误的前端处理矩阵**
+**表 4.7  认证及接口错误的前端处理矩阵**
 
 | 状态    | 业务含义             | 前端动作与验收证据                                         |
 |:--------|:---------------------|:-----------------------------------------------------------|
@@ -1280,7 +1432,7 @@ export function resetRequests() {
 | 409     | 版本或幂等键冲突     | 重新读取资源并提示人工确认；保留冲突双方版本号             |
 | 429/503 | 限流或服务暂不可用   | 按 Retry-After 或退避重试，超过上限后提供手动重试          |
 
-表4.4还可以转化为端到端测试用例。每个用例至少包含初始路由、是否已有令牌、请求次数、最终 URL、页面可见文案和日志关联 ID；对于涉及权限的用例，测试账号的角色要固定并在用例说明中写明。这样，修复一次 401 跳转或 403 提示后，其他页面也能沿同一矩阵回归，而不是只验证当前开发者电脑上的一个按钮。
+表4.7还可以转化为端到端测试用例。每个用例至少包含初始路由、是否已有令牌、请求次数、最终 URL、页面可见文案和日志关联 ID；对于涉及权限的用例，测试账号的角色要固定并在用例说明中写明。这样，修复一次 401 跳转或 403 提示后，其他页面也能沿同一矩阵回归，而不是只验证当前开发者电脑上的一个按钮。
 
 前后端对字段的兼容要采用“先增加、后切换、再清理”的节奏。后端新增`qualityFlag`时，可以在一段时间同时返回旧字段和新字段，前端先读取新字段、缺失时回退旧字段，并在日志中统计回退次数；确认所有客户端已经升级后再删除旧字段。删除字段前要检查缓存、导出任务和消息消费者，不能只在 Swagger 页面中看到接口变更就直接发布。日期时间统一使用带时区的 ISO 8601 字符串，数值单位写进字段说明，枚举值变化则由版本化接口或兼容映射处理。
 
@@ -1310,13 +1462,50 @@ export function resetRequests() {
 
 在案例水库演练中，值班员先从测站列表打开详情，专业分析员随后提交处置意见，审批人确认后才允许关闭事件。三个角色看到的按钮、请求权限和审计结果必须一致；若任何一个角色在页面上看到可点击操作却收到 403，应回到路由元数据、后端方法授权和角色映射逐层核对。通过这种真实工作流走查，学生能把前端组件、JWT 权限和水利业务责任联系起来。
 
+### 4.5.9 拓展：事件循环与任务调度
+
+**本节层次**
+
+拓展。读懂 4.5.1 即可完成本章任务；本小节解释“为什么`await`不会卡住页面”。
+
+浏览器的 JavaScript 执行线程一次只处理一个同步任务。当前任务完成后，事件循环先清空微任务队列，再从任务队列取出下一个宏任务；网络回调、定时器和用户输入通常进入任务队列，`Promise.then`、`queueMicrotask`和`MutationObserver`回调进入微任务队列。因此，在一个同步函数里安排“同步输出—定时器—微任务”三种工作，实际执行顺序并不是书写顺序。
+
+微任务适合完成同一任务内的短小收尾，例如把多个状态变化合并后再通知组件；长时间执行的微任务会阻塞绘制和用户输入，连续递归的`queueMicrotask`甚至会形成饥饿。处理大量测点时，应把计算分批放入任务队列或交给 Web Worker，并在动画帧中批量写入 DOM。清单4.33用日志顺序展示三类工作的调度次序。
+
+**清单 4.33  事件循环中的同步、微任务与宏任务**
+
+```javascript
+console.log('同步：开始读取');
+
+setTimeout(() => console.log('宏任务：定时刷新'), 0);
+queueMicrotask(() => console.log('微任务：合并状态'));
+Promise.resolve().then(() => console.log('微任务：更新摘要'));
+
+console.log('同步：结束读取');
+// 典型顺序：开始、结束、合并状态、更新摘要、定时刷新
+```
+
+### 4.5.10 自测与下一步
+
+1.  把清单4.27中最后一行的对象换成 `DAM-A-RF-01`，页面显示什么？再把地址改成 `DAM-A-RF-99`，页面应显示什么、“网络”面板的状态码是多少？（参考：雨量计的最新观测与单位 mm；404 与“对象不存在，请返回列表”。）
+
+2.  只保留清单4.29的序号校验、删去`AbortController`，故障单元的验证记录哪几行会变？（参考：页面结果仍正确，但请求1 不再显示“已取消”，仍会占用 3 秒带宽并返回 200。）
+
+3.  教学接口对`/api/assets`返回`?teach=empty`时，列表页应当显示什么？如果显示“服务暂时不可用”，说明状态模型哪里错了？（参考：空数组是 empty 而非 error；把`[]`当成失败是把“没有数据”和“拿不到数据”混为一谈。）
+
+下一步：4.6 节把本节的`render`换成 DOM 事件驱动的列表页；4.7 节用 Vue 组件承接同一份状态模型；4.9 节把`showAsset`的序号校验搬进 Pinia 仓库。第5章写出真实后端后，只需停掉教学接口、启动 Spring Boot，本节全部脚本原样可用。
+
 ## 4.6 DOM操作与事件处理
+
+**本节层次**
+
+核心。
 
 4.4 节已经分别讲过 DOM 查询、安全写入与事件模型，本节用一个最小的完整页面把它们串起来，作为进入 Vue 之前的收束练习：结构与行为分离、输入必须校验、更新走 `textContent` 而不是 `innerHTML`。
 
 下面示例完整展示事件绑定、输入校验和界面更新。警戒值仍为同一场景的5.0米。
 
-**清单 4.33  测站输入 HTML 片段**
+**清单 4.34  测站输入 HTML 片段**
 
 ```html
 <label for="level-input">水位（m）</label>
@@ -1325,9 +1514,9 @@ export function resetRequests() {
 <output id="level-result" aria-live="polite"></output>
 ```
 
-清单4.34把同一页面的行为代码单独列出，使用 JavaScript 语言标注后，关键字、字符串和箭头函数能够正确高亮；HTML 清单只负责结构，脚本清单负责查询节点、转换输入和更新输出。
+清单4.35把同一页面的行为代码单独列出，使用 JavaScript 语言标注后，关键字、字符串和箭头函数能够正确高亮；HTML 清单只负责结构，脚本清单负责查询节点、转换输入和更新输出。
 
-**清单 4.34  测站输入 JavaScript 片段**
+**清单 4.35  测站输入 JavaScript 片段**
 
 ```javascript
 const input = document.querySelector('#level-input');
@@ -1348,9 +1537,13 @@ button.addEventListener('click', () => {
 
 ## 4.7 模块化开发与调试技巧
 
+**本节层次**
+
+指导实践。
+
 ES模块通过`export`和`import`建立清晰依赖。接口访问、业务计算和视图组件应分层组织，避免在组件中散布重复的网络代码。
 
-**清单 4.35  ES 模块的导出与导入**
+**清单 4.36  ES 模块的导出与导入**
 
 ```javascript
 // level.js
@@ -1367,37 +1560,43 @@ console.log(levelStatus(5.12));
 
 ## 4.8 Vue 3组件化开发
 
+**本节层次**
+
+核心：4.8.1、4.8.2；指导实践：4.8.3、4.8.4。核心路线只要求读完核心小节。
+
 传统命令式写法需要在数据变化后手动寻找并更新多个DOM节点。水利仪表盘一旦包含曲线、表格和告警标识，这些更新容易分散。Vue使用响应式状态和声明式模板：开发者描述“状态如何映射为界面”，框架负责同步DOM。组件化仍需遵循可理解反馈和一致交互等基本设计原则<sup>[[31]](../../references.md#ref31)</sup>。
 
 本章使用Vue 3.4+组合式API（响应式系统的完整语义见官方文档<sup>[[25]](../../references.md#ref25)</sup>）。`ref`适合基本值，`reactive`适合对象，`computed`表达派生状态；组件通过props接收数据，通过emit通知父组件。下面的单文件组件把状态声明、属性校验、模板绑定和事件发射放在同一示例中，便于沿着数据流理解组件边界。
 
-**清单 4.36  测站卡片组合式组件**
+**清单 4.37  测站卡片组合式组件**
 
 ```vue
 <script setup>
 import { computed } from 'vue'
 const props = defineProps({
-  name: { type: String, required: true },
-  level: { type: Number, required: true }
+  displayName: { type: String, required: true },
+  value: { type: Number, required: true },
+  unit: { type: String, default: 'm' }
 })
 const emit = defineEmits(['open-detail'])
-const status = computed(() => props.level >= 5.0 ? 'warning' : 'normal')
+// 165.5 m 是案例水库汛限水位（8.1 节参数表）；真实阈值应来自后端
+const status = computed(() => props.value >= 165.5 ? 'warning' : 'normal')
 </script>
 
 <template>
   <article :class="['station-card', `station-card--${status}`]">
-    <h3>{{ name }}</h3>
-    <p>水位：{{ level.toFixed(2) }} m</p>
+    <h3>{{ displayName }}</h3>
+    <p>当前值：{{ value.toFixed(2) }} {{ unit }}</p>
     <button type="button" @click="emit('open-detail')">查看详情</button>
   </article>
 </template>
 ```
 
-组件在创建、挂载、更新和卸载阶段提供生命周期钩子。Vue 3中卸载阶段使用`beforeUnmount`/`unmounted`或组合式API的`onBeforeUnmount`/`onUnmounted`，不使用Vue 2的`beforeDestroy`/`destroyed`。图4.8把这些钩子按创建、挂载、更新、卸载四个阶段串起来。需要在组件内启动的定时刷新、消息订阅和三维场景实例，都应在挂载阶段建立、在卸载阶段释放；忘记释放是监测页面反复切换之后内存持续增长的最常见原因。
+组件在创建、挂载、更新和卸载阶段提供生命周期钩子。Vue 3中卸载阶段使用`beforeUnmount`/`unmounted`或组合式API的`onBeforeUnmount`/`onUnmounted`，不使用Vue 2的`beforeDestroy`/`destroyed`。图4.9把这些钩子按创建、挂载、更新、卸载四个阶段串起来。需要在组件内启动的定时刷新、消息订阅和三维场景实例，都应在挂载阶段建立、在卸载阶段释放；忘记释放是监测页面反复切换之后内存持续增长的最常见原因。
 
 <figure markdown>
-![图4.8](images/chapter04_fig_4_8.svg)
-<figcaption>图 4.8  Vue 3组件生命周期主线</figcaption>
+![图4.9](images/chapter04_fig_4_9.svg)
+<figcaption>图 4.9  Vue 3组件生命周期主线</figcaption>
 </figure>
 
 定时器、WebSocket连接和第三方图表实例应在`onMounted`中创建，并在`onUnmounted`中释放，避免页面切换后的内存泄漏。
@@ -1408,27 +1607,27 @@ Vue 3.4 的组合式 API 把状态、派生值、监听器和生命周期放进�
 
 `computed`用于从已有状态推导出只读结果，并按依赖缓存；过滤后的测站列表、是否存在预警和格式化后的更新时间都适合用它表达。`watch`适合观察一个明确的源并执行副作用，例如筛选条件变化后重新请求；`watchEffect`会自动收集同步执行阶段访问的依赖，适合小范围联动，但依赖不透明时要注意误触发。监听器若创建了定时器、订阅或请求，必须返回清理函数或在组件卸载时终止。
 
-清单4.37展示五种 API 的职责和`.value`边界。代码中的`watch`只在站点编号变化时触发请求，`watchEffect`只记录当前筛选状态；真实项目中应给请求加取消信号，防止快速输入时旧响应覆盖新状态。
+清单4.38展示五种 API 的职责和`.value`边界。代码中的`watch`只在站点编号变化时触发请求，`watchEffect`只记录当前筛选状态；真实项目中应给请求加取消信号，防止快速输入时旧响应覆盖新状态。
 
-**清单 4.37  Vue 3 响应式 API 与监听器**
+**清单 4.38  Vue 3 响应式 API 与监听器**
 
 ```vue
 <script setup>
 import { computed, reactive, ref, watch, watchEffect } from 'vue';
 
-const selectedId = ref('ST-01');
+const selectedId = ref('DAM-A-PZ-07');
 const form = reactive({ keyword: '', onlyWarning: false });
-const stations = ref([
-  { id: 'ST-01', name: '上游测站', warning: false },
-  { id: 'ST-02', name: '下游测站', warning: true }
+const assets = ref([
+  { assetId: 'DAM-A-WL-01', displayName: '案例库水位01', warning: false },
+  { assetId: 'DAM-A-PZ-07', displayName: '案例渗压07', warning: true }
 ]);
-const visibleStations = computed(() => stations.value.filter(station => {
-  const match = station.name.includes(form.keyword.trim());
-  return match && (!form.onlyWarning || station.warning);
+const visibleAssets = computed(() => assets.value.filter(asset => {
+  const match = asset.displayName.includes(form.keyword.trim());
+  return match && (!form.onlyWarning || asset.warning);
 }));
 
 watch(selectedId, id => console.log('重新加载测站', id));
-watchEffect(() => console.log('筛选数量', visibleStations.value.length));
+watchEffect(() => console.log('筛选数量', visibleAssets.value.length));
 </script>
 ```
 
@@ -1436,9 +1635,9 @@ watchEffect(() => console.log('筛选数量', visibleStations.value.length));
 
 模板指令把状态映射成可读的 HTML。`v-if`按条件创建或销毁节点，适合权限区域和少量切换内容；`v-show`只切换`display`，适合频繁显示/隐藏且初始化代价较高的面板。`v-for`渲染集合时必须提供稳定的`:key`，应使用测站 ID 而不是数组索引；列表排序或插入时，稳定 key 能让 Vue 复用正确的节点。`v-model`把输入控件与状态双向同步，`v-bind`（简写为冒号）绑定属性，`v-on`（简写为`@`）绑定事件。
 
-清单4.38用同一页面展示这些指令。预警说明使用`v-if`避免给普通测站创建无用节点，帮助文字使用`v-show`保持布局稳定；输入框用`v-model.trim`去除首尾空白，按钮通过`@click`修改状态。模板只负责声明关系，复杂筛选仍放在`computed`中。
+清单4.39用同一页面展示这些指令。预警说明使用`v-if`避免给普通测站创建无用节点，帮助文字使用`v-show`保持布局稳定；输入框用`v-model.trim`去除首尾空白，按钮通过`@click`修改状态。模板只负责声明关系，复杂筛选仍放在`computed`中。
 
-**清单 4.38  Vue 模板指令与稳定 key**
+**清单 4.39  Vue 模板指令与稳定 key**
 
 ```vue
 <template>
@@ -1451,13 +1650,13 @@ watchEffect(() => console.log('筛选数量', visibleStations.value.length));
     只看预警
   </label>
   <ul>
-    <li v-for="station in visibleStations" :key="station.id">
-      <button type="button" v-bind:aria-label="`打开${station.name}`"
-              v-on:click="selectedId = station.id">
-        {{ station.name }}
+    <li v-for="asset in visibleAssets" :key="asset.assetId">
+      <button type="button" v-bind:aria-label="`打开${asset.displayName}`"
+              v-on:click="selectedId = asset.assetId">
+        {{ asset.displayName }}
       </button>
-      <span v-if="station.warning" class="warning">需要关注</span>
-      <span v-show="!station.warning" class="normal">正常</span>
+      <span v-if="asset.warning" class="warning">需要关注</span>
+      <span v-show="!asset.warning" class="normal">正常</span>
     </li>
   </ul>
 </template>
@@ -1465,33 +1664,33 @@ watchEffect(() => console.log('筛选数量', visibleStations.value.length));
 
 父组件通过 props 向下传递只读数据，通过 emit 向上报告用户动作；子组件不应直接修改 prop，否则数据流会变成隐式双向绑定。slot 允许父组件注入一段带上下文的呈现内容，适合让“测站卡片”复用标题、操作区和空状态。provide/inject 适合跨越多层组件传递只读配置或服务，例如单位格式化器、主题令牌和请求客户端；共享的可变业务状态仍应交给 Pinia，不能把所有状态藏在依赖注入中。
 
-清单4.39把四种通信方式放在一个父子组件示例中。`StationCard`只接收`station`，点击按钮时发出`select`事件；父组件通过 slot 提供操作区，并用 provide/inject 传递单位文本。provide 的值在父组件中冻结，防止子组件意外篡改全局配置。
+清单4.40把四种通信方式放在一个父子组件示例中。`AssetCard`只接收`asset`，点击按钮时发出`select`事件；父组件通过 slot 提供操作区，并用 provide/inject 传递单位文本。provide 的值在父组件中冻结，防止子组件意外篡改全局配置。
 
-**清单 4.39  Vue props、emit、slot 与 provide/inject**
+**清单 4.40  Vue props、emit、slot 与 provide/inject**
 
 ```vue
-<!-- StationCard.vue -->
+<!-- AssetCard.vue -->
 <script setup>
 import { inject } from 'vue';
-const props = defineProps({ station: { type: Object, required: true } });
+const props = defineProps({ asset: { type: Object, required: true } });
 const emit = defineEmits(['select']);
-const levelUnit = inject('levelUnit', 'm');
+const fallbackUnit = inject('fallbackUnit', 'm');
 </script>
 <template>
   <article>
-    <h3>{{ props.station.name }}</h3>
-    <p>水位：{{ props.station.level }} {{ levelUnit }}</p>
+    <h3>{{ props.asset.displayName }}</h3>
+    <p>当前值：{{ props.asset.value }} {{ props.asset.unit ?? fallbackUnit }}</p>
     <slot name="actions">
-      <button type="button" @click="emit('select', props.station.id)">查看</button>
+      <button type="button" @click="emit('select', props.asset.assetId)">查看</button>
     </slot>
   </article>
 </template>
 
-<!-- StationPanel.vue 的 script setup 片段 -->
+<!-- AssetPanel.vue 的 script setup 片段 -->
 <script setup>
 import { provide, readonly, ref } from 'vue';
-const levelUnit = ref('m');
-provide('levelUnit', readonly(levelUnit));
+const fallbackUnit = ref('m');   // 对象自身没有单位时的兜底
+provide('fallbackUnit', readonly(fallbackUnit));
 </script>
 ```
 
@@ -1499,16 +1698,16 @@ provide('levelUnit', readonly(levelUnit));
 
 组件生命周期描述实例从建立到销毁的过程。`onMounted`适合访问已经挂载的 DOM、启动定时刷新、建立 WebSocket 或初始化图表；`onUpdated`只用于确有必要的 DOM 同步，不应在其中无条件修改响应式状态；`onUnmounted`负责清除定时器、移除监听器、取消请求和销毁第三方实例。开发者可以把资源创建与清理写在同一段组合式函数中，让调用方不容易漏掉释放逻辑。
 
-图4.9把“建立资源—使用资源—释放资源”与组件钩子对应起来。离开测站页面时，即使网络回调稍后到达，也不应再修改已卸载的组件；取消信号和布尔标记可以共同防止竞态。对于定时器，清理函数必须保存创建时返回的句柄，不能重新调用一个相同参数的`setInterval`来“猜测”旧句柄。
+图4.10把“建立资源—使用资源—释放资源”与组件钩子对应起来。离开测站页面时，即使网络回调稍后到达，也不应再修改已卸载的组件；取消信号和布尔标记可以共同防止竞态。对于定时器，清理函数必须保存创建时返回的句柄，不能重新调用一个相同参数的`setInterval`来“猜测”旧句柄。
 
 <figure markdown>
-![图4.9](images/chapter04_fig_4_9.svg)
-<figcaption>图 4.9  Vue 3 组件资源的建立、使用与清理</figcaption>
+![图4.10](images/chapter04_fig_4_10.svg)
+<figcaption>图 4.10  Vue 3 组件资源的建立、使用与清理</figcaption>
 </figure>
 
-清单4.40演示一个完整的定时刷新组件。`onMounted`保存定时器句柄，`onUnmounted`清除它；请求函数收到`AbortSignal`后，组件离开页面可以立即取消未完成请求。这个模式也适用于图表实例、地图图层和事件总线订阅。
+清单4.41演示一个完整的定时刷新组件。`onMounted`保存定时器句柄，`onUnmounted`清除它；请求函数收到`AbortSignal`后，组件离开页面可以立即取消未完成请求。这个模式也适用于图表实例、地图图层和事件总线订阅。
 
-**清单 4.40  onMounted 与 onUnmounted 的清理模式**
+**清单 4.41  onMounted 与 onUnmounted 的清理模式**
 
 ```vue
 <script setup>
@@ -1519,7 +1718,7 @@ const controller = new AbortController();
 let timerId;
 
 async function refresh() {
-  const response = await fetch('/api/stations/ST-01/latest', {
+  const response = await fetch('/api/assets/DAM-A-PZ-07/readings/latest', {
     signal: controller.signal
   });
   if (response.ok) latest.value = await response.json();
@@ -1540,14 +1739,14 @@ onUnmounted(() => {
 
 一个可交付的 Vue 页面至少包含数据来源、筛选状态、加载反馈和可操作的列表项。父组件负责获取测站、保存筛选条件并计算可见集合，子组件负责单行展示和发出选择事件；这样，筛选逻辑可以独立测试，行组件也能在地图侧栏复用。完整页面需要同时处理加载中、空结果和正常结果三种状态，不能只展示一个静态数组。
 
-清单4.41是可复用的行组件，清单4.42是使用它的完整筛选页。父组件使用`ref`保存原始数组，`reactive`保存表单，`computed`生成过滤结果，`v-for(:key)`渲染行，`v-model`接收输入，`v-if`表达加载和空状态，并在`onMounted`中加载数据。读者可以把 API 函数替换为清单4.29的`request.js`，页面结构不需要改变。
+清单4.42是可复用的行组件，清单4.43是使用它的完整筛选页。父组件使用`ref`保存原始数组，`reactive`保存表单，`computed`生成过滤结果，`v-for(:key)`渲染行，`v-model`接收输入，`v-if`表达加载和空状态，并在`onMounted`中加载数据。读者可以把 API 函数替换为清单4.30的`request.js`，页面结构不需要改变。
 
-**清单 4.41  测站列表行组件 StationRow.vue**
+**清单 4.42  测站列表行组件 AssetRow.vue**
 
 ```vue
 <script setup>
 defineProps({
-  station: { type: Object, required: true },
+  asset: { type: Object, required: true },
   selected: { type: Boolean, default: false }
 });
 const emit = defineEmits(['select']);
@@ -1555,42 +1754,42 @@ const emit = defineEmits(['select']);
 
 <template>
   <li :class="{ selected }">
-    <button type="button" @click="emit('select', station.id)">
-      <strong>{{ station.name }}</strong>
-      <span>{{ station.level ?? '—' }} m</span>
-      <span v-if="station.warning" class="warning">预警</span>
+    <button type="button" @click="emit('select', asset.assetId)">
+      <strong>{{ asset.displayName }}</strong>
+      <span>{{ asset.value ?? '—' }} {{ asset.unit }}</span>
+      <span v-if="asset.warning" class="warning">预警</span>
     </button>
   </li>
 </template>
 ```
 
-**清单 4.42  测站列表筛选页 StationFilterPage.vue**
+**清单 4.43  测站列表筛选页 AssetFilterPage.vue**
 
 ```vue
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue';
-import StationRow from './StationRow.vue';
+import AssetRow from './AssetRow.vue';
 import { request } from '../api/request.js';
 
-const stations = ref([]);
+const assets = ref([]);
 const loading = ref(false);
 const selectedId = ref(null);
 const filters = reactive({ keyword: '', onlyWarning: false });
-const visibleStations = computed(() => stations.value.filter(station => {
-  const match = station.name.includes(filters.keyword);
-  return match && (!filters.onlyWarning || station.warning);
+const visibleAssets = computed(() => assets.value.filter(asset => {
+  const match = asset.displayName.includes(filters.keyword);
+  return match && (!filters.onlyWarning || asset.warning);
 }));
 
-async function loadStations() {
+async function loadAssets() {
   loading.value = true;
   try {
-    stations.value = await request('/stations');
+    assets.value = await request('/api/assets');
   } finally {
     loading.value = false;
   }
 }
-function selectStation(id) { selectedId.value = id; }
-onMounted(loadStations);
+function selectAsset(id) { selectedId.value = id; }
+onMounted(loadAssets);
 </script>
 
 <template>
@@ -1601,11 +1800,11 @@ onMounted(loadStations);
     </label>
     <label><input v-model="filters.onlyWarning" type="checkbox">只看预警</label>
     <p v-if="loading" role="status">正在加载测站……</p>
-    <p v-else-if="visibleStations.length === 0">没有符合条件的测站</p>
+    <p v-else-if="visibleAssets.length === 0">没有符合条件的测站</p>
     <ul v-else>
-      <StationRow v-for="station in visibleStations" :key="station.id"
-                  :station="station" :selected="station.id === selectedId"
-                  @select="selectStation" />
+      <AssetRow v-for="asset in visibleAssets" :key="asset.assetId"
+                :asset="asset" :selected="asset.assetId === selectedId"
+                @select="selectAsset" />
     </ul>
   </section>
 </template>
@@ -1621,7 +1820,7 @@ SFC 的`script setup`会在编译阶段生成组件上下文，顶层声明可�
 
 选择`computed`还是`watch`可以问两个问题：结果是否能由已有状态纯粹计算，是否需要调用网络、写入存储或操作 DOM。纯计算选择`computed`，它会缓存结果并在依赖改变时失效；需要副作用时选择`watch`，明确列出监听源、是否立即执行以及是否深度监听。`watchEffect`适合把多个轻量依赖组合成一个同步动作，例如更新页面标题或记录筛选统计；当副作用涉及请求、定时器或订阅时，优先使用带清理函数的`watch`，并让每一次异步任务携带自己的取消信号。
 
-**表 4.5  Vue 响应式 API 的职责边界与验收问题**
+**表 4.8  Vue 响应式 API 的职责边界与验收问题**
 
 | API           | 适合表达的内容                 | 代码评审时的核对问题                                       |
 |:--------------|:-------------------------------|:-----------------------------------------------------------|
@@ -1631,7 +1830,7 @@ SFC 的`script setup`会在编译阶段生成组件上下文，顶层声明可�
 | `watch`       | 具有明确来源的异步或外部副作用 | 是否处理竞态、错误和清理，是否设定合理的`flush`时机        |
 | `watchEffect` | 少量依赖的同步联动             | 自动收集的依赖是否稳定，是否会因隐式访问造成重复执行       |
 
-表4.5可以作为代码走查清单。若一个`computed`内部出现`fetch`，说明派生值与副作用发生了混合；若一个`watch`只做字符串拼接，说明它可以改写为`computed`。对监测数据而言，响应式 API 只负责界面状态，阈值计算和数据质量判定仍应由后端或领域服务提供，前端展示结果时保留测点编号、采样时间和质量码，方便值班员追溯。
+表4.8可以作为代码走查清单。若一个`computed`内部出现`fetch`，说明派生值与副作用发生了混合；若一个`watch`只做字符串拼接，说明它可以改写为`computed`。对监测数据而言，响应式 API 只负责界面状态，阈值计算和数据质量判定仍应由后端或领域服务提供，前端展示结果时保留测点编号、采样时间和质量码，方便值班员追溯。
 
 #### 4.8.4.2 模板指令的性能与可访问性
 
@@ -1653,7 +1852,7 @@ props、emit、slot 和 provide/inject 形成四条不同的依赖路径。props
 
 定时刷新要先定义业务窗口，再确定间隔。若案例水库的实时读数允许三十秒延迟，页面可以使用三十秒定时器；当浏览器标签页进入后台时，可以暂停刷新，回到前台再立即拉取一次。刷新函数不能因为上一次请求较慢而并发堆积，可以使用“正在加载”标志、队列或取消旧请求实现串行化。定时器、事件监听器、WebSocket 和图表实例都必须在`onUnmounted`中释放，资源的创建与释放最好位于同一组合式函数，便于复用和单元测试。
 
-可把生命周期验收写成可观察的步骤：挂载组件后检查只创建一个定时器；切换测站时确认旧请求被取消或其结果被丢弃；卸载组件后检查网络面板没有继续写入、控制台没有更新已销毁实例的警告；重新挂载时确认资源数量回到一个。对实时订阅还要验证断线重连、重复消息和权限失效，避免把连接重试当作无限循环。图4.9中的箭头代表这些可测试的资源边界，而不是抽象的装饰。
+可把生命周期验收写成可观察的步骤：挂载组件后检查只创建一个定时器；切换测站时确认旧请求被取消或其结果被丢弃；卸载组件后检查网络面板没有继续写入、控制台没有更新已销毁实例的警告；重新挂载时确认资源数量回到一个。对实时订阅还要验证断线重连、重复消息和权限失效，避免把连接重试当作无限循环。图4.10中的箭头代表这些可测试的资源边界，而不是抽象的装饰。
 
 #### 4.8.4.5 测站筛选页的交付检查
 
@@ -1665,15 +1864,19 @@ props、emit、slot 和 provide/inject 形成四条不同的依赖路径。props
 
 ## 4.9 Vue Router与Pinia应用组织
 
+**本节层次**
+
+指导实践：4.9.1、4.9.2、4.9.3、4.9.4。本节没有核心小节，课堂核心路线可整体跳过。
+
 Vue Router把 URL 映射到页面组件，`App.vue`中的`<router-view />`是路由组件真正出现的位置。路由表应包含稳定的路径、名称、组件和元数据；页面级组件使用动态导入可以把首屏代码与详情页代码分开下载。导航的职责边界要保持清楚：路由负责页面切换和参数解析，页面负责展示与交互，后端负责最终的身份和权限判定。
 
 ### 4.9.1 根组件、路由表与登录守卫
 
 根组件通常只保留全局布局和路由出口。导航栏、全局提示和面包屑可以放在出口上下方；具体页面由路由决定。下面的骨架包含一个可跳过登录页、测站列表、动态测站详情和告警中心，读者可以直接放入 Vite 5 项目验证路径匹配。动态段`:id`会被解析为字符串参数，若业务要求数值或固定格式，应在页面或守卫中完成校验。
 
-清单4.43展示`App.vue`的最小骨架，清单4.44给出完整路由表。守卫返回一个带名称的目标对象，而不是拼接字符串；`redirect`查询参数保留用户原本想访问的路径，登录成功后可以跳回去。守卫必须识别当前是否已经在登录页，形成防环判断，否则匿名用户访问登录页也会再次被重定向。
+清单4.44展示`App.vue`的最小骨架，清单4.45给出完整路由表。守卫返回一个带名称的目标对象，而不是拼接字符串；`redirect`查询参数保留用户原本想访问的路径，登录成功后可以跳回去。守卫必须识别当前是否已经在登录页，形成防环判断，否则匿名用户访问登录页也会再次被重定向。
 
-**清单 4.43  App.vue 根组件与 router-view**
+**清单 4.44  App.vue 根组件与 router-view**
 
 ```vue
 <script setup>
@@ -1684,7 +1887,7 @@ import { RouterLink, RouterView } from 'vue-router';
   <header class="app-header">
     <RouterLink to="/">水利工程安全监测平台</RouterLink>
     <nav aria-label="主导航">
-      <RouterLink to="/stations">测站</RouterLink>
+      <RouterLink to="/assets">测站</RouterLink>
       <RouterLink to="/alerts">告警中心</RouterLink>
     </nav>
   </header>
@@ -1694,7 +1897,7 @@ import { RouterLink, RouterView } from 'vue-router';
 </template>
 ```
 
-**清单 4.44  路由表、登录守卫与重定向**
+**清单 4.45  路由表、登录守卫与重定向**
 
 ```javascript
 import { createRouter, createWebHistory } from 'vue-router';
@@ -1703,15 +1906,15 @@ import { TOKEN_KEY } from './api/request.js';
 const router = createRouter({
   history: createWebHistory(),
   routes: [
-    { path: '/', name: 'home', redirect: { name: 'stations' } },
+    { path: '/', name: 'home', redirect: { name: 'assets' } },
     { path: '/login', name: 'login', component: () => import('./views/Login.vue') },
-    { path: '/stations', name: 'stations', component: () => import('./views/StationList.vue'),
+    { path: '/assets', name: 'assets', component: () => import('./views/AssetList.vue'),
       meta: { requiresAuth: true },
       children: [
-        { path: 'map', name: 'station-map', component: () => import('./views/StationMap.vue') }
+        { path: 'map', name: 'asset-map', component: () => import('./views/AssetMap.vue') }
       ] },
-    { path: '/stations/:id', name: 'station-detail',
-      component: () => import('./views/StationDetail.vue'),
+    { path: '/assets/:id', name: 'asset-detail',
+      component: () => import('./views/AssetDetail.vue'),
       props: true, meta: { requiresAuth: true } }
   ]
 });
@@ -1728,7 +1931,7 @@ export default router;
 
 嵌套路由要求父页面提供自己的`<router-view />`，否则子路由虽然匹配成功却没有渲染位置。测站列表可以在页头显示筛选器，在内容区域再放一个出口承载地图子页；动态详情则使用顶层路径，便于从地图标记和列表行直接跳转。`useRouter`用于发起导航，`useRoute`用于读取当前路径、查询参数和动态参数。编程式导航应使用路由名称和参数对象，避免把业务 ID 直接拼进未经编码的 URL。
 
-**清单 4.45  useRouter、useRoute 与编程式导航**
+**清单 4.46  useRouter、useRoute 与编程式导航**
 
 ```vue
 <script setup>
@@ -1737,26 +1940,26 @@ import { useRoute, useRouter } from 'vue-router';
 
 const route = useRoute();
 const router = useRouter();
-const stationId = computed(() => String(route.params.id ?? ''));
-const returnTo = computed(() => String(route.query.from ?? 'stations'));
+const assetId = computed(() => String(route.params.id ?? ''));
+const returnTo = computed(() => String(route.query.from ?? 'assets'));
 
-function openStation(id) {
-  router.push({ name: 'station-detail', params: { id }, query: { from: returnTo.value } });
+function openAsset(id) {
+  router.push({ name: 'asset-detail', params: { id }, query: { from: returnTo.value } });
 }
 function backToList() {
-  router.replace({ name: 'stations', query: { selected: stationId.value } });
+  router.replace({ name: 'assets', query: { selected: assetId.value } });
 }
 </script>
 
 <template>
   <button type="button" @click="backToList">返回测站列表</button>
-  <button type="button" @click="openStation('ST-02')">打开下游测站</button>
+  <button type="button" @click="openAsset('DAM-A-WL-01')">打开案例库水位01</button>
 </template>
 ```
 
-登录页读取守卫写入的`redirect`，成功后只允许跳转到应用内部的路径，并对缺省值回退到测站首页。令牌写入和清理应复用清单4.29的请求封装，页面只负责提交凭据和显示错误。后端仍要校验令牌和权限，前端守卫只是减少无意义的页面加载，不能作为安全边界。
+登录页读取守卫写入的`redirect`，成功后只允许跳转到应用内部的路径，并对缺省值回退到测站首页。令牌写入和清理应复用清单4.30的请求封装，页面只负责提交凭据和显示错误。后端仍要校验令牌和权限，前端守卫只是减少无意义的页面加载，不能作为安全边界。
 
-**清单 4.46  登录成功后的安全回跳**
+**清单 4.47  登录成功后的安全回跳**
 
 ```vue
 <script setup>
@@ -1772,7 +1975,7 @@ const errorMessage = ref('');
 
 function safeRedirect(value) {
   return typeof value === 'string' && value.startsWith('/') && !value.startsWith('//')
-    ? value : '/stations';
+    ? value : '/assets';
 }
 async function submit() {
   errorMessage.value = '';
@@ -1798,23 +2001,23 @@ async function submit() {
 </template>
 ```
 
-**清单 4.47  Pinia测站状态管理**
+**清单 4.48  Pinia测站状态管理**
 
 ```javascript
 import { defineStore } from 'pinia';
-import { loadLatestLevel } from '../api/stations.js';
+import { loadLatest as fetchLatest } from '../api/assets.js';   // 4.5.2 节的 loadLatest
 
-export const useStationStore = defineStore('station', {
+export const useAssetStore = defineStore('asset', {
   state: () => ({ currentId: null, latest: null, loading: false, error: null }),
   getters: {
-    isWarning: state => (state.latest?.level ?? 0) >= 5.0
+    isWarning: state => (state.latest?.value ?? 0) >= 165.5   // 汛限水位，见 8.1 节
   },
   actions: {
     async loadLatest(id) {
       this.loading = true;
       this.error = null;
       try {
-        this.latest = await loadLatestLevel(id);
+        this.latest = await fetchLatest(id);
         this.currentId = id;
       } catch (error) {
         this.error = error;
@@ -1830,47 +2033,47 @@ export const useStationStore = defineStore('station', {
 
 Pinia集中管理跨组件共享且具有业务含义的状态，如当前测站、实时读数和告警数量；只在单个组件内部使用的展开状态保留在组件中。组件调用`useStationStore()`得到的是一个带响应式属性的 store。直接写`const { latest, loading } = store`会把属性值拷贝出来，后续更新无法驱动模板；需要使用`storeToRefs`保留响应式引用，动作方法则可以直接从 store 取出。
 
-**清单 4.48  组件内使用 Pinia 与 storeToRefs**
+**清单 4.49  组件内使用 Pinia 与 storeToRefs**
 
 ```vue
 <script setup>
 import { onMounted } from 'vue';
 import { storeToRefs } from 'pinia';
-import { useStationStore } from '../stores/station.js';
+import { useAssetStore } from '../stores/asset.js';
 
-const stationStore = useStationStore();
-const { latest, loading, isWarning } = storeToRefs(stationStore);
-const { loadLatest } = stationStore;
+const assetStore = useAssetStore();
+const { latest, loading, isWarning } = storeToRefs(assetStore);
+const { loadLatest } = assetStore;
 
-onMounted(() => loadLatest('ST-01'));
+onMounted(() => loadLatest('DAM-A-WL-01'));
 </script>
 
 <template>
   <p v-if="loading" role="status">正在读取最新水位……</p>
-  <p v-else-if="latest">{{ latest.level }} m <strong v-if="isWarning">需要关注</strong></p>
+  <p v-else-if="latest">{{ latest.value }} {{ latest.unit }} <strong v-if="isWarning">需要关注</strong></p>
   <p v-else>暂无读数</p>
 </template>
 ```
 
-清单4.48中，`storeToRefs`只处理状态和 getter，`loadLatest`仍保留为动作函数。若需要批量修改状态，可以调用 store 的动作；表单输入不应直接写入后端缓存字段，提交时由动作完成校验和请求。跨路由共享的当前测站、最新读数和告警计数放在 Pinia 后，列表、地图和详情页可以读取同一份状态，避免页面之间各自维护副本。
+清单4.49中，`storeToRefs`只处理状态和 getter，`loadLatest`仍保留为动作函数。若需要批量修改状态，可以调用 store 的动作；表单输入不应直接写入后端缓存字段，提交时由动作完成校验和请求。跨路由共享的当前测站、最新读数和告警计数放在 Pinia 后，列表、地图和详情页可以读取同一份状态，避免页面之间各自维护副本。
 
-### 4.9.2 StationDetail 的动态参数与数据加载
+### 4.9.2 AssetDetail 的动态参数与数据加载
 
 路由配置中的`props: true`会把`:id`动态段作为组件 prop 注入。这样，详情组件不必依赖全局路由对象，单元测试可以直接传入`id`；查询参数仍可通过`useRoute`读取。`defineProps`应明确类型和必填约束，收到参数后再调用 store 动作加载数据，并在参数变化时重新加载。组件卸载时沿用前面的取消信号和清理模式。
 
-**清单 4.49  StationDetail.vue 接收动态路由参数**
+**清单 4.50  AssetDetail.vue 接收动态路由参数**
 
 ```vue
 <script setup>
 import { watch } from 'vue';
 import { storeToRefs } from 'pinia';
-import { useStationStore } from '../stores/station.js';
+import { useAssetStore } from '../stores/asset.js';
 
 const props = defineProps({ id: { type: String, required: true } });
-const stationStore = useStationStore();
-const { latest, loading, error } = storeToRefs(stationStore);
+const assetStore = useAssetStore();
+const { latest, loading, error } = storeToRefs(assetStore);
 
-watch(() => props.id, id => stationStore.loadLatest(id), { immediate: true });
+watch(() => props.id, id => assetStore.loadLatest(id), { immediate: true });
 </script>
 
 <template>
@@ -1878,7 +2081,7 @@ watch(() => props.id, id => stationStore.loadLatest(id), { immediate: true });
     <h1 id="station-detail-title">测站 {{ props.id }}</h1>
     <p v-if="loading" role="status">正在加载……</p>
     <p v-else-if="error" role="alert">{{ error.message }}</p>
-    <dl v-else-if="latest"><dt>最新水位</dt><dd>{{ latest.level }} m</dd></dl>
+    <dl v-else-if="latest"><dt>最新观测</dt><dd>{{ latest.value }} {{ latest.unit }}</dd></dl>
     <p v-else>暂无有效读数</p>
   </article>
 </template>
@@ -1886,25 +2089,25 @@ watch(() => props.id, id => stationStore.loadLatest(id), { immediate: true });
 
 选项式 store 适合把状态、getter 和动作按对象分栏展示，便于刚接触 Pinia 的读者建立映射；setup 式 store 使用`ref`、`computed`和普通函数，适合复用组合式函数和精确控制公开成员。两种写法都通过`defineStore`注册，组件侧的`storeToRefs`用法一致。选择时以团队可读性和测试边界为依据，不要在同一个 store 中混用两套状态来源。
 
-**清单 4.50  Pinia setup 式 store 对照**
+**清单 4.51  Pinia setup 式 store 对照**
 
 ```javascript
 import { computed, ref } from 'vue';
 import { defineStore } from 'pinia';
-import { loadLatestLevel } from '../api/stations.js';
+import { loadLatest as fetchLatest } from '../api/assets.js';   // 别名避免与下面的动作同名
 
-export const useStationSetupStore = defineStore('station-setup', () => {
+export const useAssetSetupStore = defineStore('asset-setup', () => {
   const currentId = ref(null);
   const latest = ref(null);
   const loading = ref(false);
   const error = ref(null);
-  const isWarning = computed(() => (latest.value?.level ?? 0) >= 5.0);
+  const isWarning = computed(() => (latest.value?.value ?? 0) >= 165.5);
 
   async function loadLatest(id) {
     loading.value = true;
     error.value = null;
     try {
-      latest.value = await loadLatestLevel(id);
+      latest.value = await fetchLatest(id);
       currentId.value = id;
     } catch (cause) {
       error.value = cause;
@@ -1944,7 +2147,7 @@ Pinia 动作可以返回领域结果，让调用方决定提示方式。比如`l
 
 应用入口依次注册Pinia和Router，再挂载根组件：
 
-**清单 4.51  应用入口：注册 Pinia 与路由**
+**清单 4.52  应用入口：注册 Pinia 与路由**
 
 ```javascript
 import { createApp } from 'vue';
@@ -1957,11 +2160,15 @@ createApp(App).use(createPinia()).use(router).mount('#app');
 
 ## 4.10 Vite工程化与性能优化
 
+**本节层次**
+
+拓展。课堂核心路线可跳过。
+
 推荐目录按职责组织为`views/`、`components/`、`stores/`、`router/`和`api/`。Vite 在开发阶段启动原生 ES 模块服务器，浏览器按需请求被修改的模块，依赖预构建和热更新让反馈很快；生产阶段则从入口出发构建依赖图，执行 Tree Shaking、压缩、资源指纹和代码分割，输出可以被静态服务器缓存的文件。开发服务器的代理、源码地图和错误覆盖层服务于调试，不能直接当成生产部署方案。
 
 路径别名把深层相对路径转换为稳定的业务语义，例如用`@/`指向`src/`，用`@api/`指向接口封装目录。别名必须同时配置在 Vite 和编辑器/类型检查器中，否则构建能通过但 IDE 无法跳转，或者测试环境解析失败。环境变量按模式加载：`.env`提供公共默认值，`.env.development`和`.env.production`覆盖对应模式，只有以`VITE_`开头的变量会注入浏览器。令牌密钥、数据库密码和内部服务地址不能写入这类变量，前端只保存公开的 API 前缀和功能开关。
 
-**清单 4.52  Vite 5 路径别名与 manualChunks 分包**
+**清单 4.53  Vite 5 路径别名与 manualChunks 分包**
 
 ```javascript
 import { defineConfig, loadEnv } from 'vite';
@@ -1994,9 +2201,9 @@ export default defineConfig(({ mode }) => {
 });
 ```
 
-清单4.52中的`manualChunks`把变化频率相近的依赖放到同一文件，页面业务代码变化时不会迫使浏览器重新下载 Vue 核心和图表库。分包不是越多越好：每个额外文件都增加请求和调度成本，应该结合首屏性能、缓存命中率和真实网络条件测量。`loadEnv`用于读取配置并传给 Vite 配置本身，模板代码仍通过`import.meta.env`读取经过筛选的公开变量。
+清单4.53中的`manualChunks`把变化频率相近的依赖放到同一文件，页面业务代码变化时不会迫使浏览器重新下载 Vue 核心和图表库。分包不是越多越好：每个额外文件都增加请求和调度成本，应该结合首屏性能、缓存命中率和真实网络条件测量。`loadEnv`用于读取配置并传给 Vite 配置本身，模板代码仍通过`import.meta.env`读取经过筛选的公开变量。
 
-**清单 4.53  Vite 多环境变量与 API 客户端**
+**清单 4.54  Vite 多环境变量与 API 客户端**
 
 ```javascript
 # .env.development（.env 文件只支持 # 注释）
@@ -2031,7 +2238,7 @@ export async function getJson(path, options = {}) {
 
 - **运行时**：对高频输入防抖，对监测流批量刷新，避免无意义的深层监听。
 
-**清单 4.54  生产构建、体积分析与部署前检查**
+**清单 4.55  生产构建、体积分析与部署前检查**
 
 ```javascript
 // package.json scripts
@@ -2056,7 +2263,7 @@ for (const name of required) {
 
 产物体积分析要同时看原始体积和 gzip/brotli 体积，重点关注首屏入口、路由异步块和第三方依赖。若图表库占据大部分首屏，可以把图表页改为动态导入；若某个公共块被所有页面引用，则让它进入稳定的 vendor 分包。分析结果应记录在构建流水线中，超过预算时阻断发布，而不是上线后才凭感觉优化。
 
-**清单 4.55  Vite 产物与 Docker Compose 部署契约**
+**清单 4.56  Vite 产物与 Docker Compose 部署契约**
 
 ```bash
 # 构建阶段：在固定 Node 版本中生成 dist/
@@ -2077,7 +2284,7 @@ location / { try_files $uri $uri/ /index.html; }
 
 发布采用不可变目录更安全。每次构建把`dist/`复制为带提交号的版本目录，生成一份包含入口哈希、资源清单和构建时间的 manifest；反向代理通过符号链接或配置项指向当前版本。切换后先执行首页、登录、测站详情和 API 健康检查，再逐步放量。若发现路由 404、资源加载失败或数据接口异常，切换回上一个 manifest 即可恢复，原版本保留到确认监测业务稳定后再清理。回滚只改变静态文件指向，不删除数据库和时序数据。
 
-SPA 的深链接是部署验收的重点。浏览器直接打开`/stations/ST-01`时，静态服务器先寻找同名文件，找不到后必须回退到`index.html`，再由 Vue Router 渲染详情页；`/api/`则必须优先匹配反向代理规则，不能被 SPA 回退吞掉。缓存头也要分层设置：`index.html`短缓存并要求重新验证，带内容哈希的脚本和样式长期缓存，地图配置和监测接口依据数据时效使用禁止缓存或短 TTL。部署检查应使用真实浏览器和命令行各验证一次，避免只测服务器状态码。
+SPA 的深链接是部署验收的重点。浏览器直接打开`/assets/DAM-A-PZ-07`时，静态服务器先寻找同名文件，找不到后必须回退到`index.html`，再由 Vue Router 渲染详情页；`/api/`则必须优先匹配反向代理规则，不能被 SPA 回退吞掉。缓存头也要分层设置：`index.html`短缓存并要求重新验证，带内容哈希的脚本和样式长期缓存，地图配置和监测接口依据数据时效使用禁止缓存或短 TTL。部署检查应使用真实浏览器和命令行各验证一次，避免只测服务器状态码。
 
 安全审计包括源代码、产物和运行时三个面。源代码扫描禁止把令牌、私钥和内部密码提交到仓库；产物扫描检查压缩后的 JavaScript 是否残留调试开关、源地图是否公开内部路径；运行时检查 CSP、HTTPS、跨域策略、响应头和错误页面是否泄露堆栈。环境变量的公开前缀不是保密机制，任何进入前端 bundle 的值都应视为公开信息。对水利平台而言，还要记录发布人、构建提交号、镜像摘要和回滚操作，保证出现异常时可以追溯到具体版本。发布说明还应给出变更范围、影响页面、接口兼容性、验证结果和回滚入口，值班员据此可以在交接班时快速判断版本状态。
 
