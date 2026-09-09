@@ -29,7 +29,14 @@ services:
   postgres:
     image: timescale/timescaledb-ha:pg16   # 同时含 PostGIS 与 TimescaleDB 扩展
     environment: {POSTGRES_DB: qingyuan, POSTGRES_USER: qingyuan_app, POSTGRES_PASSWORD_FILE: /run/secrets/db_password}
-    volumes: [pg-data:/var/lib/postgresql/data, ./db:/docker-entrypoint-initdb.d:ro]
+    # 只挂这两个初始化脚本，不要整个 ./db 目录：
+    # Postgres 会按字母序执行 /docker-entrypoint-initdb.d 下的所有 .sql，
+    # 而 db/load-s3-data.sql 是给宿主机 psql 手工跑的（用 \copy 读 ../datasets/*.csv），
+    # 容器里没有那些 CSV，一执行就报错并让整个容器以 exit 3 退出，整栈随之起不来。
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+      - ./db/001_init.sql:/docker-entrypoint-initdb.d/001_init.sql:ro
+      - ./db/002_seed.sql:/docker-entrypoint-initdb.d/002_seed.sql:ro
     secrets: [db_password]
     healthcheck: {test: ["CMD-SHELL", "pg_isready -U qingyuan_app -d qingyuan"], interval: 10s, timeout: 5s, retries: 10}
     networks: [data-net]
@@ -40,16 +47,23 @@ services:
     healthcheck: {test: ["CMD", "redis-cli", "ping"], interval: 10s, timeout: 3s, retries: 10}
     networks: [data-net]
   kafka:
-    image: bitnami/kafka:3.7
+    # 官方 Apache 镜像。原先用的 bitnami/kafka:3.7 已被上游下架
+    # （Bitnami 2025 年把旧版本迁到 bitnamilegacy/ 归档仓库，不再更新），
+    # 教材配套不宜钉在归档镜像上，故改用 apache/kafka。
+    # 环境变量随之去掉 bitnami 特有的 CFG_ 段：KAFKA_CFG_NODE_ID -> KAFKA_NODE_ID。
+    image: apache/kafka:3.7.2
     environment:
-      KAFKA_CFG_NODE_ID: "1"
-      KAFKA_CFG_PROCESS_ROLES: "broker,controller"
-      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: "1@kafka:9093"
-      KAFKA_CFG_LISTENERS: "PLAINTEXT://:9092,CONTROLLER://:9093"
-      KAFKA_CFG_ADVERTISED_LISTENERS: "PLAINTEXT://kafka:9092"
-      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
-    volumes: [kafka-data:/bitnami/kafka]
-    healthcheck: {test: ["CMD-SHELL", "kafka-topics.sh --bootstrap-server localhost:9092 --list"], interval: 15s, timeout: 5s, retries: 10}
+      KAFKA_NODE_ID: "1"
+      KAFKA_PROCESS_ROLES: "broker,controller"
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka:9093"
+      KAFKA_LISTENERS: "PLAINTEXT://:9092,CONTROLLER://:9093"
+      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafka:9092"
+      KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
+      KAFKA_LOG_DIRS: "/var/lib/kafka/data"
+    volumes: [kafka-data:/var/lib/kafka/data]
+    healthcheck: {test: ["CMD-SHELL", "/opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --list"], interval: 15s, timeout: 10s, retries: 12}
     networks: [data-net]
 secrets:
   db_password: {file: ./secrets/db_password.txt}

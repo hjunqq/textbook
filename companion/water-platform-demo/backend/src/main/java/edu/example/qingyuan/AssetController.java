@@ -1,5 +1,6 @@
 package edu.example.qingyuan;
 
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.List;
 import org.springframework.http.HttpStatus;
@@ -15,7 +16,7 @@ public class AssetController {
             return new AssetDto(e.getAssetId(), e.getDisplayName(), e.getAssetType(), e.getUnit());
         }
     }
-    public record ReadingDto(String assetId, OffsetDateTime occurredAt, Double value,
+    public record ReadingDto(String assetId, OffsetDateTime occurredAt, BigDecimal value,
                              String unit, String quality, String eventId, int version) {
         static ReadingDto from(ReadingEntity e) {
             return new ReadingDto(e.getId().assetId(), e.getId().occurredAt(), e.getValue(),
@@ -41,7 +42,17 @@ public class AssetController {
     public List<ReadingDto> readings(@PathVariable String assetId,
                                      @RequestParam OffsetDateTime from,
                                      @RequestParam OffsetDateTime to) {
+        // 契约：时间窗左闭右开，参数非法返回 400 并指出字段。
+        // 不校验就返回空数组，调用方会把“参数写反”误读成“这段时间没有观测”。
+        if (!from.isBefore(to)) {
+            throw new InvalidRangeException("from 必须早于 to");
+        }
         return readings.find(assetId, from, to).stream().map(ReadingDto::from).toList();
+    }
+
+    /** 由全局异常处理翻译成 {code:"INVALID_RANGE", message, field:"from"}。 */
+    public static class InvalidRangeException extends RuntimeException {
+        public InvalidRangeException(String message) { super(message); }
     }
 
     /**

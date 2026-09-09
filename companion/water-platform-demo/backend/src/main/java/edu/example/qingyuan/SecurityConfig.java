@@ -55,7 +55,23 @@ public class SecurityConfig {
                         .anyRequest().authenticated())
                 .addFilterBefore(new JwtAuthenticationFilter(jwtService),
                         UsernamePasswordAuthenticationFilter.class)
+                // 契约（8.1 通用约定）：401 未登录或令牌失效，403 角色无权。
+                // 不配这两个处理器时，匿名请求会落到默认的 403，页面无法区分
+                // “没登录”和“登录了但没权限”——前者该跳登录页，后者不该跳。
+                .exceptionHandling(e -> e
+                        .authenticationEntryPoint((req, res, ex) ->
+                                writeError(res, 401, "UNAUTHORIZED", "未登录或令牌已失效"))
+                        .accessDeniedHandler((req, res, ex) ->
+                                writeError(res, 403, "FORBIDDEN", "当前角色无权访问该资源")))
                 .build();
+    }
+
+    /** 直接写契约错误体：安全过滤链在 @RestControllerAdvice 之前，异常到不了那一层。 */
+    private static void writeError(jakarta.servlet.http.HttpServletResponse res,
+                                   int status, String code, String message) throws java.io.IOException {
+        res.setStatus(status);
+        res.setContentType("application/json;charset=UTF-8");
+        res.getWriter().write("{\"code\":\"" + code + "\",\"message\":\"" + message + "\"}");
     }
 
     /** 开发期允许 Vite dev server 跨域；生产由 Nginx 同源反代，此配置不生效。 */

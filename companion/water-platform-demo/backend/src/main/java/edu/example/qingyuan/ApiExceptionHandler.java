@@ -39,6 +39,11 @@ public class ApiExceptionHandler {
         return body(HttpStatus.NOT_FOUND, "ASSET_NOT_FOUND", e.getMessage(), null);
     }
 
+    @ExceptionHandler(AssetController.InvalidRangeException.class)
+    ResponseEntity<Map<String, String>> invalidRange(AssetController.InvalidRangeException e) {
+        return body(HttpStatus.BAD_REQUEST, "INVALID_RANGE", e.getMessage(), "from");
+    }
+
     /** from/to 写成不合法的时间格式，或把 + 号原样放进地址栏时走这里。 */
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     ResponseEntity<Map<String, String>> typeMismatch(MethodArgumentTypeMismatchException e) {
@@ -63,6 +68,22 @@ public class ApiExceptionHandler {
     @ExceptionHandler(NoResourceFoundException.class)
     ResponseEntity<Map<String, String>> noResource(NoResourceFoundException e) {
         return body(HttpStatus.NOT_FOUND, "NOT_FOUND", "请求的路径不存在", null);
+    }
+
+    /**
+     * 显式抛出的 ResponseStatusException 要保留它自己的状态码。
+     * 这个处理器必须存在：否则它会落到下面的兜底分支，
+     * 登录失败本该返回的 401 会被翻译成 500——错误口令看起来像服务端故障。
+     */
+    @ExceptionHandler(org.springframework.web.server.ResponseStatusException.class)
+    ResponseEntity<Map<String, String>> statusException(
+            org.springframework.web.server.ResponseStatusException e) {
+        HttpStatus status = HttpStatus.valueOf(e.getStatusCode().value());
+        String code = status == HttpStatus.UNAUTHORIZED ? "UNAUTHORIZED"
+                : status == HttpStatus.FORBIDDEN ? "FORBIDDEN"
+                : status == HttpStatus.NOT_FOUND ? "NOT_FOUND"
+                : status == HttpStatus.CONFLICT ? "CONFLICT" : "REQUEST_REJECTED";
+        return body(status, code, e.getReason() == null ? status.getReasonPhrase() : e.getReason(), null);
     }
 
     /** 兜底：技术细节留在服务端日志，响应体只给稳定错误码。 */

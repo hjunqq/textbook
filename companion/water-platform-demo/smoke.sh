@@ -16,8 +16,11 @@ code=$(curl -s -o /dev/null -w '%{http_code}' "$API/api/assets")
 [ "$code" = 401 ] || { echo "预期 401，实际 $code"; exit 1; }
 
 echo "[3/5] 登录取令牌 ..."
+# 用 sed 取字段而不是 python3：本脚本是“一条命令验证”，不应引入 Python 依赖
+# （Windows/Git Bash 与精简容器里通常没有 python3，脚本会在这一步以 127 退出）。
 token=$(curl -fsS -X POST "$API/api/auth/login" -H 'Content-Type: application/json' \
-  -d '{"username":"duty01","password":"duty123"}' | python3 -c 'import json,sys;print(json.load(sys.stdin)["accessToken"])')
+  -d '{"username":"duty01","password":"duty123"}' \
+  | sed -n 's/.*"accessToken":"\([^"]*\)".*/\1/p')
 [ -n "$token" ]
 
 echo "[4/5] 带令牌查询测点与观测 ..."
