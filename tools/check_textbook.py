@@ -42,6 +42,9 @@ OUT = os.path.join(ROOT, "output")
 CHAP = os.path.join(OUT, "chapters")
 BASELINE = os.path.join(ROOT, "tools", "wordcount_baseline.json")
 GATEFILE = os.path.join(ROOT, "tools", "gate_baseline.json")
+LEDGER = os.path.join(ROOT, "tools", "migration_ledger.json")
+# ── 第九轮（2026-09-09，决策 D1）：全书正文上限，硬失败 ──
+TOTAL_CEILING = 240000
 
 FILES = [
     "preface.tex", "chapter01.tex", "chapter02.tex", "chapter03.tex",
@@ -49,7 +52,7 @@ FILES = [
     "chapter08.tex", "chapter09.tex",
 ]
 
-# ── 终局目标：全书正文 200,000 汉字（不含代码清单与 TikZ 内部文字）──
+# ── 第五轮扩写目标（历史，仅用于报表"完成度"列）；第九轮改为上限制，见 TOTAL_CEILING ──
 TARGET = {
     "preface.tex":   2500,
     "chapter01.tex": 12000,
@@ -158,6 +161,22 @@ def check_wordcount(texts, r, init):
                    % (f, c, b, b - c))
     # 增量防删除：静态基线是 O1 之前的旧值，随着各章增长，它已经拦不住
     # "从 38,000 删到 12,000 仍高于基线" 这类回退。再加一道与上一次提交的对比。
+    # 第九轮 D1：允许"分层迁移"——把拓展层内容迁到附录/线上时，先在
+    # tools/migration_ledger.json 登记 {"chapterNN.tex": {"allowed_drop": N, "reason": "..."}}，
+    # 与本包一起提交；登记额度只对本次提交有效，提交后须清空。未登记的成段删除仍拦截。
+    ledger = {}
+    if os.path.exists(LEDGER):
+        try:
+            ledger = json.load(open(LEDGER, encoding="utf-8"))
+        except Exception:
+            r.fail("tools/migration_ledger.json 不是合法 JSON")
+    for f, ent in ledger.items():
+        if f not in FILES or not isinstance(ent, dict) or not ent.get("reason") \
+                or not isinstance(ent.get("allowed_drop"), int):
+            r.fail("迁移登记条目非法：%s（需 allowed_drop 整数与 reason 说明）" % f)
+    if total > TOTAL_CEILING:
+        r.fail("【篇幅上限】全书正文 %d 字 > 上限 %d 字（第九轮决策 D1）。"
+               "新增内容须以分层迁移换取篇幅，不得净增。" % (total, TOTAL_CEILING))
     try:
         import subprocess as _sp
         for f in FILES:
@@ -168,6 +187,13 @@ def check_wordcount(texts, r, init):
                 continue
             pc = body_chars(prev.stdout)
             drop = pc - cur.get(f, 0)
+            allowed = ledger.get(f, {}).get("allowed_drop", 0) if isinstance(ledger.get(f), dict) else 0
+            if allowed and drop > 0:
+                r.log("【迁移登记】%s 允许减少 %d 字，实际减少 %d 字：%s"
+                      % (f, allowed, drop, ledger[f]["reason"]))
+                if drop > allowed:
+                    r.fail("【迁移超额】%s 减少 %d 字 > 登记额度 %d 字" % (f, drop, allowed))
+                continue
             if drop > 1000:
                 r.fail("【增量防删除】%s 比上一次提交少了 %d 字（%d → %d）。"
                        "个别改写造成的小幅波动可以接受，超过 1000 字属于成段删除，"
