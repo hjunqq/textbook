@@ -1,3 +1,14 @@
+> **⚠ 本目录的 MD→LaTeX 流水线自第七轮起已停用，不要运行。**
+>
+> 第七轮迁到 tex2site 后方向反了：`output/` 下的 **LaTeX 书稿才是唯一事实来源**，
+> `docs/` 是由 `tools/tex2site/convert.py` 生成的站点产物（生成物禁止手改）。
+> 而本目录的 `improved_main_converter.py`（及 `improved_build.bat/.sh`）仍按旧方向工作——
+> 读 `docs/` 的 Markdown，**覆盖写 `output/chapters/*.tex` 与 `output/main.tex`**。
+> 现在跑它一次，就会用生成物反向覆盖掉书稿源文件。
+>
+> 当前正确的流程见 `tools/tex2site/README.md`；门禁见 `tools/check_textbook.py`
+> 与 `tools/check_listings.py`。本目录保留仅为历史参考。
+
 # MD→LaTeX 转换工具（便携精简版）
 
 面向通用项目的 Markdown → LaTeX/PDF 转换工具，基于 Pandoc + XeLaTeX，并内置中文、代码、图片、告警框等处理。
