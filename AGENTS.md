@@ -42,6 +42,8 @@
 6. **技术基线锁定，不得漂移。** Vue 3.4+ / Vite 5+ / Pinia 2+ / Java 17 /
    Spring Boot 3.2+ / Spring Security 6 / Jakarta EE / jjwt 0.11.x /
    Three.js r160+ / CesiumJS 1.12x+ / PostgreSQL + PostGIS + TimescaleDB / Redis / Kafka。
+   容器镜像锁定：`timescale/timescaledb-ha:pg16`、`redis:7.2-alpine`、**`apache/kafka:3.7.2`**
+   （决策 D6：`bitnami/kafka` 已被上游下架并迁入 `bitnamilegacy/` 归档仓库，不得回退）。
    正文举例、习题、案例一律用这套，不得再出现 Django、MySQL、Oracle 作为推荐项。
 
 7. **工程参数与接口契约全书唯一。** 案例水库的坝高、特征水位、测点数量、编码规则、

@@ -30,3 +30,9 @@
 - 决策：路线改为 A（全量）：R2-4 第 1–3 章重组 → R3 第4章全章 → R4 第5章 → R5 第6–7章 → R6 第8–9章 → R7 配套 → R8 验收，仍一包一提交、门禁不放宽；篇幅靠拓展层迁移换取（migration_ledger）。
 - 代价与风险：教学单元的体例没有学生证据校准，试教发现的问题将作为第十轮整改而不是本轮门控；工作量 25–35 人日。
 - 可逆性：每包独立提交，可按包回退。
+
+## D-2026-09-09-6 Kafka 镜像改用官方 apache/kafka；配套 pom 不继承 starter-parent
+- 问题：R8-c 实跑 `docker compose up` 时 `bitnami/kafka:3.7` 拉取失败——Bitnami 2025 年把旧版本迁入 `bitnamilegacy/` 归档仓库，不再更新，`bitnami/kafka` 下已无 3.x 标签。
+- 决策：书（8.6 compose 清单）与配套一律改用官方 `apache/kafka:3.7.2`；环境变量去掉 bitnami 特有的 `CFG_` 段（`KAFKA_CFG_NODE_ID` → `KAFKA_NODE_ID`），卷路径改 `/var/lib/kafka/data`，健康检查改 `/opt/kafka/bin/kafka-topics.sh`。**不得回退到 `bitnamilegacy/`**：教材要用若干年，不能钉在明示不再维护的归档镜像上。CI 的 compose-config job 已断言新变量名。
+- 附带记录：配套 `backend/pom.xml` 走 `dependencyManagement` 导入 BOM，**不继承** `spring-boot-starter-parent`（与书中清单 lst:ch05-boot-dependencies 的教法不同）。代价是 parent 默认提供的 `-parameters` 编译参数没有了，`@PathVariable String assetId` 这类写法在运行期抛 `parameter name information not available via reflection` 并返回 500——R8-b 实跑才发现，所有带路径/查询参数的接口都是坏的。现由显式声明的 maven-compiler-plugin 补上。**改动该 pom 时不要删掉那段 `<parameters>true</parameters>`。**
+- 影响：可逆但需同步改书、配套、CI 三处；书与配套的 pom 差异已在配套 pom 的注释中说明。
