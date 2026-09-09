@@ -115,7 +115,7 @@
 \texttt{GET /api/warnings} & \texttt{level, status, assetId, page} & 预警证据摘要；\texttt{level} 取 NONE、BLUE、YELLOW、ORANGE、RED 之一 & 值班员、分析员；未评估单独显示 & 第8章 \\
 \shortstack[l]{\texttt{POST /api/warnings/}\\ \texttt{\{id\}/ack}} & 请求追踪号、版本 & 最新预警状态 & 值班员；open 条件更新，重复可重试 & 第8章 \\
 \texttt{POST /api/work-orders} & \texttt{warningId, ownerRole,} \texttt{dueAt, action} & 工单编号与状态 & 值班员、审批人；预警必须存在 & 第8章 \\
-\shortstack[l]{\texttt{POST /api/work-orders/}\\ \texttt{\{id\}/complete}} & \texttt{result}、版本 & 回执与完成时间 & 值班员；状态须为 in\_progress & 第8章 \\
+\shortstack[l]{\texttt{POST /api/}\\ \texttt{work-orders/}\\ \texttt{\{id\}/complete}} & \texttt{result}、版本 & 回执与完成时间 & 值班员；状态须为 in\_progress & 第8章 \\
 \midrule
 \multicolumn{5}{p{13.9cm}}{\textbf{通用约定}：错误体统一为 \texttt{\{code, message, field?\}}；400 参数非法、401 未登录或令牌失效、403 角色无权、404 对象不存在、5xx 服务端故障。对象编码按表\ref{tab:case-parameters}（如 \texttt{DAM-A-PZ-07}），角色见表\ref{tab:case-roles}。“骨架”指 companion/water-platform-demo 已实现并有测试；“教学接口”指第4章使用的本地模拟服务；“第 N 章”指由该章清单实现。} \\
 \bottomrule
