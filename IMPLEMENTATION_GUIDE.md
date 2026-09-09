@@ -1,3 +1,13 @@
+> **⚠ 本文档描述的流程自第七轮起已停用，仅作历史记录。**
+>
+> 文中的 `improved_main_converter.py`、`improved_build.bat/.sh` 已于 2026-09-09
+> 移入 `archive/pipeline-md2tex-legacy/`，原因见该目录的 README：
+> 第七轮迁到 tex2site 后数据流向反了——`output/` 下的 LaTeX 书稿才是唯一事实来源，
+> `docs/` 是生成物；而这套工具仍读 `docs/` 覆盖写 `output/`，跑一次就会把正文覆盖回旧状态。
+>
+> 当前流程见 `tools/tex2site/README.md`，门禁见 `tools/check_textbook.py`
+> 与 `tools/check_listings.py`。
+
 # 🎉 智慧水利教材转换器 - 改进实施指南
 
 ## ✅ 改进完成总结
