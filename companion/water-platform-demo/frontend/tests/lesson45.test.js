@@ -24,13 +24,13 @@ describe('showAsset 竞态', () => {
     const { showAsset } = await import('../src/lesson45/controller.js');
     const el = document.querySelector('#latest');
     const pz = { assetId: 'DAM-A-PZ-07', displayName: '案例渗压07' };
-    const wl = { assetId: 'DAM-A-WL-01', displayName: '案例水位01' };
+    const wl = { assetId: 'DAM-A-WL-01', displayName: '案例库水位01' };
     const first = showAsset(el, pz);
     expect(el.dataset.state).toBe('loading');
     const second = showAsset(el, wl);
     await Promise.all([first, second]);
     await new Promise(r => setTimeout(r, 250));
-    expect(el.textContent).toContain('案例水位01：166.837 m');
+    expect(el.textContent).toContain('案例库水位01：166.837 m');
     expect(aborted).toHaveLength(1);
     expect(aborted[0]).toContain('PZ-07');
   });

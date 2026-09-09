@@ -173,9 +173,9 @@ HTML 文件被浏览器接收后，先经过字节解码和词法分析，再形
     <legend>查询条件</legend>
     <label for="station-code">测站编码</label>
     <input id="station-code" name="stationCode" required
-           pattern="ST-[0-9]{2}" placeholder="ST-01"
+           pattern="DAM-[A-Z]-[A-Z]{2}-[0-9]{2}" placeholder="DAM-A-PZ-07"
            aria-describedby="station-help">
-    <small id="station-help">格式：ST-加两位数字</small>
+    <small id="station-help">格式：工程-分区-类型-序号，如 DAM-A-PZ-07</small>
 
     <label for="start-time">开始时间</label>
     <input id="start-time" name="startTime" type="datetime-local"
@@ -240,7 +240,7 @@ dialog.addEventListener('cancel', closeDialog);
 
 原生校验不是一个“提交按钮上的开关”，而是一组浏览器约束的组合。\texttt{required}检查是否为空，\texttt{pattern}适合编码和格式，数值控件的\texttt{min}、\texttt{max}、\texttt{step}共同决定可接受的离散集合，日期控件的\texttt{min}与\texttt{max}表达时间窗口。以查询表单为例，采样间隔设为 5 分钟并不意味着后端可以相信任何来自浏览器的 5 的倍数；客户端脚本可以被绕过，攻击者也可以直接发送 HTTP 请求，所以服务器必须再次校验测站是否属于当前用户的权限范围、起止时间是否有序、时间跨度是否超过查询上限。前端收到 400 响应后，应把服务端返回的字段错误映射到对应\texttt{input}的描述节点，并保留用户已经填写的其他条件。
 
-校验的可测试性来自明确的状态转换。空测站编码应显示“请输入测站编码”，格式错误应显示示例“ST-01”，采样间隔超出范围应说明允许区间；三个错误同时存在时，页面可以在表单顶部汇总数量，同时在字段旁保留具体原因。提交成功后，焦点应移动到结果标题或第一个结果项，而不是留在已经失效的提交按钮上。这样，鼠标用户、键盘用户和辅助技术用户都能得到同等的反馈。第5章的\texttt{@Valid}负责服务端对象校验，本章的 HTML 约束负责尽早发现明显错误，两者的错误码和字段名应写入接口契约并由前后端共同测试。
+校验的可测试性来自明确的状态转换。空测站编码应显示“请输入测站编码”，格式错误应显示示例“DAM-A-PZ-07”，采样间隔超出范围应说明允许区间；三个错误同时存在时，页面可以在表单顶部汇总数量，同时在字段旁保留具体原因。提交成功后，焦点应移动到结果标题或第一个结果项，而不是留在已经失效的提交按钮上。这样，鼠标用户、键盘用户和辅助技术用户都能得到同等的反馈。第5章的\texttt{@Valid}负责服务端对象校验，本章的 HTML 约束负责尽早发现明显错误，两者的错误码和字段名应写入接口契约并由前后端共同测试。
 
 \paragraph{从静态骨架到可维护组件}
 
@@ -753,25 +753,27 @@ Flex 的视觉顺序还涉及语义和键盘路径。\texttt{order}只改变绘�
 字符串可用模板字面量组合，也可通过\texttt{trim()}、\texttt{includes()}、\texttt{slice()}和\texttt{split()}完成常见处理。完成字符串处理后，再使用比较、逻辑和算术运算符表达业务规则。例如，某水库汛期警戒水位统一设为5.0米：
 
 \begin{lstlisting}[label={lst:ch04-js-basics},language=JavaScript,caption={JavaScript基础变量与函数}]
-const stationName = "案例水库";
-const warningLevel = 5.0; // 单位：m，本章同一示例场景统一采用该阈值
-const reading = { stationId: "ST-01", level: 5.12, unit: "m" };
-const status = reading.level >= warningLevel ? "预警" : "正常";
-const message = `${stationName}：${reading.level} ${reading.unit}，${status}`;
+const stationName = "案例库水位01";
+const warningLevel = 165.5; // 单位：m，案例水库汛限水位（8.1 节参数表）
+const reading = { assetId: "DAM-A-WL-01", value: 166.84, unit: "m" };
+const status = reading.value >= warningLevel ? "预警" : "正常";
+const message = `${stationName}：${reading.value} ${reading.unit}，${status}`;
 console.log(message.trim());
 \end{lstlisting}
 
 数组常用\texttt{map()}完成映射、\texttt{filter()}完成筛选、\texttt{reduce()}完成聚合；对象解构可以明确取出字段。函数应保持单一职责并显式返回结果。
 
 \begin{lstlisting}[label={lst:ch04-js-condition},language=JavaScript,caption={监测值条件判断}]
-const readings = [4.72, 5.12, 4.95];
+const readings = [165.12, 166.84, 165.37];          // 案例库水位01 三次观测，单位 m
+const floodLimit = 165.5;                            // 汛限水位，见 8.1 节参数表
 const alarms = readings
-  .filter(level => level >= 5.0)
+  .filter(level => level >= floodLimit)
   .map(level => ({ level, severity: "warning" }));
 
 function validateLevel(level) {
   if (!Number.isFinite(level)) throw new TypeError("水位必须是数字");
-  if (level < 0 || level > 50) throw new RangeError("水位超出测站量程");
+  // 量程取自测点台账（配套数据集 stations.csv）：148.0–171.6 m，即死水位到校核洪水位
+  if (level < 148 || level > 171.6) throw new RangeError("水位超出测点量程");
   return level;
 }
 \end{lstlisting}
@@ -824,8 +826,8 @@ function makeRollingAverage(limit = 3) {
   };
 }
 
-const readings = [{ level: 4.1 }, { level: null }, { level: 4.3 }];
-const validLevels = readings.map(item => item.level)
+const readings = [{ value: 166.1 }, { value: null }, { value: 166.3 }];
+const validLevels = readings.map(item => item.value)
   .filter(level => Number.isFinite(level));
 const average = validLevels.reduce((sum, level) => sum + level, 0)
   / validLevels.length;
@@ -843,15 +845,15 @@ ES 模块用\texttt{export}声明公共接口，用\texttt{import}建立静态�
 \begin{lstlisting}[label={lst:ch04-a44-modules},language=JavaScript,caption={ES 模块、解构与展开}]
 // readings.js
 export function summarizeReading(reading) {
-  const { stationId, level: rawLevel, quality = 'missing' } = reading;
+  const { assetId, value: rawValue, quality = 'missing' } = reading;
   const level = rawLevel === null ? null : Number(rawLevel);
-  return { stationId, level, quality };
+  return { assetId, value, quality };
 }
 
 // station-panel.js
 import { summarizeReading } from './readings.js';
 
-const response = { stationId: 'ST-01', level: '4.20', quality: 'valid' };
+const response = { assetId: 'DAM-A-WL-01', value: '166.84', quality: 'valid' };
 const summary = summarizeReading(response);
 const viewModel = { ...summary, updated: true };
 console.log(viewModel);
@@ -866,20 +868,20 @@ DOM 操作还要考虑布局代价。循环中逐个读取布局尺寸、再逐�
 \begin{lstlisting}[label={lst:ch04-a44-dom},language=JavaScript,caption={安全创建和更新测站 DOM}]
 document.body.innerHTML = '<ul id="station-list"></ul>';
 const list = document.querySelector('#station-list');
-const stations = [
-  { id: 'ST-01', name: '上游测站', level: 4.2 },
-  { id: 'ST-02', name: '下游测站', level: 4.6 }
+const assets = [
+  { assetId: 'DAM-A-WL-01', displayName: '案例库水位01', value: 166.84, unit: 'm' },
+  { assetId: 'DAM-A-PZ-07', displayName: '案例渗压07', value: 185.09, unit: 'kPa' }
 ];
 
 const fragment = document.createDocumentFragment();
-for (const station of stations) {
+for (const asset of assets) {
   const item = document.createElement('li');
-  item.dataset.stationId = station.id;
-  item.textContent = `${station.name}：${station.level} m`;
+  item.dataset.assetId = asset.assetId;
+  item.textContent = `${asset.displayName}：${asset.value} ${asset.unit}`;
   fragment.append(item);
 }
 list.replaceChildren(fragment);
-list.querySelector('[data-station-id="ST-02"]').textContent = '下游测站：更新中';
+list.querySelector('[data-asset-id="DAM-A-PZ-07"]').textContent = '案例渗压07：更新中';
 \end{lstlisting}
 
 \subsection{事件对象、捕获与冒泡}
@@ -913,19 +915,19 @@ list.querySelector('[data-station-id="ST-02"]').textContent = '下游测站：�
 
 \begin{lstlisting}[label={lst:ch04-a44-events},language=JavaScript,caption={测站列表的事件委托与 preventDefault}]
 document.body.innerHTML = `
-  <a id="station-link" href="/stations">测站列表</a>
+  <a id="station-link" href="/assets">测站列表</a>
   <ul id="delegated-list">
-    <li><button data-station-id="ST-01">上游测站</button></li>
-    <li><button data-station-id="ST-02">下游测站</button></li>
+    <li><button data-asset-id="DAM-A-WL-01">案例库水位01</button></li>
+    <li><button data-asset-id="DAM-A-PZ-07">案例渗压07</button></li>
   </ul>
   <output id="delegated-result" aria-live="polite"></output>`;
 
 const delegatedList = document.querySelector('#delegated-list');
 const output = document.querySelector('#delegated-result');
 delegatedList.addEventListener('click', event => {
-  const button = event.target.closest('button[data-station-id]');
+  const button = event.target.closest('button[data-asset-id]');
   if (!button || !delegatedList.contains(button)) return;
-  output.textContent = `选择了 ${button.dataset.stationId}`;
+  output.textContent = `选择了 ${button.dataset.assetId}`;
 });
 
 document.querySelector('#station-link').addEventListener('click', event => {
@@ -940,8 +942,8 @@ root.innerHTML = '<div id="virtual-list" style="height:160px;overflow:auto"></di
 document.body.append(root);
 const viewport = root.querySelector('#virtual-list');
 const records = Array.from({ length: 1000 }, (_, index) => ({
-  id: `ST-${String(index + 1).padStart(4, '0')}`,
-  level: (4 + index / 100).toFixed(2)
+  assetId: `DAM-A-PZ-${String(index + 1).padStart(4, '0')}`,
+  value: (180 + index / 100).toFixed(2)
 }));
 const rowHeight = 32;
 // 占位层把滚动条撑到全量高度，可见行再absolute定位到对应位置；
@@ -958,7 +960,7 @@ function renderWindow() {
     const row = document.createElement('div');
     row.style.cssText = `position:absolute;left:0;right:0;` +
       `top:${(first + offset) * rowHeight}px;height:${rowHeight}px`;
-    row.textContent = `${record.id}：${record.level} m`;
+    row.textContent = `${record.assetId}：${record.value} kPa`;
     return row;
   }));
 }
@@ -976,7 +978,7 @@ renderWindow();
 function parseReading(raw) {
   try {
     const reading = JSON.parse(raw);
-    return { ok: true, level: validateLevel(reading.level) };
+    return { ok: true, value: validateLevel(reading.value) };
   } catch (error) {
     if (error instanceof SyntaxError) {
       console.error("监测报文格式错误", error);
@@ -1185,7 +1187,7 @@ export function messageFor(error) {
 
 \subsection{故障单元：切换测点时旧数据覆盖新数据}
 
-\paragraph{现象}把清单\ref{lst:ch04-r1-load}改成“点击列表中的对象就读取它的最新观测”后，做如下操作：先点击 \texttt{DAM-A-PZ-07}，并让教学接口对它延迟 3 秒（请求地址加\texttt{?teach=delay:3000}）；不等结果出来，立即点击 \texttt{DAM-A-WL-01}。页面先正确显示“案例水位01：166.837 m”，约 3 秒后却变成“案例渗压07：185.091 kPa”——值班员看着水位计的标题，读到的是渗压计的数。
+\paragraph{现象}把清单\ref{lst:ch04-r1-load}改成“点击列表中的对象就读取它的最新观测”后，做如下操作：先点击 \texttt{DAM-A-PZ-07}，并让教学接口对它延迟 3 秒（请求地址加\texttt{?teach=delay:3000}）；不等结果出来，立即点击 \texttt{DAM-A-WL-01}。页面先正确显示“案例库水位01：166.837 m”，约 3 秒后却变成“案例渗压07：185.091 kPa”——值班员看着水位计的标题，读到的是渗压计的数。
 
 \paragraph{时序}图\ref{fig:ch04-r1-race}把两次请求画在同一条时间轴上。第二次请求后发先至，第一次请求的响应迟到，但代码没有任何机制知道它“已经过期”，于是照常写入页面。
 
@@ -1262,7 +1264,7 @@ export function bindList(listEl, outputEl, assets) {
 \toprule
 观察点 & 修复前 & 修复后 \\
 \midrule
-点击 WL-01 后的页面 & 立即显示 166.837 m & 先显示“正在读取 案例水位01…”，再显示 166.837 m \\
+点击 WL-01 后的页面 & 立即显示 166.837 m & 先显示“正在读取 案例库水位01…”，再显示 166.837 m \\
 约 3 秒后的页面 & 变为 185.091 kPa（错误） & 保持 166.837 m \\
 “网络”面板中请求1 & 200，耗时约 3 s & 状态“已取消”（canceled） \\
 控制台 & 无输出 & 无输出：AbortError 被识别为正常路径，不打印 \\
@@ -1611,17 +1613,19 @@ console.log(levelStatus(5.12));
 <script setup>
 import { computed } from 'vue'
 const props = defineProps({
-  name: { type: String, required: true },
-  level: { type: Number, required: true }
+  displayName: { type: String, required: true },
+  value: { type: Number, required: true },
+  unit: { type: String, default: 'm' }
 })
 const emit = defineEmits(['open-detail'])
-const status = computed(() => props.level >= 5.0 ? 'warning' : 'normal')
+// 165.5 m 是案例水库汛限水位（8.1 节参数表）；真实阈值应来自后端
+const status = computed(() => props.value >= 165.5 ? 'warning' : 'normal')
 </script>
 
 <template>
   <article :class="['station-card', `station-card--${status}`]">
-    <h3>{{ name }}</h3>
-    <p>水位：{{ level.toFixed(2) }} m</p>
+    <h3>{{ displayName }}</h3>
+    <p>当前值：{{ value.toFixed(2) }} {{ unit }}</p>
     <button type="button" @click="emit('open-detail')">查看详情</button>
   </article>
 </template>
@@ -1664,19 +1668,19 @@ Vue 3.4 的组合式 API 把状态、派生值、监听器和生命周期放进�
 <script setup>
 import { computed, reactive, ref, watch, watchEffect } from 'vue';
 
-const selectedId = ref('ST-01');
+const selectedId = ref('DAM-A-PZ-07');
 const form = reactive({ keyword: '', onlyWarning: false });
-const stations = ref([
-  { id: 'ST-01', name: '上游测站', warning: false },
-  { id: 'ST-02', name: '下游测站', warning: true }
+const assets = ref([
+  { assetId: 'DAM-A-WL-01', displayName: '案例库水位01', warning: false },
+  { assetId: 'DAM-A-PZ-07', displayName: '案例渗压07', warning: true }
 ]);
-const visibleStations = computed(() => stations.value.filter(station => {
-  const match = station.name.includes(form.keyword.trim());
-  return match && (!form.onlyWarning || station.warning);
+const visibleAssets = computed(() => assets.value.filter(asset => {
+  const match = asset.displayName.includes(form.keyword.trim());
+  return match && (!form.onlyWarning || asset.warning);
 }));
 
 watch(selectedId, id => console.log('重新加载测站', id));
-watchEffect(() => console.log('筛选数量', visibleStations.value.length));
+watchEffect(() => console.log('筛选数量', visibleAssets.value.length));
 </script>
 \end{lstlisting}
 
@@ -1697,13 +1701,13 @@ watchEffect(() => console.log('筛选数量', visibleStations.value.length));
     只看预警
   </label>
   <ul>
-    <li v-for="station in visibleStations" :key="station.id">
-      <button type="button" v-bind:aria-label="`打开${station.name}`"
-              v-on:click="selectedId = station.id">
-        {{ station.name }}
+    <li v-for="asset in visibleAssets" :key="asset.assetId">
+      <button type="button" v-bind:aria-label="`打开${asset.displayName}`"
+              v-on:click="selectedId = asset.assetId">
+        {{ asset.displayName }}
       </button>
-      <span v-if="station.warning" class="warning">需要关注</span>
-      <span v-show="!station.warning" class="normal">正常</span>
+      <span v-if="asset.warning" class="warning">需要关注</span>
+      <span v-show="!asset.warning" class="normal">正常</span>
     </li>
   </ul>
 </template>
@@ -1711,31 +1715,31 @@ watchEffect(() => console.log('筛选数量', visibleStations.value.length));
 
 父组件通过 props 向下传递只读数据，通过 emit 向上报告用户动作；子组件不应直接修改 prop，否则数据流会变成隐式双向绑定。slot 允许父组件注入一段带上下文的呈现内容，适合让“测站卡片”复用标题、操作区和空状态。provide/inject 适合跨越多层组件传递只读配置或服务，例如单位格式化器、主题令牌和请求客户端；共享的可变业务状态仍应交给 Pinia，不能把所有状态藏在依赖注入中。
 
-清单\ref{lst:ch04-a46-communication}把四种通信方式放在一个父子组件示例中。\texttt{StationCard}只接收\texttt{station}，点击按钮时发出\texttt{select}事件；父组件通过 slot 提供操作区，并用 provide/inject 传递单位文本。provide 的值在父组件中冻结，防止子组件意外篡改全局配置。
+清单\ref{lst:ch04-a46-communication}把四种通信方式放在一个父子组件示例中。\texttt{AssetCard}只接收\texttt{asset}，点击按钮时发出\texttt{select}事件；父组件通过 slot 提供操作区，并用 provide/inject 传递单位文本。provide 的值在父组件中冻结，防止子组件意外篡改全局配置。
 
 \begin{lstlisting}[label={lst:ch04-a46-communication},language=Vue,caption={Vue props、emit、slot 与 provide/inject}]
-<!-- StationCard.vue -->
+<!-- AssetCard.vue -->
 <script setup>
 import { inject } from 'vue';
-const props = defineProps({ station: { type: Object, required: true } });
+const props = defineProps({ asset: { type: Object, required: true } });
 const emit = defineEmits(['select']);
-const levelUnit = inject('levelUnit', 'm');
+const fallbackUnit = inject('fallbackUnit', 'm');
 </script>
 <template>
   <article>
-    <h3>{{ props.station.name }}</h3>
-    <p>水位：{{ props.station.level }} {{ levelUnit }}</p>
+    <h3>{{ props.asset.displayName }}</h3>
+    <p>当前值：{{ props.asset.value }} {{ props.asset.unit ?? fallbackUnit }}</p>
     <slot name="actions">
-      <button type="button" @click="emit('select', props.station.id)">查看</button>
+      <button type="button" @click="emit('select', props.asset.assetId)">查看</button>
     </slot>
   </article>
 </template>
 
-<!-- StationPanel.vue 的 script setup 片段 -->
+<!-- AssetPanel.vue 的 script setup 片段 -->
 <script setup>
 import { provide, readonly, ref } from 'vue';
-const levelUnit = ref('m');
-provide('levelUnit', readonly(levelUnit));
+const fallbackUnit = ref('m');   // 对象自身没有单位时的兜底
+provide('fallbackUnit', readonly(fallbackUnit));
 </script>
 \end{lstlisting}
 
@@ -1794,10 +1798,10 @@ onUnmounted(() => {
 
 清单\ref{lst:ch04-a46-station-row}是可复用的行组件，清单\ref{lst:ch04-a46-station-filter}是使用它的完整筛选页。父组件使用\texttt{ref}保存原始数组，\texttt{reactive}保存表单，\texttt{computed}生成过滤结果，\texttt{v-for(:key)}渲染行，\texttt{v-model}接收输入，\texttt{v-if}表达加载和空状态，并在\texttt{onMounted}中加载数据。读者可以把 API 函数替换为清单\ref{lst:ch04-a45-request}的\texttt{request.js}，页面结构不需要改变。
 
-\begin{lstlisting}[label={lst:ch04-a46-station-row},language=Vue,caption={测站列表行组件 StationRow.vue}]
+\begin{lstlisting}[label={lst:ch04-a46-station-row},language=Vue,caption={测站列表行组件 AssetRow.vue}]
 <script setup>
 defineProps({
-  station: { type: Object, required: true },
+  asset: { type: Object, required: true },
   selected: { type: Boolean, default: false }
 });
 const emit = defineEmits(['select']);
@@ -1805,40 +1809,40 @@ const emit = defineEmits(['select']);
 
 <template>
   <li :class="{ selected }">
-    <button type="button" @click="emit('select', station.id)">
-      <strong>{{ station.name }}</strong>
-      <span>{{ station.level ?? '—' }} m</span>
-      <span v-if="station.warning" class="warning">预警</span>
+    <button type="button" @click="emit('select', asset.assetId)">
+      <strong>{{ asset.displayName }}</strong>
+      <span>{{ asset.value ?? '—' }} {{ asset.unit }}</span>
+      <span v-if="asset.warning" class="warning">预警</span>
     </button>
   </li>
 </template>
 \end{lstlisting}
 
-\begin{lstlisting}[label={lst:ch04-a46-station-filter},language=Vue,caption={测站列表筛选页 StationFilterPage.vue}]
+\begin{lstlisting}[label={lst:ch04-a46-station-filter},language=Vue,caption={测站列表筛选页 AssetFilterPage.vue}]
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue';
-import StationRow from './StationRow.vue';
+import AssetRow from './AssetRow.vue';
 import { request } from '../api/request.js';
 
-const stations = ref([]);
+const assets = ref([]);
 const loading = ref(false);
 const selectedId = ref(null);
 const filters = reactive({ keyword: '', onlyWarning: false });
-const visibleStations = computed(() => stations.value.filter(station => {
-  const match = station.name.includes(filters.keyword);
-  return match && (!filters.onlyWarning || station.warning);
+const visibleAssets = computed(() => assets.value.filter(asset => {
+  const match = asset.displayName.includes(filters.keyword);
+  return match && (!filters.onlyWarning || asset.warning);
 }));
 
-async function loadStations() {
+async function loadAssets() {
   loading.value = true;
   try {
-    stations.value = await request('/api/assets');
+    assets.value = await request('/api/assets');
   } finally {
     loading.value = false;
   }
 }
-function selectStation(id) { selectedId.value = id; }
-onMounted(loadStations);
+function selectAsset(id) { selectedId.value = id; }
+onMounted(loadAssets);
 </script>
 
 <template>
@@ -1849,11 +1853,11 @@ onMounted(loadStations);
     </label>
     <label><input v-model="filters.onlyWarning" type="checkbox">只看预警</label>
     <p v-if="loading" role="status">正在加载测站……</p>
-    <p v-else-if="visibleStations.length === 0">没有符合条件的测站</p>
+    <p v-else-if="visibleAssets.length === 0">没有符合条件的测站</p>
     <ul v-else>
-      <StationRow v-for="station in visibleStations" :key="station.id"
-                  :station="station" :selected="station.id === selectedId"
-                  @select="selectStation" />
+      <AssetRow v-for="asset in visibleAssets" :key="asset.assetId"
+                :asset="asset" :selected="asset.assetId === selectedId"
+                @select="selectAsset" />
     </ul>
   </section>
 </template>
@@ -1939,7 +1943,7 @@ import { RouterLink, RouterView } from 'vue-router';
   <header class="app-header">
     <RouterLink to="/">水利工程安全监测平台</RouterLink>
     <nav aria-label="主导航">
-      <RouterLink to="/stations">测站</RouterLink>
+      <RouterLink to="/assets">测站</RouterLink>
       <RouterLink to="/alerts">告警中心</RouterLink>
     </nav>
   </header>
@@ -1956,15 +1960,15 @@ import { TOKEN_KEY } from './api/request.js';
 const router = createRouter({
   history: createWebHistory(),
   routes: [
-    { path: '/', name: 'home', redirect: { name: 'stations' } },
+    { path: '/', name: 'home', redirect: { name: 'assets' } },
     { path: '/login', name: 'login', component: () => import('./views/Login.vue') },
-    { path: '/stations', name: 'stations', component: () => import('./views/StationList.vue'),
+    { path: '/assets', name: 'assets', component: () => import('./views/AssetList.vue'),
       meta: { requiresAuth: true },
       children: [
-        { path: 'map', name: 'station-map', component: () => import('./views/StationMap.vue') }
+        { path: 'map', name: 'asset-map', component: () => import('./views/AssetMap.vue') }
       ] },
-    { path: '/stations/:id', name: 'station-detail',
-      component: () => import('./views/StationDetail.vue'),
+    { path: '/assets/:id', name: 'asset-detail',
+      component: () => import('./views/AssetDetail.vue'),
       props: true, meta: { requiresAuth: true } }
   ]
 });
@@ -1988,20 +1992,20 @@ import { useRoute, useRouter } from 'vue-router';
 
 const route = useRoute();
 const router = useRouter();
-const stationId = computed(() => String(route.params.id ?? ''));
-const returnTo = computed(() => String(route.query.from ?? 'stations'));
+const assetId = computed(() => String(route.params.id ?? ''));
+const returnTo = computed(() => String(route.query.from ?? 'assets'));
 
-function openStation(id) {
-  router.push({ name: 'station-detail', params: { id }, query: { from: returnTo.value } });
+function openAsset(id) {
+  router.push({ name: 'asset-detail', params: { id }, query: { from: returnTo.value } });
 }
 function backToList() {
-  router.replace({ name: 'stations', query: { selected: stationId.value } });
+  router.replace({ name: 'assets', query: { selected: assetId.value } });
 }
 </script>
 
 <template>
   <button type="button" @click="backToList">返回测站列表</button>
-  <button type="button" @click="openStation('ST-02')">打开下游测站</button>
+  <button type="button" @click="openAsset('DAM-A-WL-01')">打开案例库水位01</button>
 </template>
 \end{lstlisting}
 
@@ -2021,7 +2025,7 @@ const errorMessage = ref('');
 
 function safeRedirect(value) {
   return typeof value === 'string' && value.startsWith('/') && !value.startsWith('//')
-    ? value : '/stations';
+    ? value : '/assets';
 }
 async function submit() {
   errorMessage.value = '';
@@ -2049,19 +2053,19 @@ async function submit() {
 
 \begin{lstlisting}[label={lst:ch04-js-pinia},language=JavaScript,caption={Pinia测站状态管理}]
 import { defineStore } from 'pinia';
-import { loadLatest } from '../api/assets.js';   // 见 4.5.2 节 loadLatest
+import { loadLatest as fetchLatest } from '../api/assets.js';   // 4.5.2 节的 loadLatest
 
-export const useStationStore = defineStore('station', {
+export const useAssetStore = defineStore('asset', {
   state: () => ({ currentId: null, latest: null, loading: false, error: null }),
   getters: {
-    isWarning: state => (state.latest?.level ?? 0) >= 5.0
+    isWarning: state => (state.latest?.value ?? 0) >= 165.5   // 汛限水位，见 8.1 节
   },
   actions: {
     async loadLatest(id) {
       this.loading = true;
       this.error = null;
       try {
-        this.latest = await loadLatest(id);
+        this.latest = await fetchLatest(id);
         this.currentId = id;
       } catch (error) {
         this.error = error;
@@ -2081,39 +2085,39 @@ Pinia集中管理跨组件共享且具有业务含义的状态，如当前测站
 <script setup>
 import { onMounted } from 'vue';
 import { storeToRefs } from 'pinia';
-import { useStationStore } from '../stores/station.js';
+import { useAssetStore } from '../stores/asset.js';
 
-const stationStore = useStationStore();
-const { latest, loading, isWarning } = storeToRefs(stationStore);
-const { loadLatest } = stationStore;
+const assetStore = useAssetStore();
+const { latest, loading, isWarning } = storeToRefs(assetStore);
+const { loadLatest } = assetStore;
 
-onMounted(() => loadLatest('ST-01'));
+onMounted(() => loadLatest('DAM-A-WL-01'));
 </script>
 
 <template>
   <p v-if="loading" role="status">正在读取最新水位……</p>
-  <p v-else-if="latest">{{ latest.level }} m <strong v-if="isWarning">需要关注</strong></p>
+  <p v-else-if="latest">{{ latest.value }} {{ latest.unit }} <strong v-if="isWarning">需要关注</strong></p>
   <p v-else>暂无读数</p>
 </template>
 \end{lstlisting}
 
 清单\ref{lst:ch04-a47-store-usage}中，\texttt{storeToRefs}只处理状态和 getter，\texttt{loadLatest}仍保留为动作函数。若需要批量修改状态，可以调用 store 的动作；表单输入不应直接写入后端缓存字段，提交时由动作完成校验和请求。跨路由共享的当前测站、最新读数和告警计数放在 Pinia 后，列表、地图和详情页可以读取同一份状态，避免页面之间各自维护副本。
 
-\subsection{StationDetail 的动态参数与数据加载}
+\subsection{AssetDetail 的动态参数与数据加载}
 
 路由配置中的\texttt{props: true}会把\texttt{:id}动态段作为组件 prop 注入。这样，详情组件不必依赖全局路由对象，单元测试可以直接传入\texttt{id}；查询参数仍可通过\texttt{useRoute}读取。\texttt{defineProps}应明确类型和必填约束，收到参数后再调用 store 动作加载数据，并在参数变化时重新加载。组件卸载时沿用前面的取消信号和清理模式。
 
-\begin{lstlisting}[label={lst:ch04-a47-station-detail},language=Vue,caption={StationDetail.vue 接收动态路由参数}]
+\begin{lstlisting}[label={lst:ch04-a47-station-detail},language=Vue,caption={AssetDetail.vue 接收动态路由参数}]
 <script setup>
 import { watch } from 'vue';
 import { storeToRefs } from 'pinia';
-import { useStationStore } from '../stores/station.js';
+import { useAssetStore } from '../stores/asset.js';
 
 const props = defineProps({ id: { type: String, required: true } });
-const stationStore = useStationStore();
-const { latest, loading, error } = storeToRefs(stationStore);
+const assetStore = useAssetStore();
+const { latest, loading, error } = storeToRefs(assetStore);
 
-watch(() => props.id, id => stationStore.loadLatest(id), { immediate: true });
+watch(() => props.id, id => assetStore.loadLatest(id), { immediate: true });
 </script>
 
 <template>
@@ -2121,7 +2125,7 @@ watch(() => props.id, id => stationStore.loadLatest(id), { immediate: true });
     <h1 id="station-detail-title">测站 {{ props.id }}</h1>
     <p v-if="loading" role="status">正在加载……</p>
     <p v-else-if="error" role="alert">{{ error.message }}</p>
-    <dl v-else-if="latest"><dt>最新水位</dt><dd>{{ latest.level }} m</dd></dl>
+    <dl v-else-if="latest"><dt>最新观测</dt><dd>{{ latest.value }} {{ latest.unit }}</dd></dl>
     <p v-else>暂无有效读数</p>
   </article>
 </template>
@@ -2132,20 +2136,20 @@ watch(() => props.id, id => stationStore.loadLatest(id), { immediate: true });
 \begin{lstlisting}[label={lst:ch04-a47-setup-store},language=JavaScript,caption={Pinia setup 式 store 对照}]
 import { computed, ref } from 'vue';
 import { defineStore } from 'pinia';
-import { loadLatest } from '../api/assets.js';   // 见 4.5.2 节 loadLatest
+import { loadLatest as fetchLatest } from '../api/assets.js';   // 别名避免与下面的动作同名
 
-export const useStationSetupStore = defineStore('station-setup', () => {
+export const useAssetSetupStore = defineStore('asset-setup', () => {
   const currentId = ref(null);
   const latest = ref(null);
   const loading = ref(false);
   const error = ref(null);
-  const isWarning = computed(() => (latest.value?.level ?? 0) >= 5.0);
+  const isWarning = computed(() => (latest.value?.value ?? 0) >= 165.5);
 
   async function loadLatest(id) {
     loading.value = true;
     error.value = null;
     try {
-      latest.value = await loadLatest(id);
+      latest.value = await fetchLatest(id);
       currentId.value = id;
     } catch (cause) {
       error.value = cause;
@@ -2308,7 +2312,7 @@ location / { try_files $uri $uri/ /index.html; }
 
 发布采用不可变目录更安全。每次构建把\texttt{dist/}复制为带提交号的版本目录，生成一份包含入口哈希、资源清单和构建时间的 manifest；反向代理通过符号链接或配置项指向当前版本。切换后先执行首页、登录、测站详情和 API 健康检查，再逐步放量。若发现路由 404、资源加载失败或数据接口异常，切换回上一个 manifest 即可恢复，原版本保留到确认监测业务稳定后再清理。回滚只改变静态文件指向，不删除数据库和时序数据。
 
-SPA 的深链接是部署验收的重点。浏览器直接打开\texttt{/stations/ST-01}时，静态服务器先寻找同名文件，找不到后必须回退到\texttt{index.html}，再由 Vue Router 渲染详情页；\texttt{/api/}则必须优先匹配反向代理规则，不能被 SPA 回退吞掉。缓存头也要分层设置：\texttt{index.html}短缓存并要求重新验证，带内容哈希的脚本和样式长期缓存，地图配置和监测接口依据数据时效使用禁止缓存或短 TTL。部署检查应使用真实浏览器和命令行各验证一次，避免只测服务器状态码。
+SPA 的深链接是部署验收的重点。浏览器直接打开\texttt{/assets/DAM-A-PZ-07}时，静态服务器先寻找同名文件，找不到后必须回退到\texttt{index.html}，再由 Vue Router 渲染详情页；\texttt{/api/}则必须优先匹配反向代理规则，不能被 SPA 回退吞掉。缓存头也要分层设置：\texttt{index.html}短缓存并要求重新验证，带内容哈希的脚本和样式长期缓存，地图配置和监测接口依据数据时效使用禁止缓存或短 TTL。部署检查应使用真实浏览器和命令行各验证一次，避免只测服务器状态码。
 
 安全审计包括源代码、产物和运行时三个面。源代码扫描禁止把令牌、私钥和内部密码提交到仓库；产物扫描检查压缩后的 JavaScript 是否残留调试开关、源地图是否公开内部路径；运行时检查 CSP、HTTPS、跨域策略、响应头和错误页面是否泄露堆栈。环境变量的公开前缀不是保密机制，任何进入前端 bundle 的值都应视为公开信息。对水利平台而言，还要记录发布人、构建提交号、镜像摘要和回滚操作，保证出现异常时可以追溯到具体版本。发布说明还应给出变更范围、影响页面、接口兼容性、验证结果和回滚入口，值班员据此可以在交接班时快速判断版本状态。
 
