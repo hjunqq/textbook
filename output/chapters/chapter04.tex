@@ -21,6 +21,8 @@
 
 \section{Web基础概念与浏览器架构}
 
+\paragraph{本节层次}核心。
+
 浏览器通过HTTP或HTTPS请求资源，解析HTML形成DOM树，解析CSS形成CSSOM树，再计算布局并绘制页面；JavaScript通过事件循环处理用户操作、网络响应和定时任务。智慧水利页面常同时展示地图、曲线与告警，因此应避免在短时间内反复修改大量DOM节点。
 
 现代浏览器通常采用多进程架构。图\ref{fig:browser-architecture}强调各模块的协作关系：浏览器引擎负责协调，渲染引擎使用网络模块取得的资源，调用JavaScript引擎执行脚本，并通过UI后端绘制；存储模块为浏览器引擎及页面脚本提供受控的数据持久化能力。
@@ -53,6 +55,8 @@
 浏览器兼容性应通过标准API、特性检测和自动化测试控制。例如，应检测\texttt{WebSocket}是否存在，再决定使用实时连接还是降级到轮询，而不能只依据浏览器名称。资源缓存则应由HTTP缓存头控制；监测实时值不宜与长期静态资源采用同一缓存策略。
 
 \section{HTML基础与语义化}
+
+\paragraph{本节层次}核心：4.2.1。
 
 HTML描述内容的结构和语义。\texttt{header}、\texttt{nav}、\texttt{main}、\texttt{section}、\texttt{article}与\texttt{footer}等元素能够表达区域含义，有助于无障碍工具、搜索引擎和开发者理解页面。标题级别应连续，表单控件应有\texttt{label}，图片应提供\texttt{alt}文本。
 
@@ -245,6 +249,8 @@ dialog.addEventListener('cancel', closeDialog);
 在验收阶段，可以把图\ref{fig:ch04-document-flow}转化为一张检查清单：首先检查源文件是否有唯一的\texttt{main}、连续标题和可计算的表单名称；然后在 Elements 面板检查 DOM 是否与设计的地标一致；最后用 Performance 面板观察一次批量数据更新是否引起多次布局。对于动态预警，再用屏幕阅读器确认普通状态更新不会抢占焦点，真正需要值班员处理的事件才会进入\texttt{alert}区域。结构、渲染和交互三个层面都通过后，页面才算完成，而不是只看截图是否“像设计稿”。
 
 \section{CSS样式与响应式布局}
+
+\paragraph{本节层次}核心：4.3.1、4.3.2；指导实践：4.3.4、4.3.5、4.3.6、4.3.8；拓展：4.3.3、4.3.7。核心路线只要求读完核心小节。
 
 CSS负责视觉呈现。规则由选择器和声明块组成，层叠结果主要受来源、优先级和出现顺序影响。工程中宜使用类选择器组织组件样式，避免依赖过深的DOM层级。
 
@@ -739,6 +745,8 @@ Flex 的视觉顺序还涉及语义和键盘路径。\texttt{order}只改变绘�
 表\ref{tab:ch04-flex-diagnostics}可作为联调记录模板：每次修改只改变一个影响因素，并在四种视口、两种主题和键盘操作下复测。这样，CSS 调试就从“调到看起来差不多”变成可以由同伴复核的工程过程。
 
 \section{JavaScript基础编程}
+
+\paragraph{本节层次}核心：4.4.1、4.4.2、4.4.3、4.4.4、4.4.5、4.4.7；指导实践：4.4.6。核心路线只要求读完核心小节。
 
 现代JavaScript使用\texttt{const}声明不重新赋值的绑定，使用\texttt{let}声明需要变化的绑定。基本类型包括数字、字符串、布尔值、\texttt{null}、\texttt{undefined}、\texttt{bigint}与\texttt{symbol}；对象、数组和函数属于引用类型。
 
@@ -1540,6 +1548,8 @@ console.log('同步：结束读取');
 
 \section{DOM操作与事件处理}
 
+\paragraph{本节层次}核心。
+
 4.4 节已经分别讲过 DOM 查询、安全写入与事件模型，本节用一个最小的完整页面把它们串起来，作为进入 Vue 之前的收束练习：结构与行为分离、输入必须校验、更新走 \texttt{textContent} 而不是 \texttt{innerHTML}。
 
 下面示例完整展示事件绑定、输入校验和界面更新。警戒值仍为同一场景的5.0米。
@@ -1572,6 +1582,8 @@ button.addEventListener('click', () => {
 
 \section{模块化开发与调试技巧}
 
+\paragraph{本节层次}指导实践。
+
 ES模块通过\texttt{export}和\texttt{import}建立清晰依赖。接口访问、业务计算和视图组件应分层组织，避免在组件中散布重复的网络代码。
 
 \begin{lstlisting}[label={lst:ch04-js-lifecycle},language=JavaScript,caption={ES 模块的导出与导入}]
@@ -1588,6 +1600,8 @@ console.log(levelStatus(5.12));
 调试遵循“复现—缩小范围—验证假设—回归测试”的顺序。浏览器开发者工具中，Network面板用于检查请求、状态码和缓存；Sources面板可设置断点并查看调用栈；Console用于查看结构化日志；Performance面板用于定位长任务和频繁重排。代码中的临时\texttt{console.log()}不应作为生产日志方案。
 
 \section{Vue 3组件化开发}
+
+\paragraph{本节层次}核心：4.8.1、4.8.2；指导实践：4.8.3、4.8.4。核心路线只要求读完核心小节。
 
 传统命令式写法需要在数据变化后手动寻找并更新多个DOM节点。水利仪表盘一旦包含曲线、表格和告警标识，这些更新容易分散。Vue使用响应式状态和声明式模板：开发者描述“状态如何映射为界面”，框架负责同步DOM。组件化仍需遵循可理解反馈和一致交互等基本设计原则\cite{norman2013}。
 
@@ -1906,6 +1920,8 @@ props、emit、slot 和 provide/inject 形成四条不同的依赖路径。props
 
 \section{Vue Router与Pinia应用组织}
 
+\paragraph{本节层次}指导实践：4.9.1、4.9.2、4.9.3、4.9.4。本节没有核心小节，课堂核心路线可整体跳过。
+
 Vue Router把 URL 映射到页面组件，\texttt{App.vue}中的\texttt{<router-view />}是路由组件真正出现的位置。路由表应包含稳定的路径、名称、组件和元数据；页面级组件使用动态导入可以把首屏代码与详情页代码分开下载。导航的职责边界要保持清楚：路由负责页面切换和参数解析，页面负责展示与交互，后端负责最终的身份和权限判定。
 
 \subsection{根组件、路由表与登录守卫}
@@ -2179,6 +2195,8 @@ createApp(App).use(createPinia()).use(router).mount('#app');
 \end{lstlisting}
 
 \section{Vite工程化与性能优化}
+
+\paragraph{本节层次}拓展。课堂核心路线可跳过。
 
 推荐目录按职责组织为\texttt{views/}、\texttt{components/}、\texttt{stores/}、\texttt{router/}和\texttt{api/}。Vite 在开发阶段启动原生 ES 模块服务器，浏览器按需请求被修改的模块，依赖预构建和热更新让反馈很快；生产阶段则从入口出发构建依赖图，执行 Tree Shaking、压缩、资源指纹和代码分割，输出可以被静态服务器缓存的文件。开发服务器的代理、源码地图和错误覆盖层服务于调试，不能直接当成生产部署方案。
 
