@@ -12,6 +12,7 @@ ROOT = pathlib.Path(os.environ.get("TEX2SITE_BUILD", REPO / "temp" / "tex2site-b
 ROOT.mkdir(parents=True, exist_ok=True)
 SRC = REPO / "output/chapters"
 APPENDIX = REPO / "output/appendix/answers.tex"
+APPENDIX_B = REPO / "output/appendix/prep.tex"
 OUT = REPO / "docs"
 TIKZ = ROOT / "tikz"
 AUX = REPO / "output/main.aux"
@@ -19,7 +20,7 @@ WEBFIGS = HERE / "webfigs"
 
 CHAPTERS = [("preface", 0), ("chapter01", 1), ("chapter02", 2), ("chapter03", 3),
             ("chapter04", 4), ("chapter05", 5), ("chapter06", 6), ("chapter07", 7),
-            ("chapter08", 8), ("chapter09", 9), ("answers", "A")]
+            ("chapter08", 8), ("chapter09", 9), ("answers", "A"), ("prep", "B")]
 
 LANG_MAP = {"javascript": "javascript", "js": "javascript", "vue": "vue", "css": "css",
             "html": "html", "json": "json", "yaml": "yaml", "yml": "yaml", "sql": "sql",
@@ -266,6 +267,11 @@ class Conv:
         md = subprocess.run(
             ["pandoc", "-f", "latex", "-t", "gfm+tex_math_dollars", "--wrap=none", str(pre)],
             capture_output=True, text=True)
+        if md.returncode != 0 and "tex_math_dollars" in md.stderr:
+            # 旧版 pandoc（<2.10）不认识该扩展；gfm 默认已保留 $…$ 数学
+            md = subprocess.run(
+                ["pandoc", "-f", "latex", "-t", "gfm", "--wrap=none", str(pre)],
+                capture_output=True, text=True)
         if md.returncode != 0:
             print("PANDOC FAIL", self.name, md.stderr[:2000]); sys.exit(1)
         out = md.stdout
@@ -438,9 +444,9 @@ def main():
     for name, chap in CHAPTERS:
         if only and name not in only:
             continue
-        src = APPENDIX if name == "answers" else SRC / (name + ".tex")
+        src = APPENDIX if name == "answers" else APPENDIX_B if name == "prep" else SRC / (name + ".tex")
         global REFPATH
-        REFPATH = {"preface": "references.md", "answers": "../references.md"}.get(name, "../../references.md")
+        REFPATH = {"preface": "references.md", "answers": "../references.md", "prep": "../references.md"}.get(name, "../../references.md")
         c = Conv(name, chap)
         md = c.run(src)
         # 输出路径
@@ -448,6 +454,8 @@ def main():
             dest = OUT / "前言.md"
         elif name == "answers":
             dest = OUT / "appendix" / "answers.md"
+        elif name == "prep":
+            dest = OUT / "appendix" / "prep.md"
         else:
             dest = OUT / "chapters" / name / (name + ".md")
         dest.parent.mkdir(parents=True, exist_ok=True)
