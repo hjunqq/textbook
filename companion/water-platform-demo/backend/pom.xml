@@ -39,10 +39,33 @@
   <build>
     <plugins>
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.13.0</version>
+        <configuration>
+          <!-- 把形参名写进字节码。@PathVariable String assetId 这类不显式写名字的参数靠它解析；
+               缺了它，所有带路径或查询参数的接口在运行期抛
+               "parameter name information not available via reflection" 并返回 500。
+               继承 spring-boot-starter-parent 的工程默认就有这一项，本 pom 只导入 BOM，必须自己写。 -->
+          <parameters>true</parameters>
+        </configuration>
+      </plugin>
+      <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
         <version>${spring-boot.version}</version>
-        <executions><execution><goals><goal>repackage</goal></goals></execution></executions>
+        <!-- 工程里有两个 @SpringBootApplication：完整平台与第5章 S3 阶段起点。
+             不指定主类，repackage 会因为“候选不唯一”而构建失败。
+             注意只能配在 repackage 这个 execution 上：配在插件级会连 spring-boot:run 一起锁死，
+             命令行的 -Dspring-boot.run.main-class 将不再生效，启动的仍是完整工程。 -->
+        <executions>
+          <execution>
+            <goals><goal>repackage</goal></goals>
+            <configuration>
+              <mainClass>edu.example.qingyuan.WaterPlatformApplication</mainClass>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>

@@ -104,3 +104,14 @@ output/**/*.bbl-SAVE-ERROR
 # Biber 生成的参考文献中间产物
 output/*.bbl
 output/**/*.bbl
+
+# Docker secrets 的正式文件一律不入库，只提交 *.example 模板
+companion/water-platform-demo/secrets/*.txt
+!companion/water-platform-demo/secrets/*.txt.example
+
+# Maven 构建产物
+companion/water-platform-demo/backend/target/
+
+# 本地临时目录（编译中间件、tex2site 构建、待删除素材），不入库
+temp/
+_to_delete/

@@ -123,8 +123,17 @@ const run = async () => {
   const plus = await call('/api/assets/DAM-A-PZ-07/readings'
     + '?from=2026-07-01T00:00:00 08:00&to=2026-07-02T00%3A00%3A00%2B08%3A00', h);
   check('时间参数无法解析时返回 400', plus.status === 400, `status=${plus.status}`);
-  check('该 400 也必须是契约错误体，而不是框架默认页面',
-    isContractError(plus.json), plus.text.slice(0, 160));
+  if (stage === 'lesson52') {
+    // 5.2.2 节“一个会遇到的失败”：类型转换失败发生在进入控制器方法之前，
+    // 控制器里的 @ExceptionHandler 接不到，错误体因此是框架默认页面。
+    // 这一阶段就该如此——5.5 节加上 @RestControllerAdvice 后才统一成契约形状。
+    // 所以这里断言的是“还没统一”，起点包若在这条上“通过”，反倒说明书上那个失败复现不出来。
+    check('起点阶段这条 400 尚未统一为契约错误体（5.2.2 的必遇失败）',
+      !isContractError(plus.json), plus.text.slice(0, 160));
+  } else {
+    check('该 400 也必须是契约错误体，而不是框架默认页面',
+      isContractError(plus.json), plus.text.slice(0, 160));
+  }
 
   // —— 通用约定：未认证 401 ——
   if (stage !== 'lesson52') {

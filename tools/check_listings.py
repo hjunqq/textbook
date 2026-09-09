@@ -49,6 +49,15 @@ PAIRS = [
 
 # 已确认的差异：(label, 书中原行) -> 原因
 ALLOWED = {
+    ("lst:ch04-r1-load", "const output = document.querySelector('#latest');"):
+        "书中 4.5.2 的页面入口块，4.5.5 起由 main.js 接管后必须删除（正文已说明）；"
+        "留在模块顶层会导致每次 import 重新登录并抢先渲染一次",
+    ("lst:ch04-r1-load", "await login('duty01', 'duty123');"): "同上，入口块已移入 main.js",
+    ("lst:ch04-r1-load", "const assets = await loadAssets();"): "同上，入口块已移入 main.js",
+    ("lst:ch04-r1-load", "const pz07 = assets.find(a => a.assetId === 'DAM-A-PZ-07');"):
+        "同上，入口块已移入 main.js",
+    ("lst:ch04-r1-load", "renderLatest(output, pz07, await loadLatest(pz07.assetId));"):
+        "同上，入口块已移入 main.js",
     ("lst:ch07-link-controller", "function createLinkController(chart, scene, readings) {"):
         "配套文件加 export 前缀：书中按全局函数印出，工程用 ES 模块导入（picker.js 同）",
     ("lst:ch07-point-picker", "class PointPicker {"):

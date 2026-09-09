@@ -1129,6 +1129,10 @@ const pz07 = assets.find(a => a.assetId === 'DAM-A-PZ-07');
 renderLatest(output, pz07, await loadLatest(pz07.assetId));
 ```
 
+**最后四行只属于本小节。**
+
+清单末尾的页面入口（查`#latest`、登录、渲染 PZ-07）之所以能直接写在模块顶层，是因为此刻`detail.js`就是页面唯一的脚本。4.5.5 节加入`main.js`之后必须把这四行删掉：模块顶层的语句在被`import`的那一刻就会执行，留着它，每次导入都会重新登录一次，并抢在列表渲染之前先画一次 PZ-07；写单元测试时导入`controller.js`也会被它带着发真实请求。删掉之后，登录改由入口`main.js`负责——`detail.js`退回成一个只导出函数的模块。
+
 **运行方式**
 
 在配套工程目录执行`node teaching-api/server.mjs`启动教学接口（默认 8080 端口），再在`frontend`目录执行`npm run dev`启动 Vite 开发服务器，浏览器打开它给出的地址。Vite 的代理把`/api`转发到 8080，因此脚本里只写相对路径。

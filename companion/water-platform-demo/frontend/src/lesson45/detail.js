@@ -35,9 +35,7 @@ export function renderLatest(el, asset, reading) {
     + `（${reading.occurredAt}，质量 ${reading.quality}）`;
 }
 
-// 页面入口（index.html 中 <p id="latest"></p> 与 <script type="module" src="/src/detail.js">）
-const output = document.querySelector('#latest');
-await login('duty01', 'duty123');
-const assets = await loadAssets();
-const pz07 = assets.find(a => a.assetId === 'DAM-A-PZ-07');
-renderLatest(output, pz07, await loadLatest(pz07.assetId));
+// 教材 4.5.2 的清单在这里还有一段页面入口（查 #latest、登录、渲染 PZ-07），
+// 因为那时 detail.js 就是页面唯一的脚本。4.5.5 起 main.js 成为入口后必须删掉它：
+// 模块顶层的语句在被 import 时就会执行，留着会导致每次导入都重新登录、
+// 并在 main.js 渲染列表之前先渲染一次 PZ-07；测试里导入 controller.js 也会被它带跑。

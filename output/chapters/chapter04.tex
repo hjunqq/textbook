@@ -1151,6 +1151,8 @@ const pz07 = assets.find(a => a.assetId === 'DAM-A-PZ-07');
 renderLatest(output, pz07, await loadLatest(pz07.assetId));
 \end{lstlisting}
 
+\paragraph{最后四行只属于本小节。}清单末尾的页面入口（查\texttt{\#latest}、登录、渲染 PZ-07）之所以能直接写在模块顶层，是因为此刻\texttt{detail.js}就是页面唯一的脚本。4.5.5 节加入\texttt{main.js}之后必须把这四行删掉：模块顶层的语句在被\texttt{import}的那一刻就会执行，留着它，每次导入都会重新登录一次，并抢在列表渲染之前先画一次 PZ-07；写单元测试时导入\texttt{controller.js}也会被它带着发真实请求。删掉之后，登录改由入口\texttt{main.js}负责——\texttt{detail.js}退回成一个只导出函数的模块。
+
 \paragraph{运行方式}在配套工程目录执行\texttt{node teaching-api/server.mjs}启动教学接口（默认 8080 端口），再在\texttt{frontend}目录执行\texttt{npm run dev}启动 Vite 开发服务器，浏览器打开它给出的地址。Vite 的代理把\texttt{/api}转发到 8080，因此脚本里只写相对路径。
 
 \paragraph{可观察结果}页面出现一行文字：“案例渗压07：185.091 kPa（2026-07-01T23:55:00+08:00，质量 valid）”。开发者工具“网络”面板依次出现三条请求：\texttt{POST /api/auth/login} 返回 200，\texttt{GET /api/assets} 返回 200 且响应体是 28 个对象的数组，\texttt{GET /api/assets/DAM-A-PZ-07/readings/latest} 返回 200。把最后一条的地址复制到新标签页直接打开，得到的是 401——因为地址栏访问不带\texttt{Authorization}头，这就是契约中“未登录一律 401”的直观体现。表\ref{tab:ch04-r1-run}把这三条请求与页面结果对应起来，课堂验收以它为准。
