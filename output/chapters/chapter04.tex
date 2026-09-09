@@ -1275,7 +1275,7 @@ export function bindList(listEl, outputEl, assets) {
 
 \subsection{request.js：JWT、401 与超时的统一入口}
 
-\paragraph{本节层次}指导实践。清单\ref{lst:ch04-r1-load}的\texttt{getJson}放大成整个应用共用的入口；配套工程 \texttt{frontend/src/utils/request.js} 就是它的精简版。
+\paragraph{本节层次}指导实践。清单\ref{lst:ch04-r1-load}的\texttt{getJson}放大成整个应用共用的入口；配套工程里的\texttt{request.js}（位于 frontend/src/utils 目录）就是它的精简版。
 
 第5章后端签发的 JWT 必须在浏览器请求中形成闭环：登录接口成功后，前端保存短期访问令牌，后续请求在\texttt{Authorization: Bearer <token>}中携带它；收到 401 时清除令牌并跳转登录页，不能继续用旧令牌重试。教学示例把令牌放入\texttt{sessionStorage}，浏览器标签页关闭后令牌消失，代价是同源脚本若发生 XSS 可能读取它；生产系统应结合严格的 CSP、短过期时间、刷新策略和更安全的 HttpOnly Cookie 方案评估，绝不能把签名密钥放入以\texttt{VITE\_}开头的前端变量。
 
