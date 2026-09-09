@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>测点详情（4.2-4.4 节 S1 阶段页）</title>
+  <link rel="stylesheet" href="lesson44.css">
+</head>
+<body>
+<header><h1>水利工程安全监测平台</h1></header>
+
+<nav aria-label="主导航">
+  <a href="lesson44.html">测点列表</a>
+</nav>
+
+<main>
+  <section aria-labelledby="detail-title">
+    <h2 id="detail-title">测点详情</h2>
+    <div id="asset-detail" role="region" aria-live="polite"></div>
+  </section>
+
+  <p class="hint">
+    本页从地址栏的 <code>?assetId=</code> 取参数。把它改成
+    <code>DAM-A-XX-99</code> 可以复现 S1 验收要求的故障：编码格式合法但台账里没有，
+    页面必须说明未找到，而不是留一片空白。
+  </p>
+</main>
+
+<footer>
+  数据快照时间：<time datetime="2026-07-05T03:55:00+08:00">2026-07-05 03:55</time>
+</footer>
+
+<script type="module" src="/src/lesson44/detail.js"></script>
+</body>
+</html>

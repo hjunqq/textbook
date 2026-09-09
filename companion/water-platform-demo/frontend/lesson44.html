@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>测点列表（4.2-4.4 节 S1 阶段页）</title>
+  <link rel="stylesheet" href="lesson44.css">
+</head>
+<body>
+<header><h1>水利工程安全监测平台</h1></header>
+
+<nav aria-label="主导航">
+  <a href="lesson44.html" aria-current="page">测点列表</a>
+</nav>
+
+<main>
+  <p class="hint">
+    S1 阶段页：只用浏览器和本地开发服务器，不需要后端，也没有引入任何框架。
+    执行 <code>npm run dev</code> 后打开本页。数据是写死在
+    <code>src/lesson44/assets.js</code> 里的 28 个测点，与教学接口、真实后端同源
+    （<code>companion/datasets</code>），字段名遵循 8.1 节的接口契约。
+  </p>
+
+  <section aria-labelledby="filter-title">
+    <h2 id="filter-title">筛选与排序</h2>
+    <form id="filter-form" novalidate>
+      <p>
+        <label for="keyword">按名称或编码筛选</label>
+        <input id="keyword" name="keyword" type="search"
+               placeholder="例如 渗压 或 DAM-A-WL" autocomplete="off">
+      </p>
+      <p>
+        <label for="sort-direction">按最新观测值排序</label>
+        <select id="sort-direction" name="sort-direction">
+          <option value="asc">从小到大</option>
+          <option value="desc">从大到小</option>
+        </select>
+      </p>
+    </form>
+  </section>
+
+  <section aria-labelledby="jump-title">
+    <h2 id="jump-title">按编码直接打开详情</h2>
+    <p>
+      <label for="asset-id">对象编码</label>
+      <input id="asset-id" name="asset-id" type="text"
+             placeholder="DAM-A-PZ-07" autocomplete="off">
+      <button id="jump-detail" type="button">打开详情</button>
+    </p>
+    <p id="jump-result" role="status" aria-live="polite"></p>
+  </section>
+
+  <section aria-labelledby="list-title">
+    <h2 id="list-title">测点列表</h2>
+    <p id="asset-summary" role="status" aria-live="polite"></p>
+    <ul id="asset-list" class="asset-list"></ul>
+  </section>
+</main>
+
+<footer>
+  数据快照时间：<time datetime="2026-07-05T03:55:00+08:00">2026-07-05 03:55</time>
+</footer>
+
+<script type="module" src="/src/lesson44/list.js"></script>
+</body>
+</html>

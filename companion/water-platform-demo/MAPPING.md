@@ -5,7 +5,7 @@
 | 版本 | 完成于 | 能力 | 本仓库对应 |
 |---|---|---|---|
 | v0 | 起点 | 空骨架 | 仓库初始结构 |
-| v1 | 第4章 | 登录+只读监测页 | frontend/ 全部；4.5 节阶段页 lesson45.html 可只靠 teaching-api 运行 |
+| v1 | 第4章 | 登录+只读监测页 | frontend/ 全部；S1 阶段页 lesson44.html + lesson44-detail.html 不依赖后端；S2 阶段页 lesson45.html 只靠 teaching-api 运行 |
 | v2 | 第5章 | JWT认证+观测API | backend/ 全部 |
 | v3 | 第6章 | 三维场景页 | lesson61.html 为起点（坝体长方体 + 28 测点绑定）；GLTF 模型与 GIS 集成为课程实现 |
 | v4 | 第7章 | 曲线与三维联动 | frontend/src/utils/readings.js 起点 |
@@ -16,6 +16,14 @@
 
 | 仓库文件 | 对应章节 | 说明 |
 |---|---|---|
+| frontend/lesson44.html + lesson44-detail.html | 4.2 / 4.8.1 | S1 阶段页：列表与详情，只需浏览器与 `npm run dev`，无框架无后端；骨架取自清单 lst:ch04-html-shell |
+| frontend/lesson44.css | 4.3 | border-box、CSS 变量主题、Grid 卡片与移动优先断点；对应清单 lst:ch04-css-responsive |
+| frontend/src/lesson44/assets.js | 4.8.1 | S1 固定数据：28 个测点的最新观测，取自 companion/datasets，字段名遵循 8.1 接口契约 |
+| frontend/src/lesson44/query.js | 4.4 | 筛选、排序、编码校验的纯函数；null 值排末尾，不当作 0 |
+| frontend/src/lesson44/render.js | 4.4.4 | DocumentFragment + textContent 安全写入，空结果写“暂无测点”；对应清单 lst:ch04-a44-dom |
+| frontend/src/lesson44/list.js | 4.4.6 | 事件委托与表单校验装配；对应清单 lst:ch04-a44-events、lst:ch04-a44-dom-script |
+| frontend/src/lesson44/detail.js | 4.4 / 4.7.1 | 从 ?assetId= 取参数，未找到时回显编码；4.7 节换成 Vue Router 深链接 |
+| frontend/tests/lesson44.test.js | 4.8.1 | S1 验收用例：筛选、排序、空态、非法输入与故障 DAM-A-XX-99 |
 | teaching-api/server.mjs | 4.5 / 8.1 | 零依赖教学接口：按 8.1 接口契约用固定数据集应答，`teach=` 故障注入 |
 | frontend/lesson45.html + src/lesson45/*.js | 4.5 | S2 阶段页：detail.js（清单 4.5.2）、state.js（4.5.3）、controller.js（4.5.4 故障单元） |
 | frontend/tests/lesson45.test.js | 4.5.4 / 4.5.8 | 竞态覆盖的自动化验证（先发请求被取消、最终页面属于后点击对象） |

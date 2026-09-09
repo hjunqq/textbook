@@ -1,0 +1,138 @@
+/* S1 阶段包样式：对应 4.3 节的 border-box 盒模型、CSS 变量主题、
+   Grid 卡片布局与移动优先断点。刻意不引入任何 CSS 框架——
+   本阶段要能解释每一条规则为什么在这里。 */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+:root {
+  --bg: #ffffff;
+  --fg: #1a1a1a;
+  --muted: #666666;
+  --line: #d0d0d0;
+  --card-bg: #f7f8fa;
+  --accent: #17559b;
+  --suspect: #a86400;
+  --none: #767676;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #16181c;
+    --fg: #ececec;
+    --muted: #a8a8a8;
+    --line: #3a3d44;
+    --card-bg: #21242a;
+    --accent: #6fb0ee;
+    --suspect: #e0a53a;
+    --none: #9a9a9a;
+  }
+}
+
+body {
+  margin: 0;
+  padding: 0 1rem 2rem;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: system-ui, sans-serif;
+  line-height: 1.6;
+}
+
+header h1 { font-size: 1.3rem; margin: 1rem 0 .5rem; }
+nav { border-bottom: 1px solid var(--line); padding-bottom: .5rem; }
+nav a { color: var(--accent); margin-right: 1rem; }
+nav a[aria-current="page"] { font-weight: 600; text-decoration: none; }
+main { max-width: 60rem; }
+h2 { font-size: 1.05rem; margin: 1.4rem 0 .4rem; }
+
+.hint {
+  color: var(--muted);
+  font-size: .9rem;
+  border-left: 3px solid var(--line);
+  padding-left: .7rem;
+}
+
+label { display: inline-block; min-width: 9rem; }
+input, select, button { font: inherit; padding: .3rem .5rem; }
+input, select {
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: var(--bg);
+  color: var(--fg);
+}
+
+/* 列表用 Grid：卡片最小 15rem，容器有多宽就放多少列，
+   不写死列数就不必为每个断点各写一次媒体查询 */
+.asset-list {
+  list-style: none;
+  margin: .5rem 0;
+  padding: 0;
+  display: grid;
+  gap: .6rem;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+}
+
+.asset-card button {
+  width: 100%;
+  text-align: left;
+  display: grid;
+  gap: .15rem;
+  padding: .6rem .7rem;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--card-bg);
+  color: inherit;
+  cursor: pointer;
+}
+.asset-card button:hover { border-color: var(--accent); }
+/* 键盘用户看得见焦点在哪：不要用 outline: none 把它去掉 */
+.asset-card button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.asset-name { font-weight: 600; }
+.asset-code { color: var(--muted); font-size: .8rem; font-family: ui-monospace, monospace; }
+.asset-reading { font-variant-numeric: tabular-nums; }
+/* 质量码用颜色加文字，不单靠颜色区分——色觉障碍用户也要能读出差异 */
+.asset-reading[data-quality="suspect"] { color: var(--suspect); }
+.asset-reading[data-quality="none"] { color: var(--none); font-style: italic; }
+
+.asset-empty {
+  grid-column: 1 / -1;
+  color: var(--muted);
+  border: 1px dashed var(--line);
+  border-radius: 4px;
+  padding: 1rem;
+  text-align: center;
+}
+
+#jump-result[data-state="invalid"],
+#jump-result[data-state="not-found"] { color: var(--suspect); }
+
+.asset-detail {
+  display: grid;
+  grid-template-columns: 7rem 1fr;
+  gap: .3rem .8rem;
+  margin: 0;
+  max-width: 32rem;
+}
+.asset-detail dt { color: var(--muted); }
+.asset-detail dd { margin: 0; font-variant-numeric: tabular-nums; }
+
+#asset-detail[data-state="not-found"],
+#asset-detail[data-state="invalid"] {
+  color: var(--suspect);
+  border: 1px solid var(--suspect);
+  border-radius: 4px;
+  padding: .7rem;
+}
+
+footer {
+  margin-top: 2rem;
+  padding-top: .6rem;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: .85rem;
+}
+
+/* 移动优先：窄屏时标签独占一行，避免与输入框挤在一起被截断 */
+@media (max-width: 32rem) {
+  label { display: block; min-width: 0; }
+}
