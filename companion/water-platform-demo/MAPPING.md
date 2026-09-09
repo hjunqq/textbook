@@ -8,7 +8,7 @@
 | v1 | 第4章 | 登录+只读监测页 | frontend/ 全部；S1 阶段页 lesson44.html + lesson44-detail.html 不依赖后端；S2 阶段页 lesson45.html 只靠 teaching-api 运行 |
 | v2 | 第5章 | JWT认证+观测API | S3 起点 backend/src/main/java/edu/example/lesson52/（单类、无库、无认证）；S3 终点 backend/ 全部 |
 | v3 | 第6章 | 三维场景页 | lesson61.html 为起点（坝体长方体 + 28 测点绑定）；GLTF 模型与 GIS 集成为课程实现 |
-| v4 | 第7章 | 曲线与三维联动 | frontend/src/utils/readings.js 起点 |
+| v4 | 第7章 | 曲线与三维联动 | S5 阶段页 lesson74.html（拾取→曲线→高亮双向联动），依赖 S3 与 S4 |
 | v5 | 第8章核心篇 | 质量检查+预警+工单+部署 | db/、ReadingConsumer、compose、smoke.sh 骨架 |
 
 本仓库即 v1+v2+v5 骨架的合体（最小可运行闭环）；v3、v4 与 v5 的完整实现由读者按教材清单增量完成。
@@ -31,6 +31,11 @@
 | frontend/src/utils/auth.js | 4.5 | TOKEN_KEY 单一契约 |
 | frontend/src/utils/request.js | 4.5 | 令牌注入、401 分流（认证端点豁免） |
 | frontend/src/utils/readings.js | 7.2 | 缺测断线、时间窗校验（纯函数，可测试） |
+| frontend/lesson74.html + src/lesson74/main.js | 7.3 / 7.4 | S5 阶段页：真实观测曲线与三维对象双向联动 |
+| frontend/src/lesson74/scene-bus.js | 7.3 | 清单 lst:ch07-link-controller 注释里说的“应用层场景封装”，事件总线 + focusAsset，不依赖 three |
+| frontend/src/lesson74/link.js | 7.3 | 与清单 lst:ch07-link-controller 逐字一致；chart 与 scene 均为注入 |
+| frontend/src/lesson74/picker.js | 7.4 | 与清单 lst:ch07-point-picker 逐字一致（THREE 改为模块导入），另加 firstAsset 跳过坝体回指测点 |
+| frontend/tests/lesson74.test.js | 7.3 / 7.4 | S5 验收：高亮切换、下标越界、解绑、拾取回指 |
 | frontend/src/views/LoginView.vue | 4.5.7 / 4.7 | 登录与安全回跳 |
 | frontend/src/router/index.js | 4.7.1 | 路由守卫 |
 | frontend/src/stores/monitoring.js | 4.7.4 / 8.3 | Pinia 状态与查询参数 |

@@ -40,4 +40,7 @@ addEventListener('resize', () => {
   renderer.setSize(innerWidth, innerHeight);
 });
 
-window.scene = scene;   // 阶段页用：供 main.js 绑定测点
+// 阶段页与控制台用：书中 6.1.1 的“可观察结果”要求能直接敲 dam.position.y 与
+// camera.position.distanceTo(dam.position)，而 ES 模块的顶层变量不是全局的，
+// 所以这里显式挂出去。第7章的 S5 阶段页还要用 camera 与 renderer 做射线拾取。
+Object.assign(window, { scene, camera, renderer, dam, controls });

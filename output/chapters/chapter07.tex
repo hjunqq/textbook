@@ -635,6 +635,8 @@ function createLinkController(chart, scene, readings) {
 
 清单\ref{lst:ch07-link-controller}没有把\texttt{assetId}写死在图表下标里：筛选、排序或插入阈值带后，控制器仍可通过应用状态查找对象。真实项目还要把时间窗口作为\texttt{focusAsset}的参数，三维场景显示同一时刻的质量码和预警等级；若该点是missing，图表应定位到空值区间并打开质量详情，而不是强行显示最近的有效点。解绑函数必须在组件卸载时执行，否则每次进入页面都会叠加一组点击处理器。
 
+\paragraph{S5 阶段包。}清单\ref{lst:ch07-link-controller}里的\texttt{scene}是应用层封装，配套工程把它实现在\texttt{src/lesson74/scene-bus.js}：一个事件总线加\texttt{focusAsset}，不\texttt{import three}，因此可以在没有 WebGL 的环境里测试。整页装配见\texttt{lesson74.html}与\texttt{src/lesson74/main.js}，运行依赖是 S3（能返回观测的接口）与 S4（已绑好测点的场景）：点场景里的球，右侧曲线切到该测点；点曲线上的数据点，对应的球变橙。三处边界值得亲手试：图表下标越界时控制器安静返回，不能高亮一个错误的球；曲线里没有该对象时不发\texttt{dispatchAction}；换对象时必须先调用上一次返回的解绑函数，否则点击处理器一层层叠加，点一次会跳好几次。\texttt{tests/lesson74.test.js}用两个假对象覆盖了这三条。
+
 \begin{lstlisting}[label={lst:ch07-connect-charts},language=JavaScript,breaklines=true,caption={多图表缩放联动与组标识}]
 const levelChart = echarts.init(document.querySelector('#level'));
 const rainChart = echarts.init(document.querySelector('#rain'));
