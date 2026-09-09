@@ -37,3 +37,19 @@ node teaching-api/contract-check.mjs http://localhost:8080 --stage=full
 三个阶段的数据深度不同（固定数据集 28 个对象 / 5.2 节写死的 4 个 / 数据库种子），
 所以脚本按阶段裁剪对数据的期望，但**契约形状的断言三者完全相同**。
 退出码非 0 表示有断言失败，逐条打印在前面。
+
+## closeloop-check.mjs：第8章闭环
+
+把“观测 → 质量检查 → 预警 → 值班员确认 → 工单 → 处置回写并归档”写成可执行断言，
+并验证 8.4 节状态流转图上的三条受控约束：未评估的事件不能确认、没确认不能派单、
+已完成的工单不能重复完成。
+
+```bash
+node teaching-api/server.mjs &
+node teaching-api/closeloop-check.mjs http://localhost:8080
+```
+
+教学接口为此新增了 `POST /api/warnings/{id}/ack`、`POST /api/work-orders`
+与 `POST /api/work-orders/{id}/complete`（内存态，重启即清空），
+按 8.1 契约应答，不需要数据库。第8章的清单在真实后端实现完成后，
+同一个脚本应当同样全绿。

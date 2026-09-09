@@ -158,9 +158,17 @@ run().then(() => {
     console.log(`  ${tag} ${name}${detail ? '  << ' + detail : ''}`);
   }
   console.log(`\n阶段 ${stage} @ ${base}：通过 ${pass}，失败 ${fail}`);
-  process.exit(fail ? 1 : 0);
+  finish(fail ? 1 : 0);
 }).catch(err => {
   console.error(`无法连接 ${base}：${err.message}`);
   console.error('先启动对应的服务，再运行本脚本。');
-  process.exit(2);
+  finish(2);
 });
+
+// 退出：设置退出码后主动关掉 fetch 的连接池再退出。
+// 直接调 process.exit() 会与 undici 尚未关闭的 keep-alive 套接字竞争，
+// 在 Windows 上偶发 libuv 断言（退出码 127），CI 里会被误读成脚本失败。
+async function finish(code) {
+  process.exitCode = code;
+  try { await globalThis[Symbol.for('undici.globalDispatcher.1')]?.close(); } catch { /* 忽略 */ }
+}

@@ -9,7 +9,7 @@
 | v2 | 第5章 | JWT认证+观测API | S3 起点 backend/src/main/java/edu/example/lesson52/（单类、无库、无认证）；S3 终点 backend/ 全部 |
 | v3 | 第6章 | 三维场景页 | lesson61.html 为起点（坝体长方体 + 28 测点绑定）；GLTF 模型与 GIS 集成为课程实现 |
 | v4 | 第7章 | 曲线与三维联动 | S5 阶段页 lesson74.html（拾取→曲线→高亮双向联动），依赖 S3 与 S4 |
-| v5 | 第8章核心篇 | 质量检查+预警+工单+部署 | db/、ReadingConsumer、compose、smoke.sh 骨架 |
+| v5 | 第8章核心篇 | 质量检查+预警+工单+部署 | S6：classify.js（定级）+ 教学接口的 ack/工单端点 + closeloop-check.mjs（闭环核对）；db/、ReadingConsumer、compose、smoke.sh 骨架 |
 
 本仓库即 v1+v2+v5 骨架的合体（最小可运行闭环）；v3、v4 与 v5 的完整实现由读者按教材清单增量完成。
 
@@ -56,4 +56,7 @@
 | db/001_init.sql | 8.3 | 超表 + (occurred_at,event_id) 复合唯一索引 |
 | db/002_seed.sql | 8.3 | 种子观测（含缺测与可疑样例） |
 | docker-compose.yml | 8.6 | 服务编排、healthcheck、secrets |
+| frontend/src/lesson84/classify.js | 8.4 | 质量码门禁与四级定级；evaluable 与 level 两个维度，阈值 0.30/0.50/0.70/0.85 与 warnings.json 一致 |
+| frontend/tests/lesson84.test.js | 8.4 | 前三个用例与清单 lst:ch08-classification-test 的 JUnit 断言一一对应 |
+| teaching-api/closeloop-check.mjs | 8.4 / 8.6 | S6 闭环核对：观测→质量→预警→确认→工单→回写→归档，含三条受控状态约束 |
 | smoke.sh | 8.6 | 端到端冒烟验证 |

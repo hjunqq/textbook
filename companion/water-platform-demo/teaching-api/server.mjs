@@ -36,6 +36,7 @@ const warnings = JSON.parse(fs.readFileSync(path.join(DATA, 'warnings.json'), 'u
 // 教学账号与骨架后端一致（SecurityConfig）
 const USERS = { duty01: ['duty123', 'DUTY'], analyst01: ['analyst123', 'ANALYST'], ops01: ['ops123', 'OPS'] };
 const tokens = new Map(); // token -> {username, authorities, exp}
+const workOrders = new Map(); // workOrderId -> 工单；内存态，重启即清空
 
 // ---------- 工具 ----------
 function send(res, status, body, headers = {}) {
@@ -115,6 +116,61 @@ async function handle(req, res) {
     }
     return send(res, 200, out);
   }
+
+  // —— 第8章闭环：确认预警 → 建工单 → 完成 ——
+  // 状态机见 8.4 节图“预警与工单的受控状态流转”：
+  // open → acknowledged → assigned → handled → closed，
+  // 没有 open 直接到 closed 的边——关闭必须经过工单校验。
+  const ack = /^\/api\/warnings\/([^/]+)\/ack$/.exec(url.pathname);
+  if (req.method === 'POST' && ack) {
+    const w = warnings.find(x => x.warningId === decodeURIComponent(ack[1]));
+    if (!w) return fail(res, 404, 'WARNING_NOT_FOUND', `预警 ${ack[1]} 不存在`);
+    if (!w.evaluable) return fail(res, 409, 'NOT_EVALUABLE', '未评估的事件不能确认，先处理数据质量');
+    if (w.status !== 'open') return fail(res, 409, 'ILLEGAL_TRANSITION', `状态 ${w.status} 不允许确认`);
+    w.status = 'acknowledged';
+    w.acknowledgedAt = new Date().toISOString();
+    return send(res, 200, w);
+  }
+
+  if (req.method === 'POST' && url.pathname === '/api/work-orders') {
+    let body = {};
+    try { body = JSON.parse(await readBody(req) || '{}'); } catch { return fail(res, 400, 'BAD_JSON', '请求体不是合法 JSON'); }
+    for (const k of ['warningId', 'ownerRole', 'dueAt', 'action']) {
+      if (!body[k]) return fail(res, 400, 'FIELD_REQUIRED', `缺少必填字段 ${k}`, k);
+    }
+    const w = warnings.find(x => x.warningId === body.warningId);
+    if (!w) return fail(res, 404, 'WARNING_NOT_FOUND', `预警 ${body.warningId} 不存在`);
+    if (w.status !== 'acknowledged') {
+      return fail(res, 409, 'ILLEGAL_TRANSITION', '必须先确认预警才能派单', 'warningId');
+    }
+    const order = {
+      workOrderId: 'wo-' + String(workOrders.size + 1).padStart(4, '0'),
+      warningId: body.warningId, ownerRole: body.ownerRole,
+      dueAt: body.dueAt, action: body.action, status: 'in_progress',
+    };
+    workOrders.set(order.workOrderId, order);
+    w.status = 'assigned';
+    return send(res, 201, order, { Location: `/api/work-orders/${order.workOrderId}` });
+  }
+
+  const done = /^\/api\/work-orders\/([^/]+)\/complete$/.exec(url.pathname);
+  if (req.method === 'POST' && done) {
+    let body = {};
+    try { body = JSON.parse(await readBody(req) || '{}'); } catch { return fail(res, 400, 'BAD_JSON', '请求体不是合法 JSON'); }
+    const order = workOrders.get(decodeURIComponent(done[1]));
+    if (!order) return fail(res, 404, 'WORK_ORDER_NOT_FOUND', `工单 ${done[1]} 不存在`);
+    if (order.status !== 'in_progress') {
+      return fail(res, 409, 'ILLEGAL_TRANSITION', `状态 ${order.status} 不允许完成`);
+    }
+    if (!body.result) return fail(res, 400, 'FIELD_REQUIRED', '缺少处置结果 result', 'result');
+    order.status = 'completed';
+    order.result = body.result;
+    order.completedAt = new Date().toISOString();
+    const w = warnings.find(x => x.warningId === order.warningId);
+    if (w) w.status = 'closed';          // 处置回写后预警才归档
+    return send(res, 200, order);
+  }
+
   return fail(res, 404, 'NOT_FOUND', '路径不存在');
 }
 
