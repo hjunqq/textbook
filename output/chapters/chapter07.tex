@@ -412,7 +412,7 @@ const normalized = standardize(message, 'gateway-02', 'v3');
 
 图\ref{fig:ch7-rain-level-combo}只展示编码关系，不替代工程分析。雨量柱从零基线向上绘制，水位线使用独立轴但共享时间索引；若为了突出“倒挂”效果将柱形向下绘制，也要在图例中说明向下方向代表降雨量而不是负值。真正的水位预警仍由第8章的规则、质量码和模型版本决定。
 
-ECharts 配置项与 API 随版本演进，本章写法以官方手册为准\cite{echartsDocs}。本章示例统一沿用第4章的 Vite 工程：ECharts 与坐标库通过 \texttt{npm install echarts proj4} 安装、以 \texttt{import * as echarts from 'echarts'} 与 \texttt{import proj4 from 'proj4'} 引入；Three.js 沿用第6章工程的安装与导入方式。无构建环境的课堂演示可改用官方 CDN 的全局构建，此时 \texttt{echarts}、\texttt{THREE}、\texttt{proj4} 为全局变量，后文清单不再逐个重复引入语句。下面的ECharts配置给出可运行的雨量倒挂柱与水位过程线组合。配置显式声明两个y轴、单位、tooltip格式和数据缩放；真实项目还要从服务端响应读取质量码并对缺测点设置空值，不把缺测当作零雨量或零水位。
+ECharts 配置项与 API 随版本演进，本章写法以官方手册为准\cite{echartsDocs}。本章示例统一沿用第4章的 Vite 工程：ECharts 与坐标库通过 \texttt{npm install echarts proj4} 安装、以 \texttt{import * as echarts from 'echarts'} 与 \texttt{import proj4 from 'proj4'} 引入；Three.js 沿用第6章工程的安装与导入方式。无构建环境的课堂演示可改用官方 CDN 的全局构建，此时 \texttt{echarts}、\texttt{THREE}、\texttt{proj4} 为全局变量，后文清单不再逐个重复引入语句。清单\ref{lst:ch07-rain-level-dualaxis}给出可运行的雨量倒挂柱与水位过程线组合，显式声明两个y轴、单位、tooltip格式和数据缩放；真实项目还要从服务端响应读取质量码并对缺测点设置空值，不把缺测当作零雨量或零水位。
 
 \begin{lstlisting}[label={lst:ch07-rain-level-dualaxis},language=JavaScript,breaklines=true,caption={雨量倒挂柱与水位过程线ECharts配置}]
 const chart = echarts.init(document.querySelector('#rain-level'));
@@ -538,7 +538,7 @@ chart.setOption(historyOption);
 清单\ref{lst:ch07-window-options}同时展示了\texttt{dataZoom}、\texttt{markLine}、\texttt{markArea}和\texttt{visualMap.pieces}的职责：缩放改变可见时间范围，标线标出单一基准，阴影标出阈值带，分段映射控制曲线颜色。阈值来源、适用工况和规则版本必须显示在图例或详情中；不能用一条红色水平线代替第8章的质量检查和预警规则。颜色分段只服务于阅读，风险计算仍读取原始数值和质量码。
 
 \paragraph{追加接口与结构变更}
-当消息以严格递增的事件时间到达时，可以使用\texttt{appendData}追加尾部点；迟到消息、删除测项和改变时间窗则必须回到应用状态重建序列并调用\texttt{setOption}。\texttt{appendData}不会替你去重，也不会自动删除旧点，300点窗口仍由状态层或服务端维护。若同一图表从一条曲线切换为“水位+雨量+阈值带”，应在一次\texttt{replaceMerge}中提交完整序列集合，避免旧的图例项留在界面。
+当消息以严格递增的事件时间到达时，可以使用\texttt{appendData}追加尾部点；迟到消息、删除测项和改变时间窗则必须回到应用状态重建序列并调用\texttt{setOption}。\texttt{appendData}不会替你去重，也不会自动删除旧点，300点窗口仍由状态层或服务端维护。若同一图表从一条曲线切换为“水位+雨量+阈值带”，应在一次\texttt{replaceMerge}中提交完整序列集合，避免旧的图例项留在界面。清单\ref{lst:ch07-append-data}把这两条路径写在一起：尾部追加走\texttt{appendData}，结构变更走\texttt{replaceMerge}，判断依据是序列集合有没有变，而不是数据量多少。
 
 \begin{lstlisting}[label={lst:ch07-append-data},language=JavaScript,breaklines=true,caption={高频尾部数据的appendData与结构切换}]
 function appendTail(reading) {
@@ -637,6 +637,8 @@ function createLinkController(chart, scene, readings) {
 
 \paragraph{S5 阶段包。}清单\ref{lst:ch07-link-controller}里的\texttt{scene}是应用层封装，配套工程把它实现在\texttt{src/lesson74/scene-bus.js}：一个事件总线加\texttt{focusAsset}，不\texttt{import three}，因此可以在没有 WebGL 的环境里测试。整页装配见\texttt{lesson74.html}与\texttt{src/lesson74/main.js}，运行依赖是 S3（能返回观测的接口）与 S4（已绑好测点的场景）：点场景里的球，右侧曲线切到该测点；点曲线上的数据点，对应的球变橙。三处边界值得亲手试：图表下标越界时控制器安静返回，不能高亮一个错误的球；曲线里没有该对象时不发\texttt{dispatchAction}；换对象时必须先调用上一次返回的解绑函数，否则点击处理器一层层叠加，点一次会跳好几次。\texttt{tests/lesson74.test.js}用两个假对象覆盖了这三条。
 
+水位、雨量和渗压往往分成上下几张图。清单\ref{lst:ch07-connect-charts}用\texttt{echarts.connect}让它们共享缩放和提示，读者拖动其中一张的时间轴，另外几张同步跟随；但对象定位仍由业务控制器完成，图表库不认识\texttt{assetId}。
+
 \begin{lstlisting}[label={lst:ch07-connect-charts},language=JavaScript,breaklines=true,caption={多图表缩放联动与组标识}]
 const levelChart = echarts.init(document.querySelector('#level'));
 const rainChart = echarts.init(document.querySelector('#rain'));
@@ -684,7 +686,7 @@ ECharts工程验收至少准备五组数据：单点连续到达、同一事件�
 
 用户点击图表上的异常点时，联动控制器读取\texttt{assetId}和时间，定位场景中的测点并打开同一时刻的详情；反向点击三维测点时，曲线切换到对应监测项并标出当前事件。联动状态放在页面状态管理中，图表对象只使用库提供的事件接口，便于测试和解绑。
 
-交互事件可能很密集。指针移动使用节流，时间范围查询使用防抖，告警确认则不得被节流丢弃。触控长按必须在抬起或取消时清理定时器：
+交互事件可能很密集。指针移动使用节流，时间范围查询使用防抖，告警确认则不得被节流丢弃。触控长按必须在抬起或取消时清理定时器，清单\ref{lst:ch07-long-press}把\texttt{touchend}与\texttt{touchcancel}都接上——只处理前者，用户手指滑出屏幕时长按菜单仍会弹出：
 
 \begin{lstlisting}[label={lst:ch07-long-press},language=JavaScript,caption={触控长按的定时器与取消}]
 let longPressTimer = null;
@@ -881,7 +883,7 @@ function styleReading(reading) {
 }
 \end{lstlisting}
 
-清单\ref{lst:ch07-warning-palette}中的两套配置互不覆盖：预警等级提供业务颜色和图标，质量状态提供边框、纹理和文字。\texttt{styleReading}的标签把二者组合为可读短语，详情面板再展开规则版本、检查时刻和处置入口。若颜色加载失败，图标和文字仍能表达状态；若质量服务返回missing，界面不得把它回退为NONE。
+清单\ref{lst:ch07-warning-palette}中的两套配置互不覆盖：预警等级提供业务颜色和图标，质量状态提供边框、纹理和文字。\texttt{styleReading}的标签把二者组合为可读短语，详情面板再展开规则版本、检查时刻和处置入口。若颜色加载失败，图标和文字仍能表达状态；若质量服务返回missing，界面不得把它回退为NONE。颜色之外还要有替代文本：清单\ref{lst:ch07-aria-accessible}给图表配上\texttt{aria}描述与数据表格入口，读屏用户不必依赖视觉编码也能取到同一份数值。
 
 \begin{lstlisting}[label={lst:ch07-aria-accessible},language=JavaScript,breaklines=true,caption={ECharts图表的无障碍与替代文本配置}]
 const option = {
@@ -954,7 +956,7 @@ CGCS2000地理坐标 & 经度、纬度 & 度 & 数据交换与服务发布 \\
 x=E-E_0,\qquad y=H-H_0,\qquad z=-(N-N_0).
 \]
 
-负号来自Three.js常用的相机与地面坐标约定，项目也可采用其他轴向，但数据、模型和交互必须统一。
+负号来自Three.js常用的相机与地面坐标约定，项目也可采用其他轴向，但数据、模型和交互必须统一。清单\ref{lst:ch07-coordinate-transform}把上式实现为一对互逆函数，并把局部原点作为参数传入而不是写死成常量，换工程时只改调用处。
 
 \begin{lstlisting}[label={lst:ch07-coordinate-transform},language=JavaScript,breaklines=true,caption={坐标与单位转换}]
 const cgcs2000 = '+proj=longlat +ellps=GRS80 +no_defs +type=crs';
@@ -973,7 +975,7 @@ const world = {
 
 中央经线\texttt{lon\_0}必须按工程所在投影带确定，不能照抄示例。UTM同属横轴墨卡托投影体系，适合某些国际数据交换，但不是国内水利工程坐标的默认主线；输入若为UTM，应先核对带号、半球、基准和元数据，再转换到项目统一坐标。
 
-国内测绘成果有时把带号前缀拼接到东坐标左侧。例如3度带39号的成果可能写成\texttt{39500000.00}，其中前两位是带号，真正参与局部原点相减的东坐标是\texttt{500000.00}。如果把带号坐标直接送入场景，局部坐标会突然增加三千多万米，单精度顶点和相机裁剪都会失效。剥离带号必须依据元数据中的带宽和带号，不要按字符串长度盲切；剥离后的结果要与中央经线、\texttt{+x\_0=500000}和控制点复核。
+国内测绘成果有时把带号前缀拼接到东坐标左侧。例如3度带39号的成果可能写成\texttt{39500000.00}，其中前两位是带号，真正参与局部原点相减的东坐标是\texttt{500000.00}。如果把带号坐标直接送入场景，局部坐标会突然增加三千多万米，单精度顶点和相机裁剪都会失效。剥离带号必须依据元数据中的带宽和带号，不要按字符串长度盲切；剥离后的结果要与中央经线、\texttt{+x\_0=500000}和控制点复核。清单\ref{lst:ch07-strip-zone-prefix}按这个原则实现：带号来自元数据参数，函数在数值不落在合理范围时直接抛错，而不是返回一个看起来正常的坐标。
 
 \begin{lstlisting}[label={lst:ch07-strip-zone-prefix},language=JavaScript,breaklines=true,caption={剥离国内测绘成果的带号前缀}]
 function stripZonePrefix(easting, zoneWidth, zoneNumber) {
@@ -993,7 +995,7 @@ const east = stripZonePrefix('39500000.00', 3, 39);
 \[
   \boldsymbol v=(d\sin\alpha,\;0,\;-d\cos\alpha).
 \]
-因此向北位移的$z$分量为负，向东位移的$x$分量为正。角度必须先由度转换为弧度，箭头长度还应设置可视化比例并在图例中标注真实位移，避免把放大的绘制长度误读成工程量。
+因此向北位移的$z$分量为负，向东位移的$x$分量为正。角度必须先由度转换为弧度，箭头长度还应设置可视化比例并在图例中标注真实位移，避免把放大的绘制长度误读成工程量。清单\ref{lst:ch07-displacement-vector}把方位角和位移量转成场景向量，缩放比例作为单独参数传入，绘制长度与真实位移因此始终可以互相反算。
 
 \begin{lstlisting}[label={lst:ch07-displacement-vector},language=JavaScript,breaklines=true,caption={按北起顺时针方位角生成位移箭头向量}]
 function displacementVector(distance, azimuthDeg, displayScale = 1) {
@@ -1043,7 +1045,7 @@ LOD不只是“近处多画、远处少画”，而是要为每一级定义可�
 
 聚合不能把质量状态和业务等级混为一个颜色。一个簇内只要存在橙色预警，就可以用橙色边框提示需要下钻；若簇内全部是missing，应显示灰色缺测符号而不是NONE；若有suspect点但没有业务预警，符号可加斜线纹理并显示可疑比例。下钻后，三维对象、曲线和列表共享同一\texttt{assetId}过滤条件，返回上一级时恢复原来的时间窗和相机位置。LOD切换还要有迟滞区间，避免相机在阈值附近轻微抖动造成对象频繁创建和销毁。
 
-性能预算可以用屏幕占用而不是固定米数表达。测点圆点直径低于3像素时，增加几何细节没有收益；文字标签低于8像素时，应隐藏文字并保留可访问的列表入口；聚合圆点达到20像素以上且重叠严重时，优先显示数量和最高风险。每一级记录对象数、三角形数、材质切换次数和帧时间，按普通笔记本、值班室大屏和移动设备分别验收。这样，LOD阈值来自任务和设备能力，而不是照抄某个项目的距离常数。
+性能预算可以用屏幕占用而不是固定米数表达。测点圆点直径低于3像素时，增加几何细节没有收益；文字标签低于8像素时，应隐藏文字并保留可访问的列表入口；聚合圆点达到20像素以上且重叠严重时，优先显示数量和最高风险。每一级记录对象数、三角形数、材质切换次数和帧时间，按普通笔记本、值班室大屏和移动设备分别验收。这样，LOD阈值来自任务和设备能力，而不是照抄某个项目的距离常数。清单\ref{lst:ch07-world-radius}做的就是这个换算：给定像素预算和当前相机距离，反解出聚合与拾取应当使用的世界半径。
 
 \begin{lstlisting}[label={lst:ch07-world-radius},language=JavaScript,breaklines=true,caption={按相机距离换算聚合与拾取世界半径}]
 function distanceToPoint(camera, point) {
@@ -1077,7 +1079,7 @@ function radiusForObject(camera, point, px, canvasHeight) {
 
 手工求交的数值容差应与场景尺度相关。固定的$10^{-8}$在米级局部场景通常足够，但当模型缩放到毫米或数十公里时应按边长和相机距离调整。求交函数返回点坐标后，再计算点到相机的距离用于排序；若方向向量没有归一化，参数$t$只表示方向上的倍数，不能直接显示为“距离米数”。射线命中点还应带上对象层级、三角形索引和时间窗，详情卡据此解释用户点到的是模型表面、测点符号还是聚合簇。
 
-拾取测试要覆盖画布边缘、窄屏旋转、设备像素比为2的屏幕、对象被遮挡和相邻对象重叠。测试输入保存客户端坐标、画布矩形、相机参数和预期\texttt{assetId}，而不是只保存一张截图。若模型分块异步加载，点击发生在分块尚未到达时，界面应显示加载状态并允许重试；加载完成后用同一屏幕坐标重新计算射线，不要沿用旧的交点距离。
+清单\ref{lst:ch07-point-picker}把上面几步收进一个类：构造时保存相机、场景和画布，\texttt{pick}只接收客户端坐标，换画布尺寸或设备像素比时调用方不必改动。拾取测试要覆盖画布边缘、窄屏旋转、设备像素比为2的屏幕、对象被遮挡和相邻对象重叠。测试输入保存客户端坐标、画布矩形、相机参数和预期\texttt{assetId}，而不是只保存一张截图。若模型分块异步加载，点击发生在分块尚未到达时，界面应显示加载状态并允许重试；加载完成后用同一屏幕坐标重新计算射线，不要沿用旧的交点距离。
 
 \begin{lstlisting}[label={lst:ch07-point-picker},language=JavaScript,caption={PointPicker：射线拾取器}]
 class PointPicker {
@@ -1119,7 +1121,7 @@ class PointPicker {
 \label{fig:ray-picking}
 \end{figure}
 
-若教学中手工实现M\"oller--Trumbore三角形求交，必须复制向量后再做减法、叉乘和缩放，避免破坏顶点与射线输入。函数返回的是交点的世界坐标，不是参数$t$；若\texttt{direction}没有归一化，$t$表示沿射线方向的缩放量而不等于米制距离，按交点远近排序时应使用\texttt{origin.distanceTo(point)}或先归一化方向向量：
+若教学中手工实现M\"oller--Trumbore三角形求交，必须复制向量后再做减法、叉乘和缩放，避免破坏顶点与射线输入。函数返回的是交点的世界坐标，不是参数$t$；若\texttt{direction}没有归一化，$t$表示沿射线方向的缩放量而不等于米制距离，按交点远近排序时应使用\texttt{origin.distanceTo(point)}或先归一化方向向量。清单\ref{lst:ch07-triangle-intersect}是这样一份实现，注意每次运算都先\texttt{clone}再改，输入的顶点与射线不被修改：
 
 \begin{lstlisting}[label={lst:ch07-triangle-intersect},language=JavaScript,caption={M\"oller--Trumbore 三角形求交}]
 function intersectTriangle(origin, direction, a, b, c) {
@@ -1144,7 +1146,7 @@ function intersectTriangle(origin, direction, a, b, c) {
 
 \subsection{触控半径与世界单位}
 
-\texttt{raycaster.params.Points.threshold}使用世界单位，不是像素。触控目标希望具有20像素左右的可点范围时，先按相机距离和视场角换算：
+\texttt{raycaster.params.Points.threshold}使用世界单位，不是像素。触控目标希望具有20像素左右的可点范围时，先按相机距离和视场角换算，清单\ref{lst:ch07-pixels-to-world}给出这段换算——相机拉远后阈值要跟着变大，写死一个常数会让远处的测点点不中：
 
 \begin{lstlisting}[label={lst:ch07-pixels-to-world},language=JavaScript,caption={屏幕像素到世界长度的换算}]
 // 复用前文定义的 pixelsToWorld(px, distance, fovRad,

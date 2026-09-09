@@ -130,7 +130,7 @@ public class ReadingQueryService {
 
 清单\ref{lst:ch05-rest-layer}用只读事务包住查询，并把实体转换为响应 DTO；它没有把数据库实现类型暴露给控制器。查询结果为空时抛出领域可识别的异常，由统一异常处理器转换为404，客户端可以据此显示“暂无读数”或提示测站编号，而不是把空对象误当作水位为零。
 
-写入接口要把协议校验、业务校验和持久化顺序写清。协议层检查必填字段、数值格式和时间字符串，应用服务检查测站是否存在、采样时间是否落在允许窗口、质量码是否允许参与计算，Repository 在事务中保存记录。创建成功返回\texttt{201 Created}并在\texttt{Location}头给出新资源地址；重复的幂等键返回第一次创建的响应或\texttt{409 Conflict}，不能静默创建第二条记录。
+写入接口要把协议校验、业务校验和持久化顺序写清。协议层检查必填字段、数值格式和时间字符串，应用服务检查测站是否存在、采样时间是否落在允许窗口、质量码是否允许参与计算，Repository 在事务中保存记录。创建成功返回\texttt{201 Created}并在\texttt{Location}头给出新资源地址；重复的幂等键返回第一次创建的响应或\texttt{409 Conflict}，不能静默创建第二条记录。清单\ref{lst:ch05-rest-write}按这个顺序写：先\texttt{@Valid}校验请求体，再由服务层判断测站与时间窗，最后返回带\texttt{Location}的 201。
 
 \begin{lstlisting}[label={lst:ch05-rest-write},language=Java,caption={监测值写入：POST、校验与201 Location}]
 public record CreateReadingRequest(
@@ -486,7 +486,7 @@ class SecurityPropertiesConfig {}
 
 目录结构还应服务于模块边界。\texttt{common}只放真正跨模块的值对象和错误码，不能把所有工具类都塞进去；\texttt{api}只放外部 DTO 和客户端契约，\texttt{domain}不依赖 Spring Web；数据库迁移文件按版本命名并与发布记录关联。新增预警服务时，先复制边界和测试结构，再决定是否拆分进程，避免目录先于业务边界膨胀。
 每个模块还应提供自己的 README，写明启动 Profile、依赖的外部服务、健康检查和测试命令；新成员按文档即可在隔离环境复现启动过程，减少“只在某台机器上可用”的隐性配置。
-文档还应列出本地开发所需的端口、初始化命令和清理方式，保证测试结束后不会遗留后台进程。
+文档还应列出本地开发所需的端口、初始化命令和清理方式，保证测试结束后不会遗留后台进程。清单\ref{lst:ch05-http}给出本章工程的目录布局，可以对照它检查自己的工程：控制器、服务、领域与持久化各占一层，配置和迁移脚本单列。
 
 \begin{lstlisting}[label={lst:ch05-http},language=bash,caption={按职责分层的工程目录}]
 src/main/java/com/example/water/
@@ -498,7 +498,7 @@ src/main/java/com/example/water/
 src/main/resources/application.yml
 \end{lstlisting}
 
-配置应从代码中分离，并可被环境变量覆盖。密钥不得写入版本库。
+配置应从代码中分离，并可被环境变量覆盖。密钥不得写入版本库。清单\ref{lst:ch05-application}的\texttt{application.yml}用\texttt{\$\{JWT\_SECRET\}}这类占位符引用环境变量，仓库里只留变量名和默认的非敏感值。
 
 \begin{lstlisting}[label={lst:ch05-application},language=YAML,caption={Spring Boot应用入口与JWT配置}]
 spring:
@@ -512,7 +512,7 @@ security:
     issuer: ${JWT_ISSUER:water-platform}
 \end{lstlisting}
 
-依赖注入优先使用构造器，使依赖明确并便于测试。控制器把DTO交给服务，不直接访问数据库。
+依赖注入优先使用构造器，使依赖明确并便于测试。控制器把DTO交给服务，不直接访问数据库。清单\ref{lst:ch05-query-controller}的控制器只有构造器注入的一个服务字段，测试时传入替身即可，不必启动数据库。
 
 \begin{lstlisting}[label={lst:ch05-query-controller},language=Java,caption={查询接口控制器}]
 @RestController
@@ -1093,7 +1093,7 @@ class ReadingUseCase {
 \[
   \bar{x}_{n+1}=\frac{\bar{x}_n n+x}{n+1}.
 \]
-计数和均值必须初始化，并在计算后再更新计数。
+计数和均值必须初始化，并在计算后再更新计数。清单\ref{lst:ch05-tx-service}按上式做增量更新，而不是把历史观测全部读进内存再求和——后者在观测量增长后会先变慢、再耗尽堆内存。
 
 \begin{lstlisting}[label={lst:ch05-tx-service},language=Java,caption={增量统计的数值稳定实现}]
 class WaterDataSummary {
@@ -1120,7 +1120,7 @@ class WaterDataSummary {
 \paragraph{本节层次}核心：5.5.1；指导实践：5.5.2、5.5.3、5.5.5；拓展：5.5.4、5.5.6。核心路线只要求读完核心小节。
 
 
-服务层按用例组织方法，例如“保存监测值”“确认告警”“查询测站详情”。输入DTO先通过Bean Validation完成格式校验，领域规则仍由服务或领域对象校验。统一响应不应把所有结果都包装成HTTP 200；HTTP状态码仍须表达协议层结果。
+服务层按用例组织方法，例如“保存监测值”“确认告警”“查询测站详情”。输入DTO先通过Bean Validation完成格式校验，领域规则仍由服务或领域对象校验。统一响应不应把所有结果都包装成HTTP 200；HTTP状态码仍须表达协议层结果。清单\ref{lst:ch05-exception-handler}把校验失败翻译成 400 并指出出错字段，与表\ref{tab:api-contract}约定的错误体形状一致。
 
 \begin{lstlisting}[label={lst:ch05-exception-handler},language=Java,caption={参数校验异常处理}]
 // 与 5.1 节的 CreateReadingRequest 相比省略了 unit 和 quality，
@@ -1231,7 +1231,7 @@ final class ReadingMapper {
 }
 \end{lstlisting}
 
-清单\ref{lst:ch05-dto-mapper}把外部字段转换集中在映射边界，单位、质量码和版本号不会因为数据库字段改名而泄露到 API。\texttt{version}为后续的乐观锁校验预留位置；更新请求携带旧版本时，服务层可以在保存前检查版本是否仍然匹配，冲突返回409并提示客户端重新读取，而不是覆盖另一个值班员刚提交的数据。
+清单\ref{lst:ch05-dto-mapper}把外部字段转换集中在映射边界，单位、质量码和版本号不会因为数据库字段改名而泄露到 API。\texttt{version}为后续的乐观锁校验预留位置；更新请求携带旧版本时，服务层可以在保存前检查版本是否仍然匹配，冲突返回409并提示客户端重新读取，而不是覆盖另一个值班员刚提交的数据。清单\ref{lst:ch05-command-service}把写入、订正与失效三种命令放在同一个应用服务里，可以看出它们共用同一道领域校验，区别只在状态迁移。
 
 \begin{lstlisting}[label={lst:ch05-command-service},language=Java,caption={应用服务中的写入、更新与删除规则}]
 @Service
@@ -1395,6 +1395,8 @@ MockMvc 或 WebTestClient 可以在没有真实网络的情况下验证控制器
 \label{fig:ch05-security-filter}
 \end{figure}
 
+清单\ref{lst:ch05-security-chain}是图\ref{fig:ch05-security-filter}中那条过滤链的配置：会话置为无状态，认证端点放行，其余请求交给 JWT 过滤器。
+
 \begin{lstlisting}[label={lst:ch05-security-chain},language=Java,caption={Spring Security过滤链}]
 import org.springframework.context.annotation.*;
 import org.springframework.http.HttpStatus;
@@ -1432,7 +1434,7 @@ class SecurityConfig {
 }
 \end{lstlisting}
 
-浏览器若使用Cookie携带凭据，不能机械关闭CSRF防护；上例适用于只从Authorization头读取Bearer令牌的API。权限只使用一个枚举，避免名称和取值漂移。
+浏览器若使用Cookie携带凭据，不能机械关闭CSRF防护；上例适用于只从Authorization头读取Bearer令牌的API。权限只使用一个枚举，避免名称和取值漂移。清单\ref{lst:ch05-jwt-filter}的过滤器只做一件事：把\texttt{Bearer}头里的令牌解析成认证对象放进\texttt{SecurityContext}，解析失败就放行给后续环节返回 401，不在过滤器里直接写响应体。
 
 \begin{lstlisting}[label={lst:ch05-jwt-filter},language=Java,caption={JWT认证过滤器}]
 import jakarta.servlet.*;
@@ -1489,7 +1491,7 @@ class JwtAuthenticationFilter extends OncePerRequestFilter {
 }
 \end{lstlisting}
 
-JWT 密钥通过配置注入并以足够长度的 Base64 值提供。本章示例锁定 jjwt 0.11.x：\texttt{parseClaimsJws} 返回 Claims 之前已经完成签名验证，签名不合法会抛出异常，应用不能先手工解码 Base64 再“验证”字段。刷新流程若需要接受已过期的刷新令牌，只能在捕获\texttt{ExpiredJwtException}后读取其 Claims；由于解析器已经验证签名，随后还要检查\texttt{type=refresh}、issuer、audience、subject、jti 和服务端撤销状态，绝不能把过期 access token 当作刷新凭据。
+JWT 密钥通过配置注入并以足够长度的 Base64 值提供。本章示例锁定 jjwt 0.11.x：\texttt{parseClaimsJws} 返回 Claims 之前已经完成签名验证，签名不合法会抛出异常，应用不能先手工解码 Base64 再“验证”字段。刷新流程若需要接受已过期的刷新令牌，只能在捕获\texttt{ExpiredJwtException}后读取其 Claims；由于解析器已经验证签名，随后还要检查\texttt{type=refresh}、issuer、audience、subject、jti 和服务端撤销状态，绝不能把过期 access token 当作刷新凭据。清单\ref{lst:ch05-jwt-parse}给出 jjwt 0.11.x 的正确调用顺序，注意签名验证发生在读取任何 Claim 之前。
 
 \begin{lstlisting}[label={lst:ch05-jwt-parse},language=Java,caption={jjwt 0.11.x 签名验证与访问令牌解析}]
 import io.jsonwebtoken.*;
@@ -1611,7 +1613,7 @@ class TokenIssuer {
 }
 \end{lstlisting}
 
-清单\ref{lst:ch05-jwt-issue}用不同的 jti 生成访问与刷新令牌，刷新令牌不携带业务权限，减少权限变更后的残留窗口。签发时间由注入的时钟提供，测试可以固定\texttt{Instant}验证过期边界；生产环境要考虑设备与服务器时钟偏差，允许的时钟容差必须写入安全配置并监控。密钥轮换时保留短暂的旧密钥验证窗口，并给每个密钥版本设置撤销和淘汰日期。
+清单\ref{lst:ch05-jwt-issue}用不同的 jti 生成访问与刷新令牌，刷新令牌不携带业务权限，减少权限变更后的残留窗口。签发时间由注入的时钟提供，测试可以固定\texttt{Instant}验证过期边界；生产环境要考虑设备与服务器时钟偏差，允许的时钟容差必须写入安全配置并监控。密钥轮换时保留短暂的旧密钥验证窗口，并给每个密钥版本设置撤销和淘汰日期。清单\ref{lst:ch05-login}把这些约束落到登录端点上：密码比对走\texttt{PasswordEncoder}，成功后一次签发访问令牌与刷新令牌。
 
 \begin{lstlisting}[label={lst:ch05-login},language=Java,caption={登录端点、密码校验与令牌签发}]
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -1652,7 +1654,7 @@ class LoginController {
 }
 \end{lstlisting}
 
-密码只保存经过适当成本因子哈希后的结果，登录错误统一返回“凭据无效”，不区分用户名不存在还是密码错误，避免账号枚举。登录端点应有速率限制、失败计数和审计事件；密码重置、二次认证和设备绑定属于更高层的身份系统，不能用把字段塞进 JWT 的方式替代。
+密码只保存经过适当成本因子哈希后的结果，登录错误统一返回“凭据无效”，不区分用户名不存在还是密码错误，避免账号枚举。登录端点应有速率限制、失败计数和审计事件；密码重置、二次认证和设备绑定属于更高层的身份系统，不能用把字段塞进 JWT 的方式替代。刷新端点的检查比登录更容易写漏，清单\ref{lst:ch05-jwt-refresh}把三项必查列全：签名、\texttt{type}是否为\texttt{refresh}、旧 jti 是否已在轮换中作废。
 
 \begin{lstlisting}[label={lst:ch05-jwt-refresh},language=Java,caption={刷新令牌的签名、类型和轮换检查}]
 import io.jsonwebtoken.*;
@@ -1722,7 +1724,7 @@ class RedisTokenRevocationService implements TokenRevocationService {
 }
 \end{lstlisting}
 
-清单\ref{lst:ch05-revocation}让撤销记录的 TTL 不超过原令牌剩余寿命，避免黑名单永久增长。高并发平台还可以使用用户令牌版本号：用户注销或改密时递增版本，过滤器比较令牌中的版本与当前账户版本；jti 黑名单适合撤销单个设备，版本号适合撤销用户全部会话，两者可以组合。撤销状态读取失败时要按安全策略拒绝请求或进入受限降级，不能把 Redis 不可达默认为“令牌有效”。
+清单\ref{lst:ch05-revocation}让撤销记录的 TTL 不超过原令牌剩余寿命，避免黑名单永久增长。高并发平台还可以使用用户令牌版本号：用户注销或改密时递增版本，过滤器比较令牌中的版本与当前账户版本；jti 黑名单适合撤销单个设备，版本号适合撤销用户全部会话，两者可以组合。撤销状态读取失败时要按安全策略拒绝请求或进入受限降级，不能把 Redis 不可达默认为“令牌有效”。过滤链解决“是谁”，方法级注解解决“能做什么”：清单\ref{lst:ch05-method-security}用\texttt{@PreAuthorize}把角色判断写在服务方法上，跨域策略集中在一处配置，不散落在各个控制器。
 
 \begin{lstlisting}[label={lst:ch05-method-security},language=Java,caption={方法级权限与跨域策略}]
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -1830,7 +1832,7 @@ CORS 预检请求只是在浏览器侧询问“是否允许这个源访问”，
 \paragraph{本节层次}核心：5.7.1；指导实践：5.7.2、5.7.3、5.7.4、5.7.5；拓展：5.7.6。核心路线只要求读完核心小节。
 
 
-同一应用进程内的领域事件可降低模块耦合。若处理必须在数据库事务成功后执行，应使用\texttt{@TransactionalEventListener}并指定\texttt{AFTER\_COMMIT}，不能用普通\texttt{@EventListener}声称“提交后执行”。
+同一应用进程内的领域事件可降低模块耦合。若处理必须在数据库事务成功后执行，应使用\texttt{@TransactionalEventListener}并指定\texttt{AFTER\_COMMIT}，不能用普通\texttt{@EventListener}声称“提交后执行”。清单\ref{lst:ch05-cache-service}用这个注解在观测入库提交之后才更新指标，事务回滚时监听器不会被触发，指标也就不会记录一条并不存在的观测。
 
 \begin{lstlisting}[label={lst:ch05-cache-service},language=Java,caption={事务提交后的指标事件监听}]
 import org.springframework.context.event.EventListener;
@@ -1856,7 +1858,7 @@ class ReadingEventHandler {
 }
 \end{lstlisting}
 
-跨服务通信必须使用网络可达的消息基础设施。下面的Kafka监听器位于告警服务，消费数据服务发布的事件；它不是进程内事件监听器。
+跨服务通信必须使用网络可达的消息基础设施。清单\ref{lst:ch05-metrics}的 Kafka 监听器位于告警服务，消费数据服务发布的事件；它不是进程内事件监听器，两者的区别在于消息跨进程后必须自己处理重复投递。
 
 \begin{lstlisting}[label={lst:ch05-metrics},language=Java,caption={Kafka 消息监听与告警评估}]
 record ReadingMessage(String eventId, String assetId,
@@ -2049,7 +2051,7 @@ class KafkaErrorHandlingConfig {
 
 \subsection{事务发件箱与可靠发布}
 
-数据库提交和 Kafka 发送是两个资源，直接在事务中先保存再发送可能出现“数据库已提交、消息发送失败”，先发送再提交则可能出现“消息已消费、数据库回滚”。事务发件箱把待发送事件作为业务事务的一部分写入\texttt{outbox\_event}表，提交后由发布器轮询或使用 CDC 读取，发送成功后更新状态。发布器崩溃可以从状态为 pending 的记录继续，消费者仍需幂等，因为发送确认和状态更新之间也可能重试。
+数据库提交和 Kafka 发送是两个资源，直接在事务中先保存再发送可能出现“数据库已提交、消息发送失败”，先发送再提交则可能出现“消息已消费、数据库回滚”。事务发件箱把待发送事件作为业务事务的一部分写入\texttt{outbox\_event}表，提交后由发布器轮询或使用 CDC 读取，发送成功后更新状态。发布器崩溃可以从状态为 pending 的记录继续，消费者仍需幂等，因为发送确认和状态更新之间也可能重试。清单\ref{lst:ch05-outbox}分两段：写入段与业务数据同一个事务，发布段是独立的定时任务，两段之间只通过\texttt{outbox\_event}表的状态字段交接。
 
 \begin{lstlisting}[label={lst:ch05-outbox},language=Java,caption={事务发件箱写入与发布任务}]
 import jakarta.persistence.*;

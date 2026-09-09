@@ -111,7 +111,13 @@ python tools/check_textbook.py            # 默认：不得倒退模式
 python tools/check_textbook.py --build    # 含完整编译（xelatex→biber→xelatex×2）
 python tools/check_textbook.py --report   # 只看报表，永远 exit 0
 python tools/check_textbook.py --strict   # 严格模式：所有软指标必须归零（M1 与终验用）
+python tools/check_listings.py           # 核验书中清单与 companion 文件是否逐字一致
 ```
+
+`check_listings.py` 补的是门禁查不到的一条：**书上印的代码和配套仓库里的文件是不是同一段**。
+清单与配套漂移后，读者照书敲出来的东西跑不起来，而 `check_textbook.py` 依然全绿。
+新增"与书中清单逐字一致"的阶段包文件时，把它登进该脚本的 `PAIRS`；
+确有必要的差异登进 `ALLOWED` 并写明原因——不写原因的豁免等于把这个检查关掉。
 
 门禁分两类：
 

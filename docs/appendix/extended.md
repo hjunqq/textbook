@@ -114,7 +114,7 @@ class CursorReadingService {
 
 连接池容量不是越大越好。每个请求占用一个数据库连接，连接数过大会让 PostgreSQL 争抢 CPU 和内存；连接数过小则请求排队。初始值根据数据库最大连接数、服务实例数和其他后台任务估算，再通过压测调整。HikariCP 的连接超时、最大生命周期、空闲超时和泄漏检测应有明确单位，日志显示池中活动、空闲、等待连接数，不能只看 HTTP 线程数量。
 
-慢查询定位遵循“请求—Repository—SQL—执行计划”链路。结构化日志带 traceId 和查询名，Micrometer 记录耗时分位数；PostgreSQL 慢查询日志和`pg_stat_statements`提供 SQL 级证据；`EXPLAIN (ANALYZE, BUFFERS)`确认是否命中联合索引、是否发生 N+1 或大范围顺序扫描。优化后重新压测并比较 P95、锁等待、缓存命中和连接池排队，不能只凭一次本地运行下结论。
+慢查询定位遵循“请求—Repository—SQL—执行计划”链路。结构化日志带 traceId 和查询名，Micrometer 记录耗时分位数；PostgreSQL 慢查询日志和`pg_stat_statements`提供 SQL 级证据；`EXPLAIN (ANALYZE, BUFFERS)`确认是否命中联合索引、是否发生 N+1 或大范围顺序扫描。优化后重新压测并比较 P95、锁等待、缓存命中和连接池排队，不能只凭一次本地运行下结论。清单12.3给出可以直接抄进`application.yml`的一组起始值，池大小与超时都写明单位，慢查询阈值与日志开关一并列出。
 
 **清单 12.3  连接池、超时与慢查询日志配置**
 

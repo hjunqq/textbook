@@ -758,7 +758,7 @@ Flex 的视觉顺序还涉及语义和键盘路径。\texttt{order}只改变绘�
 
 现代JavaScript使用\texttt{const}声明不重新赋值的绑定，使用\texttt{let}声明需要变化的绑定。基本类型包括数字、字符串、布尔值、\texttt{null}、\texttt{undefined}、\texttt{bigint}与\texttt{symbol}；对象、数组和函数属于引用类型。
 
-字符串可用模板字面量组合，也可通过\texttt{trim()}、\texttt{includes()}、\texttt{slice()}和\texttt{split()}完成常见处理。完成字符串处理后，再使用比较、逻辑和算术运算符表达业务规则。例如，某水库汛期警戒水位统一设为5.0米：
+字符串可用模板字面量组合，也可通过\texttt{trim()}、\texttt{includes()}、\texttt{slice()}和\texttt{split()}完成常见处理。完成字符串处理后，再使用比较、逻辑和算术运算符表达业务规则。清单\ref{lst:ch04-js-basics}判断案例水库的实测水位是否越过汛限水位 165.5 m（取自表\ref{tab:case-parameters}），声明、取值、比较和字符串拼接连成一段可以直接粘进控制台运行的代码。
 
 \begin{lstlisting}[label={lst:ch04-js-basics},language=JavaScript,caption={JavaScript基础变量与函数}]
 const stationName = "案例库水位01";
@@ -769,7 +769,7 @@ const message = `${stationName}：${reading.value} ${reading.unit}，${status}`;
 console.log(message.trim());
 \end{lstlisting}
 
-数组常用\texttt{map()}完成映射、\texttt{filter()}完成筛选、\texttt{reduce()}完成聚合；对象解构可以明确取出字段。函数应保持单一职责并显式返回结果。
+数组常用\texttt{map()}完成映射、\texttt{filter()}完成筛选、\texttt{reduce()}完成聚合；对象解构可以明确取出字段。函数应保持单一职责并显式返回结果。清单\ref{lst:ch04-js-condition}用这三个方法筛出越过汛限的观测，并把“不是数字”和“超出测点量程”分成两类异常抛出，而不是都返回一个\texttt{false}让调用方猜。
 
 \begin{lstlisting}[label={lst:ch04-js-condition},language=JavaScript,caption={监测值条件判断}]
 const readings = [165.12, 166.84, 165.37];          // 案例库水位01 三次观测，单位 m
@@ -980,7 +980,7 @@ renderWindow();
 
 \subsection{异常处理}
 
-\texttt{try}包围可能失败的操作，\texttt{catch}处理异常，\texttt{finally}执行清理。异常不能被静默吞掉，应在界面给出可理解提示，并把技术细节记录到日志系统。
+\texttt{try}包围可能失败的操作，\texttt{catch}处理异常，\texttt{finally}执行清理。异常不能被静默吞掉，应在界面给出可理解提示，并把技术细节记录到日志系统。清单\ref{lst:ch04-js-array}按异常类型分流：报文格式错误、数值超出量程和未知失败各对应一个稳定错误码，界面据此决定提示文案，日志保留原始异常。
 
 \begin{lstlisting}[label={lst:ch04-js-array},language=JavaScript,caption={监测报文解析的分类异常处理}]
 function parseReading(raw) {
@@ -1591,7 +1591,7 @@ console.log('同步：结束读取');
 
 传统命令式写法需要在数据变化后手动寻找并更新多个DOM节点。水利仪表盘一旦包含曲线、表格和告警标识，这些更新容易分散。Vue使用响应式状态和声明式模板：开发者描述“状态如何映射为界面”，框架负责同步DOM。组件化仍需遵循可理解反馈和一致交互等基本设计原则\cite{norman2013}。
 
-本章使用Vue 3.4+组合式API（响应式系统的完整语义见官方文档\cite{vueDocs}）。\texttt{ref}适合基本值，\texttt{reactive}适合对象，\texttt{computed}表达派生状态；组件通过props接收数据，通过emit通知父组件。下面的单文件组件把状态声明、属性校验、模板绑定和事件发射放在同一示例中，便于沿着数据流理解组件边界。
+本章使用Vue 3.4+组合式API（响应式系统的完整语义见官方文档\cite{vueDocs}）。\texttt{ref}适合基本值，\texttt{reactive}适合对象，\texttt{computed}表达派生状态；组件通过props接收数据，通过emit通知父组件。清单\ref{lst:ch04-vue-component}把状态声明、属性校验、模板绑定和事件发射放在同一个单文件组件里，便于沿着数据流理解组件边界。
 
 \begin{lstlisting}[label={lst:ch04-vue-component},language=Vue,caption={测站卡片组合式组件}]
 <script setup>
@@ -1969,7 +1969,7 @@ router.beforeEach(to => {
 export default router;
 \end{lstlisting}
 
-嵌套路由要求父页面提供自己的\texttt{<router-view />}，否则子路由虽然匹配成功却没有渲染位置。测站列表可以在页头显示筛选器，在内容区域再放一个出口承载地图子页；动态详情则使用顶层路径，便于从地图标记和列表行直接跳转。\texttt{useRouter}用于发起导航，\texttt{useRoute}用于读取当前路径、查询参数和动态参数。编程式导航应使用路由名称和参数对象，避免把业务 ID 直接拼进未经编码的 URL。
+嵌套路由要求父页面提供自己的\texttt{<router-view />}，否则子路由虽然匹配成功却没有渲染位置。测站列表可以在页头显示筛选器，在内容区域再放一个出口承载地图子页；动态详情则使用顶层路径，便于从地图标记和列表行直接跳转。\texttt{useRouter}用于发起导航，\texttt{useRoute}用于读取当前路径、查询参数和动态参数。编程式导航应使用路由名称和参数对象，避免把业务 ID 直接拼进未经编码的 URL。清单\ref{lst:ch04-a47-navigation}把两者放在一起对照：读当前测点编码走\texttt{useRoute}，跳转到详情页走\texttt{useRouter}加路由名称。
 
 \begin{lstlisting}[label={lst:ch04-a47-navigation},language=Vue,caption={useRouter、useRoute 与编程式导航}]
 <script setup>
@@ -1995,7 +1995,7 @@ function backToList() {
 </template>
 \end{lstlisting}
 
-登录页读取守卫写入的\texttt{redirect}，成功后只允许跳转到应用内部的路径，并对缺省值回退到测站首页。令牌写入和清理应复用清单\ref{lst:ch04-a45-request}的请求封装，页面只负责提交凭据和显示错误。后端仍要校验令牌和权限，前端守卫只是减少无意义的页面加载，不能作为安全边界。
+清单\ref{lst:ch04-a47-login}的登录页读取守卫写入的\texttt{redirect}，成功后只允许跳转到应用内部的路径，并对缺省值回退到测站首页；这条白名单判断不能省，否则\texttt{redirect}可以被构造成站外地址。令牌写入和清理应复用清单\ref{lst:ch04-a45-request}的请求封装，页面只负责提交凭据和显示错误。后端仍要校验令牌和权限，前端守卫只是减少无意义的页面加载，不能作为安全边界。
 
 \begin{lstlisting}[label={lst:ch04-a47-login},language=Vue,caption={登录成功后的安全回跳}]
 <script setup>
@@ -2036,6 +2036,8 @@ async function submit() {
   </form>
 </template>
 \end{lstlisting}
+
+跨页面共享的当前测点、最新读数和加载状态放进 Pinia 后，列表页、地图页和详情页读的是同一份数据。清单\ref{lst:ch04-js-pinia}是选项式写法的测点仓库：\texttt{state}存数据，\texttt{getters}算派生值，\texttt{actions}管异步加载与错误。
 
 \begin{lstlisting}[label={lst:ch04-js-pinia},language=JavaScript,caption={Pinia测站状态管理}]
 import { defineStore } from 'pinia';
@@ -2091,7 +2093,7 @@ onMounted(() => loadLatest('DAM-A-WL-01'));
 
 \subsection{AssetDetail 的动态参数与数据加载}
 
-路由配置中的\texttt{props: true}会把\texttt{:id}动态段作为组件 prop 注入。这样，详情组件不必依赖全局路由对象，单元测试可以直接传入\texttt{id}；查询参数仍可通过\texttt{useRoute}读取。\texttt{defineProps}应明确类型和必填约束，收到参数后再调用 store 动作加载数据，并在参数变化时重新加载。组件卸载时沿用前面的取消信号和清理模式。
+路由配置中的\texttt{props: true}会把\texttt{:id}动态段作为组件 prop 注入。这样，详情组件不必依赖全局路由对象，单元测试可以直接传入\texttt{id}；查询参数仍可通过\texttt{useRoute}读取。\texttt{defineProps}应明确类型和必填约束，收到参数后再调用 store 动作加载数据，并在参数变化时重新加载。组件卸载时沿用前面的取消信号和清理模式。清单\ref{lst:ch04-a47-station-detail}就是这样一个详情组件：对象编码来自 prop 而不是全局路由对象，\texttt{watch}负责在编码变化时重新取数。
 
 \begin{lstlisting}[label={lst:ch04-a47-station-detail},language=Vue,caption={AssetDetail.vue 接收动态路由参数}]
 <script setup>
@@ -2117,7 +2119,7 @@ watch(() => props.id, id => assetStore.loadLatest(id), { immediate: true });
 </template>
 \end{lstlisting}
 
-选项式 store 适合把状态、getter 和动作按对象分栏展示，便于刚接触 Pinia 的读者建立映射；setup 式 store 使用\texttt{ref}、\texttt{computed}和普通函数，适合复用组合式函数和精确控制公开成员。两种写法都通过\texttt{defineStore}注册，组件侧的\texttt{storeToRefs}用法一致。选择时以团队可读性和测试边界为依据，不要在同一个 store 中混用两套状态来源。
+选项式 store 适合把状态、getter 和动作按对象分栏展示，便于刚接触 Pinia 的读者建立映射；setup 式 store 使用\texttt{ref}、\texttt{computed}和普通函数，适合复用组合式函数和精确控制公开成员。两种写法都通过\texttt{defineStore}注册，组件侧的\texttt{storeToRefs}用法一致。选择时以团队可读性和测试边界为依据，不要在同一个 store 中混用两套状态来源。清单\ref{lst:ch04-a47-setup-store}把同一个测点仓库改写成 setup 式，可与清单\ref{lst:ch04-js-pinia}逐行对照。
 
 \begin{lstlisting}[label={lst:ch04-a47-setup-store},language=JavaScript,caption={Pinia setup 式 store 对照}]
 import { computed, ref } from 'vue';
@@ -2173,7 +2175,7 @@ Pinia 动作可以返回领域结果，让调用方决定提示方式。比如\t
 
 组件、路由和 store 的职责可以用一次“故障演练”检验：先让列表请求超时，页面显示重试按钮且路由仍保持；点击重试后只发起一个新请求，旧请求的回调不会覆盖新结果；再让详情接口返回 404，页面显示资源不存在并提供回列表链接；最后让令牌失效，守卫带着原路径跳到登录页，登录完成后只恢复一次导航。演练记录请求时间线、路由变化和 store 状态变化，能把竞态问题从偶然现象变成可复核证据。
 
-应用入口依次注册Pinia和Router，再挂载根组件：
+清单\ref{lst:ch04-js-event}是应用入口：依次注册 Pinia 和 Router，再挂载根组件。两个注册的先后不能颠倒——路由守卫里若要读取登录状态，store 必须已经存在。
 
 \begin{lstlisting}[label={lst:ch04-js-event},language=JavaScript,caption={应用入口：注册 Pinia 与路由}]
 import { createApp } from 'vue';
@@ -2213,7 +2215,7 @@ S2 & 登录后从教学接口读取对象列表与最新观测；四种页面状
 
 \subsection{模块化开发与调试技巧}
 
-ES模块通过\texttt{export}和\texttt{import}建立清晰依赖。接口访问、业务计算和视图组件应分层组织，避免在组件中散布重复的网络代码。
+ES模块通过\texttt{export}和\texttt{import}建立清晰依赖。接口访问、业务计算和视图组件应分层组织，避免在组件中散布重复的网络代码。清单\ref{lst:ch04-js-lifecycle}用一个判断水位状态的小模块示范这种拆法：阈值与判断规则留在\texttt{level.js}，调用方只导入需要的那个函数，改阈值不必翻遍页面代码。
 
 \begin{lstlisting}[label={lst:ch04-js-lifecycle},language=JavaScript,caption={ES 模块的导出与导入}]
 // level.js
@@ -2265,7 +2267,7 @@ export default defineConfig(({ mode }) => {
 });
 \end{lstlisting}
 
-清单\ref{lst:ch04-a48-vite-config}中的\texttt{manualChunks}把变化频率相近的依赖放到同一文件，页面业务代码变化时不会迫使浏览器重新下载 Vue 核心和图表库。分包不是越多越好：每个额外文件都增加请求和调度成本，应该结合首屏性能、缓存命中率和真实网络条件测量。\texttt{loadEnv}用于读取配置并传给 Vite 配置本身，模板代码仍通过\texttt{import.meta.env}读取经过筛选的公开变量。
+清单\ref{lst:ch04-a48-vite-config}中的\texttt{manualChunks}把变化频率相近的依赖放到同一文件，页面业务代码变化时不会迫使浏览器重新下载 Vue 核心和图表库。分包不是越多越好：每个额外文件都增加请求和调度成本，应该结合首屏性能、缓存命中率和真实网络条件测量。\texttt{loadEnv}用于读取配置并传给 Vite 配置本身，模板代码仍通过\texttt{import.meta.env}读取经过筛选的公开变量。清单\ref{lst:ch04-a48-env}给出这条链路的完整写法：环境文件定义\texttt{VITE\_}前缀的变量，API 客户端只读取它们；凡是进入这层的值都会出现在浏览器 bundle 里，因此令牌密钥和内部服务地址一律不能写在这里。
 
 \begin{lstlisting}[label={lst:ch04-a48-env},language=JavaScript,caption={Vite 多环境变量与 API 客户端}]
 # .env.development（.env 文件只支持 # 注释）
@@ -2298,6 +2300,8 @@ export async function getJson(path, options = {}) {
 \item \textbf{运行时}：对高频输入防抖，对监测流批量刷新，避免无意义的深层监听。
 \end{itemize}
 
+这四条落到命令上就是清单\ref{lst:ch04-js-http}：构建、查看产物体积、核对关键文件是否生成，任何一步失败都不应继续发布。
+
 \begin{lstlisting}[label={lst:ch04-js-http},language=JavaScript,caption={生产构建、体积分析与部署前检查}]
 // package.json scripts
 {
@@ -2319,7 +2323,7 @@ for (const name of required) {
 }
 \end{lstlisting}
 
-产物体积分析要同时看原始体积和 gzip/brotli 体积，重点关注首屏入口、路由异步块和第三方依赖。若图表库占据大部分首屏，可以把图表页改为动态导入；若某个公共块被所有页面引用，则让它进入稳定的 vendor 分包。分析结果应记录在构建流水线中，超过预算时阻断发布，而不是上线后才凭感觉优化。
+产物体积分析要同时看原始体积和 gzip/brotli 体积，重点关注首屏入口、路由异步块和第三方依赖。若图表库占据大部分首屏，可以把图表页改为动态导入；若某个公共块被所有页面引用，则让它进入稳定的 vendor 分包。分析结果应记录在构建流水线中，超过预算时阻断发布，而不是上线后才凭感觉优化。清单\ref{lst:ch04-a48-deploy}把这套检查固化成一组命令，并接到容器部署上：前端容器只提供静态文件，\texttt{/api}由反向代理转给后端，SPA 深链接回退到\texttt{index.html}。
 
 \begin{lstlisting}[label={lst:ch04-a48-deploy},language=bash,caption={Vite 产物与 Docker Compose 部署契约}]
 # 构建阶段：在固定 Node 版本中生成 dist/

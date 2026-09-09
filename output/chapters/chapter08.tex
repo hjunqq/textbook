@@ -229,7 +229,7 @@ Cesium & 流域/水网、地球与大范围地形浏览 & 坐标基准、瓦片�
 
 三维对象按工程—坝段—构件—测点组织，业务标识写入\texttt{userData.assetId}。模型文件只负责几何和材质，测点状态由后端事件驱动；数据更新时修改颜色、标签和详情，不重复加载整个坝体。
 
-水体材质中的时间变量使用统一名\texttt{u\_time}，避免局部变量自引用：
+水体材质中的时间变量使用统一名\texttt{u\_time}，避免局部变量自引用；清单\ref{lst:ch08-glsl}用它驱动水面起伏，每帧只更新这一个 uniform，不重建材质：
 
 \begin{lstlisting}[label={lst:ch08-glsl},language=GLSL,caption={水面波动着色器}]
 uniform float u_time;
