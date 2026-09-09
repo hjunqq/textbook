@@ -21,7 +21,79 @@
 
 \section{WebGL2与Three.js三维渲染基础}
 
-\paragraph{本节层次}核心：6.1.1、6.1.3；拓展：6.1.2。核心路线只要求读完核心小节。
+\paragraph{本节层次}核心：6.1.1、6.1.2、6.1.4、6.1.5；拓展：6.1.3。核心路线只要求读完核心小节。
+
+
+\subsection{从一个几何体开始：场景、相机、渲染器与循环}
+
+\paragraph{业务问题}第7章要把 28 个测点画进坝体三维场景，点一下测点弹出它的观测曲线。在加载任何工程模型之前，先用一个长方体代替坝体，把 Three.js 的四个基本对象和一个渲染循环跑通；本小节结束时你有一个能转动的“坝体”，并且知道黑屏时先查哪三处。
+
+\paragraph{四个对象}场景（\texttt{Scene}）是所有物体的容器；相机（\texttt{PerspectiveCamera}）决定从哪里、以多大视角看；渲染器（\texttt{WebGLRenderer}）把场景和相机变成画布上的像素；网格（\texttt{Mesh}）= 几何体 + 材质，是能被看见的最小单位。四者的关系只有一句话：渲染器用相机去拍场景。清单\ref{lst:ch06-first-scene}是完整可运行的一页脚本，放进第4章的 Vite 工程即可（\texttt{npm install three@0.160}），尺寸单位与 8.1 节参数一致：坝高\cpDamHeight\,m，坝顶高程\cpCrestElev\,m，因此长方体的底面放在 \cpBaseElev\,m。
+
+\begin{lstlisting}[label={lst:ch06-first-scene},language=JavaScript,caption={first-scene.js：一个代表坝体的长方体与渲染循环}]
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+// 1. 场景与相机：单位用米，Y 轴向上，高程直接作为 y 坐标
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xdfe8f0);
+const camera = new THREE.PerspectiveCamera(45, innerWidth / innerHeight, 1, 2000);
+camera.position.set(220, 260, 220);   // 站在坝的斜前上方
+camera.lookAt(0, 146, 0);             // 看向坝体中部（坝基 120 + 坝高 52 的一半）
+
+// 2. 渲染器挂到页面
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(innerWidth, innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+document.body.append(renderer.domElement);
+
+// 3. “坝体”：长 160 m、高 52 m、厚 40 m 的长方体，底面在坝基高程 120 m
+const dam = new THREE.Mesh(
+  new THREE.BoxGeometry(160, 52, 40),
+  new THREE.MeshStandardMaterial({ color: 0x8d99ae }));
+dam.position.set(0, 120 + 52 / 2, 0);   // Box 以中心定位，所以抬高半个坝高
+dam.userData.assetId = 'DAM-A';         // 业务标识：第7章拾取时靠它找回对象
+scene.add(dam);
+
+// 4. 没有光，标准材质是黑的
+scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+const sun = new THREE.DirectionalLight(0xffffff, 1.2);
+sun.position.set(100, 300, 100);
+scene.add(sun);
+
+// 5. 交互与循环：每一帧都重新拍一次
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.target.set(0, 146, 0);
+renderer.setAnimationLoop(() => { controls.update(); renderer.render(scene, camera); });
+
+// 6. 窗口尺寸变化时同步相机与画布，否则画面被拉伸
+addEventListener('resize', () => {
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+\end{lstlisting}
+
+\paragraph{可观察结果}页面出现一个灰蓝色长方体，拖动鼠标可以绕它转动，滚轮可缩放。打开控制台输入\texttt{dam.position.y}得到 146；输入\texttt{camera.position.distanceTo(dam.position)}得到约 390，说明相机在近裁剪面 1 与远裁剪面 2000 之间。
+
+\paragraph{黑屏时先查哪三处}表\ref{tab:ch06-first-scene-faults}把初学者最常见的三种黑屏按“现象—原因—验证”列出。它们都不报错，控制台干干净净，这正是三维开发与前两章最大的不同：错误往往不是异常，而是“什么都没看见”。
+
+\begin{table}[htbp]
+\centering
+\caption{第一个场景的三种黑屏及其排查}
+\label{tab:ch06-first-scene-faults}
+\begin{tabular}{p{2.6cm}p{5.2cm}p{5.4cm}}
+\toprule
+现象 & 原因 & 验证方法 \\
+\midrule
+背景色有，物体没有 & 相机没有看向物体，或物体在裁剪面之外（近 1、远 2000）；坝体放在 y=146，若相机 \texttt{lookAt(0,0,0)} 就只看到脚下 & 控制台打印 \texttt{camera.position} 与 \texttt{dam.position}，算距离是否在裁剪范围；临时把 \texttt{lookAt} 指向 \texttt{dam.position} \\
+物体是纯黑一块 & 用了 \texttt{MeshStandardMaterial} 却没有加光 & 换成 \texttt{MeshBasicMaterial} 能看见即可确认；加回环境光与平行光 \\
+整页空白连背景都没有 & 渲染器画布没有加进 DOM，或没有调用渲染循环 & 元素面板里找 \texttt{<canvas>}；在 \texttt{setAnimationLoop} 回调里打一次 \texttt{console.count} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{自测}（1）把坝体改为 8.1 节参数表中的“\cpGateCount 孔弧形闸门”：在坝顶加 \cpGateCount 个宽 \cpGateWidth\,m 的小长方体，底面在闸底高程 \cpGateSillElev\,m，说出每个的 \texttt{position.y}。（2）把远裁剪面改成 300，会发生什么？为什么？（3）\texttt{setAnimationLoop} 与\texttt{requestAnimationFrame}手写循环相比，页面切到后台时有什么区别？（前者由渲染器托管，标签页不可见时自动暂停，第4章讲的资源释放原则同样适用。）
 
 \subsection{坐标变换与透视投影}
 
@@ -247,9 +319,72 @@ scene.add(gltf.scene);
 
 模型交付前应完成网格简化、纹理压缩、法线检查和层级拆分。优化顺序是先测量瓶颈，再选择实例化、LOD、视锥裁剪、遮挡裁剪或按需加载；不同策略的效果必须以目标终端实测为准。
 
+\subsection{把测点挂到坝体上：对象绑定与查找}
+
+\paragraph{业务问题}\texttt{GET /api/assets}返回 28 个对象，每个有经纬度与高程（配套数据集 stations.csv）；场景里要出现 28 个可点击的小球，点到哪个球就要知道它的\texttt{assetId}。本小节只做“挂上去、找得到”，坐标转换的精确做法在 6.2 节，拾取交互在第7章 7.4 节。
+
+\paragraph{做法}三条规则。第一，业务标识写进\texttt{userData.assetId}，永远不用网格名字或数组下标当标识——名字会重复，下标会因为增删而漂移。第二，同类对象放进一个\texttt{Group}，删一次清一组，第4章讲的资源释放在三维里表现为“切换工程时把上一组全部 dispose”。第三，从对象到网格的查找用一张\texttt{Map}，不要每次遍历场景。清单\ref{lst:ch06-bind-assets}把这三条写成一个函数；输入就是契约的\texttt{AssetDto}加上台账里的坐标，输出是可被拾取的组。局部坐标此处简单地把经纬度差乘以米/度换算、高程直接作 y，6.2 节会解释为什么真正的工程场景不能这样做。
+
+\begin{lstlisting}[label={lst:ch06-bind-assets},language=JavaScript,caption={bind-assets.js：把对象列表绑定为场景中的可拾取网格}]
+import * as THREE from 'three';
+
+const ORIGIN = { lon: 111.2, lat: 30.5 };                 // 场景局部原点（坝轴线附近）
+const M_PER_DEG_LAT = 111_000;                             // 教学近似；6.2 节改用投影坐标
+const M_PER_DEG_LON = 111_000 * Math.cos(ORIGIN.lat * Math.PI / 180);
+
+export function bindAssets(scene, assets) {
+  const group = new THREE.Group();
+  group.name = 'assets';
+  const byId = new Map();                                  // assetId -> Mesh
+  const geometry = new THREE.SphereGeometry(1.5, 16, 16);  // 所有测点共用几何体
+  for (const a of assets) {
+    const mesh = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({ color: 0x1565c0 }));
+    mesh.position.set((a.longitude - ORIGIN.lon) * M_PER_DEG_LON,
+                      a.elevation_m,                          // 高程直接作 y
+                      -(a.latitude - ORIGIN.lat) * M_PER_DEG_LAT);
+    mesh.userData.assetId = a.assetId;                       // 唯一的业务标识
+    group.add(mesh);
+    byId.set(a.assetId, mesh);
+  }
+  scene.add(group);
+  return {
+    group, byId,
+    find: assetId => byId.get(assetId),
+    dispose() {                                              // 切换工程时整组释放
+      scene.remove(group);
+      geometry.dispose();
+      group.traverse(o => o.material?.dispose());
+      byId.clear();
+    }
+  };
+}
+
+// 用法：const bound = bindAssets(scene, assets);  bound.find('DAM-A-PZ-07').material.color.set(0xffa000);
+\end{lstlisting}
+
+\paragraph{可观察结果与检查表}调用后坝体附近出现 28 个蓝色小球；控制台执行\texttt{bound.find('DAM-A-PZ-07').position}应得到一个 y 约等于台账中该测点高程的向量。表\ref{tab:ch06-bind-check}是交付前必须逐项核对的清单——对象映射错一个，第7章曲线就会挂到错误的球上，而页面不会报任何错。
+
+\begin{table}[htbp]
+\centering
+\caption{对象绑定的坐标与映射检查表}
+\label{tab:ch06-bind-check}
+\begin{tabular}{p{3.4cm}p{4.6cm}p{5.2cm}}
+\toprule
+检查项 & 怎么查 & 不通过的表现 \\
+\midrule
+数量一致 & \texttt{group.children.length} 等于接口返回的对象数 & 少球：有对象缺坐标被跳过；多球：上一次未 dispose \\
+标识唯一 & \texttt{byId.size} 等于对象数 & 重复 assetId 覆盖，两个球只找得到一个 \\
+高程合理 & 所有球的 y 在坝基 \cpBaseElev 与坝顶 \cpCrestElev 之间（雨量站可高于坝顶） & 有球在地下或天上：高程列单位或基准错 \\
+水平位置合理 & 球到原点的水平距离小于 1 km & 经纬度写反（lat/lon 互换）时球会飞出几十公里 \\
+切换后无残留 & \texttt{dispose()} 后 \texttt{scene.getObjectByName('assets')} 为 undefined & 内存与球一起累积 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 \section{GIS服务、坐标与二三维集成}
 
 \paragraph{本节层次}核心：6.2.2、6.2.3；指导实践：6.2.1；拓展：6.2.4。核心路线只要求读完核心小节。
+
 
 \subsection{OGC地图与要素服务}
 
@@ -613,6 +748,7 @@ try {
 
 \paragraph{本节层次}拓展：6.3.1、6.3.2、6.3.3。本节没有核心小节，课堂核心路线可整体跳过。
 
+
 \subsection{倾斜摄影数据生产}
 
 倾斜摄影通过垂直与多个倾斜视角获取影像，用于恢复工程及周边地表。系统由飞行平台、航摄仪、地面控制和内业处理组成，如图\ref{fig:uav-oblique-system}所示。
@@ -814,6 +950,7 @@ IFC 4.3 的 Ports and Waterways Domain 面向航道、运河、船闸与升船�
 \section{数字孪生水利平台架构概览}\label{sec:ch06-twin-overview}
 
 \paragraph{本节层次}拓展：6.4.1、6.4.2、6.4.3、6.4.4、6.4.5、6.4.6、6.4.7、6.4.8、6.4.9、6.4.10、6.4.11、6.4.12、6.4.13、6.4.14、6.4.15、6.4.16、6.4.17、6.4.18。本节没有核心小节，课堂核心路线可整体跳过。
+
 
 \subsection{概念边界与五维组织}
 
