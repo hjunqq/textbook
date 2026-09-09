@@ -286,6 +286,11 @@ def check_refs(texts, r):
     unref = sorted(l for l in labels
                    if l not in refs and not l.startswith(("ch:", "sec:", "lst:")))
     r.metric("unref_labels", len(unref), "未被 \\ref 引用的图/表/公式 label")
+    # 第九轮 R2：代码清单同样必须随文引出（铁律 3 从未豁免清单，此前只是漏检）。
+    unref_lst = sorted(l for l in labels if l.startswith("lst:") and l not in refs)
+    r.metric("unref_listings", len(unref_lst), "未被 \\ref 引用的代码清单")
+    if unref_lst:
+        r.log("未引用清单：" + "、".join(unref_lst[:12]) + ("…" if len(unref_lst) > 12 else ""))
     r.log("\nlabel 总数 %d，被引用 %d，待补 \\ref %d 个" % (len(labels), len(set(refs)), len(unref)))
     if unref:
         r.log("  " + "、".join(unref[:12]) + (" …" if len(unref) > 12 else ""))
