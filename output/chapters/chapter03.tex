@@ -507,7 +507,7 @@ public interface MonitoringDataProvider {
 \begin{lstlisting}[label={lst:ch03-monitoring-dto},language=Java,caption={监测数据传输对象}]
 import java.math.BigDecimal;
 import java.time.Instant;
-public record MonitoringDataDto(String pointId,
+public record MonitoringDataDto(String assetId,
         Instant occurredAt, BigDecimal value,
         String qualityCode, String ruleVersion) {
 }
@@ -518,7 +518,7 @@ public record MonitoringDataDto(String pointId,
 import java.util.Optional;
 public interface MonitoringRecordPort {
     MonitoringRecord save(MonitoringRecord record);
-    Optional<MonitoringRecord> findLatest(String pointId);
+    Optional<MonitoringRecord> findLatest(String assetId);
 }
 \end{lstlisting}
 
@@ -540,20 +540,20 @@ public final class ReceiveMonitoringUseCase {
 }
 \end{lstlisting}
 
-控制器只负责协议转换和参数校验，不把预警规则写在 Web 层。代码清单\ref{lst:ch03-controller}以 Spring MVC 的构造器注入保持依赖显式。
+控制器只负责协议转换和参数校验，不把预警规则写在 Web 层。代码清单\ref{lst:ch03-controller}以 Spring MVC 的构造器注入保持依赖显式；它暴露的路径就是表\ref{tab:api-contract}中的“最新观测”端点，第4章的页面和第5章的实现都对着同一条路径。
 \begin{lstlisting}[label={lst:ch03-controller},language=Java,caption={监测数据查询控制器}]
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 @RestController
-@RequestMapping("/api/monitoring")
+@RequestMapping("/api/assets")   // 路径与第8章 8.1 节接口契约一致
 public class MonitoringController {
     private final MonitoringQuery query;
     public MonitoringController(MonitoringQuery query) { this.query = query; }
-    @GetMapping("/{pointId}/latest")
-    public MonitoringDataDto latest(@PathVariable String pointId) {
-        return query.readLatest(pointId);
+    @GetMapping("/{assetId}/readings/latest")
+    public MonitoringDataDto latest(@PathVariable String assetId) {
+        return query.readLatest(assetId);
     }
 }
 \end{lstlisting}
@@ -562,7 +562,7 @@ public class MonitoringController {
 \begin{lstlisting}[label={lst:ch03-anomaly-event},language=Java,caption={异常分析事件契约}]
 import java.math.BigDecimal;
 import java.time.Instant;
-public record AnomalyEvent(String eventId, String pointId,
+public record AnomalyEvent(String eventId, String assetId,
         Instant occurredAt, String qualityCode,
         String ruleVersion, BigDecimal score) {
 }
@@ -587,7 +587,7 @@ public record AnomalyEvent(String eventId, String pointId,
 
 \paragraph{接口封装}
 
-定义\texttt{MonitoringAcquisitionService}接口，暴露\texttt{pauseAcquisition(pointId, reason, until)}和\texttt{resumeAcquisition(pointId)}方法，隐藏设备协议、采样调度和断线重传逻辑。暂停只用于设备检修等受控场景，必须校验授权、记录原因和到期时间，并自动恢复单个测点采集，不中断整站运行。
+定义\texttt{MonitoringAcquisitionService}接口，暴露\texttt{pauseAcquisition(assetId, reason, until)}和\texttt{resumeAcquisition(assetId)}方法，隐藏设备协议、采样调度和断线重传逻辑。暂停只用于设备检修等受控场景，必须校验授权、记录原因和到期时间，并自动恢复单个测点采集，不中断整站运行。
 
 抽象与信息隐藏沿用本节前述“识别关注点—划分模块—定义接口—评估优化”步骤，但评审重点转为两项：接口是否泄露设备协议、存储结构等实现细节，以及替换实现后调用方测试是否仍能通过。这样避免重复一套流程，同时把原则落实为可检验条件。
 
