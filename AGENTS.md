@@ -44,9 +44,13 @@
    Three.js r160+ / CesiumJS 1.12x+ / PostgreSQL + PostGIS + TimescaleDB / Redis / Kafka。
    正文举例、习题、案例一律用这套，不得再出现 Django、MySQL、Oracle 作为推荐项。
 
-7. **工程参数全书唯一。** 案例水库的坝高、特征水位、测点数量、编码规则、预警等级、
-   接口路径、表结构，以第8章 8.1 节的参数表为唯一来源，其他章一律引用不得自设。
-   新增参数必须先写进 8.1 的参数表。
+7. **工程参数与接口契约全书唯一。** 案例水库的坝高、特征水位、测点数量、编码规则、
+   预警等级、表结构，以第8章 8.1 节的参数表（`tab:case-parameters`，宏在 `output/case-params.tex`）
+   为唯一来源；**接口路径、字段、错误体以 8.1 节的接口契约表（`tab:api-contract`）为唯一来源**，
+   资源模型为 asset / reading / warning / work-order，与 companion/water-platform-demo 一致。
+   其他章一律引用不得自设（第九轮 D4：ch03/ch04/ch05 残留的 `/api/stations`、`/api/monitoring`、
+   `/api/readings` 路径在 R1/R4 改名归一）。新增参数或端点必须先写进 8.1 的表，再在正文使用。
+   第4章的教学接口按 `tab:api-teach-faults` 用查询参数 `teach=` 注入故障，真实后端忽略该参数。
 
 8. **一个工作包一次提交。** 提交前必须 `python tools/check_textbook.py --build` 输出"通过"（口径见第五节）。
    提交说明里写清：工作包编号、正文字数 before → after、新增了哪些小节/代码/图表、

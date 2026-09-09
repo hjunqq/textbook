@@ -94,6 +94,50 @@
 \end{tabular}
 \end{table}
 
+表\ref{tab:api-contract}给出案例平台的接口契约，它与表\ref{tab:case-parameters}一样是全书唯一来源：第4章的页面、第5章的后端、第7章的联动和本章的集成使用同一组路径、字段与错误约定；“来源”列说明每个端点由配套工程骨架提供、由教学接口先行模拟，还是留给对应章节实现。表\ref{tab:api-teach-faults}约定教学接口的故障注入方式，第4章用它在没有后端时演练加载、空数据、非法参数和未认证四种状态。
+
+\begin{table}[htbp]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\caption{案例水库监测平台接口契约（全书唯一来源）}
+\label{tab:api-contract}
+\begin{tabular}{p{3.1cm}p{2.6cm}p{3.4cm}p{2.6cm}p{1.9cm}}
+\toprule
+方法与路径 & 请求 & 成功响应 & 角色与约束 & 来源 \\
+\midrule
+\texttt{POST /api/auth/login} & \texttt{username, password} & \texttt{accessToken, expiresInSeconds, authorities} & 匿名；失败一律 401 固定文案 & 骨架 \\
+\texttt{GET /api/assets} & \texttt{assetType, after, limit} & \texttt{assetId, displayName, assetType, unit}（数组） & 值班员、分析员；只返回 active & 骨架 \\
+\shortstack[l]{\texttt{GET /api/assets/}\\ \texttt{\{id\}/readings}} & \texttt{from, to}（ISO-8601 带时区），可选 \texttt{agg} & \texttt{occurredAt, value, unit, quality, eventId, version}（数组）；\texttt{quality} 取 valid/suspect/missing & 值班员、分析员；时间窗左闭右开；400 参数非法 & 骨架 \\
+\shortstack[l]{\texttt{GET /api/assets/}\\ \texttt{\{id\}/readings/latest}} & 无 & 单个观测；尚无观测时 204 & 值班员、分析员；404 对象不存在 & 教学接口；第5章实现 \\
+\texttt{GET /api/warnings} & \texttt{level, status, page} & 预警证据摘要；\texttt{level} 取 NONE/BLUE/YELLOW/ORANGE/RED & 值班员、分析员；未评估单独显示 & 第8章 \\
+\texttt{POST /api/warnings/\{id\}/ack} & 请求追踪号、版本 & 最新预警状态 & 值班员；open 条件更新，重复可重试 & 第8章 \\
+\texttt{POST /api/work-orders} & \texttt{warningId, ownerRole, dueAt, action} & 工单编号与状态 & 值班员、审批人；预警必须存在 & 第8章 \\
+\shortstack[l]{\texttt{POST /api/work-orders/}\\ \texttt{\{id\}/complete}} & \texttt{result}、版本 & 回执与完成时间 & 值班员；只允许 in\_progress & 第8章 \\
+\midrule
+\multicolumn{5}{p{13.9cm}}{\textbf{通用约定}：错误体统一为 \texttt{\{code, message, field?\}}；400 参数非法、401 未登录或令牌失效、403 角色无权、404 对象不存在、5xx 服务端故障。对象编码按表\ref{tab:case-parameters}（如 \texttt{DAM-A-PZ-07}），角色见表\ref{tab:case-roles}。“骨架”指 companion/water-platform-demo 已实现并有测试；“教学接口”指第4章使用的本地模拟服务；“第 N 章”指由该章清单实现。} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\caption{教学接口的故障注入约定（仅教学接口识别，真实后端忽略）}
+\label{tab:api-teach-faults}
+\small
+\begin{tabular}{p{3.2cm}p{5.2cm}p{5.0cm}}
+\toprule
+查询参数 \texttt{teach=} & 教学接口行为 & 页面应当出现的表现 \\
+\midrule
+\texttt{delay:3000} & 延迟 3000 ms 后再正常返回 & 加载态可见；期间切换对象不得被旧响应覆盖 \\
+\texttt{empty} & 返回 \texttt{[]} 或 204 & 显示“暂无数据”，不是空白也不是报错 \\
+\texttt{invalid} & 返回 400 与 \texttt{\{code:"INVALID\_RANGE", field:"from"\}} & 提示到具体字段，保留用户已输入的值 \\
+\texttt{unauthorized} & 返回 401 & 清除令牌并跳转登录，登录后回到原页面 \\
+\texttt{error} & 返回 503 & 显示“稍后重试”，提供重试按钮，不清除令牌 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 权限校验同时发生在前端路由、后端方法和数据查询层。前端隐藏按钮只能改善体验，不能代替后端授权；敏感字段不应先发送到浏览器再依靠CSS隐藏。
 
 \subsection{端到端业务闭环}
@@ -2009,31 +2053,7 @@ Repository 接口在真实项目中分别保存为独立 Java 文件；清单\re
 实体的对应关系。服务层把质量码默认设为 valid 只是查询筛选的默认值，
 不会改写数据库；当调用方显式查询 suspect 或 missing 时，界面必须展示相应质量提示。
 
-监测主线接口采用稳定路径和明确的请求响应。表\ref{tab:monitoring-api-contract}把测点、观测、预警
-和工单四类接口列成契约，并注明角色和幂等要求。路径中的\texttt{from}、\texttt{to}和\texttt{agg}
-均为查询参数，不改变本章8.1节参数表中的工程常数；分页、排序和质量过滤通过统一请求对象传递。
-
-\begin{table}[htbp]
-\centering
-\scriptsize
-\setlength{\tabcolsep}{3pt}
-\caption{案例水库监测主线接口契约}
-\label{tab:monitoring-api-contract}
-\begin{tabular}{p{2.8cm}p{2.7cm}p{3.5cm}p{2.3cm}p{2.5cm}}
-\toprule
-方法与路径 & 请求参数 & 成功响应 & 角色 & 关键约束 \\
-\midrule
-GET /assets & assetType、after、limit & 测点摘要与经纬高 & 值班员、分析员 & 只返回 active 对象 \\
-\shortstack{\texttt{GET /assets/}\\
-\texttt{\{id\}/readings?}\\
-\texttt{from=\&to=\&agg=}} & 时间窗、质量码、聚合粒度 & 时间桶、值、样本数、质量 & 值班员、分析员 & 时间窗左闭右开 \\
-GET /warnings & level、status、page & 预警证据摘要 & 值班员、分析员 & 未评估单独显示 \\
-POST /warnings/{id}/ack & 请求追踪号、版本 & 最新预警状态 & 值班员 & open 条件更新，重复可重试 \\
-POST /work-orders & warningId、ownerRole、dueAt、action & 工单编号与状态 & 值班员、审批人 & 预警必须存在 \\
-POST /work-orders/{id}/complete & result、版本 & 回执与完成时间 & 值班员 & 只允许 in\_progress \\
-\bottomrule
-\end{tabular}
-\end{table}
+监测主线接口按表\ref{tab:api-contract}（8.1节）实现，本节不再另列一套路径：路径中的\texttt{from}、\texttt{to}和\texttt{agg}均为查询参数，不改变8.1节参数表中的工程常数；分页、排序和质量过滤通过统一请求对象传递。契约表的“角色与约束”列就是本节各 Controller 方法上\texttt{@PreAuthorize}与条件更新的依据。
 
 Controller 将 HTTP 类型转换为服务参数，并统一处理异常。代码清单\ref{lst:ch08-controller}给出
 Spring MVC 的完整入口和 DTO record；\texttt{@PreAuthorize}使用 Spring Security 6 的方法授权，

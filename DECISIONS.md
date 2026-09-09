@@ -18,3 +18,9 @@
 - 决策：两段式（B）。本轮只做 R0 盘点 + R1 第4章样章 + R2 全书分层标注与预备单元（约 12–15 人日）；试教或试读后再决定 R3–R6；纸书付印不等 S 阶段包，阶段包作为线上配套分期发布。
 - 否决：A 全量（35–45 人日，付印推后一学期）；C 不改。
 - 影响：目标从"付印"扩展为"付印 + 可教"；付印时点取决于 R2 完成与试教结论。
+
+## D-2026-09-09-4 接口契约统一
+- 问题：R0 发现接口路径四套并存（ch03 monitoring/pointId、ch04 stations、ch05 readings+stations、ch08+companion assets），8.1 节无接口表，R1 教学接口无契约可对齐。
+- 决策：以 ch08 + companion 的 asset/reading/warning/work-order 模型为唯一契约；契约表 `tab:api-contract` 与故障注入表 `tab:api-teach-faults` 放在 8.1 节（与参数表同处），原 8.3 节的接口表并入并删除；ch04 在 R1、ch05 在 R4、ch03 在 R2 改名归一。
+- 否决：以 ch04 stations 为契约（需改 companion、DDL、ch06–08、CI，代价约三倍）。
+- 影响：可逆但成本随章节推进递增；contract 中 `readings/latest` 端点骨架尚未实现，标为“教学接口；第5章实现”。
