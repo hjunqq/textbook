@@ -23,7 +23,7 @@
 | \cpRfCount | 5 | preface(1) ch08(1) |
 | \cpStationCount | 28 | preface(1) ch08(1) |
 | \cpGatewayCount | 6 | preface(1) ch08(1) |
-| \cpKeyStation | DAM-A-PZ-07 | preface(1) |
+| \cpKeyStation | DAM-A-PZ-07 | preface(1) ch01(1) |
 
 # 8.1 节 label 被其他章引用情况
 
