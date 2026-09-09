@@ -1197,10 +1197,10 @@ export function messageFor(error) {
   \draw[->,draw=Primary] (c1) -- node[left,pos=.55]{请求1} (2.6,-2.4);
   \draw[->,draw=Primary] (c2) -- node[left,pos=.55]{请求2} (4.4,-2.4);
   \draw[->,draw=Primary] (4.4,-2.4) -- node[right,pos=.45]{响应2（50 ms）} (5.2,0);
-  \node[ev] at (5.2,0) {}; \node[above] at (5.2,0) {显示 WL-01 ✓};
+  \node[ev] at (5.2,0) {}; \node[above] at (5.2,0) {显示 WL-01（正确）};
   \draw[dashed,draw=Primary!60] (2.6,-2.4) -- node[below]{延迟 3 s} (9.6,-2.4);
   \draw[->,draw=Accent] (9.6,-2.4) -- node[right,pos=.45]{响应1（迟到）} (10.4,0);
-  \node[bad] at (10.4,.55) {显示 PZ-07 ✗\\标题仍是 WL-01};
+  \node[bad] at (10.4,.55) {显示 PZ-07（错误）\\标题仍是 WL-01};
 \end{tikzpicture}
 \caption{切换对象时迟到的旧响应覆盖新页面}
 \label{fig:ch04-r1-race}
