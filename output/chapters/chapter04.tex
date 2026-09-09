@@ -23,6 +23,8 @@
 
 \paragraph{本节层次}核心。
 
+
+
 浏览器通过HTTP或HTTPS请求资源，解析HTML形成DOM树，解析CSS形成CSSOM树，再计算布局并绘制页面；JavaScript通过事件循环处理用户操作、网络响应和定时任务。智慧水利页面常同时展示地图、曲线与告警，因此应避免在短时间内反复修改大量DOM节点。
 
 现代浏览器通常采用多进程架构。图\ref{fig:browser-architecture}强调各模块的协作关系：浏览器引擎负责协调，渲染引擎使用网络模块取得的资源，调用JavaScript引擎执行脚本，并通过UI后端绘制；存储模块为浏览器引擎及页面脚本提供受控的数据持久化能力。
@@ -57,6 +59,8 @@
 \section{HTML基础与语义化}
 
 \paragraph{本节层次}核心：4.2.1。
+
+
 
 HTML描述内容的结构和语义。\texttt{header}、\texttt{nav}、\texttt{main}、\texttt{section}、\texttt{article}与\texttt{footer}等元素能够表达区域含义，有助于无障碍工具、搜索引擎和开发者理解页面。标题级别应连续，表单控件应有\texttt{label}，图片应提供\texttt{alt}文本。
 
@@ -251,6 +255,8 @@ dialog.addEventListener('cancel', closeDialog);
 \section{CSS样式与响应式布局}
 
 \paragraph{本节层次}核心：4.3.1、4.3.2；指导实践：4.3.4、4.3.5、4.3.6、4.3.8；拓展：4.3.3、4.3.7。核心路线只要求读完核心小节。
+
+
 
 CSS负责视觉呈现。规则由选择器和声明块组成，层叠结果主要受来源、优先级和出现顺序影响。工程中宜使用类选择器组织组件样式，避免依赖过深的DOM层级。
 
@@ -746,7 +752,9 @@ Flex 的视觉顺序还涉及语义和键盘路径。\texttt{order}只改变绘�
 
 \section{JavaScript基础编程}
 
-\paragraph{本节层次}核心：4.4.1、4.4.2、4.4.3、4.4.4、4.4.5、4.4.7；指导实践：4.4.6。核心路线只要求读完核心小节。
+\paragraph{本节层次}核心：4.4.1、4.4.2、4.4.3、4.4.4、4.4.5、4.4.7、4.4.8；指导实践：4.4.6。核心路线只要求读完核心小节。
+
+
 
 现代JavaScript使用\texttt{const}声明不重新赋值的绑定，使用\texttt{let}声明需要变化的绑定。基本类型包括数字、字符串、布尔值、\texttt{null}、\texttt{undefined}、\texttt{bigint}与\texttt{symbol}；对象、数组和函数属于引用类型。
 
@@ -994,13 +1002,45 @@ function parseReading(raw) {
 }
 \end{lstlisting}
 
+\subsection{收束练习：一个最小的输入校验页面}
+
+前面几个小节分别讲过 DOM 查询、安全写入与事件模型，本小节用一个最小的完整页面把它们串起来，作为进入 Vue 之前的收束练习：结构与行为分离、输入必须校验、更新走 \texttt{textContent} 而不是 \texttt{innerHTML}。
+
+下面示例完整展示事件绑定、输入校验和界面更新。阈值取案例水库的汛限水位 165.5 m（8.1 节参数表）。
+
+\begin{lstlisting}[label={lst:ch04-html-vue},language=html,caption={测站输入 HTML 片段}]
+<label for="level-input">库水位（m）</label>
+<input id="level-input" type="number" step="0.01">
+<button id="check-level" type="button">判断状态</button>
+<output id="level-result" aria-live="polite"></output>
+\end{lstlisting}
+
+清单\ref{lst:ch04-a44-dom-script}把同一页面的行为代码单独列出，使用 JavaScript 语言标注后，关键字、字符串和箭头函数能够正确高亮；HTML 清单只负责结构，脚本清单负责查询节点、转换输入和更新输出。
+
+\begin{lstlisting}[label={lst:ch04-a44-dom-script},language=JavaScript,caption={测站输入 JavaScript 片段}]
+const input = document.querySelector('#level-input');
+const result = document.querySelector('#level-result');
+const button = document.querySelector('#check-level');
+
+button.addEventListener('click', () => {
+  const level = Number(input.value);
+  if (!Number.isFinite(level)) {
+    result.textContent = '请输入有效水位';
+    return;
+  }
+  result.textContent = level >= 165.5 ? '超过汛限水位' : '水位正常';
+});
+\end{lstlisting}
+
+高频监测数据不应逐条触发复杂布局。可以先把数据聚合到内存，再按固定帧率更新图表；列表较长时采用分页或虚拟滚动。
+
 \section{数据请求与页面状态}\label{sec:ch04-request-state}
 
 \paragraph{本节层次}核心。其中 4.5.5–4.5.7 为指导实践，4.5.8 与 4.5.9 为拓展；核心路线只要求读完 4.5.1–4.5.4 并完成 4.5.10 的自测。
 
 \paragraph{进入本节所需知识}4.4 节的函数、数组方法与 DOM 写入；能打开浏览器开发者工具的“网络”面板，看到一次请求的状态码与耗时（终端、端口与开发者工具的用法见附录B的 P0 单元）；表\ref{tab:api-contract}中“对象列表”与“最新观测”两个端点的字段。本节不需要后端：教学接口（配套工程 \texttt{teaching-api}）按同一契约用固定数据集应答，第5章写出自己的后端后直接替换，前端代码一行不改。
 
-\paragraph{业务问题}值班员打开测点详情页，要看到该测点的最新观测值、时间和质量码。页面必须先显示“正在读取”，再显示数据或“暂无观测”，请求失败时说明原因；值班员连续点击两个测点时，最后显示的必须是最后点击的那个。本节最后交付的是一个能在教学接口上运行、四种状态都能观察到的详情页脚本，它也是第 4.7 节 Vue 组件和第 4.9 节 Pinia 仓库的前身。
+\paragraph{业务问题}值班员打开测点详情页，要看到该测点的最新观测值、时间和质量码。页面必须先显示“正在读取”，再显示数据或“暂无观测”，请求失败时说明原因；值班员连续点击两个测点时，最后显示的必须是最后点击的那个。本节最后交付的是一个能在教学接口上运行、四种状态都能观察到的详情页脚本，它也是 4.6 节 Vue 组件和 4.7 节 Pinia 仓库的前身。
 
 \subsection{原理：一次请求从发出到页面更新}
 
@@ -1273,11 +1313,10 @@ export function bindList(listEl, outputEl, assets) {
 \end{tabular}
 \end{table}
 
-\paragraph{延伸}同一个模式在本书后面反复出现：4.9 节 Pinia 仓库的\texttt{loadReadings}要加同样的序号校验，否则切换测点时曲线会闪回；7.4 节切换三维对象时，详情面板也不能显示上一个对象的观测；第8章预警确认属于写操作，取消请求并不能撤销服务端已完成的确认，那里要靠幂等键而不是序号。
+\paragraph{延伸}同一个模式在本书后面反复出现：4.7 节 Pinia 仓库的\texttt{loadReadings}要加同样的序号校验，否则切换测点时曲线会闪回；7.4 节切换三维对象时，详情面板也不能显示上一个对象的观测；第8章预警确认属于写操作，取消请求并不能撤销服务端已完成的确认，那里要靠幂等键而不是序号。
 
 \subsection{request.js：JWT、401 与超时的统一入口}
 
-\paragraph{本节层次}指导实践。清单\ref{lst:ch04-r1-load}的\texttt{getJson}放大成整个应用共用的入口；配套工程里的\texttt{request.js}（位于 frontend/src/utils 目录）就是它的精简版。
 
 第5章后端签发的 JWT 必须在浏览器请求中形成闭环：登录接口成功后，前端保存短期访问令牌，后续请求在\texttt{Authorization: Bearer <token>}中携带它；收到 401 时清除令牌并跳转登录页，不能继续用旧令牌重试。教学示例把令牌放入\texttt{sessionStorage}，浏览器标签页关闭后令牌消失，代价是同源脚本若发生 XSS 可能读取它；生产系统应结合严格的 CSP、短过期时间、刷新策略和更安全的 HttpOnly Cookie 方案评估，绝不能把签名密钥放入以\texttt{VITE\_}开头的前端变量。
 
@@ -1335,7 +1374,6 @@ export async function request(path, options = {}) {
 
 \subsection{Vite 代理与环境变量}
 
-\paragraph{本节层次}指导实践。
 
 开发环境中的浏览器页面通常运行在 Vite 的开发端口，后端运行在另一个端口；直接请求会触发跨域限制。Vite 的\texttt{server.proxy}可以把以\texttt{/api}开头的请求转发到后端，浏览器仍然看到同源路径，生产环境再由 Nginx 或网关完成同样的路径转发。代理只服务于开发过程，不能被误解为后端认证或网络隔离。
 
@@ -1369,7 +1407,6 @@ export default defineConfig(({ mode }) => {
 
 \subsection{登录到受保护接口的前后端联调闭环}
 
-\paragraph{本节层次}指导实践。教学接口与第5章后端使用同一份登录契约（表\ref{tab:api-contract}第一行），本小节的联调步骤对两者都成立。
 
 前端能否显示测站列表，不应只看页面是否出现了加载动画，而要核对一条完整的认证契约。第5章的登录控制器返回访问令牌，令牌至少包含主体、发行者、有效期、令牌类型和权限代码；前端登录页保存访问令牌，\texttt{request.js}在每次受保护请求中注入 Bearer 头，后端的 \texttt{SecurityFilterChain} 和 JWT 过滤器验签后把主体放入安全上下文，控制器再依据方法权限决定是否执行。图\ref{fig:ch04-jwt-integration}把这条链路与失败分支并列画出，调试时可逐段定位是凭据错误、令牌过期、权限不足还是网络转发问题。
 
@@ -1464,7 +1501,6 @@ export async function loadAssets() {
 
 \subsection{拓展：认证契约测试与故障复盘}
 
-\paragraph{本节层次}拓展。面向要把联调做成自动化测试与上线检查单的读者；课堂核心路线可以跳过。
 
 认证联调的难点往往不在“能否登录”，而在多个请求同时发生、页面刷新和网络抖动时是否仍然保持同一套状态语义。测试设计应先画出状态机：匿名、已登录、令牌即将过期、令牌已过期、权限不足和服务不可达是六种不同状态；每种状态都要规定界面文案、是否保留原路径、是否允许重试以及日志中应出现的事件。比如匿名用户访问测站详情，守卫保存\texttt{redirect=/stations/ST-02}并跳转登录；登录成功后只恢复一次导航；如果后端返回 403，则停留在业务页面并显示权限说明，而不是再次跳到登录页。
 
@@ -1521,7 +1557,6 @@ export async function loadAssets() {
 
 \subsection{拓展：事件循环与任务调度}
 
-\paragraph{本节层次}拓展。读懂 4.5.1 即可完成本章任务；本小节解释“为什么\texttt{await}不会卡住页面”。
 
 浏览器的 JavaScript 执行线程一次只处理一个同步任务。当前任务完成后，事件循环先清空微任务队列，再从任务队列取出下一个宏任务；网络回调、定时器和用户输入通常进入任务队列，\texttt{Promise.then}、\texttt{queueMicrotask}和\texttt{MutationObserver}回调进入微任务队列。因此，在一个同步函数里安排“同步输出—定时器—微任务”三种工作，实际执行顺序并不是书写顺序。
 
@@ -1546,64 +1581,13 @@ console.log('同步：结束读取');
 \item 教学接口对\texttt{/api/assets}返回\texttt{?teach=empty}时，列表页应当显示什么？如果显示“服务暂时不可用”，说明状态模型哪里错了？（参考：空数组是 empty 而非 error；把\texttt{[]}当成失败是把“没有数据”和“拿不到数据”混为一谈。）
 \end{enumerate}
 
-下一步：4.6 节把本节的\texttt{render}换成 DOM 事件驱动的列表页；4.7 节用 Vue 组件承接同一份状态模型；4.9 节把\texttt{showAsset}的序号校验搬进 Pinia 仓库。第5章写出真实后端后，只需停掉教学接口、启动 Spring Boot，本节全部脚本原样可用。
-
-\section{DOM操作与事件处理}
-
-\paragraph{本节层次}核心。
-
-4.4 节已经分别讲过 DOM 查询、安全写入与事件模型，本节用一个最小的完整页面把它们串起来，作为进入 Vue 之前的收束练习：结构与行为分离、输入必须校验、更新走 \texttt{textContent} 而不是 \texttt{innerHTML}。
-
-下面示例完整展示事件绑定、输入校验和界面更新。警戒值仍为同一场景的5.0米。
-
-\begin{lstlisting}[label={lst:ch04-html-vue},language=html,caption={测站输入 HTML 片段}]
-<label for="level-input">水位（m）</label>
-<input id="level-input" type="number" step="0.01">
-<button id="check-level" type="button">判断状态</button>
-<output id="level-result" aria-live="polite"></output>
-\end{lstlisting}
-
-清单\ref{lst:ch04-a44-dom-script}把同一页面的行为代码单独列出，使用 JavaScript 语言标注后，关键字、字符串和箭头函数能够正确高亮；HTML 清单只负责结构，脚本清单负责查询节点、转换输入和更新输出。
-
-\begin{lstlisting}[label={lst:ch04-a44-dom-script},language=JavaScript,caption={测站输入 JavaScript 片段}]
-const input = document.querySelector('#level-input');
-const result = document.querySelector('#level-result');
-const button = document.querySelector('#check-level');
-
-button.addEventListener('click', () => {
-  const level = Number(input.value);
-  if (!Number.isFinite(level)) {
-    result.textContent = '请输入有效水位';
-    return;
-  }
-  result.textContent = level >= 5.0 ? '达到警戒水位' : '水位正常';
-});
-\end{lstlisting}
-
-高频监测数据不应逐条触发复杂布局。可以先把数据聚合到内存，再按固定帧率更新图表；列表较长时采用分页或虚拟滚动。
-
-\section{模块化开发与调试技巧}
-
-\paragraph{本节层次}指导实践。
-
-ES模块通过\texttt{export}和\texttt{import}建立清晰依赖。接口访问、业务计算和视图组件应分层组织，避免在组件中散布重复的网络代码。
-
-\begin{lstlisting}[label={lst:ch04-js-lifecycle},language=JavaScript,caption={ES 模块的导出与导入}]
-// level.js
-export function levelStatus(level, warning = 5.0) {
-  return level >= warning ? "warning" : "normal";
-}
-
-// panel.js
-import { levelStatus } from "./level.js";
-console.log(levelStatus(5.12));
-\end{lstlisting}
-
-调试遵循“复现—缩小范围—验证假设—回归测试”的顺序。浏览器开发者工具中，Network面板用于检查请求、状态码和缓存；Sources面板可设置断点并查看调用栈；Console用于查看结构化日志；Performance面板用于定位长任务和频繁重排。代码中的临时\texttt{console.log()}不应作为生产日志方案。
+下一步：4.6 节用 Vue 组件承接同一份状态模型；4.7 节把\texttt{showAsset}的序号校验搬进 Pinia 仓库；4.8 节给出 S1/S2 两个阶段的验收检查单。第5章写出真实后端后，只需停掉教学接口、启动 Spring Boot，本节全部脚本原样可用。
 
 \section{Vue 3组件化开发}
 
-\paragraph{本节层次}核心：4.8.1、4.8.2；指导实践：4.8.3、4.8.4。核心路线只要求读完核心小节。
+\paragraph{本节层次}核心：4.6.1、4.6.2；指导实践：4.6.3、4.6.4。核心路线只要求读完核心小节。
+
+
 
 传统命令式写法需要在数据变化后手动寻找并更新多个DOM节点。水利仪表盘一旦包含曲线、表格和告警标识，这些更新容易分散。Vue使用响应式状态和声明式模板：开发者描述“状态如何映射为界面”，框架负责同步DOM。组件化仍需遵循可理解反馈和一致交互等基本设计原则\cite{norman2013}。
 
@@ -1924,7 +1908,9 @@ props、emit、slot 和 provide/inject 形成四条不同的依赖路径。props
 
 \section{Vue Router与Pinia应用组织}
 
-\paragraph{本节层次}指导实践：4.9.1、4.9.2、4.9.3、4.9.4。本节没有核心小节，课堂核心路线可整体跳过。
+\paragraph{本节层次}指导实践：4.7.1、4.7.2、4.7.3、4.7.4。本节没有核心小节，课堂核心路线可整体跳过。
+
+
 
 Vue Router把 URL 映射到页面组件，\texttt{App.vue}中的\texttt{<router-view />}是路由组件真正出现的位置。路由表应包含稳定的路径、名称、组件和元数据；页面级组件使用动态导入可以把首屏代码与详情页代码分开下载。导航的职责边界要保持清楚：路由负责页面切换和参数解析，页面负责展示与交互，后端负责最终的身份和权限判定。
 
@@ -2198,9 +2184,47 @@ import router from './router';
 createApp(App).use(createPinia()).use(router).mount('#app');
 \end{lstlisting}
 
-\section{Vite工程化与性能优化}
+\section{调试、构建与阶段验收}\label{sec:ch04-stage-acceptance}
 
-\paragraph{本节层次}拓展。课堂核心路线可跳过。
+\paragraph{本节层次}核心：4.8.1；指导实践：4.8.2；拓展：4.8.3。核心路线只要求读完核心小节。
+
+
+\subsection{阶段验收：S1 与 S2 的检查单}
+
+本章的产出分两个阶段验收。S1 是不依赖任何框架和后端的静态监测页面（4.2–4.4 节），S2 是跑在教学接口上的 Vue 页面（4.5–4.7 节）。表\ref{tab:ch04-stage-acceptance}列出每个阶段必须能演示的行为和一个故意注入的故障；验收看的是行为与证据，不是代码行数。两个阶段都通过后，第5章写出真实后端，S2 的页面不改代码直接换数据源，这就是 S3 的起点。
+
+\begin{table}[htbp]
+\centering
+\caption{第4章两个阶段的验收检查单}
+\label{tab:ch04-stage-acceptance}
+\begin{tabular}{p{1.2cm}p{5.4cm}p{3.6cm}p{3.2cm}}
+\toprule
+阶段 & 必须能演示 & 故意注入的故障 & 证据 \\
+\midrule
+S1 & 测点列表与详情两个静态页面；列表可按名称筛选、按值排序；非法输入有提示；空列表显示“暂无测点” & 输入 \texttt{DAM-A-XX-99} 这样不存在的编码 & 页面截图；开发者工具“元素”面板中 \texttt{aria-*} 属性 \\
+S2 & 登录后从教学接口读取对象列表与最新观测；四种页面状态可观察；快速切换对象不出现旧数据；路由可直接打开详情深链接 & \texttt{teach=delay:3000} 与 \texttt{teach=unauthorized} & “网络”面板中被取消的请求；401 后回到登录页并能回跳；\texttt{lesson45.test.js} 通过 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{模块化开发与调试技巧}
+
+ES模块通过\texttt{export}和\texttt{import}建立清晰依赖。接口访问、业务计算和视图组件应分层组织，避免在组件中散布重复的网络代码。
+
+\begin{lstlisting}[label={lst:ch04-js-lifecycle},language=JavaScript,caption={ES 模块的导出与导入}]
+// level.js
+export function levelStatus(level, warning = 165.5) {   // 汛限水位，8.1 节
+  return level >= warning ? "warning" : "normal";
+}
+
+// panel.js
+import { levelStatus } from "./level.js";
+console.log(levelStatus(166.84));   // "warning"
+\end{lstlisting}
+
+调试遵循“复现—缩小范围—验证假设—回归测试”的顺序。浏览器开发者工具中，Network面板用于检查请求、状态码和缓存；Sources面板可设置断点并查看调用栈；Console用于查看结构化日志；Performance面板用于定位长任务和频繁重排。代码中的临时\texttt{console.log()}不应作为生产日志方案。
+
+\subsection{Vite 工程化与性能优化}
 
 推荐目录按职责组织为\texttt{views/}、\texttt{components/}、\texttt{stores/}、\texttt{router/}和\texttt{api/}。Vite 在开发阶段启动原生 ES 模块服务器，浏览器按需请求被修改的模块，依赖预构建和热更新让反馈很快；生产阶段则从入口出发构建依赖图，执行 Tree Shaking、压缩、资源指纹和代码分割，输出可以被静态服务器缓存的文件。开发服务器的代理、源码地图和错误覆盖层服务于调试，不能直接当成生产部署方案。
 

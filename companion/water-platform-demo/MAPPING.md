@@ -22,11 +22,11 @@
 | frontend/src/utils/auth.js | 4.5 | TOKEN_KEY 单一契约 |
 | frontend/src/utils/request.js | 4.5 | 令牌注入、401 分流（认证端点豁免） |
 | frontend/src/utils/readings.js | 7.2 | 缺测断线、时间窗校验（纯函数，可测试） |
-| frontend/src/views/LoginView.vue | 4.7 | 登录与安全回跳 |
-| frontend/src/router/index.js | 4.7 | 路由守卫 |
-| frontend/src/stores/monitoring.js | 4.7 / 8.3 | Pinia 状态与查询参数 |
+| frontend/src/views/LoginView.vue | 4.5.7 / 4.7 | 登录与安全回跳 |
+| frontend/src/router/index.js | 4.7.1 | 路由守卫 |
+| frontend/src/stores/monitoring.js | 4.7.4 / 8.3 | Pinia 状态与查询参数 |
 | frontend/src/components/MonitoringDashboard.vue | 7.2 / 8.3 | ECharts 曲线、缺测与可疑呈现 |
-| frontend/tests/*.test.js | 4.8 | vitest 单元测试 |
+| frontend/tests/*.test.js | 4.8.1 | vitest 单元测试 |
 | backend/.../JwtService.java | 5.5 | jjwt 0.11.x 签发与校验 |
 | backend/.../JwtAuthenticationFilter.java | 5.5 | Bearer 解析入 SecurityContext |
 | backend/.../SecurityConfig.java | 5.5 | 无状态过滤链、CORS、教学账号 |
