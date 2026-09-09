@@ -20,9 +20,17 @@ jobs:
         run: docker compose config -q
       - name: Kafka 环境变量不得被逗号拆键
         working-directory: companion/water-platform-demo
+        # 变量名随 R8-c 从 bitnami 换到官方 apache/kafka 镜像后去掉了 CFG_ 段
         run: |
-          docker compose config | grep -q 'KAFKA_CFG_PROCESS_ROLES: broker,controller' || \
-          docker compose config | grep -q 'KAFKA_CFG_PROCESS_ROLES: "broker,controller"'
+          docker compose config | grep -q 'KAFKA_PROCESS_ROLES: broker,controller' || \
+          docker compose config | grep -q 'KAFKA_PROCESS_ROLES: "broker,controller"'
+
+      - name: 初始化脚本只能挂 001 与 002
+        working-directory: companion/water-platform-demo
+        # 整个 ./db 挂进 /docker-entrypoint-initdb.d 会连 load-s3-data.sql 一起执行，
+        # 它读的 ../datasets/*.csv 在容器里不存在，Postgres 初始化失败、整栈起不来。
+        run: |
+          ! docker compose config | grep -qE '\./db:/docker-entrypoint-initdb\.d'
 
   frontend:
     name: 前端测试与构建
@@ -55,3 +63,74 @@ jobs:
         with: {python-version: '3.11'}
       - run: pip install mkdocs-material
       - run: mkdocs build --strict -f mkdocs-ci.yml
+
+  listings:
+    name: 书中清单与配套代码一致
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      # 清单一旦与 companion 漂移，读者照书敲出来的代码跑不起来，
+      # 而 check_textbook.py 仍然全绿——这条补的就是那个缺口。
+      - run: python tools/check_listings.py
+
+  teaching-api:
+    name: 教学接口契约与第8章闭环
+    runs-on: ubuntu-latest
+    defaults: {run: {working-directory: companion/water-platform-demo}}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: 20}
+      - name: 启动教学接口
+        run: |
+          node teaching-api/server.mjs 8080 &
+          for i in $(seq 1 30); do curl -s -o /dev/null http://localhost:8080/api/assets && break || sleep 1; done
+      - name: 接口契约（表 tab:ch05-first-verify 与 8.1 通用约定）
+        run: node teaching-api/contract-check.mjs http://localhost:8080 --stage=teaching
+      - name: 预警到工单闭环（8.4 受控状态流转）
+        run: node teaching-api/closeloop-check.mjs http://localhost:8080
+
+  stage-lesson52:
+    name: S3 起点可启动且契约一致
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: {distribution: temurin, java-version: '17', cache: maven}
+      - uses: actions/setup-node@v4
+        with: {node-version: 20}
+      - name: 启动 5.2 节的起点包
+        working-directory: companion/water-platform-demo/backend
+        # 起点包没有数据库也没有认证，能独立启动是 5.2 节的前提
+        run: |
+          mvn -B -q spring-boot:run \
+            -Dspring-boot.run.main-class=edu.example.lesson52.Lesson52Application &
+          for i in $(seq 1 60); do curl -s -o /dev/null http://localhost:8080/api/assets && break || sleep 2; done
+      - name: 契约核对
+        working-directory: companion/water-platform-demo
+        run: node teaching-api/contract-check.mjs http://localhost:8080 --stage=lesson52
+
+  stack-e2e:
+    name: 整栈端到端（compose + smoke）
+    runs-on: ubuntu-latest
+    defaults: {run: {working-directory: companion/water-platform-demo}}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: 20}
+      - name: 准备 secrets 占位文件
+        run: for f in secrets/*.example; do cp "$f" "${f%.example}"; done
+      - name: 启动全栈
+        run: docker compose up -d --build --wait
+      - name: 端到端冒烟（启动—401—登录—取数—错误口令）
+        run: ./smoke.sh
+      - name: 真实后端的契约核对
+        run: node teaching-api/contract-check.mjs http://localhost:8080 --stage=full
+      - name: 失败时导出容器日志
+        if: failure()
+        run: docker compose logs --tail=120
+      - name: 清理
+        if: always()
+        run: docker compose down -v
