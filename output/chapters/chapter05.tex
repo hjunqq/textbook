@@ -243,7 +243,7 @@ public class AssetController {
 
 \subsection{路径参数、查询参数与错误体}
 
-契约的第三、四行需要两样东西：路径里的对象编码（\texttt{/api/assets/\{assetId\}/readings/latest}）和查询串里的时间范围（\texttt{?from=…\&to=…}）。清单\ref{lst:ch05-first-params}在同一个控制器里加两个方法。\texttt{@PathVariable}把路径片段绑定到参数，\texttt{@RequestParam}把查询参数绑定到参数并自动转换类型；找不到对象时不能返回一个空对象让页面猜，而要按契约返回 404 与\texttt{\{code, message\}}。这里用一个最小的异常类和\texttt{@ExceptionHandler}把“业务上的找不到”翻译成 HTTP 的 404；5.5 节把它扩展成全局统一的错误响应。
+契约的第三、四行需要两样东西：路径里的对象编码（\texttt{/api/assets/}\allowbreak\texttt{\{assetId\}/}\allowbreak\texttt{readings/latest}）和查询串里的时间范围（\texttt{?from=…\&to=…}）。清单\ref{lst:ch05-first-params}在同一个控制器里加两个方法。\texttt{@PathVariable}把路径片段绑定到参数，\texttt{@RequestParam}把查询参数绑定到参数并自动转换类型；找不到对象时不能返回一个空对象让页面猜，而要按契约返回 404 与\texttt{\{code, message\}}。这里用一个最小的异常类和\texttt{@ExceptionHandler}把“业务上的找不到”翻译成 HTTP 的 404；5.5 节把它扩展成全局统一的错误响应。
 
 \begin{lstlisting}[label={lst:ch05-first-params},language=Java,caption={路径参数、查询参数与契约错误体}]
 import java.time.OffsetDateTime;

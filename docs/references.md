@@ -40,13 +40,13 @@
 
 <a id="ref20"></a>[20] 中华人民共和国国家质量监督检验检疫总局, 中国国家标准化管理委员会. 软件工程 产品质量 第1部分：质量模型[S]. , 2006.
 
-<a id="ref21"></a>[21] Martin, Robert C.. Clean Architecture: A Craftsman's Guide to Software Structure and Design[M]. Boston: Prentice Hall, 2017.
+<a id="ref21"></a>[21] Fowler, Martin. Patterns of Enterprise Application Architecture[M]. Boston: Addison-Wesley, 2002.
 
-<a id="ref22"></a>[22] Gamma, Erich, Helm, Richard, Johnson, Ralph, Vlissides, John. Design Patterns: Elements of Reusable Object-Oriented Software[M]. Boston: Addison-Wesley, 1994.
+<a id="ref22"></a>[22] Martin, Robert C.. Clean Architecture: A Craftsman's Guide to Software Structure and Design[M]. Boston: Prentice Hall, 2017.
 
-<a id="ref23"></a>[23] Parnas, David L.. On the Criteria to be Used in Decomposing Systems into Modules[J]. Communications of the ACM, 1972, 15(12): 1053--1058.
+<a id="ref23"></a>[23] Gamma, Erich, Helm, Richard, Johnson, Ralph, Vlissides, John. Design Patterns: Elements of Reusable Object-Oriented Software[M]. Boston: Addison-Wesley, 1994.
 
-<a id="ref24"></a>[24] Fowler, Martin. Patterns of Enterprise Application Architecture[M]. Boston: Addison-Wesley, 2002.
+<a id="ref24"></a>[24] Parnas, David L.. On the Criteria to be Used in Decomposing Systems into Modules[J]. Communications of the ACM, 1972, 15(12): 1053--1058.
 
 <a id="ref25"></a>[25] Vue.js Team. Vue.js 3 Documentation[EB/OL]. https://vuejs.org/guide/.
 

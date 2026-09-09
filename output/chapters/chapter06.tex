@@ -376,7 +376,7 @@ export function bindAssets(scene, assets) {
 标识唯一 & \texttt{byId.size} 等于对象数 & 重复 assetId 覆盖，两个球只找得到一个 \\
 高程合理 & 所有球的 y 在坝基 \cpBaseElev 与坝顶 \cpCrestElev 之间（雨量站可高于坝顶） & 有球在地下或天上：高程列单位或基准错 \\
 水平位置合理 & 球到原点的水平距离小于 1 km & 经纬度写反（lat/lon 互换）时球会飞出几十公里 \\
-切换后无残留 & \texttt{dispose()} 后 \texttt{scene.getObjectByName('assets')} 为 undefined & 内存与球一起累积 \\
+切换后无残留 & \texttt{dispose()} 后 \texttt{scene.}\allowbreak\texttt{getObjectByName(}\allowbreak\texttt{'assets')} 为 undefined & 内存与球一起累积 \\
 \bottomrule
 \end{tabular}
 \end{table}
