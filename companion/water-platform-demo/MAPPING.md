@@ -4,7 +4,7 @@
 
 | 版本 | 完成于 | 能力 | 本仓库对应 |
 |---|---|---|---|
-| v0 | 起点 | 空骨架 | 仓库初始结构 |
+| v0 | 起点 | 空骨架 | 仓库初始结构；第1章的 S0 演示记录见 S0-demo-record.md（由 teaching-api/record-demo.mjs 实录生成） |
 | v1 | 第4章 | 登录+只读监测页 | frontend/ 全部；S1 阶段页 lesson44.html + lesson44-detail.html 不依赖后端；S2 阶段页 lesson45.html 只靠 teaching-api 运行 |
 | v2 | 第5章 | JWT认证+观测API | S3 起点 backend/src/main/java/edu/example/lesson52/（单类、无库、无认证）；S3 终点 backend/ 全部 |
 | v3 | 第6章 | 三维场景页 | lesson61.html 为起点（坝体长方体 + 28 测点绑定）；GLTF 模型与 GIS 集成为课程实现 |
@@ -60,3 +60,11 @@
 | frontend/tests/lesson84.test.js | 8.4 | 前三个用例与清单 lst:ch08-classification-test 的 JUnit 断言一一对应 |
 | teaching-api/closeloop-check.mjs | 8.4 / 8.6 | S6 闭环核对：观测→质量→预警→确认→工单→回写→归档，含三条受控状态约束 |
 | smoke.sh | 8.6 | 端到端冒烟验证 |
+
+## 面向读者的三份索引
+
+| 文件 | 给谁看 | 内容 |
+|---|---|---|
+| STAGES.md | 学生 | S0–S6 每个阶段的入口、运行依赖、必须能演示的行为、注入故障与验收证据 |
+| TEACHING.md | 教师 | 核心教学路线与 56 学时分配、O1–O7 验收证据、六处常见卡点、实验课收法、环境清单 |
+| S0-demo-record.md | 第1章课堂 | 一次“查看某测点历史观测”的完整实录，含四种失败情形的状态码与错误码 |

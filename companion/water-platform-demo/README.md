@@ -4,6 +4,15 @@
 登录认证 → 测点/观测查询 → Kafka 消息消费入库 → 一条命令启动 → 前后端冒烟测试。
 它是练习的起点仓库；书中 200+ 代码清单是把它改造成完整平台的施工图（对应关系见 `MAPPING.md`）。
 
+先看哪一份：
+
+| 你是 | 从这里开始 |
+|---|---|
+| 学生，想知道这一章该跑出什么 | **`STAGES.md`** —— S0–S6 每个阶段的入口、依赖、验收与注入故障 |
+| 教师，要备课或定评分 | **`TEACHING.md`** —— 核心教学路线、O1–O7 验收证据、六处常见卡点、环境清单 |
+| 想知道书上某个清单对应哪个文件 | **`MAPPING.md`** |
+| 第1章要演示但没有环境 | **`S0-demo-record.md`** —— 一次完整操作的实录（由 `teaching-api/record-demo.mjs` 生成） |
+
 ## 一条命令启动
 
 ```bash
@@ -43,7 +52,7 @@ psql "postgresql://qingyuan_app:<密码>@localhost:5432/qingyuan" -f db/load-s3-
 ## 各自运行测试
 
 ```bash
-cd frontend && npm ci && npm test     # vitest：6 个断言（缺测断线/时间窗/令牌契约）
+cd frontend && npm ci && npm test     # vitest：令牌契约、缺测断线与时间窗，以及 S1/S2/S5/S6 四个阶段包的验收用例
 cd backend  && mvn -q test            # JUnit：JWT 签发/过期/篡改 + 事件契约反序列化
 ```
 
@@ -68,3 +77,16 @@ smoke.sh    端到端冒烟脚本
 ## 没有后端也能上第4章：教学接口
 
 `node teaching-api/server.mjs` 按教材 8.1 节接口契约用 `../datasets` 固定数据应答（端口 8080，与真实后端互换），支持 `teach=` 故障注入；详见 teaching-api/README.md。
+
+## 三个可执行的验收脚本
+
+契约和状态机不是文档里的约定，是能跑出退出码的东西：
+
+```bash
+node teaching-api/contract-check.mjs  http://localhost:8080 --stage=teaching   # 接口契约（第5章）
+node teaching-api/closeloop-check.mjs http://localhost:8080                    # 预警闭环（第8章）
+./smoke.sh                                                                     # 端到端冒烟（第8章部署）
+```
+
+前两个跑在教学接口上，不需要数据库。`--stage` 换成 `lesson52` 或 `full`，
+同一套契约断言就对 S3 的起点和终点各跑一遍——这是“页面一行不改就能换数据源”的证据。
