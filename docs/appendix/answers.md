@@ -144,7 +144,7 @@ A。Pinia用于存放跨页面、跨组件共享的状态，组件私有状态�
 Promise链写法：`fetch(url).then(r => { if (!r.ok) throw new Error(String(r.status)); return r.json(); }).then(render).catch(showError)`。async/await写法：在`try`中`await fetch`后先判断`response.ok`并抛错，再`await response.json()`，在`catch`中统一提示并区分网络异常与HTTP错误码。两种写法都要保证非2xx响应进入错误分支，且错误提示对值班员友好。*常见错误：*忘记`fetch`对404/500不会reject，漏判`response.ok`导致把错误页当JSON解析。
 
 第10题·要点  
-路由表：`/`（首页仪表盘）、`/stations/:id`（测站详情，动态路由懒加载）、`/alerts`（告警中心），配合全局守卫校验登录态。放入Pinia的是跨页面共享状态：用户信息与令牌（`TOKEN_KEY=’access_token’`）、告警未读数、当前选中测站、预警等级（蓝黄橙红与NONE）字典等。表单临时输入、图表悬浮提示等组件局部状态留在组件内。*常见错误：*把一切状态都塞进Pinia，或把测站`id`存store而不走路由参数导致无法直达分享。
+路由表：`/`（首页仪表盘）、`/assets`（测站列表）、`/assets/:id`（测站详情，动态路由懒加载）、`/warnings`（告警中心），配合全局守卫校验登录态。放入Pinia的是跨页面共享状态：用户信息与令牌（`TOKEN_KEY=’access_token’`）、告警未读数、当前选中测站、预警等级（蓝黄橙红与NONE）字典等。表单临时输入、图表悬浮提示等组件局部状态留在组件内。*常见错误：*把一切状态都塞进Pinia，或把测站`id`存store而不走路由参数导致无法直达分享。
 
 第11题·验收  
 最小合格：用Network面板定位一次慢接口（截图含耗时瀑布与Timing分解），用Performance面板录制并定位一处频繁重排的触发代码位置，证据齐全。良好：量化修复前后指标（接口响应时间、Layout次数与主线程占用），慢接口给出前端侧缓解（加载态、缓存、并发合并），重排改为批量读写或用`transform`/`opacity`替代布局属性。优秀：形成“现象—证据—根因—修复—复测”完整记录，重排修复后Performance火焰图对比清晰，接口问题能区分前端与后端责任并提出后端建议。验证方式：现场用开发者工具复测，对照修复前后录制结果与提交的记录文档逐项核对。
@@ -180,7 +180,7 @@ B。跨服务、需持久化与重放的事件应通过Kafka主题传递，进�
 `@Transactional`依赖Spring为Bean生成的代理对象拦截方法调用；同Bean内`this.methodB()`是对原始对象的直接调用，绕过代理，事务通知不会生效。改进一：把事务方法拆分到另一个Bean，通过依赖注入调用，走代理。改进二：自注入自身代理（或`AopContext.currentProxy()`）后经代理调用，亦可改用`TransactionTemplate`编程式事务显式控制。*常见错误：*以为把方法改成`public`或加`REQUIRES_NEW`就能解决自调用失效。
 
 第9题·要点  
-查询最新水位：`GET /api/stations/{stationId}/water-levels/latest`，成功返回200与含质量码（valid/suspect/missing）的数值，测站不存在返回404。写入监测值：`POST /api/stations/{stationId}/measurements`，成功创建返回201并带Location头；参数非法返回400，未登录401，角色无权（如值班员越权写入）403，测站不存在404，携带重复`eventId`命中`(occurred_at, event_id)`复合唯一索引时按幂等返回200或409并不重复入库。*常见错误：*所有失败一律返回200加错误字段，或用GET承载写操作。
+路径与状态码以 8.1 节的接口契约表为准。查询最新观测：`GET /api/assets/{assetId}/readings/latest`，200 返回含质量码（valid/suspect/missing）的单条观测；对象不存在返回404，对象存在但尚无观测返回204（两者必须分开，页面据此区分“编码打错了”和“这个测点还没上报”）。写入观测：`POST /api/readings`，请求体含`assetId`、`occurredAt`、`value`、`unit`、`quality`，头部携带`Idempotency-Key`；成功创建返回201并带Location头；参数非法返回400（错误体指出出错字段），未登录401，角色无权（如值班员越权写入）403，对象不存在404，重复幂等键返回同一记录，命中`(occurred_at, event_id)`复合唯一索引时不重复入库。注意写入路径挂在`/api/readings`下而不是测站子资源下：观测有自己的生命周期（可订正、加版本），不随测站路径变动。*常见错误：*所有失败一律返回200加错误字段，或用GET承载写操作。
 
 第10题·要点  
 `@TransactionalEventListener(AFTER_COMMIT)`是进程内机制：事务提交后在同一应用内触发监听器，适合发送缓存刷新、站内通知等本地副作用，事件不持久化，应用重启即丢失。Kafka监听器面向跨服务集成：事件持久化在主题中，支持多消费组、重放与削峰，适合预警事件分发到短信、审批等下游服务。原则：单体内部解耦用前者，跨服务边界用Kafka主题，并在消费端以`eventId`幂等。*常见错误：*用AFTER_COMMIT监听器直接执行跨服务调用且无重试补偿，误以为它有投递保证。
