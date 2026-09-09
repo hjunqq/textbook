@@ -185,7 +185,54 @@
 
 \section{智慧水利平台架构体系}
 
-\paragraph{本节层次}核心：1.2.1、1.2.2、1.2.3、1.2.4。
+\paragraph{本节层次}核心：1.2.1、1.2.2、1.2.3、1.2.4、1.2.5。
+
+\subsection{一次查询的完整过程：从浏览器到数据库再回来}
+
+\paragraph{业务问题}值班员在监测页面点开渗压计 \cpKeyStation，页面上出现“185.091 kPa，2026-07-01 23:55，质量 valid”。这一行数字从哪里来、经过了哪些环节、每个环节各负责什么——这是理解本书全部内容的起点，也是第4、5章要亲手实现的东西。本小节只追踪，不写代码。
+
+\paragraph{过程追踪}图\ref{fig:ch01-request-trace}把这次查询拆成六步。浏览器里运行的是页面脚本，它把用户动作翻译成一条 HTTP 请求：方法\texttt{GET}，路径\texttt{/api/assets/DAM-A-PZ-07/readings/latest}，头部带着登录时取得的令牌。请求到达服务端后，先由接口层核对令牌与角色，再交给业务层检查对象是否存在，业务层向数据库发出一条 SQL 查询，数据库按主键找到最新一条观测返回。业务层把数据库行整理成约定好的 JSON（字段名、时间格式、质量码都在第8章的接口契约里规定），接口层加上状态码 200 发回浏览器，页面脚本把 JSON 写进 DOM，用户看到那一行数字。
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[>=Stealth,thick,font=\scriptsize,node distance=4mm and 6mm,
+  box/.style={draw=Primary,rounded corners=2pt,fill=PrimaryLight,text=PrimaryDark,minimum width=2.5cm,minimum height=.8cm,align=center}]
+  \node[box] (browser) {(1) 页面脚本\\用户点击→HTTP 请求};
+  \node[box,right=of browser] (api) {(2) 接口层\\核对令牌与角色};
+  \node[box,right=of api] (service) {(3) 业务层\\对象存在？取最新};
+  \node[box,right=of service] (db) {(4) 数据库\\按主键查一行};
+  \draw[->,draw=Primary] (browser) -- node[above]{GET /api/assets/…/latest} (api);
+  \draw[->,draw=Primary] (api) -- (service);
+  \draw[->,draw=Primary] (service) -- node[above]{SQL} (db);
+  \draw[->,draw=Accent] (db.south) -- ++(0,-.7) -| node[below,pos=.25]{(5) 行→JSON，状态码 200} (browser.south);
+  \node[below=9mm of browser,box,draw=Accent] (dom) {(6) 写入 DOM\\“185.091 kPa”};
+  \draw[->,draw=Accent] (browser.south) -- (dom.north);
+\end{tikzpicture}
+\caption{“查看某测点最新观测”的一次完整请求过程}
+\label{fig:ch01-request-trace}
+\end{figure}
+
+\paragraph{六个环节各自会怎么坏}这张图的价值不在“成功时怎么走”，而在“页面没有数据时该去哪里找”。表\ref{tab:ch01-request-failures}按环节列出最常见的失败原因和你能看到的证据：同样是“页面空白”，令牌过期、对象编码写错、数据库里确实没有观测、脚本把 204 当成错误，四种原因分别落在不同环节，排查顺序也不同。第4章会教你用浏览器开发者工具看到(1)(2)(5)(6)的证据，第5章会教你用日志和 SQL 看到(3)(4)的证据。
+
+\begin{table}[htbp]
+\centering
+\caption{页面无数据时，各环节的常见原因与可见证据}
+\label{tab:ch01-request-failures}
+\begin{tabular}{p{1.6cm}p{5.0cm}p{6.6cm}}
+\toprule
+环节 & 常见原因 & 你能看到的证据 \\
+\midrule
+(1) 页面脚本 & 路径拼错；请求根本没发出 & 开发者工具“网络”面板里找不到这条请求，或路径不对 \\
+(2) 接口层 & 未登录、令牌过期、角色无权 & 状态码 401 或 403，响应体给出错误码 \\
+(3) 业务层 & 对象编码不存在；参数非法 & 状态码 404 或 400，错误体指出字段 \\
+(4) 数据库 & 该对象确实没有观测；数据库连不上 & 前者状态码 204（正常的“没有”）；后者 5xx 与服务端日志 \\
+(5) 序列化 & 字段名、时间格式与契约不一致 & 状态码 200 但页面脚本读到 undefined \\
+(6) 写入 DOM & 脚本把 204 当作失败，或把旧响应写了进去 & 状态码正常而页面仍空白或显示错对象 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{验收}不要求写代码。能对着图\ref{fig:ch01-request-trace}说出：页面显示“暂无观测”时最可能在哪个环节、需要看什么证据；令牌过期与对象编码写错在页面上的表现有什么区别。做到这两点，第4章的“数据请求与页面状态”和第5章的“第一个 HTTP 接口”就都有了落点。
 
 \subsection{四层架构与双向链路}
 
