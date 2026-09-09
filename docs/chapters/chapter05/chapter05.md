@@ -193,7 +193,7 @@ public class AssetController {
     private static final List<AssetDto> FIXED = List.of(
         new AssetDto("DAM-A-PZ-07", "案例渗压07", "渗压", "kPa"),
         new AssetDto("DAM-A-WL-01", "案例库水位01", "库水位", "m"),
-        new AssetDto("DAM-A-DP-01", "案例位移01", "位移", "mm"),
+        new AssetDto("DAM-A-D-01", "案例位移01", "位移", "mm"),
         new AssetDto("DAM-A-RF-01", "案例雨量01", "雨量", "mm"));
 
     @GetMapping                      // GET /api/assets
@@ -284,6 +284,10 @@ ResponseEntity<Map<String, String>> badRequest(BadRequest e) {
 | GET /api/assets/DAM-A-WL-01/readings/latest    | 204      | 空体；页面显示“暂无观测”而不是报错                           |
 | GET /api/assets/DAM-A-XX-99/readings/latest    | 404      | `{code:"ASSET_NOT_FOUND"}`；页面显示“对象不存在，请返回列表” |
 | GET …/readings?from=2026-07-02…&to=2026-07-01… | 400      | `{code:"INVALID_RANGE", field:"from"}`                       |
+
+**S3 阶段包与契约核对脚本。**
+
+清单5.3与清单5.4合起来就是配套工程里的`backend/src/main/java/edu/example/lesson52/`，它是 S3 的起点：一个类、没有数据库、没有认证。它刻意放在`edu.example.lesson52`包下而不是完整工程的`edu.example.qingyuan`包下——后者会被完整工程一起扫描，两个`/api/assets`映射冲突，启动即失败。表5.3的四行不必手工点，配套工程的`teaching-api/contract-check.mjs`把它们连同错误体形状写成了可执行检查：`node teaching-api/contract-check.mjs http://localhost:8080 –stage=lesson52`。同一个脚本把`–stage`换成`teaching`或`full`，就分别核对教学接口和接了数据库的完整后端。三种来源都全绿，才算真正做到“页面一行不改就能换数据源”；只要有一行红，说明契约在某一端被写歪了。
 
 **自测**
 
@@ -1274,35 +1278,48 @@ Spring Boot 3提供的`ProblemDetail`可以承载标准状态、标题、详情�
 ```java
 @RestControllerAdvice
 class ReadingProblemAdvice {
+    /** 契约错误体：{code, message, field?}，见 8.1 节表的通用约定。
+     *  ProblemDetail 负责状态码与 application/problem+json，
+     *  三个扩展属性负责契约要求的字段，两者不冲突。 */
+    private static ProblemDetail of(HttpStatus status, String code, String message, String field) {
+        ProblemDetail problem = ProblemDetail.forStatus(status);
+        problem.setProperty("code", code);
+        problem.setProperty("message", message);
+        if (field != null) problem.setProperty("field", field);
+        return problem;
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     ResponseEntity<ProblemDetail> invalid(MethodArgumentNotValidException ex) {
-        ProblemDetail problem = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
-        problem.setTitle("请求参数无效");
-        problem.setProperty("code", "VALIDATION_ERROR");
-        problem.setProperty("fields", ex.getBindingResult().getFieldErrors()
-                .stream().map(FieldError::getField).distinct().toList());
-        return ResponseEntity.badRequest().body(problem);
+        // 契约的 field 是单数：先报第一个出错的字段，前端据此定位输入框
+        String field = ex.getBindingResult().getFieldErrors()
+                .stream().map(FieldError::getField).findFirst().orElse(null);
+        return ResponseEntity.badRequest()
+                .body(of(HttpStatus.BAD_REQUEST, "VALIDATION_ERROR", "请求参数无效", field));
     }
 
     @ExceptionHandler(EntityNotFoundException.class)
     ResponseEntity<ProblemDetail> notFound(EntityNotFoundException ex) {
-        ProblemDetail problem = ProblemDetail.forStatus(HttpStatus.NOT_FOUND);
-        problem.setTitle("资源不存在");
-        problem.setProperty("code", "READING_NOT_FOUND");
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(problem);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(of(HttpStatus.NOT_FOUND, "READING_NOT_FOUND", "观测记录不存在", null));
     }
 
     @ExceptionHandler(ConflictException.class)
     ResponseEntity<ProblemDetail> conflict(ConflictException ex) {
-        ProblemDetail problem = ProblemDetail.forStatus(HttpStatus.CONFLICT);
-        problem.setTitle("资源状态冲突");
-        problem.setProperty("code", "READING_CONFLICT");
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(problem);
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(of(HttpStatus.CONFLICT, "READING_CONFLICT", "记录版本或状态冲突", null));
+    }
+
+    /** 时间参数解析失败发生在进入方法之前，控制器内的处理器接不到，只有这一层能兜住。 */
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    ResponseEntity<ProblemDetail> mismatch(MethodArgumentTypeMismatchException ex) {
+        return ResponseEntity.badRequest().body(of(HttpStatus.BAD_REQUEST, "INVALID_PARAMETER",
+                "参数 " + ex.getName() + " 需为 ISO-8601 带时区格式", ex.getName()));
     }
 }
 ```
 
-清单5.27只把字段名和稳定错误码放入响应，具体原因留在受控日志。校验字段列表可以帮助前端逐项标记输入框；对跨字段错误，服务层抛出带业务码的异常。异常处理器本身也应有测试，确保新异常不会意外回落到500，并验证响应的`Content-Type`为`application/problem+json`。
+清单5.27只把字段名和稳定错误码放入响应，具体原因留在受控日志。四个处理器产出同一形状的`{code, message, field?}`，与表8.3的通用约定、教学接口以及 5.2 节那个最小控制器完全一致——页面的错误分支因此不必区分数据来自哪一端。`field`指向第一个出错的字段，帮助前端定位输入框；对跨字段错误，服务层抛出带业务码的异常。异常处理器本身也应有测试，确保新异常不会意外回落到500，并验证响应的`Content-Type`为`application/problem+json`。
 
 浮点边界是参数校验的常见陷阱。Jakarta Bean Validation 对`double`和`float`不保证`@DecimalMin`与`@DecimalMax`的十进制精确语义，二进制舍入可能让边界值在比较时偏离预期；水位、雨量等带单位的小数应使用`BigDecimal`或整数最小单位，并在转换时指定舍入模式。校验通过后仍要执行物理范围、单位换算和质量码优先级检查，避免“格式合法”被误解为“业务可信”。
 

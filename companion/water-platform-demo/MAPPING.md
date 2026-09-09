@@ -6,7 +6,7 @@
 |---|---|---|---|
 | v0 | 起点 | 空骨架 | 仓库初始结构 |
 | v1 | 第4章 | 登录+只读监测页 | frontend/ 全部；S1 阶段页 lesson44.html + lesson44-detail.html 不依赖后端；S2 阶段页 lesson45.html 只靠 teaching-api 运行 |
-| v2 | 第5章 | JWT认证+观测API | backend/ 全部 |
+| v2 | 第5章 | JWT认证+观测API | S3 起点 backend/src/main/java/edu/example/lesson52/（单类、无库、无认证）；S3 终点 backend/ 全部 |
 | v3 | 第6章 | 三维场景页 | lesson61.html 为起点（坝体长方体 + 28 测点绑定）；GLTF 模型与 GIS 集成为课程实现 |
 | v4 | 第7章 | 曲线与三维联动 | frontend/src/utils/readings.js 起点 |
 | v5 | 第8章核心篇 | 质量检查+预警+工单+部署 | db/、ReadingConsumer、compose、smoke.sh 骨架 |
@@ -40,7 +40,10 @@
 | backend/.../JwtAuthenticationFilter.java | 5.5 | Bearer 解析入 SecurityContext |
 | backend/.../SecurityConfig.java | 5.5 | 无状态过滤链、CORS、教学账号 |
 | backend/.../AuthController.java | 5.5 | 登录端点（防账号枚举） |
-| backend/.../AssetController.java | 5.3 / 8.3 | DTO 映射，不暴露实体 |
+| backend/edu/example/lesson52/ | 5.2 | S3 阶段起点：清单 lst:ch05-first-controller + lst:ch05-first-params 合并成的可运行类；独立根包，避免与完整工程的 /api/assets 映射冲突 |
+| teaching-api/contract-check.mjs | 5.2.3 / 8.1 | 把表 tab:ch05-first-verify 与契约错误体写成可执行检查；--stage=teaching/lesson52/full 对三种数据来源跑同一套断言 |
+| backend/.../ApiExceptionHandler.java | 5.5 / 8.1 | 契约错误体 {code, message, field?}；兜住控制器接不到的时间参数解析失败 |
+| backend/.../AssetController.java | 5.3 / 8.3 | DTO 映射，不暴露实体；readings/latest 按契约区分 404（对象不存在）与 204（尚无观测） |
 | backend/.../ReadingService.java | 5.4 / 8.3 | 事务边界、幂等预检 |
 | backend/.../ReadingConsumer.java | 5.6 / 8.3 | 事务边界外捕获冲突 |
 | backend/.../FileSecretsEnvironmentPostProcessor.java | 8.6 | Docker secrets 的 *_FILE 约定 |

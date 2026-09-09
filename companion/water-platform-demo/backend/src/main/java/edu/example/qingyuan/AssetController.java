@@ -2,6 +2,8 @@ package edu.example.qingyuan;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -40,5 +42,28 @@ public class AssetController {
                                      @RequestParam OffsetDateTime from,
                                      @RequestParam OffsetDateTime to) {
         return readings.find(assetId, from, to).stream().map(ReadingDto::from).toList();
+    }
+
+    /**
+     * 契约 GET /api/assets/{id}/readings/latest（8.1 节 tab:api-contract）。
+     * 对象不存在 404，对象存在但没有观测 204——两者必须分开，
+     * 否则第4章的页面无法区分“编码打错了”和“这个测点还没上报”。
+     */
+    @GetMapping("/{assetId}/readings/latest")
+    @PreAuthorize("hasAnyAuthority('DUTY','ANALYST','OPS')")
+    public ResponseEntity<ReadingDto> latest(@PathVariable String assetId) {
+        if (!assets.existsById(assetId)) {
+            throw new AssetNotFoundException(assetId);
+        }
+        return readings.latest(assetId)
+                .map(ReadingDto::from)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.noContent().build());
+    }
+
+    /** 由全局异常处理翻译成契约错误体 {code:"ASSET_NOT_FOUND", message}。 */
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public static class AssetNotFoundException extends RuntimeException {
+        public AssetNotFoundException(String assetId) { super("对象 " + assetId + " 不存在"); }
     }
 }
