@@ -24,6 +24,7 @@
 
 \paragraph{本节层次}核心。
 
+
 \paragraph{进入本章所需知识}会写 Java 类、方法、\texttt{List}与\texttt{try/catch}；读过附录B的 P2 单元（工程目录、Maven、注解与依赖注入）和 P3 单元（表、键、SQL 与事务）。两个单元末尾的自测题做得出来，本章清单里的注解与 SQL 就不需要另外查资料。
 
 后端位于用户界面与数据资源之间，承担身份校验、业务计算、持久化、审计和系统集成。典型请求链路为“浏览器或设备网关—控制器—应用服务—Repository—数据库”。控制器只处理协议转换和输入校验，业务规则放在服务层，数据访问集中在Repository；若进一步拆分为微服务，还需显式管理边界、版本和分布式失败\cite{newman2021}。
@@ -70,9 +71,9 @@ DELETE & 删除资源 & 删除尚未发布的规则 & 是 \\
 
 图\ref{fig:ch05-request-chain}把一次监测值写入拆成五个可测试边界：控制器负责把JSON转换为命令并拒绝格式错误，应用服务检查测站状态、质量码和时间窗口，Repository执行参数化查询，数据库保证约束与索引。任何一层都不应越过下一层直接修改另一层的内部状态；例如控制器不拼接SQL，Repository不决定预警业务规则。
 
-资源路径使用名词，例如\texttt{/api/stations/ST-01/readings}；筛选条件放入查询参数，例如\texttt{?from=...\&to=...}。设备协议接入属于边缘网关职责，本章不展开Modbus或MQTT细节。
+资源路径使用名词，例如\texttt{/api/assets/DAM-A-PZ-07/readings}；筛选条件放入查询参数，例如\texttt{?from=...\&to=...}。设备协议接入属于边缘网关职责，本章不展开Modbus或MQTT细节。
 
-资源建模先回答“系统管理的对象是什么”。测站是稳定资源，监测读数是按时间追加的子资源，告警处置单是具备状态迁移的业务资源。查询最新读数可以使用\texttt{GET /api/stations/ST-01/readings/latest}，查询时间范围使用\texttt{GET /api/stations/ST-01/readings?from=...\&to=...}；创建一条读数使用\texttt{POST /api/readings}，请求体包含测站 ID、采样时间、数值、单位和质量码。路径表达资源层级，查询参数表达视图条件，业务动作只有在无法用资源状态表达时才使用动词，例如\texttt{POST /api/alerts/AL-01/acknowledge}。
+资源建模先回答“系统管理的对象是什么”。测站是稳定资源，监测读数是按时间追加的子资源，告警处置单是具备状态迁移的业务资源。查询最新读数可以使用\texttt{GET /api/assets/DAM-A-PZ-07/readings/latest}，查询时间范围使用\texttt{GET /api/assets/DAM-A-PZ-07/readings?from=...\&to=...}；创建一条读数使用\texttt{POST /api/readings}，请求体包含测站 ID、采样时间、数值、单位和质量码。路径表达资源层级，查询参数表达视图条件，业务动作只有在无法用资源状态表达时才使用动词，例如\texttt{POST /api/alerts/AL-01/acknowledge}。
 
 分层依赖方向应从外向内收敛：Controller 依赖 Application Service，Service 依赖领域对象和 Repository 接口，Repository 的具体实现依赖 PostgreSQL、PostGIS 或 TimescaleDB。领域对象不依赖 HTTP、JSON 和 Spring 注解，便于在单元测试中用内存对象验证规则。若把数据库实体直接作为响应体，内部字段、懒加载关系和审计信息可能泄露到外部契约；DTO 映射应在控制器或应用服务边界完成，并为时间、单位和质量码提供稳定格式。图\ref{fig:ch05-rest-contract}把“请求进入—校验—用例—响应”四个边界与失败返回位置标出，便于把接口测试从状态码断言扩展到字段、事务和审计证据。
 
@@ -101,11 +102,11 @@ DELETE & 删除资源 & 删除尚未发布的规则 & 是 \\
 
 \begin{lstlisting}[label={lst:ch05-rest-layer},language=Java,caption={分层 REST 查询：DTO、服务与仓储接口}]
 public record LatestReadingResponse(
-        String stationId, double level, String unit,
-        Instant measuredAt, String quality) {}
+        String assetId, double value, String unit,
+        Instant occurredAt, String quality) {}
 
 public interface ReadingQueryRepository {
-    Optional<WaterReading> findLatest(String stationId);
+    Optional<Reading> findLatest(String assetId);
 }
 
 @Service
@@ -117,11 +118,11 @@ public class ReadingQueryService {
     }
 
     @Transactional(readOnly = true)
-    public LatestReadingResponse latest(String stationId) {
-        WaterReading reading = repository.findLatest(stationId)
+    public LatestReadingResponse latest(String assetId) {
+        Reading reading = repository.findLatest(assetId)
                 .orElseThrow(() -> new EntityNotFoundException("测站无读数"));
         return new LatestReadingResponse(reading.getStationId(),
-                reading.getLevel(), reading.getUnit(),
+                reading.getValue(), reading.getUnit(),
                 reading.getMeasuredAt(), reading.getQuality());
     }
 }
@@ -133,11 +134,11 @@ public class ReadingQueryService {
 
 \begin{lstlisting}[label={lst:ch05-rest-write},language=Java,caption={监测值写入：POST、校验与201 Location}]
 public record CreateReadingRequest(
-        @NotBlank String stationId,
+        @NotBlank String assetId,
         // 上下限为示例阈值，工程取值以第8章8.1参数表为唯一来源
-        @NotNull @DecimalMin("0.0") @DecimalMax("50.0") BigDecimal level,
+        @NotNull @DecimalMin("0.0") @DecimalMax("1000.0") BigDecimal value,   // 量程按对象类型再校验，见测点台账
         @NotBlank String unit,
-        @NotNull Instant measuredAt,
+        @NotNull Instant occurredAt,
         @NotBlank String quality) {}
 
 @RestController
@@ -153,7 +154,7 @@ public class ReadingCommandController {
     ResponseEntity<ReadingResponse> create(
             @Valid @RequestBody CreateReadingRequest request,
             @RequestHeader(value = "Idempotency-Key", required = false) String key) {
-        WaterReading saved = service.create(request, key);
+        Reading saved = service.create(request, key);
         URI location = URI.create("/api/readings/" + saved.getId());
         return ResponseEntity.created(location).body(ReadingResponse.from(saved));
     }
@@ -162,9 +163,9 @@ public class ReadingCommandController {
 
 这里使用\texttt{BigDecimal}表达水位，避免用\texttt{double}承载边界校验时出现二进制浮点舍入误差；服务内部仍可按明确规则转换为数据库数值类型。\texttt{@Valid @RequestBody}只负责触发Bean Validation，诸如“测站属于当前工程”“时间不得早于上一条记录”等跨字段规则必须在服务层再次检查。控制器接收可选的幂等键，但不负责保存去重记录，去重状态由服务层和数据库唯一约束共同保证。
 
-分页、排序和过滤也要形成稳定的 URL 契约。\texttt{page}从0开始还是从1开始必须在全书统一；本章示例采用从0开始的\texttt{page}、正数\texttt{size}，排序使用\texttt{sort=measuredAt,desc}，过滤使用\texttt{stationId}、\texttt{quality}和时间范围。服务端限制\texttt{size}上限，拒绝未知排序字段，返回\texttt{content}、\texttt{page}、\texttt{size}、\texttt{totalElements}和\texttt{totalPages}，这样前端可以显示总页数而不是用当前页长度猜测。
+分页、排序和过滤也要形成稳定的 URL 契约。\texttt{page}从0开始还是从1开始必须在全书统一；本章示例采用从0开始的\texttt{page}、正数\texttt{size}，排序使用\texttt{sort=occurredAt,desc}，过滤使用\texttt{assetId}、\texttt{quality}和时间范围。服务端限制\texttt{size}上限，拒绝未知排序字段，返回\texttt{content}、\texttt{page}、\texttt{size}、\texttt{totalElements}和\texttt{totalPages}，这样前端可以显示总页数而不是用当前页长度猜测。
 
-游标分页适合持续追加的时序读数：客户端携带上一页最后一条记录的\texttt{measuredAt,id}，服务端按联合索引向后查找，避免高页码\texttt{OFFSET}扫描大量历史数据。游标应视为不透明字符串，不能让客户端自行修改时间边界；接口文档还要说明读数在分页期间追加时的排序稳定性。报表导出属于异步任务时，使用任务资源返回\texttt{202 Accepted}，由客户端轮询任务状态，而不是让一次 HTTP 请求长时间占用连接。
+游标分页适合持续追加的时序读数：客户端携带上一页最后一条记录的\texttt{occurredAt,id}，服务端按联合索引向后查找，避免高页码\texttt{OFFSET}扫描大量历史数据。游标应视为不透明字符串，不能让客户端自行修改时间边界；接口文档还要说明读数在分页期间追加时的排序稳定性。报表导出属于异步任务时，使用任务资源返回\texttt{202 Accepted}，由客户端轮询任务状态，而不是让一次 HTTP 请求长时间占用连接。
 
 服务发现与微服务边界必须以业务能力为中心。数据采集、读数查询、预警评估和通知可以是不同服务，但每个服务拥有明确的数据所有权和 API 契约；拆分不是把每个类都部署成独立进程。开发环境可用配置文件把逻辑服务名映射到固定地址，生产环境再接入服务注册与发现组件、健康检查和负载均衡。业务代码只依赖接口客户端，不能把某个注册中心的注解散落到领域层，这样更换实现时只需调整基础设施配置。
 
@@ -181,9 +182,143 @@ API 版本化需要在兼容性和演进速度之间作出可审计的选择。�
 服务发现的健康检查至少分为进程存活、依赖可达和业务可用三类。进程存活用于重启异常实例，依赖可达检查数据库、Redis 和 Kafka 连接，业务可用则验证关键表结构、时序写入权限和预警规则加载。网关路由切换时先摘除不健康实例，再等待正在处理的请求完成；客户端重试只针对明确的瞬态错误，写入请求必须携带幂等键。通过这些约束，微服务边界才能在故障时保持数据一致和可观察。
 接口文档还应给出示例请求、示例响应、错误码和限流规则，并在每次版本发布时同步更新 OpenAPI 描述；值班员和前端开发者据此可以复现问题、核对字段单位并确认兼容范围。
 
+\section{第一个 HTTP 接口：从固定数据到契约}\label{sec:ch05-first-api}
+
+\paragraph{本节层次}核心：5.2.1、5.2.2、5.2.3。
+
+
+\paragraph{业务问题}第4章的页面一直对着教学接口开发。现在要让\texttt{GET /api/assets}由自己写的 Java 程序应答，而且页面一行不改。本节先返回写死的对象列表，把“一个方法怎样变成一个 HTTP 接口”看清楚；再处理路径参数与查询参数，把错误体做成契约规定的样子；最后用第4章的页面和教学接口的故障注入表反过来验证它。数据库到 5.4 节才接入。
+
+\paragraph{进入本节所需知识}附录B的 P2 单元（工程目录、Maven、注解、依赖注入）；表\ref{tab:api-contract}前三行；能用浏览器地址栏或\texttt{curl}发一个 GET 请求。
+
+\subsection{返回固定数据的接口}
+
+清单\ref{lst:ch05-first-controller}是完整的一个类。三个注解各管一件事：\texttt{@RestController}告诉框架这个类的方法返回 JSON；\texttt{@RequestMapping}给出公共前缀；\texttt{@GetMapping}把一个方法绑到一条路径上。方法体里没有任何 Web 代码——它只是返回一个\texttt{List}，框架负责把它序列化成 JSON 并加上状态码 200。四个测点的编码与名称取自表\ref{tab:case-parameters}的测点设定，单位与数据集一致。
+
+\begin{lstlisting}[label={lst:ch05-first-controller},language=Java,caption={AssetController：返回写死的对象列表}]
+package edu.example.qingyuan;
+
+import java.util.List;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("/api/assets")
+public class AssetController {
+    /** 与 8.1 节契约表同名的字段；record 自动生成构造器与访问方法 */
+    public record AssetDto(String assetId, String displayName,
+                           String assetType, String unit) {}
+
+    private static final List<AssetDto> FIXED = List.of(
+        new AssetDto("DAM-A-PZ-07", "案例渗压07", "渗压", "kPa"),
+        new AssetDto("DAM-A-WL-01", "案例库水位01", "库水位", "m"),
+        new AssetDto("DAM-A-DP-01", "案例位移01", "位移", "mm"),
+        new AssetDto("DAM-A-RF-01", "案例雨量01", "雨量", "mm"));
+
+    @GetMapping                      // GET /api/assets
+    public List<AssetDto> assets() {
+        return FIXED;
+    }
+}
+\end{lstlisting}
+
+\paragraph{运行与观察}在配套工程\texttt{backend}目录执行\texttt{mvn spring-boot:run}，控制台最后出现\texttt{Tomcat started on port 8080}。此时教学接口必须已经停掉，否则端口冲突（附录B P0）。浏览器打开\texttt{http://localhost:8080/api/assets}，看到四个对象的 JSON 数组；把第4章的 Vite 开发服务器指向 8080（它本来就指向 8080），刷新列表页，四个对象出现在页面上——页面代码没有改动，这就是契约的意义。表\ref{tab:ch05-first-run}是应当观察到的结果。
+
+\begin{table}[htbp]
+\centering
+\caption{清单\ref{lst:ch05-first-controller}的预期运行记录}
+\label{tab:ch05-first-run}
+\begin{tabular}{p{0.40\textwidth}p{0.10\textwidth}p{0.40\textwidth}}
+\toprule
+操作 & 状态码 & 观察 \\
+\midrule
+浏览器打开 /api/assets & 200 & 四元素 JSON 数组；字段名与契约一致（assetId 而不是 asset\_id） \\
+浏览器打开 /api/asset（少一个 s） & 404 & Spring 默认错误体，不是契约格式——5.2.3 处理 \\
+第4章列表页刷新 & 200 & 页面显示四个对象；“网络”面板里请求发往 5173 再由代理转到 8080 \\
+先启动教学接口再启动本工程 & — & 启动失败，日志含 \texttt{Port 8080 was already in use} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{路径参数、查询参数与错误体}
+
+契约的第三、四行需要两样东西：路径里的对象编码（\texttt{/api/assets/\{assetId\}/readings/latest}）和查询串里的时间范围（\texttt{?from=…\&to=…}）。清单\ref{lst:ch05-first-params}在同一个控制器里加两个方法。\texttt{@PathVariable}把路径片段绑定到参数，\texttt{@RequestParam}把查询参数绑定到参数并自动转换类型；找不到对象时不能返回一个空对象让页面猜，而要按契约返回 404 与\texttt{\{code, message\}}。这里用一个最小的异常类和\texttt{@ExceptionHandler}把“业务上的找不到”翻译成 HTTP 的 404；5.5 节把它扩展成全局统一的错误响应。
+
+\begin{lstlisting}[label={lst:ch05-first-params},language=Java,caption={路径参数、查询参数与契约错误体}]
+import java.time.OffsetDateTime;
+import java.util.Map;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+// —— 放在 AssetController 里 ——
+public record ReadingDto(String assetId, OffsetDateTime occurredAt, Double value,
+                         String unit, String quality, String eventId, int version) {}
+
+@GetMapping("/{assetId}/readings/latest")
+public ResponseEntity<ReadingDto> latest(@PathVariable String assetId) {
+    AssetDto asset = FIXED.stream().filter(a -> a.assetId().equals(assetId))
+        .findFirst().orElseThrow(() -> new NotFound("ASSET_NOT_FOUND", "对象 " + assetId + " 不存在"));
+    if (!asset.assetId().equals("DAM-A-PZ-07")) return ResponseEntity.noContent().build(); // 契约：无观测 204
+    return ResponseEntity.ok(new ReadingDto(asset.assetId(),
+        OffsetDateTime.parse("2026-07-01T23:55:00+08:00"), 185.091, "kPa", "valid", "evt-pz-0287-6", 1));
+}
+
+@GetMapping("/{assetId}/readings")
+public List<ReadingDto> readings(@PathVariable String assetId,
+                                 @RequestParam OffsetDateTime from,
+                                 @RequestParam OffsetDateTime to) {
+    if (!from.isBefore(to)) throw new BadRequest("INVALID_RANGE", "from 必须早于 to", "from");
+    return List.of();   // 5.4 节改为查数据库
+}
+
+// —— 两个最小异常与它们到 HTTP 的翻译 ——
+static class NotFound extends RuntimeException {
+    final String code; NotFound(String code, String msg) { super(msg); this.code = code; }
+}
+static class BadRequest extends RuntimeException {
+    final String code, field;
+    BadRequest(String code, String msg, String field) { super(msg); this.code = code; this.field = field; }
+}
+@ExceptionHandler(NotFound.class)
+ResponseEntity<Map<String, String>> notFound(NotFound e) {
+    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("code", e.code, "message", e.getMessage()));
+}
+@ExceptionHandler(BadRequest.class)
+ResponseEntity<Map<String, String>> badRequest(BadRequest e) {
+    return ResponseEntity.badRequest().body(Map.of("code", e.code, "message", e.getMessage(), "field", e.field));
+}
+\end{lstlisting}
+
+\paragraph{一个会遇到的失败}\texttt{from=2026-07-01T00:00:00+08:00}直接放进地址栏，加号会被浏览器当作空格，服务端解析时报 400，错误体却不是契约格式而是 Spring 的默认页面。原因是类型转换失败发生在进入方法之前，\texttt{@ExceptionHandler(BadRequest.class)}接不到它。两件事要做：客户端把\texttt{+}编码成\texttt{\%2B}（第4章的\texttt{URLSearchParams}会自动做）；服务端在 5.5 节用\texttt{@ControllerAdvice}接住\texttt{MethodArgumentTypeMismatchException}，统一翻译成契约错误体。这个失败值得亲手复现一次：它说明“错误体格式统一”不是一个类里加几个方法就能完成的。
+
+\subsection{用第4章的页面和故障表验证接口}
+
+接口写完，验证不靠“浏览器能打开”，而靠第4章已经准备好的两样东西。第一，把第4章 S2 阶段页对着本工程重新走一遍表\ref{tab:ch04-stage-acceptance}的 S2 行：列表、详情、切换对象，页面表现应与对着教学接口时一致。第二，表\ref{tab:api-teach-faults}里教学接口用\texttt{teach=}注入的四种故障，现在要由真实行为触发：不带令牌访问（本节还没有认证，5.6 节补上后应得 401）、不存在的对象编码（404）、\texttt{from}晚于\texttt{to}（400 且\texttt{field}为\texttt{from}）、没有观测的对象（204）。表\ref{tab:ch05-first-verify}是核对单，四行全部与契约一致，本节完成。
+
+\begin{table}[htbp]
+\centering
+\caption{第一个接口的契约核对单}
+\label{tab:ch05-first-verify}
+\begin{tabular}{p{0.34\textwidth}p{0.12\textwidth}p{0.44\textwidth}}
+\toprule
+请求 & 期望状态 & 期望响应体 / 页面表现 \\
+\midrule
+GET /api/assets/DAM-A-PZ-07/readings/latest & 200 & value 185.091，页面显示“案例渗压07：185.091 kPa” \\
+GET /api/assets/DAM-A-WL-01/readings/latest & 204 & 空体；页面显示“暂无观测”而不是报错 \\
+GET /api/assets/DAM-A-XX-99/readings/latest & 404 & \texttt{\{code:"ASSET\_NOT\_FOUND"\}}；页面显示“对象不存在，请返回列表” \\
+GET …/readings?from=2026-07-02…\&to=2026-07-01… & 400 & \texttt{\{code:"INVALID\_RANGE", field:"from"\}} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{自测}（1）把清单\ref{lst:ch05-first-controller}中的\texttt{@RestController}换成\texttt{@Controller}，访问\texttt{/api/assets}会发生什么？为什么？（框架把返回值当视图名去找模板，得到 404 或 500；\texttt{@RestController} = \texttt{@Controller} + \texttt{@ResponseBody}。）（2）\texttt{latest}方法为什么返回\texttt{ResponseEntity}而\texttt{assets}方法直接返回\texttt{List}？（前者需要区分 200 与 204 两种状态码，后者永远 200。）（3）不看代码，说出契约里“错误体统一为\texttt{\{code, message, field?\}}”在本节由哪两个方法保证，还有哪一类错误它们接不住。
+
 \section{Spring Boot企业级开发基础}
 
-\paragraph{本节层次}核心：5.2.1、5.2.3；指导实践：5.2.2、5.2.4、5.2.6；拓展：5.2.5。核心路线只要求读完核心小节。
+\paragraph{本节层次}核心：5.3.1、5.3.3；指导实践：5.3.2、5.3.4、5.3.6；拓展：5.3.5。核心路线只要求读完核心小节。
+
 
 Spring Boot通过约定、自动配置和Starter依赖减少基础配置。自动配置会依据类路径、配置属性和已有Bean选择合适组件，但开发者仍应理解其条件，避免把“自动”误解为“不可控”。推荐目录如下：
 
@@ -379,15 +514,15 @@ security:
 
 \begin{lstlisting}[label={lst:ch05-query-controller},language=Java,caption={查询接口控制器}]
 @RestController
-@RequestMapping("/api/stations")
-class StationController {
-    private final StationQueryService queryService;
+@RequestMapping("/api/assets")
+class AssetQueryController {
+    private final AssetQueryService queryService;
 
-    StationController(StationQueryService queryService) {
+    AssetQueryController(AssetQueryService queryService) {
         this.queryService = queryService;
     }
 
-    @GetMapping("/{id}/latest")
+    @GetMapping("/{id}/readings/latest")   // 路径见 8.1 节契约表
     ReadingResponse latest(@PathVariable String id) {
         return queryService.latest(id);
     }
@@ -398,7 +533,8 @@ Spring Boot 3使用\texttt{jakarta.servlet.*}命名空间。旧项目从\texttt{
 
 \section{Jakarta Persistence与事务管理}
 
-\paragraph{本节层次}核心：5.3.1、5.3.9、5.3.10；指导实践：5.3.2、5.3.4、5.3.5、5.3.6、5.3.13；拓展：5.3.3、5.3.7、5.3.8、5.3.11、5.3.12、5.3.14。核心路线只要求读完核心小节。
+\paragraph{本节层次}核心：5.4.1、5.4.9、5.4.10；指导实践：5.4.2、5.4.4、5.4.5、5.4.6、5.4.13；拓展：5.4.3、5.4.7、5.4.8、5.4.11、5.4.12、5.4.14。核心路线只要求读完核心小节。
+
 
 \subsection{实体映射与Repository基础}
 
@@ -410,16 +546,16 @@ import java.math.BigDecimal;
 import java.time.Instant;
 
 @Entity
-@Table(name = "water_reading")
-public class WaterReading {
+@Table(name = "reading")
+public class Reading {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(name = "station_id", nullable = false, length = 32)
-    private String stationId;
+    @Column(name = "asset_id", nullable = false, length = 32)
+    private String assetId;
     @Column(nullable = false, precision = 12, scale = 4)
-    private BigDecimal level;
+    private BigDecimal value;
     @Column(nullable = false, length = 12) private String unit;
-    @Column(nullable = false) private Instant measuredAt;
+    @Column(nullable = false) private Instant occurredAt;
     @Column(nullable = false, length = 16) private String quality;
     @Version @Column(nullable = false) private long version;
     @Column(nullable = false) private boolean archived;
@@ -428,64 +564,64 @@ public class WaterReading {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
-    protected WaterReading() {}
-    public WaterReading(String stationId, BigDecimal level, String unit,
-                        Instant measuredAt, String quality, Instant now) {
-        this.stationId = stationId;
-        this.level = level;
+    protected Reading() {}
+    public Reading(String assetId, BigDecimal value, String unit,
+                        Instant occurredAt, String quality, Instant now) {
+        this.assetId = assetId;
+        this.value = value;
         this.unit = unit;
-        this.measuredAt = measuredAt;
+        this.occurredAt = occurredAt;
         this.quality = quality;
         this.createdAt = now;
         this.updatedAt = now;
     }
 
     public Long getId() { return id; }
-    public String getStationId() { return stationId; }
-    public BigDecimal getLevel() { return level; }
+    public String getStationId() { return assetId; }
+    public BigDecimal getValue() { return value; }
     public String getUnit() { return unit; }
-    public Instant getMeasuredAt() { return measuredAt; }
+    public Instant getMeasuredAt() { return occurredAt; }
     public String getQuality() { return quality; }
     public long getVersion() { return version; }
     public Instant getCreatedAt() { return createdAt; }
     public Instant getUpdatedAt() { return updatedAt; }
-    public void replace(BigDecimal level, String unit, Instant measuredAt,
+    public void replace(BigDecimal value, String unit, Instant occurredAt,
                         String quality, Instant now) {
-        this.level = level;
+        this.value = value;
         this.unit = unit;
-        this.measuredAt = measuredAt;
+        this.occurredAt = occurredAt;
         this.quality = quality;
         this.updatedAt = now;
     }
 
     /** 工厂方法：由 DTO 映射层调用，统一填充服务器时间。 */
-    public static WaterReading create(String stationId, BigDecimal level,
-                                      String unit, Instant measuredAt,
+    public static Reading create(String assetId, BigDecimal value,
+                                      String unit, Instant occurredAt,
                                       String quality) {
-        return new WaterReading(stationId, level, unit,
-                measuredAt, quality, Instant.now());
+        return new Reading(assetId, value, unit,
+                occurredAt, quality, Instant.now());
     }
 
     /** 带版本校验的替换：客户端版本与当前版本不一致即视为并发冲突。 */
-    public void replaceIfVersion(BigDecimal level, String unit,
-                                 Instant measuredAt, String quality,
+    public void replaceIfVersion(BigDecimal value, String unit,
+                                 Instant occurredAt, String quality,
                                  long expectedVersion) {
         if (this.version != expectedVersion)
             throw new OptimisticLockException("版本不一致，请重新读取");
-        replace(level, unit, measuredAt, quality, Instant.now());
+        replace(value, unit, occurredAt, quality, Instant.now());
     }
 
     public boolean isArchived() { return archived; }
 }
 
-interface WaterReadingRepository extends JpaRepository<WaterReading, Long> {
-    Optional<WaterReading> findFirstByStationIdOrderByMeasuredAtDesc(String id);
+interface ReadingRepository extends JpaRepository<Reading, Long> {
+    Optional<Reading> findFirstByStationIdOrderByMeasuredAtDesc(String id);
 }
 \end{lstlisting}
 
 Repository提供基本数据访问，服务层决定一次用例需要哪些读写。查询列表时应分页，避免把多年监测记录一次加载到内存。
 
-实体映射的关键不是把每一列机械地搬到 Java 字段，而是明确身份、精度、生命周期和并发语义。水位属于有单位的测量值，使用\texttt{BigDecimal}并设置数据库精度，避免在累计统计时把二进制浮点误差当作工程变化；\texttt{measuredAt}记录设备采样时间，\texttt{createdAt}和\texttt{updatedAt}记录服务器侧生命周期。\texttt{version}由 JPA 在更新时递增，控制器将它映射为响应中的版本，服务层在替换前比较客户端版本。清单\ref{lst:ch05-jpa-entity}补齐了实体访问器，因而前面 DTO 的\texttt{ReadingResponse.from}能够通过公开的只读方法取值，而不会依赖反射或直接暴露字段。
+实体映射的关键不是把每一列机械地搬到 Java 字段，而是明确身份、精度、生命周期和并发语义。水位属于有单位的测量值，使用\texttt{BigDecimal}并设置数据库精度，避免在累计统计时把二进制浮点误差当作工程变化；\texttt{occurredAt}记录设备采样时间，\texttt{createdAt}和\texttt{updatedAt}记录服务器侧生命周期。\texttt{version}由 JPA 在更新时递增，控制器将它映射为响应中的版本，服务层在替换前比较客户端版本。清单\ref{lst:ch05-jpa-entity}补齐了实体访问器，因而前面 DTO 的\texttt{ReadingResponse.from}能够通过公开的只读方法取值，而不会依赖反射或直接暴露字段。
 
 实体的无参构造器供 JPA 反射创建，业务构造器负责建立完整不变量；访问器默认只读，修改通过\texttt{replace}等有业务含义的方法完成。数据库列名、长度、精度和非空约束应与迁移脚本逐项对照，不能只相信 Java 类型。特别是字符串枚举要用稳定的代码值，展示文字由界面字典提供，这样新增中文名称不会破坏历史记录。
 
@@ -502,14 +638,14 @@ import java.util.*;
 class StationEntity {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(name = "station_id", nullable = false, unique = true)
-    private String stationId;
+    @Column(name = "asset_id", nullable = false, unique = true)
+    private String assetId;
     @OneToMany(mappedBy = "station", fetch = FetchType.LAZY)
     private final Set<StationReadingEntity> readings = new LinkedHashSet<>();
 
     protected StationEntity() {}
-    StationEntity(String stationId) { this.stationId = stationId; }
-    public String getStationId() { return stationId; }
+    StationEntity(String assetId) { this.assetId = assetId; }
+    public String getStationId() { return assetId; }
     public Set<StationReadingEntity> getReadings() {
         return Collections.unmodifiableSet(readings);
     }
@@ -526,13 +662,13 @@ class StationReadingEntity {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "station_pk", nullable = false)
     private StationEntity station;
-    @Column(nullable = false) private Instant measuredAt;
+    @Column(nullable = false) private Instant occurredAt;
 
     protected StationReadingEntity() {}
-    StationReadingEntity(Instant measuredAt) { this.measuredAt = measuredAt; }
+    StationReadingEntity(Instant occurredAt) { this.occurredAt = occurredAt; }
     void attachTo(StationEntity station) { this.station = station; }
     public Long getId() { return id; }
-    public Instant getMeasuredAt() { return measuredAt; }
+    public Instant getMeasuredAt() { return occurredAt; }
     public StationEntity getStation() { return station; }
 }
 \end{lstlisting}
@@ -553,11 +689,11 @@ public interface StationReadingQueryRepository
         extends JpaRepository<StationReadingEntity, Long> {
     @Query("select r from StationReadingEntity r "
          + "join fetch r.station s "
-         + "where s.stationId = :stationId "
-         + "and r.measuredAt >= :from and r.measuredAt < :to "
-         + "order by r.measuredAt desc, r.id desc")
+         + "where s.assetId = :assetId "
+         + "and r.occurredAt >= :from and r.occurredAt < :to "
+         + "order by r.occurredAt desc, r.id desc")
     List<StationReadingEntity> findForReport(
-            @Param("stationId") String stationId,
+            @Param("assetId") String assetId,
             @Param("from") Instant from,
             @Param("to") Instant to);
 
@@ -596,9 +732,9 @@ Spring Data 的派生查询名称按“动词 + 属性 + 条件 + 排序”组�
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-interface ReadingPageRepository extends JpaRepository<WaterReading, Long> {
-    Page<WaterReading> findByStationIdAndQuality(
-            String stationId, String quality, Pageable pageable);
+interface ReadingPageRepository extends JpaRepository<Reading, Long> {
+    Page<Reading> findByStationIdAndQuality(
+            String assetId, String quality, Pageable pageable);
 }
 
 @Service
@@ -611,13 +747,13 @@ class ReadingPageService {
     }
 
     @Transactional(readOnly = true)
-    Page<ReadingResponse> page(String stationId, String quality,
+    Page<ReadingResponse> page(String assetId, String quality,
                                int page, int size) {
         int bounded = Math.min(Math.max(size, 1), MAX_PAGE_SIZE);
         Pageable request = PageRequest.of(page, bounded,
-                Sort.by(Sort.Order.desc("measuredAt"),
+                Sort.by(Sort.Order.desc("occurredAt"),
                         Sort.Order.desc("id")));
-        return repository.findByStationIdAndQuality(stationId, quality, request)
+        return repository.findByStationIdAndQuality(assetId, quality, request)
                 .map(ReadingResponse::from);
     }
 }
@@ -629,7 +765,7 @@ class ReadingPageService {
 
 监测读数的修改通常不是高冲突写入，但测站配置、预警规则和人工订正可能被多个值班员同时编辑。\texttt{@Version}把冲突检测交给数据库更新条件：更新语句带上旧版本，影响行数为零就抛出乐观锁异常，异常处理器返回409，客户端重新读取后让用户决定是否合并。它不能替代权限检查，也不能保证跨表操作自动一致；跨聚合修改仍要由事务边界和约束共同保护。
 
-审计字段至少分为创建时间、更新时间、操作者和来源。创建/更新时间可以由 Spring Data Auditing 自动填充，操作者来自经过认证的主体；设备上报的\texttt{stationId}和采样时间属于业务字段，不能用服务器时间覆盖。对逻辑删除记录保留删除时间和原因，查询默认过滤，审计查询按权限开放。
+审计字段至少分为创建时间、更新时间、操作者和来源。创建/更新时间可以由 Spring Data Auditing 自动填充，操作者来自经过认证的主体；设备上报的\texttt{assetId}和采样时间属于业务字段，不能用服务器时间覆盖。对逻辑删除记录保留删除时间和原因，查询默认过滤，审计查询按权限开放。
 
 \begin{lstlisting}[label={lst:ch05-version-audit},language=Java,caption={乐观锁与审计字段映射}]
 import jakarta.persistence.*;
@@ -660,11 +796,11 @@ class StationConfigEntity extends AuditedEntity {
     private Long id;
     @Version @Column(nullable = false)
     private long version;
-    @Column(name = "station_id", nullable = false, unique = true)
-    private String stationId;
+    @Column(name = "asset_id", nullable = false, unique = true)
+    private String assetId;
     @Column(nullable = false) private boolean archived;
     public long getVersion() { return version; }
-    public String getStationId() { return stationId; }
+    public String getStationId() { return assetId; }
     public boolean isArchived() { return archived; }
 }
 \end{lstlisting}
@@ -681,9 +817,9 @@ CREATE EXTENSION IF NOT EXISTS postgis;
 CREATE EXTENSION IF NOT EXISTS timescaledb;
 
 CREATE INDEX IF NOT EXISTS idx_reading_station_time
-    ON water_reading (station_id, measured_at DESC, id DESC);
+    ON reading (asset_id, occurred_at DESC, id DESC);
 CREATE INDEX IF NOT EXISTS idx_reading_quality_time
-    ON water_reading (quality, measured_at DESC)
+    ON reading (quality, occurred_at DESC)
     WHERE quality IN ('valid', 'suspect');
 CREATE TABLE IF NOT EXISTS reading_idempotency (
     idempotency_key text PRIMARY KEY,
@@ -744,7 +880,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.*;
 import java.time.Instant;
 
-record ReadingSavedEvent(Long readingId, String stationId) {}
+record ReadingSavedEvent(Long readingId, String assetId) {}
 
 @Service
 class AuditService {
@@ -761,11 +897,11 @@ class AuditService {
 
 @Service
 class ReadingCommandService {
-    private final WaterReadingRepository repository;
+    private final ReadingRepository repository;
     private final AuditService auditService;
     private final ApplicationEventPublisher eventPublisher;
 
-    ReadingCommandService(WaterReadingRepository repository,
+    ReadingCommandService(ReadingRepository repository,
             AuditService auditService,
             ApplicationEventPublisher eventPublisher) {
         this.repository = repository;
@@ -774,8 +910,8 @@ class ReadingCommandService {
     }
 
     @Transactional
-    public void save(WaterReading reading) {
-        WaterReading saved = repository.save(reading);
+    public void save(Reading reading) {
+        Reading saved = repository.save(reading);
         auditService.record("SAVE_READING"); // 经另一Bean代理调用
         eventPublisher.publishEvent(
                 new ReadingSavedEvent(saved.getId(), saved.getStationId()));
@@ -836,7 +972,7 @@ class ReadingBatchService {
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public void saveBatch(List<WaterReading> batch) {
+    public void saveBatch(List<Reading> batch) {
         readings.saveAll(batch);
         audit.record("BATCH_SAVED");
         metrics.sample(batch.size());
@@ -872,11 +1008,11 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class ReadingConcurrencyTest {
     // JUnit 5 的构造器注入需要 @Autowired，否则参数无法解析
     private final ReadingCommandService service;
-    private final WaterReadingRepository repository;
+    private final ReadingRepository repository;
 
     @Autowired
     ReadingConcurrencyTest(ReadingCommandService service,
-                           WaterReadingRepository repository) {
+                           ReadingRepository repository) {
         this.service = service;
         this.repository = repository;
     }
@@ -889,8 +1025,8 @@ class ReadingConcurrencyTest {
 
     @Test
     void staleVersionIsConflict() {
-        WaterReading first = repository.findById(1L).orElseThrow();
-        WaterReading second = repository.findById(1L).orElseThrow();
+        Reading first = repository.findById(1L).orElseThrow();
+        Reading second = repository.findById(1L).orElseThrow();
         service.replace(first, new BigDecimal("1.20"));
         assertThatThrownBy(() -> service.replace(second, new BigDecimal("1.30")))
                 .isInstanceOf(OptimisticLockingFailureException.class);
@@ -921,25 +1057,25 @@ import org.springframework.transaction.annotation.*;
 
 @Service
 class ReadingUseCase {
-    private final WaterReadingRepository repository;
+    private final ReadingRepository repository;
     private final ApplicationEventPublisher publisher;
 
-    ReadingUseCase(WaterReadingRepository repository,
+    ReadingUseCase(ReadingRepository repository,
                    ApplicationEventPublisher publisher) {
         this.repository = repository;
         this.publisher = publisher;
     }
 
     @Transactional(readOnly = true)
-    ReadingResponse latest(String stationId) {
-        return repository.findFirstByStationIdOrderByMeasuredAtDesc(stationId)
+    ReadingResponse latest(String assetId) {
+        return repository.findFirstByStationIdOrderByMeasuredAtDesc(assetId)
                 .map(ReadingResponse::from)
                 .orElseThrow(() -> new EntityNotFoundException("测站无读数"));
     }
 
     @Transactional
-    ReadingResponse save(WaterReading reading) {
-        WaterReading saved = repository.save(reading);
+    ReadingResponse save(Reading reading) {
+        Reading saved = repository.save(reading);
         publisher.publishEvent(
                 new ReadingSavedEvent(saved.getId(), saved.getStationId()));
         return ReadingResponse.from(saved);
@@ -979,7 +1115,8 @@ class WaterDataSummary {
 
 \section{服务层与异常处理}
 
-\paragraph{本节层次}核心：5.4.1；指导实践：5.4.2、5.4.3、5.4.5；拓展：5.4.4、5.4.6。核心路线只要求读完核心小节。
+\paragraph{本节层次}核心：5.5.1；指导实践：5.5.2、5.5.3、5.5.5；拓展：5.5.4、5.5.6。核心路线只要求读完核心小节。
+
 
 服务层按用例组织方法，例如“保存监测值”“确认告警”“查询测站详情”。输入DTO先通过Bean Validation完成格式校验，领域规则仍由服务或领域对象校验。统一响应不应把所有结果都包装成HTTP 200；HTTP状态码仍须表达协议层结果。
 
@@ -987,10 +1124,10 @@ class WaterDataSummary {
 // 与 5.1 节的 CreateReadingRequest 相比省略了 unit 和 quality，
 // 用最小字段演示校验异常的响应结构，故单独命名
 record ReadingValidationPayload(
-        @NotBlank String stationId,
+        @NotBlank String assetId,
         // 上下限为示例阈值，工程取值以第8章8.1参数表为唯一来源
-        @NotNull @DecimalMin("0.0") @DecimalMax("50.0") BigDecimal level,
-        @NotNull Instant measuredAt) {}
+        @NotNull @DecimalMin("0.0") @DecimalMax("1000.0") BigDecimal value,   // 量程按对象类型再校验，见测点台账
+        @NotNull Instant occurredAt) {}
 
 @RestControllerAdvice
 class GlobalExceptionHandler {
@@ -1015,7 +1152,7 @@ class GlobalExceptionHandler {
 
 \subsection{读写接口的完整闭环}
 
-一个可交付的 REST 资源至少要说明集合查询、单项查询、创建、整体更新和删除的语义。以监测读数为例，\texttt{GET /api/readings/{id}}返回单条记录，\texttt{GET /api/readings}支持分页与过滤，\texttt{POST /api/readings}创建新记录，\texttt{PUT /api/readings/{id}}替换可编辑字段，\texttt{DELETE /api/readings/{id}}删除尚未归档的记录。更新和删除前要检查资源版本、用户权限和业务状态；已进入审计归档的读数应采用逻辑失效或拒绝删除，而不是直接破坏时序证据。
+一个可交付的 REST 资源至少要说明集合查询、单项查询、创建、整体更新和删除的语义。案例平台对观测记录只允许“新增”和“订正为新版本”（见 8.1 节契约表），下面清单中的\texttt{DELETE}只用于讲解 REST 语义，真实平台不提供删除观测的接口。以监测读数为例，\texttt{GET /api/readings/{id}}返回单条记录，\texttt{GET /api/readings}支持分页与过滤，\texttt{POST /api/readings}创建新记录，\texttt{PUT /api/readings/{id}}替换可编辑字段，\texttt{DELETE /api/readings/{id}}删除尚未归档的记录。更新和删除前要检查资源版本、用户权限和业务状态；已进入审计归档的读数应采用逻辑失效或拒绝删除，而不是直接破坏时序证据。
 
 \begin{lstlisting}[label={lst:ch05-crud-controller},language=Java,caption={监测读数 GET/POST/PUT/DELETE 控制器}]
 @RestController
@@ -1029,9 +1166,9 @@ class ReadingCrudController {
 
     @GetMapping
     Page<ReadingResponse> list(@PageableDefault(size = 20) Pageable pageable,
-                               @RequestParam(required = false) String stationId,
+                               @RequestParam(required = false) String assetId,
                                @RequestParam(required = false) String quality) {
-        return service.list(pageable, stationId, quality);
+        return service.list(pageable, assetId, quality);
     }
 
     @GetMapping("/{id}")
@@ -1066,18 +1203,18 @@ class ReadingCrudController {
 
 \begin{lstlisting}[label={lst:ch05-dto-mapper},language=Java,caption={DTO 与实体的双向映射}]
 record ReplaceReadingRequest(
-        @NotNull BigDecimal level,
+        @NotNull BigDecimal value,
         @NotBlank String unit,
-        @NotNull Instant measuredAt,
+        @NotNull Instant occurredAt,
         @NotBlank String quality,
         @NotNull Long version) {}
 
-record ReadingResponse(long id, String stationId, BigDecimal level,
-                       String unit, Instant measuredAt, String quality,
+record ReadingResponse(long id, String assetId, BigDecimal value,
+                       String unit, Instant occurredAt, String quality,
                        long version) {
-    static ReadingResponse from(WaterReading entity) {
+    static ReadingResponse from(Reading entity) {
         return new ReadingResponse(entity.getId(), entity.getStationId(),
-                entity.getLevel(), entity.getUnit(), entity.getMeasuredAt(),
+                entity.getValue(), entity.getUnit(), entity.getMeasuredAt(),
                 entity.getQuality(), entity.getVersion());
     }
 }
@@ -1085,9 +1222,9 @@ record ReadingResponse(long id, String stationId, BigDecimal level,
 final class ReadingMapper {
     private ReadingMapper() {}
 
-    static WaterReading toEntity(CreateReadingRequest request) {
-        return WaterReading.create(request.stationId(), request.level(),
-                request.unit(), request.measuredAt(), request.quality());
+    static Reading toEntity(CreateReadingRequest request) {
+        return Reading.create(request.assetId(), request.value(),
+                request.unit(), request.occurredAt(), request.quality());
     }
 }
 \end{lstlisting}
@@ -1097,10 +1234,10 @@ final class ReadingMapper {
 \begin{lstlisting}[label={lst:ch05-command-service},language=Java,caption={应用服务中的写入、更新与删除规则}]
 @Service
 class ReadingApplicationService {
-    private final WaterReadingRepository repository;
+    private final ReadingRepository repository;
     private final StationRepository stations;
 
-    ReadingApplicationService(WaterReadingRepository repository,
+    ReadingApplicationService(ReadingRepository repository,
                               StationRepository stations) {
         this.repository = repository;
         this.stations = stations;
@@ -1108,24 +1245,24 @@ class ReadingApplicationService {
 
     @Transactional
     ReadingResponse create(CreateReadingRequest request) {
-        if (!stations.existsById(request.stationId()))
+        if (!stations.existsById(request.assetId()))
             throw new EntityNotFoundException("测站不存在");
-        WaterReading entity = ReadingMapper.toEntity(request);
+        Reading entity = ReadingMapper.toEntity(request);
         return ReadingResponse.from(repository.save(entity));
     }
 
     @Transactional
     ReadingResponse replace(long id, ReplaceReadingRequest request) {
-        WaterReading entity = repository.findById(id)
+        Reading entity = repository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("读数不存在"));
-        entity.replaceIfVersion(request.level(), request.unit(),
-                request.measuredAt(), request.quality(), request.version());
+        entity.replaceIfVersion(request.value(), request.unit(),
+                request.occurredAt(), request.quality(), request.version());
         return ReadingResponse.from(repository.save(entity));
     }
 
     @Transactional
     void delete(long id) {
-        WaterReading entity = repository.findById(id)
+        Reading entity = repository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("读数不存在"));
         if (entity.isArchived()) throw new ConflictException("归档读数不可删除");
         repository.delete(entity);
@@ -1178,9 +1315,9 @@ class ReadingProblemAdvice {
 
 参数校验可以分为表示层、领域层和持久化层三道闸。表示层验证 JSON 是否完整、类型是否正确、字符串长度和枚举值是否落在公开契约内；领域层验证测站是否存在、单位是否与测点配置匹配、采样时间是否满足时序顺序、质量码是否允许进入计算；持久化层通过非空约束、唯一约束、外键和检查约束保证最后一道数据完整性。三层校验不是重复劳动，而是分别面对不同入口：HTTP 请求、内部消息和数据库脚本都可能绕过其中一层。
 
-同一字段的错误要有稳定的错误码。\texttt{stationId}为空属于\texttt{FIELD\_REQUIRED}，测站不存在属于\texttt{STATION\_NOT\_FOUND}，水位超出批准范围属于\texttt{LEVEL\_OUT\_OF\_RANGE}，采样时间倒退属于\texttt{MEASURED\_AT\_ORDER}。错误码与 HTTP 状态码分离：字段错误和业务规则错误都可以返回400，但前端通过错误码决定提示文本和是否允许重试。错误详情不要包含数据库列名、SQL 或内部堆栈，以免把实现细节暴露给外部调用者。
+同一字段的错误要有稳定的错误码。\texttt{assetId}为空属于\texttt{FIELD\_REQUIRED}，测站不存在属于\texttt{STATION\_NOT\_FOUND}，水位超出批准范围属于\texttt{LEVEL\_OUT\_OF\_RANGE}，采样时间倒退属于\texttt{MEASURED\_AT\_ORDER}。错误码与 HTTP 状态码分离：字段错误和业务规则错误都可以返回400，但前端通过错误码决定提示文本和是否允许重试。错误详情不要包含数据库列名、SQL 或内部堆栈，以免把实现细节暴露给外部调用者。
 
-校验分组适合处理创建和更新的差异。创建读数要求\texttt{stationId}、\texttt{measuredAt}、\texttt{level}和\texttt{quality}全部提供；更新读数可能只允许修改订正值和质量码，同时必须携带版本号；删除请求不需要读取体，但要检查资源状态和操作者权限。把三种请求复用为一个“万能 DTO”会产生大量可选字段，容易出现“字段缺失却被当作清空”的歧义。为每种用例定义独立 record，能让 OpenAPI 文档、测试和错误提示保持一致。
+校验分组适合处理创建和更新的差异。创建读数要求\texttt{assetId}、\texttt{occurredAt}、\texttt{value}和\texttt{quality}全部提供；更新读数可能只允许修改订正值和质量码，同时必须携带版本号；删除请求不需要读取体，但要检查资源状态和操作者权限。把三种请求复用为一个“万能 DTO”会产生大量可选字段，容易出现“字段缺失却被当作清空”的歧义。为每种用例定义独立 record，能让 OpenAPI 文档、测试和错误提示保持一致。
 
 \subsection{HTTP 状态转换与事务语义}
 
@@ -1213,7 +1350,8 @@ MockMvc 或 WebTestClient 可以在没有真实网络的情况下验证控制器
 
 \section{Spring Security 6与JWT}
 
-\paragraph{本节层次}指导实践：5.5.1、5.5.3、5.5.5；拓展：5.5.2、5.5.4、5.5.6、5.5.7、5.5.8。本节没有核心小节，课堂核心路线可整体跳过。
+\paragraph{本节层次}指导实践：5.6.1、5.6.3、5.6.5；拓展：5.6.2、5.6.4、5.6.6、5.6.7、5.6.8。本节没有核心小节，课堂核心路线可整体跳过。
+
 
 认证回答“用户是谁”，授权回答“允许做什么”。Spring Security 6使用\texttt{@EnableMethodSecurity}启用方法授权，并采用Lambda DSL配置过滤链。无状态API关闭服务器会话并在JWT过滤器中建立认证上下文。
 
@@ -1674,7 +1812,8 @@ CORS 预检请求只是在浏览器侧询问“是否允许这个源访问”，
 
 \section{事务事件与消息队列}
 
-\paragraph{本节层次}核心：5.6.1；指导实践：5.6.2、5.6.3、5.6.4、5.6.5；拓展：5.6.6。核心路线只要求读完核心小节。
+\paragraph{本节层次}核心：5.7.1；指导实践：5.7.2、5.7.3、5.7.4、5.7.5；拓展：5.7.6。核心路线只要求读完核心小节。
+
 
 同一应用进程内的领域事件可降低模块耦合。若处理必须在数据库事务成功后执行，应使用\texttt{@TransactionalEventListener}并指定\texttt{AFTER\_COMMIT}，不能用普通\texttt{@EventListener}声称“提交后执行”。
 
@@ -1684,7 +1823,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.*;
 
 interface MetricsCounter {
-    void increment(String stationId);
+    void increment(String assetId);
 }
 
 @Component
@@ -1697,7 +1836,7 @@ class ReadingEventHandler {
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     void afterCommit(ReadingSavedEvent event) {
-        metricsCounter.increment(event.stationId());
+        metricsCounter.increment(event.assetId());
     }
 }
 \end{lstlisting}
@@ -1705,8 +1844,8 @@ class ReadingEventHandler {
 跨服务通信必须使用网络可达的消息基础设施。下面的Kafka监听器位于告警服务，消费数据服务发布的事件；它不是进程内事件监听器。
 
 \begin{lstlisting}[label={lst:ch05-metrics},language=Java,caption={Kafka 消息监听与告警评估}]
-record ReadingMessage(String eventId, String stationId,
-                      BigDecimal level, Instant measuredAt) {}
+record ReadingMessage(String eventId, String assetId,
+                      BigDecimal value, Instant occurredAt) {}
 
 @Component
 class AlertMessageListener {
@@ -1719,8 +1858,8 @@ class AlertMessageListener {
     // 与后文幂等消费者分属不同消费组：两组各自独立消费同一主题
     @KafkaListener(topics = "water.reading.saved", groupId = "alert-basic-v1")
     void onReading(ReadingMessage message) {
-        alertService.evaluateIdempotently(message.eventId(), message.stationId(),
-                message.level(), message.measuredAt());
+        alertService.evaluateIdempotently(message.eventId(), message.assetId(),
+                message.value(), message.occurredAt());
     }
 }
 \end{lstlisting}
@@ -1772,8 +1911,8 @@ import java.time.Instant;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-record ReadingSavedMessage(String eventId, String stationId,
-                           String quality, Instant measuredAt,
+record ReadingSavedMessage(String eventId, String assetId,
+                           String quality, Instant occurredAt,
                            String schemaVersion, String traceId) {}
 
 @Service
@@ -1787,13 +1926,13 @@ class ReadingEventPublisher {
         this.failures = failures;
     }
 
-    void publish(String stationId, String quality, Instant measuredAt,
+    void publish(String assetId, String quality, Instant occurredAt,
                  String traceId) {
         String eventId = UUID.randomUUID().toString();
         ReadingSavedMessage message = new ReadingSavedMessage(
-                eventId, stationId, quality, measuredAt, "v1", traceId);
+                eventId, assetId, quality, occurredAt, "v1", traceId);
         CompletableFuture<?> future = kafka.send("water.reading.saved",
-                stationId, message);
+                assetId, message);
         future.whenComplete((result, error) -> {
             if (error != null) failures.record(eventId, message, error);
         });
@@ -1849,7 +1988,7 @@ class ReadingAlertConsumer {
         } catch (DataIntegrityViolationException duplicate) {
             return; // 唯一约束表明该事件已成功处理
         }
-        alerts.evaluate(message.stationId(), message.measuredAt(),
+        alerts.evaluate(message.assetId(), message.occurredAt(),
                         message.quality(), message.traceId());
     }
 }
@@ -1971,244 +2110,16 @@ Kafka 主题由多个分区组成，分区是并行度和顺序边界。同一�
 
 当 Kafka 集群不可用时，写入接口要依据业务级别选择策略：关键监测原始记录仍可先落库并由发件箱延迟发布，实时预警状态则返回“暂未评估”并在界面显示数据时间；不应为了保持 HTTP 200 而假装告警已完成。恢复后发布器按创建时间和优先级追赶积压，并限制重放速率，避免恢复瞬间再次冲击下游。运维手册记录暂停消费、扩容分区、迁移死信和回滚模式版本的步骤。
 
-\section{性能优化与可观测性}
+\section{性能与可观测性：往哪里找}\label{sec:ch05-perf-pointer}
 
-\paragraph{本节层次}拓展：5.7.1、5.7.2、5.7.3、5.7.4、5.7.5。本节没有核心小节，课堂核心路线可整体跳过。
+\paragraph{本节层次}拓展。
 
-性能优化先测量再修改。数据库查询应建立与查询模式匹配的索引并使用分页；热点且允许短暂陈旧的数据可缓存；外部调用设置连接、读取和总超时；线程池与数据库连接池容量应依据压测结果配置。
-
-可观测性包括日志、指标和追踪。关键指标可包含请求延迟、错误率、数据库连接使用率、Kafka消费积压和告警处理时延。健康检查只说明实例可服务，不等同于业务正确。
-
-\subsection{缓存与 Redis 一致性}
-
-缓存的目标是减少重复读取和下游压力，而不是把数据库当作可选项。测站最新状态、权限字典和短期统计适合缓存；原始监测记录、审计日志和需要强一致的版本检查仍以 PostgreSQL 为准。缓存键要包含租户、测站、查询版本和单位，值中带生成时间与数据版本，界面显示缓存时间，避免把陈旧快照误当作实时水位。
-
-\begin{lstlisting}[label={lst:ch05-cache-redis},language=Java,caption={Spring Cache 与 Redis 缓存读写}]
-import org.springframework.cache.annotation.*;
-import org.springframework.stereotype.Service;
-import java.time.Duration;
-
-@Service
-class LatestReadingCache {
-    private final ReadingQueryRepository repository;
-
-    LatestReadingCache(ReadingQueryRepository repository) {
-        this.repository = repository;
-    }
-
-    @Cacheable(cacheNames = "latest-reading", key = "#stationId",
-               unless = "#result == null")
-    public ReadingResponse get(String stationId) {
-        return repository.findLatest(stationId)
-                .map(ReadingResponse::from)
-                .orElseThrow(() -> new EntityNotFoundException("测站无读数"));
-    }
-
-    @CacheEvict(cacheNames = "latest-reading", key = "#stationId")
-    public void evictAfterWrite(String stationId) {
-        // 由提交后事件调用，避免事务回滚时清错缓存
-    }
-}
-
-@Configuration
-class RedisCacheConfig {
-    @Bean
-    RedisCacheConfiguration cacheDefaults() {
-        return RedisCacheConfiguration.defaultCacheConfig()
-                .entryTtl(Duration.ofSeconds(30))
-                .disableCachingNullValues();
-    }
-}
-\end{lstlisting}
-
-清单\ref{lst:ch05-cache-redis}把缓存失效挂到写入提交后的事件，而不是在事务中提前删除；如果写入回滚，旧缓存仍然有效。生产环境为不同缓存设置 TTL 和容量上限，序列化采用受控 JSON 类型，禁止把 JPA 实体和懒加载代理直接写入 Redis。缓存命中、未命中、序列化失败和驱逐次数都要有指标，才能判断缓存是否真正降低了数据库压力。
-
-缓存有三类常见风险。缓存穿透是大量请求查询不存在的测站，应用可以对空结果短暂缓存、校验 ID 格式并设置限流；缓存击穿是热门键在同一时刻过期，应用可以使用互斥锁、逻辑过期或预热任务；缓存雪崩是大量键同时过期或 Redis 集群故障，应用应加入随机 TTL、分批预热、熔断和数据库限流。降级读取旧快照时必须标注时间和可信等级，不能静默返回“最新”。
-
-\subsection{分页、游标与查询预算}
-
-页码分页适合需要跳转和精确总数的管理界面，游标分页适合不断追加的时序数据。游标由最后一条记录的时间和唯一 ID 组成，服务端签名或编码后返回不透明字符串；下一页使用\texttt{(measuredAt,id) < (cursorTime,cursorId)}的联合条件，避免高页码\texttt{OFFSET}扫描历史数据。游标必须绑定原查询过滤条件和过期时间，客户端不能自行修改边界。
-
-\begin{lstlisting}[label={lst:ch05-cursor-page},language=Java,caption={基于时间与 ID 的游标分页}]
-import org.springframework.data.domain.*;
-import org.springframework.data.jpa.repository.*;
-import org.springframework.data.repository.query.Param;
-import java.time.Instant;
-import java.util.List;
-
-record ReadingCursor(Instant measuredAt, long id) {}
-record CursorPage<T>(List<T> content, String nextCursor,
-                     boolean hasNext) {}
-
-interface ReadingCursorRepository extends JpaRepository<WaterReading, Long> {
-    @Query("select r from WaterReading r "
-         + "where r.stationId = :stationId "
-         + "and (r.measuredAt < :time or "
-         + "(r.measuredAt = :time and r.id < :id)) "
-         + "order by r.measuredAt desc, r.id desc")
-    List<WaterReading> next(@Param("stationId") String stationId,
-                            @Param("time") Instant time,
-                            @Param("id") long id, Pageable limit);
-}
-
-@Service
-class CursorReadingService {
-    private final ReadingCursorRepository repository;
-    CursorReadingService(ReadingCursorRepository repository) {
-        this.repository = repository;
-    }
-
-    @Transactional(readOnly = true)
-    CursorPage<ReadingResponse> next(String stationId, ReadingCursor cursor) {
-        List<WaterReading> rows = repository.next(stationId,
-                cursor.measuredAt(), cursor.id(), PageRequest.of(0, 51));
-        boolean hasNext = rows.size() > 50;
-        List<WaterReading> page = hasNext ? rows.subList(0, 50) : rows;
-        String next = hasNext ? encode(page.get(page.size() - 1)) : null;
-        return new CursorPage<>(page.stream().map(ReadingResponse::from).toList(),
-                next, hasNext);
-    }
-
-    private String encode(WaterReading row) {
-        return row.getMeasuredAt().toString() + ":" + row.getId();
-    }
-}
-\end{lstlisting}
-
-清单\ref{lst:ch05-cursor-page}多取一条记录判断是否还有下一页，避免额外的\texttt{count(*)}；生产实现要对游标签名或使用服务器端存储，防止客户端篡改时间和测站。分页请求限制时间范围、单页大小和并发导出任务数，大范围报表转成异步任务并返回任务 ID。性能预算写在接口契约中，例如 P95 查询时延、最大返回字节数和连接占用上限。
-
-\subsection{连接池与慢查询定位}
-
-连接池容量不是越大越好。每个请求占用一个数据库连接，连接数过大会让 PostgreSQL 争抢 CPU 和内存；连接数过小则请求排队。初始值根据数据库最大连接数、服务实例数和其他后台任务估算，再通过压测调整。HikariCP 的连接超时、最大生命周期、空闲超时和泄漏检测应有明确单位，日志显示池中活动、空闲、等待连接数，不能只看 HTTP 线程数量。
-
-慢查询定位遵循“请求—Repository—SQL—执行计划”链路。结构化日志带 traceId 和查询名，Micrometer 记录耗时分位数；PostgreSQL 慢查询日志和\texttt{pg\_stat\_statements}提供 SQL 级证据；\texttt{EXPLAIN (ANALYZE, BUFFERS)}确认是否命中联合索引、是否发生 N+1 或大范围顺序扫描。优化后重新压测并比较 P95、锁等待、缓存命中和连接池排队，不能只凭一次本地运行下结论。
-
-\begin{lstlisting}[label={lst:ch05-pool-config},language=YAML,caption={连接池、超时与慢查询日志配置}]
-spring:
-  datasource:
-    hikari:
-      maximum-pool-size: ${DB_POOL_MAX:20}
-      minimum-idle: ${DB_POOL_MIN:5}
-      connection-timeout: 2000
-      validation-timeout: 1000
-      max-lifetime: 1800000
-      leak-detection-threshold: 5000
-  jpa:
-    properties:
-      hibernate.generate_statistics: false
-logging:
-  level:
-    org.hibernate.SQL: INFO
-    com.zaxxer.hikari: INFO
-\end{lstlisting}
-
-配置中的默认值只用于开发验证，生产值由容量评估和压测报告确定。泄漏检测用于发现忘记关闭流或事务边界失控，不能长期替代正确的资源管理；SQL 日志在生产环境要脱敏并控制采样率，避免把测站数据和参数全部写入日志。连接池耗尽应触发告警和限流，服务返回503或可解释的降级结果，而不是无限等待。
-
-\subsection{Actuator、Micrometer 与结构化日志}
-
-Actuator 端点按暴露风险分组。健康检查可以公开进程存活和依赖状态，指标端点只允许运维角色访问，\texttt{env}、\texttt{configprops}和线程转储在生产环境默认关闭或经过严格授权。健康状态区分 liveness、readiness 和业务可用：数据库不可达时实例可能仍存活，但不应接收写入流量。
-
-\begin{lstlisting}[label={lst:ch05-actuator-metrics},language=Java,caption={Actuator 健康检查与 Micrometer 指标}]
-import io.micrometer.core.instrument.*;
-import org.springframework.boot.actuate.health.*;
-import org.springframework.context.annotation.*;
-import org.springframework.stereotype.Component;
-
-@Component
-class ReadingHealthIndicator implements HealthIndicator {
-    private final ReadingRepository repository;
-    ReadingHealthIndicator(ReadingRepository repository) {
-        this.repository = repository;
-    }
-    public Health health() {
-        return repository.isAvailable()
-                ? Health.up().withDetail("store", "postgresql").build()
-                : Health.down().withDetail("store", "unavailable").build();
-    }
-}
-
-@Configuration
-class ReadingMetrics {
-    ReadingMetrics(MeterRegistry registry) {
-        Gauge.builder("water.reading.queue.depth", this,
-                metrics -> metrics.queueDepth())
-             .description("待处理读数队列深度").register(registry);
-        Counter.builder("water.reading.rejected")
-               .description("因质量或权限拒收的读数")
-               .register(registry);
-    }
-    double queueDepth() { return 0; }
-}
-\end{lstlisting}
-
-清单\ref{lst:ch05-actuator-metrics}把健康检查和业务指标分开：健康检查回答“实例是否能工作”，指标回答“处理质量和容量如何”。指标标签使用有限枚举，如质量码、结果类型和服务版本，不能把测站 ID、用户 ID 或完整 URL 作为高基数标签。告警阈值与案例水库 8.1 参数表中的工程阈值分离，运维告警不能修改业务预警标准。
-
-\begin{table}[htbp]
-\centering
-\small
-\caption{后端性能与可运维关键指标}
-\label{tab:ch05-observability-metrics}
-\begin{tabular}{p{0.24\textwidth}p{0.28\textwidth}p{0.34\textwidth}}
-\toprule
-指标 & 采集位置 & 处置动作 \\
-\midrule
-HTTP P95/P99 延迟 & Micrometer Timer、网关 & 按路由定位慢查询或下游超时 \\
-连接池活动/等待数 & Hikari 指标 & 调整池大小、限流并检查事务泄漏 \\
-缓存命中率/驱逐数 & Redis 客户端 & 调整 TTL、键设计和预热策略 \\
-Kafka 积压/死信数 & 消费者组、DLT & 扩容消费者、修复模式或补发事件 \\
-错误率与401/403/503 & 结构化日志、计数器 & 区分客户端、权限、依赖和发布故障 \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-表\ref{tab:ch05-observability-metrics}中的指标必须能关联同一 traceId 和发布版本，值班员才能从告警跳到具体请求和日志。指标只做趋势和阈值判断，根因仍需结合日志、数据库执行计划和消息偏移量。告警规则设置冷却、恢复通知和责任角色，避免同一故障在网关、服务、数据库和 Kafka 层重复轰炸。
-
-\begin{lstlisting}[label={lst:ch05-trace-log},language=Java,caption={traceId 贯穿请求与结构化日志}]
-import jakarta.servlet.*;
-import jakarta.servlet.http.*;
-import org.slf4j.MDC;
-import org.springframework.web.filter.OncePerRequestFilter;
-import java.io.IOException;
-import java.util.UUID;
-
-class TraceIdFilter extends OncePerRequestFilter {
-    protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain chain)
-            throws ServletException, IOException {
-        String traceId = request.getHeader("X-Trace-Id");
-        if (traceId == null || traceId.isBlank())
-            traceId = UUID.randomUUID().toString();
-        try (MDC.MDCCloseable ignored = MDC.putCloseable("traceId", traceId)) {
-            response.setHeader("X-Trace-Id", traceId);
-            chain.doFilter(request, response);
-        }
-    }
-}
-\end{lstlisting}
-
-清单\ref{lst:ch05-trace-log}在请求进入时建立 traceId，在离开线程前清理 MDC，避免线程池复用造成串号。Kafka 事件、数据库审计、Redis 操作和异步任务要显式传递 traceId；跨服务只传递可追踪 ID，不把 Authorization 头写入日志。结构化日志字段固定为时间、级别、服务、版本、traceId、事件类型、耗时和结果码，中文描述作为补充，便于机器检索和人工复核。
-
-性能优化要与容量和恢复一起验收。一次压测至少记录并发请求、P95/P99、数据库连接、缓存命中、Kafka 积压、错误分类和 CPU/内存；故障演练再观察 Redis 不可用、数据库慢查询、Kafka 延迟和下游超时的降级结果。任何优化都保留开关、回滚配置和前后对比，避免为了追求单次吞吐牺牲数据可信度或审计完整性。
-
-\subsection{性能故障的分层处置}
-
-发现接口变慢时，先用 traceId 确认请求是否在网关排队、控制器参数校验、服务业务规则、数据库查询、Redis 访问还是 Kafka 发送阶段耗时。网关延迟高应检查连接和限流，服务耗时高应检查线程池和外部超时，数据库耗时高应查看执行计划、锁等待和连接池，缓存异常应查看命中率、序列化和网络延迟，消息积压则检查分区热点和消费者处理时间。分层诊断避免把所有问题都归结为“数据库不够快”。
-
-降级策略要保持业务语义。测站最新状态查询可以在短时间内返回标注时间的缓存快照；原始读数写入应优先保证落库，消息通知通过发件箱延迟；预警评估依赖数据质量不足时返回“未评估”，而不是生成一个看似正常的颜色；权限和审计服务不可用时，高风险写操作拒绝并返回503。每种降级都记录原因、开始时间、影响接口和恢复条件，恢复后自动清除或由运维确认。
-
-Actuator 与日志端点本身也是生产攻击面。只暴露健康和必要指标，端点路径放在独立管理网或由 Spring Security 保护；健康详情不显示数据库地址、用户名、异常堆栈和令牌配置。结构化日志采用 JSON 输出，敏感字段在进入 MDC 前脱敏，异常堆栈关联内部事件 ID 而不是回显给客户端。日志采样不能丢失安全失败、事务回滚、死信和数据拒收事件，这些事件需要完整审计。
-
-连接池和线程池必须共同估算。一个请求可能先占数据库连接，再等待 Kafka 回调或外部 HTTP，若线程数远大于连接池就会产生排队，若连接池远大于数据库容量则会放大锁竞争。使用压测数据设定最大并发、队列长度、拒绝策略和优雅停机时间；停机先停止接收新消息，再等待正在处理的事务提交或回滚，最后关闭连接池。健康检查只有在资源准备好后才报告 ready，滚动发布不会把半初始化实例加入流量。
-
-缓存、分页和指标的配置要纳入版本管理。每次改变 TTL、最大页大小、连接池或告警阈值，都在变更记录中说明预期收益、风险、验证查询和回滚值；环境变量覆盖只改变部署参数，不改变案例水库的工程参数。运维手册提供一条从指标告警到日志、SQL、Kafka 偏移量和发布版本的排查路径，值班员按步骤即可复现和升级问题。
-每次演练结束后还要归档指标快照、关键日志、执行计划和责任人复盘结论，形成下一轮容量评估的可追溯基线。
-复盘结论应同步到发布记录和运维知识库。
-容量评估还应标注数据版本和运行环境，保证不同批次的结果可比较。
+缓存与 Redis 一致性、游标分页、连接池与慢查询定位、Actuator 与结构化日志、性能故障的分层处置，这五个专题不在基础课程的编码要求之内，已整体移至附录C“拓展专题”，供课程设计与运维阶段查阅。课堂核心路线在本章需要记住的只有一句：任何性能措施都必须先有 5.4 节的查询测试与执行计划证据，再谈缓存和连接池。
 
 \section{测试策略与质量门禁}
 
 \paragraph{本节层次}指导实践。
+
 
 测试不是在开发完成后“补一遍请求”，而是把接口契约、事务边界和安全策略转化为可以重复执行的证据。对水利工程安全监测平台而言，测试数据必须带有测站编号、采样时间、质量码和操作者上下文；只验证 HTTP 状态码而不检查质量码和审计字段，仍可能把无效读数送入风险计算。测试报告应记录代码版本、数据库迁移版本、配置 Profile、时区和数据集版本，便于值班员在故障复盘时重现同一条件。
 
@@ -2246,7 +2157,7 @@ class ReadingCommandServiceTest {
 
     @Test
     void rejectsMissingQualityReading() {
-        ReadingCommand command = new ReadingCommand("QY-001",
+        ReadingCommand command = new ReadingCommand("DAM-A-PZ-07",
                 new BigDecimal("48.20"), Instant.parse("2026-08-06T23:59:00Z"),
                 "missing", "event-1");
         assertThatThrownBy(() -> service.save(command))
@@ -2256,7 +2167,7 @@ class ReadingCommandServiceTest {
 
     @Test
     void storesValidReadingOnceForAnIdempotencyKey() {
-        ReadingCommand command = new ReadingCommand("QY-001",
+        ReadingCommand command = new ReadingCommand("DAM-A-PZ-07",
                 new BigDecimal("48.20"), Instant.parse("2026-08-06T23:59:00Z"),
                 "valid", "event-2");
         when(idempotencyStore.claim("event-2")).thenReturn(true);
@@ -2291,18 +2202,17 @@ class ReadingControllerIT {
 
     @Test
     void returnsLatestReadingForAnAuthorizedUser() throws Exception {
-        mockMvc.perform(get("/api/readings/latest")
-                .param("stationId", "QY-001")
+        mockMvc.perform(get("/api/assets/DAM-A-PZ-07/readings/latest")
                 .with(SecurityMockMvcRequestPostProcessors.user("analyst")
                         .roles("ANALYST")))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.stationId").value("QY-001"));
+            .andExpect(jsonPath("$.assetId").value("DAM-A-PZ-07"));
     }
 
     @Test
     void rejectsInvalidParameter() throws Exception {
-        mockMvc.perform(get("/api/readings/latest")
-                .param("stationId", "")
+        // 对象编码不符合 DAM-区-类型-序号 的格式：进入方法前即由校验拦截为 400
+        mockMvc.perform(get("/api/assets/bad id/readings/latest")
                 .with(SecurityMockMvcRequestPostProcessors.user("analyst")
                         .roles("ANALYST")))
             .andExpect(status().isBadRequest())
@@ -2312,16 +2222,14 @@ class ReadingControllerIT {
 
     @Test
     void rejectsUserWithoutReadPermission() throws Exception {
-        mockMvc.perform(get("/api/readings/latest")
-                .param("stationId", "QY-001")
+        mockMvc.perform(get("/api/assets/DAM-A-PZ-07/readings/latest")
                 .with(SecurityMockMvcRequestPostProcessors.user("operator")))
             .andExpect(status().isForbidden());
     }
 
     @Test
-    void returnsNotFoundForUnknownStation() throws Exception {
-        mockMvc.perform(get("/api/readings/latest")
-                .param("stationId", "QY-999")
+    void returnsNotFoundForUnknownAsset() throws Exception {
+        mockMvc.perform(get("/api/assets/DAM-A-XX-99/readings/latest")
                 .with(SecurityMockMvcRequestPostProcessors.user("analyst")
                         .roles("ANALYST")))
             .andExpect(status().isNotFound())

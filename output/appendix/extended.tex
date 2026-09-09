@@ -1,0 +1,240 @@
+\chapter{附录C 拓展专题}
+\label{app:extended}
+
+本附录收纳正文中标为“拓展”且篇幅较长的专题。它们不属于基础课程的编码要求，但在课程设计、毕业设计和平台运维阶段会用到。每个专题保留原有的清单与表格，可独立阅读；引用正文时以章节号为准。
+
+\section{后端性能优化与可观测性（原第5章拓展）}\label{app:ext-perf}
+
+
+
+性能优化先测量再修改。数据库查询应建立与查询模式匹配的索引并使用分页；热点且允许短暂陈旧的数据可缓存；外部调用设置连接、读取和总超时；线程池与数据库连接池容量应依据压测结果配置。
+
+可观测性包括日志、指标和追踪。关键指标可包含请求延迟、错误率、数据库连接使用率、Kafka消费积压和告警处理时延。健康检查只说明实例可服务，不等同于业务正确。
+
+\subsection{缓存与 Redis 一致性}
+
+缓存的目标是减少重复读取和下游压力，而不是把数据库当作可选项。测站最新状态、权限字典和短期统计适合缓存；原始监测记录、审计日志和需要强一致的版本检查仍以 PostgreSQL 为准。缓存键要包含租户、测站、查询版本和单位，值中带生成时间与数据版本，界面显示缓存时间，避免把陈旧快照误当作实时水位。
+
+\begin{lstlisting}[label={lst:ch05-cache-redis},language=Java,caption={Spring Cache 与 Redis 缓存读写}]
+import org.springframework.cache.annotation.*;
+import org.springframework.stereotype.Service;
+import java.time.Duration;
+
+@Service
+class LatestReadingCache {
+    private final ReadingQueryRepository repository;
+
+    LatestReadingCache(ReadingQueryRepository repository) {
+        this.repository = repository;
+    }
+
+    @Cacheable(cacheNames = "latest-reading", key = "#assetId",
+               unless = "#result == null")
+    public ReadingResponse get(String assetId) {
+        return repository.findLatest(assetId)
+                .map(ReadingResponse::from)
+                .orElseThrow(() -> new EntityNotFoundException("测站无读数"));
+    }
+
+    @CacheEvict(cacheNames = "latest-reading", key = "#assetId")
+    public void evictAfterWrite(String assetId) {
+        // 由提交后事件调用，避免事务回滚时清错缓存
+    }
+}
+
+@Configuration
+class RedisCacheConfig {
+    @Bean
+    RedisCacheConfiguration cacheDefaults() {
+        return RedisCacheConfiguration.defaultCacheConfig()
+                .entryTtl(Duration.ofSeconds(30))
+                .disableCachingNullValues();
+    }
+}
+\end{lstlisting}
+
+清单\ref{lst:ch05-cache-redis}把缓存失效挂到写入提交后的事件，而不是在事务中提前删除；如果写入回滚，旧缓存仍然有效。生产环境为不同缓存设置 TTL 和容量上限，序列化采用受控 JSON 类型，禁止把 JPA 实体和懒加载代理直接写入 Redis。缓存命中、未命中、序列化失败和驱逐次数都要有指标，才能判断缓存是否真正降低了数据库压力。
+
+缓存有三类常见风险。缓存穿透是大量请求查询不存在的测站，应用可以对空结果短暂缓存、校验 ID 格式并设置限流；缓存击穿是热门键在同一时刻过期，应用可以使用互斥锁、逻辑过期或预热任务；缓存雪崩是大量键同时过期或 Redis 集群故障，应用应加入随机 TTL、分批预热、熔断和数据库限流。降级读取旧快照时必须标注时间和可信等级，不能静默返回“最新”。
+
+\subsection{分页、游标与查询预算}
+
+页码分页适合需要跳转和精确总数的管理界面，游标分页适合不断追加的时序数据。游标由最后一条记录的时间和唯一 ID 组成，服务端签名或编码后返回不透明字符串；下一页使用\texttt{(occurredAt,id) < (cursorTime,cursorId)}的联合条件，避免高页码\texttt{OFFSET}扫描历史数据。游标必须绑定原查询过滤条件和过期时间，客户端不能自行修改边界。
+
+\begin{lstlisting}[label={lst:ch05-cursor-page},language=Java,caption={基于时间与 ID 的游标分页}]
+import org.springframework.data.domain.*;
+import org.springframework.data.jpa.repository.*;
+import org.springframework.data.repository.query.Param;
+import java.time.Instant;
+import java.util.List;
+
+record ReadingCursor(Instant occurredAt, long id) {}
+record CursorPage<T>(List<T> content, String nextCursor,
+                     boolean hasNext) {}
+
+interface ReadingCursorRepository extends JpaRepository<Reading, Long> {
+    @Query("select r from Reading r "
+         + "where r.assetId = :assetId "
+         + "and (r.occurredAt < :time or "
+         + "(r.occurredAt = :time and r.id < :id)) "
+         + "order by r.occurredAt desc, r.id desc")
+    List<Reading> next(@Param("assetId") String assetId,
+                            @Param("time") Instant time,
+                            @Param("id") long id, Pageable limit);
+}
+
+@Service
+class CursorReadingService {
+    private final ReadingCursorRepository repository;
+    CursorReadingService(ReadingCursorRepository repository) {
+        this.repository = repository;
+    }
+
+    @Transactional(readOnly = true)
+    CursorPage<ReadingResponse> next(String assetId, ReadingCursor cursor) {
+        List<Reading> rows = repository.next(assetId,
+                cursor.occurredAt(), cursor.id(), PageRequest.of(0, 51));
+        boolean hasNext = rows.size() > 50;
+        List<Reading> page = hasNext ? rows.subList(0, 50) : rows;
+        String next = hasNext ? encode(page.get(page.size() - 1)) : null;
+        return new CursorPage<>(page.stream().map(ReadingResponse::from).toList(),
+                next, hasNext);
+    }
+
+    private String encode(Reading row) {
+        return row.getMeasuredAt().toString() + ":" + row.getId();
+    }
+}
+\end{lstlisting}
+
+清单\ref{lst:ch05-cursor-page}多取一条记录判断是否还有下一页，避免额外的\texttt{count(*)}；生产实现要对游标签名或使用服务器端存储，防止客户端篡改时间和测站。分页请求限制时间范围、单页大小和并发导出任务数，大范围报表转成异步任务并返回任务 ID。性能预算写在接口契约中，例如 P95 查询时延、最大返回字节数和连接占用上限。
+
+\subsection{连接池与慢查询定位}
+
+连接池容量不是越大越好。每个请求占用一个数据库连接，连接数过大会让 PostgreSQL 争抢 CPU 和内存；连接数过小则请求排队。初始值根据数据库最大连接数、服务实例数和其他后台任务估算，再通过压测调整。HikariCP 的连接超时、最大生命周期、空闲超时和泄漏检测应有明确单位，日志显示池中活动、空闲、等待连接数，不能只看 HTTP 线程数量。
+
+慢查询定位遵循“请求—Repository—SQL—执行计划”链路。结构化日志带 traceId 和查询名，Micrometer 记录耗时分位数；PostgreSQL 慢查询日志和\texttt{pg\_stat\_statements}提供 SQL 级证据；\texttt{EXPLAIN (ANALYZE, BUFFERS)}确认是否命中联合索引、是否发生 N+1 或大范围顺序扫描。优化后重新压测并比较 P95、锁等待、缓存命中和连接池排队，不能只凭一次本地运行下结论。
+
+\begin{lstlisting}[label={lst:ch05-pool-config},language=YAML,caption={连接池、超时与慢查询日志配置}]
+spring:
+  datasource:
+    hikari:
+      maximum-pool-size: ${DB_POOL_MAX:20}
+      minimum-idle: ${DB_POOL_MIN:5}
+      connection-timeout: 2000
+      validation-timeout: 1000
+      max-lifetime: 1800000
+      leak-detection-threshold: 5000
+  jpa:
+    properties:
+      hibernate.generate_statistics: false
+logging:
+  value:
+    org.hibernate.SQL: INFO
+    com.zaxxer.hikari: INFO
+\end{lstlisting}
+
+配置中的默认值只用于开发验证，生产值由容量评估和压测报告确定。泄漏检测用于发现忘记关闭流或事务边界失控，不能长期替代正确的资源管理；SQL 日志在生产环境要脱敏并控制采样率，避免把测站数据和参数全部写入日志。连接池耗尽应触发告警和限流，服务返回503或可解释的降级结果，而不是无限等待。
+
+\subsection{Actuator、Micrometer 与结构化日志}
+
+Actuator 端点按暴露风险分组。健康检查可以公开进程存活和依赖状态，指标端点只允许运维角色访问，\texttt{env}、\texttt{configprops}和线程转储在生产环境默认关闭或经过严格授权。健康状态区分 liveness、readiness 和业务可用：数据库不可达时实例可能仍存活，但不应接收写入流量。
+
+\begin{lstlisting}[label={lst:ch05-actuator-metrics},language=Java,caption={Actuator 健康检查与 Micrometer 指标}]
+import io.micrometer.core.instrument.*;
+import org.springframework.boot.actuate.health.*;
+import org.springframework.context.annotation.*;
+import org.springframework.stereotype.Component;
+
+@Component
+class ReadingHealthIndicator implements HealthIndicator {
+    private final ReadingRepository repository;
+    ReadingHealthIndicator(ReadingRepository repository) {
+        this.repository = repository;
+    }
+    public Health health() {
+        return repository.isAvailable()
+                ? Health.up().withDetail("store", "postgresql").build()
+                : Health.down().withDetail("store", "unavailable").build();
+    }
+}
+
+@Configuration
+class ReadingMetrics {
+    ReadingMetrics(MeterRegistry registry) {
+        Gauge.builder("water.reading.queue.depth", this,
+                metrics -> metrics.queueDepth())
+             .description("待处理读数队列深度").register(registry);
+        Counter.builder("water.reading.rejected")
+               .description("因质量或权限拒收的读数")
+               .register(registry);
+    }
+    double queueDepth() { return 0; }
+}
+\end{lstlisting}
+
+清单\ref{lst:ch05-actuator-metrics}把健康检查和业务指标分开：健康检查回答“实例是否能工作”，指标回答“处理质量和容量如何”。指标标签使用有限枚举，如质量码、结果类型和服务版本，不能把测站 ID、用户 ID 或完整 URL 作为高基数标签。告警阈值与案例水库 8.1 参数表中的工程阈值分离，运维告警不能修改业务预警标准。
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{后端性能与可运维关键指标}
+\label{tab:ch05-observability-metrics}
+\begin{tabular}{p{0.24\textwidth}p{0.28\textwidth}p{0.34\textwidth}}
+\toprule
+指标 & 采集位置 & 处置动作 \\
+\midrule
+HTTP P95/P99 延迟 & Micrometer Timer、网关 & 按路由定位慢查询或下游超时 \\
+连接池活动/等待数 & Hikari 指标 & 调整池大小、限流并检查事务泄漏 \\
+缓存命中率/驱逐数 & Redis 客户端 & 调整 TTL、键设计和预热策略 \\
+Kafka 积压/死信数 & 消费者组、DLT & 扩容消费者、修复模式或补发事件 \\
+错误率与401/403/503 & 结构化日志、计数器 & 区分客户端、权限、依赖和发布故障 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+表\ref{tab:ch05-observability-metrics}中的指标必须能关联同一 traceId 和发布版本，值班员才能从告警跳到具体请求和日志。指标只做趋势和阈值判断，根因仍需结合日志、数据库执行计划和消息偏移量。告警规则设置冷却、恢复通知和责任角色，避免同一故障在网关、服务、数据库和 Kafka 层重复轰炸。
+
+\begin{lstlisting}[label={lst:ch05-trace-log},language=Java,caption={traceId 贯穿请求与结构化日志}]
+import jakarta.servlet.*;
+import jakarta.servlet.http.*;
+import org.slf4j.MDC;
+import org.springframework.web.filter.OncePerRequestFilter;
+import java.io.IOException;
+import java.util.UUID;
+
+class TraceIdFilter extends OncePerRequestFilter {
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain chain)
+            throws ServletException, IOException {
+        String traceId = request.getHeader("X-Trace-Id");
+        if (traceId == null || traceId.isBlank())
+            traceId = UUID.randomUUID().toString();
+        try (MDC.MDCCloseable ignored = MDC.putCloseable("traceId", traceId)) {
+            response.setHeader("X-Trace-Id", traceId);
+            chain.doFilter(request, response);
+        }
+    }
+}
+\end{lstlisting}
+
+清单\ref{lst:ch05-trace-log}在请求进入时建立 traceId，在离开线程前清理 MDC，避免线程池复用造成串号。Kafka 事件、数据库审计、Redis 操作和异步任务要显式传递 traceId；跨服务只传递可追踪 ID，不把 Authorization 头写入日志。结构化日志字段固定为时间、级别、服务、版本、traceId、事件类型、耗时和结果码，中文描述作为补充，便于机器检索和人工复核。
+
+性能优化要与容量和恢复一起验收。一次压测至少记录并发请求、P95/P99、数据库连接、缓存命中、Kafka 积压、错误分类和 CPU/内存；故障演练再观察 Redis 不可用、数据库慢查询、Kafka 延迟和下游超时的降级结果。任何优化都保留开关、回滚配置和前后对比，避免为了追求单次吞吐牺牲数据可信度或审计完整性。
+
+\subsection{性能故障的分层处置}
+
+发现接口变慢时，先用 traceId 确认请求是否在网关排队、控制器参数校验、服务业务规则、数据库查询、Redis 访问还是 Kafka 发送阶段耗时。网关延迟高应检查连接和限流，服务耗时高应检查线程池和外部超时，数据库耗时高应查看执行计划、锁等待和连接池，缓存异常应查看命中率、序列化和网络延迟，消息积压则检查分区热点和消费者处理时间。分层诊断避免把所有问题都归结为“数据库不够快”。
+
+降级策略要保持业务语义。测站最新状态查询可以在短时间内返回标注时间的缓存快照；原始读数写入应优先保证落库，消息通知通过发件箱延迟；预警评估依赖数据质量不足时返回“未评估”，而不是生成一个看似正常的颜色；权限和审计服务不可用时，高风险写操作拒绝并返回503。每种降级都记录原因、开始时间、影响接口和恢复条件，恢复后自动清除或由运维确认。
+
+Actuator 与日志端点本身也是生产攻击面。只暴露健康和必要指标，端点路径放在独立管理网或由 Spring Security 保护；健康详情不显示数据库地址、用户名、异常堆栈和令牌配置。结构化日志采用 JSON 输出，敏感字段在进入 MDC 前脱敏，异常堆栈关联内部事件 ID 而不是回显给客户端。日志采样不能丢失安全失败、事务回滚、死信和数据拒收事件，这些事件需要完整审计。
+
+连接池和线程池必须共同估算。一个请求可能先占数据库连接，再等待 Kafka 回调或外部 HTTP，若线程数远大于连接池就会产生排队，若连接池远大于数据库容量则会放大锁竞争。使用压测数据设定最大并发、队列长度、拒绝策略和优雅停机时间；停机先停止接收新消息，再等待正在处理的事务提交或回滚，最后关闭连接池。健康检查只有在资源准备好后才报告 ready，滚动发布不会把半初始化实例加入流量。
+
+缓存、分页和指标的配置要纳入版本管理。每次改变 TTL、最大页大小、连接池或告警阈值，都在变更记录中说明预期收益、风险、验证查询和回滚值；环境变量覆盖只改变部署参数，不改变案例水库的工程参数。运维手册提供一条从指标告警到日志、SQL、Kafka 偏移量和发布版本的排查路径，值班员按步骤即可复现和升级问题。
+每次演练结束后还要归档指标快照、关键日志、执行计划和责任人复盘结论，形成下一轮容量评估的可追溯基线。
+复盘结论应同步到发布记录和运维知识库。
+容量评估还应标注数据版本和运行环境，保证不同批次的结果可比较。
+

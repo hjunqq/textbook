@@ -13,6 +13,7 @@ ROOT.mkdir(parents=True, exist_ok=True)
 SRC = REPO / "output/chapters"
 APPENDIX = REPO / "output/appendix/answers.tex"
 APPENDIX_B = REPO / "output/appendix/prep.tex"
+APPENDIX_C = REPO / "output/appendix/extended.tex"
 OUT = REPO / "docs"
 TIKZ = ROOT / "tikz"
 AUX = REPO / "output/main.aux"
@@ -20,7 +21,7 @@ WEBFIGS = HERE / "webfigs"
 
 CHAPTERS = [("preface", 0), ("chapter01", 1), ("chapter02", 2), ("chapter03", 3),
             ("chapter04", 4), ("chapter05", 5), ("chapter06", 6), ("chapter07", 7),
-            ("chapter08", 8), ("chapter09", 9), ("answers", "A"), ("prep", "B")]
+            ("chapter08", 8), ("chapter09", 9), ("answers", "A"), ("prep", "B"), ("extended", "C")]
 
 LANG_MAP = {"javascript": "javascript", "js": "javascript", "vue": "vue", "css": "css",
             "html": "html", "json": "json", "yaml": "yaml", "yml": "yaml", "sql": "sql",
@@ -444,9 +445,9 @@ def main():
     for name, chap in CHAPTERS:
         if only and name not in only:
             continue
-        src = APPENDIX if name == "answers" else APPENDIX_B if name == "prep" else SRC / (name + ".tex")
+        src = APPENDIX if name == "answers" else APPENDIX_B if name == "prep" else APPENDIX_C if name == "extended" else SRC / (name + ".tex")
         global REFPATH
-        REFPATH = {"preface": "references.md", "answers": "../references.md", "prep": "../references.md"}.get(name, "../../references.md")
+        REFPATH = {"preface": "references.md", "answers": "../references.md", "prep": "../references.md", "extended": "../references.md"}.get(name, "../../references.md")
         c = Conv(name, chap)
         md = c.run(src)
         # 输出路径
@@ -456,6 +457,8 @@ def main():
             dest = OUT / "appendix" / "answers.md"
         elif name == "prep":
             dest = OUT / "appendix" / "prep.md"
+        elif name == "extended":
+            dest = OUT / "appendix" / "extended.md"
         else:
             dest = OUT / "chapters" / name / (name + ".md")
         dest.parent.mkdir(parents=True, exist_ok=True)

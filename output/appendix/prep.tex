@@ -105,7 +105,7 @@ public class AssetController {
 }
 \end{lstlisting}
 
-\paragraph{依赖注入}清单\ref{lst:prep-p2-controller}里没有任何一行\texttt{new AssetController(...)}，也没有\texttt{new AssetRepository()}，程序却能运行。框架在启动时创建所有带注解的类的实例（称为 Bean），并按构造器参数类型把需要的实例传进去——这就是依赖注入。它解决的问题是“对象之间怎么互相拿到对方”：类只声明“我需要一个 AssetRepository”，不关心它是数据库实现还是测试替身。第5章 5.2 节解释它的使用规则，Bean 的作用域与代理机制属于拓展。
+\paragraph{依赖注入}清单\ref{lst:prep-p2-controller}里没有任何一行\texttt{new AssetController(...)}，也没有\texttt{new AssetRepository()}，程序却能运行。框架在启动时创建所有带注解的类的实例（称为 Bean），并按构造器参数类型把需要的实例传进去——这就是依赖注入。它解决的问题是“对象之间怎么互相拿到对方”：类只声明“我需要一个 AssetRepository”，不关心它是数据库实现还是测试替身。第5章 5.3 节解释它的使用规则，Bean 的作用域与代理机制属于拓展。
 
 \paragraph{自测}（1）说出\texttt{src/main/java}、\texttt{src/test/java}、\texttt{application.yml}、\texttt{pom.xml}各放什么。（2）把清单\ref{lst:prep-p2-controller}中的\texttt{@GetMapping}删掉，预计访问\texttt{GET /api/assets}会得到什么状态码？（404：方法不再是入口。）（3）\texttt{AssetController}的构造器参数从哪里来？（框架注入，不是调用方 new 出来的。）
 
@@ -164,7 +164,7 @@ SELECT occurred_at, value, quality FROM reading
 UPDATE asset SET active = false WHERE asset_id = 'DAM-A-PZ-07';
 \end{lstlisting}
 
-\paragraph{事务}事务把几条语句捆成一个整体：要么全部生效，要么全部不生效。第8章“确认预警并创建工单”要同时更新\texttt{warning}表和插入\texttt{work\_order}表，两条语句之间进程崩溃会留下“预警已确认但没有工单”的半成品，事务就是为此存在。清单\ref{lst:prep-p3-tx}用最简单的形式演示：\texttt{BEGIN}开始，\texttt{COMMIT}提交，出错时\texttt{ROLLBACK}撤销。第5章 5.5 节把它写进 Java 的\texttt{@Transactional}，传播行为与隔离级别属于拓展。
+\paragraph{事务}事务把几条语句捆成一个整体：要么全部生效，要么全部不生效。第8章“确认预警并创建工单”要同时更新\texttt{warning}表和插入\texttt{work\_order}表，两条语句之间进程崩溃会留下“预警已确认但没有工单”的半成品，事务就是为此存在。清单\ref{lst:prep-p3-tx}用最简单的形式演示：\texttt{BEGIN}开始，\texttt{COMMIT}提交，出错时\texttt{ROLLBACK}撤销。第5章 5.4 节把它写进 Java 的\texttt{@Transactional}，传播行为与隔离级别属于拓展。
 
 \begin{lstlisting}[label={lst:prep-p3-tx},language=SQL,caption={事务：两条语句要么都生效，要么都不生效}]
 BEGIN;

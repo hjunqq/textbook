@@ -112,6 +112,8 @@
 \texttt{GET /api/assets} & \texttt{assetType, after, limit} & \texttt{assetId, displayName, assetType, unit}（数组） & 值班员、分析员；只返回 active & 骨架 \\
 \shortstack[l]{\texttt{GET /api/assets/}\\ \texttt{\{id\}/readings}} & \texttt{from, to}（ISO-8601 带时区），可选 \texttt{agg} & \texttt{occurredAt, value, unit, quality, eventId, version}（数组）；\texttt{quality} 取 valid/suspect/missing & 值班员、分析员；时间窗左闭右开；400 参数非法 & 骨架 \\
 \shortstack[l]{\texttt{GET /api/assets/}\\ \texttt{\{id\}/readings/latest}} & 无 & 单个观测；尚无观测时 204 & 值班员、分析员；404 对象不存在 & 教学接口；第5章实现 \\
+\texttt{POST /api/readings} & \texttt{assetId, occurredAt, value, unit, quality}；头 \texttt{Idempotency-Key} & 201 与新记录；重复键返回同一记录 & 分析员；人工补录或订正 & 第5章 \\
+\shortstack[l]{\texttt{GET/PUT /api/}\\ \texttt{readings/\{id\}}} & PUT 带版本号 & 单条记录 / 订正后的记录（版本 +1） & 分析员；观测不删除，只增版本 & 第5章 \\
 \texttt{GET /api/warnings} & \texttt{level, status, assetId, page} & 预警证据摘要；\texttt{level} 取 NONE、BLUE、YELLOW、ORANGE、RED 之一 & 值班员、分析员；未评估单独显示 & 第8章 \\
 \shortstack[l]{\texttt{POST /api/warnings/}\\ \texttt{\{id\}/ack}} & 请求追踪号、版本 & 最新预警状态 & 值班员；open 条件更新，重复可重试 & 第8章 \\
 \texttt{POST /api/work-orders} & \texttt{warningId, ownerRole,} \texttt{dueAt, action} & 工单编号与状态 & 值班员、审批人；预警必须存在 & 第8章 \\
