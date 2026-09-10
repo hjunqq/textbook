@@ -8,9 +8,9 @@ import * as echarts from 'echarts';
 import '../lesson61/first-scene.js';                 // 复用 S4 的场景（它把 scene 挂到 window）
 import { bindAssets } from '../lesson61/bind-assets.js';
 import { createSceneBus } from './scene-bus.js';
-import { createLinkController } from './link.js';
+import { createSeriesController } from './series-controller.js';
 import { PointPicker, firstAsset } from './picker.js';
-import { toChartPoints, readingQuery, qualityText } from '../utils/readings.js';
+import { readingQuery } from '../utils/readings.js';
 
 const TOKEN_HEADER = token => ({ Authorization: `Bearer ${token}` });
 
@@ -47,9 +47,9 @@ const chart = echarts.init(document.querySelector('#chart'));
 // 时间窗取数据集覆盖的那一天；readingQuery 会校验左闭右开与先后顺序
 const range = readingQuery({ from: '2026-07-01T00:00:00+08:00', to: '2026-07-02T00:00:00+08:00' });
 
-async function loadSeries(assetId) {
+async function loadSeries(assetId, signal) {
   const query = new URLSearchParams(range).toString();
-  const res = await fetch(`/api/assets/${assetId}/readings?${query}`, { headers: auth });
+  const res = await fetch(`/api/assets/${assetId}/readings?${query}`, { headers: auth, signal });
   if (res.status === 204) return [];
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
@@ -58,39 +58,13 @@ async function loadSeries(assetId) {
   return res.json();
 }
 
-let unlink = () => {};
+const series = createSeriesController({ chart, scene: sceneBus, status, loadSeries });
 
-async function showAsset(assetId) {
-  status.textContent = `正在读取 ${assetId} 的观测…`;
-  const readings = await loadSeries(assetId);
-  if (readings.length === 0) {
-    chart.clear();
-    status.textContent = `${assetId}：暂无观测`;
-    return;
-  }
-  chart.setOption({
-    xAxis: { type: 'time' },
-    yAxis: { type: 'value', scale: true, name: readings[0].unit },
-    series: [{
-      id: 'level', type: 'line', showSymbol: false,
-      connectNulls: false,               // 缺测必须断开，不能连成一条直线
-      data: toChartPoints(readings),
-    }],
-  }, true);
-
-  // 每次换对象都重建联动：旧的解绑函数不调用，点击处理器会一层层叠加
-  unlink();
-  unlink = createLinkController(chart, sceneBus, readings);
-  const bad = readings.filter(r => r.quality !== 'valid').length;
-  status.textContent = `${assetId}：${readings.length} 条观测`
-    + (bad ? `，其中 ${bad} 条非${qualityText.valid}` : '');
-}
-
-sceneBus.on('select', mesh => showAsset(mesh.userData.assetId));
+sceneBus.on('select', mesh => series.showAsset(mesh.userData.assetId));
 
 // 打开页面时先显示一个有观测的对象，避免空白页
-await showAsset('DAM-A-PZ-07');
 sceneBus.focusAsset('DAM-A-PZ-07');
+await series.showAsset('DAM-A-PZ-07');
 
-addEventListener('beforeunload', () => { unlink(); sceneBus.dispose(); chart.dispose(); });
+addEventListener('beforeunload', () => { series.dispose(); sceneBus.dispose(); chart.dispose(); });
 window.sceneBus = sceneBus;   // 控制台可用：sceneBus.focusAsset('DAM-A-WL-01')

@@ -1,0 +1,17 @@
+{
+  "checks": [
+    "index: production HTML 200",
+    "lesson44: production HTML 200",
+    "lesson44-detail: production HTML 200",
+    "lesson45: production HTML 200",
+    "lesson61: production HTML 200",
+    "lesson74: production HTML 200",
+    "S5: 28 assets and initial piezometer series",
+    "S5: real canvas click picks the projected asset and loads its series",
+    "S5: delayed old request cannot replace newest selection",
+    "S5: displacement without readings shows empty state",
+    "S5: request failure is visible and retry restores data",
+    "S2: production page logs in and displays empty state"
+  ],
+  "pageErrors": []
+}

@@ -462,7 +462,8 @@ def main():
         else:
             dest = OUT / "chapters" / name / (name + ".md")
         dest.parent.mkdir(parents=True, exist_ok=True)
-        dest.write_text(md, encoding="utf-8")
+        # 保持现有docs的CRLF约定，避免不同平台重新生成时改动整份文件。
+        dest.write_text(md, encoding="utf-8", newline="\r\n")
         for fname, snip in c.tikz_jobs:
             (TIKZ / (fname[:-4] + ".tex")).write_text(snip, encoding="utf-8")
         report[name] = {"figs": c.cnt["fig"], "tabs": c.cnt["tab"], "lsts": c.cnt["lst"],
@@ -472,7 +473,7 @@ def main():
     for i, k in enumerate(CITE_ORDER, 1):
         refs.append('<a id="ref%d"></a>[%d] %s' % (i, i, fmt_ref(i, k)))
         refs.append("")
-    (OUT / "references.md").write_text("\n".join(refs), encoding="utf-8")
+    (OUT / "references.md").write_text("\n".join(refs), encoding="utf-8", newline="\r\n")
     # 分发已编译的 SVG(先运行 build-tikz.sh)
     n = 0
     for svg in TIKZ.glob("chapter*_fig_*.svg"):

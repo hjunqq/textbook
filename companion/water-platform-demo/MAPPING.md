@@ -11,7 +11,7 @@
 | v4 | 第7章 | 曲线与三维联动 | S5 阶段页 lesson74.html（拾取→曲线→高亮双向联动），依赖 S3 与 S4 |
 | v5 | 第8章核心篇 | 质量检查+预警+工单+部署 | S6：classify.js（定级）+ 教学接口的 ack/工单端点 + closeloop-check.mjs（闭环核对）；db/、ReadingConsumer、compose、smoke.sh 骨架 |
 
-本仓库即 v1+v2+v5 骨架的合体（最小可运行闭环）；v3、v4 与 v5 的完整实现由读者按教材清单增量完成。
+本仓库包含各阶段可运行的教学切片；完整业务界面、详情路由、GLTF/GIS集成等课程任务由读者在骨架上完成。已提供能力与学生待完成任务逐项见 STAGES.md。
 
 
 | 仓库文件 | 对应章节 | 说明 |
@@ -31,28 +31,30 @@
 | frontend/src/utils/auth.js | 4.5 | TOKEN_KEY 单一契约 |
 | frontend/src/utils/request.js | 4.5 | 令牌注入、401 分流（认证端点豁免） |
 | frontend/src/utils/readings.js | 7.2 | 缺测断线、时间窗校验（纯函数，可测试） |
-| frontend/lesson74.html + src/lesson74/main.js | 7.3 / 7.4 | S5 阶段页：真实观测曲线与三维对象双向联动 |
-| frontend/src/lesson74/scene-bus.js | 7.3 | 清单 lst:ch07-link-controller 注释里说的“应用层场景封装”，事件总线 + focusAsset，不依赖 three |
-| frontend/src/lesson74/link.js | 7.3 | 与清单 lst:ch07-link-controller 逐字一致；chart 与 scene 均为注入 |
+| frontend/lesson74.html + src/lesson74/main.js | 7.2.4 / 7.4 | S5 阶段页：真实观测曲线与三维对象双向联动 |
+| frontend/src/lesson74/scene-bus.js | 7.2.4 | 清单 lst:ch07-link-controller 注释里说的“应用层场景封装”，事件总线 + focusAsset，不依赖 three |
+| frontend/src/lesson74/link.js | 7.2.4 | 与清单 lst:ch07-link-controller 逐字一致；chart 与 scene 均为注入 |
 | frontend/src/lesson74/picker.js | 7.4 | 与清单 lst:ch07-point-picker 逐字一致（THREE 改为模块导入），另加 firstAsset 跳过坝体回指测点 |
-| frontend/tests/lesson74.test.js | 7.3 / 7.4 | S5 验收：高亮切换、下标越界、解绑、拾取回指 |
+| frontend/tests/lesson74.test.js | 7.2.4 / 7.4 | S5 验收：高亮切换、下标越界、解绑、拾取回指 |
+| frontend/src/lesson74/series-controller.js + tests/series-controller.test.js | 4.5.4 / 7.2.4 | 切换立即解绑、取消与序号校验、空数据/失败/卸载回归 |
+| frontend/src/lesson74/window-chart.js + tests/window-chart.test.js | 7.2.2 | 与清单 lst:ch07-append-data 一致；实测 ECharts 折线更新、300点窗口、缺测与双轴 |
 | frontend/src/views/LoginView.vue | 4.5.7 / 4.7 | 登录与安全回跳 |
 | frontend/src/router/index.js | 4.7.1 | 路由守卫 |
 | frontend/src/stores/monitoring.js | 4.7.4 / 8.3 | Pinia 状态与查询参数 |
 | frontend/src/components/MonitoringDashboard.vue | 7.2 / 8.3 | ECharts 曲线、缺测与可疑呈现 |
 | frontend/tests/*.test.js | 4.8.1 | vitest 单元测试 |
-| backend/.../JwtService.java | 5.5 | jjwt 0.11.x 签发与校验 |
-| backend/.../JwtAuthenticationFilter.java | 5.5 | Bearer 解析入 SecurityContext |
-| backend/.../SecurityConfig.java | 5.5 | 无状态过滤链、CORS、教学账号 |
-| backend/.../AuthController.java | 5.5 | 登录端点（防账号枚举） |
+| backend/.../JwtService.java | 5.6 | jjwt 0.11.x 签发与校验 |
+| backend/.../JwtAuthenticationFilter.java | 5.6 | Bearer 解析入 SecurityContext |
+| backend/.../SecurityConfig.java | 5.6 | 无状态过滤链、CORS、教学账号 |
+| backend/.../AuthController.java | 5.6 | 登录端点（防账号枚举） |
 | backend/edu/example/lesson52/ | 5.2 | S3 阶段起点：清单 lst:ch05-first-controller + lst:ch05-first-params 合并成的可运行类；独立根包，避免与完整工程的 /api/assets 映射冲突 |
 | teaching-api/contract-check.mjs | 5.2.3 / 8.1 | 把表 tab:ch05-first-verify 与契约错误体写成可执行检查；--stage=teaching/lesson52/full 对三种数据来源跑同一套断言 |
 | backend/.../ApiExceptionHandler.java | 5.5 / 8.1 | 契约错误体 {code, message, field?}；兜住控制器接不到的时间参数解析失败 |
-| backend/.../AssetController.java | 5.3 / 8.3 | DTO 映射，不暴露实体；readings/latest 按契约区分 404（对象不存在）与 204（尚无观测） |
+| backend/.../AssetController.java | 5.2 / 8.3 | DTO 映射，不暴露实体；readings/latest 按契约区分 404（对象不存在）与 204（尚无观测） |
 | backend/.../ReadingService.java | 5.4 / 8.3 | 事务边界、幂等预检 |
-| backend/.../ReadingConsumer.java | 5.6 / 8.3 | 事务边界外捕获冲突 |
+| backend/.../ReadingConsumer.java | 5.7 / 8.3 | 事务边界外捕获冲突 |
 | backend/.../FileSecretsEnvironmentPostProcessor.java | 8.6 | Docker secrets 的 *_FILE 约定 |
-| backend/src/test/... | 5.8 | JUnit 单元测试（无外部依赖） |
+| backend/src/test/... | 5.9 | JUnit 单元测试（无外部依赖） |
 | db/001_init.sql | 8.3 | 超表 + (occurred_at,event_id) 复合唯一索引 |
 | db/002_seed.sql | 8.3 | 种子观测（含缺测与可疑样例） |
 | docker-compose.yml | 8.6 | 服务编排、healthcheck、secrets |

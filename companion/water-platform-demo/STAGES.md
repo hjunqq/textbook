@@ -1,125 +1,100 @@
-# S0–S6 阶段包总表
+# S0–S6 阶段包与验收
 
-本文件回答一个问题：**学完某一段，学生手上应该有什么能跑起来的东西，怎么验收。**
+从本目录（`companion/water-platform-demo`）执行命令。首次使用先在 `frontend/` 执行 `npm ci`。长时间运行的服务分别放在独立终端；以下命令不依赖 shell 后台语法。
 
-阶段划分与教材一致（前言的学习路线、第4章表“第4章两个阶段的验收检查单”）。
-每一行的“可见成果”是学生能演示的东西，“注入故障”是必须亲手复现一次的失败，
-“证据”是验收时要交的东西——不是截图好看，而是能说明系统在异常时做了什么。
+| 阶段 | 学习位置 | 已提供入口 | 依赖与实际能力 |
+|---|---|---|---|
+| S0 | 第1章 | `S0-demo-record.md` | 固定演示记录；解释一次查询的六个环节 |
+| S1 | 4.2–4.4 | `lesson44.html`、`lesson44-detail.html` | Node、浏览器；静态列表、详情、筛选与排序 |
+| S2 核心 | 4.5 | `lesson45.html` | 教学接口；原生 JavaScript、四种状态与竞态处理 |
+| S2 指导实践 | 4.6–4.7 | `index.html`、`src/router/`等骨架 | Vue、Pinia与登录守卫；按书中清单完成详情路由 |
+| S3 起点 | 5.2 | `edu.example.lesson52.Lesson52Application` | Java 17、Maven；四个固定对象、部分固定观测，无登录和数据库 |
+| S3 终点 | 5.4–5.6、8.3 | 完整 `backend/` 与 Compose | 持久化、认证及契约错误体齐备后承接 S2 联调 |
+| S4 | 6.1 | `lesson61.html` | 教学接口、Three.js；坝体几何体与28个测点 |
+| S5 | 7.2–7.4 | `lesson74.html` | 教学接口或 S3 完整后端、S4场景；曲线与测点联动 |
+| S6 | 8.4 | `classify.js`、`closeloop-check.mjs` | 教学接口验证受控闭环；完整工程另做部署验收 |
 
-| 阶段 | 学习位置 | 入口 | 运行依赖 | 可见成果 |
-|---|---|---|---|---|
-| S0 | 第1章 | `S0-demo-record.md` | 无（教师投影固定记录） | 看懂平台一次操作的六个环节 |
-| S1 | 第4章 4.2–4.4 | `lesson44.html` / `lesson44-detail.html` | 浏览器 + `npm run dev` | 静态测点列表与详情、筛选、排序 |
-| S2 | 第4章 4.5–4.7 | `lesson45.html` | S1 + 教学接口 | Vue 页面、四种页面状态、竞态修复 |
-| S3 | 第5章 | `edu.example.lesson52` → 完整 `backend/` | JDK 17 + Maven（终点还需 PostgreSQL） | 自己写的接口替换教学接口，页面不改 |
-| S4 | 第6章 | `lesson61.html` | S2 + Three.js | 坝体场景 + 28 个测点绑定 |
-| S5 | 第7章 | `lesson74.html` | S3 + S4 | 观测曲线与三维对象双向联动 |
-| S6 | 第8章 | `classify.js` + `closeloop-check.mjs` | 教学接口（终点需完整工程） | 质量门禁、四级预警、工单闭环 |
+## S0：解释请求
 
-## 每个阶段怎么跑，怎么验收
+直接阅读固定演示记录；需要重新实录时，在终端一运行 `node teaching-api/server.mjs`，在终端二运行 `node teaching-api/record-demo.mjs`。实录是 HTTP 交互证据，学生还要结合1.2.1节解释浏览器渲染等环节。
 
-### S0 演示记录（第1章）
+验收：说明正常请求各环节的责任，并为一次失败指出状态码、日志或页面证据。不要求编程。
 
-```bash
-node teaching-api/server.mjs &
-node teaching-api/record-demo.mjs > S0-demo-record.md
+## S1：静态列表与详情
+
+```powershell
+cd frontend
+npm run dev
 ```
 
-记录是实录生成的，不是手写示例。**验收**：学生能指着记录说出，
-页面显示不出数据时，六个环节里各应该去哪里找证据；不要求写代码。
+打开终端显示的地址下的 `/lesson44.html`。验收：列表与详情可访问，能按名称或编码筛选、按数值排序；空列表有提示。8个位移测点的 `null` 观测排在末尾。
 
-### S1 静态监测页（第4章 4.2–4.4）
+故障：把详情页编码改为 `DAM-A-XX-99`，应回显编码并提示未找到。保存输入、页面结果与 `lesson44.test.js` 测试输出。
 
-```bash
-cd frontend && npm run dev     # 打开 /lesson44.html
-```
+## S2：先验证状态，再迁移到 Vue
 
-**必须能演示**：列表与详情两个页面；按名称或编码筛选；按最新观测值排序；
-非法输入有提示；筛选结果为空时显示“暂无测点”。
-**注入故障**：把详情页地址里的编码改成 `DAM-A-XX-99`——格式合法但台账里没有。
-**证据**：页面截图；开发者工具“元素”面板里的 `aria-*` 属性；`npm test` 中 lesson44 用例通过。
+终端一在本目录运行 `node teaching-api/server.mjs`；终端二在 `frontend/` 运行 `npm run dev`，打开 `/lesson45.html`。
 
-值得注意的一点：8 个位移测点没有观测，`value` 为 `null`。
-按值升序排序时它们必须留在末尾——把 `null` 当成 0，它们会挤到最前面，看起来像读数最低的一批。
+该页的入口是 `src/lesson45/main.js`，自动使用教学账号登录，采用原生 DOM 操作。它负责验证加载、成功、空数据、失败和快速切换；它没有 Vue Router，也不承担登录回跳的验收。选择无观测的位移测点可观察空状态。
 
-### S2 数据请求与页面状态（第4章 4.5–4.7）
+故障注入按8.1节约定，在 `src/lesson45/detail.js` 的最新观测请求 URL 后临时加入 `?teach=delay:3000` 或 `?teach=unauthorized`，试验后恢复。只改浏览器页面地址不会自动把参数传给接口。快速切换两个对象，最后状态必须属于后选对象；401在此核心页显示读取失败。`lesson45.test.js` 用可控响应验证竞态。
 
-```bash
-node teaching-api/server.mjs &
-cd frontend && npm run dev     # 打开 /lesson45.html
-```
+Vue指导实践以 `/login`、`/monitoring` 和 `src/router/index.js` 为已提供骨架。按4.6–4.7节实现 `/assets/:id` 详情路由并验证刷新、参数变化和登录回跳；提交修改后的代码与独立证据。现有路由表不包含这条详情路由，不能用 `lesson45.test.js` 代替该项验收。
 
-**必须能演示**：登录后读取对象列表与最新观测；加载、空数据、错误、正常四种状态都能看到；
-快速切换两个对象时不出现旧数据；路由可直接打开详情深链接。
-**注入故障**：`teach=delay:3000` 与 `teach=unauthorized`。
-**证据**：“网络”面板里被取消的请求；401 后回登录页并能回跳；`lesson45.test.js` 通过。
+## S3：分开验收起点和终点
 
-### S3 自己的接口（第5章）
+先停教学接口，释放8080。在终端一运行起点：
 
-```bash
-# 起点：一个类、无数据库、无认证。先停掉教学接口，否则 8080 端口冲突
+```powershell
 cd backend
 mvn spring-boot:run -Dspring-boot.run.main-class=edu.example.lesson52.Lesson52Application
-node ../teaching-api/contract-check.mjs http://localhost:8080 --stage=lesson52
+```
 
-# 终点：完整工程（需数据库）
+终端二回到本目录：
+
+```powershell
+node teaching-api/contract-check.mjs http://localhost:8080 --stage=lesson52
+```
+
+起点只提供四个固定对象、PZ-07最新值和空历史查询；没有登录端点。直接请求 `/api/assets` 观察四元素数组，核对204、400与404，先不用 S2 的自动登录页。时间参数中的 `+` 应编码为 `%2B`；类型转换失败的统一错误体在5.5节接入。
+
+终点：完成 `README.md` 中的 secrets 和数据准备，停掉起点，在本目录的独立终端执行：
+
+```powershell
 docker compose up -d --build
 node teaching-api/contract-check.mjs http://localhost:8080 --stage=full
 ```
 
-**必须能演示**：第4章的页面一行不改，换成自己的后端仍然工作。
-**注入故障**：把 `from` 里的 `+` 原样放进地址栏——解析失败发生在进入控制器之前，
-控制器里的异常处理器接不到，必须由 `@RestControllerAdvice` 兜住。
-**证据**：`contract-check.mjs` 三种来源全绿。这是整套阶段包里最重要的一条验收：
-它证明契约不是文档里的约定，而是可执行的。
+终点通过契约核对后再连接 S2 页面，验证认证、对象列表、最新观测与空数据行为。教学接口与终点共用固定数据；起点是教学子集，数据条数和认证能力不能视为相同。
 
-### S4 三维场景（第6章）
+## S4：场景与对象绑定
 
-```bash
-node teaching-api/server.mjs &
-cd frontend && npm run dev     # 打开 /lesson61.html
-```
+运行教学接口和 Vite，打开 `/lesson61.html`。坝体可旋转缩放；控制台 `bound.group.children.length` 应等于接口返回的对象数（教学数据为28），`bound.find('DAM-A-PZ-07')` 应返回相应对象。按6.1.5节检查表核对高程、轴方向和单位。
 
-**必须能演示**：坝体长方体可拖动缩放；28 个测点绑在正确位置；
-控制台 `bound.find('DAM-A-PZ-07')` 能取到对象。
-**注入故障**：黑屏的三种原因（没有光、相机在物体内部、忘了渲染循环）各制造一次。
-**证据**：`bound.group.children.length` 等于接口返回的对象数；
-所有球的 y 落在坝基与坝顶之间。
+按6.1.1节分别制造缺少光源、相机位置错误、停止渲染循环的黑屏情形；每次只改一个因素，恢复后验证。记录现象、原因、处理、结果。
 
-### S5 曲线与三维联动（第7章）
+## S5：曲线与场景联动
 
-```bash
-node teaching-api/server.mjs &
-cd frontend && npm run dev     # 打开 /lesson74.html
-```
+运行教学接口和 Vite，打开 `/lesson74.html`。点球应切换曲线；点曲线数据点应高亮对应球；点坝体或空白应提示未选中。此页可以直接使用教学接口，不必先启动 Java 和数据库。
 
-**必须能演示**：点场景里的球，曲线切到该测点；点曲线上的数据点，对应的球变橙。
-**注入故障**：点坝体或空白处——必须提示“未选中测点”，不能高亮一个错误的球。
-**证据**：`lesson74.test.js` 通过，其中覆盖下标越界、曲线里没有该对象、
-换对象前先解绑三条边界。
+依次验证：快速切换两个测点、选择无观测的位移测点、断网后重试。异步控制器必须同时约束曲线、单位与状态文字；切换开始即解绑旧联动。`lesson74.test.js` 验证映射与拾取，`series-controller.test.js` 用可控顺序覆盖旧响应、空结果、网络错误和卸载后迟到响应。
 
-### S6 质量、预警与闭环（第8章）
+自动化通过后仍需在真实浏览器核对坐标、视图布局与交互，这些不由无 WebGL 的测试代替。
 
-```bash
-node teaching-api/server.mjs &
+## S6：预警与工单闭环
+
+先运行教学接口，在另一终端执行：
+
+```powershell
 node teaching-api/closeloop-check.mjs http://localhost:8080
-cd frontend && npm test         # lesson84 用例：质量门禁与四级定级
 ```
 
-**必须能演示**：一条 PZ-07 的观测经质量检查触发预警，值班员确认、派单、
-处置回写、预警归档。
-**注入故障**：拿一条 `suspect` 的高分记录去定级——必须是“未评估”，
-不能因为分数高就升级；拿一条未评估的事件去确认——必须被拒绝。
-**证据**：`closeloop-check.mjs` 全绿；`docker compose up` 后 `./smoke.sh` 通过。
+在 `frontend/` 运行 `npm test`，其中 `lesson84.test.js` 核对质量门禁与蓝黄橙红分界。故障：高分但质量为 `suspect` 的记录必须未评估；未评估事件不能确认。记录确认、派单、完成与归档的受控转换。
 
-## 一条贯穿线
+完整工程的部署验收另按 `README.md` 启动 Compose，在 Git Bash/Linux 执行 `./smoke.sh`；教学内存闭环通过不代表持久化和容器恢复已经通过。
 
-七个阶段用的是同一份数据和同一份契约：
+## 构建与交付
 
-- **数据**：`companion/datasets/` 的 28 个测点与三份观测 CSV。S1 把它写成字面量，
-  S2–S6 由教学接口或真实后端应答，数值一致（DAM-A-WL-01 = 166.84 m，
-  DAM-A-PZ-07 = 185.09 kPa）。
-- **契约**：教材 8.1 节的接口契约表。字段名 `assetId` / `displayName` / `value` /
-  `unit` / `quality` / `occurredAt`，错误体 `{code, message, field?}`，从 S1 到 S6 不变。
+在 `frontend/` 执行 `npm run build`，生产包应包含 `index.html`、`lesson44.html`、`lesson44-detail.html`、`lesson45.html`、`lesson61.html`、`lesson74.html` 六个入口。静态服务器须配置 `/api` 代理；Vite开发代理不会自动进入生产服务器。阶段页使用现代浏览器的 ES2022 能力。
 
-所以换数据源不需要改业务代码——这句话在 S3 那一步会被 `contract-check.mjs` 当场验证。
+各阶段字段与错误体以教材8.1节为准；运行版本以随书发行包的 `package-lock.json`、`pom.xml`、Compose和 `MAPPING.md` 为准。每次实验提交一个可观察结果及一条“现象→原因→处理→验证”的失败记录。

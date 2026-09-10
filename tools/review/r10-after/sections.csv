@@ -1,0 +1,295 @@
+﻿number,title,layer,prerequisite,file,line
+1.1,智慧水利的概念与发展,混合,True,output/chapters/chapter01.tex,19
+1.1.1,定义、边界与基本特征,核心,,output/chapters/chapter01.tex,25
+1.1.2,政策主线与建设方向,核心,,output/chapters/chapter01.tex,52
+1.1.3,感知、通信与数据交换,拓展,,output/chapters/chapter01.tex,60
+1.1.4,发展脉络：从信息化到数字孪生,拓展,,output/chapters/chapter01.tex,79
+1.1.5,政策体系的阅读方法,拓展,,output/chapters/chapter01.tex,109
+1.1.6,国内外建设路径对照,拓展,,output/chapters/chapter01.tex,134
+1.1.7,智能能力的技术选型与安全边界,拓展,,output/chapters/chapter01.tex,148
+1.1.8,贯穿场景：一次洪水预警如何形成闭环,核心,,output/chapters/chapter01.tex,152
+1.2,智慧水利平台架构体系,混合,True,output/chapters/chapter01.tex,188
+1.2.1,一次查询的完整过程：从浏览器到数据库再回来,核心,,output/chapters/chapter01.tex,194
+1.2.2,四层架构与双向链路,核心,,output/chapters/chapter01.tex,241
+1.2.3,平台形态与能力边界,核心,,output/chapters/chapter01.tex,267
+1.2.4,典型子系统与业务实例,核心,,output/chapters/chapter01.tex,314
+1.2.5,架构设计原则,核心,,output/chapters/chapter01.tex,336
+1.3,软件工程方法概述,混合,True,output/chapters/chapter01.tex,402
+1.3.1,软件及其工程特征,核心,,output/chapters/chapter01.tex,408
+1.3.2,生命周期与核心活动,核心,,output/chapters/chapter01.tex,423
+1.3.3,软件工程对智慧水利开发的作用,核心,,output/chapters/chapter01.tex,457
+2.1,软件生命周期,混合,True,output/chapters/chapter02.tex,19
+2.1.1,需求与规划阶段,核心,,output/chapters/chapter02.tex,27
+2.1.2,架构与详细设计阶段,核心,,output/chapters/chapter02.tex,31
+2.1.3,实现、集成与验证阶段,核心,,output/chapters/chapter02.tex,35
+2.1.4,部署、运行与维护阶段,核心,,output/chapters/chapter02.tex,39
+2.1.5,退役与数据处置阶段,拓展,,output/chapters/chapter02.tex,43
+2.2,软件生命周期模型与选型,混合,True,output/chapters/chapter02.tex,65
+2.2.1,瀑布模型,核心,,output/chapters/chapter02.tex,73
+2.2.2,原型模型,核心,,output/chapters/chapter02.tex,97
+2.2.3,迭代与增量模型,核心,,output/chapters/chapter02.tex,121
+2.2.4,螺旋模型,拓展,,output/chapters/chapter02.tex,140
+2.2.5,敏捷与迭代交付,核心,,output/chapters/chapter02.tex,173
+2.2.6,Scrum与看板的落地,拓展,,output/chapters/chapter02.tex,179
+2.2.7,DevOps与持续交付,拓展,,output/chapters/chapter02.tex,189
+2.2.8,其他模型的适用边界,拓展,,output/chapters/chapter02.tex,215
+2.2.9,模型选择,指导实践,,output/chapters/chapter02.tex,219
+2.3,需求获取与理解,混合,True,output/chapters/chapter02.tex,272
+2.3.1,干系方与业务场景,核心,,output/chapters/chapter02.tex,280
+2.3.2,需求获取方法,核心,,output/chapters/chapter02.tex,290
+2.3.3,需求获取方法的组合与陷阱,指导实践,,output/chapters/chapter02.tex,296
+2.3.4,需求分类与优先级,核心,,output/chapters/chapter02.tex,345
+2.3.5,用例规约与用户故事,核心,,output/chapters/chapter02.tex,368
+2.3.6,非功能需求的分类与量化,核心,,output/chapters/chapter02.tex,397
+2.4,需求分析的任务与原则,混合,True,output/chapters/chapter02.tex,430
+2.4.1,核心任务,核心,,output/chapters/chapter02.tex,438
+2.4.2,基本原则,核心,,output/chapters/chapter02.tex,452
+2.4.3,需求验证与冲突处理,核心,,output/chapters/chapter02.tex,458
+2.5,结构化分析,混合,True,output/chapters/chapter02.tex,484
+2.5.1,系统流程图,核心,,output/chapters/chapter02.tex,492
+2.5.2,数据流图,核心,,output/chapters/chapter02.tex,555
+2.5.3,数据字典,核心,,output/chapters/chapter02.tex,648
+2.5.4,实体关系与规范化,核心,,output/chapters/chapter02.tex,677
+2.5.5,状态转换图与判定树,指导实践,,output/chapters/chapter02.tex,722
+2.5.6,决策表,指导实践,,output/chapters/chapter02.tex,752
+2.5.7,结构化分析的交叉校验,指导实践,,output/chapters/chapter02.tex,800
+2.6,软件需求规格说明与验收,混合,True,output/chapters/chapter02.tex,823
+2.6.1,需求评审检查单,指导实践,,output/chapters/chapter02.tex,886
+2.6.2,需求变更控制流程,拓展,,output/chapters/chapter02.tex,918
+2.6.3,从灌区回到水库：方法迁移,核心,,output/chapters/chapter02.tex,993
+3.1,从需求到模块,混合,True,output/chapters/chapter03.tex,25
+3.1.1,软件架构的定义与重要性,指导实践,,output/chapters/chapter03.tex,33
+3.1.2,架构描述方法,核心,,output/chapters/chapter03.tex,99
+3.1.3,系统环境表示,核心,,output/chapters/chapter03.tex,368
+3.1.4,需求分析和用例建模,核心,,output/chapters/chapter03.tex,374
+3.2,分层与职责,混合,True,output/chapters/chapter03.tex,410
+3.2.1,常见架构类型,核心,,output/chapters/chapter03.tex,455
+3.2.2,MVC架构模式,核心,,output/chapters/chapter03.tex,558
+3.2.3,原型定义与细化,指导实践,,output/chapters/chapter03.tex,594
+3.3,接口与数据流,混合,True,output/chapters/chapter03.tex,634
+3.3.1,构件级设计,指导实践,,output/chapters/chapter03.tex,642
+3.3.2,构件协作与接口设计,核心,,output/chapters/chapter03.tex,676
+3.4,模块化与依赖,混合,True,output/chapters/chapter03.tex,713
+3.4.1,模块化与关注点分离原则,核心,,output/chapters/chapter03.tex,723
+3.4.2,抽象与信息隐藏原则,核心,,output/chapters/chapter03.tex,797
+3.4.3,功能独立性与复用性原则,核心,,output/chapters/chapter03.tex,937
+3.4.4,案例分析：水利工程安全监测平台的监测接入模块,指导实践,,output/chapters/chapter03.tex,992
+3.5,架构选择,混合,True,output/chapters/chapter03.tex,1008
+3.5.1,架构风格与模式的选择,核心,,output/chapters/chapter03.tex,1016
+3.5.2,单体、模块化单体与微服务：用案例水库的数字做一次决策,核心,,output/chapters/chapter03.tex,1024
+3.5.3,微服务（Microservices）,拓展,,output/chapters/chapter03.tex,1036
+3.5.4,事件驱动（Event-Driven）,拓展,,output/chapters/chapter03.tex,1082
+3.5.5,Web 形态的特殊考虑,拓展,,output/chapters/chapter03.tex,1100
+3.6,架构评审,混合,True,output/chapters/chapter03.tex,1106
+3.6.1,架构决策记录（ADR）,指导实践,,output/chapters/chapter03.tex,1114
+3.6.2,把设计交给评审：一次架构评审会的组织,指导实践,,output/chapters/chapter03.tex,1124
+3.6.3,课堂演练：一次90分钟的迷你ATAM,指导实践,,output/chapters/chapter03.tex,1130
+3.6.4,评估方法,拓展,,output/chapters/chapter03.tex,1142
+3.6.5,复杂度与风险分析,拓展,,output/chapters/chapter03.tex,1195
+4.1,Web基础概念与浏览器架构,核心,True,output/chapters/chapter04.tex,22
+4.2,HTML基础与语义化,混合,True,output/chapters/chapter04.tex,61
+4.2.1,文档流、渲染流程与页面地标,核心,,output/chapters/chapter04.tex,96
+4.3,CSS样式与响应式布局,混合,True,output/chapters/chapter04.tex,259
+4.3.1,盒模型与尺寸计算,核心,,output/chapters/chapter04.tex,290
+4.3.2,单位体系与可伸缩界面,核心,,output/chapters/chapter04.tex,380
+4.3.3,定位、层叠上下文与覆盖关系,拓展,,output/chapters/chapter04.tex,408
+4.3.4,Flexbox：一维的告警工具栏,指导实践,,output/chapters/chapter04.tex,445
+4.3.5,Grid：二维的监测仪表盘,指导实践,,output/chapters/chapter04.tex,505
+4.3.6,响应式断点与大屏适配,指导实践,,output/chapters/chapter04.tex,589
+4.3.7,CSS 变量与暗色主题,拓展,,output/chapters/chapter04.tex,643
+4.3.8,Flex布局的故障定位与可访问性验收,指导实践,,output/chapters/chapter04.tex,689
+4.4,JavaScript基础编程,混合,True,output/chapters/chapter04.tex,759
+4.4.1,类型、相等性与可预测数据,核心,,output/chapters/chapter04.tex,797
+4.4.2,函数、闭包与数组高阶方法,核心,,output/chapters/chapter04.tex,821
+4.4.3,解构、展开与 ES 模块,核心,,output/chapters/chapter04.tex,853
+4.4.4,DOM 查询、增删改与安全写入,核心,,output/chapters/chapter04.tex,878
+4.4.5,事件对象、捕获与冒泡,核心,,output/chapters/chapter04.tex,903
+4.4.6,事件委托与长列表,指导实践,,output/chapters/chapter04.tex,926
+4.4.7,异常处理,核心,,output/chapters/chapter04.tex,989
+4.4.8,收束练习：一个最小的输入校验页面,核心,,output/chapters/chapter04.tex,1013
+4.5,数据请求与页面状态,混合,True,output/chapters/chapter04.tex,1045
+4.5.1,原理：一次请求从发出到页面更新,核心,,output/chapters/chapter04.tex,1053
+4.5.2,完整例子：读取对象列表与最新观测,核心,,output/chapters/chapter04.tex,1112
+4.5.3,页面的四种状态：加载、空数据、错误与过期,核心,,output/chapters/chapter04.tex,1184
+4.5.4,故障单元：切换测点时旧数据覆盖新数据,核心,,output/chapters/chapter04.tex,1238
+4.5.5,request.js：JWT、401 与超时的统一入口,指导实践,,output/chapters/chapter04.tex,1328
+4.5.6,Vite 代理与环境变量,指导实践,,output/chapters/chapter04.tex,1385
+4.5.7,登录到受保护接口的前后端联调闭环,指导实践,,output/chapters/chapter04.tex,1418
+4.5.8,拓展：认证契约测试与故障复盘,拓展,,output/chapters/chapter04.tex,1512
+4.5.9,拓展：事件循环与任务调度,拓展,,output/chapters/chapter04.tex,1568
+4.5.10,自测与下一步,核心,,output/chapters/chapter04.tex,1586
+4.6,Vue 3组件化开发,混合,True,output/chapters/chapter04.tex,1596
+4.6.1,Vue 3.4 组合式 API 与响应式状态,核心,,output/chapters/chapter04.tex,1655
+4.6.2,模板指令与组件通信,核心,,output/chapters/chapter04.tex,1683
+4.6.3,生命周期与资源清理,指导实践,,output/chapters/chapter04.tex,1742
+4.6.4,测站列表筛选页：从 SFC 到组件拆分,指导实践,,output/chapters/chapter04.tex,1791
+4.7,Vue Router与Pinia应用组织,混合,True,output/chapters/chapter04.tex,1921
+4.7.1,根组件、路由表与登录守卫,指导实践,,output/chapters/chapter04.tex,1931
+4.7.2,AssetDetail 的动态参数与数据加载,指导实践,,output/chapters/chapter04.tex,2112
+4.7.3,路由参数、查询状态与可恢复导航,指导实践,,output/chapters/chapter04.tex,2174
+4.7.4,Pinia 状态建模、错误恢复与持久化边界,指导实践,,output/chapters/chapter04.tex,2184
+4.8,调试、构建与阶段验收,混合,True,output/chapters/chapter04.tex,2207
+4.8.1,阶段验收：S1 与 S2 的检查单,核心,,output/chapters/chapter04.tex,2214
+4.8.2,模块化开发与调试技巧,指导实践,,output/chapters/chapter04.tex,2236
+4.8.3,Vite 工程化与性能优化,拓展,,output/chapters/chapter04.tex,2253
+5.1,后端服务与REST接口概述,核心,True,output/chapters/chapter05.tex,23
+5.2,第一个 HTTP 接口：从固定数据到契约,混合,True,output/chapters/chapter05.tex,185
+5.2.1,返回固定数据的接口,核心,,output/chapters/chapter05.tex,196
+5.2.2,路径参数、查询参数与错误体,核心,,output/chapters/chapter05.tex,246
+5.2.3,用第4章的页面和故障表验证接口,核心,,output/chapters/chapter05.tex,298
+5.3,Spring Boot企业级开发基础,混合,True,output/chapters/chapter05.tex,322
+5.3.1,起步依赖与自动配置的边界,核心,,output/chapters/chapter05.tex,331
+5.3.2,application.yml 与 Profile 多环境,指导实践,,output/chapters/chapter05.tex,369
+5.3.3,依赖注入与 Bean 生命周期,核心,,output/chapters/chapter05.tex,409
+5.3.4,自动配置诊断与启动契约,指导实践,,output/chapters/chapter05.tex,453
+5.3.5,Bean 作用域、代理与资源释放,拓展,,output/chapters/chapter05.tex,477
+5.3.6,工程骨架的测试切片,指导实践,,output/chapters/chapter05.tex,485
+5.4,Jakarta Persistence与事务管理,混合,True,output/chapters/chapter05.tex,540
+5.4.1,实体映射与Repository基础,核心,,output/chapters/chapter05.tex,547
+5.4.2,关联关系与懒加载边界,指导实践,,output/chapters/chapter05.tex,636
+5.4.3,N+1 查询与 fetch join,拓展,,output/chapters/chapter05.tex,686
+5.4.4,派生查询、Pageable 与稳定分页,指导实践,,output/chapters/chapter05.tex,735
+5.4.5,乐观锁与审计字段,指导实践,,output/chapters/chapter05.tex,772
+5.4.6,索引设计与 PostgreSQL 迁移,指导实践,,output/chapters/chapter05.tex,818
+5.4.7,查询测试、执行计划与观测,拓展,,output/chapters/chapter05.tex,852
+5.4.8,统计服务中的数值稳定性,拓展,,output/chapters/chapter05.tex,875
+5.4.9,事务边界与传播,核心,,output/chapters/chapter05.tex,881
+5.4.10,事务的 ACID 契约与边界,核心,,output/chapters/chapter05.tex,932
+5.4.11,七种传播行为与使用场景,拓展,,output/chapters/chapter05.tex,959
+5.4.12,隔离级别与并发异常,拓展,,output/chapters/chapter05.tex,1002
+5.4.13,只读事务与事件发布闭环,指导实践,,output/chapters/chapter05.tex,1058
+5.4.14,统计量更新,拓展,,output/chapters/chapter05.tex,1096
+5.5,服务层与异常处理,混合,True,output/chapters/chapter05.tex,1124
+5.5.1,读写接口的完整闭环,核心,,output/chapters/chapter05.tex,1163
+5.5.2,统一错误响应与参数校验,指导实践,,output/chapters/chapter05.tex,1285
+5.5.3,三层校验与错误定位,指导实践,,output/chapters/chapter05.tex,1337
+5.5.4,HTTP 状态转换与事务语义,拓展,,output/chapters/chapter05.tex,1345
+5.5.5,DTO 契约与单位转换,指导实践,,output/chapters/chapter05.tex,1353
+5.5.6,测试矩阵与接口可观测性,拓展,,output/chapters/chapter05.tex,1359
+5.6,Spring Security 6与JWT,混合,True,output/chapters/chapter05.tex,1374
+5.6.1,威胁模型与认证边界,指导实践,,output/chapters/chapter05.tex,1776
+5.6.2,密钥生命周期与配置管理,拓展,,output/chapters/chapter05.tex,1782
+5.6.3,密码、账户与登录防护,指导实践,,output/chapters/chapter05.tex,1788
+5.6.4,CSRF、CORS 与浏览器存储,拓展,,output/chapters/chapter05.tex,1794
+5.6.5,权限建模与最小授权,指导实践,,output/chapters/chapter05.tex,1802
+5.6.6,撤销、重放与故障降级,拓展,,output/chapters/chapter05.tex,1808
+5.6.7,认证链路的可观测性与演练,拓展,,output/chapters/chapter05.tex,1814
+5.6.8,令牌失效与会话迁移,拓展,,output/chapters/chapter05.tex,1822
+5.7,事务事件与消息队列,混合,True,output/chapters/chapter05.tex,1840
+5.7.1,为什么引入消息队列,核心,,output/chapters/chapter05.tex,1900
+5.7.2,生产者、事件模式与发送确认,指导实践,,output/chapters/chapter05.tex,1932
+5.7.3,消费者幂等与去重约束,指导实践,,output/chapters/chapter05.tex,1974
+5.7.4,重试、退避与死信队列,指导实践,,output/chapters/chapter05.tex,2028
+5.7.5,事务发件箱与可靠发布,指导实践,,output/chapters/chapter05.tex,2064
+5.7.6,分区、顺序与消费者组,拓展,,output/chapters/chapter05.tex,2128
+5.8,性能与可观测性：往哪里找,拓展,True,output/chapters/chapter05.tex,2142
+5.9,测试策略与质量门禁,指导实践,True,output/chapters/chapter05.tex,2150
+6.1,WebGL2与Three.js三维渲染基础,混合,True,output/chapters/chapter06.tex,22
+6.1.1,从一个几何体开始：场景、相机、渲染器与循环,核心,,output/chapters/chapter06.tex,29
+6.1.2,坐标变换与透视投影,核心,,output/chapters/chapter06.tex,100
+6.1.3,WebGL2渲染管线,拓展,,output/chapters/chapter06.tex,118
+6.1.4,Three.js场景组织与模型加载,核心,,output/chapters/chapter06.tex,304
+6.1.5,把测点挂到坝体上：对象绑定与查找,核心,,output/chapters/chapter06.tex,324
+6.2,GIS服务、坐标与二三维集成,混合,True,output/chapters/chapter06.tex,386
+6.2.1,OGC地图与要素服务,指导实践,,output/chapters/chapter06.tex,393
+6.2.2,CGCS2000与投影坐标,核心,,output/chapters/chapter06.tex,529
+6.2.3,高程基准与空间一致性,核心,,output/chapters/chapter06.tex,613
+6.2.4,Cesium场景集成,拓展,,output/chapters/chapter06.tex,735
+6.3,倾斜摄影与BIM模型构建,混合,True,output/chapters/chapter06.tex,753
+6.3.1,倾斜摄影数据生产,拓展,,output/chapters/chapter06.tex,760
+6.3.2,BIM语义与IFC 4.3,拓展,,output/chapters/chapter06.tex,905
+6.3.3,多源模型融合与发布,拓展,,output/chapters/chapter06.tex,944
+6.4,数字孪生水利平台架构概览,混合,True,output/chapters/chapter06.tex,958
+6.4.1,概念边界与五维组织,拓展,,output/chapters/chapter06.tex,965
+6.4.2,分层技术架构,拓展,,output/chapters/chapter06.tex,1017
+6.4.3,跨层契约与架构演进,拓展,,output/chapters/chapter06.tex,1044
+6.4.4,业务场景与需求分解,拓展,,output/chapters/chapter06.tex,1072
+6.4.5,数据底板与模型平台,拓展,,output/chapters/chapter06.tex,1097
+6.4.6,模型卡与可信度管理,拓展,,output/chapters/chapter06.tex,1120
+6.4.7,事件时间、状态估计与质量码,拓展,,output/chapters/chapter06.tex,1150
+6.4.8,三维交互与决策证据链,拓展,,output/chapters/chapter06.tex,1182
+6.4.9,实时同步与闭环控制,拓展,,output/chapters/chapter06.tex,1216
+6.4.10,接口与事件契约,拓展,,output/chapters/chapter06.tex,1266
+6.4.11,大坝安全监测场景,拓展,,output/chapters/chapter06.tex,1320
+6.4.12,流域预报调度场景,拓展,,output/chapters/chapter06.tex,1343
+6.4.13,云边协同与部署,拓展,,output/chapters/chapter06.tex,1370
+6.4.14,安全、权限与失效降级,拓展,,output/chapters/chapter06.tex,1396
+6.4.15,可观测性、数据血缘与运行值守,拓展,,output/chapters/chapter06.tex,1424
+6.4.16,验证、验收与持续改进,拓展,,output/chapters/chapter06.tex,1480
+6.4.17,课程项目实施路线,拓展,,output/chapters/chapter06.tex,1506
+6.4.18,发展重点,拓展,,output/chapters/chapter06.tex,1532
+7.1,面向可视化的数据准备,混合,True,output/chapters/chapter07.tex,25
+7.1.1,从观测记录到视觉变量,核心,,output/chapters/chapter07.tex,31
+7.1.2,时间窗口、降采样与缺测,核心,,output/chapters/chapter07.tex,76
+7.1.3,实时流、历史回放与时间对齐,指导实践,,output/chapters/chapter07.tex,145
+7.1.4,数据质量检验、缺测断线与异常处理,指导实践,,output/chapters/chapter07.tex,230
+7.1.5,多源异构数据的标准化与融合,拓展,,output/chapters/chapter07.tex,293
+7.1.6,案例的数据视图契约,核心,,output/chapters/chapter07.tex,339
+7.2,图表与实时联动,混合,True,output/chapters/chapter07.tex,363
+7.2.1,图表选型与视觉编码,核心,,output/chapters/chapter07.tex,369
+7.2.2,可运行的实时曲线,指导实践,,output/chapters/chapter07.tex,471
+7.2.3,渲染器、性能预算与生命周期,拓展,,output/chapters/chapter07.tex,577
+7.2.4,图表与三维对象的双向联动,核心,,output/chapters/chapter07.tex,619
+7.2.5,响应式与异常状态,核心,,output/chapters/chapter07.tex,727
+7.2.6,专题地图的表达方式,拓展,,output/chapters/chapter07.tex,733
+7.2.7,色彩体系与可读性,拓展,,output/chapters/chapter07.tex,810
+7.3,三维场景中的监测点绘制,混合,True,output/chapters/chapter07.tex,944
+7.3.1,坐标转换与局部原点,指导实践,,output/chapters/chapter07.tex,950
+7.3.2,状态编码、LOD与聚合,拓展,,output/chapters/chapter07.tex,1034
+7.3.3,状态变化与渲染更新,核心,,output/chapters/chapter07.tex,1082
+7.4,监测点互动与拾取技术,混合,True,output/chapters/chapter07.tex,1088
+7.4.1,射线拾取与安全的向量运算,核心,,output/chapters/chapter07.tex,1094
+7.4.2,触控半径与世界单位,拓展,,output/chapters/chapter07.tex,1167
+7.4.3,信息面板与渐进披露,核心,,output/chapters/chapter07.tex,1203
+7.4.4,案例联调与验收,指导实践,,output/chapters/chapter07.tex,1209
+8.1,需求分析与业务闭环,混合,True,output/chapters/chapter08.tex,43
+8.1.1,案例边界与工程参数,核心,,output/chapters/chapter08.tex,49
+8.1.2,角色、用例与权限边界,核心,,output/chapters/chapter08.tex,78
+8.1.3,端到端业务闭环,核心,,output/chapters/chapter08.tex,149
+8.2,总体架构与三维场景设计,混合,True,output/chapters/chapter08.tex,181
+8.2.1,统一技术栈与分层架构,核心,,output/chapters/chapter08.tex,187
+8.2.2,Three.js主线与Cesium扩展,拓展,,output/chapters/chapter08.tex,211
+8.2.3,场景组织、材质与交互,指导实践,,output/chapters/chapter08.tex,232
+8.3,数据模型、前端展示与后端处理,混合,True,output/chapters/chapter08.tex,362
+8.3.1,数据模型与事件契约,核心,,output/chapters/chapter08.tex,368
+8.3.2,关系模型、空间索引与时序分区,指导实践,,output/chapters/chapter08.tex,391
+8.3.3,数据库迁移、查询与运行维护练习,指导实践,,output/chapters/chapter08.tex,681
+8.3.4,从业务约束到物理设计的推导,拓展,,output/chapters/chapter08.tex,1012
+8.3.5,Vue前端页面组织,指导实践,,output/chapters/chapter08.tex,1190
+8.3.6,Spring Boot后端与数据质量,指导实践,,output/chapters/chapter08.tex,1492
+8.3.7,监测主线后端实现,指导实践,,output/chapters/chapter08.tex,1647
+8.3.8,存储、缓存与一致性,拓展,,output/chapters/chapter08.tex,2369
+8.4,智能分析、预警与业务闭环,混合,True,output/chapters/chapter08.tex,2375
+8.4.1,蓝黄橙红四级预警,核心,,output/chapters/chapter08.tex,2381
+8.4.2,从预警到工单与复盘,指导实践,,output/chapters/chapter08.tex,2484
+8.4.3,模型可信度与人在回路,拓展,,output/chapters/chapter08.tex,2510
+8.5,数字孪生水利平台案例,混合,True,output/chapters/chapter08.tex,2568
+8.5.1,案例来源、边界与建设目标,拓展,,output/chapters/chapter08.tex,2578
+8.5.2,防台防洪预演的输入与输出,拓展,,output/chapters/chapter08.tex,2640
+8.5.3,淹没影响、疏散路线与证据链,拓展,,output/chapters/chapter08.tex,2698
+8.5.4,数字孪生水库矩阵与“四预”,拓展,,output/chapters/chapter08.tex,2756
+8.5.5,闸门调度正算、反算与方案约束,拓展,,output/chapters/chapter08.tex,2822
+8.5.6,预警方案预演与角色协同,拓展,,output/chapters/chapter08.tex,2888
+8.5.7,AI助手驱动的调度会商,拓展,,output/chapters/chapter08.tex,2911
+8.5.8,底板与算法解耦、权限与模拟标注,拓展,,output/chapters/chapter08.tex,2972
+8.5.9,对象编码、时空基线与孪生状态,拓展,,output/chapters/chapter08.tex,3000
+8.5.10,模型任务编排与运行生命周期,拓展,,output/chapters/chapter08.tex,3056
+8.5.11,数字孪生水网的供需平衡与联合调度,拓展,,output/chapters/chapter08.tex,3096
+8.5.12,场景版本、方案比较与不确定性表达,拓展,,output/chapters/chapter08.tex,3165
+8.5.13,端到端实现切片与验收脚本,拓展,,output/chapters/chapter08.tex,3227
+8.5.14,会商时间线、值守交接与复盘,拓展,,output/chapters/chapter08.tex,3345
+8.5.15,失效降级、验收与课程实现,拓展,,output/chapters/chapter08.tex,3401
+8.6,系统部署、运维与验收,混合,True,output/chapters/chapter08.tex,3450
+8.6.1,部署架构与环境一致性,指导实践,,output/chapters/chapter08.tex,3456
+8.6.2,可观测性、备份与恢复,指导实践,,output/chapters/chapter08.tex,3598
+8.6.3,阶段验收,指导实践,,output/chapters/chapter08.tex,3621
+9.1,全书回顾,核心,True,output/chapters/chapter09.tex,15
+9.2,技术发展趋势与展望,混合,True,output/chapters/chapter09.tex,52
+9.2.1,政策与建设背景,拓展,,output/chapters/chapter09.tex,60
+9.2.2,教材主线之外的延伸方向,拓展,,output/chapters/chapter09.tex,68
+9.2.3,如何判断一项新技术是否值得投入,拓展,,output/chapters/chapter09.tex,90
+9.3,对读者的建议与后续学习指引,混合,True,output/chapters/chapter09.tex,96
+9.3.1,学习与实践策略,核心,,output/chapters/chapter09.tex,104
+9.3.2,面向前沿技术的持续学习,拓展,,output/chapters/chapter09.tex,112
+9.3.3,行业追踪与信息渠道,拓展,,output/chapters/chapter09.tex,137
+9.3.4,跨学科知识补充,拓展,,output/chapters/chapter09.tex,155

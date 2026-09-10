@@ -24,7 +24,9 @@
 
 \section{面向可视化的数据准备}\label{sec:data-types-display}
 
-\paragraph{本节层次}核心：7.1.1、7.1.2、7.1.6；指导实践：7.1.3、7.1.4；拓展：7.1.5。核心路线只要求读完核心小节。
+\paragraph{本节层次}核心：7.1.1、7.1.2、7.1.6；指导实践：7.1.3、7.1.4；拓展：7.1.5。核心阅读按所列小节推进，实践成果按章末要求验收。
+
+\paragraph{进入本节所需知识}先读4.5节核心内容及表\ref{tab:api-contract}，能辨认时间、数值、单位和质量码。
 
 \subsection{从观测记录到视觉变量}
 
@@ -360,7 +362,9 @@ const normalized = standardize(message, 'gateway-02', 'v3');
 
 \section{图表与实时联动}\label{sec:data-chart-display}
 
-\paragraph{本节层次}核心：7.2.1、7.2.4、7.2.5；指导实践：7.2.2；拓展：7.2.3、7.2.6、7.2.7。核心路线只要求读完核心小节。
+\paragraph{本节层次}核心：7.2.1、7.2.4、7.2.5；指导实践：7.2.2；拓展：7.2.3、7.2.6、7.2.7。核心阅读按所列小节推进，实践成果按章末要求验收。
+
+\paragraph{进入本节所需知识}先读7.1节核心内容与4.5.4节竞态处理；联动实践复用6.1节场景。
 
 \subsection{图表选型与视觉编码}
 
@@ -466,9 +470,9 @@ chart.setOption({
 
 \subsection{可运行的实时曲线}
 
-ECharts的\texttt{setOption}不是“把新对象覆盖到旧对象”这么简单。默认\texttt{notMerge:false}时，框架会把新配置与旧配置合并；\texttt{series}优先按稳定的\texttt{id}匹配，同一序列只更新被提供的字段。\texttt{lazyUpdate:true}允许把短时间内的多次更新合并到下一帧，适合5\,min采样或批量补传。若业务要删除一条已经不存在的序列，必须显式使用\texttt{replaceMerge:['series']}，否则旧序列可能继续留在图例和tooltip中。对于大批量点位，\texttt{appendData}可以把数据追加到指定序列，避免每次复制整份数组；它适合只追加、不需要重新排序的历史尾部。
+ECharts的\texttt{setOption}不是“把新对象覆盖到旧对象”这么简单。默认\texttt{notMerge:false}时，框架会把新配置与旧配置合并；\texttt{series}优先按稳定的\texttt{id}匹配，同一序列只更新被提供的字段。\texttt{lazyUpdate:true}允许把短时间内的多次更新合并到下一帧，适合5\,min采样或批量补传。若业务要删除一条已经不存在的序列，必须显式使用\texttt{replaceMerge:['series']}，否则旧序列可能继续留在图例和tooltip中。本书的水位折线\texttt{line}通过\texttt{setOption}更新。\texttt{appendData}的增量渲染仅适用于支持它的系列，例如基础 ECharts 的\texttt{scatter}和\texttt{lines}，且不支持\texttt{dataset}；其中\texttt{lines}是线段系列，与水位折线\texttt{line}用途不同\cite{apacheECharts}。
 
-表\ref{tab:ch07-echarts-update}对照三种更新方式。选择方式时先问“是否改变序列结构”：只改数据点可局部合并，需要删除序列就替换集合，持续追加的高频数据则使用追加接口。无论哪一种方式，应用状态都要保存原始缓冲，不能把图表实例的合并结果当作业务状态。
+表\ref{tab:ch07-echarts-update}对照三种更新方式。选择方式时先问“是否改变序列结构”：只改数据点可局部合并，需要删除序列就替换集合，仅当系列支持增量渲染时才使用追加接口。无论哪一种方式，应用状态都要保存原始缓冲，不能把图表实例的合并结果当作业务状态。
 
 \begin{table}[htbp]
 \centering
@@ -480,7 +484,7 @@ ECharts的\texttt{setOption}不是“把新对象覆盖到旧对象”这么简�
 \midrule
 局部合并 & \texttt{setOption(option)} & 默认按\texttt{id}合并；保留未提供的配置，适合更新已有序列数据 \\
 替换集合 & \texttt{replaceMerge} & 删除或重排序列时使用；必须重新提供完整序列集合 \\
-流式追加 & \texttt{appendData(...)} & 只追加尾部点；不负责排序、去重和窗口裁剪，应用层先完成校验 \\
+流式追加 & \texttt{appendData(...)} & 限支持的系列且不用\texttt{dataset}；水位折线用局部合并，排序、去重和窗口裁剪由应用层处理 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -537,27 +541,37 @@ chart.setOption(historyOption);
 
 清单\ref{lst:ch07-window-options}同时展示了\texttt{dataZoom}、\texttt{markLine}、\texttt{markArea}和\texttt{visualMap.pieces}的职责：缩放改变可见时间范围，标线标出单一基准，阴影标出阈值带，分段映射控制曲线颜色。阈值来源、适用工况和规则版本必须显示在图例或详情中；不能用一条红色水平线代替第8章的质量检查和预警规则。颜色分段只服务于阅读，风险计算仍读取原始数值和质量码。
 
-\paragraph{追加接口与结构变更}
-当消息以严格递增的事件时间到达时，可以使用\texttt{appendData}追加尾部点；迟到消息、删除测项和改变时间窗则必须回到应用状态重建序列并调用\texttt{setOption}。\texttt{appendData}不会替你去重，也不会自动删除旧点，300点窗口仍由状态层或服务端维护。若同一图表从一条曲线切换为“水位+雨量+阈值带”，应在一次\texttt{replaceMerge}中提交完整序列集合，避免旧的图例项留在界面。清单\ref{lst:ch07-append-data}把这两条路径写在一起：尾部追加走\texttt{appendData}，结构变更走\texttt{replaceMerge}，判断依据是序列集合有没有变，而不是数据量多少。
+\paragraph{尾部更新与结构变更}
+水位折线收到新观测时，先把记录追加到应用缓冲，再用\texttt{setOption}更新\texttt{line}系列；缓冲负责保持300点窗口。迟到消息应先按事件时间排序、去重，再重建序列。若图表从一条水位曲线切换为水位与雨量两条序列，应在一次\texttt{replaceMerge}中提供完整集合和对应坐标轴。清单\ref{lst:ch07-append-data}给出可独立使用的更新模块。调用方在导入后传入已初始化的图表，收到一条按时间递增的观测就调用\texttt{appendTail}；需要切换序列时调用\texttt{replaceWithTwoSeries}。验证时追加一个\texttt{missing}点，应保留空值并断线；再追加超过300点，缓冲应只保留末尾300点。将折线更新误换为追加接口时，先核对系列类型是否支持增量渲染。
 
-\begin{lstlisting}[label={lst:ch07-append-data},language=JavaScript,breaklines=true,caption={高频尾部数据的appendData与结构切换}]
-function appendTail(reading) {
-  // 缺测点以 null 保留时间位置，曲线在此断开而不是把两侧连起来；
-  // 序列不能设置 connectNulls
-  const value = reading.quality === 'missing' ? null : reading.value;
-  chart.appendData({seriesIndex: 0,
-    data: [[reading.occurredAt, value]]});
+\begin{lstlisting}[label={lst:ch07-append-data},language=JavaScript,breaklines=true,caption={水位折线的尾部更新与序列切换}]
+export function createWindowChart(chart) {
+  let points = [];
+  function replaceWithTwoSeries(level, rain) {
+    points = level.slice(-300);
+    chart.setOption({
+      legend: {data: ['库水位', '时段雨量']},
+      xAxis: {type: 'time'},
+      yAxis: [{type: 'value', name: '水位/m'},
+              {type: 'value', name: '雨量/mm'}],
+      series: [
+        {id: 'level', name: '库水位', type: 'line',
+         yAxisIndex: 0, connectNulls: false, data: points},
+        {id: 'rain', name: '时段雨量', type: 'bar',
+         yAxisIndex: 1, data: rain.slice(-300)}
+      ]
+    }, {replaceMerge: ['series'], lazyUpdate: true});
+  }
+  function appendTail(reading) {
+    const value = reading.quality === 'missing' ? null : reading.value;
+    points = [...points, [reading.occurredAt, value]].slice(-300);
+    chart.setOption({series: [{id: 'level', data: points}]});
+  }
+  replaceWithTwoSeries([], []);
+  return {appendTail, replaceWithTwoSeries};
 }
-
-function replaceWithTwoSeries(level, rain) {
-  chart.setOption({
-    legend: {data: ['库水位', '时段雨量']},
-    series: [
-      {id: 'level', name: '库水位', type: 'line', data: level},
-      {id: 'rain', name: '时段雨量', type: 'bar', data: rain}
-    ]
-  }, {replaceMerge: ['series'], lazyUpdate: true});
-}
+// 页面调用：const live = createWindowChart(chart);
+// 收到下一条观测时调用 live.appendTail(reading)。
 \end{lstlisting}
 
 \subsection{渲染器、性能预算与生命周期}
@@ -635,7 +649,9 @@ function createLinkController(chart, scene, readings) {
 
 清单\ref{lst:ch07-link-controller}没有把\texttt{assetId}写死在图表下标里：筛选、排序或插入阈值带后，控制器仍可通过应用状态查找对象。真实项目还要把时间窗口作为\texttt{focusAsset}的参数，三维场景显示同一时刻的质量码和预警等级；若该点是missing，图表应定位到空值区间并打开质量详情，而不是强行显示最近的有效点。解绑函数必须在组件卸载时执行，否则每次进入页面都会叠加一组点击处理器。
 
-\paragraph{S5 阶段包。}清单\ref{lst:ch07-link-controller}里的\texttt{scene}是应用层封装，配套工程把它实现在\texttt{src/lesson74/scene-bus.js}：一个事件总线加\texttt{focusAsset}，不\texttt{import three}，因此可以在没有 WebGL 的环境里测试。整页装配见\texttt{lesson74.html}与\texttt{src/lesson74/main.js}，运行依赖是 S3（能返回观测的接口）与 S4（已绑好测点的场景）：点场景里的球，右侧曲线切到该测点；点曲线上的数据点，对应的球变橙。三处边界值得亲手试：图表下标越界时控制器安静返回，不能高亮一个错误的球；曲线里没有该对象时不发\texttt{dispatchAction}；换对象时必须先调用上一次返回的解绑函数，否则点击处理器一层层叠加，点一次会跳好几次。\texttt{tests/lesson74.test.js}用两个假对象覆盖了这三条。
+\paragraph{S5 阶段包。}清单\ref{lst:ch07-link-controller}中的\texttt{scene}由\texttt{src/lesson74/scene-bus.js}提供事件总线和对象高亮；\texttt{lesson74.html}与\texttt{main.js}完成装配，使用教学接口或 S3 完整后端以及 S4 场景。点球后应显示该对象曲线，点曲线上的数据点应高亮对应测点。\texttt{series-controller.js}负责异步切换，复用4.5.4节的取消请求与序号校验：一开始切换就解绑并清空旧曲线，当前请求成功后再建立联动。
+
+\paragraph{故障验证与自测}先让渗压测点的请求延迟，再立即选择库水位测点，最终曲线、单位和状态文字应全部属于后选对象；接着选择无观测的位移测点，应显示“暂无观测”且旧曲线无法响应点击。断网时应显示失败原因，恢复后重新选择可重试。若旧图恢复或旧监听器仍生效，检查序号校验和解绑是否位于所有返回分支之前。\texttt{tests/series-controller.test.js}覆盖这些异常路径及卸载后迟到的响应，\texttt{tests/lesson74.test.js}验证对象映射、下标越界和拾取。自测：取消请求后为什么还需要序号？答案要点：取消不能撤回已经完成的异步计算，只有当前选择的结果才有更新权限。
 
 水位、雨量和渗压往往分成上下几张图。清单\ref{lst:ch07-connect-charts}用\texttt{echarts.connect}让它们共享缩放和提示，读者拖动其中一张的时间轴，另外几张同步跟随；但对象定位仍由业务控制器完成，图表库不认识\texttt{assetId}。
 
@@ -927,7 +943,9 @@ chart.getDom().setAttribute('aria-label', option.aria.description);
 
 \section{三维场景中的监测点绘制}\label{sec:3d-monitoring-rendering}
 
-\paragraph{本节层次}核心：7.3.3；指导实践：7.3.1；拓展：7.3.2。核心路线只要求读完核心小节。
+\paragraph{本节层次}核心：7.3.3；指导实践：7.3.1；拓展：7.3.2。核心阅读按所列小节推进，实践成果按章末要求验收。
+
+\paragraph{进入本节所需知识}先读6.1.5节对象绑定和7.1节数据准备，按对象标识核对观测。
 
 \subsection{坐标转换与局部原点}
 
@@ -1069,7 +1087,9 @@ function radiusForObject(camera, point, px, canvasHeight) {
 
 \section{监测点互动与拾取技术}\label{sec:monitoring-interaction}
 
-\paragraph{本节层次}核心：7.4.1、7.4.3；指导实践：7.4.4；拓展：7.4.2。核心路线只要求读完核心小节。
+\paragraph{本节层次}核心：7.4.1、7.4.3；指导实践：7.4.4；拓展：7.4.2。核心阅读按所列小节推进，实践成果按章末要求验收。
+
+\paragraph{进入本节所需知识}先读6.1节场景基础与4.4节事件；使用已绑定测点的 S4 场景。
 
 \subsection{射线拾取与安全的向量运算}
 
@@ -1206,7 +1226,7 @@ raycaster.params.Points.threshold = pickingRadiusWorld;
 
 本章最该记住的五个判断是：第一，图表先回答业务问题再选择编码；第二，颜色之外必须有文字、形状或图标；第三，坐标转换要同时记录基准、单位和精度；第四，三维对象必须携带稳定 assetId 并能回到数据详情；第五，任何性能优化都要用峰谷保留率、帧时间和失败场景验收。沿着“质量与时间校验—图表表达—空间定位—拾取交互”链路，ECharts 与 Three.js 才能共同服务于可复核的监测判断。
 
-一次课堂联调中，某站把缺测值填成零，曲线在凌晨形成陡降，值班员误以为水位骤降而发起工单；复核日志后才发现原始记录是通信中断。另一次演示只用颜色表示可疑值，大屏投影后颜色对比不足，听课者无法分辨状态。两个例子说明数据质量和无障碍表达都属于业务正确性，而不是页面装饰。
+可以在课堂构造两个故障情境：把通信中断产生的缺测值填成零，观察曲线是否出现虚假的陡降，再恢复空值并核对质量码；把可疑值仅用颜色区分，降低投影对比度后检查能否辨认，再补充形状和文字。两个例子说明数据质量和无障碍表达都属于业务正确性，而不是页面装饰。
 
 \section*{章末交付物}
 
@@ -1238,7 +1258,7 @@ raycaster.params.Points.threshold = pickingRadiusWorld;
 \item 设计正常、关注、告警、离线和可疑数据的颜色、形状与文字组合。
 
 \item[\textbf{实践题}]
-\item 使用配套仓库\texttt{companion/datasets/}提供的1000条水位数据生成一张曲线，并在一课时内实现300点滑动窗口和缺测断线。
+\item 使用配套仓库\texttt{companion/datasets/}提供的水位数据中截取1000条连续记录生成一张曲线，并在一课时内实现300点滑动窗口和缺测断线。
 \item 为案例水库28个观测点建立局部坐标映射，抽查5点并记录定位误差。
 \item 实现“点击曲线异常点—定位三维测点—打开同一时刻详情”的联动，并完成一条失败场景测试。
 \item 实现 LTTB 降采样，将同一组水位序列分别用等间隔抽样和 LTTB 抽样绘制，比较两种方法对峰值、谷值和突变点的保留率，并说明何时必须回看原始数据。

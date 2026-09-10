@@ -131,7 +131,7 @@
 \item \textbf{课程设计方案：}以第8章贯穿案例为中心，要求学生分组完成需求说明、架构设计、前端页面、后端接口和三维场景集成，可与毕业设计或综合实训衔接。
 \end{itemize}
 
-\paragraph{每节的学习层次}从第1章起，每一节开头都有一段“本节层次”，把该节的小节分为三层。\textbf{核心}：要求能解释原理、完成小规模实现、独立完成基本题，是课堂讲授与闭卷考核的范围。\textbf{指导实践}：理解职责与边界，能在提供的工程骨架上修改、运行和验证，主要在随堂实验中完成。\textbf{拓展}：理解适用条件与代价，不作为基础课程的独立编码要求，供课程设计与自学。层次不等于重要程度——认证、部署都很重要，但初学者可以先在可运行的骨架上使用它们，框架内部机制放到拓展。各章的核心路线只依赖核心小节，不要求先读拓展。
+\paragraph{每节的学习层次}从第1章起，每一节开头都有一段“本节层次”，把该节的小节分为三层。\textbf{核心}：要求能解释原理、完成小规模实现、独立完成基本题，是课堂讲授与闭卷考核的范围。\textbf{指导实践}：理解职责与边界，能在提供的工程骨架上修改、运行和验证，主要在随堂实验中完成。\textbf{拓展}：理解适用条件与代价，不作为基础课程的独立编码要求，供课程设计与自学。层次不等于重要程度——认证、部署都很重要，但初学者可以先在可运行的骨架上使用它们，框架内部机制放到拓展。核心理论路线不要求先读拓展；指导实践使用提供的骨架，按章末交付要求完成。只读核心小节可以建立概念框架，完成课程成果还需要运行、修改和验证相应实践。
 
 \paragraph{核心内容与选学内容}全书内容量大于任何一种学时方案的课堂容量，这是有意为之：核心内容支撑课堂教学，选学内容服务课程设计、毕业设计与自学进阶。二者的边界见表\ref{tab:preface-core-optional}，任课教师可按此裁剪，学生自学时也应先走完核心主线再进入选学专题。
 
@@ -198,13 +198,13 @@ Issues反馈渠道 & 勘误、环境问题和可复现实验报告 & 在配套�
 \end{tabular}
 \end{table}
 
-\paragraph{配套工程的定位。}\texttt{companion/water-platform-demo/}提供的是一条\textbf{最小可运行闭环}：登录认证、测点与观测查询、消息消费入库、一条命令启动和前后端各自的冒烟测试，用来证明全书技术栈能够协同工作，并作为练习的起点仓库。它不逐条收录书中203个代码清单——清单服务于讲解，仓库服务于运行，两者以文件路径和章节号互相索引（见仓库\texttt{MAPPING.md}）。读者应把书中清单视为“把仓库改造成完整平台”的施工图，而不是期待仓库已经包含成品。
+\paragraph{配套工程的定位。}\texttt{companion/water-platform-demo/}提供的是一条\textbf{最小可运行闭环}：登录认证、测点与观测查询、消息消费入库、一条命令启动和前后端各自的冒烟测试，用来证明全书技术栈能够协同工作，并作为练习的起点仓库。配套工程按教学阶段组织代码——清单服务于讲解，仓库服务于运行，两者以文件路径和章节号互相索引（见仓库\texttt{MAPPING.md}）。读者应把书中清单视为“把仓库改造成完整平台”的施工图，而不是期待仓库已经包含成品。
 
-\paragraph{代码仓库结构。}配套代码的根目录为\texttt{companion/}\allowbreak\texttt{water-platform-}\allowbreak\texttt{demo/}（仓库提交\texttt{f71b52a}）。\texttt{frontend/}的可运行入口是\texttt{package.json}、\texttt{src/}\allowbreak\texttt{main.js}、\texttt{src/router/}\allowbreak\texttt{index.js}、\texttt{src/stores/}\allowbreak\texttt{monitoring.js}、\texttt{src/utils/}\allowbreak\texttt{request.js}和\texttt{src/components/}\allowbreak\texttt{MonitoringDashboard.vue}，并配有\texttt{vite.config.js}、\texttt{Dockerfile}和\texttt{nginx.conf}；\texttt{backend/}包含\texttt{pom.xml}、\texttt{src/main/java/}\allowbreak\texttt{edu/example/}\allowbreak\texttt{qingyuan/}下的实体、Repository、服务、JWT 过滤器和安全配置，以及\texttt{application.yml}和\texttt{Dockerfile}；\texttt{db/}包含\texttt{001\_init.sql}与\texttt{load-s3-data.sql}；根目录的\texttt{docker-compose.yml}负责编排前端、后端、PostgreSQL、Redis和Kafka，\texttt{secrets/}只提交\texttt{*.example}模板。目录中的每个服务都提供配置样例和健康检查说明，学生可以先运行最小链路，再逐个替换为章节中的实现。
+\paragraph{代码仓库结构。}配套代码的根目录为\texttt{companion/}\allowbreak\texttt{water-platform-}\allowbreak\texttt{demo/}（运行版本以随书发行包及\texttt{MAPPING.md}为准）。\texttt{frontend/}的可运行入口是\texttt{package.json}、\texttt{src/}\allowbreak\texttt{main.js}、\texttt{src/router/}\allowbreak\texttt{index.js}、\texttt{src/stores/}\allowbreak\texttt{monitoring.js}、\texttt{src/utils/}\allowbreak\texttt{request.js}和\texttt{src/components/}\allowbreak\texttt{MonitoringDashboard.vue}，并配有\texttt{vite.config.js}、\texttt{Dockerfile}和\texttt{nginx.conf}；\texttt{backend/}包含\texttt{pom.xml}、\texttt{src/main/java/}\allowbreak\texttt{edu/example/}\allowbreak\texttt{qingyuan/}下的实体、Repository、服务、JWT 过滤器和安全配置，以及\texttt{application.yml}和\texttt{Dockerfile}；\texttt{db/}包含\texttt{001\_init.sql}与\texttt{load-s3-data.sql}；根目录的\texttt{docker-compose.yml}负责编排前端、后端、PostgreSQL、Redis和Kafka，\texttt{secrets/}只提交\texttt{*.example}模板。目录中的每个服务都提供配置样例和健康检查说明，学生可以先运行最小链路，再逐个替换为章节中的实现。
 
 \paragraph{示例数据集。}\texttt{companion/datasets/}（仓库提交\texttt{4fed08e}）由\texttt{generate.py}生成，固定随机种子为\texttt{20260807}。\texttt{stations.csv/json}含28个测点元数据，字段为\texttt{asset\_id}、\texttt{asset\_type}、\texttt{display\_name}、单位、经纬度、\texttt{elevation\_m}、量程、精度、阈值和投运日期；\texttt{water\_level.csv}含3个库水位测点各1,200条、5分钟间隔的观测；\texttt{rainfall.csv}含5个雨量测点各288条，\texttt{piezometer.csv}含12个渗压测点各288条；8个位移测点当前仅提供\texttt{stations}中的元数据与阈值，其观测序列留作第7章练习用\texttt{generate.py}扩展生成。三类已生成观测共同使用\texttt{asset\_id}、\texttt{occurred\_at}、\texttt{version}、\texttt{event\_id}、\texttt{value}、\texttt{unit}、\texttt{quality}和\texttt{source}字段；\texttt{warnings.json}含蓝、黄、橙、红、无预警（NONE）与未评估样例。质量码只取\texttt{valid}、\texttt{suspect}、\texttt{missing}，文件中的缺测、超量程和跳变记录均保留原因。使用前应先阅读README中的字段说明，确认时间采用ISO 8601、时区采用UTC+8，并在报告中注明数据版本。
 
-\paragraph{环境版本基线。}为避免“在我的电脑上可以运行”的差异，建议按表\ref{tab:preface-companion-versions}的主线配置准备环境；补丁版本可以在同一大版本内更新，但不得跨越书中API假设。仓库快照中前端实际锁定Vue 3.4.38、Vite 5.4.8、Pinia 2.1.7、Vue Router 4.4.5、ECharts 5.5.1、Three.js 0.160.1和\texttt{@vitejs/plugin-vue} 5.2.3；后端\texttt{pom.xml}锁定Java 17、Spring Boot 3.2.10，应用版本为0.1.0；Compose 使用\texttt{timescale/timescaledb-ha:pg16}（同时含 PostGIS 与 TimescaleDB 扩展）、\texttt{redis:7.2-alpine}和Bitnami Kafka 3.7。Python生成脚本只使用标准库，建议Python 3.11或更高版本；若操作系统或CPU架构不同，应在提交问题时同时附上版本输出和启动日志。
+\paragraph{环境版本基线。}为避免“在我的电脑上可以运行”的差异，建议按表\ref{tab:preface-companion-versions}的主线配置准备环境；补丁版本可以在同一大版本内更新，但不得跨越书中API假设。仓库快照中前端实际锁定Vue 3.4.38、Vite 5.4.8、Pinia 2.1.7、Vue Router 4.4.5、ECharts 5.5.1、Three.js 0.160.1和\texttt{@vitejs/plugin-vue} 5.2.3；后端\texttt{pom.xml}锁定Java 17、Spring Boot 3.2.10，应用版本为0.1.0；Compose 使用\texttt{timescale/timescaledb-ha:pg16}（同时含 PostGIS 与 TimescaleDB 扩展）、\texttt{redis:7.2-alpine}和\texttt{apache/kafka:3.7.2}。Python生成脚本只使用标准库，建议Python 3.11或更高版本；若操作系统或CPU架构不同，应在提交问题时同时附上版本输出和启动日志。
 
 \begin{table}[htbp]
 \centering
@@ -214,15 +214,15 @@ Issues反馈渠道 & 勘误、环境问题和可复现实验报告 & 在配套�
 \toprule
 资源 & 仓库中的确切入口与版本 & 用途 \\
 \midrule
-配套代码 & \texttt{companion/}\allowbreak\texttt{water-platform-}\allowbreak\texttt{demo/}；仓库提交 \texttt{f71b52a}；Vue 3.4.38、Vite 5.4.8、Spring Boot 3.2.10 & 第4、5、8章代码联调与容器启动 \\
+配套代码 & \texttt{companion/}\allowbreak\texttt{water-platform-}\allowbreak\texttt{demo/}；入口见\texttt{STAGES.md}；Vue 3.4.38、Vite 5.4.8、Spring Boot 3.2.10 & 第4、5、8章代码联调与容器启动 \\
 示例数据 & \texttt{companion/datasets/}；仓库提交 \texttt{4fed08e}；生成器种子 \texttt{20260807} & 第7章实践题和第8章验收测试 \\
-参考答案 & 编辑源 \texttt{appendix/}\allowbreak\texttt{appendixA.md}；编译入口 \texttt{output/appendix/}\allowbreak\texttt{answers.tex}；仓库提交 \texttt{5a3fb7b} & 按章节和题号核对评分要点、验收证据与延伸阅读 \\
-运行编排 & \texttt{docker-compose.yml}；PostGIS 16/3.4、Redis 7.2、Kafka 3.7；健康检查为 \texttt{/readyz} 与 \texttt{/healthz} & 启动前后端、数据库、缓存和消息服务 \\
+参考答案 & 编辑与编译源 \texttt{output/appendix/}\allowbreak\texttt{answers.tex}；在线答案由该文件生成 & 按章节和题号核对评分要点、验收证据与延伸阅读 \\
+运行编排 & \texttt{docker-compose.yml}；镜像采用本节环境基线；经前端访问 \texttt{/readyz} 与 \texttt{/healthz} & 启动前后端、数据库、缓存和消息服务 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\paragraph{答案与勘误。}附录A的编辑源文件是\texttt{appendix/appendixA.md}，随主文档编译的答案入口是\texttt{output/appendix/answers.tex}，在 PDF 中以“附录A 习题参考答案”出现。它按章节和题号提供客观题答案、简答题评分要点、实践题验收清单与延伸阅读；建议先独立完成并保存运行日志，再按题号检索评分证据，不直接复制完整项目。发现错别字、公式编号、代码环境或数据字段问题时，请在配套仓库Issues提交；注明书名、章节、页码、资源提交号、环境版本和最小复现步骤。每条勘误在确认后记录处理状态，读者可据此区分已修复问题与个人环境差异。
+\paragraph{答案与勘误。}附录A的编辑与编译源文件是\texttt{output/appendix/answers.tex}，在 PDF 中以“附录A 习题参考答案”出现，在线答案由同一文件生成。它按章节和题号提供客观题答案、简答题评分要点、实践题验收清单与延伸阅读；建议先独立完成并保存运行日志，再按题号检索评分证据，不直接复制完整项目。发现错别字、公式编号、代码环境或数据字段问题时，请在配套仓库Issues提交；注明书名、章节、页码、资源提交号、环境版本和最小复现步骤。每条勘误在确认后记录处理状态，读者可据此区分已修复问题与个人环境差异。
 
 \section*{适用对象}
 

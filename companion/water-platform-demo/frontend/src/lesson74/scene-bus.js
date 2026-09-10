@@ -31,7 +31,10 @@ export function createSceneBus(bound) {
     },
     emit(event, payload) {
       // 复制一份再遍历：处理函数里调用 off 时不会破坏正在进行的迭代
-      for (const handler of [...(listeners.get(event) ?? [])]) handler(payload);
+      for (const handler of [...(listeners.get(event) ?? [])]) {
+        // 本次分发中已经解绑的旧曲线处理器也不能继续响应。
+        if (listeners.get(event)?.has(handler)) handler(payload);
+      }
       return bus;
     },
 

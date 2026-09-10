@@ -27,6 +27,8 @@ import difflib
 
 # (清单 label, 书稿文件, 配套文件)
 PAIRS = [
+    ("lst:ch07-append-data", "output/chapters/chapter07.tex",
+     "companion/water-platform-demo/frontend/src/lesson74/window-chart.js"),
     ("lst:ch04-r1-load", "output/chapters/chapter04.tex",
      "companion/water-platform-demo/frontend/src/lesson45/detail.js"),
     ("lst:ch04-r1-state", "output/chapters/chapter04.tex",

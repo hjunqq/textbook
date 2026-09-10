@@ -1,5 +1,6 @@
 import {defineConfig} from 'vite';
 import vue from '@vitejs/plugin-vue';
+import { fileURLToPath } from 'node:url';
 
 // 与第4章"构建与性能优化"呼应:第三方依赖单独分包,
 // 业务页面配合路由懒加载(见 router/index.js 的动态 import)按需加载。
@@ -12,7 +13,12 @@ export default defineConfig({
   // 纯函数用例（readings、auth、lesson84）在 jsdom 下同样正常。
   test: { environment: 'jsdom' },
   build: {
+    // 阶段页使用顶层 await；运行环境为课程约定的现代浏览器。
+    target: 'es2022',
     rollupOptions: {
+      input: Object.fromEntries([
+        'index', 'lesson44', 'lesson44-detail', 'lesson45', 'lesson61', 'lesson74',
+      ].map(name => [name, fileURLToPath(new URL(`./${name}.html`, import.meta.url))])),
       output: {
         manualChunks(id) {
           if (id.includes('node_modules')) return 'vendor';

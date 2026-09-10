@@ -1,0 +1,87 @@
+{
+  "chapters": [
+    {
+      "file": "preface.tex",
+      "before": 4741,
+      "after": 4812,
+      "delta": 71
+    },
+    {
+      "file": "chapter01.tex",
+      "before": 13969,
+      "after": 14080,
+      "delta": 111
+    },
+    {
+      "file": "chapter02.tex",
+      "before": 23115,
+      "after": 23352,
+      "delta": 237
+    },
+    {
+      "file": "chapter03.tex",
+      "before": 35535,
+      "after": 35771,
+      "delta": 236
+    },
+    {
+      "file": "chapter04.tex",
+      "before": 29561,
+      "after": 29852,
+      "delta": 291
+    },
+    {
+      "file": "chapter05.tex",
+      "before": 28936,
+      "after": 29301,
+      "delta": 365
+    },
+    {
+      "file": "chapter06.tex",
+      "before": 30321,
+      "after": 30472,
+      "delta": 151
+    },
+    {
+      "file": "chapter07.tex",
+      "before": 22122,
+      "after": 22452,
+      "delta": 330
+    },
+    {
+      "file": "chapter08.tex",
+      "before": 41548,
+      "after": 41775,
+      "delta": 227
+    },
+    {
+      "file": "chapter09.tex",
+      "before": 6114,
+      "after": 6219,
+      "delta": 105
+    }
+  ],
+  "total_before": 235962,
+  "total_after": 238086,
+  "teacher_hours_before": [
+    34,
+    22
+  ],
+  "teacher_hours_after": [
+    30,
+    26
+  ],
+  "final_compile_log": {
+    "errors": 0,
+    "overfull": 0,
+    "missing_characters": 0,
+    "undefined": 0
+  },
+  "tests": {
+    "files": 8,
+    "passed": 55
+  },
+  "listing_pairs": 10,
+  "site_strict": "passed",
+  "pdf_pages": 477
+}
