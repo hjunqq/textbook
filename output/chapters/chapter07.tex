@@ -90,25 +90,29 @@
 
 \begin{figure}[htbp]
 \centering
-\begin{tikzpicture}[x=.9cm,y=.75cm]
-\draw[->,gray] (0,0)--(11,0) node[right]{时间};
-\draw[->,gray] (0,0)--(0,4.3) node[above]{观测值};
-\draw[gray!60] plot[smooth] coordinates {(0.5,1.0)(1.2,1.4)(2,1.2)(2.8,2.7)(3.6,1.7)(4.4,2.0)(5.2,3.7)(6,2.2)(6.8,2.5)(7.6,1.4)(8.4,3.0)(9.2,2.6)(10,3.4)};
-\draw[gray,dashed] (3.1,.1)--(3.1,4.0);
-\draw[gray,dashed] (6.3,.1)--(6.3,4.0);
-\fill[Accent!20] (3.1,.15) rectangle (6.3,4.0);
+\begin{tikzpicture}[x=.95cm,y=.82cm,>=Stealth,font=\small]
+\fill[Accent!9] (3.1,0) rectangle (6.3,4.05);
+\fill[PrimaryLight!65] (6.3,0) rectangle (10.3,4.05);
+\foreach \x in {3.1,6.3,10.3}{\draw[TextGray!45,dashed] (\x,0)--(\x,4.05);}
+\node[text=Accent!80!black,font=\scriptsize] at (4.7,4.8) {当前桶：比较候选面积};
+\node[text=PrimaryDark,font=\scriptsize] at (8.3,4.8) {下一桶：求平均点};
+\draw[->,TextGray] (0,0)--(11,0) node[right]{时间};
+\draw[->,TextGray] (0,0)--(0,4.3) node[above]{观测值};
 \coordinate (prev) at (2.8,2.7);
 \coordinate (cand) at (4.4,2.0);
-\coordinate (candtwo) at (5.2,3.7);
-\coordinate (nextmean) at (7.0,2.6);
-\fill[Primary] (prev) circle(2pt) node[above left]{$P_{\mathrm{prev}}$};
-\fill[Accent] (cand) circle(2pt) node[below]{$P_{\mathrm{cand}}$};
-\fill[Accent] (candtwo) circle(2pt);
-\fill[PrimaryDark] (nextmean) circle(2pt) node[above]{$\overline{P}_{C}$};
-\draw[Accent,fill=Accent!25,opacity=.75] (prev)--(candtwo)--(nextmean)--cycle;
-\draw[Primary,thick] (0.5,1.0)--(prev)--(candtwo)--(7.6,1.4)--(10,3.4);
-\node[font=\small,text=PrimaryDark] at (4.7,4.05) {当前桶：比较候选三角形面积};
-\node[font=\scriptsize,text=Accent] at (5.4,.35) {半透明三角形为最大面积候选};
+\coordinate (chosen) at (5.2,3.7);
+\coordinate (nextmean) at (8.4,2.58);
+\fill[Accent!22] (prev)--(chosen)--(nextmean)--cycle;
+\draw[TextGray!65] plot coordinates {(0.5,1.0)(1.2,1.4)(2,1.2)(2.8,2.7)(3.6,1.7)(4.4,2.0)(5.2,3.7)(6,2.2)(6.8,2.5)(7.6,1.4)(8.4,3.0)(9.2,2.6)(10,3.4)};
+\foreach \x/\y in {.5/1,1.2/1.4,2/1.2,2.8/2.7,3.6/1.7,4.4/2,5.2/3.7,6/2.2,6.8/2.5,7.6/1.4,8.4/3,9.2/2.6,10/3.4}{\fill[TextGray] (\x,\y) circle(1.3pt);}
+\draw[Primary,dashed] (prev)--(cand)--(nextmean)--cycle;
+\draw[Accent,thick] (prev)--(chosen)--(nextmean)--cycle;
+\fill[Primary] (prev) circle(2.4pt) node[above left]{$P_{\mathrm{prev}}$};
+\fill[Primary] (cand) circle(2.4pt) node[below]{$P_{\mathrm{cand},1}$};
+\fill[Accent] (chosen) circle(2.6pt) node[above]{$P_{\mathrm{cand},2}$};
+\fill[PrimaryDark] ($(nextmean)+(-.06,-.06)$) rectangle ($(nextmean)+(.06,.06)$);
+\node[text=PrimaryDark,anchor=north west] at ($(nextmean)+(.08,-.05)$) {$\overline{P}_{C}$};
+\node[text=TextGray,font=\scriptsize,align=center] at (5.5,-.65) {灰线与小圆点：原始观测；橙色三角形：本桶最大面积候选\\下一桶平均点由桶内五个观测的时间与数值分别求均值得到};
 \end{tikzpicture}
 \caption{LTTB降采样的几何直觉}
 \label{fig:lttb-principle}
@@ -276,8 +280,8 @@ console.log(windowExample().revisions.length); // 输出 1：历史回放中一�
     \begin{scope}[xshift=\shift cm]
       \fill[PrimaryLight!35,rounded corners=3pt] (0,1.7) rectangle (7.1,5.6);
       \node[anchor=west,font=\small\bfseries] at (.25,5.3) {\heading};
-      \fill[black!8] (2.85,2.3) rectangle (3.85,4.7);
-      \node[text=TextGray] at (3.35,4.45) {缺测};
+      \fill[black!8] (2.6,2.3) rectangle (4.4,4.7);
+      \node[text=TextGray] at (3.5,4.45) {缺测};
       \draw[->,TextGray] (.65,2.3)--(.65,4.7) node[above]{观测值};
       \draw[->,TextGray] (.65,2.3)--(6.5,2.3) node[right]{时间};
       \foreach \yy in {2.9,3.5,4.1} {\draw[black!8] (.7,\yy)--(6.2,\yy);}
@@ -452,16 +456,17 @@ console.log(inspectReading({...normalized, value: Infinity}, {unit: 'kPa'}).issu
 
 \begin{figure}[htbp]
 \centering
-\begin{tikzpicture}[node distance=5mm and 5mm,
+\begin{tikzpicture}[>=Stealth,font=\small,
   flowstep/.style={draw=Primary,rounded corners,fill=PrimaryLight,align=center,
-    minimum width=2.35cm,minimum height=.8cm,font=\small,text=PrimaryDark}]
-\node[flowstep] (adapter) {来源适配：单位/编码/坐标};
-\node[flowstep,right=of adapter] (time) {时间服务：格网/时区/水印};
-\node[flowstep,right=of time] (quality) {质量服务：缺测/异常/问题};
-\node[flowstep,below=of quality] (window) {窗口服务：原始/聚合/回放};
-\node[flowstep,below=of adapter] (view) {展示层：断线/颜色/联动};
-\draw[->,thick,draw=Primary] (adapter)--(time)--(quality)--(window)--(view);
-\draw[->,thick,dashed,draw=Accent] (view)-|(time);
+    text width=3.4cm,minimum height=.95cm,text=PrimaryDark}]
+\node[flowstep] (adapter) at (0,0) {来源适配\\单位/编码/坐标};
+\node[flowstep] (time) at (4.2,0) {时间服务\\格网/时区/水印};
+\node[flowstep] (quality) at (8.4,0) {质量服务\\缺测/异常/问题};
+\node[flowstep] (window) at (8.4,-1.6) {窗口服务\\原始/聚合/回放};
+\node[flowstep] (view) at (0,-1.6) {展示层\\断线/颜色/联动};
+\foreach \a/\b in {adapter/time,time/quality,quality/window,window/view}{\draw[->,thick,Primary] (\a)--(\b);}
+\draw[->,thick,dashed,Accent] (view.west)--(-2.4,-1.6)--(-2.4,1.2)
+  --node[above,font=\scriptsize]{切换时间窗或回放时刻} (4.2,1.2)--(time.north);
 \end{tikzpicture}
 \caption{实时流与历史回放共用的数据质量边界}
 \label{fig:ch07-time-quality-pipeline}
@@ -530,22 +535,29 @@ console.log(inspectReading({...normalized, value: Infinity}, {unit: 'kPa'}).issu
 
 \begin{figure}[htbp]
 \centering
-\begin{tikzpicture}[x=1cm,y=0.65cm]
-\draw[->,gray] (0,0)--(9,0) node[right]{时间};
-\draw[->,gray] (0,0)--(0,4.2) node[above]{水位/雨量};
-\foreach \x/\h in {1/1.0,2/2.2,3/1.4,4/3.2,5/2.1,6/3.8,7/2.8,8/3.4}{
-  \draw[Accent,fill=Accent!35] (\x-.22,0) rectangle (\x+.22,\h);
+\begin{tikzpicture}[x=1cm,y=1cm,>=Stealth,font=\scriptsize]
+\foreach \y in {0,1,2,3,4}{\draw[TextGray!15] (0,\y)--(10,\y);}
+\draw[->,TextGray] (0,4.2)--(0,-.18);
+\draw[->,TextGray] (10,-.05)--(10,4.2);
+\draw[TextGray] (0,0)--(10,0);
+\node[text=TextGray] at (10.65,-.4) {时刻};
+\node[text=Accent!80!black,above] at (0,4.35) {雨量/mm（向下增大）};
+\node[text=PrimaryDark,above] at (10,4.35) {水位/m（向上增大）};
+\foreach \y/\v in {4/0,3/5,2/10,1/15,0/20}{\draw[TextGray] (0,\y)--(-.1,\y) node[left]{\v};}
+\foreach \y/\v in {0/163.5,1/164.0,2/164.5,3/165.0,4/165.5}{\draw[TextGray] (10,\y)--(10.1,\y) node[right]{\v};}
+\foreach \x/\v in {1/0,3/8.4,5/16.2,7/4.8,9/0}{
+  \filldraw[fill=Accent!28,draw=Accent] (\x-.25,4) rectangle (\x+.25,4-.2*\v);
 }
-\draw[Primary,very thick] (1,1.2)--(2,1.4)--(3,1.8)--(4,2.0)--(5,2.6)--(6,3.0)--(7,3.3)--(8,3.6);
-\foreach \x/\y in {1/1.2,2/1.4,3/1.8,4/2.0,5/2.6,6/3.0,7/3.3,8/3.6}{\fill[Primary] (\x,\y) circle(1.7pt);}
-\node[font=\small,text=PrimaryDark] at (4.5,4.05) {柱：时段雨量\quad 折线：水位过程};
-\node[font=\scriptsize,text=TextGray] at (4.5,-.55) {同一时间轴、明确单位、标注响应延迟};
+\draw[Primary,line width=1.2pt] (1,1.4)--(3,1.6)--(5,2.4)--(7,3.2)--(9,3.0);
+\foreach \x/\y in {1/1.4,3/1.6,5/2.4,7/3.2,9/3.0}{\filldraw[fill=white,draw=Primary] (\x,\y) circle(2pt);}
+\foreach \x/\t in {1/08:00,3/10:00,5/12:00,7/14:00,9/16:00}{\draw[TextGray] (\x,0)--(\x,-.1) node[below]{\t};}
+\node[text=TextGray,align=center] at (5,-.85) {橙柱：时段雨量，零基线在上方；蓝线：库水位，读取右轴\\数据与本节ECharts清单一致，两个纵轴共用观测时刻};
 \end{tikzpicture}
 \caption{雨量倒挂柱与水位过程线的双轴组合示意}
 \label{fig:ch7-rain-level-combo}
 \end{figure}
 
-图\ref{fig:ch7-rain-level-combo}中，雨量柱从零基线向上绘制，水位线使用独立轴但共享时间索引；若为了突出“倒挂”效果将柱形向下绘制，也要在图例中说明向下方向代表降雨量而不是负值。水位预警由第8章的规则结合质量码与模型版本确定。
+图\ref{fig:ch7-rain-level-combo}中，雨量柱从上方零基线向下绘制，左轴雨量随之增大；水位线读取右轴，两者共享观测时刻。向下的柱形仍表示非负雨量。水位预警由第8章的规则结合质量码与模型版本确定。
 
 ECharts 配置项与 API 随版本演进，本章写法以官方手册为准\cite{echartsDocs}。本章示例统一沿用第4章的 Vite 工程：ECharts 与坐标库通过 \texttt{npm install echarts proj4} 安装、以 \texttt{import * as echarts from 'echarts'} 与 \texttt{import proj4 from 'proj4'} 引入；Three.js 沿用第6章工程的安装与导入方式。无构建环境的课堂演示可改用官方 CDN 的全局构建，此时 \texttt{echarts}、\texttt{THREE}、\texttt{proj4} 为全局变量，使用前应确认这三个变量已由对应脚本加载。清单\ref{lst:ch07-rain-level-dualaxis}给出可运行的雨量倒挂柱与水位过程线组合，显式声明两个y轴、单位、tooltip格式和数据缩放；真实项目还要从服务端响应读取质量码并对缺测点设置空值，不把缺测当作零雨量或零水位。
 
@@ -731,15 +743,18 @@ function mountChart(container, option, subscribe) {
 
 \begin{figure}[htbp]
 \centering
-\begin{tikzpicture}[node distance=6mm and 9mm,
+\begin{tikzpicture}[>=Stealth,font=\small,
   life/.style={draw=Primary,rounded corners,fill=PrimaryLight,align=center,
-    minimum width=2.8cm,minimum height=.75cm,text=PrimaryDark}]
-\node[life] (create) {创建实例：初始化option};
-\node[life,right=of create] (update) {状态更新：合并或追加};
-\node[life,right=of update] (resize) {容器变化：chart.resize};
-\node[life,below=of resize] (dispose) {卸载组件：unsubscribe+dispose};
-\draw[->,thick,draw=Primary] (create)--(update)--(resize)--(dispose);
-\draw[->,thick,dashed,draw=Accent] (resize)|-(update);
+    minimum width=2.7cm,minimum height=.95cm,text=PrimaryDark}]
+\node[life] (create) at (0,0) {创建实例\\初始化option};
+\node[life] (active) at (3.8,0) {组件存续期间\\按事件响应};
+\node[life] (update) at (8.5,1.55) {更新数据\\setOption/appendData};
+\node[life] (resize) at (8.5,0) {调整尺寸\\chart.resize};
+\node[life,fill=Accent!10,draw=Accent] (dispose) at (8.5,-1.55) {解除订阅与释放实例\\unsubscribe + dispose};
+\draw[->,Primary,thick] (create)--(active);
+\draw[->,Primary,thick] (active.north east)--node[above,sloped,font=\scriptsize]{数据变化} (update.west);
+\draw[->,Primary,thick] (active)--node[above,font=\scriptsize]{容器变化} (resize);
+\draw[->,Accent,thick] (active.south east)--node[below,sloped,font=\scriptsize]{组件卸载} (dispose.west);
 \end{tikzpicture}
 \caption{ECharts实例的创建、更新、响应式与销毁生命周期}
 \label{fig:ch07-echarts-lifecycle}
@@ -855,12 +870,12 @@ function cancelLongPress() {
 
 短按时\texttt{pointerup}的处理器会先取消定时器，因此不会误触发长按；\texttt{pointercancel}覆盖系统手势或窗口切换导致的中断；\texttt{pointerdown}入口先清理旧定时器，保证多指按下时前一个定时器不会失控触发。
 
-图\ref{fig:ch07-scene-chart}展示S5阶段页中的对象与曲线。核对场景中的选择、状态栏的对象编码及纵轴单位，可以发现“选中了一个对象，却显示另一个对象曲线”的错配。
+图\ref{fig:ch07-scene-chart}展示点击PZ-07测点后得到的同编码渗压曲线。左侧网格与垂直投影辅助识读位置，右侧显示2026年7月1日的288条观测；核对对象编码、时间范围和kPa单位可检查联动是否正确。
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=16cm]{images/runtime/s5-scene-chart.png}
-\caption{三维对象与时序曲线的联合展示（S5阶段页运行截图，显示放大）}
+\caption{三维测点与渗压曲线联动（配套程序运行图，添加坐标识读标记）}
 \label{fig:ch07-scene-chart}
 \end{figure}
 
@@ -878,22 +893,26 @@ function cancelLongPress() {
 
 \begin{figure}[htbp]
 \centering
-\begin{tikzpicture}[x=0.85cm,y=0.65cm]
-\draw[fill=PrimaryLight,draw=Primary] (0,0) rectangle (10,5);
-\draw[Primary!60,dashed] (0,1.1) .. controls (2,1.8) and (3,1.0) .. (5,1.6)
+\begin{tikzpicture}[x=1cm,y=.8cm,>=Stealth,font=\scriptsize]
+\fill[Primary!8] (0,0) rectangle (10,5);
+\fill[Primary!18] (0,1.1) .. controls (2,1.8) and (3,1.0) .. (5,1.6)
+  .. controls (7,2.2) and (8,1.2) .. (10,1.8)--(10,5)--(0,5)--cycle;
+\fill[Primary!30] (0,2.7) .. controls (2,3.4) and (3,2.3) .. (5,2.9)
+  .. controls (7,3.7) and (8,2.6) .. (10,3.2)--(10,5)--(0,5)--cycle;
+\draw[Primary] (0,0) rectangle (10,5);
+\draw[PrimaryDark!75,dashed] (0,1.1) .. controls (2,1.8) and (3,1.0) .. (5,1.6)
   .. controls (7,2.2) and (8,1.2) .. (10,1.8);
-\draw[Primary!60,dashed] (0,2.7) .. controls (2,3.4) and (3,2.3) .. (5,2.9)
+\draw[PrimaryDark!75,dashed] (0,2.7) .. controls (2,3.4) and (3,2.3) .. (5,2.9)
   .. controls (7,3.7) and (8,2.6) .. (10,3.2);
-\draw[Accent,very thick,->] (1,4.5)--(3,3.7);
-\draw[Accent,very thick,->] (3,3.7)--(5.2,3.0);
-\draw[Accent,very thick,->] (5.2,3.0)--(7.5,2.2);
-\foreach \x/\y/\s in {1.2/1.4/A,3.4/2.4/B,6.2/3.4/C,8.4/1.1/D}{
-  \fill[PrimaryDark] (\x,\y) circle(2.5pt);
-  \node[font=\scriptsize,above] at (\x,\y) {\s};
+\foreach \a/\b/\c/\d in {1/4.5/2.8/3.9,3.3/3.65/5.1/3.05,5.6/2.8/7.4/2.2}{\draw[Accent!85!black,line width=1.1pt,->] (\a,\b)--(\c,\d);}
+\foreach \x/\y/\s in {1.2/1.4/A,3.4/2.4/B,6.2/3.8/C,8.4/1.1/D}{
+  \filldraw[fill=white,draw=PrimaryDark,thick] (\x,\y) circle(2.6pt);
+  \node[above,text=PrimaryDark] at (\x,\y) {\s};
 }
-\node[font=\scriptsize,text=TextGray] at (2.2,.45) {色斑图：连续场};
-\node[font=\scriptsize,text=TextGray] at (7.9,.45) {站点：对象状态};
-\node[font=\scriptsize,text=Accent] at (5.0,4.65) {箭头：流向};
+\node[text=Accent!85!black] at (5,4.65) {箭头：流向};
+\foreach \x/\c in {0/8,.45/18,.9/30}{\fill[Primary!\c] (\x,-.6) rectangle (\x+.45,-.35);}
+\node[anchor=west,text=TextGray] at (1.55,-.47) {连续场：由浅至深表示低到高（示意）};
+\node[anchor=west,text=TextGray] at (0,-1.05) {虚线：等值线\qquad 带字母圆点：监测站点};
 \end{tikzpicture}
 \caption{等值线、色斑图、流向箭头与站点符号的组合表达}
 \label{fig:ch7-thematic-map}
@@ -1265,17 +1284,25 @@ class PointPicker {
 
 \begin{figure}[htbp]
 \centering
-\begin{tikzpicture}[x=1cm,y=1cm]
-\draw[fill=PrimaryLight,draw=Primary] (0,0) rectangle (3.2,2.4);
-\node at (1.6,1.2) {屏幕点击};
-\coordinate (cam) at (5.1,1.2);
-\fill[Primary] (cam) circle(2pt) node[above]{相机};
-\draw[draw=Primary,thick] (1.8,1.2)--(cam);
-\node[font=\scriptsize,text=PrimaryDark] at (3.6,1.45) {NDC换算};
-\draw[draw=Accent,thick] (cam)--(10.4,2.88);
-\draw[fill=PrimaryLight,draw=Primary] (8.2,.3)--(9.5,2.8)--(10.4,.7)--cycle;
-\fill[Accent] (9.37,2.55) circle(2.5pt) node[above right]{最近交点};
-\node[font=\small,text=Accent] at (7.2,2.65) {世界射线};
+\begin{tikzpicture}[x=1cm,y=1cm,>=Stealth,font=\small]
+\draw[fill=PrimaryLight,draw=Primary] (0,0) rectangle (3,2.5);
+\node[text=PrimaryDark] at (1.5,2.15) {屏幕画布};
+\fill[Accent] (1,1.25) circle(2.5pt);
+\node[below,text=Accent!85!black,font=\scriptsize] at (1,.95) {点击位置};
+\draw[->,Primary,dashed] (3,1.25)--node[above,font=\scriptsize]{NDC换算} (4.7,1.25);
+\coordinate (cam) at (5.2,1.25);
+\fill[Primary] (cam) circle(2.4pt) node[above]{相机};
+\coordinate (a) at (8,.2);
+\coordinate (b) at (9.6,2.6);
+\coordinate (c) at (10.6,.2);
+\draw[fill=PrimaryLight,draw=Primary] (a)--(b)--(c)--cycle;
+\coordinate (hit) at ($(a)!.4375!(b)$);
+\draw[->,Accent!85!black,line width=1.1pt] (cam)--(11.1,1.25);
+\fill[Accent] (hit) circle(2.6pt);
+\draw[Accent!85!black] (hit)--++(-.35,.65) node[above,font=\scriptsize]{最近交点};
+\node[text=Accent!85!black,font=\scriptsize] at (6.5,.92) {世界射线};
+\node[text=TextGray,font=\scriptsize] at (9.4,-.1) {场景对象};
+\node[text=TextGray,font=\scriptsize] at (5.4,-.65) {透视相机：由相机与点击位置确定方向，按沿射线的距离取最近交点};
 \end{tikzpicture}
 \caption{从屏幕坐标到场景交点的拾取过程}
 \label{fig:ray-picking}

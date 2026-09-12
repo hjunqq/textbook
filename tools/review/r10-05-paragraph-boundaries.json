@@ -1,0 +1,46 @@
+{
+  "change": "为环境结束后紧接的独立正文段补空行，使首行缩进生效；文字与代码不变。",
+  "count": 8,
+  "paragraphs": [
+    {
+      "file": "output/chapters/preface.tex",
+      "line": 37,
+      "paragraph": "每个技术点都围绕水利监测平台的实际需求展开，代码示例均取自水利业务场景。"
+    },
+    {
+      "file": "output/chapters/chapter08.tex",
+      "line": 35,
+      "paragraph": "运行后，用事件标识核对观测、预警与工单的对应关系，再检查失败请求是否留下原因。空间查询、连续聚合、压缩保留、可观测性和备份演练等清单在实验课或课程设计"
+    },
+    {
+      "file": "output/chapters/chapter08.tex",
+      "line": 2559,
+      "paragraph": "模型卡与场景版本、输入快照和人工审批绑定。只要改变初始水位、降雨情景、闸门约束或模型版本，就创建新的运行记录；只改变镜头和图层透明度，不产生新的计算版"
+    },
+    {
+      "file": "output/chapters/chapter08.tex",
+      "line": 3524,
+      "paragraph": "代码清单\\ref{lst:ch08-compose}中的 \\texttt{depends\\_on} 只保证启动顺序，就绪状态由健康检查判定。\\text"
+    },
+    {
+      "file": "output/chapters/chapter08.tex",
+      "line": 3537,
+      "paragraph": "清单\\ref{lst:ch08-env-secrets}中的轮换字段是运维约束而不是业务参数。轮换数据库口令先创建新凭据并验证连接池，再撤销旧凭据；轮"
+    },
+    {
+      "file": "output/chapters/chapter08.tex",
+      "line": 3557,
+      "paragraph": "代码清单\\ref{lst:ch08-nginx}把访问路径按静态资源、API、探针分开，浏览器只需记住一个域名。\\texttt{try\\_files}"
+    },
+    {
+      "file": "output/chapters/chapter08.tex",
+      "line": 3582,
+      "paragraph": "代码清单\\ref{lst:ch08-alert-rules}把告警规则按基础设施、数据链路和业务闭环分开，每条告警都有责任角色与处置手册。阈值要结合补"
+    },
+    {
+      "file": "output/chapters/chapter08.tex",
+      "line": 3595,
+      "paragraph": "代码清单\\ref{lst:ch08-backup-rehearsal}把“有备份”改成可观察证据。开始前冻结变更窗口并记录最后一个观测、预警和工单 I"
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+Rendered 100 pages
+Rendered 200 pages
+Rendered 300 pages
+Rendered 400 pages
+{"package": "R10-05", "pages": 402, "body_offset": 12, "pdf_sha256": "55e06399d130c89f31c71e00bd5f211ba528c81d824921a9fba084a183a51fc3", "figure_count": 107, "build_log": {"errors": 0, "overfull": 0, "missing_characters": 0, "undefined": 0}, "page_scan": "全页栅格边界检查；不以此代替图内语义和遮挡目视审核", "sample_pages": [1, 3, 13, 15, 30, 57, 94, 132, 154, 217, 222, 255, 262, 274, 293, 294, 299]}

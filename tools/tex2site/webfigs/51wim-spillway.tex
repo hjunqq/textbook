@@ -1,14 +1,18 @@
 \begin{tikzpicture}[font=\small,>=Stealth,
-  box/.style={draw=Primary,fill=PrimaryLight,rounded corners=2pt,minimum width=3.0cm,minimum height=1.05cm,align=center,font=\scriptsize,text=PrimaryDark}]
-  \node[box] (plan) at (-4.4,1.2) {泄洪方案\\3孔开度组合};
-  \node[box] (gate) at (-4.4,-1.2) {闸门动作模拟\\按方案开启};
+  box/.style={draw=Primary,fill=PrimaryLight,rounded corners=2pt,minimum width=3cm,minimum height=1.05cm,align=center,font=\scriptsize,text=PrimaryDark}]
+  \node[box] (plan) at (-4.4,1.2) {泄洪方案\\孔口开度组合};
+  \node[box] (gate) at (-4.4,-1.2) {闸门状态模拟\\按方案更新};
   \node[draw=Primary!40,rounded corners=3pt,minimum width=6.3cm,minimum height=3.6cm] (v) at (2.6,0) {};
-  \node[anchor=north,font=\scriptsize,text=PrimaryDark] at ($(v.north)+(0,-.12)$) {三维泄流模拟};
-  \draw[Primary,thick] ($(v.center)+(-2.4,1.0)$) -- ($(v.center)+(-1.2,1.0)$) -- ($(v.center)+(-1.2,-.9)$);
-  \draw[Primary!60,thick,decorate,decoration={snake,amplitude=.5mm,segment length=3mm}]
-    ($(v.center)+(-1.15,.2)$) .. controls ($(v.center)+(-.2,-.4)$) .. ($(v.center)+(2.4,-1.0)$);
-  \node[font=\scriptsize,text=TextGray] at ($(v.center)+(.9,.75)$) {水流经溢洪道下泄};
+  \node[anchor=north,font=\scriptsize,text=PrimaryDark] at ($(v.north)+(0,-.12)$) {闸门与泄流示意};
+  \fill[Primary!20] (.05,.55)--(1.05,.55)--(1.05,.22)--(1.3,.14)--(4.8,-.83)--(4.8,-1.05)--(1.25,0)--(.05,0)--cycle;
+  \draw[Primary,thick] (.05,0)--(1.25,0)--(4.8,-1.05);
+  \draw[fill=TextGray!15,draw=TextGray,thick] (1.05,.3) rectangle (1.3,1.03);
+  \draw[->,Primary,thick] (.2,.35)--(.85,.35);
+  \draw[->,Primary,thick] (1.7,-.05)--(3.25,-.5);
+  \draw[->,Primary,thick] (3.5,-.57)--(4.45,-.85);
+  \node[font=\scriptsize,text=TextGray] at (3.55,.8) {开度与泄量关联同一方案};
+  \node[font=\scriptsize,text=TextGray] at (2.6,-1.4) {闸下出流经溢洪道下泄};
   \draw[->,thick,Primary] (plan)--(gate);
-  \draw[->,thick,Primary] (gate.east) -- (v.west|-gate.east);
-  \draw[->,thick,Primary] (plan.east) -- (v.west|-plan.east);
+  \draw[->,thick,Primary] (gate.east)--(v.west|-gate.east);
+  \draw[->,thick,Primary] (plan.east)--(v.west|-plan.east);
 \end{tikzpicture}

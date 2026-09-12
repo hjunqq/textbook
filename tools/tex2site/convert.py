@@ -4,6 +4,7 @@
 输出: ~/site-mig/out/docs/... 与 tikz 片段 ~/site-mig/tikz/
 """
 import re, sys, os, pathlib, subprocess, json, shutil
+from svg_provenance import source_hash, verified_svg
 
 # 仓库路径约定:本脚本位于 tools/tex2site/,唯一事实来源是 output/ 下的 LaTeX。
 HERE = pathlib.Path(__file__).resolve().parent
@@ -176,7 +177,10 @@ class Conv:
             image_dir = dest.parent / "images"
             image_dir.mkdir(parents=True, exist_ok=True)
             for source, fname in self.raster_jobs:
-                shutil.copy2(source, image_dir / fname)
+                target = image_dir / fname
+                data = source.read_bytes()
+                if not target.is_file() or target.read_bytes() != data:
+                    target.write_bytes(data)
 
     def extract_fig(self, t):
         out, pos = [], 0
@@ -524,6 +528,9 @@ def main():
     OUT.mkdir(parents=True, exist_ok=True)
     TIKZ.mkdir(exist_ok=True)
     report = {}
+    expected_jobs = []
+    preamble = (HERE / "preamble.tex").read_text(encoding="utf-8")
+    definitions = (REPO / "output/tikz-diagrams.tex").read_text(encoding="utf-8")
     only = sys.argv[1:] or None
     for name, chap in CHAPTERS:
         if only and name not in only:
@@ -550,6 +557,14 @@ def main():
         dest.write_text(md, encoding="utf-8", newline="\r\n")
         for fname, snip in c.tikz_jobs:
             (TIKZ / (fname[:-4] + ".tex")).write_text(snip, encoding="utf-8")
+            expected_jobs.append({"file": fname, "source_sha256": source_hash(snip, preamble, definitions)})
+        if name.startswith("chapter"):
+            active_images = {fname for fname, _ in c.tikz_jobs} | {fname for _, fname in c.raster_jobs}
+            image_dir = dest.parent / "images"
+            if image_dir.is_dir():
+                for old in image_dir.iterdir():
+                    if re.fullmatch(r"chapter\d+_fig_[\d_]+\.(?:svg|png)", old.name) and old.name not in active_images:
+                        old.unlink()
         report[name] = {"figs": c.cnt["fig"], "tabs": c.cnt["tab"], "lsts": c.cnt["lst"],
                         "tikz": len(c.tikz_jobs), "raster": len(c.raster_jobs),
                         "missing_ref": sorted(c.missing_ref)}
@@ -559,16 +574,26 @@ def main():
         refs.append('<a id="ref%d"></a>[%d] %s' % (i, i, fmt_ref(i, k)))
         refs.append("")
     (OUT / "references.md").write_text("\n".join(refs), encoding="utf-8", newline="\r\n")
-    # 分发已编译的 SVG(先运行 build-tikz.sh)
-    n = 0
-    for svg in TIKZ.glob("chapter*_fig_*.svg"):
-        ch = svg.name.split("_")[0]
+    (TIKZ / "expected-jobs.json").write_text(json.dumps(expected_jobs, ensure_ascii=False, indent=2), encoding="utf-8")
+    # 图号会随增图改变；文件名相同也必须核对当前图源和共享定义。
+    n, pending = 0, 0
+    for job in expected_jobs:
+        fname = job["file"]
+        ch = fname.split("_")[0]
         d = OUT / "chapters" / ch / "images"
         d.mkdir(parents=True, exist_ok=True)
-        shutil.copy(svg, d / svg.name)
-        n += 1
+        svg = verified_svg(TIKZ, fname, job["source_sha256"])
+        if svg is None:
+            (d / fname).unlink(missing_ok=True)
+            pending += 1
+        else:
+            target = d / fname
+            data = svg.read_bytes()
+            if not target.is_file() or target.read_bytes() != data:
+                target.write_bytes(data)
+            n += 1
     print(json.dumps(report, ensure_ascii=False, indent=1))
-    print("cited keys:", len(CITE_ORDER), "| svg distributed:", n)
+    print("cited keys:", len(CITE_ORDER), "| verified SVG distributed:", n, "| pending rebuild:", pending)
 
 if __name__ == "__main__":
     main()

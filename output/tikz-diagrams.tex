@@ -536,7 +536,7 @@
   \node[module] (office) at ( 5.1,0) {内业数据处理软件};
 
   \node[detail] (uavd)    at (-5.1,-1.75) {搭载传感器\par 按规划航线采集影像};
-  \node[detail] (camerad) at (-1.7,-1.75) {多镜头同步曝光\par 记录影像与姿态};
+  \node[detail] (camerad) at (-1.7,-1.75) {多镜头同步曝光\par 关联POS姿态资料};
   \node[detail] (groundd) at ( 1.7,-1.75) {航线规划与飞行监控\par 处置异常状态};
   \node[detail] (officed) at ( 5.1,-1.75) {空三加密与三维重建\par 质量检查和成果输出};
 
@@ -558,34 +558,30 @@
 % ──────────────────────────────────────
 \newcommand{\obliqueImagePreprocessQC}{%
 \begin{tikzpicture}[>=Stealth,
-  qcstep/.style={draw=Primary, fill=PrimaryLight, text=PrimaryDark,
-    rounded corners=2pt, text width=2.05cm, minimum height=1.0cm,
-    font=\scriptsize\bfseries, align=center},
-  io/.style={draw=Accent, fill=Accent!10, text=TextGray,
-    rounded corners=2pt, text width=2.05cm, minimum height=1.0cm,
-    font=\scriptsize\bfseries, align=center},
-  decision/.style={diamond, draw=PrimaryDark, fill=Primary!12,
-    aspect=2.0, inner sep=1.2pt, text width=1.55cm,
-    font=\scriptsize\bfseries, align=center, text=PrimaryDark},
-  flow/.style={->, thick, Primary},
-  rework/.style={->, thick, Accent},
-]
-  \node[io]       (input) at (-5.7,0) {原始影像\par POS与相机资料};
-  \node[qcstep]   (check) at (-3.0,0) {完整性核查\par 文件、架次与元数据};
-  \node[qcstep]   (quality) at (-0.3,0) {影像质量检查\par 清晰度、曝光与色差};
-  \node[qcstep]   (adjust) at ( 2.4,0) {匀光匀色\par 畸变与色彩校正};
-  \node[qcstep]   (mosaic) at ( 5.1,0) {Mosaic检查\par 接边与整体色调};
-  \node[decision] (gate) at ( 5.1,-2.0) {满足质量要求？};
-  \node[io]       (output) at ( 2.4,-2.0) {合格影像成果\par 处理记录与质检报告};
-
-  \draw[flow] (input) -- (check);
-  \draw[flow] (check) -- (quality);
-  \draw[flow] (quality) -- (adjust);
-  \draw[flow] (adjust) -- (mosaic);
-  \draw[flow] (mosaic) -- (gate);
-  \draw[flow] (gate) -- node[above, font=\scriptsize, text=PrimaryDark] {是} (output);
-  \draw[rework] (gate.south) -- ++(0,-0.72) -| (quality.south)
-    node[pos=0.20, right, font=\scriptsize, text=Accent] {否：返回校正};
+  qcstep/.style={draw=Primary,fill=PrimaryLight,text=PrimaryDark,rounded corners=2pt,text width=2.05cm,minimum height=1cm,font=\scriptsize\bfseries,align=center},
+  io/.style={qcstep,draw=Accent,fill=Accent!10},
+  decision/.style={diamond,draw=PrimaryDark,fill=Primary!12,aspect=2,inner sep=1.2pt,text width=1.5cm,font=\scriptsize\bfseries,align=center,text=PrimaryDark},
+  flow/.style={->,thick,Primary},
+  rework/.style={->,thick,Accent}]
+  \node[io] (input) at (-5.7,0) {原始影像\\POS资料\\相机参数};
+  \node[qcstep] (check) at (-3,0) {完整性核查\\文件、架次\\与元数据};
+  \node[qcstep] (quality) at (-.3,0) {影像质量检查\\清晰度、曝光\\与色差};
+  \node[qcstep] (adjust) at (2.4,0) {校正与匀色\\畸变、亮度\\与色彩};
+  \node[qcstep] (mosaic) at (5.1,0) {拼接预览检查\\接边与整体色调};
+  \node[decision] (gate) at (5.1,-2.1) {质量检查\\通过？};
+  \node[io] (output) at (1.2,-2.1) {合格影像成果\\处理记录\\与质检报告};
+  \node[qcstep] (cause) at (-.3,-4.1) {定位缺陷};
+  \node[io] (capture) at (-5.7,-4.1) {补拍或重采\\更新原始影像};
+  \draw[flow] (input)--(check);
+  \draw[flow] (check)--(quality);
+  \draw[flow] (quality)--(adjust);
+  \draw[flow] (adjust)--(mosaic);
+  \draw[flow] (mosaic)--(gate);
+  \draw[flow] (gate.west)--node[above,font=\scriptsize]{是}(output.east);
+  \draw[rework] (gate.south)--(5.1,-4.1)--node[above,font=\scriptsize]{否}(cause.east);
+  \draw[rework] (cause.west)--node[above,font=\scriptsize]{缺片、模糊、重叠不足}(capture.east);
+  \draw[rework] (capture.north)--(input.south);
+  \draw[rework] (cause.north)--(-.3,-1.15)--node[above,font=\scriptsize]{色调、接边}(2.4,-1.15)--(adjust.south);
 \end{tikzpicture}%
 }
 

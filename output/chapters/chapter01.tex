@@ -175,7 +175,7 @@
 
 \begin{figure}[htbp]
 \centering
-\begin{tikzpicture}[node distance=6mm and 6mm,
+\begin{tikzpicture}[node distance=10mm and 6mm,
   casebox/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=2.15cm,
     minimum height=.8cm,align=center,font=\small}]
 \node[casebox] (sense) {雨量/水位\\监测};
@@ -195,7 +195,10 @@
 \draw[->,draw=Primary,thick] (work)--(review);
 \draw[->,draw=Primary,thick] (review)--(action);
 \draw[->,draw=Primary,thick] (action)--(learn);
-\draw[->,draw=Accent,dashed,thick,bend right=28] (learn) to node[below,font=\scriptsize]{规则/模型校正} (quality);
+\coordinate (feedback) at ($(quality.south)+(0,-5mm)$);
+\draw[draw=Accent,dashed,thick] (learn.north) |- node[above,pos=.75,font=\scriptsize,fill=white,inner sep=1pt]{规则校正} (feedback);
+\draw[->,draw=Accent,dashed,thick] (feedback) -- (quality.south);
+\draw[->,draw=Accent,dashed,thick] (feedback) -| node[above,pos=.25,font=\scriptsize,fill=white,inner sep=1pt]{模型校正} (model.south);
 \end{tikzpicture}
 \caption{一次洪水预警从监测到复核的闭环}
 \label{fig:flood-warning-loop}
@@ -213,22 +216,25 @@
 
 \paragraph{业务问题}值班员在监测页面点开渗压计 \cpKeyStation，页面上出现“185.091 kPa，2026-07-01 23:55，质量 valid”。这一行数字从哪里来、经过了哪些环节、每个环节各负责什么——这是理解本书全部内容的起点，也是第4、5章要亲手实现的东西。本小节只追踪，不写代码。
 
-\paragraph{过程追踪}图\ref{fig:ch01-request-trace}把这次查询拆成六步。浏览器里运行的是页面脚本，它把用户动作翻译成一条 HTTP 请求：方法\texttt{GET}，路径\texttt{/api/assets/DAM-A-PZ-07/readings/latest}，头部带着登录时取得的令牌。请求到达服务端后，先由接口层核对令牌与角色，再交给业务层检查对象是否存在，业务层向数据库发出一条 SQL 查询，数据库按主键找到最新一条观测返回。业务层把数据库行整理成约定好的 JSON（字段名、时间格式、质量码都在第8章的接口契约里规定），接口层加上状态码 200 发回浏览器，页面脚本把 JSON 写进 DOM，用户看到那一行数字。
+\paragraph{过程追踪}图\ref{fig:ch01-request-trace}把这次查询拆成六步。浏览器里运行的是页面脚本，它把用户动作翻译成一条 HTTP 请求：方法\texttt{GET}，路径\texttt{/api/assets/DAM-A-PZ-07/readings/latest}，头部带着登录时取得的令牌。请求到达服务端后，先由接口层核对令牌与角色，再交给业务层检查对象是否存在，业务层向数据库发出一条 SQL 查询，数据库按测点编码和观测时间检索，返回最新一条观测。业务层把数据库行整理成约定好的 JSON（字段名、时间格式、质量码都在第8章的接口契约里规定），接口层加上状态码 200 发回浏览器，页面脚本把 JSON 写进 DOM，用户看到那一行数字。
 
 \begin{figure}[htbp]
 \centering
-\begin{tikzpicture}[>=Stealth,thick,font=\scriptsize,node distance=4mm and 6mm,
+\begin{tikzpicture}[>=Stealth,thick,font=\scriptsize,node distance=8mm and 7mm,
   box/.style={draw=Primary,rounded corners=2pt,fill=PrimaryLight,text=PrimaryDark,minimum width=2.5cm,minimum height=.8cm,align=center}]
   \node[box] (browser) {(1) 页面脚本\\用户点击→HTTP 请求};
   \node[box,right=of browser] (api) {(2) 接口层\\核对令牌与角色};
   \node[box,right=of api] (service) {(3) 业务层\\对象存在？取最新};
-  \node[box,right=of service] (db) {(4) 数据库\\按主键查一行};
-  \draw[->,draw=Primary] (browser) -- node[above]{GET /api/assets/…/latest} (api);
-  \draw[->,draw=Primary] (api) -- (service);
-  \draw[->,draw=Primary] (service) -- node[above]{SQL} (db);
-  \draw[->,draw=Accent] (db.south) -- ++(0,-.7) -| node[below,pos=.25]{(5) 行→JSON，状态码 200} (browser.south);
-  \node[below=9mm of browser,box,draw=Accent] (dom) {(6) 写入 DOM\\“185.091 kPa”};
-  \draw[->,draw=Accent] (browser.south) -- (dom.north);
+  \node[box,right=of service] (db) {(4) 数据库\\按测点与时间取最新};
+  \node[box,below=of service,draw=Accent] (serialize) {(5) 业务层\\观测行→约定的 JSON};
+  \node[box,below=of api,draw=Accent] (response) {接口层\\HTTP 200 与 JSON};
+  \node[box,below=of browser,draw=Accent] (dom) {(6) 页面脚本写入 DOM\\“185.091 kPa”};
+  \draw[->,draw=Primary] (browser)--node[above=5mm]{HTTP GET}(api);
+  \draw[->,draw=Primary] (api)--(service);
+  \draw[->,draw=Primary] (service)--node[above=5mm]{SQL}(db);
+  \draw[->,draw=Accent] (db.south) |- node[above,pos=.75]{观测行}(serialize.east);
+  \draw[->,draw=Accent] (serialize)--(response);
+  \draw[->,draw=Accent] (response)--(dom);
 \end{tikzpicture}
 \caption{“查看某测点最新观测”的一次完整请求过程}
 \label{fig:ch01-request-trace}
@@ -269,12 +275,12 @@
 \node[layer,below=of user] (app) {应用层：防洪预警、水资源调度、工程安全、会商与工单};
 \node[layer,below=of app] (platform) {平台层：数据治理、模型服务、事件总线、空间底板、权限与审计};
 \node[layer,below=of platform] (sense) {感知层：雨量、水位、流量、工情、视频、遥测终端与边缘网关};
-\draw[->,draw=Primary,thick,xshift=-18mm] (sense.north)--node[left,font=\scriptsize]{观测与回执上行} (platform.south);
-\draw[->,draw=Primary,thick,xshift=-18mm] (platform.north)--(app.south);
-\draw[->,draw=Primary,thick,xshift=-18mm] (app.north)--(user.south);
-\draw[->,draw=Accent,thick,xshift=18mm] (user.south)--node[right,font=\scriptsize]{授权指令下行} (app.north);
-\draw[->,draw=Accent,thick,xshift=18mm] (app.south)--(platform.north);
-\draw[->,draw=Accent,thick,xshift=18mm] (platform.south)--(sense.north);
+\draw[->,draw=Primary,thick] ([xshift=-18mm]sense.north)--node[left,font=\scriptsize]{观测与回执上行} ([xshift=-18mm]platform.south);
+\draw[->,draw=Primary,thick] ([xshift=-18mm]platform.north)--([xshift=-18mm]app.south);
+\draw[->,draw=Primary,thick] ([xshift=-18mm]app.north)--([xshift=-18mm]user.south);
+\draw[->,draw=Accent,thick] ([xshift=18mm]user.south)--node[right,font=\scriptsize]{授权指令下行} ([xshift=18mm]app.north);
+\draw[->,draw=Accent,thick] ([xshift=18mm]app.south)--([xshift=18mm]platform.north);
+\draw[->,draw=Accent,thick] ([xshift=18mm]platform.south)--([xshift=18mm]sense.north);
 \end{tikzpicture}
 \caption{智慧水利平台四层架构及数据、控制双向链路}
 \label{fig:smart-water-architecture}

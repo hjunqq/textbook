@@ -16,7 +16,7 @@ python tools/check_textbook.py --build
 python3 tools/tex2site/convert.py
 
 # 2) 编译 TikZ -> SVG(需 xelatex、pdftocairo、Noto CJK 字体)
-bash tools/tex2site/build-tikz.sh
+python tools/tex2site/build_tikz.py --jobs 4
 
 # 3) 再跑一次转换,把 SVG 分发进 docs/,并本地严格校验
 python3 tools/tex2site/convert.py
@@ -26,7 +26,7 @@ mkdocs build --strict -f mkdocs-ci.yml
 ## Noto CJK 字体的安装(第 2 步的前提)
 
 `preamble.tex` 按字族名请求 `Noto Sans CJK SC` 与 `Noto Sans Mono CJK SC`,
-两者都必须能被 xelatex 按**字族名**找到,否则 93 个片段会全部编译失败。
+两者都必须能被 xelatex 按**字族名**找到,否则片段编译会失败。
 
 - Linux / WSL:`apt install fonts-noto-cjk texlive-xetex poppler-utils` 即可。
 - Windows + TeX Live:把静态 OTF 放进 texmf 字体树再刷新索引——
@@ -44,9 +44,11 @@ mkdocs build --strict -f mkdocs-ci.yml
   (`%LOCALAPPDATA%\Microsoft\Windows\Fonts` + HKCU 注册表)、`OSFONTDIR` 环境变量、
   系统自带的 `NotoSansSC-VF.ttf`(可变字体,xdvipdfmx 生成 PDF 失败)。
 
-- 只新增/改动了少量图时,不必重编 93 张:片段编号未位移的图,
-  `docs/` 中的旧 SVG 仍然有效;手工只编需要的那几个片段,
-  再跑第 3 步的 `convert.py` 分发即可(它只复制、不删除)。
+- 编译器仅复用同时匹配图源、字体导言、共享图定义和 SVG 文件指纹的结果。
+  `convert.py` 生成 `expected-jobs.json`；`build_tikz.py` 生成 `svg-manifest.json`。
+  未登记或不匹配的旧 SVG 不会分发，目标目录中的同名过期图会移除，等待重建。
+  初次采用本流程及整书终验可传入 `--force` 全量编译；不能按“同名文件存在”跳过。
+  回归验证：`python tools/tex2site/test_svg_provenance.py`。
 
 ## 约定
 

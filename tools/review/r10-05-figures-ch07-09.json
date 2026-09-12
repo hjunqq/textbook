@@ -1,0 +1,1818 @@
+{
+  "package": "R10-05",
+  "date": "2026-09-12",
+  "reviewer": "prose_ch07_09",
+  "scope": {
+    "chapter07_figures": 13,
+    "chapter08_figures": 27,
+    "chapter09_figures": 0,
+    "main_figures_reviewed": 40,
+    "website_only_extra": 6
+  },
+  "source_frozen": true,
+  "summary": {
+    "main_tikz_modified": 20,
+    "main_labels_with_registered_source_edits": 25,
+    "main_tikz_rendered_before": 30,
+    "main_rasters_viewed": 10,
+    "licensed_jpegs_viewed": 6,
+    "website_tikz_modified": 5,
+    "main_body_char_delta": -103,
+    "full_book_compile_performed_by_this_agent": false,
+    "commit_performed": false,
+    "shared_macro_or_main_tex_changed": false
+  },
+  "items": [
+    {
+      "chapter": 7,
+      "figure_number": "7-1",
+      "label": "fig:data-visualization-process",
+      "kind": "tikz",
+      "caption_before": "观测数据到交互展示的处理链",
+      "caption_after": "观测数据到交互展示的处理链",
+      "viewed": true,
+      "status": "reviewed_no_material_error",
+      "observation": "逐段数据处理箭头和交互反馈方向清楚，节点文字未被路径穿过；输入含时间、单位和质量码，展示前检查在映射之前。",
+      "findings": [],
+      "changes": [],
+      "view_evidence": {
+        "before_png": "temp/r10-05-ch07-09/before/ch07-01.png",
+        "after_png": "temp/r10-05-ch07-09/before/ch07-01.png",
+        "final_pdf": "temp/r10-05-ch07-09/before/ch07-01.pdf",
+        "log": "temp/r10-05-ch07-09/before/ch07-01.log",
+        "final_png_sha256": "d7076166860210f44df982e977db3e46e14fa4f101a875da0fd317fb9a96a29a",
+        "renderer": "XeLaTeX standalone 11pt + pypdfium2 at 2x; each image inspected separately",
+        "pdf_width_cm_including_standalone_border": 14.33
+      },
+      "validation": {
+        "compiled": true,
+        "errors": [],
+        "visual_recheck_complete": true,
+        "current_tikz_matches_last_compiled_tex": true
+      }
+    },
+    {
+      "chapter": 7,
+      "figure_number": "7-2",
+      "label": "fig:lttb-principle",
+      "kind": "tikz",
+      "caption_before": "LTTB降采样的几何直觉",
+      "caption_after": "LTTB降采样的几何直觉",
+      "viewed": true,
+      "status": "fixed_and_verified",
+      "observation": "底色盖住桶内观测；下一桶平均点坐标与所绘观测不一致；选中折线未显示候选比较。重排绘制层次，下一桶五点均值改为(8.4,2.58)，同时画出两个候选三角形。；二次目视发现P_cand,2与桶标题间距不足，将标题上移。；两个桶标题保持同一水平线。",
+      "findings": [
+        "底色盖住桶内观测；下一桶平均点坐标与所绘观测不一致；选中折线未显示候选比较。重排绘制层次，下一桶五点均值改为(8.4,2.58)，同时画出两个候选三角形。",
+        "二次目视发现P_cand,2与桶标题间距不足，将标题上移。",
+        "两个桶标题保持同一水平线。"
+      ],
+      "changes": [
+        {
+          "chapter": 7,
+          "label": "fig:lttb-principle",
+          "kind": "tikz",
+          "finding": "底色盖住桶内观测；下一桶平均点坐标与所绘观测不一致；选中折线未显示候选比较。重排绘制层次，下一桶五点均值改为(8.4,2.58)，同时画出两个候选三角形。",
+          "before": "\\begin{tikzpicture}[x=.9cm,y=.75cm]\n\\draw[->,gray] (0,0)--(11,0) node[right]{时间};\n\\draw[->,gray] (0,0)--(0,4.3) node[above]{观测值};\n\\draw[gray!60] plot[smooth] coordinates {(0.5,1.0)(1.2,1.4)(2,1.2)(2.8,2.7)(3.6,1.7)(4.4,2.0)(5.2,3.7)(6,2.2)(6.8,2.5)(7.6,1.4)(8.4,3.0)(9.2,2.6)(10,3.4)};\n\\draw[gray,dashed] (3.1,.1)--(3.1,4.0);\n\\draw[gray,dashed] (6.3,.1)--(6.3,4.0);\n\\fill[Accent!20] (3.1,.15) rectangle (6.3,4.0);\n\\coordinate (prev) at (2.8,2.7);\n\\coordinate (cand) at (4.4,2.0);\n\\coordinate (candtwo) at (5.2,3.7);\n\\coordinate (nextmean) at (7.0,2.6);\n\\fill[Primary] (prev) circle(2pt) node[above left]{$P_{\\mathrm{prev}}$};\n\\fill[Accent] (cand) circle(2pt) node[below]{$P_{\\mathrm{cand}}$};\n\\fill[Accent] (candtwo) circle(2pt);\n\\fill[PrimaryDark] (nextmean) circle(2pt) node[above]{$\\overline{P}_{C}$};\n\\draw[Accent,fill=Accent!25,opacity=.75] (prev)--(candtwo)--(nextmean)--cycle;\n\\draw[Primary,thick] (0.5,1.0)--(prev)--(candtwo)--(7.6,1.4)--(10,3.4);\n\\node[font=\\small,text=PrimaryDark] at (4.7,4.05) {当前桶：比较候选三角形面积};\n\\node[font=\\scriptsize,text=Accent] at (5.4,.35) {半透明三角形为最大面积候选};\n\\end{tikzpicture}",
+          "after": "\\begin{tikzpicture}[x=.95cm,y=.82cm,>=Stealth,font=\\small]\n\\fill[Accent!9] (3.1,0) rectangle (6.3,4.05);\n\\fill[PrimaryLight!65] (6.3,0) rectangle (10.3,4.05);\n\\foreach \\x in {3.1,6.3,10.3}{\\draw[TextGray!45,dashed] (\\x,0)--(\\x,4.05);}\n\\node[text=Accent!80!black,font=\\scriptsize] at (4.7,4.4) {当前桶：比较候选面积};\n\\node[text=PrimaryDark,font=\\scriptsize] at (8.3,4.4) {下一桶：求平均点};\n\\draw[->,TextGray] (0,0)--(11,0) node[right]{时间};\n\\draw[->,TextGray] (0,0)--(0,4.3) node[above]{观测值};\n\\coordinate (prev) at (2.8,2.7);\n\\coordinate (cand) at (4.4,2.0);\n\\coordinate (chosen) at (5.2,3.7);\n\\coordinate (nextmean) at (8.4,2.58);\n\\fill[Accent!22] (prev)--(chosen)--(nextmean)--cycle;\n\\draw[TextGray!65] plot coordinates {(0.5,1.0)(1.2,1.4)(2,1.2)(2.8,2.7)(3.6,1.7)(4.4,2.0)(5.2,3.7)(6,2.2)(6.8,2.5)(7.6,1.4)(8.4,3.0)(9.2,2.6)(10,3.4)};\n\\foreach \\x/\\y in {.5/1,1.2/1.4,2/1.2,2.8/2.7,3.6/1.7,4.4/2,5.2/3.7,6/2.2,6.8/2.5,7.6/1.4,8.4/3,9.2/2.6,10/3.4}{\\fill[TextGray] (\\x,\\y) circle(1.3pt);}\n\\draw[Primary,dashed] (prev)--(cand)--(nextmean)--cycle;\n\\draw[Accent,thick] (prev)--(chosen)--(nextmean)--cycle;\n\\fill[Primary] (prev) circle(2.4pt) node[above left]{$P_{\\mathrm{prev}}$};\n\\fill[Primary] (cand) circle(2.4pt) node[below]{$P_{\\mathrm{cand},1}$};\n\\fill[Accent] (chosen) circle(2.6pt) node[above]{$P_{\\mathrm{cand},2}$};\n\\fill[PrimaryDark] ($(nextmean)+(-.06,-.06)$) rectangle ($(nextmean)+(.06,.06)$);\n\\node[text=PrimaryDark,anchor=north west] at ($(nextmean)+(.08,-.05)$) {$\\overline{P}_{C}$};\n\\node[text=TextGray,font=\\scriptsize,align=center] at (5.5,-.65) {灰线与小圆点：原始观测；橙色三角形：本桶最大面积候选\\\\下一桶平均点由桶内五个观测的时间与数值分别求均值得到};\n\\end{tikzpicture}"
+        },
+        {
+          "chapter": 7,
+          "label": "fig:lttb-principle",
+          "kind": "tikz-edit",
+          "finding": "二次目视发现P_cand,2与桶标题间距不足，将标题上移。",
+          "before": "at (4.7,4.4) {当前桶",
+          "after": "at (4.7,4.8) {当前桶"
+        },
+        {
+          "chapter": 7,
+          "label": "fig:lttb-principle",
+          "kind": "tikz-edit",
+          "finding": "两个桶标题保持同一水平线。",
+          "before": "at (8.3,4.4) {下一桶",
+          "after": "at (8.3,4.8) {下一桶"
+        }
+      ],
+      "view_evidence": {
+        "before_png": "temp/r10-05-ch07-09/before/ch07-02.png",
+        "after_png": "temp/r10-05-ch07-09/after/ch07-02.png",
+        "final_pdf": "temp/r10-05-ch07-09/after/ch07-02.pdf",
+        "log": "temp/r10-05-ch07-09/after/ch07-02.log",
+        "final_png_sha256": "62318064e6ab4d03106ab262f329fd54b1629b70d479f7eb8f2b0c4dfd6c5d1b",
+        "renderer": "XeLaTeX standalone 11pt + pypdfium2 at 2x; each image inspected separately",
+        "pdf_width_cm_including_standalone_border": 12.49
+      },
+      "validation": {
+        "compiled": true,
+        "errors": [],
+        "visual_recheck_complete": true,
+        "current_tikz_matches_last_compiled_tex": true
+      }
+    },
+    {
+      "chapter": 7,
+      "figure_number": "7-3",
+      "label": "fig:ch07-missing-gap",
+      "kind": "tikz",
+      "caption_before": "缺测断线与跨缺测连线的比较（数值为示意）",
+      "caption_after": "缺测断线与跨缺测连线的比较（数值为示意）",
+      "viewed": true,
+      "status": "fixed_and_verified",
+      "observation": "两个null对应t2、t3，但灰色缺测区只覆盖t2；扩展阴影覆盖两个缺测采样时刻。；缺测文字随双时刻阴影居中。",
+      "findings": [
+        "两个null对应t2、t3，但灰色缺测区只覆盖t2；扩展阴影覆盖两个缺测采样时刻。",
+        "缺测文字随双时刻阴影居中。"
+      ],
+      "changes": [
+        {
+          "chapter": 7,
+          "label": "fig:ch07-missing-gap",
+          "kind": "tikz-edit",
+          "finding": "两个null对应t2、t3，但灰色缺测区只覆盖t2；扩展阴影覆盖两个缺测采样时刻。",
+          "before": "\\fill[black!8] (2.85,2.3) rectangle (3.85,4.7);",
+          "after": "\\fill[black!8] (2.6,2.3) rectangle (4.4,4.7);"
+        },
+        {
+          "chapter": 7,
+          "label": "fig:ch07-missing-gap",
+          "kind": "tikz-edit",
+          "finding": "缺测文字随双时刻阴影居中。",
+          "before": "\\node[text=TextGray] at (3.35,4.45) {缺测};",
+          "after": "\\node[text=TextGray] at (3.5,4.45) {缺测};"
+        }
+      ],
+      "view_evidence": {
+        "before_png": "temp/r10-05-ch07-09/before/ch07-03.png",
+        "after_png": "temp/r10-05-ch07-09/after/ch07-03.png",
+        "final_pdf": "temp/r10-05-ch07-09/after/ch07-03.pdf",
+        "log": "temp/r10-05-ch07-09/after/ch07-03.log",
+        "final_png_sha256": "5cdd190c2d247dcd5534a59a9c49e8e57eb55413bd82efede2647a7652f8fe12",
+        "renderer": "XeLaTeX standalone 11pt + pypdfium2 at 2x; each image inspected separately",
+        "pdf_width_cm_including_standalone_border": 15.22
+      },
+      "validation": {
+        "compiled": true,
+        "errors": [],
+        "visual_recheck_complete": true,
+        "current_tikz_matches_last_compiled_tex": true
+      }
+    },
+    {
+      "chapter": 7,
+      "figure_number": "7-4",
+      "label": "fig:ch07-gap-results",
+      "kind": "raster",
+      "caption_before": "缺测记录与曲线断线逐项核对（教学查看器，调用S5曲线模块）",
+      "caption_after": "缺测记录与曲线断线逐项核对（教学查看器，调用S5曲线模块）",
+      "viewed": true,
+      "status": "reviewed_no_material_error",
+      "observation": "实际查看48条记录的曲线、03:00/03:05/03:10三行值与missing/null；断线跨度、横轴时刻及m单位一致。",
+      "findings": [],
+      "changes": [],
+      "view_evidence": {
+        "source_image": "output/images/runtime/s5-missing-gap.png",
+        "current_sha256": "75a421d9a71eba89021f80ea539a88767ab8a5e2ccfcc3b00b81148a5db8f15f",
+        "method": "tools.view_image inspected actual raster; third-party JPEG never copied into docs"
+      },
+      "validation": {
+        "caption_and_introduction_checked_against_actual_pixels": true,
+        "image_mutation_owner": null
+      }
+    },
+    {
+      "chapter": 7,
+      "figure_number": "7-5",
+      "label": "fig:ch07-time-quality-pipeline",
+      "kind": "tikz",
+      "caption_before": "实时流与历史回放共用的数据质量边界",
+      "caption_after": "实时流与历史回放共用的数据质量边界",
+      "viewed": true,
+      "status": "fixed_and_verified",
+      "observation": "连续路径只有末端箭头，阶段间方向未标出；反馈线与窗口到展示线重合。逐段添加箭头，查询反馈走底部独立路径。；二次目视发现查询反馈与数据主链交叉，改走左侧和上方外缘。",
+      "findings": [
+        "连续路径只有末端箭头，阶段间方向未标出；反馈线与窗口到展示线重合。逐段添加箭头，查询反馈走底部独立路径。",
+        "二次目视发现查询反馈与数据主链交叉，改走左侧和上方外缘。"
+      ],
+      "changes": [
+        {
+          "chapter": 7,
+          "label": "fig:ch07-time-quality-pipeline",
+          "kind": "tikz",
+          "finding": "连续路径只有末端箭头，阶段间方向未标出；反馈线与窗口到展示线重合。逐段添加箭头，查询反馈走底部独立路径。",
+          "before": "\\begin{tikzpicture}[node distance=5mm and 5mm,\n  flowstep/.style={draw=Primary,rounded corners,fill=PrimaryLight,align=center,\n    minimum width=2.35cm,minimum height=.8cm,font=\\small,text=PrimaryDark}]\n\\node[flowstep] (adapter) {来源适配：单位/编码/坐标};\n\\node[flowstep,right=of adapter] (time) {时间服务：格网/时区/水印};\n\\node[flowstep,right=of time] (quality) {质量服务：缺测/异常/问题};\n\\node[flowstep,below=of quality] (window) {窗口服务：原始/聚合/回放};\n\\node[flowstep,below=of adapter] (view) {展示层：断线/颜色/联动};\n\\draw[->,thick,draw=Primary] (adapter)--(time)--(quality)--(window)--(view);\n\\draw[->,thick,dashed,draw=Accent] (view)-|(time);\n\\end{tikzpicture}",
+          "after": "\\begin{tikzpicture}[>=Stealth,font=\\small,\n  flowstep/.style={draw=Primary,rounded corners,fill=PrimaryLight,align=center,\n    text width=3.4cm,minimum height=.95cm,text=PrimaryDark}]\n\\node[flowstep] (adapter) at (0,0) {来源适配\\\\单位/编码/坐标};\n\\node[flowstep] (time) at (4.2,0) {时间服务\\\\格网/时区/水印};\n\\node[flowstep] (quality) at (8.4,0) {质量服务\\\\缺测/异常/问题};\n\\node[flowstep] (window) at (8.4,-1.6) {窗口服务\\\\原始/聚合/回放};\n\\node[flowstep] (view) at (0,-1.6) {展示层\\\\断线/颜色/联动};\n\\foreach \\a/\\b in {adapter/time,time/quality,quality/window,window/view}{\\draw[->,thick,Primary] (\\a)--(\\b);}\n\\draw[->,thick,dashed,Accent] (view.south)--++(0,-.6)\n  --node[below,font=\\scriptsize]{切换时间窗或回放时刻} (4.2,-2.7)--(4.2,-.5);\n\\end{tikzpicture}"
+        },
+        {
+          "chapter": 7,
+          "label": "fig:ch07-time-quality-pipeline",
+          "kind": "tikz-edit",
+          "finding": "二次目视发现查询反馈与数据主链交叉，改走左侧和上方外缘。",
+          "before": "\\draw[->,thick,dashed,Accent] (view.south)--++(0,-.6)\n  --node[below,font=\\scriptsize]{切换时间窗或回放时刻} (4.2,-2.7)--(4.2,-.5);",
+          "after": "\\draw[->,thick,dashed,Accent] (view.west)--(-2.4,-1.6)--(-2.4,1.2)\n  --node[above,font=\\scriptsize]{切换时间窗或回放时刻} (4.2,1.2)--(time.north);"
+        }
+      ],
+      "view_evidence": {
+        "before_png": "temp/r10-05-ch07-09/before/ch07-05.png",
+        "after_png": "temp/r10-05-ch07-09/after/ch07-05.png",
+        "final_pdf": "temp/r10-05-ch07-09/after/ch07-05.pdf",
+        "log": "temp/r10-05-ch07-09/after/ch07-05.log",
+        "final_png_sha256": "e04afb2bbe2bee0be886af68109066c4885d8684731dfec2f342ea1d65e034ad",
+        "renderer": "XeLaTeX standalone 11pt + pypdfium2 at 2x; each image inspected separately",
+        "pdf_width_cm_including_standalone_border": 13.07
+      },
+      "validation": {
+        "compiled": true,
+        "errors": [],
+        "visual_recheck_complete": true,
+        "current_tikz_matches_last_compiled_tex": true
+      }
+    },
+    {
+      "chapter": 7,
+      "figure_number": "7-6",
+      "label": "fig:ch7-rain-level-combo",
+      "kind": "tikz",
+      "caption_before": "雨量倒挂柱与水位过程线的双轴组合示意",
+      "caption_after": "雨量倒挂柱与水位过程线的双轴组合示意",
+      "viewed": true,
+      "status": "fixed_and_verified",
+      "observation": "原图为正柱单轴，与倒挂/双轴caption及同节代码不一致。改用代码中五时刻原数据绘制倒挂雨量左轴与水位右轴，明确单位、方向和零基线。；正文原称正柱，改为与修复后的倒挂雨量图及代码一致。；二次目视发现“时间”与右轴163.5刻度重叠，时间轴名称移至右下空白。；横轴箭头端点碰到右轴最低刻度；横轴止于右轴，保持图表常规框线。",
+      "findings": [
+        "原图为正柱单轴，与倒挂/双轴caption及同节代码不一致。改用代码中五时刻原数据绘制倒挂雨量左轴与水位右轴，明确单位、方向和零基线。",
+        "正文原称正柱，改为与修复后的倒挂雨量图及代码一致。",
+        "二次目视发现“时间”与右轴163.5刻度重叠，时间轴名称移至右下空白。",
+        "横轴箭头端点碰到右轴最低刻度；横轴止于右轴，保持图表常规框线。"
+      ],
+      "changes": [
+        {
+          "chapter": 7,
+          "label": "fig:ch7-rain-level-combo",
+          "kind": "tikz",
+          "finding": "原图为正柱单轴，与倒挂/双轴caption及同节代码不一致。改用代码中五时刻原数据绘制倒挂雨量左轴与水位右轴，明确单位、方向和零基线。",
+          "before": "\\begin{tikzpicture}[x=1cm,y=0.65cm]\n\\draw[->,gray] (0,0)--(9,0) node[right]{时间};\n\\draw[->,gray] (0,0)--(0,4.2) node[above]{水位/雨量};\n\\foreach \\x/\\h in {1/1.0,2/2.2,3/1.4,4/3.2,5/2.1,6/3.8,7/2.8,8/3.4}{\n  \\draw[Accent,fill=Accent!35] (\\x-.22,0) rectangle (\\x+.22,\\h);\n}\n\\draw[Primary,very thick] (1,1.2)--(2,1.4)--(3,1.8)--(4,2.0)--(5,2.6)--(6,3.0)--(7,3.3)--(8,3.6);\n\\foreach \\x/\\y in {1/1.2,2/1.4,3/1.8,4/2.0,5/2.6,6/3.0,7/3.3,8/3.6}{\\fill[Primary] (\\x,\\y) circle(1.7pt);}\n\\node[font=\\small,text=PrimaryDark] at (4.5,4.05) {柱：时段雨量\\quad 折线：水位过程};\n\\node[font=\\scriptsize,text=TextGray] at (4.5,-.55) {同一时间轴、明确单位、标注响应延迟};\n\\end{tikzpicture}",
+          "after": "\\begin{tikzpicture}[x=1cm,y=1cm,>=Stealth,font=\\scriptsize]\n\\foreach \\y in {0,1,2,3,4}{\\draw[TextGray!15] (0,\\y)--(10,\\y);}\n\\draw[->,TextGray] (0,4.2)--(0,-.18);\n\\draw[->,TextGray] (10,-.05)--(10,4.2);\n\\draw[->,TextGray] (0,0)--(10.6,0) node[right]{时间};\n\\node[text=Accent!80!black,above] at (0,4.35) {雨量/mm（向下增大）};\n\\node[text=PrimaryDark,above] at (10,4.35) {水位/m（向上增大）};\n\\foreach \\y/\\v in {4/0,3/5,2/10,1/15,0/20}{\\draw[TextGray] (0,\\y)--(-.1,\\y) node[left]{\\v};}\n\\foreach \\y/\\v in {0/163.5,1/164.0,2/164.5,3/165.0,4/165.5}{\\draw[TextGray] (10,\\y)--(10.1,\\y) node[right]{\\v};}\n\\foreach \\x/\\v in {1/0,3/8.4,5/16.2,7/4.8,9/0}{\n  \\filldraw[fill=Accent!28,draw=Accent] (\\x-.25,4) rectangle (\\x+.25,4-.2*\\v);\n}\n\\draw[Primary,line width=1.2pt] (1,1.4)--(3,1.6)--(5,2.4)--(7,3.2)--(9,3.0);\n\\foreach \\x/\\y in {1/1.4,3/1.6,5/2.4,7/3.2,9/3.0}{\\filldraw[fill=white,draw=Primary] (\\x,\\y) circle(2pt);}\n\\foreach \\x/\\t in {1/08:00,3/10:00,5/12:00,7/14:00,9/16:00}{\\draw[TextGray] (\\x,0)--(\\x,-.1) node[below]{\\t};}\n\\node[text=TextGray,align=center] at (5,-.85) {橙柱：时段雨量，零基线在上方；蓝线：库水位，读取右轴\\\\数据与本节ECharts清单一致，两个纵轴共用观测时刻};\n\\end{tikzpicture}"
+        },
+        {
+          "chapter": 7,
+          "label": "fig:ch7-rain-level-combo",
+          "kind": "text",
+          "finding": "正文原称正柱，改为与修复后的倒挂雨量图及代码一致。",
+          "before": "图\\ref{fig:ch7-rain-level-combo}中，雨量柱从零基线向上绘制，水位线使用独立轴但共享时间索引；若为了突出“倒挂”效果将柱形向下绘制，也要在图例中说明向下方向代表降雨量而不是负值。水位预警由第8章的规则结合质量码与模型版本确定。",
+          "after": "图\\ref{fig:ch7-rain-level-combo}中，雨量柱从上方零基线向下绘制，左轴雨量随之增大；水位线读取右轴，两者共享观测时刻。向下的柱形仍表示非负雨量。水位预警由第8章的规则结合质量码与模型版本确定。"
+        },
+        {
+          "chapter": 7,
+          "label": "fig:ch7-rain-level-combo",
+          "kind": "tikz-edit",
+          "finding": "二次目视发现“时间”与右轴163.5刻度重叠，时间轴名称移至右下空白。",
+          "before": "\\draw[->,TextGray] (0,0)--(10.6,0) node[right]{时间};",
+          "after": "\\draw[->,TextGray] (0,0)--(10.35,0);\n\\node[text=TextGray] at (10.65,-.4) {时刻};"
+        },
+        {
+          "chapter": 7,
+          "label": "fig:ch7-rain-level-combo",
+          "kind": "tikz-edit",
+          "finding": "横轴箭头端点碰到右轴最低刻度；横轴止于右轴，保持图表常规框线。",
+          "before": "\\draw[->,TextGray] (0,0)--(10.35,0);",
+          "after": "\\draw[TextGray] (0,0)--(10,0);"
+        }
+      ],
+      "view_evidence": {
+        "before_png": "temp/r10-05-ch07-09/before/ch07-06.png",
+        "after_png": "temp/r10-05-ch07-09/after/ch07-06.png",
+        "final_pdf": "temp/r10-05-ch07-09/after/ch07-06.pdf",
+        "log": "temp/r10-05-ch07-09/after/ch07-06.log",
+        "final_png_sha256": "838baae95adb6e5fd3e2e523d762f4e889828b37b379ec3ae7852d2f06ad9d69",
+        "renderer": "XeLaTeX standalone 11pt + pypdfium2 at 2x; each image inspected separately",
+        "pdf_width_cm_including_standalone_border": 13.16
+      },
+      "validation": {
+        "compiled": true,
+        "errors": [],
+        "visual_recheck_complete": true,
+        "current_tikz_matches_last_compiled_tex": true
+      }
+    },
+    {
+      "chapter": 7,
+      "figure_number": "7-7",
+      "label": "fig:chart-technology-selection",
+      "kind": "tikz",
+      "caption_before": "图表、三维场景与联动控制器的职责",
+      "caption_after": "图表、三维场景与联动控制器的职责",
+      "viewed": true,
+      "status": "reviewed_no_material_error",
+      "observation": "统一记录分别进入ECharts和Three.js，两侧经联动控制器双向传递对象ID与时间窗，图表与场景之间没有绕过控制器的直接调用箭头。",
+      "findings": [],
+      "changes": [],
+      "view_evidence": {
+        "before_png": "temp/r10-05-ch07-09/before/ch07-07.png",
+        "after_png": "temp/r10-05-ch07-09/before/ch07-07.png",
+        "final_pdf": "temp/r10-05-ch07-09/before/ch07-07.pdf",
+        "log": "temp/r10-05-ch07-09/before/ch07-07.log",
+        "final_png_sha256": "5a3fb71cfadd231e6240c5a6fbaac36b3bf27188a7471a20b7649459f075fb74",
+        "renderer": "XeLaTeX standalone 11pt + pypdfium2 at 2x; each image inspected separately",
+        "pdf_width_cm_including_standalone_border": 11.53
+      },
+      "validation": {
+        "compiled": true,
+        "errors": [],
+        "visual_recheck_complete": true,
+        "current_tikz_matches_last_compiled_tex": true
+      }
+    },
+    {
+      "chapter": 7,
+      "figure_number": "7-8",
+      "label": "fig:ch07-echarts-lifecycle",
+      "kind": "tikz",
+      "caption_before": "ECharts实例的创建、更新、响应式与销毁生命周期",
+      "caption_after": "ECharts实例的创建、更新、响应式与销毁生命周期",
+      "viewed": true,
+      "status": "fixed_and_verified",
+      "observation": "旧图把更新、resize、卸载误连成固定顺序，反馈线穿过resize文字且正反线重合。改为初始化后的三个事件分支。",
+      "findings": [
+        "旧图把更新、resize、卸载误连成固定顺序，反馈线穿过resize文字且正反线重合。改为初始化后的三个事件分支。"
+      ],
+      "changes": [
+        {
+          "chapter": 7,
+          "label": "fig:ch07-echarts-lifecycle",
+          "kind": "tikz",
+          "finding": "旧图把更新、resize、卸载误连成固定顺序，反馈线穿过resize文字且正反线重合。改为初始化后的三个事件分支。",
+          "before": "\\begin{tikzpicture}[node distance=6mm and 9mm,\n  life/.style={draw=Primary,rounded corners,fill=PrimaryLight,align=center,\n    minimum width=2.8cm,minimum height=.75cm,text=PrimaryDark}]\n\\node[life] (create) {创建实例：初始化option};\n\\node[life,right=of create] (update) {状态更新：合并或追加};\n\\node[life,right=of update] (resize) {容器变化：chart.resize};\n\\node[life,below=of resize] (dispose) {卸载组件：unsubscribe+dispose};\n\\draw[->,thick,draw=Primary] (create)--(update)--(resize)--(dispose);\n\\draw[->,thick,dashed,draw=Accent] (resize)|-(update);\n\\end{tikzpicture}",
+          "after": "\\begin{tikzpicture}[>=Stealth,font=\\small,\n  life/.style={draw=Primary,rounded corners,fill=PrimaryLight,align=center,\n    minimum width=2.7cm,minimum height=.95cm,text=PrimaryDark}]\n\\node[life] (create) at (0,0) {创建实例\\\\初始化option};\n\\node[life] (active) at (3.8,0) {组件存续期间\\\\按事件响应};\n\\node[life] (update) at (8.5,1.55) {更新数据\\\\setOption/appendData};\n\\node[life] (resize) at (8.5,0) {调整尺寸\\\\chart.resize};\n\\node[life,fill=Accent!10,draw=Accent] (dispose) at (8.5,-1.55) {解除订阅与释放实例\\\\unsubscribe + dispose};\n\\draw[->,Primary,thick] (create)--(active);\n\\draw[->,Primary,thick] (active.north east)--node[above,sloped,font=\\scriptsize]{数据变化} (update.west);\n\\draw[->,Primary,thick] (active)--node[above,font=\\scriptsize]{容器变化} (resize);\n\\draw[->,Accent,thick] (active.south east)--node[below,sloped,font=\\scriptsize]{组件卸载} (dispose.west);\n\\end{tikzpicture}"
+        }
+      ],
+      "view_evidence": {
+        "before_png": "temp/r10-05-ch07-09/before/ch07-08.png",
+        "after_png": "temp/r10-05-ch07-09/after/ch07-08.png",
+        "final_pdf": "temp/r10-05-ch07-09/after/ch07-08.pdf",
+        "log": "temp/r10-05-ch07-09/after/ch07-08.log",
+        "final_png_sha256": "335e0d57af987cd7fb08b8459e9bdae0e286594f3f7c268164cd44f4517f662e",
+        "renderer": "XeLaTeX standalone 11pt + pypdfium2 at 2x; each image inspected separately",
+        "pdf_width_cm_including_standalone_border": 12.17
+      },
+      "validation": {
+        "compiled": true,
+        "errors": [],
+        "visual_recheck_complete": true,
+        "current_tikz_matches_last_compiled_tex": true
+      }
+    },
+    {
+      "chapter": 7,
+      "figure_number": "7-9",
+      "label": "fig:ch07-scene-chart",
+      "kind": "raster",
+      "caption_before": "三维对象与时序曲线的联合展示（S5阶段页运行截图，显示放大）",
+      "caption_after": "三维测点与渗压曲线联动（配套程序运行图，添加坐标识读标记）",
+      "viewed": true,
+      "status": "fixed_and_verified",
+      "observation": "旧图测点被图表遮挡，仅有坝体和曲线，无法核对选择对象。root重新定位相机、添加参考网格与投影，实际点击原PZ07小球后同编码渗压曲线出现；本代理已看最终PNG并修随文/图注。",
+      "findings": [
+        "root重录已实际触发PointPicker并提供局部坐标识读标记；随文改为可见测点与实际联动验证，不再描述未显示的坝体。",
+        "图注披露采集时新增坐标标记，并与原PointPicker点击后的测点/曲线一致。"
+      ],
+      "changes": [
+        {
+          "chapter": 7,
+          "label": "fig:ch07-scene-chart",
+          "kind": "text",
+          "finding": "root重录已实际触发PointPicker并提供局部坐标识读标记；随文改为可见测点与实际联动验证，不再描述未显示的坝体。",
+          "before": "图\\ref{fig:ch07-scene-chart}展示S5阶段页中的对象与曲线。核对场景中的选择、状态栏的对象编码及纵轴单位，可以发现“选中了一个对象，却显示另一个对象曲线”的错配。",
+          "after": "图\\ref{fig:ch07-scene-chart}展示点击PZ-07测点后得到的同编码渗压曲线。左侧网格与垂直投影辅助识读位置，右侧显示2026年7月1日的288条观测；核对对象编码、时间范围和kPa单位可检查联动是否正确。"
+        },
+        {
+          "chapter": 7,
+          "label": "fig:ch07-scene-chart",
+          "kind": "text",
+          "finding": "图注披露采集时新增坐标标记，并与原PointPicker点击后的测点/曲线一致。",
+          "before": "三维对象与时序曲线的联合展示（S5阶段页运行截图，显示放大）",
+          "after": "三维测点与渗压曲线联动（配套程序运行图，添加坐标识读标记）"
+        }
+      ],
+      "view_evidence": {
+        "source_image": "output/images/runtime/s5-scene-chart.png",
+        "current_sha256": "a57f85d10b19bda1b32f36625a558073e496e15f8187b8e982a4ebf9c20d99d3",
+        "method": "tools.view_image inspected actual raster; third-party JPEG never copied into docs"
+      },
+      "validation": {
+        "caption_and_introduction_checked_against_actual_pixels": true,
+        "image_mutation_owner": "root"
+      }
+    },
+    {
+      "chapter": 7,
+      "figure_number": "7-10",
+      "label": "fig:ch7-thematic-map",
+      "kind": "tikz",
+      "caption_before": "等值线、色斑图、流向箭头与站点符号的组合表达",
+      "caption_after": "等值线、色斑图、流向箭头与站点符号的组合表达",
+      "viewed": true,
+      "status": "fixed_and_verified",
+      "observation": "原图只有均匀底色却称色斑图，箭头首尾直接相接不易分辨；补充与等值线一致的分级色带及图例，流向箭头留间隔。",
+      "findings": [
+        "原图只有均匀底色却称色斑图，箭头首尾直接相接不易分辨；补充与等值线一致的分级色带及图例，流向箭头留间隔。"
+      ],
+      "changes": [
+        {
+          "chapter": 7,
+          "label": "fig:ch7-thematic-map",
+          "kind": "tikz",
+          "finding": "原图只有均匀底色却称色斑图，箭头首尾直接相接不易分辨；补充与等值线一致的分级色带及图例，流向箭头留间隔。",
+          "before": "\\begin{tikzpicture}[x=0.85cm,y=0.65cm]\n\\draw[fill=PrimaryLight,draw=Primary] (0,0) rectangle (10,5);\n\\draw[Primary!60,dashed] (0,1.1) .. controls (2,1.8) and (3,1.0) .. (5,1.6)\n  .. controls (7,2.2) and (8,1.2) .. (10,1.8);\n\\draw[Primary!60,dashed] (0,2.7) .. controls (2,3.4) and (3,2.3) .. (5,2.9)\n  .. controls (7,3.7) and (8,2.6) .. (10,3.2);\n\\draw[Accent,very thick,->] (1,4.5)--(3,3.7);\n\\draw[Accent,very thick,->] (3,3.7)--(5.2,3.0);\n\\draw[Accent,very thick,->] (5.2,3.0)--(7.5,2.2);\n\\foreach \\x/\\y/\\s in {1.2/1.4/A,3.4/2.4/B,6.2/3.4/C,8.4/1.1/D}{\n  \\fill[PrimaryDark] (\\x,\\y) circle(2.5pt);\n  \\node[font=\\scriptsize,above] at (\\x,\\y) {\\s};\n}\n\\node[font=\\scriptsize,text=TextGray] at (2.2,.45) {色斑图：连续场};\n\\node[font=\\scriptsize,text=TextGray] at (7.9,.45) {站点：对象状态};\n\\node[font=\\scriptsize,text=Accent] at (5.0,4.65) {箭头：流向};\n\\end{tikzpicture}",
+          "after": "\\begin{tikzpicture}[x=1cm,y=.8cm,>=Stealth,font=\\scriptsize]\n\\fill[Primary!8] (0,0) rectangle (10,5);\n\\fill[Primary!18] (0,1.1) .. controls (2,1.8) and (3,1.0) .. (5,1.6)\n  .. controls (7,2.2) and (8,1.2) .. (10,1.8)--(10,5)--(0,5)--cycle;\n\\fill[Primary!30] (0,2.7) .. controls (2,3.4) and (3,2.3) .. (5,2.9)\n  .. controls (7,3.7) and (8,2.6) .. (10,3.2)--(10,5)--(0,5)--cycle;\n\\draw[Primary] (0,0) rectangle (10,5);\n\\draw[PrimaryDark!75,dashed] (0,1.1) .. controls (2,1.8) and (3,1.0) .. (5,1.6)\n  .. controls (7,2.2) and (8,1.2) .. (10,1.8);\n\\draw[PrimaryDark!75,dashed] (0,2.7) .. controls (2,3.4) and (3,2.3) .. (5,2.9)\n  .. controls (7,3.7) and (8,2.6) .. (10,3.2);\n\\foreach \\a/\\b/\\c/\\d in {1/4.5/2.8/3.9,3.3/3.65/5.1/3.05,5.6/2.8/7.4/2.2}{\\draw[Accent!85!black,line width=1.1pt,->] (\\a,\\b)--(\\c,\\d);}\n\\foreach \\x/\\y/\\s in {1.2/1.4/A,3.4/2.4/B,6.2/3.8/C,8.4/1.1/D}{\n  \\filldraw[fill=white,draw=PrimaryDark,thick] (\\x,\\y) circle(2.6pt);\n  \\node[above,text=PrimaryDark] at (\\x,\\y) {\\s};\n}\n\\node[text=Accent!85!black] at (5,4.65) {箭头：流向};\n\\foreach \\x/\\c in {0/8,.45/18,.9/30}{\\fill[Primary!\\c] (\\x,-.6) rectangle (\\x+.45,-.35);}\n\\node[anchor=west,text=TextGray] at (1.55,-.47) {连续场：由浅至深表示低到高（示意）};\n\\node[anchor=west,text=TextGray] at (0,-1.05) {虚线：等值线\\qquad 带字母圆点：监测站点};\n\\end{tikzpicture}"
+        }
+      ],
+      "view_evidence": {
+        "before_png": "temp/r10-05-ch07-09/before/ch07-10.png",
+        "after_png": "temp/r10-05-ch07-09/after/ch07-10.png",
+        "final_pdf": "temp/r10-05-ch07-09/after/ch07-10.pdf",
+        "log": "temp/r10-05-ch07-09/after/ch07-10.log",
+        "final_png_sha256": "beda009ed4461874b85a796c6f5a86f90f8c5a87ac1faa74f6b5f5abfa5e74e2",
+        "renderer": "XeLaTeX standalone 11pt + pypdfium2 at 2x; each image inspected separately",
+        "pdf_width_cm_including_standalone_border": 10.44
+      },
+      "validation": {
+        "compiled": true,
+        "errors": [],
+        "visual_recheck_complete": true,
+        "current_tikz_matches_last_compiled_tex": true
+      }
+    },
+    {
+      "chapter": 7,
+      "figure_number": "7-11",
+      "label": "fig:ch7-color-accessibility",
+      "kind": "tikz",
+      "caption_before": "色彩、冗余编码与可达性验收闭环",
+      "caption_after": "色彩、冗余编码与可达性验收闭环",
+      "viewed": true,
+      "status": "reviewed_no_material_error",
+      "observation": "业务语义、色板、冗余通道、可达性和验收的路径可辨认，两个返回段不穿框；文字同时包含形状、纹理、文字，未只依赖颜色。",
+      "findings": [],
+      "changes": [],
+      "view_evidence": {
+        "before_png": "temp/r10-05-ch07-09/before/ch07-11.png",
+        "after_png": "temp/r10-05-ch07-09/before/ch07-11.png",
+        "final_pdf": "temp/r10-05-ch07-09/before/ch07-11.pdf",
+        "log": "temp/r10-05-ch07-09/before/ch07-11.log",
+        "final_png_sha256": "cbd4678a4b526dd401be64f699ec036efb1b95692831bbeca6635ab2e47d1568",
+        "renderer": "XeLaTeX standalone 11pt + pypdfium2 at 2x; each image inspected separately",
+        "pdf_width_cm_including_standalone_border": 15.99
+      },
+      "validation": {
+        "compiled": true,
+        "errors": [],
+        "visual_recheck_complete": true,
+        "current_tikz_matches_last_compiled_tex": true
+      }
+    },
+    {
+      "chapter": 7,
+      "figure_number": "7-12",
+      "label": "fig:lod-cluster",
+      "kind": "tikz",
+      "caption_before": "监测点LOD与聚合表达",
+      "caption_after": "监测点LOD与聚合表达",
+      "viewed": true,
+      "status": "reviewed_no_material_error",
+      "observation": "近景到中景到远景的缩小方向与下方放大/下钻回路一致，聚合数量与最高风险仅在远景节点中描述。",
+      "findings": [],
+      "changes": [],
+      "view_evidence": {
+        "before_png": "temp/r10-05-ch07-09/before/ch07-12.png",
+        "after_png": "temp/r10-05-ch07-09/before/ch07-12.png",
+        "final_pdf": "temp/r10-05-ch07-09/before/ch07-12.pdf",
+        "log": "temp/r10-05-ch07-09/before/ch07-12.log",
+        "final_png_sha256": "53f8a54bfe318411b237a3bf312864d0b9984935f813ced821edb9bcf14adb5c",
+        "renderer": "XeLaTeX standalone 11pt + pypdfium2 at 2x; each image inspected separately",
+        "pdf_width_cm_including_standalone_border": 12.93
+      },
+      "validation": {
+        "compiled": true,
+        "errors": [],
+        "visual_recheck_complete": true,
+        "current_tikz_matches_last_compiled_tex": true
+      }
+    },
+    {
+      "chapter": 7,
+      "figure_number": "7-13",
+      "label": "fig:ray-picking",
+      "kind": "tikz",
+      "caption_before": "从屏幕坐标到场景交点的拾取过程",
+      "caption_after": "从屏幕坐标到场景交点的拾取过程",
+      "viewed": true,
+      "status": "fixed_and_verified",
+      "observation": "屏幕到相机的连线穿过“屏幕点击”文字，世界射线缺箭头且被对象填色遮断。分开NDC换算与世界求交，使用精确插值交点(8.7,1.25)，对象先填充后画射线。",
+      "findings": [
+        "屏幕到相机的连线穿过“屏幕点击”文字，世界射线缺箭头且被对象填色遮断。分开NDC换算与世界求交，使用精确插值交点(8.7,1.25)，对象先填充后画射线。"
+      ],
+      "changes": [
+        {
+          "chapter": 7,
+          "label": "fig:ray-picking",
+          "kind": "tikz",
+          "finding": "屏幕到相机的连线穿过“屏幕点击”文字，世界射线缺箭头且被对象填色遮断。分开NDC换算与世界求交，使用精确插值交点(8.7,1.25)，对象先填充后画射线。",
+          "before": "\\begin{tikzpicture}[x=1cm,y=1cm]\n\\draw[fill=PrimaryLight,draw=Primary] (0,0) rectangle (3.2,2.4);\n\\node at (1.6,1.2) {屏幕点击};\n\\coordinate (cam) at (5.1,1.2);\n\\fill[Primary] (cam) circle(2pt) node[above]{相机};\n\\draw[draw=Primary,thick] (1.8,1.2)--(cam);\n\\node[font=\\scriptsize,text=PrimaryDark] at (3.6,1.45) {NDC换算};\n\\draw[draw=Accent,thick] (cam)--(10.4,2.88);\n\\draw[fill=PrimaryLight,draw=Primary] (8.2,.3)--(9.5,2.8)--(10.4,.7)--cycle;\n\\fill[Accent] (9.37,2.55) circle(2.5pt) node[above right]{最近交点};\n\\node[font=\\small,text=Accent] at (7.2,2.65) {世界射线};\n\\end{tikzpicture}",
+          "after": "\\begin{tikzpicture}[x=1cm,y=1cm,>=Stealth,font=\\small]\n\\draw[fill=PrimaryLight,draw=Primary] (0,0) rectangle (3,2.5);\n\\node[text=PrimaryDark] at (1.5,2.15) {屏幕画布};\n\\fill[Accent] (1,1.25) circle(2.5pt);\n\\node[below,text=Accent!85!black,font=\\scriptsize] at (1,.95) {点击位置};\n\\draw[->,Primary,dashed] (3,1.25)--node[above,font=\\scriptsize]{NDC换算} (4.7,1.25);\n\\coordinate (cam) at (5.2,1.25);\n\\fill[Primary] (cam) circle(2.4pt) node[above]{相机};\n\\coordinate (a) at (8,.2);\n\\coordinate (b) at (9.6,2.6);\n\\coordinate (c) at (10.6,.2);\n\\draw[fill=PrimaryLight,draw=Primary] (a)--(b)--(c)--cycle;\n\\coordinate (hit) at ($(a)!.4375!(b)$);\n\\draw[->,Accent!85!black,line width=1.1pt] (cam)--(11.1,1.25);\n\\fill[Accent] (hit) circle(2.6pt);\n\\draw[Accent!85!black] (hit)--++(-.35,.65) node[above,font=\\scriptsize]{最近交点};\n\\node[text=Accent!85!black,font=\\scriptsize] at (6.5,.92) {世界射线};\n\\node[text=TextGray,font=\\scriptsize] at (9.4,-.1) {场景对象};\n\\node[text=TextGray,font=\\scriptsize] at (5.4,-.65) {透视相机：由相机与点击位置确定方向，按沿射线的距离取最近交点};\n\\end{tikzpicture}"
+        }
+      ],
+      "view_evidence": {
+        "before_png": "temp/r10-05-ch07-09/before/ch07-13.png",
+        "after_png": "temp/r10-05-ch07-09/after/ch07-13.png",
+        "final_pdf": "temp/r10-05-ch07-09/after/ch07-13.pdf",
+        "log": "temp/r10-05-ch07-09/after/ch07-13.log",
+        "final_png_sha256": "24b15b441472f3906284c38b9c150e1cb29ead3b5af7cec0a6bd51fb742e49e6",
+        "renderer": "XeLaTeX standalone 11pt + pypdfium2 at 2x; each image inspected separately",
+        "pdf_width_cm_including_standalone_border": 11.55
+      },
+      "validation": {
+        "compiled": true,
+        "errors": [],
+        "visual_recheck_complete": true,
+        "current_tikz_matches_last_compiled_tex": true
+      }
+    },
+    {
+      "chapter": 8,
+      "figure_number": "8-1",
+      "label": "fig:smart-water-monitoring-architecture",
+      "kind": "tikz",
+      "caption_before": "水利工程安全监测业务闭环",
+      "caption_after": "水利工程安全监测业务闭环",
+      "viewed": true,
+      "status": "fixed_and_verified",
+      "observation": "复盘反馈曲线直接穿过质量检查框与文字；绕节点外侧返回风险分析。；将剩余斜底边统一为正交反馈路由。",
+      "findings": [
+        "复盘反馈曲线直接穿过质量检查框与文字；绕节点外侧返回风险分析。",
+        "将剩余斜底边统一为正交反馈路由。"
+      ],
+      "changes": [
+        {
+          "chapter": 8,
+          "label": "fig:smart-water-monitoring-architecture",
+          "kind": "tikz-edit",
+          "finding": "复盘反馈曲线直接穿过质量检查框与文字；绕节点外侧返回风险分析。",
+          "before": "\\draw[->,draw=Accent,dashed,thick,bend left=25] (review) to node[below,font=\\scriptsize]{改进规则/模型} (analysis);",
+          "after": "\\draw[->,draw=Accent,dashed,thick] (review.south)--++(0,-.65)\n  --node[below,font=\\scriptsize]{复盘后改进规则/模型} ($(analysis.east)+(.55,-2.1)$)\n  --($(analysis.east)+(.55,0)$)--(analysis.east);"
+        },
+        {
+          "chapter": 8,
+          "label": "fig:smart-water-monitoring-architecture",
+          "kind": "tikz-edit",
+          "finding": "将剩余斜底边统一为正交反馈路由。",
+          "before": "\\draw[->,draw=Accent,dashed,thick] (review.south)--++(0,-.65)\n  --node[below,font=\\scriptsize]{复盘后改进规则/模型} ($(analysis.east)+(.55,-2.1)$)\n  --($(analysis.east)+(.55,0)$)--(analysis.east);",
+          "after": "\\coordinate (feedbacklow) at ($(review.south)+(0,-.65)$);\n\\coordinate (feedbackright) at ($(analysis.east)+(.55,0)$);\n\\draw[->,draw=Accent,dashed,thick] (review.south)--(feedbacklow)\n  --node[below,font=\\scriptsize]{复盘后改进规则/模型} (feedbackright |- feedbacklow)\n  --(feedbackright)--(analysis.east);"
+        }
+      ],
+      "view_evidence": {
+        "before_png": "temp/r10-05-ch07-09/before/ch08-01.png",
+        "after_png": "temp/r10-05-ch07-09/after/ch08-01.png",
+        "final_pdf": "temp/r10-05-ch07-09/after/ch08-01.pdf",
+        "log": "temp/r10-05-ch07-09/after/ch08-01.log",
+        "final_png_sha256": "4f3bbb7ffed55367cb0db1b340e3befe667ce80fee9321134d0c5dcdd9cc9c8a",
+        "renderer": "XeLaTeX standalone 11pt + pypdfium2 at 2x; each image inspected separately",
+        "pdf_width_cm_including_standalone_border": 11.91
+      },
+      "validation": {
+        "compiled": true,
+        "errors": [],
+        "visual_recheck_complete": true,
+        "current_tikz_matches_last_compiled_tex": true
+      }
+    },
+    {
+      "chapter": 8,
+      "figure_number": "8-2",
+      "label": "fig:case-layered-architecture",
+      "kind": "tikz",
+      "caption_before": "案例水库平台统一技术架构",
+      "caption_after": "案例水库平台统一技术架构",
+      "viewed": true,
+      "status": "reviewed_no_material_error",
+      "observation": "5层框及双向箭头均清晰，无文字溢出或穿线；Vue/Spring/数据组件与本章锁定技术架构一致。",
+      "findings": [],
+      "changes": [],
+      "view_evidence": {
+        "before_png": "temp/r10-05-ch07-09/before/ch08-02.png",
+        "after_png": "temp/r10-05-ch07-09/before/ch08-02.png",
+        "final_pdf": "temp/r10-05-ch07-09/before/ch08-02.pdf",
+        "log": "temp/r10-05-ch07-09/before/ch08-02.log",
+        "final_png_sha256": "5246074e91f48bc2650ee762b060b048fea82b9a04281efbcf00a98a2c218c7a",
+        "renderer": "XeLaTeX standalone 11pt + pypdfium2 at 2x; each image inspected separately",
+        "pdf_width_cm_including_standalone_border": 12.42
+      },
+      "validation": {
+        "compiled": true,
+        "errors": [],
+        "visual_recheck_complete": true,
+        "current_tikz_matches_last_compiled_tex": true
+      }
+    },
+    {
+      "chapter": 8,
+      "figure_number": "8-3",
+      "label": "fig:ch08-acquisition-cabinet",
+      "kind": "raster",
+      "caption_before": "按供电、采集与通信识读采集柜（AI生成的教学渲染，非接线设计图）",
+      "caption_after": "按供电、采集与通信识读采集柜（AI生成的教学渲染，非接线设计图）",
+      "viewed": true,
+      "status": "fixed_and_verified",
+      "observation": "原蓝色线缆接入圆形射频连接器，root修复为采集模块RJ45到通信模块RJ45。本代理已目视新图，电源/电池、端子排、采集与通信区仍与文字一致；图注保留教学渲染和非接线设计性质。",
+      "findings": [],
+      "changes": [],
+      "view_evidence": {
+        "source_image": "output/images/generated/acquisition-cabinet.png",
+        "current_sha256": "45d438cb9f584c01d3fa7a710bff30b7a86e0379ef73da010cd58f3f79541de2",
+        "method": "tools.view_image inspected actual raster; third-party JPEG never copied into docs"
+      },
+      "validation": {
+        "caption_and_introduction_checked_against_actual_pixels": true,
+        "image_mutation_owner": "root"
+      }
+    },
+    {
+      "chapter": 8,
+      "figure_number": "8-4",
+      "label": "fig:ch08-database-er",
+      "kind": "tikz",
+      "caption_before": "第8章核心实体关系与追溯路径",
+      "caption_after": "第8章核心实体关系与追溯路径",
+      "viewed": true,
+      "status": "fixed_and_verified",
+      "observation": "asset→warning连线穿过reading且1:N标签压字；model_run没有asset_id外键却画成asset的1:N从表。修正为独立模型运行与输入快照追溯，实体关系路线分离。；外键关系与证据追溯含义不清，且“向下追踪观测”与布局不符；按DDL明确主从与快照关系。；按root复核将纠错式否定说明改为正向输入快照语义。",
+      "findings": [
+        "asset→warning连线穿过reading且1:N标签压字；model_run没有asset_id外键却画成asset的1:N从表。修正为独立模型运行与输入快照追溯，实体关系路线分离。",
+        "外键关系与证据追溯含义不清，且“向下追踪观测”与布局不符；按DDL明确主从与快照关系。",
+        "按root复核将纠错式否定说明改为正向输入快照语义。"
+      ],
+      "changes": [
+        {
+          "chapter": 8,
+          "label": "fig:ch08-database-er",
+          "kind": "tikz",
+          "finding": "asset→warning连线穿过reading且1:N标签压字；model_run没有asset_id外键却画成asset的1:N从表。修正为独立模型运行与输入快照追溯，实体关系路线分离。",
+          "before": "\\begin{tikzpicture}[\n  er/.style={draw=Primary,rounded corners,fill=PrimaryLight,align=center,\n    minimum width=2.65cm,minimum height=1.05cm,font=\\small},\n  rel/.style={->,draw=PrimaryDark,thick},\n  node distance=12mm and 18mm]\n\\node[er] (asset) {asset\\\\工程对象/测点};\n\\node[er,right=of asset] (reading) {reading\\\\时序观测};\n\\node[er,right=of reading] (warning) {warning\\\\预警事件};\n\\node[er,below=of warning] (work) {work\\_order\\\\处置工单};\n\\node[er,below=of asset] (run) {model\\_run\\\\模型运行};\n\\draw[rel] (asset) -- node[above,font=\\scriptsize]{1:N} (reading);\n\\draw[rel] (asset) -- node[left,font=\\scriptsize]{1:N} (run);\n\\draw[rel] (asset) |- node[pos=.25,left,font=\\scriptsize]{1:N} (warning);\n\\draw[rel] (warning) -- node[right,font=\\scriptsize]{1:N} (work);\n\\draw[rel,dashed] (reading) -- node[above,font=\\scriptsize]{event\\_id证据} (warning);\n\\end{tikzpicture}",
+          "after": "\\begin{tikzpicture}[>=Stealth,font=\\small,\n  er/.style={draw=Primary,rounded corners,fill=PrimaryLight,align=center,\n    minimum width=2.65cm,minimum height=1.05cm},\n  rel/.style={->,draw=PrimaryDark,thick}]\n\\node[er] (asset) at (0,0) {asset\\\\工程对象/测点};\n\\node[er] (reading) at (4.4,0) {reading\\\\时序观测};\n\\node[er] (warning) at (8.8,0) {warning\\\\预警事件};\n\\node[er] (run) at (4.4,-2.0) {model\\_run\\\\模型运行};\n\\node[er] (work) at (8.8,-2.0) {work\\_order\\\\处置工单};\n\\draw[rel] (asset)--node[above,font=\\scriptsize]{1:N} (reading);\n\\draw[rel] (asset.north)--++(0,.6)--node[above,font=\\scriptsize]{1:N} ($(warning.north)+(0,.6)$)--(warning.north);\n\\draw[rel] (warning)--node[right,font=\\scriptsize]{1:N} (work);\n\\draw[rel,dashed] (reading)--node[above,font=\\scriptsize]{事件标识证据} (warning);\n\\draw[rel,dashed] (reading)--node[left,font=\\scriptsize]{输入快照} (run);\n\\node[font=\\scriptsize,text=TextGray,align=center] at (4.4,-3.0) {实线：主对象到关联记录的一对多关系；虚线：证据与快照追溯\\\\model\\_run通过input\\_snapshot保存输入，未设置asset外键};\n\\end{tikzpicture}"
+        },
+        {
+          "chapter": 8,
+          "label": "fig:ch08-database-er",
+          "kind": "text",
+          "finding": "外键关系与证据追溯含义不清，且“向下追踪观测”与布局不符；按DDL明确主从与快照关系。",
+          "before": "图\\ref{fig:ch08-database-er}用实体关系图呈现外键方向和审计边界。图中的箭头表示数据库中的\n可追溯关系，不表示消息一定同步到达；异步事件仍需通过事件标识和状态版本处理乱序。阅读图时先从\n\\texttt{asset}向下追踪观测，再从观测和规则证据进入预警，最后沿工单回执闭合业务链；模型运行则以\n输入快照和结果独立留痕，避免把模型输出误当作原始观测。",
+          "after": "图\\ref{fig:ch08-database-er}中的实线从主对象指向关联记录，标注一对多关系；虚线表示事件证据\n和输入快照的追溯关系。\\texttt{asset}分别关联观测和预警，预警再关联工单；模型运行以输入快照\n和结果独立留痕。图中关系不表示消息同步到达，异步事件仍需用事件标识和状态版本处理乱序。"
+        },
+        {
+          "chapter": 8,
+          "label": "fig:ch08-database-er",
+          "kind": "tikz-edit",
+          "finding": "按root复核将纠错式否定说明改为正向输入快照语义。",
+          "before": "model\\_run通过input\\_snapshot保存输入，未设置asset外键",
+          "after": "model\\_run的input\\_snapshot记录本次计算的输入范围"
+        }
+      ],
+      "view_evidence": {
+        "before_png": "temp/r10-05-ch07-09/before/ch08-04.png",
+        "after_png": "temp/r10-05-ch07-09/after/ch08-04.png",
+        "final_pdf": "temp/r10-05-ch07-09/after/ch08-04.pdf",
+        "log": "temp/r10-05-ch07-09/after/ch08-04.log",
+        "final_png_sha256": "6e05d6caf84a28ab7ee2183e16e78b202ec60b4d7a3d69ae31902cf6586d9072",
+        "renderer": "XeLaTeX standalone 11pt + pypdfium2 at 2x; each image inspected separately",
+        "pdf_width_cm_including_standalone_border": 11.89
+      },
+      "validation": {
+        "compiled": true,
+        "errors": [],
+        "visual_recheck_complete": true,
+        "current_tikz_matches_last_compiled_tex": true
+      }
+    },
+    {
+      "chapter": 8,
+      "figure_number": "8-5",
+      "label": "fig:monitoring-data-pipeline",
+      "kind": "tikz",
+      "caption_before": "监测数据接入、质量检查与展示流水线",
+      "caption_after": "监测数据接入、质量检查与展示流水线",
+      "viewed": true,
+      "status": "fixed_and_verified",
+      "observation": "虚线穿风险服务框并从前端更新指向存储，误示数据写入；改为存储查询结果经外侧进入SSE/REST展示出口。；将查询结果的底部斜连线改为正交走线。",
+      "findings": [
+        "虚线穿风险服务框并从前端更新指向存储，误示数据写入；改为存储查询结果经外侧进入SSE/REST展示出口。",
+        "将查询结果的底部斜连线改为正交走线。"
+      ],
+      "changes": [
+        {
+          "chapter": 8,
+          "label": "fig:monitoring-data-pipeline",
+          "kind": "tikz-edit",
+          "finding": "虚线穿风险服务框并从前端更新指向存储，误示数据写入；改为存储查询结果经外侧进入SSE/REST展示出口。",
+          "before": "\\draw[->,draw=Accent,dashed,thick] (push)-|(store);",
+          "after": "\\draw[->,draw=Accent,dashed,thick] (store.east)--++(.6,0)\n  --($(store.east)+(.6,-2.3)$)--node[below,font=\\scriptsize]{历史观测查询结果} ($(push.south)+(0,-.6)$)--(push.south);"
+        },
+        {
+          "chapter": 8,
+          "label": "fig:monitoring-data-pipeline",
+          "kind": "tikz-edit",
+          "finding": "将查询结果的底部斜连线改为正交走线。",
+          "before": "\\draw[->,draw=Accent,dashed,thick] (store.east)--++(.6,0)\n  --($(store.east)+(.6,-2.3)$)--node[below,font=\\scriptsize]{历史观测查询结果} ($(push.south)+(0,-.6)$)--(push.south);",
+          "after": "\\coordinate (queryright) at ($(store.east)+(.6,0)$);\n\\coordinate (querylow) at ($(push.south)+(0,-.6)$);\n\\draw[->,draw=Accent,dashed,thick] (store.east)--(queryright)\n  --(queryright |- querylow)--node[below,font=\\scriptsize]{历史观测查询结果} (querylow)--(push.south);"
+        }
+      ],
+      "view_evidence": {
+        "before_png": "temp/r10-05-ch07-09/before/ch08-05.png",
+        "after_png": "temp/r10-05-ch07-09/after/ch08-05.png",
+        "final_pdf": "temp/r10-05-ch07-09/after/ch08-05.pdf",
+        "log": "temp/r10-05-ch07-09/after/ch08-05.log",
+        "final_png_sha256": "5245485481a9c39ad201c8ac03fc95a54eb4197d64da34dad31d971c90022685",
+        "renderer": "XeLaTeX standalone 11pt + pypdfium2 at 2x; each image inspected separately",
+        "pdf_width_cm_including_standalone_border": 11.98
+      },
+      "validation": {
+        "compiled": true,
+        "errors": [],
+        "visual_recheck_complete": true,
+        "current_tikz_matches_last_compiled_tex": true
+      }
+    },
+    {
+      "chapter": 8,
+      "figure_number": "8-6",
+      "label": "fig:ch08-work-order-results",
+      "kind": "raster",
+      "caption_before": "预警与工单状态的实际响应（教学查看器，配套教学接口）",
+      "caption_after": "预警与工单状态的实际响应（教学查看器，配套教学接口）",
+      "viewed": true,
+      "status": "reviewed_no_material_error",
+      "observation": "已目视预警w-0001与工单wo-0001的四阶段响应及未确认派单409；状态/ID与实际manifest一致，当前图注限定教学接口。",
+      "findings": [],
+      "changes": [],
+      "view_evidence": {
+        "source_image": "output/images/runtime/s6-work-order.png",
+        "current_sha256": "257fae959151588842fb199816f85dee01dfa2ae162891f8eff28448638f4624",
+        "method": "tools.view_image inspected actual raster; third-party JPEG never copied into docs"
+      },
+      "validation": {
+        "caption_and_introduction_checked_against_actual_pixels": true,
+        "image_mutation_owner": null
+      }
+    },
+    {
+      "chapter": 8,
+      "figure_number": "8-7",
+      "label": "fig:warning-workorder-flow",
+      "kind": "tikz",
+      "caption_before": "预警与工单的受控状态流转",
+      "caption_after": "预警与工单的受控状态流转",
+      "viewed": true,
+      "status": "fixed_and_verified",
+      "observation": "旧图混合预警/工单状态并绘制无接口依据的“已处置→已确认”回退；正文还声称每边已有角色/条件却实际未标。按现有open/acknowledged/closed与工单in_progress/completed拆成两条状态线并补触发角色。；区分两个资源的枚举与服务条件，移除图中不存在的“已发出”和不准确的转移描述。",
+      "findings": [
+        "旧图混合预警/工单状态并绘制无接口依据的“已处置→已确认”回退；正文还声称每边已有角色/条件却实际未标。按现有open/acknowledged/closed与工单in_progress/completed拆成两条状态线并补触发角色。",
+        "区分两个资源的枚举与服务条件，移除图中不存在的“已发出”和不准确的转移描述。"
+      ],
+      "changes": [
+        {
+          "chapter": 8,
+          "label": "fig:warning-workorder-flow",
+          "kind": "tikz",
+          "finding": "旧图混合预警/工单状态并绘制无接口依据的“已处置→已确认”回退；正文还声称每边已有角色/条件却实际未标。按现有open/acknowledged/closed与工单in_progress/completed拆成两条状态线并补触发角色。",
+          "before": "\\begin{tikzpicture}[node distance=7mm,\n  state/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=2.2cm,\n    minimum height=.8cm,align=center}]\n\\node[state] (new) {新建};\n\\node[state,right=of new] (confirmed) {已确认};\n\\node[state,right=of confirmed] (assigned) {已派单};\n\\node[state,right=of assigned] (handled) {已处置};\n\\node[state,right=of handled] (closed) {已复核关闭};\n\\draw[->,draw=Primary,thick] (new)--(confirmed);\n\\draw[->,draw=Primary,thick] (confirmed)--(assigned);\n\\draw[->,draw=Primary,thick] (assigned)--(handled);\n\\draw[->,draw=Primary,thick] (handled)--(closed);\n\\draw[->,draw=Accent,dashed,thick,bend right=30] (handled) to node[below,font=\\scriptsize]{证据不足/继续观察} (confirmed);\n\\end{tikzpicture}",
+          "after": "\\begin{tikzpicture}[>=Stealth,font=\\small,\n  state/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=2.8cm,\n    minimum height=1cm,align=center},\n  ar/.style={->,Primary,thick}]\n\\node[state] (open) at (0,0) {预警待确认\\\\open};\n\\node[state] (ack) at (5.3,0) {预警已确认\\\\acknowledged};\n\\node[state] (closed) at (10.6,0) {预警已关闭\\\\closed};\n\\node[state,fill=white] (work) at (5.3,-2.25) {工单处理中\\\\in\\_progress};\n\\node[state,fill=white] (done) at (10.6,-2.25) {工单已完成\\\\completed};\n\\draw[ar] (open)--node[above,font=\\scriptsize,align=center]{值班员确认\\\\核对事件与证据} (ack);\n\\draw[ar] (ack)--node[left,font=\\scriptsize,align=right]{值班员派单\\\\指定责任与时限} (work);\n\\draw[ar] (work)--node[below,font=\\scriptsize,align=center]{运维员处理\\\\提交处置回执} (done);\n\\draw[ar] (done)--node[right,font=\\scriptsize,align=left]{服务校验\\\\关联工单已完成} (closed);\n\\node[font=\\scriptsize,text=TextGray,align=center] at (0,-2.25) {预警与工单\\\\分别保存状态};\n\\node[font=\\scriptsize,text=TextGray] at (5.3,-3.4) {正常处置路径：未确认不可派单，缺少完成回执不可关闭预警};\n\\end{tikzpicture}"
+        },
+        {
+          "chapter": 8,
+          "label": "fig:warning-workorder-flow",
+          "kind": "text",
+          "finding": "区分两个资源的枚举与服务条件，移除图中不存在的“已发出”和不准确的转移描述。",
+          "before": "图\\ref{fig:warning-workorder-flow}把预警到工单的状态流转画成受控流程，每条转移边都标注了触发条件与责任角色。图中没有从“已发出”直接指向“已关闭”的边——关闭预警必须经过工单校验，这条约束正是防止预警被随手清空的机制。",
+          "after": "图\\ref{fig:warning-workorder-flow}按预警和工单分别标出正常处置路径。值班员确认并派单，运维员提交回执后，服务校验关联工单是否完成，再关闭预警。图中英文状态与本章接口及数据库约束对应。"
+        }
+      ],
+      "view_evidence": {
+        "before_png": "temp/r10-05-ch07-09/before/ch08-07.png",
+        "after_png": "temp/r10-05-ch07-09/after/ch08-07.png",
+        "final_pdf": "temp/r10-05-ch07-09/after/ch08-07.pdf",
+        "log": "temp/r10-05-ch07-09/after/ch08-07.log",
+        "final_png_sha256": "f3e81dddbca2c3cd9d246c22961e304901eea8686164744c1d257f6060bddc3c",
+        "renderer": "XeLaTeX standalone 11pt + pypdfium2 at 2x; each image inspected separately",
+        "pdf_width_cm_including_standalone_border": 14.67
+      },
+      "validation": {
+        "compiled": true,
+        "errors": [],
+        "visual_recheck_complete": true,
+        "current_tikz_matches_last_compiled_tex": true
+      }
+    },
+    {
+      "chapter": 8,
+      "figure_number": "8-8",
+      "label": "fig:ch08-51wim-portal",
+      "kind": "raster",
+      "caption_before": "51WIM数字孪生水利平台一体化门户：流域、水网、水利工程三类业务入口（图片来源：51WIM数字孪生水利平台，经授权使用）",
+      "caption_after": "51WIM数字孪生水利平台一体化门户：流域、水网、水利工程三类业务入口（图片来源：51WIM数字孪生水利平台，经授权使用）",
+      "viewed": true,
+      "status": "reviewed_no_material_error",
+      "observation": "已查看授权原JPG：中部流域、水网、水利工程三个入口清楚，与图注一致；没有借此声称配套程序具备全部产品功能。",
+      "findings": [],
+      "changes": [],
+      "view_evidence": {
+        "source_image": "output/images/chapter08/51wim-portal.jpg",
+        "current_sha256": "f960217e75c30f6eb3676ee1334ae2fcbb724632477f48738d581dcae5f2950c",
+        "method": "tools.view_image inspected actual raster; third-party JPEG never copied into docs"
+      },
+      "validation": {
+        "caption_and_introduction_checked_against_actual_pixels": true,
+        "image_mutation_owner": null
+      },
+      "source_resolution_limit": "原授权JPG约910×512或相近尺寸，承担界面结构识读，不据其小字核定工程数值；保留纸质/PDF授权范围。"
+    },
+    {
+      "chapter": 8,
+      "figure_number": "8-9",
+      "label": "fig:twin-portal-sharing",
+      "kind": "tikz",
+      "caption_before": "流域、水网、工程三类入口共享同一套编码、底板与事件契约",
+      "caption_after": "流域、水网、工程三类入口共享同一套编码、底板与事件契约",
+      "viewed": true,
+      "status": "reviewed_no_material_error",
+      "observation": "三类入口均进入统一对象编码，继而共享底板与事件契约；箭头不交叉，框内文本完整。",
+      "findings": [],
+      "changes": [],
+      "view_evidence": {
+        "before_png": "temp/r10-05-ch07-09/before/ch08-09.png",
+        "after_png": "temp/r10-05-ch07-09/before/ch08-09.png",
+        "final_pdf": "temp/r10-05-ch07-09/before/ch08-09.pdf",
+        "log": "temp/r10-05-ch07-09/before/ch08-09.log",
+        "final_png_sha256": "7a10e11cc497d06fc3e3ffc45364070b349da89d2adf6b6b67327420178b83c5",
+        "renderer": "XeLaTeX standalone 11pt + pypdfium2 at 2x; each image inspected separately",
+        "pdf_width_cm_including_standalone_border": 11.56
+      },
+      "validation": {
+        "compiled": true,
+        "errors": [],
+        "visual_recheck_complete": true,
+        "current_tikz_matches_last_compiled_tex": true
+      }
+    },
+    {
+      "chapter": 8,
+      "figure_number": "8-10",
+      "label": "fig:ch08-51wim-basin",
+      "kind": "raster",
+      "caption_before": "数字孪生流域总览：三维场景常驻底层，雨水情与工程要素以浮层面板覆盖（图片来源：51WIM数字孪生水利平台，经授权使用）",
+      "caption_after": "数字孪生流域总览：三维场景常驻底层，雨水情与工程要素以浮层面板覆盖（图片来源：51WIM数字孪生水利平台，经授权使用）",
+      "viewed": true,
+      "status": "reviewed_no_material_error",
+      "observation": "已查看授权原JPG：三维流域底图与两侧浮层面板位置清楚，界面结构与图注一致；不把小字数值作为教材参数。",
+      "findings": [],
+      "changes": [],
+      "view_evidence": {
+        "source_image": "output/images/chapter08/51wim-basin.jpg",
+        "current_sha256": "8d05a501e3562be01a6f3506f551fdfb924c06a2e8794a0eff634db2448893be",
+        "method": "tools.view_image inspected actual raster; third-party JPEG never copied into docs"
+      },
+      "validation": {
+        "caption_and_introduction_checked_against_actual_pixels": true,
+        "image_mutation_owner": null
+      },
+      "source_resolution_limit": "原授权JPG约910×512或相近尺寸，承担界面结构识读，不据其小字核定工程数值；保留纸质/PDF授权范围。"
+    },
+    {
+      "chapter": 8,
+      "figure_number": "8-11",
+      "label": "fig:typhoon-simulation-chain",
+      "kind": "tikz",
+      "caption_before": "防台防洪预演的计算与反馈链",
+      "caption_after": "防台防洪预演的计算与反馈链",
+      "viewed": true,
+      "status": "fixed_and_verified",
+      "observation": "五个计算节点及外侧反馈曲线无碰撞；已修正文中虚称每一步标有不确定性及置信度必然递减的错误。",
+      "findings": [
+        "图中未逐步标不确定性；“置信度总是更低”的断言也无依据。改为图中实有计算链与误差传播条件。"
+      ],
+      "changes": [
+        {
+          "chapter": 8,
+          "label": "fig:typhoon-simulation-chain",
+          "kind": "text",
+          "finding": "图中未逐步标不确定性；“置信度总是更低”的断言也无依据。改为图中实有计算链与误差传播条件。",
+          "before": "图\\ref{fig:typhoon-simulation-chain}把从场景输入到结果反馈的计算链画了出来，并在每一步标出携带的不确定性说明。链条越往后不确定性累积越多，因此淹没范围的置信度总是低于降雨输入本身。",
+          "after": "图\\ref{fig:typhoon-simulation-chain}给出从降雨输入到预案比选的计算与反馈链。降雨误差、模型参数和地形分辨率会共同影响淹没结果；不同模型还可能放大或削弱某些误差，需要用敏感性分析或集合情景评估。"
+        }
+      ],
+      "view_evidence": {
+        "before_png": "temp/r10-05-ch07-09/before/ch08-11.png",
+        "after_png": "temp/r10-05-ch07-09/before/ch08-11.png",
+        "final_pdf": "temp/r10-05-ch07-09/before/ch08-11.pdf",
+        "log": "temp/r10-05-ch07-09/before/ch08-11.log",
+        "final_png_sha256": "4f754424c6fe6eafa87c680e61658dd0760736a2a3cb47c031f5807f7edf5619",
+        "renderer": "XeLaTeX standalone 11pt + pypdfium2 at 2x; each image inspected separately",
+        "pdf_width_cm_including_standalone_border": 12.52
+      },
+      "validation": {
+        "compiled": true,
+        "errors": [],
+        "visual_recheck_complete": true,
+        "current_tikz_matches_last_compiled_tex": true
+      }
+    },
+    {
+      "chapter": 8,
+      "figure_number": "8-12",
+      "label": "fig:ch08-51wim-flood",
+      "kind": "raster",
+      "caption_before": "自定义暴雨情景的淹没仿真预演结果（颜色梯度表示淹没范围与相对水深）（图片来源：51WIM数字孪生水利平台，经授权使用）",
+      "caption_after": "淹没仿真预演的空间结果、情景选择与时间轴（图片来源：51WIM数字孪生水利平台，经授权使用）",
+      "viewed": true,
+      "status": "fixed_and_verified",
+      "observation": "已查看授权原JPG：右侧为情景/分析入口，左侧为水资源调度，原文却称自定义暴雨与左侧降雨契约。改为画面可观察的空间结果、选择面板和时间轴。",
+      "findings": [
+        "实际授权截图右侧为历史情景选择，左侧是水资源调度；不能称自定义暴雨或左侧降雨契约。颜色图例低清不作额外精确物理声称。",
+        "caption移除截图未证实的自定义暴雨及精确色彩物理含义。"
+      ],
+      "changes": [
+        {
+          "chapter": 8,
+          "label": "fig:ch08-51wim-flood",
+          "kind": "text",
+          "finding": "实际授权截图右侧为历史情景选择，左侧是水资源调度；不能称自定义暴雨或左侧降雨契约。颜色图例低清不作额外精确物理声称。",
+          "before": "图\\ref{fig:ch08-51wim-flood}是一次自定义暴雨情景的淹没仿真结果：绿色至红色的渐变表示淹没范围与相对水深，左侧面板保留了触发本次计算的降雨契约参数。读图时应带着证据链的眼光：画面本身只是结果的一帧，可复核的是它背后的输入快照、模型版本与空间数据版本。",
+          "after": "图\\ref{fig:ch08-51wim-flood}展示淹没仿真的空间结果与时间轴，右侧面板提供情景选择和淹没分析入口，左侧保留水资源调度信息。阅读颜色分布时须同时核对图例、所选情景和预演时刻；复核计算还需要对应的输入快照、模型版本与空间数据版本。"
+        },
+        {
+          "chapter": 8,
+          "label": "fig:ch08-51wim-flood",
+          "kind": "text",
+          "finding": "caption移除截图未证实的自定义暴雨及精确色彩物理含义。",
+          "before": "自定义暴雨情景的淹没仿真预演结果（颜色梯度表示淹没范围与相对水深）",
+          "after": "淹没仿真预演的空间结果、情景选择与时间轴"
+        }
+      ],
+      "view_evidence": {
+        "source_image": "output/images/chapter08/51wim-flood.jpg",
+        "current_sha256": "b211b150b59b52f986fbf30e43d9f8cd0e8523d137df504e38d6be009491e175",
+        "method": "tools.view_image inspected actual raster; third-party JPEG never copied into docs"
+      },
+      "validation": {
+        "caption_and_introduction_checked_against_actual_pixels": true,
+        "image_mutation_owner": null
+      },
+      "source_resolution_limit": "原授权JPG约910×512或相近尺寸，承担界面结构识读，不据其小字核定工程数值；保留纸质/PDF授权范围。"
+    },
+    {
+      "chapter": 8,
+      "figure_number": "8-13",
+      "label": "fig:case-evidence-chain",
+      "kind": "tikz",
+      "caption_before": "从情景输入到执行归档的证据链及其回放方向",
+      "caption_after": "从情景输入到执行归档的证据链及其回放方向",
+      "viewed": true,
+      "status": "reviewed_no_material_error",
+      "observation": "五段输入、模型运行、空间叠加、人工判断、执行归档在同一水平线上，外侧回放箭头从归档回到输入；标签不穿节点。",
+      "findings": [],
+      "changes": [],
+      "view_evidence": {
+        "before_png": "temp/r10-05-ch07-09/before/ch08-13.png",
+        "after_png": "temp/r10-05-ch07-09/before/ch08-13.png",
+        "final_pdf": "temp/r10-05-ch07-09/before/ch08-13.pdf",
+        "log": "temp/r10-05-ch07-09/before/ch08-13.log",
+        "final_png_sha256": "1fd3cb408b9b510eccaa4e7d650a589536e0c99d88500a367e715c93e1d99aef",
+        "renderer": "XeLaTeX standalone 11pt + pypdfium2 at 2x; each image inspected separately",
+        "pdf_width_cm_including_standalone_border": 14.24
+      },
+      "validation": {
+        "compiled": true,
+        "errors": [],
+        "visual_recheck_complete": true,
+        "current_tikz_matches_last_compiled_tex": true
+      }
+    },
+    {
+      "chapter": 8,
+      "figure_number": "8-14",
+      "label": "fig:ch08-51wim-dam-safety",
+      "kind": "raster",
+      "caption_before": "水库工程安全评估视图：安全性态评分、坝体评估范围与预报预警面板同屏（图片来源：51WIM数字孪生水利平台，经授权使用）",
+      "caption_after": "水库工程安全评估视图：安全性态评分、坝体评估范围与预报预警面板同屏（图片来源：51WIM数字孪生水利平台，经授权使用）",
+      "viewed": true,
+      "status": "fixed_and_verified",
+      "observation": "已查看授权原JPG：安全性态评分和预报预警均在左侧，原文把预报预警位置写成右侧；已纠正。坝体网格高亮与图注一致。",
+      "findings": [
+        "授权截图预报预警位于左侧，正文原称右侧。"
+      ],
+      "changes": [
+        {
+          "chapter": 8,
+          "label": "fig:ch08-51wim-dam-safety",
+          "kind": "text",
+          "finding": "授权截图预报预警位于左侧，正文原称右侧。",
+          "before": "右侧同屏呈现预报预警面板",
+          "after": "左侧同屏呈现预报预警面板"
+        }
+      ],
+      "view_evidence": {
+        "source_image": "output/images/chapter08/51wim-dam-safety.jpg",
+        "current_sha256": "53b7b3eccdfb0544e349d6bdc894177e4dca42111728082b21bf831e0ad05ef0",
+        "method": "tools.view_image inspected actual raster; third-party JPEG never copied into docs"
+      },
+      "validation": {
+        "caption_and_introduction_checked_against_actual_pixels": true,
+        "image_mutation_owner": null
+      },
+      "source_resolution_limit": "原授权JPG约910×512或相近尺寸，承担界面结构识读，不据其小字核定工程数值；保留纸质/PDF授权范围。"
+    },
+    {
+      "chapter": 8,
+      "figure_number": "8-15",
+      "label": "fig:four-pre-loop",
+      "kind": "tikz",
+      "caption_before": "预报、预警、预演、预案的业务闭环",
+      "caption_after": "预报、预警、预演、预案的业务闭环",
+      "viewed": true,
+      "status": "fixed_and_verified",
+      "observation": "效果反馈线及标签穿过预警节点；沿图外侧回到预报输入。；将效果反馈底边改为正交走线。",
+      "findings": [
+        "效果反馈线及标签穿过预警节点；沿图外侧回到预报输入。",
+        "将效果反馈底边改为正交走线。"
+      ],
+      "changes": [
+        {
+          "chapter": 8,
+          "label": "fig:four-pre-loop",
+          "kind": "tikz-edit",
+          "finding": "效果反馈线及标签穿过预警节点；沿图外侧回到预报输入。",
+          "before": "\\draw[->,draw=Accent,dashed,thick,bend right=35] (effect) to node[below,font=\\scriptsize]{校正输入/模型} (forecast);",
+          "after": "\\draw[->,draw=Accent,dashed,thick] (effect.south)--++(0,-.6)\n  --node[below,font=\\scriptsize]{校正输入/模型} ($(forecast.west)+(-.5,-2.15)$)\n  --($(forecast.west)+(-.5,0)$)--(forecast.west);"
+        },
+        {
+          "chapter": 8,
+          "label": "fig:four-pre-loop",
+          "kind": "tikz-edit",
+          "finding": "将效果反馈底边改为正交走线。",
+          "before": "\\draw[->,draw=Accent,dashed,thick] (effect.south)--++(0,-.6)\n  --node[below,font=\\scriptsize]{校正输入/模型} ($(forecast.west)+(-.5,-2.15)$)\n  --($(forecast.west)+(-.5,0)$)--(forecast.west);",
+          "after": "\\coordinate (effectlow) at ($(effect.south)+(0,-.6)$);\n\\coordinate (forecastleft) at ($(forecast.west)+(-.5,0)$);\n\\draw[->,draw=Accent,dashed,thick] (effect.south)--(effectlow)\n  --node[below,font=\\scriptsize]{校正输入/模型} (forecastleft |- effectlow)\n  --(forecastleft)--(forecast.west);"
+        }
+      ],
+      "view_evidence": {
+        "before_png": "temp/r10-05-ch07-09/before/ch08-15.png",
+        "after_png": "temp/r10-05-ch07-09/after/ch08-15.png",
+        "final_pdf": "temp/r10-05-ch07-09/after/ch08-15.pdf",
+        "log": "temp/r10-05-ch07-09/after/ch08-15.log",
+        "final_png_sha256": "2218b27542308a90742515f34a01a918305b81811e6aac22f0f53ba9e6c011fc",
+        "renderer": "XeLaTeX standalone 11pt + pypdfium2 at 2x; each image inspected separately",
+        "pdf_width_cm_including_standalone_border": 12.19
+      },
+      "validation": {
+        "compiled": true,
+        "errors": [],
+        "visual_recheck_complete": true,
+        "current_tikz_matches_last_compiled_tex": true
+      }
+    },
+    {
+      "chapter": 8,
+      "figure_number": "8-16",
+      "label": "fig:ch08-51wim-spillway",
+      "kind": "raster",
+      "caption_before": "泄洪方案预演的三维模拟：闸门按方案开度开启，水流经溢洪道下泄（图片来源：51WIM数字孪生水利平台，经授权使用）",
+      "caption_after": "泄洪方案预演界面：闸门设施、溢洪道水流与业务面板（图片来源：51WIM数字孪生水利平台，经授权使用）",
+      "viewed": true,
+      "status": "fixed_and_verified",
+      "observation": "已查看授权原JPG：画面显示溢洪道水流，但左侧开度显示不能支持“闸门按方案开度开启”的断言；右侧也不是原文所称开度泄量面板。改为静态可见对象与教学实现核对要求。",
+      "findings": [
+        "原文错称右侧为开度泄量，并无证据断言产品使用教材孔流算法；截图左侧开度显示零，与“按方案开度开启”声称不符。",
+        "将静态截图可观察对象与运行验证区分，避免断言开度正确。"
+      ],
+      "changes": [
+        {
+          "chapter": 8,
+          "label": "fig:ch08-51wim-spillway",
+          "kind": "text",
+          "finding": "原文错称右侧为开度泄量，并无证据断言产品使用教材孔流算法；截图左侧开度显示零，与“按方案开度开启”声称不符。",
+          "before": "图\\ref{fig:ch08-51wim-spillway}是泄洪方案预演的三维模拟画面：闸门按方案开度开启，水流经溢洪道下泄。需要强调的是，水流动画只是计算结果的可视化表达，其背后是上文的孔流关系与约束校验；界面右侧面板中的开度与泄量数值必须与算法接口的返回值一致，否则画面越逼真，误导越严重。",
+          "after": "图\\ref{fig:ch08-51wim-spillway}展示闸门设施、溢洪道水流和预演面板。单帧画面不能验证开度与泄量是否匹配，也不能确定产品采用的水力算法。实现教学预演时，应把开度、泄量、方案版本和时刻绑定到同一份计算结果，再检查数值与动画的一致性。"
+        },
+        {
+          "chapter": 8,
+          "label": "fig:ch08-51wim-spillway",
+          "kind": "text",
+          "finding": "将静态截图可观察对象与运行验证区分，避免断言开度正确。",
+          "before": "泄洪方案预演的三维模拟：闸门按方案开度开启，水流经溢洪道下泄",
+          "after": "泄洪方案预演界面：闸门设施、溢洪道水流与业务面板"
+        }
+      ],
+      "view_evidence": {
+        "source_image": "output/images/chapter08/51wim-spillway.jpg",
+        "current_sha256": "ab8b023f79618d19a65aaa21657a593c38e252c47ecff1e9bf30725f6904e6ca",
+        "method": "tools.view_image inspected actual raster; third-party JPEG never copied into docs"
+      },
+      "validation": {
+        "caption_and_introduction_checked_against_actual_pixels": true,
+        "image_mutation_owner": null
+      },
+      "source_resolution_limit": "原授权JPG约910×512或相近尺寸，承担界面结构识读，不据其小字核定工程数值；保留纸质/PDF授权范围。"
+    },
+    {
+      "chapter": 8,
+      "figure_number": "8-17",
+      "label": "fig:gate-simulation-flow",
+      "kind": "tikz",
+      "caption_before": "闸门方案从反算到模拟回执的受控流程",
+      "caption_after": "闸门方案从反算到模拟回执的受控流程",
+      "viewed": true,
+      "status": "fixed_and_verified",
+      "observation": "流程限定三维模拟，不能将模拟结果称为现场设备状态回执。；反馈曲线标签贴近回执框且转向不清，移至底部独立回路。",
+      "findings": [
+        "流程限定三维模拟，不能将模拟结果称为现场设备状态回执。",
+        "反馈曲线标签贴近回执框且转向不清，移至底部独立回路。"
+      ],
+      "changes": [
+        {
+          "chapter": 8,
+          "label": "fig:gate-simulation-flow",
+          "kind": "tikz-edit",
+          "finding": "流程限定三维模拟，不能将模拟结果称为现场设备状态回执。",
+          "before": "\\node[gate,left=of simulate] (receipt) {设备状态/回执};",
+          "after": "\\node[gate,left=of simulate] (receipt) {模拟状态/回执};"
+        },
+        {
+          "chapter": 8,
+          "label": "fig:gate-simulation-flow",
+          "kind": "tikz-edit",
+          "finding": "反馈曲线标签贴近回执框且转向不清，移至底部独立回路。",
+          "before": "\\draw[->,draw=Accent,dashed,thick,bend left=30] (receipt) to node[below,font=\\scriptsize]{复核与修正} (solve);",
+          "after": "\\draw[->,draw=Accent,dashed,thick] (receipt.south)--++(0,-.6)\n  --node[below,font=\\scriptsize]{复核与修正} ($(solve.south)+(0,-2.05)$)--(solve.south);"
+        }
+      ],
+      "view_evidence": {
+        "before_png": "temp/r10-05-ch07-09/before/ch08-17.png",
+        "after_png": "temp/r10-05-ch07-09/after/ch08-17.png",
+        "final_pdf": "temp/r10-05-ch07-09/after/ch08-17.pdf",
+        "log": "temp/r10-05-ch07-09/after/ch08-17.log",
+        "final_png_sha256": "d33e0feabbe9394febf4983f0ca03c12ccbe820501502f14f45be31180220038",
+        "renderer": "XeLaTeX standalone 11pt + pypdfium2 at 2x; each image inspected separately",
+        "pdf_width_cm_including_standalone_border": 11.91
+      },
+      "validation": {
+        "compiled": true,
+        "errors": [],
+        "visual_recheck_complete": true,
+        "current_tikz_matches_last_compiled_tex": true
+      }
+    },
+    {
+      "chapter": 8,
+      "figure_number": "8-18",
+      "label": "fig:ai-consultation-flow",
+      "kind": "tikz",
+      "caption_before": "AI会商助手位于人与工具之间，通向执行的每条路径都穿过人工审批",
+      "caption_after": "AI会商助手位于人与工具之间，通向执行的每条路径都穿过人工审批",
+      "viewed": true,
+      "status": "reviewed_no_material_error",
+      "observation": "用户→助手→查询工具→候选结论→人工审批→执行关系清晰，拒绝回路从审批节点返回助手；所有通向执行的路径都经过审批，无穿字或旁路。",
+      "findings": [],
+      "changes": [],
+      "view_evidence": {
+        "before_png": "temp/r10-05-ch07-09/before/ch08-18.png",
+        "after_png": "temp/r10-05-ch07-09/before/ch08-18.png",
+        "final_pdf": "temp/r10-05-ch07-09/before/ch08-18.pdf",
+        "log": "temp/r10-05-ch07-09/before/ch08-18.log",
+        "final_png_sha256": "b0602f70b26b7fce6574318ce6c3a55baf55675fd2546ea06af27ebdf3f52888",
+        "renderer": "XeLaTeX standalone 11pt + pypdfium2 at 2x; each image inspected separately",
+        "pdf_width_cm_including_standalone_border": 12.37
+      },
+      "validation": {
+        "compiled": true,
+        "errors": [],
+        "visual_recheck_complete": true,
+        "current_tikz_matches_last_compiled_tex": true
+      }
+    },
+    {
+      "chapter": 8,
+      "figure_number": "8-19",
+      "label": "fig:twin-decoupling",
+      "kind": "tikz",
+      "caption_before": "数字孪生水利平台的解耦分层",
+      "caption_after": "数字孪生水利平台的解耦分层",
+      "viewed": true,
+      "status": "reviewed_no_material_error",
+      "observation": "五个解耦层的文字和双向依赖连接完整，没有错误交叉或叠框。",
+      "findings": [],
+      "changes": [],
+      "view_evidence": {
+        "before_png": "temp/r10-05-ch07-09/before/ch08-19.png",
+        "after_png": "temp/r10-05-ch07-09/before/ch08-19.png",
+        "final_pdf": "temp/r10-05-ch07-09/before/ch08-19.pdf",
+        "log": "temp/r10-05-ch07-09/before/ch08-19.log",
+        "final_png_sha256": "0bb57fa6d781e0c5aba55f63451a8363b042df5636a119870b36d0195aa39aa8",
+        "renderer": "XeLaTeX standalone 11pt + pypdfium2 at 2x; each image inspected separately",
+        "pdf_width_cm_including_standalone_border": 11.44
+      },
+      "validation": {
+        "compiled": true,
+        "errors": [],
+        "visual_recheck_complete": true,
+        "current_tikz_matches_last_compiled_tex": true
+      }
+    },
+    {
+      "chapter": 8,
+      "figure_number": "8-20",
+      "label": "fig:twin-state-separation",
+      "kind": "tikz",
+      "caption_before": "观测状态、场景快照与推演状态的分离",
+      "caption_after": "观测状态、场景快照与推演状态的分离",
+      "viewed": true,
+      "status": "fixed_and_verified",
+      "observation": "“归档而非覆盖”反馈箭头实际回写输入快照且穿过方案证据框，与快照不可变规则矛盾。删除错误回写边，分别标出观测更新、固定快照与模型计算来源。",
+      "findings": [
+        "“归档而非覆盖”反馈箭头实际回写输入快照且穿过方案证据框，与快照不可变规则矛盾。删除错误回写边，分别标出观测更新、固定快照与模型计算来源。"
+      ],
+      "changes": [
+        {
+          "chapter": 8,
+          "label": "fig:twin-state-separation",
+          "kind": "tikz",
+          "finding": "“归档而非覆盖”反馈箭头实际回写输入快照且穿过方案证据框，与快照不可变规则矛盾。删除错误回写边，分别标出观测更新、固定快照与模型计算来源。",
+          "before": "\\begin{tikzpicture}[node distance=6mm and 8mm,\n  state/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=2.6cm,\n    minimum height=.85cm,align=center}]\n\\node[state] (object) {稳定对象编码};\n\\node[state,right=of object] (observe) {观测状态流\\\\有效/知识时间};\n\\node[state,right=of observe] (snapshot) {场景输入快照\\\\版本与来源};\n\\node[state,below=of snapshot] (simulate) {模型推演状态\\\\模拟标识};\n\\node[state,left=of simulate] (compare) {方案差异与证据};\n\\node[state,left=of compare] (decision) {人工决策记录};\n\\draw[->,draw=Primary,thick] (object)--(observe);\n\\draw[->,draw=Primary,thick] (observe)--(snapshot);\n\\draw[->,draw=Primary,thick] (snapshot)--(simulate);\n\\draw[->,draw=Primary,thick] (simulate)--(compare);\n\\draw[->,draw=Primary,thick] (compare)--(decision);\n\\draw[->,draw=Accent,dashed,thick,bend right=28] (decision) to node[below,font=\\scriptsize]{归档而非覆盖} (snapshot);\n\\end{tikzpicture}",
+          "after": "\\begin{tikzpicture}[>=Stealth,font=\\small,\n  state/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=3cm,\n    minimum height=1.05cm,align=center}]\n\\node[state] (object) at (0,0) {稳定对象编码};\n\\node[state] (observe) at (4.2,0) {观测状态流\\\\随新观测更新};\n\\node[state] (snapshot) at (8.4,0) {场景输入快照\\\\固定版本与来源};\n\\node[state] (simulate) at (8.4,-1.9) {模型推演状态\\\\由该快照计算};\n\\node[state] (compare) at (4.2,-1.9) {方案差异与证据};\n\\node[state] (decision) at (0,-1.9) {人工决策记录};\n\\foreach \\a/\\b in {object/observe,observe/snapshot,snapshot/simulate,simulate/compare,compare/decision}{\\draw[->,Primary,thick] (\\a)--(\\b);}\n\\node[font=\\scriptsize,text=TextGray,align=center] at (4.2,-3) {推演结果与决策按快照版本归档；新观测更新实时状态，重新取数须创建新快照};\n\\end{tikzpicture}"
+        }
+      ],
+      "view_evidence": {
+        "before_png": "temp/r10-05-ch07-09/before/ch08-20.png",
+        "after_png": "temp/r10-05-ch07-09/after/ch08-20.png",
+        "final_pdf": "temp/r10-05-ch07-09/after/ch08-20.pdf",
+        "log": "temp/r10-05-ch07-09/after/ch08-20.log",
+        "final_png_sha256": "a3b511996d912a32171b9f678a38d630f9e9d2d3cda21bd4ac83a8ba9812366c",
+        "renderer": "XeLaTeX standalone 11pt + pypdfium2 at 2x; each image inspected separately",
+        "pdf_width_cm_including_standalone_border": 11.84
+      },
+      "validation": {
+        "compiled": true,
+        "errors": [],
+        "visual_recheck_complete": true,
+        "current_tikz_matches_last_compiled_tex": true
+      }
+    },
+    {
+      "chapter": 8,
+      "figure_number": "8-21",
+      "label": "fig:model-run-lifecycle",
+      "kind": "tikz",
+      "caption_before": "模型任务的受控生命周期",
+      "caption_after": "模型任务的受控生命周期",
+      "viewed": true,
+      "status": "fixed_and_verified",
+      "observation": "失败与归档位于相同坐标导致“失败”被盖住；运行看似直达归档；复核回路缺失。把三种状态分开并绘制独立失败/复核退回新任务路径。",
+      "findings": [
+        "失败与归档位于相同坐标导致“失败”被盖住；运行看似直达归档；复核回路缺失。把三种状态分开并绘制独立失败/复核退回新任务路径。"
+      ],
+      "changes": [
+        {
+          "chapter": 8,
+          "label": "fig:model-run-lifecycle",
+          "kind": "tikz",
+          "finding": "失败与归档位于相同坐标导致“失败”被盖住；运行看似直达归档；复核回路缺失。把三种状态分开并绘制独立失败/复核退回新任务路径。",
+          "before": "\\begin{tikzpicture}[node distance=5mm and 7mm,\n  run/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=2.0cm,\n    minimum height=.75cm,align=center,font=\\small}]\n\\node[run] (draft) {草稿};\n\\node[run,right=of draft] (validated) {已校验};\n\\node[run,right=of validated] (queued) {排队};\n\\node[run,right=of queued] (running) {运行};\n\\node[run,right=of running] (done) {完成};\n\\node[run,below=of running] (failed) {失败};\n\\node[run,below=of done] (reviewed) {复核/发布};\n\\node[run,left=of reviewed] (archive) {归档};\n\\draw[->,draw=Primary,thick] (draft)--(validated);\n\\draw[->,draw=Primary,thick] (validated)--(queued);\n\\draw[->,draw=Primary,thick] (queued)--(running);\n\\draw[->,draw=Primary,thick] (running)--(done);\n\\draw[->,draw=Primary,thick] (running)--(failed);\n\\draw[->,draw=Primary,thick] (done)--(reviewed);\n\\draw[->,draw=Primary,thick] (reviewed)--(archive);\n\\draw[->,draw=Accent,dashed,thick,bend right=28] (failed) to node[below,font=\\scriptsize]{修正后新运行} (draft);\n\\end{tikzpicture}",
+          "after": "\\begin{tikzpicture}[>=Stealth,font=\\small,\n  run/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=2cm,\n    minimum height=.8cm,align=center}]\n\\node[run] (draft) at (0,0) {草稿};\n\\node[run] (validated) at (2.9,0) {已校验};\n\\node[run] (queued) at (5.8,0) {排队};\n\\node[run] (running) at (8.7,0) {运行};\n\\node[run] (done) at (11.6,0) {完成};\n\\node[run,fill=Accent!10,draw=Accent] (failed) at (8.7,-1.6) {失败};\n\\node[run] (reviewed) at (11.6,-1.6) {复核/发布};\n\\node[run] (archive) at (11.6,-3.15) {归档};\n\\foreach \\a/\\b in {draft/validated,validated/queued,queued/running,running/done,running/failed,done/reviewed,reviewed/archive}{\\draw[->,Primary,thick] (\\a)--(\\b);}\n\\draw[->,Accent,dashed,thick] (failed.south)--++(0,-.55)\n  --node[below,font=\\scriptsize]{保留失败记录，修正输入后新建任务} (0,-2.55)--(draft.south);\n\\draw[->,Accent,dashed,thick] (reviewed.east)--++(.55,0)\n  --(13.15,1.1)--node[above,font=\\scriptsize]{复核不通过：保留原结果，另建任务} (0,1.1)--(draft.north);\n\\end{tikzpicture}"
+        }
+      ],
+      "view_evidence": {
+        "before_png": "temp/r10-05-ch07-09/before/ch08-21.png",
+        "after_png": "temp/r10-05-ch07-09/after/ch08-21.png",
+        "final_pdf": "temp/r10-05-ch07-09/after/ch08-21.pdf",
+        "log": "temp/r10-05-ch07-09/after/ch08-21.log",
+        "final_png_sha256": "2a9491f99509d86cd39e75dcaab54f65f06d4234d772b9f154d2c2d92510d59c",
+        "renderer": "XeLaTeX standalone 11pt + pypdfium2 at 2x; each image inspected separately",
+        "pdf_width_cm_including_standalone_border": 14.6
+      },
+      "validation": {
+        "compiled": true,
+        "errors": [],
+        "visual_recheck_complete": true,
+        "current_tikz_matches_last_compiled_tex": true
+      }
+    },
+    {
+      "chapter": 8,
+      "figure_number": "8-22",
+      "label": "fig:ch08-51wim-network",
+      "kind": "raster",
+      "caption_before": "水网联合调度拓扑视图：节点为水源、泵站与需水单元，连线表达输水链路（图片来源：51WIM数字孪生水利平台，经授权使用）",
+      "caption_after": "水网联合调度拓扑视图：节点为水源、泵站与需水单元，连线表达输水链路（图片来源：51WIM数字孪生水利平台，经授权使用）",
+      "viewed": true,
+      "status": "reviewed_no_material_error",
+      "observation": "已查看授权原JPG：水源、泵站/水闸、用水单元与输水连线及图例可辨，和图注表达的水网拓扑一致；不逐项引用低清界面的工程数值。",
+      "findings": [],
+      "changes": [],
+      "view_evidence": {
+        "source_image": "output/images/chapter08/51wim-network.jpg",
+        "current_sha256": "fc06af0c4552c4be135bedd470bc0cdc29d4407a6f7b990635e15230c51fabc3",
+        "method": "tools.view_image inspected actual raster; third-party JPEG never copied into docs"
+      },
+      "validation": {
+        "caption_and_introduction_checked_against_actual_pixels": true,
+        "image_mutation_owner": null
+      },
+      "source_resolution_limit": "原授权JPG约910×512或相近尺寸，承担界面结构识读，不据其小字核定工程数值；保留纸质/PDF授权范围。"
+    },
+    {
+      "chapter": 8,
+      "figure_number": "8-23",
+      "label": "fig:water-network-graph",
+      "kind": "tikz",
+      "caption_before": "供水、输配水、调蓄与需水单元的网络表达",
+      "caption_after": "供水、输配水、调蓄与需水单元的网络表达",
+      "viewed": true,
+      "status": "fixed_and_verified",
+      "observation": "“能力/水质”标签贴压水库水源边框；改为图下说明，不遮挡实体或连线。",
+      "findings": [
+        "“能力/水质”标签贴压水库水源边框；改为图下说明，不遮挡实体或连线。"
+      ],
+      "changes": [
+        {
+          "chapter": 8,
+          "label": "fig:water-network-graph",
+          "kind": "tikz-edit",
+          "finding": "“能力/水质”标签贴压水库水源边框；改为图下说明，不遮挡实体或连线。",
+          "before": "\\draw[->,draw=Primary,thick] (source1)--node[above,font=\\scriptsize]{能力/水质} (pump);",
+          "after": "\\draw[->,draw=Primary,thick] (source1)--(pump);\n\\node[font=\\scriptsize,text=TextGray] at ($(pump.south)+(0,-1.1)$) {输水链路记录输送能力与水质约束};"
+        }
+      ],
+      "view_evidence": {
+        "before_png": "temp/r10-05-ch07-09/before/ch08-23.png",
+        "after_png": "temp/r10-05-ch07-09/after/ch08-23.png",
+        "final_pdf": "temp/r10-05-ch07-09/after/ch08-23.pdf",
+        "log": "temp/r10-05-ch07-09/after/ch08-23.log",
+        "final_png_sha256": "a3f6fbec9df69de7c5f3bd8485a0506bc6e6db839a790bf2690e34e1a4d7e00a",
+        "renderer": "XeLaTeX standalone 11pt + pypdfium2 at 2x; each image inspected separately",
+        "pdf_width_cm_including_standalone_border": 12.84
+      },
+      "validation": {
+        "compiled": true,
+        "errors": [],
+        "visual_recheck_complete": true,
+        "current_tikz_matches_last_compiled_tex": true
+      }
+    },
+    {
+      "chapter": 8,
+      "figure_number": "8-24",
+      "label": "fig:scenario-branch-compare",
+      "kind": "tikz",
+      "caption_before": "方案分支从同一基线分出、并排比较到人工选定的过程",
+      "caption_after": "方案分支从同一基线分出、并排比较到人工选定的过程",
+      "viewed": true,
+      "status": "fixed_and_verified",
+      "observation": "图内900m3/s与提前12h无参数表或同段来源；保留方案类型，去除可能被误作工程参数的无依据数值。；图内600m3/s无参数表或同段来源；保留分级方案的比较含义。",
+      "findings": [
+        "图内900m3/s与提前12h无参数表或同段来源；保留方案类型，去除可能被误作工程参数的无依据数值。",
+        "图内600m3/s无参数表或同段来源；保留分级方案的比较含义。"
+      ],
+      "changes": [
+        {
+          "chapter": 8,
+          "label": "fig:scenario-branch-compare",
+          "kind": "tikz-edit",
+          "finding": "图内900m3/s与提前12h无参数表或同段来源；保留方案类型，去除可能被误作工程参数的无依据数值。",
+          "before": "{方案B：提前12h预泄\\\\控泄 900\\,m$^3$/s}",
+          "after": "{方案B：提前预泄\\\\按方案限定泄量}"
+        },
+        {
+          "chapter": 8,
+          "label": "fig:scenario-branch-compare",
+          "kind": "tikz-edit",
+          "finding": "图内600m3/s无参数表或同段来源；保留分级方案的比较含义。",
+          "before": "{方案C：分级预泄\\\\控泄 600\\,m$^3$/s}",
+          "after": "{方案C：分级预泄\\\\按阶段限定泄量}"
+        }
+      ],
+      "view_evidence": {
+        "before_png": "temp/r10-05-ch07-09/before/ch08-24.png",
+        "after_png": "temp/r10-05-ch07-09/after/ch08-24.png",
+        "final_pdf": "temp/r10-05-ch07-09/after/ch08-24.pdf",
+        "log": "temp/r10-05-ch07-09/after/ch08-24.log",
+        "final_png_sha256": "cba6a610e9ba9d54f221c9aa204ce1ffb2183ea7d7bd930aa572f99f11a5727c",
+        "renderer": "XeLaTeX standalone 11pt + pypdfium2 at 2x; each image inspected separately",
+        "pdf_width_cm_including_standalone_border": 14.95
+      },
+      "validation": {
+        "compiled": true,
+        "errors": [],
+        "visual_recheck_complete": true,
+        "current_tikz_matches_last_compiled_tex": true
+      }
+    },
+    {
+      "chapter": 8,
+      "figure_number": "8-25",
+      "label": "fig:shift-handover-flow",
+      "kind": "tikz",
+      "caption_before": "值守交接班必须覆盖的四类内容与双签确认",
+      "caption_after": "值守交接班必须覆盖的四类内容与双签确认",
+      "viewed": true,
+      "status": "fixed_and_verified",
+      "observation": "签字框上边与两个内容框下边重合，箭头像小弯钩；四类并列交接项被画成两条顺序依赖。改为四项共同汇总后双签，留足空隙并给过期方案添加文字提示。",
+      "findings": [
+        "签字框上边与两个内容框下边重合，箭头像小弯钩；四类并列交接项被画成两条顺序依赖。改为四项共同汇总后双签，留足空隙并给过期方案添加文字提示。"
+      ],
+      "changes": [
+        {
+          "chapter": 8,
+          "label": "fig:shift-handover-flow",
+          "kind": "tikz",
+          "finding": "签字框上边与两个内容框下边重合，箭头像小弯钩；四类并列交接项被画成两条顺序依赖。改为四项共同汇总后双签，留足空隙并给过期方案添加文字提示。",
+          "before": "\\begin{tikzpicture}[node distance=5mm and 7mm,\n  item/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=5.0cm,\n    minimum height=1.15cm,align=center,font=\\scriptsize},\n  warn/.style={draw=Accent,rounded corners,fill=Accent!12,minimum width=5.0cm,\n    minimum height=1.15cm,align=center,font=\\scriptsize},\n  sign/.style={draw=Primary,rounded corners,fill=white,minimum width=10.7cm,\n    minimum height=.9cm,align=center,font=\\scriptsize},\n  ar/.style={->,draw=Primary,thick}]\n\\node[item] (a) {当前态势\\\\水位、雨情、预警等级与趋势};\n\\node[item,right=of a] (b) {未闭环任务\\\\待确认告警、在办工单、责任人};\n\\node[warn,below=of a] (c) {已批准方案及有效期\\\\过期方案必须显式标红};\n\\node[item,below=of b] (d) {失效服务与数据龄期\\\\离线测点、积压消息、最后更新时刻};\n\\coordinate (mid) at ($(c)!0.5!(d)$);\n\\node[sign,below=6mm of mid] (sig) {交班人与接班人双签，异常项转为交接工单并写入审计};\n\\draw[ar] (a)--(c);\n\\draw[ar] (b)--(d);\n\\draw[ar] (c) -- (sig);\n\\draw[ar] (d) -- (sig);\n\\end{tikzpicture}",
+          "after": "\\begin{tikzpicture}[>=Stealth,font=\\scriptsize,\n  item/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=5cm,\n    minimum height=1.15cm,align=center},\n  sign/.style={draw=Primary,rounded corners,fill=white,minimum width=10.7cm,\n    minimum height=.9cm,align=center}]\n\\node[item] (a) at (0,0) {当前态势\\\\水位、雨情、预警等级与趋势};\n\\node[item] (b) at (5.7,0) {在办任务\\\\待确认告警、在办工单、责任人};\n\\node[item,draw=Accent,fill=Accent!12] (c) at (0,-1.7) {已批准方案及有效期\\\\过期方案标色并注明“已过期”};\n\\node[item] (d) at (5.7,-1.7) {失效服务与数据龄期\\\\离线测点、积压消息、最后更新时刻};\n\\coordinate (busleft) at (-2.9,-2.9);\n\\coordinate (busright) at (8.6,-2.9);\n\\node[sign] (sig) at (2.85,-4) {交班人与接班人双签，异常项转为交接工单并写入审计};\n\\draw[Primary,thick] (a.west)--(-2.9,0)--(busleft);\n\\draw[Primary,thick] (b.east)--(8.6,0)--(busright);\n\\draw[Primary,thick] (c.south)--(0,-2.9);\n\\draw[Primary,thick] (d.south)--(5.7,-2.9);\n\\draw[Primary,thick] (busleft)--(busright);\n\\draw[->,Primary,thick] (2.85,-2.9)--node[right]{四类内容共同核对} (sig.north);\n\\end{tikzpicture}"
+        }
+      ],
+      "view_evidence": {
+        "before_png": "temp/r10-05-ch07-09/before/ch08-25.png",
+        "after_png": "temp/r10-05-ch07-09/after/ch08-25.png",
+        "final_pdf": "temp/r10-05-ch07-09/after/ch08-25.pdf",
+        "log": "temp/r10-05-ch07-09/after/ch08-25.log",
+        "final_png_sha256": "1a0d558a757a2921ec2484b00a862b91f57e4eee9e7f56143273bd92fdd6b038",
+        "renderer": "XeLaTeX standalone 11pt + pypdfium2 at 2x; each image inspected separately",
+        "pdf_width_cm_including_standalone_border": 11.95
+      },
+      "validation": {
+        "compiled": true,
+        "errors": [],
+        "visual_recheck_complete": true,
+        "current_tikz_matches_last_compiled_tex": true
+      }
+    },
+    {
+      "chapter": 8,
+      "figure_number": "8-26",
+      "label": "fig:system-deployment-architecture",
+      "kind": "tikz",
+      "caption_before": "案例水库平台部署架构",
+      "caption_after": "案例水库平台部署架构",
+      "viewed": true,
+      "status": "fixed_and_verified",
+      "observation": "业务服务到对象存储的连线穿过Kafka框，误示Kafka位于对象访问路径中。改为Kafka与数据库间的独立路由直达对象存储。；二次目视发现对象存储支线仍与数据库连线相交；将四个依赖并排放在业务服务下方，以独立扇出线连接。",
+      "findings": [
+        "业务服务到对象存储的连线穿过Kafka框，误示Kafka位于对象访问路径中。改为Kafka与数据库间的独立路由直达对象存储。",
+        "二次目视发现对象存储支线仍与数据库连线相交；将四个依赖并排放在业务服务下方，以独立扇出线连接。"
+      ],
+      "changes": [
+        {
+          "chapter": 8,
+          "label": "fig:system-deployment-architecture",
+          "kind": "tikz",
+          "finding": "业务服务到对象存储的连线穿过Kafka框，误示Kafka位于对象访问路径中。改为Kafka与数据库间的独立路由直达对象存储。",
+          "before": "\\begin{tikzpicture}[node distance=6mm and 8mm,\n  deploy/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=2.45cm,\n    minimum height=.9cm,align=center}]\n\\node[deploy] (browser) {浏览器/移动端\\\\Vue 3 + Three.js};\n\\node[deploy,right=of browser] (gateway) {API入口\\\\认证/限流};\n\\node[deploy,right=of gateway] (service) {Spring Boot\\\\业务服务};\n\\node[deploy,below=of service] (kafka) {Kafka\\\\事件总线};\n\\node[deploy,left=of kafka] (redis) {Redis\\\\可重建缓存};\n\\node[deploy,right=of kafka] (db) {PostgreSQL\\\\PostGIS/TimescaleDB};\n\\node[deploy,below=of kafka] (object) {对象存储\\\\模型/报告/备份};\n\\draw[<->,draw=Primary,thick] (browser)--(gateway);\n\\draw[<->,draw=Primary,thick] (gateway)--(service);\n\\draw[<->,draw=Primary,thick] (service)--(kafka);\n\\draw[<->,draw=Primary,thick] (service)--(redis);\n\\draw[<->,draw=Primary,thick] (service)--(db);\n\\draw[<->,draw=Accent,thick] (service)--(object);\n\\end{tikzpicture}",
+          "after": "\\begin{tikzpicture}[>=Stealth,font=\\small,\n  deploy/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=2.6cm,\n    minimum height=1.05cm,align=center}]\n\\node[deploy] (browser) at (0,0) {浏览器/移动端\\\\Vue 3 + Three.js};\n\\node[deploy] (gateway) at (4,0) {API入口\\\\认证/限流};\n\\node[deploy] (service) at (8,0) {Spring Boot\\\\业务服务};\n\\node[deploy] (redis) at (4,-2) {Redis\\\\可重建缓存};\n\\node[deploy] (kafka) at (8,-2) {Kafka\\\\事件总线};\n\\node[deploy] (db) at (12,-2) {PostgreSQL\\\\PostGIS/TimescaleDB};\n\\node[deploy] (object) at (8,-4) {对象存储\\\\模型/报告/备份};\n\\foreach \\a/\\b in {browser/gateway,gateway/service,service/kafka,service/redis,service/db}{\\draw[<->,Primary,thick] (\\a)--(\\b);}\n\\draw[<->,Accent,thick] (service.south east)--(10,-.9)--(10,-3.3)--(object.east);\n\\end{tikzpicture}"
+        },
+        {
+          "chapter": 8,
+          "label": "fig:system-deployment-architecture",
+          "kind": "tikz",
+          "finding": "二次目视发现对象存储支线仍与数据库连线相交；将四个依赖并排放在业务服务下方，以独立扇出线连接。",
+          "before": "\\begin{tikzpicture}[>=Stealth,font=\\small,\n  deploy/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=2.6cm,\n    minimum height=1.05cm,align=center}]\n\\node[deploy] (browser) at (0,0) {浏览器/移动端\\\\Vue 3 + Three.js};\n\\node[deploy] (gateway) at (4,0) {API入口\\\\认证/限流};\n\\node[deploy] (service) at (8,0) {Spring Boot\\\\业务服务};\n\\node[deploy] (redis) at (4,-2) {Redis\\\\可重建缓存};\n\\node[deploy] (kafka) at (8,-2) {Kafka\\\\事件总线};\n\\node[deploy] (db) at (12,-2) {PostgreSQL\\\\PostGIS/TimescaleDB};\n\\node[deploy] (object) at (8,-4) {对象存储\\\\模型/报告/备份};\n\\foreach \\a/\\b in {browser/gateway,gateway/service,service/kafka,service/redis,service/db}{\\draw[<->,Primary,thick] (\\a)--(\\b);}\n\\draw[<->,Accent,thick] (service.south east)--(10,-.9)--(10,-3.3)--(object.east);\n\\end{tikzpicture}",
+          "after": "\\begin{tikzpicture}[>=Stealth,font=\\small,\n  deploy/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=2.6cm,\n    minimum height=1.05cm,align=center}]\n\\node[deploy] (browser) at (0,0) {浏览器/移动端\\\\Vue 3 + Three.js};\n\\node[deploy] (gateway) at (3.8,0) {API入口\\\\认证/限流};\n\\node[deploy] (service) at (7.6,0) {Spring Boot\\\\业务服务};\n\\node[deploy] (redis) at (0,-2.2) {Redis\\\\可重建缓存};\n\\node[deploy] (kafka) at (4,-2.2) {Kafka\\\\事件总线};\n\\node[deploy] (db) at (8,-2.2) {PostgreSQL\\\\PostGIS/TimescaleDB};\n\\node[deploy] (object) at (12,-2.2) {对象存储\\\\模型/报告/备份};\n\\foreach \\a/\\b in {browser/gateway,gateway/service,service/kafka,service/redis,service/db}{\\draw[<->,Primary,thick] (\\a)--(\\b);}\n\\draw[<->,Accent,thick] (service)--(object);\n\\end{tikzpicture}"
+        }
+      ],
+      "view_evidence": {
+        "before_png": "temp/r10-05-ch07-09/before/ch08-26.png",
+        "after_png": "temp/r10-05-ch07-09/after/ch08-26.png",
+        "final_pdf": "temp/r10-05-ch07-09/after/ch08-26.pdf",
+        "log": "temp/r10-05-ch07-09/after/ch08-26.log",
+        "final_png_sha256": "decd09fe3323100b5532a03c893b4a4280c6dcaa8d3ba155f920308ef7e0a1c8",
+        "renderer": "XeLaTeX standalone 11pt + pypdfium2 at 2x; each image inspected separately",
+        "pdf_width_cm_including_standalone_border": 15.15
+      },
+      "validation": {
+        "compiled": true,
+        "errors": [],
+        "visual_recheck_complete": true,
+        "current_tikz_matches_last_compiled_tex": true
+      }
+    },
+    {
+      "chapter": 8,
+      "figure_number": "8-27",
+      "label": "fig:recovery-rehearsal-timeline",
+      "kind": "tikz",
+      "caption_before": "备份恢复演练的阶段时间轴",
+      "caption_after": "备份恢复演练的阶段时间轴",
+      "viewed": true,
+      "status": "fixed_and_verified",
+      "observation": "原连续折线路径只有最后一段箭头，阶段间方向不完整；改为每段独立箭头。；图实际未标责任人、条件和时间刻度；改为准确描述阶段顺序，并明确记录待填写的字段。",
+      "findings": [
+        "原连续折线路径只有最后一段箭头，阶段间方向不完整；改为每段独立箭头。",
+        "图实际未标责任人、条件和时间刻度；改为准确描述阶段顺序，并明确记录待填写的字段。"
+      ],
+      "changes": [
+        {
+          "chapter": 8,
+          "label": "fig:recovery-rehearsal-timeline",
+          "kind": "tikz-edit",
+          "finding": "原连续折线路径只有最后一段箭头，阶段间方向不完整；改为每段独立箭头。",
+          "before": "\\draw[->,draw=Primary,thick] (freeze)--(restore)--(verify)--(replay)--(open);",
+          "after": "\\foreach \\a/\\b in {freeze/restore,restore/verify,verify/replay,replay/open}{\\draw[->,draw=Primary,thick] (\\a)--(\\b);}"
+        },
+        {
+          "chapter": 8,
+          "label": "fig:recovery-rehearsal-timeline",
+          "kind": "text",
+          "finding": "图实际未标责任人、条件和时间刻度；改为准确描述阶段顺序，并明确记录待填写的字段。",
+          "before": "恢复演练按“冻结—恢复—只读核验—重放—放开写入—复盘”推进，而不是只检查备份文件是否存在。图\\ref{fig:recovery-rehearsal-timeline}用时间轴标出每个阶段的责任人与放行条件，学生可据此填写一次可复核的演练记录。",
+          "after": "恢复演练按“冻结—恢复—只读核验—重放—放开写入—复盘”推进。图\\ref{fig:recovery-rehearsal-timeline}给出恢复至开放写入的阶段顺序及主要检查项；演练记录还需补充各阶段责任人、起止时刻和放行结果。"
+        }
+      ],
+      "view_evidence": {
+        "before_png": "temp/r10-05-ch07-09/before/ch08-27.png",
+        "after_png": "temp/r10-05-ch07-09/after/ch08-27.png",
+        "final_pdf": "temp/r10-05-ch07-09/after/ch08-27.pdf",
+        "log": "temp/r10-05-ch07-09/after/ch08-27.log",
+        "final_png_sha256": "d68bf917a91fc7d1521cbf56c1871a5d16c3d95c08a05c9a1b976ef724ad940e",
+        "renderer": "XeLaTeX standalone 11pt + pypdfium2 at 2x; each image inspected separately",
+        "pdf_width_cm_including_standalone_border": 13.52
+      },
+      "validation": {
+        "compiled": true,
+        "errors": [],
+        "visual_recheck_complete": true,
+        "current_tikz_matches_last_compiled_tex": true
+      }
+    }
+  ],
+  "website_only_extra": [
+    {
+      "file": "tools/tex2site/webfigs/51wim-basin.tex",
+      "viewed": true,
+      "before_png": "temp/r10-05-ch07-09/web-before/51wim-basin.png",
+      "after_png": "temp/r10-05-ch07-09/web-before/51wim-basin.png",
+      "pdf": "temp/r10-05-ch07-09/web-before/51wim-basin.pdf",
+      "status": "reviewed_no_material_error",
+      "finding": "流域界面布局示意的左/右浮层、上方预警条与下方时间轴均位于外框内，中央保留场景区域；无需修改。",
+      "change": null,
+      "validation": {
+        "standalone_xelatex_passed": true,
+        "visual_recheck_complete": true,
+        "errors": []
+      }
+    },
+    {
+      "file": "tools/tex2site/webfigs/51wim-dam-safety.tex",
+      "viewed": true,
+      "before_png": "temp/r10-05-ch07-09/web-before/51wim-dam-safety.png",
+      "after_png": "temp/r10-05-ch07-09/web-after/51wim-dam-safety.png",
+      "pdf": "temp/r10-05-ch07-09/web-after/51wim-dam-safety.pdf",
+      "status": "fixed_and_verified",
+      "finding": "评分87/100无来源且不等于授权画面92分；移除伪造数值，用评分入口说明。空白坝体占位增加原创网格与高亮示意，明确其示意性质。",
+      "change": {
+        "file": "tools/tex2site/webfigs/51wim-dam-safety.tex",
+        "finding": "评分87/100无来源且不等于授权画面92分；移除伪造数值，用评分入口说明。空白坝体占位增加原创网格与高亮示意，明确其示意性质。",
+        "before": "\\begin{tikzpicture}[font=\\small,\n  card/.style={draw=Primary,fill=white,rounded corners=2pt,align=center,font=\\scriptsize,text=PrimaryDark}]\n  \\node[draw=Primary!40,rounded corners=4pt,minimum width=12.2cm,minimum height=5.2cm] (f) at (0,0) {};\n  \\node[anchor=north west,font=\\scriptsize\\bfseries,text=Primary] at ($(f.north west)+(.2,-.15)$) {水库工程安全评估视图};\n  \\node[card,minimum width=3.1cm,minimum height=1.6cm] (score) at (-4.1,1.1) {安全性态评分\\\\[1pt]{\\normalsize\\bfseries 87}/100};\n  \\node[card,minimum width=3.1cm,minimum height=1.9cm] (alert) at (-4.1,-1.15) {预报预警面板\\\\渗压·位移·库水位\\\\越限与趋势提示};\n  \\node[card,minimum width=7.3cm,minimum height=3.9cm] (dam) at (1.9,0) {坝体三维视图\\\\[2pt]评估范围高亮·测点定位标注\\\\(与监测平台共用对象编码)};\n\\end{tikzpicture}\n",
+        "after": "\\begin{tikzpicture}[font=\\small,\n  card/.style={draw=Primary,fill=white,rounded corners=2pt,align=center,font=\\scriptsize,text=PrimaryDark}]\n  \\node[draw=Primary!40,rounded corners=4pt,minimum width=12.2cm,minimum height=5.2cm] (f) at (0,0) {};\n  \\node[anchor=north west,font=\\scriptsize\\bfseries,text=Primary] at ($(f.north west)+(.2,-.15)$) {水库工程安全评估视图};\n  \\node[card,minimum width=3.1cm,minimum height=1.6cm] (score) at (-4.1,1.1) {安全性态评分入口\\\\查看指标与证据};\n  \\node[card,minimum width=3.1cm,minimum height=1.9cm] (alert) at (-4.1,-1.15) {预报预警面板\\\\渗压·位移·库水位\\\\越限与趋势提示};\n  \\node[card,minimum width=7.3cm,minimum height=3.9cm] (dam) at (1.9,0) {};\n  \\node[font=\\scriptsize,text=PrimaryDark] at (1.9,1.65) {坝体评估范围与测点（示意）};\n  \\draw[fill=Primary!12,draw=Primary!60] (.8,.85)--(4.7,.85)--(5.05,1.17)--(1.15,1.17)--cycle;\n  \\draw[fill=PrimaryLight,draw=Primary] (-.9,-1.2)--(3.8,-1.2)--(4.7,.85)--(.8,.85)--cycle;\n  \\begin{scope}\n    \\clip (-.9,-1.2)--(3.8,-1.2)--(4.7,.85)--(.8,.85)--cycle;\n    \\fill[Accent!35] (-1.1,-.25) rectangle (5,.03);\n    \\foreach \\y in {-.85,-.5,-.15,.2,.55}{\\draw[Primary!45,thin] (-1,\\y)--(5,\\y);}\n    \\foreach \\x in {-.4,.3,1,1.7,2.4,3.1,3.8}{\\draw[Primary!45,thin] (\\x,-1.25)--(\\x+.9,.9);}\n  \\end{scope}\n  \\fill[PrimaryDark] (1,-.6) circle(2pt);\n  \\fill[PrimaryDark] (2.9,.33) circle(2pt);\n  \\node[font=\\scriptsize,text=TextGray] at (1.9,-1.65) {高亮区关联观测记录与评估证据};\n\\end{tikzpicture}\n"
+      },
+      "validation": {
+        "standalone_xelatex_passed": true,
+        "visual_recheck_complete": true,
+        "errors": []
+      }
+    },
+    {
+      "file": "tools/tex2site/webfigs/51wim-flood.tex",
+      "viewed": true,
+      "before_png": "temp/r10-05-ch07-09/web-before/51wim-flood.png",
+      "after_png": "temp/r10-05-ch07-09/web-after/51wim-flood.png",
+      "pdf": "temp/r10-05-ch07-09/web-after/51wim-flood.pdf",
+      "status": "fixed_and_verified",
+      "finding": "淹没色块越出视图框，并伸入相邻模型区域；反馈曲线穿过模型文字与色块。色块限定到面板内部，反馈沿下缘正交返回。",
+      "change": {
+        "file": "tools/tex2site/webfigs/51wim-flood.tex",
+        "finding": "淹没色块越出视图框，并伸入相邻模型区域；反馈曲线穿过模型文字与色块。色块限定到面板内部，反馈沿下缘正交返回。",
+        "before": "\\begin{tikzpicture}[font=\\small,>=Stealth,\n  box/.style={draw=Primary,fill=PrimaryLight,rounded corners=2pt,minimum width=2.9cm,minimum height=1.05cm,align=center,font=\\scriptsize,text=PrimaryDark}]\n  \\node[box] (p) at (-4.6,0) {暴雨情景参数\\\\雨量·历时·分布};\n  \\node[box] (m) at (-1.2,0) {产汇流与\\\\淹没计算};\n  \\node[draw=Primary!40,rounded corners=3pt,minimum width=4.6cm,minimum height=3.2cm] (v) at (3.4,0) {};\n  \\node[anchor=north,font=\\scriptsize,text=PrimaryDark] at ($(v.north)+(0,-.12)$) {淹没范围渲染};\n  \\fill[Primary!15] ($(v.center)+(-1.7,-1.1)$) ellipse (1.9 and .75);\n  \\fill[Primary!35] ($(v.center)+(-1.1,-.95)$) ellipse (1.25 and .55);\n  \\fill[Primary!60] ($(v.center)+(-.6,-.8)$) ellipse (.7 and .35);\n  \\node[font=\\scriptsize,text=TextGray,anchor=south] at ($(v.south)+(1.15,.28)$) {深色=相对水深大};\n  \\draw[->,thick,Primary] (p)--(m);\n  \\draw[->,thick,Primary] (m)--(v);\n  \\draw[->,thick,Accent,dashed] ($(v.south)+(0,0)$) to[bend right=20] node[below,font=\\scriptsize]{调整参数再预演} (p.south);\n\\end{tikzpicture}\n",
+        "after": "\\begin{tikzpicture}[font=\\small,>=Stealth,\n  box/.style={draw=Primary,fill=PrimaryLight,rounded corners=2pt,minimum width=2.9cm,minimum height=1.05cm,align=center,font=\\scriptsize,text=PrimaryDark}]\n  \\node[box] (p) at (-4.6,0) {降雨情景参数\\\\雨量·历时·分布};\n  \\node[box] (m) at (-1.2,0) {产汇流与\\\\淹没计算};\n  \\node[draw=Primary!40,rounded corners=3pt,minimum width=4.6cm,minimum height=3.2cm] (v) at (3.4,0) {};\n  \\node[anchor=north,font=\\scriptsize,text=PrimaryDark] at ($(v.north)+(0,-.12)$) {淹没范围与相对水深（示意）};\n  \\begin{scope}\n    \\clip (1.2,-1.45) rectangle (5.6,1.25);\n    \\fill[Primary!15] (3.4,-.3) ellipse (1.9 and .75);\n    \\fill[Primary!35] (3.65,-.3) ellipse (1.2 and .5);\n    \\fill[Primary!60] (4.1,-.25) ellipse (.5 and .25);\n  \\end{scope}\n  \\node[font=\\scriptsize,text=TextGray] at (3.4,-1.3) {同一时刻：深色表示相对水深较大};\n  \\draw[->,thick,Primary] (p)--(m);\n  \\draw[->,thick,Primary] (m)--(v);\n  \\draw[->,thick,Accent,dashed] (v.south)--(3.4,-2.25)\n    --node[below,font=\\scriptsize]{调整情景后重新计算} (-4.6,-2.25)--(p.south);\n\\end{tikzpicture}\n"
+      },
+      "validation": {
+        "standalone_xelatex_passed": true,
+        "visual_recheck_complete": true,
+        "errors": []
+      }
+    },
+    {
+      "file": "tools/tex2site/webfigs/51wim-network.tex",
+      "viewed": true,
+      "before_png": "temp/r10-05-ch07-09/web-before/51wim-network.png",
+      "after_png": "temp/r10-05-ch07-09/web-after/51wim-network.png",
+      "pdf": "temp/r10-05-ch07-09/web-after/51wim-network.pdf",
+      "status": "fixed_and_verified",
+      "finding": "原注称线上标了能力与流量，但图中没有这些标注；拓扑本身也不能证明实时供需平衡。改为链路属性和对象编码的正向说明。",
+      "change": {
+        "file": "tools/tex2site/webfigs/51wim-network.tex",
+        "finding": "原注称线上标了能力与流量，但图中没有这些标注；拓扑本身也不能证明实时供需平衡。改为链路属性和对象编码的正向说明。",
+        "before": "\\begin{tikzpicture}[font=\\small,>=Stealth,\n  src/.style={draw=Primary,fill=PrimaryLight,rounded corners=2pt,minimum width=2.1cm,minimum height=0.9cm,align=center,font=\\scriptsize,text=PrimaryDark},\n  pump/.style={draw=Accent,fill=Accent!10,rounded corners=2pt,minimum width=2.1cm,minimum height=0.9cm,align=center,font=\\scriptsize,text=Accent!70!black},\n  dem/.style={draw=Primary!60,fill=white,rounded corners=2pt,minimum width=2.3cm,minimum height=0.9cm,align=center,font=\\scriptsize,text=TextGray}]\n  \\node[src] (s1) at (-4.8,1.4) {水源:水库A};\n  \\node[src] (s2) at (-4.8,-1.4) {水源:水库B};\n  \\node[pump] (p1) at (-1.2,1.4) {泵站P1};\n  \\node[pump] (p2) at (-1.2,-1.4) {泵站P2};\n  \\node[dem] (d1) at (2.6,2.0) {城区供水};\n  \\node[dem] (d2) at (2.6,0) {灌区用水};\n  \\node[dem] (d3) at (2.6,-2.0) {生态流量};\n  \\draw[->,thick,Primary] (s1)--(p1); \\draw[->,thick,Primary] (s2)--(p2);\n  \\draw[->,thick,Primary] (p1)--(d1); \\draw[->,thick,Primary] (p1)--(d2);\n  \\draw[->,thick,Primary] (p2)--(d2); \\draw[->,thick,Primary] (p2)--(d3);\n  \\node[font=\\scriptsize,text=TextGray,align=center] at (0,-2.9) {连线为输水链路,线上标注能力与当前流量;\\\\调度方案改变泵站与闸门设定,拓扑同步反映供需平衡};\n\\end{tikzpicture}\n",
+        "after": "\\begin{tikzpicture}[font=\\small,>=Stealth,\n  src/.style={draw=Primary,fill=PrimaryLight,rounded corners=2pt,minimum width=2.1cm,minimum height=0.9cm,align=center,font=\\scriptsize,text=PrimaryDark},\n  pump/.style={draw=Accent,fill=Accent!10,rounded corners=2pt,minimum width=2.1cm,minimum height=0.9cm,align=center,font=\\scriptsize,text=Accent!70!black},\n  dem/.style={draw=Primary!60,fill=white,rounded corners=2pt,minimum width=2.3cm,minimum height=0.9cm,align=center,font=\\scriptsize,text=TextGray}]\n  \\node[src] (s1) at (-4.8,1.4) {水源:水库A};\n  \\node[src] (s2) at (-4.8,-1.4) {水源:水库B};\n  \\node[pump] (p1) at (-1.2,1.4) {泵站P1};\n  \\node[pump] (p2) at (-1.2,-1.4) {泵站P2};\n  \\node[dem] (d1) at (2.6,2.0) {城区供水};\n  \\node[dem] (d2) at (2.6,0) {灌区用水};\n  \\node[dem] (d3) at (2.6,-2.0) {生态流量};\n  \\draw[->,thick,Primary] (s1)--(p1); \\draw[->,thick,Primary] (s2)--(p2);\n  \\draw[->,thick,Primary] (p1)--(d1); \\draw[->,thick,Primary] (p1)--(d2);\n  \\draw[->,thick,Primary] (p2)--(d2); \\draw[->,thick,Primary] (p2)--(d3);\n  \\node[font=\\scriptsize,text=TextGray,align=center] at (0,-2.9) {连线表示输水链路，其属性记录输水能力与当前流量；\\\\泵站与需水单元通过对象编码关联时序数据};\n\\end{tikzpicture}\n"
+      },
+      "validation": {
+        "standalone_xelatex_passed": true,
+        "visual_recheck_complete": true,
+        "errors": []
+      }
+    },
+    {
+      "file": "tools/tex2site/webfigs/51wim-portal.tex",
+      "viewed": true,
+      "before_png": "temp/r10-05-ch07-09/web-before/51wim-portal.png",
+      "after_png": "temp/r10-05-ch07-09/web-after/51wim-portal.png",
+      "pdf": "temp/r10-05-ch07-09/web-after/51wim-portal.pdf",
+      "status": "fixed_and_verified",
+      "finding": "三条入口箭头错误先汇聚到中心再返折，交叉且贴着数据底板边框。改为各自垂直进入底板，底板再连接统一编码与事件契约。",
+      "change": {
+        "file": "tools/tex2site/webfigs/51wim-portal.tex",
+        "finding": "三条入口箭头错误先汇聚到中心再返折，交叉且贴着数据底板边框。改为各自垂直进入底板，底板再连接统一编码与事件契约。",
+        "before": "\\begin{tikzpicture}[font=\\small,\n  entry/.style={draw=Primary,fill=PrimaryLight,rounded corners=3pt,minimum width=3.2cm,minimum height=1.5cm,align=center,text=PrimaryDark,font=\\small\\bfseries},\n  base/.style={draw=Primary!60,fill=white,rounded corners=2pt,minimum width=11.4cm,minimum height=0.7cm,align=center,text=TextGray}]\n  \\node[draw=Primary!40,rounded corners=4pt,minimum width=12.2cm,minimum height=4.9cm] (frame) at (0,0) {};\n  \\node[anchor=north west,font=\\scriptsize\\bfseries,text=Primary] at ($(frame.north west)+(.2,-.15)$) {一体化门户};\n  \\node[entry] (a) at (-4,.7) {流域\\\\防洪调度与预演};\n  \\node[entry] (b) at (0,.7) {水网\\\\供需平衡与联合调度};\n  \\node[entry] (c) at (4,.7) {水利工程\\\\安全监测与运行};\n  \\node[base] (d) at (0,-1) {统一数据底板};\n  \\node[base] (e) at (0,-1.9) {统一对象编码 · 统一事件契约};\n  \\foreach \\x in {a,b,c} \\draw[->,thick,Primary] (\\x.south) -- ($(d.north)+(0,.05)$|-\\x.south) -- (d.north -| \\x.south);\n\\end{tikzpicture}\n",
+        "after": "\\begin{tikzpicture}[font=\\small,\n  entry/.style={draw=Primary,fill=PrimaryLight,rounded corners=3pt,minimum width=3.2cm,minimum height=1.5cm,align=center,text=PrimaryDark,font=\\small\\bfseries},\n  base/.style={draw=Primary!60,fill=white,rounded corners=2pt,minimum width=11.4cm,minimum height=0.7cm,align=center,text=TextGray}]\n  \\node[draw=Primary!40,rounded corners=4pt,minimum width=12.2cm,minimum height=4.9cm] (frame) at (0,0) {};\n  \\node[anchor=north west,font=\\scriptsize\\bfseries,text=Primary] at ($(frame.north west)+(.2,-.15)$) {一体化门户};\n  \\node[entry] (a) at (-4,.7) {流域\\\\防洪调度与预演};\n  \\node[entry] (b) at (0,.7) {水网\\\\供需平衡与联合调度};\n  \\node[entry] (c) at (4,.7) {水利工程\\\\安全监测与运行};\n  \\node[base] (d) at (0,-1) {统一数据底板};\n  \\node[base] (e) at (0,-1.9) {统一对象编码 · 统一事件契约};\n  \\foreach \\x in {a,b,c} \\draw[->,thick,Primary] (\\x.south)--(d.north -| \\x.south);\n  \\draw[->,thick,Primary] (d.south)--(e.north);\n\\end{tikzpicture}\n"
+      },
+      "validation": {
+        "standalone_xelatex_passed": true,
+        "visual_recheck_complete": true,
+        "errors": []
+      }
+    },
+    {
+      "file": "tools/tex2site/webfigs/51wim-spillway.tex",
+      "viewed": true,
+      "before_png": "temp/r10-05-ch07-09/web-before/51wim-spillway.png",
+      "after_png": "temp/r10-05-ch07-09/web-after/51wim-spillway.png",
+      "pdf": "temp/r10-05-ch07-09/web-after/51wim-spillway.pdf",
+      "status": "fixed_and_verified",
+      "finding": "原稿无依据指定3孔，且所谓三维泄流仅是一根直角线和从空中开始的波浪线。改为不指定孔数的方案输入，绘制有闸门、底板、开口和出流方向的剖面示意。",
+      "change": {
+        "file": "tools/tex2site/webfigs/51wim-spillway.tex",
+        "finding": "原稿无依据指定3孔，且所谓三维泄流仅是一根直角线和从空中开始的波浪线。改为不指定孔数的方案输入，绘制有闸门、底板、开口和出流方向的剖面示意。",
+        "before": "\\begin{tikzpicture}[font=\\small,>=Stealth,\n  box/.style={draw=Primary,fill=PrimaryLight,rounded corners=2pt,minimum width=3.0cm,minimum height=1.05cm,align=center,font=\\scriptsize,text=PrimaryDark}]\n  \\node[box] (plan) at (-4.4,1.2) {泄洪方案\\\\3孔开度组合};\n  \\node[box] (gate) at (-4.4,-1.2) {闸门动作模拟\\\\按方案开启};\n  \\node[draw=Primary!40,rounded corners=3pt,minimum width=6.3cm,minimum height=3.6cm] (v) at (2.6,0) {};\n  \\node[anchor=north,font=\\scriptsize,text=PrimaryDark] at ($(v.north)+(0,-.12)$) {三维泄流模拟};\n  \\draw[Primary,thick] ($(v.center)+(-2.4,1.0)$) -- ($(v.center)+(-1.2,1.0)$) -- ($(v.center)+(-1.2,-.9)$);\n  \\draw[Primary!60,thick,decorate,decoration={snake,amplitude=.5mm,segment length=3mm}]\n    ($(v.center)+(-1.15,.2)$) .. controls ($(v.center)+(-.2,-.4)$) .. ($(v.center)+(2.4,-1.0)$);\n  \\node[font=\\scriptsize,text=TextGray] at ($(v.center)+(.9,.75)$) {水流经溢洪道下泄};\n  \\draw[->,thick,Primary] (plan)--(gate);\n  \\draw[->,thick,Primary] (gate.east) -- (v.west|-gate.east);\n  \\draw[->,thick,Primary] (plan.east) -- (v.west|-plan.east);\n\\end{tikzpicture}\n",
+        "after": "\\begin{tikzpicture}[font=\\small,>=Stealth,\n  box/.style={draw=Primary,fill=PrimaryLight,rounded corners=2pt,minimum width=3cm,minimum height=1.05cm,align=center,font=\\scriptsize,text=PrimaryDark}]\n  \\node[box] (plan) at (-4.4,1.2) {泄洪方案\\\\孔口开度组合};\n  \\node[box] (gate) at (-4.4,-1.2) {闸门状态模拟\\\\按方案更新};\n  \\node[draw=Primary!40,rounded corners=3pt,minimum width=6.3cm,minimum height=3.6cm] (v) at (2.6,0) {};\n  \\node[anchor=north,font=\\scriptsize,text=PrimaryDark] at ($(v.north)+(0,-.12)$) {闸门与泄流示意};\n  \\fill[Primary!20] (.05,.55)--(1.05,.55)--(1.05,.22)--(1.3,.14)--(4.8,-.83)--(4.8,-1.05)--(1.25,0)--(.05,0)--cycle;\n  \\draw[Primary,thick] (.05,0)--(1.25,0)--(4.8,-1.05);\n  \\draw[fill=TextGray!15,draw=TextGray,thick] (1.05,.3) rectangle (1.3,1.03);\n  \\draw[->,Primary,thick] (.2,.35)--(.85,.35);\n  \\draw[->,Primary,thick] (1.7,-.05)--(3.25,-.5);\n  \\draw[->,Primary,thick] (3.5,-.57)--(4.45,-.85);\n  \\node[font=\\scriptsize,text=TextGray] at (3.55,.8) {开度与泄量关联同一方案};\n  \\node[font=\\scriptsize,text=TextGray] at (2.6,-1.4) {闸下出流经溢洪道下泄};\n  \\draw[->,thick,Primary] (plan)--(gate);\n  \\draw[->,thick,Primary] (gate.east)--(v.west|-gate.east);\n  \\draw[->,thick,Primary] (plan.east)--(v.west|-plan.east);\n\\end{tikzpicture}\n"
+      },
+      "validation": {
+        "standalone_xelatex_passed": true,
+        "visual_recheck_complete": true,
+        "errors": []
+      }
+    }
+  ],
+  "chapter_preservation_checks": [
+    {
+      "chapter": 7,
+      "body_chars_before": 22613,
+      "body_chars_after": 22606,
+      "delta": -7,
+      "all_changes_registered": true,
+      "code_listings_unchanged": true,
+      "labels_unchanged": true,
+      "chapter_structure_unchanged": true
+    },
+    {
+      "chapter": 8,
+      "body_chars_before": 41584,
+      "body_chars_after": 41488,
+      "delta": -96,
+      "all_changes_registered": true,
+      "code_listings_unchanged": true,
+      "labels_unchanged": true,
+      "chapter_structure_unchanged": true
+    },
+    {
+      "chapter": 9,
+      "body_chars_before": 6022,
+      "body_chars_after": 6022,
+      "delta": 0,
+      "all_changes_registered": true,
+      "code_listings_unchanged": true,
+      "labels_unchanged": true,
+      "chapter_structure_unchanged": true
+    }
+  ],
+  "mathematical_checks": {
+    "lttb_next_bucket": {
+      "points": [
+        [
+          6.8,
+          2.5
+        ],
+        [
+          7.6,
+          1.4
+        ],
+        [
+          8.4,
+          3
+        ],
+        [
+          9.2,
+          2.6
+        ],
+        [
+          10,
+          3.4
+        ]
+      ],
+      "mean": [
+        8.4,
+        2.58
+      ],
+      "candidate_areas": {
+        "3.6,1.7": 2.752,
+        "4.4,2": 1.864,
+        "5.2,3.7": 2.944,
+        "6,2.2": 1.208
+      },
+      "selected": [
+        5.2,
+        3.7
+      ]
+    },
+    "ray_picking": {
+      "camera": [
+        5.2,
+        1.25
+      ],
+      "nearest_intersection": [
+        8.7,
+        1.25
+      ],
+      "left_edge_interpolation": 0.4375
+    },
+    "rain_level": {
+      "source": "lst:ch07-rain-level-dualaxis",
+      "rain_mm": [
+        0,
+        8.4,
+        16.2,
+        4.8,
+        0
+      ],
+      "water_level_m": [
+        164.2,
+        164.3,
+        164.7,
+        165.1,
+        165.0
+      ],
+      "rain_axis_direction": "down",
+      "water_level_axis_direction": "up"
+    }
+  },
+  "runtime_s5_final_evidence": {
+    "manifest": "companion/illustrations/runtime/manifest.json",
+    "capture_time": "2026-09-12T04:36:57.772Z",
+    "image_sha256": "a57f85d10b19bda1b32f36625a558073e496e15f8187b8e982a4ebf9c20d99d3",
+    "pick": {
+      "from": "DAM-A-WL-01",
+      "to": "DAM-A-PZ-07",
+      "method": "Playwright mouse.click -> 原 PointPicker 射线拾取 -> select -> 教学 API",
+      "click": {
+        "x": 231.9999999999995,
+        "y": 160.88057127391656
+      },
+      "responseStatus": 200,
+      "responseUrl": "http://127.0.0.1:5194/api/assets/DAM-A-PZ-07/readings?from=2026-07-01T00%3A00%3A00%2B08%3A00&to=2026-07-02T00%3A00%3A00%2B08%3A00",
+      "returnedRecords": 288
+    },
+    "data_count": 288,
+    "series_hash_before": "62012d2b5ad81e172c64a20f14692fad6968187e9083d783c7e44bb213bd5a42",
+    "series_hash_after": "62012d2b5ad81e172c64a20f14692fad6968187e9083d783c7e44bb213bd5a42",
+    "annotations_disclosed_in_caption": true
+  },
+  "tikz_labels_to_rebuild": [
+    "fig:ch07-echarts-lifecycle",
+    "fig:ch07-missing-gap",
+    "fig:ch07-time-quality-pipeline",
+    "fig:ch08-database-er",
+    "fig:ch7-rain-level-combo",
+    "fig:ch7-thematic-map",
+    "fig:four-pre-loop",
+    "fig:gate-simulation-flow",
+    "fig:lttb-principle",
+    "fig:model-run-lifecycle",
+    "fig:monitoring-data-pipeline",
+    "fig:ray-picking",
+    "fig:recovery-rehearsal-timeline",
+    "fig:scenario-branch-compare",
+    "fig:shift-handover-flow",
+    "fig:smart-water-monitoring-architecture",
+    "fig:system-deployment-architecture",
+    "fig:twin-state-separation",
+    "fig:warning-workorder-flow",
+    "fig:water-network-graph"
+  ],
+  "website_files_to_rebuild": [
+    "tools/tex2site/webfigs/51wim-portal.tex",
+    "tools/tex2site/webfigs/51wim-flood.tex",
+    "tools/tex2site/webfigs/51wim-dam-safety.tex",
+    "tools/tex2site/webfigs/51wim-spillway.tex",
+    "tools/tex2site/webfigs/51wim-network.tex"
+  ],
+  "remaining_work_owner": "root performs final full-book PDF layout verification and all website SVG regeneration after source freeze"
+}

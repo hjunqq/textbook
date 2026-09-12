@@ -1,0 +1,3 @@
+INFO    -  Cleaning site directory
+INFO    -  Building documentation to directory: E:\2026\教材\智慧水利平台架构与开发\site
+INFO    -  Documentation built in 2.79 seconds

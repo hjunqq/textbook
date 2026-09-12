@@ -111,8 +111,8 @@
 \draw[->,draw=Primary,thick] (ask)--(quick);
 \draw[->,draw=Primary,thick] (quick)--(proto);
 \draw[->,draw=Primary,thick] (proto)--(review);
-\draw[->,draw=Accent,thick,bend left=28] (review) to node[above,font=\scriptsize]{反馈} (quick);
-\draw[->,draw=Primary,thick] (review)--(baseline);
+\draw[->,draw=Accent,thick,bend right=28] (review.north) to node[above,font=\scriptsize]{反馈修订} (quick.north);
+\draw[->,draw=Primary,thick] (review)--node[right,font=\scriptsize]{达成一致}(baseline);
 \end{tikzpicture}
 \caption{原型模型以用户反馈澄清需求}
 \label{fig:prototype-model}
@@ -201,7 +201,11 @@ DevOps把开发、测试、发布和运行看作一条有反馈的交付链。�
 \node[devstep,below=of build] (release) {发布与审批};
 \node[devstep,left=of release] (operate) {运行与监控};
 \node[devstep,left=of operate] (learn) {反馈与改进};
-\draw[->,thick,draw=Primary] (plan)--(code)--(build)--(release)--(operate)--(learn);
+\draw[->,thick,draw=Primary] (plan)--(code);
+\draw[->,thick,draw=Primary] (code)--(build);
+\draw[->,thick,draw=Primary] (build)--(release);
+\draw[->,thick,draw=Primary] (release)--(operate);
+\draw[->,thick,draw=Primary] (operate)--(learn);
 \draw[->,thick,dashed,draw=Accent] (learn)--(plan);
 \end{tikzpicture}
 \caption{水利平台的DevOps持续交付反馈环}
@@ -531,7 +535,7 @@ Won't & 本期自动下发闸门控制 & 控制安全论证不在当前范围 \\
 \node[proc,right=of complete] (supplement) {补充资料};
 \node[proc,right=of approve] (revise) {修订计划};
 \node[proc,left=of execute] (review) {偏差复核};
-\node[term,below=of execute] (end) {结束};
+\node[term,below=of review] (end) {结束};
 \draw[->,draw=Primary,thick] (start)--(submit);
 \draw[->,draw=Primary,thick] (submit)--(complete);
 \draw[->,draw=Primary,thick] (complete)--node[left,font=\scriptsize]{是} (check);
@@ -543,7 +547,7 @@ Won't & 本期自动下发闸门控制 & 控制安全论证不在当前范围 \\
 \draw[->,draw=Accent,thick] (revise) |- (check);
 \draw[->,draw=Primary,thick] (task)--(execute);
 \draw[->,draw=Primary,thick] (execute)--(review);
-\draw[->,draw=Primary,thick] (execute)--(end);
+\draw[->,draw=Primary,thick] (review)--(end);
 \draw[->,draw=Accent,dashed,thick,bend left=30] (review) to node[above,font=\scriptsize]{形成下一周期依据} (submit);
 \end{tikzpicture}
 \caption{用水计划申报、审批、配水与反馈流程}
@@ -563,81 +567,93 @@ Won't & 本期自动下发闸门控制 & 控制安全论证不在当前范围 \\
 \node[process,right=of farmer] (system) {灌区用水计划\\与配水系统};
 \node[entity,right=of system] (manager) {调度与审批人员};
 \node[entity,below=of system] (meter) {计量与闸门系统};
-\draw[->,draw=Primary,thick] (farmer)--node[above,font=\scriptsize]{申报/补充资料} (system);
-\draw[->,draw=Primary,thick] (system)--node[below,font=\scriptsize]{状态/批准计划} (farmer);
-\draw[->,draw=Primary,thick] (manager)--node[above,font=\scriptsize]{审批/调整} (system);
-\draw[->,draw=Primary,thick] (system)--node[below,font=\scriptsize]{待办/分析结果} (manager);
-\draw[->,draw=Primary,thick] (system)--node[right,font=\scriptsize]{配水任务} (meter);
-\draw[->,draw=Primary,thick] (meter)--node[left,font=\scriptsize]{执行回执} (system);
+\draw[->,draw=Primary,thick] ([yshift=2mm]farmer.east)--node[above,font=\scriptsize]{申报/补充资料}(system.160);
+\draw[->,draw=Primary,thick] (system.200)--node[below,font=\scriptsize]{状态/批准计划}([yshift=-2mm]farmer.east);
+\draw[->,draw=Primary,thick] ([yshift=2mm]manager.west)--node[above,font=\scriptsize]{审批/调整}(system.20);
+\draw[->,draw=Primary,thick] (system.340)--node[below,font=\scriptsize]{待办/分析结果}([yshift=-2mm]manager.west);
+\draw[->,draw=Primary,thick] (system.290)--node[right,font=\scriptsize]{配水任务}([xshift=4mm]meter.north);
+\draw[->,draw=Primary,thick] ([xshift=-4mm]meter.north)--node[left,font=\scriptsize]{执行回执}(system.250);
 \end{tikzpicture}
 \caption{灌区用水计划与配水系统上下文图}
 \label{fig:dfd-level-zero}
 \end{figure}
 
-把上下文图中的单个处理展开，就得到图\ref{fig:dfd-level-one}的一级数据流图。检查分解是否正确的办法是做平衡核对：一级图中所有跨越系统边界的数据流，必须与上下文图中进出系统的数据流逐条对应，既不能多出一条，也不能漏掉一条。
+把上下文图中的单个处理展开，就得到图\ref{fig:dfd-level-one}的一级数据流图。检查分解是否正确的办法是做平衡核对：一级图中所有跨越系统边界的数据流，必须与上下文图中进出系统的数据流逐条对应，既不能多出一条，也不能漏掉一条。图中上下两条平行线表示数据存储，D1–D3是存储编号。
 
 \begin{figure}[htbp]
 \centering
-\begin{tikzpicture}[node distance=5mm and 3mm,
-  entity/.style={draw=Primary,fill=PrimaryLight,minimum width=1.5cm,minimum height=.65cm,align=center,font=\scriptsize},
-  process/.style={ellipse,draw=Primary,fill=PrimaryLight,minimum width=1.7cm,minimum height=.8cm,align=center,font=\scriptsize},
-  store/.style={draw=Primary,double,minimum width=1.9cm,minimum height=.6cm,align=center,font=\scriptsize},
-  flow/.style={->,draw=Primary,thick},
-  lbl/.style={font=\tiny}]
-\node[process] (receive) {1.0 接收申报};
-\node[process,right=of receive] (validate) {2.0 校验与分析};
-\node[process,right=of validate] (approve) {3.0 审批计划};
-\node[process,right=of approve] (dispatch) {4.0 生成配水};
-\node[entity,above=8mm of receive] (farmer) {用水户};
-\node[entity,above=8mm of approve] (manager) {调度与审批人员};
-\node[entity,above=8mm of dispatch,xshift=10mm] (meter) {计量与闸门系统};
-\node[store,below=11mm of validate,xshift=24mm] (plan) {D1 用水计划};
-\node[store,below=11mm of validate,xshift=-15mm] (resource) {D2 水源与工程能力};
-\node[store,below=of dispatch,xshift=8mm] (receipt) {D3 执行记录};
-\draw[flow] (farmer.south west) -- ++(-1.5mm,0) |- node[pos=.28,left,lbl]{申报/补充资料} (receive.west);
-\draw[flow] (receive.north)--node[right,lbl]{状态/批准计划}(farmer.south);
-\draw[flow] (manager.south)--node[right,lbl]{审批/调整}(approve.north);
-\draw[flow] (approve.north west) to[bend left=18] node[left,lbl]{待办/分析结果} (manager.south west);
-\draw[flow] (dispatch.east)-|node[pos=.85,right,lbl]{配水任务}(meter.south);
-\draw[flow] (meter.south east) to[bend left=32] node[right,lbl]{执行回执} (receipt.east);
-\draw[flow] (receive)--node[above,lbl]{规范化申请}(validate);
-\draw[flow] (validate)--node[above,lbl]{校核结论}(approve);
-\draw[flow] (approve)--node[above,lbl]{批准计划}(dispatch);
-\draw[<->,draw=Primary,thick] (validate.south east)--(plan.north west);
-\draw[<->,draw=Primary,thick] (validate.south west)--(resource.north);
-\draw[flow] (approve.south)--node[right,pos=.4,lbl]{审批结果}(plan.north east);
-\draw[->,draw=Accent,dashed,thick] (receipt.south) |- ++(-10.2,-.6) node[below,pos=.55,lbl]{回执反馈} -| (validate.south);
+\begin{tikzpicture}[
+  entity/.style={draw=Primary,fill=PrimaryLight,minimum width=1.9cm,minimum height=.65cm,align=center,font=\scriptsize},
+  process/.style={ellipse,draw=Primary,fill=PrimaryLight,minimum width=2.1cm,minimum height=.8cm,align=center,font=\scriptsize},
+  store/.style={minimum width=2.1cm,minimum height=.65cm,align=center,font=\scriptsize},
+  flow/.style={->,draw=Primary,thick},lbl/.style={font=\scriptsize,fill=white,inner sep=1pt}]
+\node[process] (receive) at (0,0) {1.0 接收申报};
+\node[process] (validate) at (3.5,0) {2.0 校验与分析};
+\node[process] (approve) at (7,0) {3.0 审批计划};
+\node[process] (dispatch) at (10.5,0) {4.0 配水执行\\与回执登记};
+\node[entity] (farmer) at (0,1.65) {用水户};
+\node[entity] (manager) at (7,1.65) {调度与审批人员};
+\node[entity] (meter) at (10.5,1.65) {计量与闸门系统};
+\node[store] (resource) at (0,-1.8) {D2 水源与工程能力};
+\node[store] (receipt) at (3.5,-1.8) {D3 执行记录};
+\node[store] (plan) at (7,-1.8) {D1 用水计划};
+\foreach \storeNode in {resource,receipt,plan}{
+  \draw[draw=Primary] (\storeNode.north west)--(\storeNode.north east);
+  \draw[draw=Primary] (\storeNode.south west)--(\storeNode.south east);
+}
+\draw[flow] (farmer.south)--node[left,lbl]{申报/补充资料}(receive.north);
+\draw[flow] (approve.north west)--++(-8mm,0)--++(0,2.5cm)-|node[above,pos=.6,lbl]{状态/批准计划}(farmer.north);
+\draw[flow] ([xshift=3mm]manager.south)--node[right,lbl]{审批/调整}([xshift=3mm]approve.north);
+\draw[flow] ([xshift=-3mm]approve.north)--node[left,lbl,align=center]{待办/\\分析结果}([xshift=-3mm]manager.south);
+\draw[flow] (dispatch.110)--node[left,lbl]{配水任务}([xshift=-4mm]meter.south);
+\draw[flow] ([xshift=4mm]meter.south)--node[right,lbl]{执行回执}(dispatch.70);
+\draw[flow] (dispatch.east)--++(12mm,0) |- node[below,pos=.7,lbl]{执行记录} ($(receipt.south)+(0,-8mm)$)--(receipt.south);
+\draw[flow] (receive)--node[above=2mm,lbl]{规范化申请}(validate);
+\draw[flow] (validate)--node[below=2mm,lbl]{校核结论}(approve);
+\draw[flow] (approve)--node[above=2mm,lbl]{批准计划}(dispatch);
+\draw[flow] (resource.north)--node[above left,lbl]{能力参数}(validate.south west);
+\draw[flow] (receipt.north)--node[left,lbl]{回执反馈}(validate.south);
+\draw[flow] (plan.west)--node[below left,lbl]{既有计划}(validate.285);
+\draw[flow] (validate.330)--node[above right,lbl]{校核记录}(plan.north west);
+\draw[flow] (approve.south)--node[right,lbl]{审批结果}(plan.north);
 \end{tikzpicture}
 \caption{灌区用水计划与配水系统一级数据流图}
 \label{fig:dfd-level-one}
 \end{figure}
 
-一级图只说明四个主要处理之间的边界，不能直接替代接口和数据校验设计。以“2.0 校验与分析”为例，二级分解可以拆成完整性与重复检查、需水量计算、渠道能力匹配、生成校核结果四个处理，再把每个处理的输出写回统一的数据存储。图\ref{fig:ch02-dfd-level-two}给出这一展开，同时保留从一级图传入的“申报资料”和传出的“校核结果”两个边界流；一级图中经 D3 的回执反馈在此层并入 D2 的工程能力更新，属于同一边界流的细化而非丢失。二级图新增的内部数据流可以更细，但不能改变父处理对外承诺的名称、方向和含义。
+一级图只说明四个主要处理之间的边界，不能直接替代接口和数据校验设计。以“2.0 校验与分析”为例，二级分解可以拆成完整性与重复检查、需水量计算、渠道能力匹配、生成校核结果四个处理，分别标出既有计划、工程能力和执行记录的读取位置，以及校核记录的写入位置。图\ref{fig:ch02-dfd-level-two}给出这一展开，同时保留从一级图传入的“规范化申请”和传出的“校核结论”，并逐项展开 D1 的读写、D2 的能力参数与 D3 的回执反馈。二级图新增的内部数据流可以更细，但不能改变父处理对外承诺的名称、方向和含义。
 
 绘制二级图时要做三项平衡检查。第一，边界平衡：父图的每条输入和输出在子图中都必须找到对应流；第二，处理守恒：每个处理不能凭空产生业务数据，也不能吞掉没有去向的输入；第三，存储责任：读取和写入哪个数据存储要明确，不能用一条双向箭头掩盖读写时序。若子图需要引入“外部信用评分”一类新实体，应先回到上下文图讨论系统边界，而不是直接画进二级图。
 
 \begin{figure}[htbp]
 \centering
-\begin{tikzpicture}[node distance=8mm and 7mm,
-  process/.style={ellipse,draw=Primary,fill=PrimaryLight,minimum width=2.25cm,minimum height=.75cm,align=center,font=\small},
-  store/.style={draw=Primary,double,minimum width=2.3cm,minimum height=.65cm,align=center,font=\small},
-  ext/.style={draw=Accent,rounded corners,fill=Accent!10,minimum width=2.3cm,minimum height=.65cm,align=center,font=\small}]
-\node[ext] (in) {申报资料};
-\node[process,right=of in] (p21) {2.1 完整性\\与重复检查};
-\node[process,right=of p21] (p22) {2.2 需水量\\计算};
-\node[process,below=of p22] (p23) {2.3 渠道能力\\匹配};
-\node[process,left=of p23] (p24) {2.4 生成\\校核结果};
-\node[store,below=of p21] (d1) {D1 用水计划};
-\node[store,below=of p24] (d2) {D2 水源与工程能力};
-\node[ext,right=of p23] (out) {校核结果};
-\draw[->,thick] (in)--(p21);
-\draw[->,thick] (p21)--(p22);
-\draw[->,thick] (p22)--(p23);
-\draw[->,thick] (p23)--(p24);
-\draw[->,thick] (p24)--(out);
-\draw[<->,thick] (p21)--(d1);
-\draw[<->,thick] (p23)--(d2);
-\draw[->,dashed] (p24)--(d1);
+\begin{tikzpicture}[
+  process/.style={ellipse,draw=Primary,fill=PrimaryLight,minimum width=2.6cm,minimum height=.9cm,align=center,font=\small},
+  store/.style={minimum width=2.4cm,minimum height=.65cm,align=center,font=\small},
+  ext/.style={draw=Accent,rounded corners,fill=Accent!10,minimum width=2.3cm,minimum height=.65cm,align=center,font=\small},
+  flow/.style={->,draw=Primary,thick},lbl/.style={font=\scriptsize,fill=white,inner sep=1pt}]
+\node[ext] (in) at (-3.5,0) {规范化申请};
+\node[process] (p21) at (0,0) {2.1 完整性\\与重复检查};
+\node[process] (p22) at (4.5,0) {2.2 需水量\\计算};
+\node[process] (p23) at (4.5,-2) {2.3 渠道能力\\匹配};
+\node[process] (p24) at (0,-2) {2.4 生成\\校核结果};
+\node[store] (d1) at (-3.5,-2) {D1 用水计划};
+\node[store] (d2) at (8.2,-2) {D2 水源与工程能力};
+\node[store] (d3) at (4.5,-4) {D3 执行记录};
+\node[ext] (out) at (0,-4) {校核结论};
+\foreach \storeNode in {d1,d2,d3}{
+  \draw[draw=Primary] (\storeNode.north west)--(\storeNode.north east);
+  \draw[draw=Primary] (\storeNode.south west)--(\storeNode.south east);
+}
+\draw[flow] (in)--(p21);
+\draw[flow] (p21)--node[above,lbl]{通过校验的申请}(p22);
+\draw[flow] (p22)--node[right,lbl]{需水量}(p23);
+\draw[flow] (p23)--node[above,lbl]{能力匹配结果}(p24);
+\draw[flow] (p24)--(out);
+\draw[flow] (d1.north)--++(0,7mm)-|node[above,pos=.25,lbl]{既有计划}(p21.south);
+\draw[flow] (p24.west)--node[below=5mm,lbl]{校核记录}(d1.east);
+\draw[flow] (d2.west)--node[above=5mm,lbl]{能力参数}(p23.east);
+\draw[flow] (d3.north)--node[right,lbl]{回执反馈}(p23.south);
 \end{tikzpicture}
 \caption{校验与分析处理的二级数据流图}
 \label{fig:ch02-dfd-level-two}
@@ -723,7 +739,7 @@ version & 整数 & — & 每次修订递增，批准后不可覆盖 \\
 
 \begin{figure}[htbp]
 \centering
-\begin{tikzpicture}[node distance=9mm and 9mm,
+\begin{tikzpicture}[node distance=9mm and 15mm,
   state/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=2.0cm,minimum height=.62cm,align=center,font=\small}]
 \node[state] (draft) {草稿};
 \node[state,right=of draft] (submitted) {已提交};
@@ -734,12 +750,12 @@ version & 整数 & — & 每次修订递增，批准后不可覆盖 \\
 \node[state,below=of checking] (returned) {已退回};
 \draw[->,thick] (draft)--node[above,font=\scriptsize]{提交}(submitted);
 \draw[->,thick] (submitted)--node[above,font=\scriptsize]{受理}(checking);
-\draw[->,thick] (checking)--node[above,font=\scriptsize]{校核通过}(approved);
+\draw[->,thick] (checking)--node[above,font=\scriptsize]{审批通过}(approved);
 \draw[->,thick] (approved)--node[above,font=\scriptsize]{进入时段}(running);
 \draw[->,thick] (running)--node[right,font=\scriptsize]{回执完成}(closed);
 \draw[->,thick] (checking)--node[left,font=\scriptsize]{资料或水量问题}(returned);
 \draw[->,thick] (returned) -| node[near start,below,font=\scriptsize]{补充后再提交} (draft);
-\draw[->,dashed,thick] (running) to[bend left=35] node[right,font=\scriptsize]{偏差中止（受控）} (returned);
+\draw[->,dashed,thick] (running.south west)--++(-3mm,-22mm)-|node[below,pos=.25,font=\scriptsize]{偏差中止（受控）}(returned.south);
 \end{tikzpicture}
 \caption{用水计划状态与受控转换}
 \label{fig:ch02-plan-state}
@@ -933,7 +949,7 @@ SRS中的功能需求最好采用“条件—动作—结果—证据”的句�
 \draw[->,thick] (review)--node[above,font=\scriptsize]{是}(implement);
 \draw[->,thick] (review)--node[left,font=\scriptsize]{否}(defer);
 \draw[->,thick] (implement)--(verify);
-\draw[->,thick] (verify) -| node[near start,below,font=\scriptsize]{发现回归}(impact);
+\draw[->,thick] (verify.south)--++(0,-7mm)-|node[below,pos=.35,font=\scriptsize]{发现偏差}(impact.south);
 \end{tikzpicture}
 \caption{需求变更从申请到验证的控制闭环}
 \label{fig:ch02-change-control}

@@ -8,6 +8,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const assert = require('node:assert/strict');
 const crypto = require('node:crypto');
+const prepareSceneDisplay = require('./scene-display.cjs');
 const root = path.resolve(__dirname, '../../..');
 const base = path.join(root, 'companion/water-platform-demo');
 const frontend = path.join(base, 'frontend');
@@ -65,7 +66,7 @@ ${loginCode}const headers={...auth,'Content-Type':'application/json'};window.wor
 
 async function ready(url){for(let i=0;i<80;i++){try{if((await fetch(url)).status<500)return;}catch{}await new Promise(r=>setTimeout(r,200));}throw new Error('Not ready '+url);}
 function fixture(name){return origin+'/@fs/'+path.join(out,name).replaceAll('\\','/');}
-async function capture(page, filename, meta, options={}){const buffer=await page.screenshot({path:path.join(imageOut,filename),...options});const width=buffer.readUInt32BE(16),height=buffer.readUInt32BE(20);entries.push({file:'output/images/runtime/'+filename,url:page.url(),viewport:page.viewportSize(),deviceScaleFactor:2,width,height,printHeightAt16cm:Number((16*height/width).toFixed(2)),sha256:crypto.createHash('sha256').update(buffer).digest('hex'),...meta});}
+async function capture(page, filename, meta, options={}){const buffer=await page.screenshot(options);const target=path.join(imageOut,filename);if(!fs.existsSync(target)||!fs.readFileSync(target).equals(buffer))fs.writeFileSync(target,buffer);const width=buffer.readUInt32BE(16),height=buffer.readUInt32BE(20);entries.push({file:'output/images/runtime/'+filename,url:page.url(),viewport:page.viewportSize(),deviceScaleFactor:2,width,height,printHeightAt16cm:Number((16*height/width).toFixed(2)),sha256:crypto.createHash('sha256').update(buffer).digest('hex'),...meta});}
 (async()=>{let api,vite,browser;try{
   api=spawn(process.execPath,['teaching-api/server.mjs',String(HTTP_PORT)],{cwd:base,windowsHide:true,stdio:'pipe'});api.stderr.on('data',b=>process.stderr.write(b));
   process.env.VITE_PROXY_TARGET=`http://127.0.0.1:${HTTP_PORT}`;
@@ -84,9 +85,23 @@ async function capture(page, filename, meta, options={}){const buffer=await page
   await page.goto(fixture('quality.html'));await page.waitForFunction(()=>window.captureReady);await page.waitForTimeout(1200);await capture(page,'s5-missing-gap.png',{kind:'fixture',sourceModules:['src/lesson74/series-controller.js','src/lesson74/link.js','src/utils/readings.js'],sceneAdapter:'无操作事件适配器；本图只展示真实曲线与数据，不展示三维',evidence:await page.evaluate(()=>window.qualityEvidence)},{fullPage:true});
   await page.goto(fixture('work-order.html'));await page.waitForFunction(()=>window.captureReady);const workflowEvidence=await page.evaluate(()=>window.workflowEvidence);assert.deepEqual(workflowEvidence.statuses,[409,200,201,200,200]);assert.deepEqual(workflowEvidence.states,['acknowledged','in_progress','completed','closed']);await capture(page,'s6-work-order.png',{kind:'fixture',stage:'S6',backend:'teaching-api/server.mjs',evidence:workflowEvidence,records:await page.evaluate(()=>window.workflowRecords)},{fullPage:true});
   await page.setViewportSize({width:800,height:900});await page.goto(origin+'/lesson44.html');await page.locator('#keyword').fill('DAM-A-WL');await page.locator('#sort-direction').selectOption('desc');assert.equal(await page.locator('.asset-card').count(),3);const listClip=await page.locator('section[aria-labelledby="list-title"]').boundingBox();await capture(page,'s1-asset-list.png',{kind:'original-stage',stage:'S1',entry:'lesson44.html',interaction:'筛选 DAM-A-WL；按最新观测值降序排列；仅截取测点列表区域',summary:await page.locator('#asset-summary').innerText(),cards:await page.locator('.asset-card').allTextContents(),crop:listClip},{clip:listClip});
-  await page.setViewportSize({width:1120,height:420});await page.goto(origin+'/lesson61.html');await page.waitForFunction(()=>window.bound?.group.children.length===28);await page.waitForTimeout(400);await capture(page,'s4-scene.png',{kind:'original-stage',stage:'S4',actualAssets:28,entry:'lesson61.html',view:'阶段页默认相机；只有当前视野内测点可见，未改变真实几何体或台账坐标',captureStyle:'仅截图时隐藏顶部教学说明条 #tip；源码、模型和坐标不变'},{style:'#tip { visibility:hidden !important; }'});
+  await page.setViewportSize({width:1120,height:440});
+  await page.goto(origin+'/lesson61.html');
+  await page.waitForFunction(()=>window.bound?.group.children.length===28);
+  const s4Display=await prepareSceneDisplay(page);
+  await capture(page,'s4-scene.png',{kind:'annotated-stage',stage:'S4',entry:'lesson61.html',...s4Display});
   await page.goto(origin+'/lesson74.html');
   await page.waitForFunction(()=>document.querySelector('#status')?.textContent.startsWith('DAM-A-PZ-07：288'));
+  await page.waitForTimeout(2200);
+  const s5Display=await prepareSceneDisplay(page,{linked:true});
+  // 先切到 WL-01，再用原射线拾取器实际点击 PZ-07；验证接口、状态和高亮。
+  await page.evaluate(()=>sceneBus.select(scene.getObjectByName('assets').children.find(m=>m.userData.assetId==='DAM-A-WL-01')));
+  await page.waitForFunction(()=>document.querySelector('#status').textContent.startsWith('DAM-A-WL-01：288'));
+  const pickedResponse=page.waitForResponse(r=>r.url().includes('/api/assets/DAM-A-PZ-07/readings?')&&r.status()===200);
+  await page.mouse.click(s5Display.click.x,s5Display.click.y);
+  const picked=await pickedResponse;
+  await page.waitForFunction(()=>document.querySelector('#status').textContent.startsWith('DAM-A-PZ-07：288'));
+  assert.equal(await page.evaluate(()=>sceneBus.focused),'DAM-A-PZ-07');
   await page.waitForTimeout(2200);
   const displayEvidence=await page.evaluate(async()=>{
     const moduleUrl=performance.getEntriesByType('resource').find(e=>/\/echarts\.js(?:\?|$)/.test(e.name))?.name;
@@ -96,14 +111,19 @@ async function capture(page, filename, meta, options={}){const buffer=await page
     const before=JSON.stringify(chart.getOption().series.map(series=>series.data));
     const panel=document.querySelector('#panel'),canvas=document.querySelector('#chart'),status=document.querySelector('#status');
     Object.assign(panel.style,{width:'600px',padding:'12px',background:'#ffffff',boxSizing:'content-box'});
-    canvas.style.height='290px';
+    canvas.style.height='275px';
+    panel.style.top='60px';
     Object.assign(status.style,{fontSize:'22px',lineHeight:'1.5',margin:'8px 0 0'});
     chart.resize();
-    chart.setOption({animation:false,textStyle:{fontFamily:'Microsoft YaHei',fontSize:22},grid:{left:66,right:18,top:40,bottom:48},xAxis:{axisLabel:{fontSize:22}},yAxis:{axisLabel:{fontSize:22},nameTextStyle:{fontSize:22}}});
+    chart.setOption({animation:false,textStyle:{fontFamily:'Microsoft YaHei',fontSize:22},grid:{left:66,right:18,top:40,bottom:48},xAxis:{axisLabel:{fontSize:22,formatter:value=>new Date(value).toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit',timeZone:'Asia/Shanghai'})}},yAxis:{axisLabel:{fontSize:22},nameTextStyle:{fontSize:22}}});
     chart.getZr().flush();
+    const title=document.createElement('div');
+    Object.assign(title.style,{position:'fixed',left:'484px',top:'18px',fontSize:'22px',fontWeight:'600',color:'#173b54',fontFamily:'Microsoft YaHei'});
+    title.textContent='② 同一编码的渗压曲线 · 2026-07-01（UTC+8）';
+    document.body.append(title);
     const after=JSON.stringify(chart.getOption().series.map(series=>series.data));
     const textSpans=chart.getZr().storage.getDisplayList().filter(el=>el.type==='tspan').map(el=>{const matrix=el.getComputedTransform();return{text:el.style.text,font:el.style.font,boundingBoxHeight:el.getBoundingRect().height,scaleY:matrix?Math.hypot(matrix[2],matrix[3]):1};});
-    return{actualModuleUrl:moduleUrl,seriesDataUnchanged:before===after,seriesDataBefore:before,seriesDataAfter:after,dataCount:chart.getOption().series[0].data.length,textSpans,statusComputedFontPx:parseFloat(getComputedStyle(status).fontSize),statusLineHeightPx:parseFloat(getComputedStyle(status).lineHeight),panelBounds:panel.getBoundingClientRect().toJSON(),chartBounds:canvas.getBoundingClientRect().toJSON(),displaySettings:{axisFontCssPx:22,statusFontCssPx:22,chartHeightCssPx:290,panelWidthCssPx:600,background:'#ffffff',dataAndModulesUnchanged:true}};
+    return{actualModuleUrl:moduleUrl,seriesDataUnchanged:before===after,seriesDataBefore:before,seriesDataAfter:after,dataCount:chart.getOption().series[0].data.length,textSpans,statusComputedFontPx:parseFloat(getComputedStyle(status).fontSize),statusLineHeightPx:parseFloat(getComputedStyle(status).lineHeight),panelBounds:panel.getBoundingClientRect().toJSON(),chartBounds:canvas.getBoundingClientRect().toJSON(),displaySettings:{axisFontCssPx:22,statusFontCssPx:22,chartHeightCssPx:275,panelWidthCssPx:600,background:'#ffffff',dataAndModulesUnchanged:true}};
   });
   assert.equal(displayEvidence.seriesDataUnchanged,true);assert.equal(displayEvidence.dataCount,288);assert.equal(displayEvidence.statusComputedFontPx,22);
   assert.ok(displayEvidence.textSpans.length>8);assert.ok(displayEvidence.textSpans.every(span=>/22px/.test(span.font)&&span.scaleY===1));
@@ -112,14 +132,15 @@ async function capture(page, filename, meta, options={}){const buffer=await page
   delete displayEvidence.seriesDataBefore;delete displayEvidence.seriesDataAfter;
   displayEvidence.equivalentPointSizeAt16cm=Number((22*16*72/(1120*2.54)).toFixed(2));
   displayEvidence.fontEvidenceMethod='读取原 ECharts 实例的 ZRender tspan 实际 font 与变换比例，以及状态条的 getComputedStyle；等效 pt = CSS px × 16 cm × 72 ÷ (1120 CSS px × 2.54)。';
-  await page.mouse.move(400,350);await page.mouse.down({button:'right'});await page.mouse.move(180,350,{steps:8});await page.mouse.up({button:'right'});await page.waitForTimeout(200);
-  await capture(page,'s5-scene-chart.png',{kind:'original-stage',stage:'S5',entry:'lesson74.html',status:await page.locator('#status').innerText(),actualAssets:await page.evaluate(()=>scene.getObjectByName('assets').children.length),interaction:'原阶段页在浏览器中放大图表显示；右键从(400,350)拖到(180,350)平移相机，让坝体与曲线并排；模型、台账坐标和288条序列数据未改',captureStyle:'隐藏教学说明条 #tip；面板宽600px、图表高290px、轴标签和状态条22px，调用原图表实例resize/setOption仅调显示选项',displayEvidence},{style:'#tip { visibility:hidden !important; }'});
+  displayEvidence.pick={from:'DAM-A-WL-01',to:'DAM-A-PZ-07',method:'Playwright mouse.click -> 原 PointPicker 射线拾取 -> select -> 教学 API',click:s5Display.click,responseStatus:picked.status(),responseUrl:picked.url(),returnedRecords:(await picked.json()).length};
+  await page.waitForTimeout(500);
+  await capture(page,'s5-scene-chart.png',{kind:'annotated-stage',stage:'S5',entry:'lesson74.html',status:await page.locator('#status').innerText(),...s5Display,displayEvidence});
   assert.deepEqual(errors,[]);let commit;try{commit=execFileSync('git',['-c',`safe.directory=${root.replaceAll('\\','/')}`,'rev-parse','HEAD'],{cwd:root,encoding:'utf8',windowsHide:true}).trim();}catch{};
-  const sourcePaths=['companion/water-platform-demo/teaching-api/server.mjs','companion/water-platform-demo/frontend/src/lesson45/detail.js','companion/water-platform-demo/frontend/src/lesson45/state.js','companion/water-platform-demo/frontend/src/lesson45/controller.js','companion/water-platform-demo/frontend/src/lesson61/first-scene.js','companion/water-platform-demo/frontend/src/lesson61/bind-assets.js','companion/water-platform-demo/frontend/src/lesson74/series-controller.js','companion/water-platform-demo/frontend/src/utils/readings.js','companion/water-platform-demo/frontend/src/lesson44/assets.js','companion/datasets/stations.csv','companion/datasets/water_level.csv','companion/datasets/warnings.json'];
+  const sourcePaths=['companion/illustrations/runtime/capture.cjs','companion/illustrations/runtime/scene-display.cjs','companion/water-platform-demo/teaching-api/server.mjs','companion/water-platform-demo/frontend/src/lesson45/detail.js','companion/water-platform-demo/frontend/src/lesson45/state.js','companion/water-platform-demo/frontend/src/lesson45/controller.js','companion/water-platform-demo/frontend/src/lesson61/first-scene.js','companion/water-platform-demo/frontend/src/lesson61/bind-assets.js','companion/water-platform-demo/frontend/src/lesson74/series-controller.js','companion/water-platform-demo/frontend/src/utils/readings.js','companion/water-platform-demo/frontend/src/lesson44/assets.js','companion/datasets/stations.csv','companion/datasets/water_level.csv','companion/datasets/warnings.json'];
   const sourceHashes=Object.fromEntries(sourcePaths.map(file=>[file,crypto.createHash('sha256').update(fs.readFileSync(path.join(root,file))).digest('hex')]));
-  const evidence={http:records,network:networkRecords,workflow:entries.find(e=>e.stage==='S6').records,quality:entries.find(e=>e.evidence?.missingIndex!==undefined).evidence,switch:entries.find(e=>e.events).events,s5Display:displayEvidence};
+  const evidence={http:records,network:networkRecords,workflow:entries.find(e=>e.stage==='S6').records,quality:entries.find(e=>e.evidence?.missingIndex!==undefined).evidence,switch:entries.find(e=>e.events).events,s4Display,s5Display:{...s5Display,...displayEvidence}};
   fs.writeFileSync(path.join(out,'request-evidence.json'),JSON.stringify(evidence,null,2)+'\n');
-  const manifest={package:'R10-04',captureTime:new Date().toISOString(),sourceCommit:commit,sourceHashes,command:'node companion/illustrations/runtime/capture.cjs',services:{teachingApi:'node teaching-api/server.mjs '+HTTP_PORT,vite:'Vite createServer, port '+VITE_PORT+', VITE_PROXY_TARGET=http://127.0.0.1:'+HTTP_PORT},browser:'Microsoft Edge / Playwright, headless, deviceScaleFactor=2',browserExecutable,notes:['所有图片为真实浏览器运行结果；无图像后期绘制或数值替换。','标注教学查看器的页面为采集专用fixture，调用实际配套模块或实际教学API；不是配套原页面或浏览器DevTools截图。','请求等待和取消实验通过真实教学接口teach查询参数注入；截图与证据不含令牌。','S1保留原页面，执行筛选与降序排序后裁取测点列表；S4/S5截图时隐藏教学提示条；S5临时放大图表面板和文字，并通过真实鼠标右键拖动平移视野。显示调整和实际字号记录于displayEvidence；未改阶段源码、模型、台账坐标或序列数据。','坝体为长方体教学几何体，默认视野只覆盖局部测点；场景内实有28个绑定对象。','S6工单和预警状态保存在此次独立教学API进程内存中，截图不证明Java后端持久化/角色鉴权/实际工程处置。','S5缺测图选取固定CSV中WL-01在2026-07-01 03:05+08:00的真实missing记录；曲线数值未改，显示48个相邻采样点。'],pageErrors:errors,images:entries};
+  const manifest={package:'R10-05',captureTime:new Date().toISOString(),sourceCommit:commit,sourceHashes,command:'node companion/illustrations/runtime/capture.cjs',services:{teachingApi:'node teaching-api/server.mjs '+HTTP_PORT,vite:'Vite createServer, port '+VITE_PORT+', VITE_PROXY_TARGET=http://127.0.0.1:'+HTTP_PORT},browser:'Microsoft Edge / Playwright, headless, deviceScaleFactor=2',browserExecutable,notes:['所有图片为真实浏览器运行结果；无图像后期绘制或数值替换。','标注教学查看器的页面为采集专用fixture，调用实际配套模块或实际教学API；不是配套原页面或浏览器DevTools截图。','请求等待和取消实验通过真实教学接口teach查询参数注入；截图与证据不含令牌。','S1原页面筛选、排序后裁切；S4/S5由原阶段页调整相机，添加局部参考网格、垂直投影和编码标注。S5实际用鼠标点击PZ-07，原射线拾取器触发请求并显示同一编码曲线。显示与拾取证据见displayEvidence。','S4/S5截图聚焦PZ-07，不是阶段页默认视野。28个绑定对象及其坐标、几何体与观测值保持不变；局部网格10m，仅供坐标识读。','S6工单和预警状态保存在此次独立教学API进程内存中，截图不证明Java后端持久化/角色鉴权/实际工程处置。','S5缺测图选取固定CSV中WL-01在2026-07-01 03:05+08:00的真实missing记录；曲线数值未改，显示48个相邻采样点。'],pageErrors:errors,images:entries};
   fs.writeFileSync(path.join(out,'manifest.json'),JSON.stringify(manifest,null,2)+'\n');
   console.log(JSON.stringify({images:entries.map(e=>({file:e.file,width:e.width,height:e.height,printHeightAt16cm:e.printHeightAt16cm})),pageErrors:errors}));
 }finally{await browser?.close();await vite?.close();api?.kill();}})().catch(e=>{console.error(e);process.exitCode=1;});

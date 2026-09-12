@@ -1,9 +1,10 @@
 {
-  "package": "R10-04",
+  "package": "R10-05",
   "date": "2026-09-12",
   "prompts": [
     "tools/review/r10-04-image-prompts.json",
-    "tools/review/r10-04-components-prompt.json"
+    "tools/review/r10-04-components-prompt.json",
+    "tools/review/r10-05-image-edit.json"
   ],
   "images": [
     {
@@ -38,18 +39,20 @@
     },
     {
       "file": "output/images/generated/acquisition-cabinet.png",
-      "original": "exec-cf3a1c27-fdd6-4031-acf0-1bcf13d028aa.png",
+      "original": "exec-80fe9d2b-6fc2-4da8-98ce-f48f1215a677.png",
       "prompt_key": "cabinet",
       "label": "fig:ch08-acquisition-cabinet",
       "pixels": [
         1536,
         1024
       ],
-      "sha256": "6e4ccc9311cdd9f10ca1af8842d2c5d6316e42fa2e3ab2604774015deab4be5d",
+      "sha256": "45d438cb9f584c01d3fa7a710bff30b7a86e0379ef73da010cd58f3f79541de2",
       "source": "OpenAI built-in image_gen",
       "disclosure": "AI生成教学渲染",
       "use": "工程对象外观与空间关系识读；不作为实测、模型成果或接线设计",
-      "review": "主代理目视检查：坝体与3孔闸门、监测仪器姿态、采集柜功能区、双联构件对应。照片式纹理仅表达外观。"
+      "review": "已实际查看：蓝线两端改为矩形RJ45网口，天线使用独立射频连接；设备识读使用，不作为接线设计图。",
+      "previous_original": "exec-cf3a1c27-fdd6-4031-acf0-1bcf13d028aa.png",
+      "edit_record": "tools/review/r10-05-image-edit.json"
     },
     {
       "file": "output/images/generated/appearance-components.png",

@@ -1,0 +1,1089 @@
+{
+  "package": "R10-05",
+  "scope": "第4–6章全部35幅图；只编辑三章TeX与获授权的两个第6章宏",
+  "reviewedAt": "2026-09-12",
+  "method": "先以当前TeX生成28幅独立图核对，不使用旧网站SVG为正确基准；另对7幅栅格图实际查看。修复后再次独立编译并渲染。独立编译前图上的页码1来自ctex页式，后图使用pagestyle empty去除；不属于书稿图形。",
+  "counts": [
+    {
+      "chapter": 4,
+      "before": 30242,
+      "after": 30265,
+      "delta": 23
+    },
+    {
+      "chapter": 5,
+      "before": 29518,
+      "after": 29516,
+      "delta": -2
+    },
+    {
+      "chapter": 6,
+      "before": 30702,
+      "after": 30755,
+      "delta": 53
+    }
+  ],
+  "codeContracts": [
+    {
+      "chapter": 4,
+      "listingsUnchanged": true,
+      "lfOnly": true
+    },
+    {
+      "chapter": 5,
+      "listingsUnchanged": true,
+      "lfOnly": true
+    },
+    {
+      "chapter": 6,
+      "listingsUnchanged": true,
+      "lfOnly": true
+    }
+  ],
+  "totals": {
+    "figures": 35,
+    "repaired": 23,
+    "passedWithoutChanges": 12,
+    "tikzFigures": 28,
+    "tikzSourcesChanged": 21
+  },
+  "changedTikzLabels": [
+    "fig:ch04-document-flow",
+    "fig:ch04-css-box-model",
+    "fig:ch04-responsive-breakpoints",
+    "fig:ch04-a44-event-flow",
+    "fig:ch04-jwt-integration",
+    "fig:vue-lifecycle",
+    "fig:ch04-a46-lifecycle-cleanup",
+    "fig:ch05-request-chain",
+    "fig:ch05-rest-contract",
+    "fig:ch05-tx-proxy",
+    "fig:ch05-auth-sequence",
+    "fig:ch06-render-pipeline",
+    "fig:ch06-scene-graph",
+    "fig:ch06-coordinate-chain",
+    "fig:uav-oblique-system",
+    "fig:ch06-aerial-control-network",
+    "fig:oblique-preprocess",
+    "fig:dt-five-dimensions",
+    "fig:dt-closed-loop",
+    "fig:dt-event-contract",
+    "fig:dt-lineage"
+  ],
+  "records": [
+    {
+      "chapter": 4,
+      "number": 1,
+      "label": "fig:browser-architecture",
+      "file": "output/chapters/chapter04.tex",
+      "line": 34,
+      "status": "通过",
+      "viewEvidence": {
+        "before": "temp/r10-05-ch04-06/source-before/ch04-01.png",
+        "after": "temp/r10-05-ch04-06/source-after/ch04-01.png",
+        "afterSha256": "ae5ad0b6eaf7683db3013c32192437392299a07a1222886729cd8784aa8734ca",
+        "method": "当前TeX独立XeLaTeX编译，pdftoppm 200dpi渲染后实际查看；弃用错配的旧网站SVG"
+      },
+      "finding": "模块协作图而非进程拓扑；网络、脚本、图形后端与渲染器的连线端点可辨，未发现穿框或互相覆盖。",
+      "change": "保留。",
+      "sourceFigureChanged": false,
+      "beforeSourceSha256": "b120e7aca7b1836d4cbbb7dc973fe8784dd061553708faa053249c20e7974bb3",
+      "afterSourceSha256": "b120e7aca7b1836d4cbbb7dc973fe8784dd061553708faa053249c20e7974bb3",
+      "validation": {
+        "visual": "已逐图查看；箭头端点、节点间距、文本边界、步骤关系及单位与上述发现逐项核对",
+        "compile": {
+          "pdf": "temp/r10-05-ch04-06/source-after/ch04-01.pdf",
+          "log": "temp/r10-05-ch04-06/source-after/ch04-01.log",
+          "errorOrMissingGlyph": false,
+          "overfull": false
+        },
+        "references": []
+      }
+    },
+    {
+      "chapter": 4,
+      "number": 2,
+      "label": "fig:ch04-s1-list",
+      "file": "output/chapters/chapter04.tex",
+      "line": 98,
+      "status": "通过",
+      "viewEvidence": {
+        "before": "temp/r10-05-ch04-06/before/ch04-02.png",
+        "after": "temp/r10-05-ch04-06/raster-current/ch04-02.png",
+        "afterSha256": "f79167da602b3881b77c25487f6919c206712f90c33c766e2eb489cf425f9093",
+        "method": "实际打开PNG并核对图内编码、单位、字段与正文"
+      },
+      "finding": "真实S1筛选后为WL-01/02/03三条合法库水位对象，读数单位m、降序与3/28计数相符；编码和读数均可读。",
+      "change": "保留，来源为静态阶段页，未宣称实时更新。",
+      "sourceFigureChanged": false,
+      "beforeSourceSha256": "c2c455b589a09ee1eea88534019f2a9be02a6edf80dbd9dce0487e8eb9be613f",
+      "afterSourceSha256": "c2c455b589a09ee1eea88534019f2a9be02a6edf80dbd9dce0487e8eb9be613f",
+      "validation": {
+        "visual": "已逐图查看；箭头端点、节点间距、文本边界、步骤关系及单位与上述发现逐项核对",
+        "compile": "真实运行采集的PNG，本轮由root维护采集程序；未使用TikZ编译",
+        "references": []
+      }
+    },
+    {
+      "chapter": 4,
+      "number": 3,
+      "label": "fig:ch04-document-flow",
+      "file": "output/chapters/chapter04.tex",
+      "line": 111,
+      "status": "修复",
+      "viewEvidence": {
+        "before": "temp/r10-05-ch04-06/source-before/ch04-03.png",
+        "after": "temp/r10-05-ch04-06/source-after/ch04-03.png",
+        "afterSha256": "1e5ac28f8ea9323347150f8204901cb9d1b1c2b370c1a4c72ce61682de179f53",
+        "method": "当前TeX独立XeLaTeX编译，pdftoppm 200dpi渲染后实际查看；弃用错配的旧网站SVG"
+      },
+      "finding": "原图把页面地标/辅助技术串在绘制合成之后，且正文把四节点称为三个阶段。",
+      "change": "重画视觉渲染与可访问性树两个分支，同步样式计算顺序和图题。",
+      "sourceFigureChanged": true,
+      "beforeSourceSha256": "8737bde9e7cfa84f8d0138caf6bd1e1591837b67bb0f7b8ea0e82af1484bd7aa",
+      "afterSourceSha256": "b93d8cd1ca16450e2ad3a2baf129c9151b4a054e9e4b1d8b2a450e86aeb239ec",
+      "validation": {
+        "visual": "已逐图查看；箭头端点、节点间距、文本边界、步骤关系及单位与上述发现逐项核对",
+        "compile": {
+          "pdf": "temp/r10-05-ch04-06/source-after/ch04-03.pdf",
+          "log": "temp/r10-05-ch04-06/source-after/ch04-03.log",
+          "errorOrMissingGlyph": false,
+          "overfull": false
+        },
+        "references": [
+          "https://developer.mozilla.org/en-US/docs/Glossary/Accessibility_tree",
+          "https://developer.mozilla.org/en-US/docs/Web/Performance/Guides/How_browsers_work"
+        ]
+      }
+    },
+    {
+      "chapter": 4,
+      "number": 4,
+      "label": "fig:ch04-css-box-model",
+      "file": "output/chapters/chapter04.tex",
+      "line": 304,
+      "status": "修复",
+      "viewEvidence": {
+        "before": "temp/r10-05-ch04-06/source-before/ch04-04.png",
+        "after": "temp/r10-05-ch04-06/source-after/ch04-04.png",
+        "afterSha256": "430eed294e2ac938421b5c043a71525c477fc8f24c8cefb78c640d4c69cf9238",
+        "method": "当前TeX独立XeLaTeX编译，pdftoppm 200dpi渲染后实际查看；弃用错配的旧网站SVG"
+      },
+      "finding": "content高仅0.34cm，padding和border文字紧贴/覆盖相邻边框。",
+      "change": "增加各层带状空间，四个标签分别落在对应区域中央。",
+      "sourceFigureChanged": true,
+      "beforeSourceSha256": "990fe514eed76c9563682ef837041ce9cb4e99f41a45c00e05e1da7ddfd2ef9f",
+      "afterSourceSha256": "98bd4c6e4f3a870c2282c892a24666108c4942cdca0c5016aba1ff2d95cdb55b",
+      "validation": {
+        "visual": "已逐图查看；箭头端点、节点间距、文本边界、步骤关系及单位与上述发现逐项核对",
+        "compile": {
+          "pdf": "temp/r10-05-ch04-06/source-after/ch04-04.pdf",
+          "log": "temp/r10-05-ch04-06/source-after/ch04-04.log",
+          "errorOrMissingGlyph": false,
+          "overfull": false
+        },
+        "references": []
+      }
+    },
+    {
+      "chapter": 4,
+      "number": 5,
+      "label": "fig:ch04-layout-choice",
+      "file": "output/chapters/chapter04.tex",
+      "line": 519,
+      "status": "通过",
+      "viewEvidence": {
+        "before": "temp/r10-05-ch04-06/source-before/ch04-05.png",
+        "after": "temp/r10-05-ch04-06/source-after/ch04-05.png",
+        "afterSha256": "a352d31a2623d43c01be4b112a95b9da0f179a4c9a382ca6ea0df7859a29838f",
+        "method": "当前TeX独立XeLaTeX编译，pdftoppm 200dpi渲染后实际查看；弃用错配的旧网站SVG"
+      },
+      "finding": "Flex一维主轴与Grid二维行列、两类用例分组清楚；中间双向关系为按层组合，不是强制转换。",
+      "change": "保留。",
+      "sourceFigureChanged": false,
+      "beforeSourceSha256": "c43973ddda883e45ae3bc8eb0af2d6c7ceb763ca5ecd5dc3157d3653a53c6a9b",
+      "afterSourceSha256": "c43973ddda883e45ae3bc8eb0af2d6c7ceb763ca5ecd5dc3157d3653a53c6a9b",
+      "validation": {
+        "visual": "已逐图查看；箭头端点、节点间距、文本边界、步骤关系及单位与上述发现逐项核对",
+        "compile": {
+          "pdf": "temp/r10-05-ch04-06/source-after/ch04-05.pdf",
+          "log": "temp/r10-05-ch04-06/source-after/ch04-05.log",
+          "errorOrMissingGlyph": false,
+          "overfull": false
+        },
+        "references": []
+      }
+    },
+    {
+      "chapter": 4,
+      "number": 6,
+      "label": "fig:ch04-responsive-breakpoints",
+      "file": "output/chapters/chapter04.tex",
+      "line": 603,
+      "status": "修复",
+      "viewEvidence": {
+        "before": "temp/r10-05-ch04-06/source-before/ch04-06.png",
+        "after": "temp/r10-05-ch04-06/source-after/ch04-06.png",
+        "afterSha256": "d9351659cdd11342bb06af3947623ee147e9bc3f013996dd7f5634a9cfd1f829",
+        "method": "当前TeX独立XeLaTeX编译，pdftoppm 200dpi渲染后实际查看；弃用错配的旧网站SVG"
+      },
+      "finding": "宽度1920/2560/3840没有单位；“移动”混用终端类型，“多区联屏”无依据。",
+      "change": "明确CSS视口像素和非等距示意；改窄视口、多区布局，正文规定实际断点由内容验证。",
+      "sourceFigureChanged": true,
+      "beforeSourceSha256": "12c90a7da92bcbd5faf3592cac2a967789d809df0b697d29c6ea191dde942c0a",
+      "afterSourceSha256": "d2264935f71fde739acf9e99178ca3c89d49ab7c616f23a3ef9792d947e837c6",
+      "validation": {
+        "visual": "已逐图查看；箭头端点、节点间距、文本边界、步骤关系及单位与上述发现逐项核对",
+        "compile": {
+          "pdf": "temp/r10-05-ch04-06/source-after/ch04-06.pdf",
+          "log": "temp/r10-05-ch04-06/source-after/ch04-06.log",
+          "errorOrMissingGlyph": false,
+          "overfull": false
+        },
+        "references": []
+      }
+    },
+    {
+      "chapter": 4,
+      "number": 7,
+      "label": "fig:ch04-a44-event-flow",
+      "file": "output/chapters/chapter04.tex",
+      "line": 919,
+      "status": "修复",
+      "viewEvidence": {
+        "before": "temp/r10-05-ch04-06/source-before/ch04-07.png",
+        "after": "temp/r10-05-ch04-06/source-after/ch04-07.png",
+        "afterSha256": "db9fe35a783bd9faeedba6ca5eddb5dda856d505861015a9d440ec91f965bae4",
+        "method": "当前TeX独立XeLaTeX编译，pdftoppm 200dpi渲染后实际查看；弃用错配的旧网站SVG"
+      },
+      "finding": "捕获和冒泡路径端点不完整；正文还将capture错写成第二个参数，并把默认目标监听器也归入冒泡。",
+      "change": "补window/document/list路径和被点击目标；标明省略祖先，说明第三参数及目标阶段。",
+      "sourceFigureChanged": true,
+      "beforeSourceSha256": "b6cceb9792c2102ad53292409748f2f2c11c5d1926a1d0033910a9b7a8733236",
+      "afterSourceSha256": "41e5cb7e7d43ec9b4be01dd4d0a07ad4133edd021da6e9cbbe0710b9d6581ba2",
+      "validation": {
+        "visual": "已逐图查看；箭头端点、节点间距、文本边界、步骤关系及单位与上述发现逐项核对",
+        "compile": {
+          "pdf": "temp/r10-05-ch04-06/source-after/ch04-07.pdf",
+          "log": "temp/r10-05-ch04-06/source-after/ch04-07.log",
+          "errorOrMissingGlyph": false,
+          "overfull": false
+        },
+        "references": [
+          "https://developer.mozilla.org/en-US/docs/Web/API/Event/eventPhase"
+        ]
+      }
+    },
+    {
+      "chapter": 4,
+      "number": 8,
+      "label": "fig:ch04-http-observe",
+      "file": "output/chapters/chapter04.tex",
+      "line": 1195,
+      "status": "通过",
+      "viewEvidence": {
+        "before": "temp/r10-05-ch04-06/before/ch04-08.png",
+        "after": "temp/r10-05-ch04-06/raster-current/ch04-08.png",
+        "afterSha256": "8fe63e4f19d5bef677c83267658e31dc04d61375b71cb00cff48dc2b3af7eec5",
+        "method": "实际打开PNG并核对图内编码、单位、字段与正文"
+      },
+      "finding": "教学查看器列出200/204/400/404四条真实请求；橙色选中行是时间范围错误，右侧INVALID_RANGE、message与field=from对应HTTP400。图中未假冒DevTools。",
+      "change": "保留。",
+      "sourceFigureChanged": false,
+      "beforeSourceSha256": "9fafb9016f0b7e02de490aae27cfe168f9b82377ea69c296b6da33718aef91c8",
+      "afterSourceSha256": "9fafb9016f0b7e02de490aae27cfe168f9b82377ea69c296b6da33718aef91c8",
+      "validation": {
+        "visual": "已逐图查看；箭头端点、节点间距、文本边界、步骤关系及单位与上述发现逐项核对",
+        "compile": "真实运行采集的PNG，本轮由root维护采集程序；未使用TikZ编译",
+        "references": []
+      }
+    },
+    {
+      "chapter": 4,
+      "number": 9,
+      "label": "fig:ch04-state-results",
+      "file": "output/chapters/chapter04.tex",
+      "line": 1258,
+      "status": "通过",
+      "viewEvidence": {
+        "before": "temp/r10-05-ch04-06/before/ch04-09.png",
+        "after": "temp/r10-05-ch04-06/raster-current/ch04-09.png",
+        "afterSha256": "72dbcffb2cecc9d9a2327b935b6356f2cdef1c48c8c39a5aee6a6353ed45134d",
+        "method": "实际打开PNG并核对图内编码、单位、字段与正文"
+      },
+      "finding": "成功185.091 kPa、PZ-06请求等待、D-01的204无数据、XX-99的404不存在四态各自保留对象编码与状态，未把无数据当0。",
+      "change": "保留。",
+      "sourceFigureChanged": false,
+      "beforeSourceSha256": "167867c9f80dbd933e5fc0533f37cbaeb113010fa2b6848129eaf7dbceee92d4",
+      "afterSourceSha256": "167867c9f80dbd933e5fc0533f37cbaeb113010fa2b6848129eaf7dbceee92d4",
+      "validation": {
+        "visual": "已逐图查看；箭头端点、节点间距、文本边界、步骤关系及单位与上述发现逐项核对",
+        "compile": "真实运行采集的PNG，本轮由root维护采集程序；未使用TikZ编译",
+        "references": []
+      }
+    },
+    {
+      "chapter": 4,
+      "number": 10,
+      "label": "fig:ch04-r1-race",
+      "file": "output/chapters/chapter04.tex",
+      "line": 1271,
+      "status": "通过",
+      "viewEvidence": {
+        "before": "temp/r10-05-ch04-06/source-before/ch04-10.png",
+        "after": "temp/r10-05-ch04-06/source-after/ch04-10.png",
+        "afterSha256": "d6834901c9d0ce3b1de400db2fb19d4974ab731691ab364e7b5be9dd44b59a95",
+        "method": "当前TeX独立XeLaTeX编译，pdftoppm 200dpi渲染后实际查看；弃用错配的旧网站SVG"
+      },
+      "finding": "请求1(PZ-07)先发后回、请求2(WL-01)后发先回；2=2允许写入、1≠2拒绝覆盖与上下两种结果一致。",
+      "change": "保留。",
+      "sourceFigureChanged": false,
+      "beforeSourceSha256": "6fc11450d3d579e4527e2d357341ea840240853614bb56aa5ffa87eba6cb6bb6",
+      "afterSourceSha256": "6fc11450d3d579e4527e2d357341ea840240853614bb56aa5ffa87eba6cb6bb6",
+      "validation": {
+        "visual": "已逐图查看；箭头端点、节点间距、文本边界、步骤关系及单位与上述发现逐项核对",
+        "compile": {
+          "pdf": "temp/r10-05-ch04-06/source-after/ch04-10.pdf",
+          "log": "temp/r10-05-ch04-06/source-after/ch04-10.log",
+          "errorOrMissingGlyph": false,
+          "overfull": false
+        },
+        "references": []
+      }
+    },
+    {
+      "chapter": 4,
+      "number": 11,
+      "label": "fig:ch04-switch-results",
+      "file": "output/chapters/chapter04.tex",
+      "line": 1368,
+      "status": "通过",
+      "viewEvidence": {
+        "before": "temp/r10-05-ch04-06/before/ch04-11.png",
+        "after": "temp/r10-05-ch04-06/raster-current/ch04-11.png",
+        "afterSha256": "fb69054cdddec821d195d842868e52cfef0d2e0d913d58e89ebd03f78ea97873",
+        "method": "实际打开PNG并核对图内编码、单位、字段与正文"
+      },
+      "finding": "PZ-07旧请求已取消；最后选择和最终数据均为WL-01，时间与过程行无覆盖。",
+      "change": "保留。",
+      "sourceFigureChanged": false,
+      "beforeSourceSha256": "de3b23ab47693a2a5b7b5034d0c1f30761f3cb88ad8a0e394734d58565b9b6fe",
+      "afterSourceSha256": "de3b23ab47693a2a5b7b5034d0c1f30761f3cb88ad8a0e394734d58565b9b6fe",
+      "validation": {
+        "visual": "已逐图查看；箭头端点、节点间距、文本边界、步骤关系及单位与上述发现逐项核对",
+        "compile": "真实运行采集的PNG，本轮由root维护采集程序；未使用TikZ编译",
+        "references": []
+      }
+    },
+    {
+      "chapter": 4,
+      "number": 12,
+      "label": "fig:ch04-jwt-integration",
+      "file": "output/chapters/chapter04.tex",
+      "line": 1470,
+      "status": "修复",
+      "viewEvidence": {
+        "before": "temp/r10-05-ch04-06/source-before/ch04-12.png",
+        "after": "temp/r10-05-ch04-06/source-after/ch04-12.png",
+        "afterSha256": "dca276735dbf3c07acd7fafe979e4b77d47bf967d590c885d123e16d2efe3e03",
+        "method": "当前TeX独立XeLaTeX编译，pdftoppm 200dpi渲染后实际查看；弃用错配的旧网站SVG"
+      },
+      "finding": "登录提交凭据直接连Bearer，缺成功签发前提；SecurityContext被误写为权限决策者。",
+      "change": "图从登录成功保存accessToken开始；授权节点读取安全上下文。401/403各自终止于对应界面反馈。",
+      "sourceFigureChanged": true,
+      "beforeSourceSha256": "2c7f5ad1e056e9f0992e2e5140595c7b62f61292298093233fbc9f3879a44334",
+      "afterSourceSha256": "a4619f281ddefc0a8812ce4d2260e8525f222bc3f21b3bcb01c71183dfdfabf5",
+      "validation": {
+        "visual": "已逐图查看；箭头端点、节点间距、文本边界、步骤关系及单位与上述发现逐项核对",
+        "compile": {
+          "pdf": "temp/r10-05-ch04-06/source-after/ch04-12.pdf",
+          "log": "temp/r10-05-ch04-06/source-after/ch04-12.log",
+          "errorOrMissingGlyph": false,
+          "overfull": false
+        },
+        "references": [
+          "https://docs.spring.io/spring-security/reference/servlet/authentication/architecture.html"
+        ]
+      }
+    },
+    {
+      "chapter": 4,
+      "number": 13,
+      "label": "fig:vue-lifecycle",
+      "file": "output/chapters/chapter04.tex",
+      "line": 1679,
+      "status": "修复",
+      "viewEvidence": {
+        "before": "temp/r10-05-ch04-06/source-before/ch04-13.png",
+        "after": "temp/r10-05-ch04-06/source-after/ch04-13.png",
+        "afterSha256": "68109a8ebdc24dfaf8329b2f53fc0f731f3adbe445991613063a6a0783b3aeaa",
+        "method": "当前TeX独立XeLaTeX编译，pdftoppm 200dpi渲染后实际查看；弃用错配的旧网站SVG"
+      },
+      "finding": "原线性图要求先更新一次才能卸载，且混用选项式与组合式标签。",
+      "change": "重画运行状态的可重复更新分支和独立卸载分支；钩子统一组合式；缩短分支文字避免贴框。",
+      "sourceFigureChanged": true,
+      "beforeSourceSha256": "de3d10aa4618579cfdbba77431f029c6bdfbd32bf4e68f359271e6fa88440ff6",
+      "afterSourceSha256": "68085ba3b3133aeab82e088bbf781e6844dc03aa3d34da6ae099943b35a0246f",
+      "validation": {
+        "visual": "已逐图查看；箭头端点、节点间距、文本边界、步骤关系及单位与上述发现逐项核对",
+        "compile": {
+          "pdf": "temp/r10-05-ch04-06/source-after/ch04-13.pdf",
+          "log": "temp/r10-05-ch04-06/source-after/ch04-13.log",
+          "errorOrMissingGlyph": false,
+          "overfull": false
+        },
+        "references": [
+          "https://vuejs.org/guide/essentials/lifecycle.html",
+          "https://vuejs.org/api/composition-api-lifecycle.html"
+        ]
+      }
+    },
+    {
+      "chapter": 4,
+      "number": 14,
+      "label": "fig:ch04-a46-lifecycle-cleanup",
+      "file": "output/chapters/chapter04.tex",
+      "line": 1798,
+      "status": "修复",
+      "viewEvidence": {
+        "before": "temp/r10-05-ch04-06/source-before/ch04-14.png",
+        "after": "temp/r10-05-ch04-06/source-after/ch04-14.png",
+        "afterSha256": "45896a1216a91a4947cb9cb4bbc7256c9c9191bfbfe02c34fb33595b5d4fa6b3",
+        "method": "当前TeX独立XeLaTeX编译，pdftoppm 200dpi渲染后实际查看；弃用错配的旧网站SVG"
+      },
+      "finding": "清理回箭头弯入创建节点并穿过节点文字，错误暗示卸载回到挂载。",
+      "change": "删除回箭头，保留创建、运行、卸载主线；下方写句柄、订阅与请求清理。",
+      "sourceFigureChanged": true,
+      "beforeSourceSha256": "362940ed474a2efb4e8f20a21015fd2e42a80db49529cd265e0c12dfcacc8398",
+      "afterSourceSha256": "f0005db5aa0b2e9b04e18e9b2e97639cc219a330552602732c9d4e4dd90ccd82",
+      "validation": {
+        "visual": "已逐图查看；箭头端点、节点间距、文本边界、步骤关系及单位与上述发现逐项核对",
+        "compile": {
+          "pdf": "temp/r10-05-ch04-06/source-after/ch04-14.pdf",
+          "log": "temp/r10-05-ch04-06/source-after/ch04-14.log",
+          "errorOrMissingGlyph": false,
+          "overfull": false
+        },
+        "references": [
+          "https://vuejs.org/api/composition-api-lifecycle.html"
+        ]
+      }
+    },
+    {
+      "chapter": 5,
+      "number": 1,
+      "label": "fig:ch05-request-chain",
+      "file": "output/chapters/chapter05.tex",
+      "line": 53,
+      "status": "修复",
+      "viewEvidence": {
+        "before": "temp/r10-05-ch04-06/source-before/ch05-01.png",
+        "after": "temp/r10-05-ch04-06/source-after/ch05-01.png",
+        "afterSha256": "edae1ecd2329fcd2161d23217db42a7c633ff21f9890ea0f78a1b983c212952e",
+        "method": "当前TeX独立XeLaTeX编译，pdftoppm 200dpi渲染后实际查看；弃用错配的旧网站SVG"
+      },
+      "finding": "数据库返回的大弧线横穿两端节点，像直接跳过中间各层。",
+      "change": "每对相邻节点分别画右向调用与左向返回；长数据库技术名称分行，复验消除Overfull。",
+      "sourceFigureChanged": true,
+      "beforeSourceSha256": "71fc54e1386e828fcb9720202ca3b46a435361e8ca1bad2f3bf740910acaa404",
+      "afterSourceSha256": "8b8bef7cdbf16f16922b760ada34543da106ee5404f11eae5fee5941336c183e",
+      "validation": {
+        "visual": "已逐图查看；箭头端点、节点间距、文本边界、步骤关系及单位与上述发现逐项核对",
+        "compile": {
+          "pdf": "temp/r10-05-ch04-06/source-after/ch05-01.pdf",
+          "log": "temp/r10-05-ch04-06/source-after/ch05-01.log",
+          "errorOrMissingGlyph": false,
+          "overfull": false
+        },
+        "references": []
+      }
+    },
+    {
+      "chapter": 5,
+      "number": 2,
+      "label": "fig:ch05-rest-contract",
+      "file": "output/chapters/chapter05.tex",
+      "line": 80,
+      "status": "修复",
+      "viewEvidence": {
+        "before": "temp/r10-05-ch04-06/source-before/ch05-02.png",
+        "after": "temp/r10-05-ch04-06/source-after/ch05-02.png",
+        "afterSha256": "9a02b2d9210c23c3ecbf5d50612eb49bffef3f5379fa7ffde06a95f095d13612",
+        "method": "当前TeX独立XeLaTeX编译，pdftoppm 200dpi渲染后实际查看；弃用错配的旧网站SVG"
+      },
+      "finding": "HTTP请求误含状态码；Repository误归事务，并直接指向响应DTO。",
+      "change": "请求写方法/路径/JSON；事务置应用服务；数据访问下挂应用服务，响应从用例边界映射；404/409分别说明不存在/冲突。",
+      "sourceFigureChanged": true,
+      "beforeSourceSha256": "4f669138c120306f2439fbd3ffc65d7900ff175da5602c5deb0064ad94d39f2e",
+      "afterSourceSha256": "b5b06a3b74e1be6aad2f1a72fdbf032c3a88eeca84b3a1b92bc52a1c69841faf",
+      "validation": {
+        "visual": "已逐图查看；箭头端点、节点间距、文本边界、步骤关系及单位与上述发现逐项核对",
+        "compile": {
+          "pdf": "temp/r10-05-ch04-06/source-after/ch05-02.pdf",
+          "log": "temp/r10-05-ch04-06/source-after/ch05-02.log",
+          "errorOrMissingGlyph": false,
+          "overfull": false
+        },
+        "references": []
+      }
+    },
+    {
+      "chapter": 5,
+      "number": 3,
+      "label": "fig:ch05-error-results",
+      "file": "output/chapters/chapter05.tex",
+      "line": 300,
+      "status": "通过",
+      "viewEvidence": {
+        "before": "temp/r10-05-ch04-06/before/ch05-03.png",
+        "after": "temp/r10-05-ch04-06/raster-current/ch05-03.png",
+        "afterSha256": "e61cb95b1a11dcb4515978017b99c3e97b2627dc159c34655a9d3ae242e5ed2a",
+        "method": "实际打开PNG并核对图内编码、单位、字段与正文"
+      },
+      "finding": "真实400 INVALID_RANGE包含from字段；404 ASSET_NOT_FOUND对应不存在assetId，JSON可读且未声称Java部署输出。",
+      "change": "保留，记录教学API来源。",
+      "sourceFigureChanged": false,
+      "beforeSourceSha256": "f895b291c826c52cbc033d4c8fecbe9a32331250946da22ef852095bad4f7923",
+      "afterSourceSha256": "f895b291c826c52cbc033d4c8fecbe9a32331250946da22ef852095bad4f7923",
+      "validation": {
+        "visual": "已逐图查看；箭头端点、节点间距、文本边界、步骤关系及单位与上述发现逐项核对",
+        "compile": "真实运行采集的PNG，本轮由root维护采集程序；未使用TikZ编译",
+        "references": []
+      }
+    },
+    {
+      "chapter": 5,
+      "number": 4,
+      "label": "fig:ch05-tx-proxy",
+      "file": "output/chapters/chapter05.tex",
+      "line": 947,
+      "status": "修复",
+      "viewEvidence": {
+        "before": "temp/r10-05-ch04-06/source-before/ch05-04.png",
+        "after": "temp/r10-05-ch04-06/source-after/ch05-04.png",
+        "afterSha256": "7e598156b48e5039d1427d89d5abf732593a252c3f8591ff5d11b1892087550e",
+        "method": "当前TeX独立XeLaTeX编译，pdftoppm 200dpi渲染后实际查看；弃用错配的旧网站SVG"
+      },
+      "finding": "挂起/恢复共用单向箭头且标签压主事务；图题声称展示了未画出的自调用。",
+      "change": "独立往返箭头表示挂起与恢复；说明内层事务独立提交/回滚；标题与内容对齐，英文枚举缩至scriptsize避免溢出。",
+      "sourceFigureChanged": true,
+      "beforeSourceSha256": "18a0af6cd21e993e307107eff71b0eeaa3fa63cd5b9597ec87800587a15f7db4",
+      "afterSourceSha256": "104103cf9be2ab8f0d94d903a25967d5d3750f7dde7036fcc8035f45415e4e75",
+      "validation": {
+        "visual": "已逐图查看；箭头端点、节点间距、文本边界、步骤关系及单位与上述发现逐项核对",
+        "compile": {
+          "pdf": "temp/r10-05-ch04-06/source-after/ch05-04.pdf",
+          "log": "temp/r10-05-ch04-06/source-after/ch05-04.log",
+          "errorOrMissingGlyph": false,
+          "overfull": false
+        },
+        "references": [
+          "https://docs.spring.io/spring-framework/reference/data-access/transaction/declarative/tx-propagation.html"
+        ]
+      }
+    },
+    {
+      "chapter": 5,
+      "number": 5,
+      "label": "fig:ch05-security-filter",
+      "file": "output/chapters/chapter05.tex",
+      "line": 1397,
+      "status": "通过",
+      "viewEvidence": {
+        "before": "temp/r10-05-ch04-06/source-before/ch05-05.png",
+        "after": "temp/r10-05-ch04-06/source-after/ch05-05.png",
+        "afterSha256": "9ca0c8627c507d55193ac71f1b51fdf74255122c17c9e61f923f2a3652df537c",
+        "method": "当前TeX独立XeLaTeX编译，pdftoppm 200dpi渲染后实际查看；弃用错配的旧网站SVG"
+      },
+      "finding": "JWT过滤器建立可信主体及权限，方法授权独立判断；401与403分支及业务事务入口清楚。",
+      "change": "保留。",
+      "sourceFigureChanged": false,
+      "beforeSourceSha256": "5d31ddf0323089465f3635873a95c4aaba5805eb1617709f2ae8de9ada403e29",
+      "afterSourceSha256": "5d31ddf0323089465f3635873a95c4aaba5805eb1617709f2ae8de9ada403e29",
+      "validation": {
+        "visual": "已逐图查看；箭头端点、节点间距、文本边界、步骤关系及单位与上述发现逐项核对",
+        "compile": {
+          "pdf": "temp/r10-05-ch04-06/source-after/ch05-05.pdf",
+          "log": "temp/r10-05-ch04-06/source-after/ch05-05.log",
+          "errorOrMissingGlyph": false,
+          "overfull": false
+        },
+        "references": [
+          "https://docs.spring.io/spring-security/reference/servlet/authentication/architecture.html"
+        ]
+      }
+    },
+    {
+      "chapter": 5,
+      "number": 6,
+      "label": "fig:ch05-auth-sequence",
+      "file": "output/chapters/chapter05.tex",
+      "line": 1626,
+      "status": "修复",
+      "viewEvidence": {
+        "before": "temp/r10-05-ch04-06/source-before/ch05-06.png",
+        "after": "temp/r10-05-ch04-06/source-after/ch05-06.png",
+        "afterSha256": "2a9e2af7a1d95240ee4fdfb4541a242fce9f30893614ec0c088662f2ea532a16",
+        "method": "当前TeX独立XeLaTeX编译，pdftoppm 200dpi渲染后实际查看；弃用错配的旧网站SVG"
+      },
+      "finding": "401/403共用通往刷新端点的箭头，且穿越方法授权节点。",
+      "change": "仅access过期且持有效refresh可进入刷新；403权限不足终止，正常业务链、刷新验证及签发分别画出。",
+      "sourceFigureChanged": true,
+      "beforeSourceSha256": "1190d3732dd37945ef9e287ae2729ff7002098a10d4b85379b8d006aa0b22d1d",
+      "afterSourceSha256": "3ebef8f2bf429eab58c1380c6a402480195ea7f56f02e87a711cdf49585afbe7",
+      "validation": {
+        "visual": "已逐图查看；箭头端点、节点间距、文本边界、步骤关系及单位与上述发现逐项核对",
+        "compile": {
+          "pdf": "temp/r10-05-ch04-06/source-after/ch05-06.pdf",
+          "log": "temp/r10-05-ch04-06/source-after/ch05-06.log",
+          "errorOrMissingGlyph": false,
+          "overfull": false
+        },
+        "references": [
+          "https://docs.spring.io/spring-security/reference/servlet/authentication/architecture.html"
+        ]
+      }
+    },
+    {
+      "chapter": 6,
+      "number": 1,
+      "label": "fig:ch06-render-pipeline",
+      "file": "output/chapters/chapter06.tex",
+      "line": 150,
+      "status": "修复",
+      "viewEvidence": {
+        "before": "temp/r10-05-ch04-06/source-before/ch06-01.png",
+        "after": "temp/r10-05-ch04-06/source-after/ch06-01.png",
+        "afterSha256": "d0b1e34d4c629957b3d155028b7c6803fab080636a993d16c49c0caf78bd0560",
+        "method": "当前TeX独立XeLaTeX编译，pdftoppm 200dpi渲染后实际查看；弃用错配的旧网站SVG"
+      },
+      "finding": "近远面共享相机顶点、投影点和视口轴方向正确；但底部“映射到像素”容易误解为顶点取整。",
+      "change": "改为连续窗口坐标，并在随文区分后续光栅化生成片元；保留正确的精确视锥图。",
+      "sourceFigureChanged": true,
+      "beforeSourceSha256": "1b284a5f23855db51f80bb7ec13a70b035075efbe5e27edcf357489481e6d448",
+      "afterSourceSha256": "443f4ec0e27d07acd4337e6939f6def07cf2566aefafa342d5a4c8e26700959f",
+      "validation": {
+        "visual": "已逐图查看；箭头端点、节点间距、文本边界、步骤关系及单位与上述发现逐项核对",
+        "compile": {
+          "pdf": "temp/r10-05-ch04-06/source-after/ch06-01.pdf",
+          "log": "temp/r10-05-ch04-06/source-after/ch06-01.log",
+          "errorOrMissingGlyph": false,
+          "overfull": false
+        },
+        "references": []
+      }
+    },
+    {
+      "chapter": 6,
+      "number": 2,
+      "label": "fig:ch06-scene-graph",
+      "file": "output/chapters/chapter06.tex",
+      "line": 345,
+      "status": "修复",
+      "viewEvidence": {
+        "before": "temp/r10-05-ch04-06/source-before/ch06-02.png",
+        "after": "temp/r10-05-ch04-06/source-after/ch06-02.png",
+        "afterSha256": "56a68e6c1bc8a44e905c2e80b4f69721e24e719840607101d39cfc9ee1bc2fcb",
+        "method": "当前TeX独立XeLaTeX编译，pdftoppm 200dpi渲染后实际查看；弃用错配的旧网站SVG"
+      },
+      "finding": "Gate与Gallery兄弟节点相互覆盖，父子连线拥挤。",
+      "change": "使用显式坐标，闸门/廊道/测点节点保持间距，业务标识完整可读。",
+      "sourceFigureChanged": true,
+      "beforeSourceSha256": "5ccdfeb8655f5db174f0ab5ce088258a6de51d5256e096e31aaaf0814eab358d",
+      "afterSourceSha256": "181dc4b673056f8f5af3eb578707694319e7e56297dfdc696e0a0f842e783b02",
+      "validation": {
+        "visual": "已逐图查看；箭头端点、节点间距、文本边界、步骤关系及单位与上述发现逐项核对",
+        "compile": {
+          "pdf": "temp/r10-05-ch04-06/source-after/ch06-02.pdf",
+          "log": "temp/r10-05-ch04-06/source-after/ch06-02.log",
+          "errorOrMissingGlyph": false,
+          "overfull": false
+        },
+        "references": []
+      }
+    },
+    {
+      "chapter": 6,
+      "number": 3,
+      "label": "fig:ch06-bound-scene",
+      "file": "output/chapters/chapter06.tex",
+      "line": 508,
+      "status": "修复",
+      "viewEvidence": {
+        "before": "temp/r10-05-ch04-06/before/ch06-03.png",
+        "after": "temp/r10-05-ch04-06/raster-current/ch06-03.png",
+        "afterSha256": "1c8df74448626336b47e9c02e6337f8c6c51f2a4d7830df7d21840047b300ecf",
+        "method": "实际打开PNG并核对图内编码、单位、字段与正文"
+      },
+      "finding": "旧默认截图只见长方体及很小的孤立点，不足以识读绑定；旧随文声称图中包含坝体。",
+      "change": "采用root重采的PZ-07局部定位图；核对x=688.61、y=160.80、z=-599.40、28绑定点、10m网格与y=120参考面；注明附加识读标记，未改变测点几何。另取消表中错误的全部测点<1km条件。",
+      "sourceFigureChanged": true,
+      "beforeSourceSha256": "dde953976f53b787650baec378a6f3ac9812df73d3002bab2bcb4a3b414d92ae",
+      "afterSourceSha256": "8f37851fbfafbf42f2ab8a0829238cc21dc56b449a757c4abe70258ae49551b0",
+      "validation": {
+        "visual": "已逐图查看；箭头端点、节点间距、文本边界、步骤关系及单位与上述发现逐项核对",
+        "compile": "真实运行采集的PNG，本轮由root维护采集程序；未使用TikZ编译",
+        "references": []
+      }
+    },
+    {
+      "chapter": 6,
+      "number": 4,
+      "label": "fig:ch06-coordinate-chain",
+      "file": "output/chapters/chapter06.tex",
+      "line": 695,
+      "status": "修复",
+      "viewEvidence": {
+        "before": "temp/r10-05-ch04-06/source-before/ch06-04.png",
+        "after": "temp/r10-05-ch04-06/source-after/ch06-04.png",
+        "afterSha256": "7b5f3230ad45efc077ed7cfb6ef43f540d117af402910078f041a6daeee00812",
+        "method": "当前TeX独立XeLaTeX编译，pdftoppm 200dpi渲染后实际查看；弃用错配的旧网站SVG"
+      },
+      "finding": "二维横轴墨卡托节点把H列为投影产物；平移/旋转标签夹在过窄节点间。",
+      "change": "平面输出E,N，高程H单独统一垂直基准后输入局部坐标与轴向换算；操作写入节点。",
+      "sourceFigureChanged": true,
+      "beforeSourceSha256": "e6e015f405aadeb610b9a6b88fd556a2409235b3d873af32e8a079f7dc00cf14",
+      "afterSourceSha256": "e28cc112b8ddf5ca303768093c104246e5341d10755f92c001ea59deab1fd55e",
+      "validation": {
+        "visual": "已逐图查看；箭头端点、节点间距、文本边界、步骤关系及单位与上述发现逐项核对",
+        "compile": {
+          "pdf": "temp/r10-05-ch04-06/source-after/ch06-04.pdf",
+          "log": "temp/r10-05-ch04-06/source-after/ch06-04.log",
+          "errorOrMissingGlyph": false,
+          "overfull": false
+        },
+        "references": [
+          "https://proj.org/en/stable/operations/projections/tmerc.html"
+        ]
+      }
+    },
+    {
+      "chapter": 6,
+      "number": 5,
+      "label": "fig:uav-oblique-system",
+      "file": "output/chapters/chapter06.tex",
+      "line": 894,
+      "status": "修复",
+      "viewEvidence": {
+        "before": "temp/r10-05-ch04-06/source-before/ch06-05.png",
+        "after": "temp/r10-05-ch04-06/source-after/ch06-05.png",
+        "afterSha256": "fe9e205f4533f64726ccd506f13a3f57d0ce73705379989ff05fd8e8160e6a11",
+        "method": "当前TeX独立XeLaTeX编译，pdftoppm 200dpi渲染后实际查看；弃用错配的旧网站SVG"
+      },
+      "finding": "四模块结构清楚，无穿框；相机描述“记录影像与姿态”易将POS测量归于镜头。",
+      "change": "仅改为多镜头曝光、关联POS姿态资料；宏独立渲染复验。",
+      "sourceFigureChanged": true,
+      "beforeSourceSha256": "9e70a476eeb14606ee6b3c315c4e9e5eb1bee2d68f2c02efb44d99f95bab7066",
+      "afterSourceSha256": "9e70a476eeb14606ee6b3c315c4e9e5eb1bee2d68f2c02efb44d99f95bab7066",
+      "validation": {
+        "visual": "已逐图查看；箭头端点、节点间距、文本边界、步骤关系及单位与上述发现逐项核对",
+        "compile": {
+          "pdf": "temp/r10-05-ch04-06/source-after/ch06-05.pdf",
+          "log": "temp/r10-05-ch04-06/source-after/ch06-05.log",
+          "errorOrMissingGlyph": false,
+          "overfull": false
+        },
+        "references": []
+      },
+      "macroDependency": {
+        "file": "output/tikz-diagrams.tex",
+        "macro": "uavObliquePhotographySystem",
+        "beforeSource": "temp/r10-05-ch04-06/tikz-diagrams-before.tex",
+        "afterSource": "output/tikz-diagrams.tex",
+        "changed": true
+      }
+    },
+    {
+      "chapter": 6,
+      "number": 6,
+      "label": "fig:ch06-aerial-control-network",
+      "file": "output/chapters/chapter06.tex",
+      "line": 909,
+      "status": "修复",
+      "viewEvidence": {
+        "before": "temp/r10-05-ch04-06/source-before/ch06-06.png",
+        "after": "temp/r10-05-ch04-06/source-after/ch06-06.png",
+        "afterSha256": "c59199b0eb9f73745fb43825bbff44d39b36bfc525b9aa8d1b97fad8d54414e4",
+        "method": "当前TeX独立XeLaTeX编译，pdftoppm 200dpi渲染后实际查看；弃用错配的旧网站SVG"
+      },
+      "finding": "原图三种点各在一条隔开的航带外，没有共同影像覆盖，连接点图意不成立。",
+      "change": "重画重叠影像覆盖框，标出单幅影像与重叠区；连接点在重叠区，像控点与独立检查点分散覆盖测区；正文区分角色独立和空间分布。",
+      "sourceFigureChanged": true,
+      "beforeSourceSha256": "a95c35c2989c8856b8c7a041db4943df771e7aeb5bce59d35f72d5d2de2b513e",
+      "afterSourceSha256": "802732b13d0e7452825fe7b9da63d5e2c0f49d906a4a24bad8f977ad0e890830",
+      "validation": {
+        "visual": "已逐图查看；箭头端点、节点间距、文本边界、步骤关系及单位与上述发现逐项核对",
+        "compile": {
+          "pdf": "temp/r10-05-ch04-06/source-after/ch06-06.pdf",
+          "log": "temp/r10-05-ch04-06/source-after/ch06-06.log",
+          "errorOrMissingGlyph": false,
+          "overfull": false
+        },
+        "references": []
+      }
+    },
+    {
+      "chapter": 6,
+      "number": 7,
+      "label": "fig:oblique-preprocess",
+      "file": "output/chapters/chapter06.tex",
+      "line": 1015,
+      "status": "修复",
+      "viewEvidence": {
+        "before": "temp/r10-05-ch04-06/source-before/ch06-07.png",
+        "after": "temp/r10-05-ch04-06/source-after/ch06-07.png",
+        "afterSha256": "0b457bd1faebb9c7629140cd6fe7f4b69b8b695f23a56fa4272d140de0881ae9",
+        "method": "当前TeX独立XeLaTeX编译，pdftoppm 200dpi渲染后实际查看；弃用错配的旧网站SVG"
+      },
+      "finding": "质量菱形与成功输出框重叠，成功箭头视觉反向；失败只回检查，与正文返回采集/匀色不符。",
+      "change": "拉开成功分支；失败定位后分别补拍/重采或校正匀色；处理后重新检查，文字手动断行避免拆词。",
+      "sourceFigureChanged": true,
+      "beforeSourceSha256": "24c253c5f888c592e6016a77e2a8468139737abdd27fbca2b3972b6a52ace36a",
+      "afterSourceSha256": "24c253c5f888c592e6016a77e2a8468139737abdd27fbca2b3972b6a52ace36a",
+      "validation": {
+        "visual": "已逐图查看；箭头端点、节点间距、文本边界、步骤关系及单位与上述发现逐项核对",
+        "compile": {
+          "pdf": "temp/r10-05-ch04-06/source-after/ch06-07.pdf",
+          "log": "temp/r10-05-ch04-06/source-after/ch06-07.log",
+          "errorOrMissingGlyph": false,
+          "overfull": false
+        },
+        "references": []
+      },
+      "macroDependency": {
+        "file": "output/tikz-diagrams.tex",
+        "macro": "obliqueImagePreprocessQC",
+        "beforeSource": "temp/r10-05-ch04-06/tikz-diagrams-before.tex",
+        "afterSource": "output/tikz-diagrams.tex",
+        "changed": true
+      }
+    },
+    {
+      "chapter": 6,
+      "number": 8,
+      "label": "fig:ch06-appearance-components",
+      "file": "output/chapters/chapter06.tex",
+      "line": 1045,
+      "status": "通过",
+      "viewEvidence": {
+        "before": "temp/r10-05-ch04-06/before/ch06-08.png",
+        "after": "temp/r10-05-ch04-06/raster-current/ch06-08.png",
+        "afterSha256": "29933ccc7bde8cf362ceeed6b167156a22340913e391190a7dac50f5b5966edd",
+        "method": "实际打开PNG并核对图内编码、单位、字段与正文"
+      },
+      "finding": "左右同一三孔坝体的外观与分区可对应；右图区分闸门、支承与启闭设备，未显示真实IFC属性。",
+      "change": "保留AI生成教学渲染图注与非测绘/BIM输出范围；不将分色当业务绑定。",
+      "sourceFigureChanged": false,
+      "beforeSourceSha256": "24a42badc0c5010abea2e8ba5ee70c150f47b3ead59af797894a4d4d047006bd",
+      "afterSourceSha256": "24a42badc0c5010abea2e8ba5ee70c150f47b3ead59af797894a4d4d047006bd",
+      "validation": {
+        "visual": "已逐图查看；箭头端点、节点间距、文本边界、步骤关系及单位与上述发现逐项核对",
+        "compile": "AI生成教学渲染，非测绘/BIM成果；仅用于外观与语义分区识读",
+        "references": []
+      }
+    },
+    {
+      "chapter": 6,
+      "number": 9,
+      "label": "fig:dt-five-dimensions",
+      "file": "output/chapters/chapter06.tex",
+      "line": 1118,
+      "status": "修复",
+      "viewEvidence": {
+        "before": "temp/r10-05-ch04-06/source-before/ch06-09.png",
+        "after": "temp/r10-05-ch04-06/source-after/ch06-09.png",
+        "afterSha256": "96e86104982e62731263ba56165e551e7b7d8a07a537d9ad3ff8f353bc373fe1",
+        "method": "当前TeX独立XeLaTeX编译，pdftoppm 200dpi渲染后实际查看；弃用错配的旧网站SVG"
+      },
+      "finding": "CN到PE/VE的斜线穿过DD/Ss节点，连接维却只画单向输出。",
+      "change": "CN居中、四维分列四角，双向线不穿框；正文说明连接是交换与反馈关系。",
+      "sourceFigureChanged": true,
+      "beforeSourceSha256": "91fa6589a6847e42c91b5159dcbd2a66e5e84e43efdcb7f45589d04fbdba32fd",
+      "afterSourceSha256": "1c60c0c0786a64ec97bea6112b6d892f33971d4c9ecd3d220d39f9ab08728cfa",
+      "validation": {
+        "visual": "已逐图查看；箭头端点、节点间距、文本边界、步骤关系及单位与上述发现逐项核对",
+        "compile": {
+          "pdf": "temp/r10-05-ch04-06/source-after/ch06-09.pdf",
+          "log": "temp/r10-05-ch04-06/source-after/ch06-09.log",
+          "errorOrMissingGlyph": false,
+          "overfull": false
+        },
+        "references": []
+      }
+    },
+    {
+      "chapter": 6,
+      "number": 10,
+      "label": "fig:dt-layered-architecture",
+      "file": "output/chapters/chapter06.tex",
+      "line": 1156,
+      "status": "修复",
+      "viewEvidence": {
+        "before": "temp/r10-05-ch04-06/source-before/ch06-10.png",
+        "after": "temp/r10-05-ch04-06/source-after/ch06-10.png",
+        "afterSha256": "61eceef4cabad0bfc674494f34a302ff85419406fefbd1907aa23c6d2181d4e7",
+        "method": "当前TeX独立XeLaTeX编译，pdftoppm 200dpi渲染后实际查看；弃用错配的旧网站SVG"
+      },
+      "finding": "图中是无类别的双向层间接口，正文却称已标出数据上行与指令下行两条通道。",
+      "change": "保留无重叠的六层图；随文准确解释为层间接口与数据交换，避免把指令误导为必经数据库/模型。",
+      "sourceFigureChanged": false,
+      "beforeSourceSha256": "2ef51e010468729d4ef1d07dab7c1ad701bee2ae487b61c4dc2f4b15fa5aef10",
+      "afterSourceSha256": "2ef51e010468729d4ef1d07dab7c1ad701bee2ae487b61c4dc2f4b15fa5aef10",
+      "validation": {
+        "visual": "已逐图查看；箭头端点、节点间距、文本边界、步骤关系及单位与上述发现逐项核对",
+        "compile": {
+          "pdf": "temp/r10-05-ch04-06/source-after/ch06-10.pdf",
+          "log": "temp/r10-05-ch04-06/source-after/ch06-10.log",
+          "errorOrMissingGlyph": false,
+          "overfull": false
+        },
+        "references": []
+      }
+    },
+    {
+      "chapter": 6,
+      "number": 11,
+      "label": "fig:dt-evidence-chain",
+      "file": "output/chapters/chapter06.tex",
+      "line": 1325,
+      "status": "通过",
+      "viewEvidence": {
+        "before": "temp/r10-05-ch04-06/source-before/ch06-11.png",
+        "after": "temp/r10-05-ch04-06/source-after/ch06-11.png",
+        "afterSha256": "acc91e5db1e926c7130c720dba9025a9d10fe68da0820d42f2d28f6036a7e857",
+        "method": "当前TeX独立XeLaTeX编译，pdftoppm 200dpi渲染后实际查看；弃用错配的旧网站SVG"
+      },
+      "finding": "对象→状态→历史与模型证据→业务处置各箭头在框外；质量、时间与模型版本均有位置。",
+      "change": "保留。",
+      "sourceFigureChanged": false,
+      "beforeSourceSha256": "a72ecc3be2b3486955154a4bfea44e660cdf299fa35483916a43a07531bbaab2",
+      "afterSourceSha256": "a72ecc3be2b3486955154a4bfea44e660cdf299fa35483916a43a07531bbaab2",
+      "validation": {
+        "visual": "已逐图查看；箭头端点、节点间距、文本边界、步骤关系及单位与上述发现逐项核对",
+        "compile": {
+          "pdf": "temp/r10-05-ch04-06/source-after/ch06-11.pdf",
+          "log": "temp/r10-05-ch04-06/source-after/ch06-11.log",
+          "errorOrMissingGlyph": false,
+          "overfull": false
+        },
+        "references": []
+      }
+    },
+    {
+      "chapter": 6,
+      "number": 12,
+      "label": "fig:dt-closed-loop",
+      "file": "output/chapters/chapter06.tex",
+      "line": 1355,
+      "status": "修复",
+      "viewEvidence": {
+        "before": "temp/r10-05-ch04-06/source-before/ch06-12.png",
+        "after": "temp/r10-05-ch04-06/source-after/ch06-12.png",
+        "afterSha256": "bdb572ddcb64958accb864708ccf31b93c0dd58d033c3498f5fe6a11ef922643",
+        "method": "当前TeX独立XeLaTeX编译，pdftoppm 200dpi渲染后实际查看；弃用错配的旧网站SVG"
+      },
+      "finding": "回路方向正确，但控制指令前的步骤只写人工确认，审批未在图中明确。",
+      "change": "第4步补确认与审批，随文同步；外侧回路不穿文字。",
+      "sourceFigureChanged": true,
+      "beforeSourceSha256": "db2d0b30b42ddb2e9fbbf386150e5bbed6e5f314943f4889d9ddc9d10f4cf5c8",
+      "afterSourceSha256": "e33850837418f8f2330c338d5198964ea99795799a78dc7c527257dcf515fd77",
+      "validation": {
+        "visual": "已逐图查看；箭头端点、节点间距、文本边界、步骤关系及单位与上述发现逐项核对",
+        "compile": {
+          "pdf": "temp/r10-05-ch04-06/source-after/ch06-12.pdf",
+          "log": "temp/r10-05-ch04-06/source-after/ch06-12.log",
+          "errorOrMissingGlyph": false,
+          "overfull": false
+        },
+        "references": []
+      }
+    },
+    {
+      "chapter": 6,
+      "number": 13,
+      "label": "fig:dt-event-contract",
+      "file": "output/chapters/chapter06.tex",
+      "line": 1426,
+      "status": "修复",
+      "viewEvidence": {
+        "before": "temp/r10-05-ch04-06/source-before/ch06-13.png",
+        "after": "temp/r10-05-ch04-06/source-after/ch06-13.png",
+        "afterSha256": "8081af23bf98936ca8dec38d048c4bef9d65ce0b22ecf94ba4623681ff4a8491",
+        "method": "当前TeX独立XeLaTeX编译，pdftoppm 200dpi渲染后实际查看；弃用错配的旧网站SVG"
+      },
+      "finding": "审计箭头穿过设备执行节点，事件标签贴框；文字误称状态事件重复投递天然无副作用。",
+      "change": "改中间审计带，上方事件链与下方受控命令/回执各自直达；标签分行，补消费者去重与命令审批/有效期/幂等要求。",
+      "sourceFigureChanged": true,
+      "beforeSourceSha256": "0bf9940c21d70364a9ec08bd6545f47e5095833797c572c4928a6193f8d4b4ca",
+      "afterSourceSha256": "733a26a5ff5d0f3ee6dbb71dbcd2bf4566554483125e228268117248b70d56b1",
+      "validation": {
+        "visual": "已逐图查看；箭头端点、节点间距、文本边界、步骤关系及单位与上述发现逐项核对",
+        "compile": {
+          "pdf": "temp/r10-05-ch04-06/source-after/ch06-13.pdf",
+          "log": "temp/r10-05-ch04-06/source-after/ch06-13.log",
+          "errorOrMissingGlyph": false,
+          "overfull": false
+        },
+        "references": []
+      }
+    },
+    {
+      "chapter": 6,
+      "number": 14,
+      "label": "fig:dt-edge-cloud",
+      "file": "output/chapters/chapter06.tex",
+      "line": 1506,
+      "status": "通过",
+      "viewEvidence": {
+        "before": "temp/r10-05-ch04-06/source-before/ch06-14.png",
+        "after": "temp/r10-05-ch04-06/source-after/ch06-14.png",
+        "afterSha256": "286ea2f15f549e3011949e502e9da4ff9d21139550909a30b96f0a001b4dc8c3",
+        "method": "当前TeX独立XeLaTeX编译，pdftoppm 200dpi渲染后实际查看；弃用错配的旧网站SVG"
+      },
+      "finding": "现场设备↔边缘缓存↔中心接入位置清楚，中心分别连接模型平台与业务会商；外侧双向虚线没有穿框。",
+      "change": "保留。",
+      "sourceFigureChanged": false,
+      "beforeSourceSha256": "a209d9d6addb076aad5a719a179dd7fdf3bf3e78138f0c66ffc1350aec23543b",
+      "afterSourceSha256": "a209d9d6addb076aad5a719a179dd7fdf3bf3e78138f0c66ffc1350aec23543b",
+      "validation": {
+        "visual": "已逐图查看；箭头端点、节点间距、文本边界、步骤关系及单位与上述发现逐项核对",
+        "compile": {
+          "pdf": "temp/r10-05-ch04-06/source-after/ch06-14.pdf",
+          "log": "temp/r10-05-ch04-06/source-after/ch06-14.log",
+          "errorOrMissingGlyph": false,
+          "overfull": false
+        },
+        "references": []
+      }
+    },
+    {
+      "chapter": 6,
+      "number": 15,
+      "label": "fig:dt-lineage",
+      "file": "output/chapters/chapter06.tex",
+      "line": 1585,
+      "status": "修复",
+      "viewEvidence": {
+        "before": "temp/r10-05-ch04-06/source-before/ch06-15.png",
+        "after": "temp/r10-05-ch04-06/source-after/ch06-15.png",
+        "afterSha256": "557d38ec08989e787d9b76477144c2b38b8d50c694cbddabed2ba17067d4dd45",
+        "method": "当前TeX独立XeLaTeX编译，pdftoppm 200dpi渲染后实际查看；弃用错配的旧网站SVG"
+      },
+      "finding": "反馈箭头标签压在清洗结果底缘，并指回历史清洗结果，容易误读为改写既有血缘。",
+      "change": "复盘后发布规则/模型新版本，用于后续批次；保留历史证据，取消回写历史节点的线。",
+      "sourceFigureChanged": true,
+      "beforeSourceSha256": "19fedf44954b42b4e2db2fed1a1406c6ab024379c56c7c6a27de744466bd429f",
+      "afterSourceSha256": "f1ea263bc44c8a52f3b40ef07d86cbfc1c67e8c7762d7141ca1e24da51d2752b",
+      "validation": {
+        "visual": "已逐图查看；箭头端点、节点间距、文本边界、步骤关系及单位与上述发现逐项核对",
+        "compile": {
+          "pdf": "temp/r10-05-ch04-06/source-after/ch06-15.pdf",
+          "log": "temp/r10-05-ch04-06/source-after/ch06-15.log",
+          "errorOrMissingGlyph": false,
+          "overfull": false
+        },
+        "references": []
+      }
+    }
+  ]
+}

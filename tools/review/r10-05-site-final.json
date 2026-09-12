@@ -1,0 +1,482 @@
+{
+  "svg_count": 94,
+  "png_count": 13,
+  "body_figures": 107,
+  "missing_images": 0,
+  "licensed_originals_in_docs": 0,
+  "all_current_source_svg_hashes_match": true,
+  "image_provenance_matches": true,
+  "svg": [
+    {
+      "file": "chapter01_fig_1_2.svg",
+      "source_sha256": "d98472d8abe292a8146e284115fb09711e33c8dd53ae5f42d79c4d0862f4d59f",
+      "web": "docs/chapters/chapter01/images/chapter01_fig_1_2.svg"
+    },
+    {
+      "file": "chapter01_fig_1_4.svg",
+      "source_sha256": "a2e36ca7a3f6bce8b2f74394d1e04c95978e8d378d74a9236f80e43ff7483e33",
+      "web": "docs/chapters/chapter01/images/chapter01_fig_1_4.svg"
+    },
+    {
+      "file": "chapter01_fig_1_5.svg",
+      "source_sha256": "b83ee51cd0707ff104796a4c8f06c1fee082d7b2545362f0520120920b94b18a",
+      "web": "docs/chapters/chapter01/images/chapter01_fig_1_5.svg"
+    },
+    {
+      "file": "chapter01_fig_1_6.svg",
+      "source_sha256": "9830460bfbce5d6e1abc13bdc307fecbdc8e8544a35e4da658fe9fa61eba402b",
+      "web": "docs/chapters/chapter01/images/chapter01_fig_1_6.svg"
+    },
+    {
+      "file": "chapter01_fig_1_7.svg",
+      "source_sha256": "2fa21f73a004d4939db6c49267de1f37d487cc075ef24e88b2960b4b5876beaa",
+      "web": "docs/chapters/chapter01/images/chapter01_fig_1_7.svg"
+    },
+    {
+      "file": "chapter01_fig_1_8.svg",
+      "source_sha256": "d491aa090aa3b6d99e56d77b1e027a971714f21b2f8762d3630156b1ecbff101",
+      "web": "docs/chapters/chapter01/images/chapter01_fig_1_8.svg"
+    },
+    {
+      "file": "chapter02_fig_2_1.svg",
+      "source_sha256": "9fd32b9cae1bf516403e2baff0af17b23795b8a4a16121977d3c3be579c3f6ef",
+      "web": "docs/chapters/chapter02/images/chapter02_fig_2_1.svg"
+    },
+    {
+      "file": "chapter02_fig_2_2.svg",
+      "source_sha256": "e05e170fbbfb3ed6b2efa1f3040d7d171ad39ac092a978d2f89688fa31fdaaba",
+      "web": "docs/chapters/chapter02/images/chapter02_fig_2_2.svg"
+    },
+    {
+      "file": "chapter02_fig_2_3.svg",
+      "source_sha256": "fc5f1f4478fc6d6e46d8af0d0b0a9c01b54555d14a68dd1d33067a4180350de5",
+      "web": "docs/chapters/chapter02/images/chapter02_fig_2_3.svg"
+    },
+    {
+      "file": "chapter02_fig_2_4.svg",
+      "source_sha256": "d74eb137f0cfeebd45de6a43ef2816e3110bf1031765b550a774a408a18c3001",
+      "web": "docs/chapters/chapter02/images/chapter02_fig_2_4.svg"
+    },
+    {
+      "file": "chapter02_fig_2_5.svg",
+      "source_sha256": "4c3306d3238dcca322f5e2e21f7f0b2bbac48bf2e0c749cd7133925750ed1cb7",
+      "web": "docs/chapters/chapter02/images/chapter02_fig_2_5.svg"
+    },
+    {
+      "file": "chapter02_fig_2_6.svg",
+      "source_sha256": "d3914e775a09ec5f768c15f0def96d777746b8101b9f2c0cc9f3c1bed524b2e5",
+      "web": "docs/chapters/chapter02/images/chapter02_fig_2_6.svg"
+    },
+    {
+      "file": "chapter02_fig_2_7.svg",
+      "source_sha256": "7c7e3331ef70a16aa4fc46bf27c98a0b2fb321a26b3fefb61c589b15559f15c4",
+      "web": "docs/chapters/chapter02/images/chapter02_fig_2_7.svg"
+    },
+    {
+      "file": "chapter02_fig_2_8.svg",
+      "source_sha256": "532dcea5a75457c0a8635de8e9a9ea026b23f7819f821bf947d8a55dd18a77ea",
+      "web": "docs/chapters/chapter02/images/chapter02_fig_2_8.svg"
+    },
+    {
+      "file": "chapter02_fig_2_9.svg",
+      "source_sha256": "33f416409b8a81b456ab76efe304cef13fbc99a671973dae40a22aa889cdf3d8",
+      "web": "docs/chapters/chapter02/images/chapter02_fig_2_9.svg"
+    },
+    {
+      "file": "chapter02_fig_2_10.svg",
+      "source_sha256": "1060ddbf803e7bfd08d056b6ed99fb09c909c83d6dc94ac1cadfdacf9bf31c25",
+      "web": "docs/chapters/chapter02/images/chapter02_fig_2_10.svg"
+    },
+    {
+      "file": "chapter02_fig_2_11.svg",
+      "source_sha256": "731e65f7a35e19142a9efbd3edae1eaf062072644d57c226e4ad4a50c6d85c4a",
+      "web": "docs/chapters/chapter02/images/chapter02_fig_2_11.svg"
+    },
+    {
+      "file": "chapter02_fig_2_12.svg",
+      "source_sha256": "afc7e1da91c6cfe58851644fee4d5bf3238d65b1cb089dc33f6d07ece6ed307f",
+      "web": "docs/chapters/chapter02/images/chapter02_fig_2_12.svg"
+    },
+    {
+      "file": "chapter02_fig_2_13.svg",
+      "source_sha256": "4d54f6502bf9e00a115d707525f22dd3fb46f417c40ea554d3cdbaaafdc91540",
+      "web": "docs/chapters/chapter02/images/chapter02_fig_2_13.svg"
+    },
+    {
+      "file": "chapter02_fig_2_14.svg",
+      "source_sha256": "07c0e3595c44c1bda37c51a2e1fcbf9493d8cee058f5a3fa55afe056e8b3cc95",
+      "web": "docs/chapters/chapter02/images/chapter02_fig_2_14.svg"
+    },
+    {
+      "file": "chapter03_fig_3_1.svg",
+      "source_sha256": "b1f8c53db0ccd25cff2aa09f366c212059884df6ae78430e972bafce16a5bd67",
+      "web": "docs/chapters/chapter03/images/chapter03_fig_3_1.svg"
+    },
+    {
+      "file": "chapter03_fig_3_2.svg",
+      "source_sha256": "ce80c7438f5f95c8295a166cbfd0f31de2ee75bacecebf2bb33029ca963e2fb7",
+      "web": "docs/chapters/chapter03/images/chapter03_fig_3_2.svg"
+    },
+    {
+      "file": "chapter03_fig_3_3.svg",
+      "source_sha256": "78cff4dd420d7c97fb819336ff7f8cbf62699daf7dc7ea4b6e65633221c15747",
+      "web": "docs/chapters/chapter03/images/chapter03_fig_3_3.svg"
+    },
+    {
+      "file": "chapter03_fig_3_4.svg",
+      "source_sha256": "bf91f4a00ec631a32fca46845ca22d8819550fbeff3e907cef70a0c54b43ea92",
+      "web": "docs/chapters/chapter03/images/chapter03_fig_3_4.svg"
+    },
+    {
+      "file": "chapter03_fig_3_5.svg",
+      "source_sha256": "6be57890f942d59a8cc85d7154799ae194af4cfd0328cd6d0fdaf63a67650144",
+      "web": "docs/chapters/chapter03/images/chapter03_fig_3_5.svg"
+    },
+    {
+      "file": "chapter03_fig_3_6.svg",
+      "source_sha256": "d8fa798f356c566d75a43addf2f4f6e77a65d7b0d62142f11c7bdad5030d7819",
+      "web": "docs/chapters/chapter03/images/chapter03_fig_3_6.svg"
+    },
+    {
+      "file": "chapter03_fig_3_7.svg",
+      "source_sha256": "be2fc45bcbd16a77e42f2ad6efc141d15216b0c7fa8c75769d462823864bec1b",
+      "web": "docs/chapters/chapter03/images/chapter03_fig_3_7.svg"
+    },
+    {
+      "file": "chapter03_fig_3_8.svg",
+      "source_sha256": "b49e5899c2b2f326b1b8f348634c7d68721cce560161dfe57de501ec7f563be0",
+      "web": "docs/chapters/chapter03/images/chapter03_fig_3_8.svg"
+    },
+    {
+      "file": "chapter03_fig_3_9.svg",
+      "source_sha256": "bca0faccd77326a6671716a7c2fdf9495873b1957d206e98002b1fa9db2f4cd7",
+      "web": "docs/chapters/chapter03/images/chapter03_fig_3_9.svg"
+    },
+    {
+      "file": "chapter03_fig_3_10.svg",
+      "source_sha256": "83abe6b37911c9f6fdebc1568cefeb317126e1a228e64cc4caf7bf70de4f255c",
+      "web": "docs/chapters/chapter03/images/chapter03_fig_3_10.svg"
+    },
+    {
+      "file": "chapter04_fig_4_1.svg",
+      "source_sha256": "c0df3bc0b7a70aa60a17a4897ed0020198b4e43ef1e34bd0366588641974553c",
+      "web": "docs/chapters/chapter04/images/chapter04_fig_4_1.svg"
+    },
+    {
+      "file": "chapter04_fig_4_3.svg",
+      "source_sha256": "be76d1f76cfb0bb6d87cf9bc4164a01c2850612f05dae8e9712b7ea046156137",
+      "web": "docs/chapters/chapter04/images/chapter04_fig_4_3.svg"
+    },
+    {
+      "file": "chapter04_fig_4_4.svg",
+      "source_sha256": "17e93b2cf392d0ff1f958165a76edf8dfe59ace236a96b09a60510ca8f89d9f8",
+      "web": "docs/chapters/chapter04/images/chapter04_fig_4_4.svg"
+    },
+    {
+      "file": "chapter04_fig_4_5.svg",
+      "source_sha256": "d2848b86cee6adc724d7a9d7b2a30bb431ea00f964fd3dfb20f58fd99e3131c8",
+      "web": "docs/chapters/chapter04/images/chapter04_fig_4_5.svg"
+    },
+    {
+      "file": "chapter04_fig_4_6.svg",
+      "source_sha256": "2caaa7f53c9c3254c82e2885840de85916e816dd7294b80b31e14fa5ecf297ec",
+      "web": "docs/chapters/chapter04/images/chapter04_fig_4_6.svg"
+    },
+    {
+      "file": "chapter04_fig_4_7.svg",
+      "source_sha256": "5c7e773579619d689732163defa94c7919b7620e8ab261a0796c1c03c0ff3f80",
+      "web": "docs/chapters/chapter04/images/chapter04_fig_4_7.svg"
+    },
+    {
+      "file": "chapter04_fig_4_10.svg",
+      "source_sha256": "fa477b7a883b0b9972e80d1fc66091cd8b170b25c76f28cd80e44e553534b77b",
+      "web": "docs/chapters/chapter04/images/chapter04_fig_4_10.svg"
+    },
+    {
+      "file": "chapter04_fig_4_12.svg",
+      "source_sha256": "b184ee27e41e363b2b36336402ec16632a9849a45706a75f4cbb445b7e4a2d28",
+      "web": "docs/chapters/chapter04/images/chapter04_fig_4_12.svg"
+    },
+    {
+      "file": "chapter04_fig_4_13.svg",
+      "source_sha256": "2d48bb139f7b5014f822cafc1f167222c1e5601659951ac6e010ed1c2afdec1b",
+      "web": "docs/chapters/chapter04/images/chapter04_fig_4_13.svg"
+    },
+    {
+      "file": "chapter04_fig_4_14.svg",
+      "source_sha256": "366e78c6533bf039a4ea5e8da7d8b8fe70ce6aff8d7e322eba91dbf63cd073cc",
+      "web": "docs/chapters/chapter04/images/chapter04_fig_4_14.svg"
+    },
+    {
+      "file": "chapter05_fig_5_1.svg",
+      "source_sha256": "a92614afd6c4368d6361c285156c6d48fb708af35c68a77e56bb6ab9302dbda8",
+      "web": "docs/chapters/chapter05/images/chapter05_fig_5_1.svg"
+    },
+    {
+      "file": "chapter05_fig_5_2.svg",
+      "source_sha256": "f948e1018a297b15a6378027a5c9995bf33bf111c49cb831fd61c17a9b5f2ddc",
+      "web": "docs/chapters/chapter05/images/chapter05_fig_5_2.svg"
+    },
+    {
+      "file": "chapter05_fig_5_4.svg",
+      "source_sha256": "bf80061190d0fc189a021d1aa177b18eeaa8759161fd7424567a3a616d63af1d",
+      "web": "docs/chapters/chapter05/images/chapter05_fig_5_4.svg"
+    },
+    {
+      "file": "chapter05_fig_5_5.svg",
+      "source_sha256": "c53e5710808addb2055b5950a4e124abadde56580758fdcb1a155aba90e05265",
+      "web": "docs/chapters/chapter05/images/chapter05_fig_5_5.svg"
+    },
+    {
+      "file": "chapter05_fig_5_6.svg",
+      "source_sha256": "b42352cec44fef5407823c04b787014b9b898d9d4d67f7323c75db800a4835f7",
+      "web": "docs/chapters/chapter05/images/chapter05_fig_5_6.svg"
+    },
+    {
+      "file": "chapter06_fig_6_1.svg",
+      "source_sha256": "5e011fd02c15887db15c95fe55539600e6c32394ad2a4664ddc787a7a88c3d8b",
+      "web": "docs/chapters/chapter06/images/chapter06_fig_6_1.svg"
+    },
+    {
+      "file": "chapter06_fig_6_2.svg",
+      "source_sha256": "36c330ec50689556ed7ba8766630a33b30a06a44a1f77b3072b3ea166116d966",
+      "web": "docs/chapters/chapter06/images/chapter06_fig_6_2.svg"
+    },
+    {
+      "file": "chapter06_fig_6_4.svg",
+      "source_sha256": "433489b227022547fa864c29cc4dfadbeba7f4aadc76029e4d523bf8c5e31ec0",
+      "web": "docs/chapters/chapter06/images/chapter06_fig_6_4.svg"
+    },
+    {
+      "file": "chapter06_fig_6_5.svg",
+      "source_sha256": "5d734f261b01d8ce0bfc2e8d033a43e20c622731c88eac6547779c0c5f9b8815",
+      "web": "docs/chapters/chapter06/images/chapter06_fig_6_5.svg"
+    },
+    {
+      "file": "chapter06_fig_6_6.svg",
+      "source_sha256": "f4e8afdcf02dd7fa46da9a98c61900a54942586e3336a29366d2bb162367ec91",
+      "web": "docs/chapters/chapter06/images/chapter06_fig_6_6.svg"
+    },
+    {
+      "file": "chapter06_fig_6_7.svg",
+      "source_sha256": "b04e3931c1e3b2b74e212b92b4ea428c9835a8d8241e0aef636eae317f2f2128",
+      "web": "docs/chapters/chapter06/images/chapter06_fig_6_7.svg"
+    },
+    {
+      "file": "chapter06_fig_6_9.svg",
+      "source_sha256": "f64d0573ecdedd870e49b872b51ba85b97372ef7058e8fc58e2dab9d6314b4a6",
+      "web": "docs/chapters/chapter06/images/chapter06_fig_6_9.svg"
+    },
+    {
+      "file": "chapter06_fig_6_10.svg",
+      "source_sha256": "fb4916b76c676ee8d9534c68ca7c924e84c73e1b2e4dba370560c85990d70738",
+      "web": "docs/chapters/chapter06/images/chapter06_fig_6_10.svg"
+    },
+    {
+      "file": "chapter06_fig_6_11.svg",
+      "source_sha256": "8dfd1df609dafc52ffaffa5c6e29b2af5d5dad8e6ac286774ef6faef8048680c",
+      "web": "docs/chapters/chapter06/images/chapter06_fig_6_11.svg"
+    },
+    {
+      "file": "chapter06_fig_6_12.svg",
+      "source_sha256": "2cd5308081d0966e4ec4c3af1eaeda9e400be9ffc9de066218cc94ef2730be3e",
+      "web": "docs/chapters/chapter06/images/chapter06_fig_6_12.svg"
+    },
+    {
+      "file": "chapter06_fig_6_13.svg",
+      "source_sha256": "c35811f061c089177ae16d332979c47f63cddf0fadf40cccea0099d69043e17b",
+      "web": "docs/chapters/chapter06/images/chapter06_fig_6_13.svg"
+    },
+    {
+      "file": "chapter06_fig_6_14.svg",
+      "source_sha256": "636521b30b3837d1803b9b577b72c1eeb8ba12cf000ec4409f02166d386dce39",
+      "web": "docs/chapters/chapter06/images/chapter06_fig_6_14.svg"
+    },
+    {
+      "file": "chapter06_fig_6_15.svg",
+      "source_sha256": "612f42ace92d49af64a366ba73c6d7e057fd5243a383f96577e7d59635d79ff8",
+      "web": "docs/chapters/chapter06/images/chapter06_fig_6_15.svg"
+    },
+    {
+      "file": "chapter07_fig_7_1.svg",
+      "source_sha256": "da8f2a841d96e594f40e309cb89a346306d17965efbb9da58bda68f6fa7307d7",
+      "web": "docs/chapters/chapter07/images/chapter07_fig_7_1.svg"
+    },
+    {
+      "file": "chapter07_fig_7_2.svg",
+      "source_sha256": "685a9d12b836eae33c6957397209e0f593353129652d6d4b2af471aa2942ab12",
+      "web": "docs/chapters/chapter07/images/chapter07_fig_7_2.svg"
+    },
+    {
+      "file": "chapter07_fig_7_3.svg",
+      "source_sha256": "be03b1afacfd355df1a58c62c6751874b9a494c360b677a1cd8108b2f90b4fdd",
+      "web": "docs/chapters/chapter07/images/chapter07_fig_7_3.svg"
+    },
+    {
+      "file": "chapter07_fig_7_5.svg",
+      "source_sha256": "61ec6f52f1833360d346ae9ff3566fd4d07473898133d0171fb551dfdb57089b",
+      "web": "docs/chapters/chapter07/images/chapter07_fig_7_5.svg"
+    },
+    {
+      "file": "chapter07_fig_7_6.svg",
+      "source_sha256": "afe4df8e8fb6679953d66168ad486ddfb386d2e9639db453c8087f908400b9f6",
+      "web": "docs/chapters/chapter07/images/chapter07_fig_7_6.svg"
+    },
+    {
+      "file": "chapter07_fig_7_7.svg",
+      "source_sha256": "00668dc0d10132ad0c5066baabcf4c1365d54babba33e5b5b37d7a7191b6286e",
+      "web": "docs/chapters/chapter07/images/chapter07_fig_7_7.svg"
+    },
+    {
+      "file": "chapter07_fig_7_8.svg",
+      "source_sha256": "9d9477ed1617ee34cfdd187e1ed1b6140cf0da705d437cfd18aa585d1e03d1c8",
+      "web": "docs/chapters/chapter07/images/chapter07_fig_7_8.svg"
+    },
+    {
+      "file": "chapter07_fig_7_10.svg",
+      "source_sha256": "499232edf2030e029f008fba150050a7c2ba34ccf5a6714f87d2db80c23b58e7",
+      "web": "docs/chapters/chapter07/images/chapter07_fig_7_10.svg"
+    },
+    {
+      "file": "chapter07_fig_7_11.svg",
+      "source_sha256": "73728b49a4eceef5fff42a8c6eb1f0e3f2b18a3e458ef2b31975dbfe8acf8052",
+      "web": "docs/chapters/chapter07/images/chapter07_fig_7_11.svg"
+    },
+    {
+      "file": "chapter07_fig_7_12.svg",
+      "source_sha256": "3ca753b59bb743a659cdef46b6addf1aa260f8f30ddc9f150d26fcfd1662839e",
+      "web": "docs/chapters/chapter07/images/chapter07_fig_7_12.svg"
+    },
+    {
+      "file": "chapter07_fig_7_13.svg",
+      "source_sha256": "8a98d430a4dc63bfdbeab649e610c905c43aaa8db2506b111fdbebb3e24576fb",
+      "web": "docs/chapters/chapter07/images/chapter07_fig_7_13.svg"
+    },
+    {
+      "file": "chapter08_fig_8_1.svg",
+      "source_sha256": "9e658aaa47ae2a3531017d32fcb785238b7e80e460ca8f957561cd423f23a505",
+      "web": "docs/chapters/chapter08/images/chapter08_fig_8_1.svg"
+    },
+    {
+      "file": "chapter08_fig_8_2.svg",
+      "source_sha256": "ea5225c3cc30b974759872f7f8cb0afdd6220889b01966655e935d010617283c",
+      "web": "docs/chapters/chapter08/images/chapter08_fig_8_2.svg"
+    },
+    {
+      "file": "chapter08_fig_8_4.svg",
+      "source_sha256": "93bcdc07a82faa539bce80dadb1ec258f5bff640baacc7aa43947e4b92d3b1d9",
+      "web": "docs/chapters/chapter08/images/chapter08_fig_8_4.svg"
+    },
+    {
+      "file": "chapter08_fig_8_5.svg",
+      "source_sha256": "09229fe45d50eaa090a69494357bf4c338c9ad65263f0d92a05e5a24b1cb2155",
+      "web": "docs/chapters/chapter08/images/chapter08_fig_8_5.svg"
+    },
+    {
+      "file": "chapter08_fig_8_7.svg",
+      "source_sha256": "47fdc79f1b9834f2d717527606e361e00e3722603a5d4b4a9bab38f35e23f09c",
+      "web": "docs/chapters/chapter08/images/chapter08_fig_8_7.svg"
+    },
+    {
+      "file": "chapter08_fig_8_8.svg",
+      "source_sha256": "d80c00d4bc66a8a1c8eed624938cd3f88afdeca4035f3993a1274a98adcd0770",
+      "web": "docs/chapters/chapter08/images/chapter08_fig_8_8.svg"
+    },
+    {
+      "file": "chapter08_fig_8_9.svg",
+      "source_sha256": "899a9cc1911e44a99aa8ab45df909d1e00a49c2d9d6e93b2bbbb67db9fe89d61",
+      "web": "docs/chapters/chapter08/images/chapter08_fig_8_9.svg"
+    },
+    {
+      "file": "chapter08_fig_8_10.svg",
+      "source_sha256": "c1353d8f333f32e7d4fd9602a1c7a106e65e3e5481fc7060e9efb1f813e99cf5",
+      "web": "docs/chapters/chapter08/images/chapter08_fig_8_10.svg"
+    },
+    {
+      "file": "chapter08_fig_8_11.svg",
+      "source_sha256": "92ae2a4f95047162e8587a732f021ea6596454374ecd0f59be48edc2464b3ac2",
+      "web": "docs/chapters/chapter08/images/chapter08_fig_8_11.svg"
+    },
+    {
+      "file": "chapter08_fig_8_12.svg",
+      "source_sha256": "b6c61a92508203dd20f7b0f6e5d28b6616160f1100b11f9c40e4ceb22c9009e5",
+      "web": "docs/chapters/chapter08/images/chapter08_fig_8_12.svg"
+    },
+    {
+      "file": "chapter08_fig_8_13.svg",
+      "source_sha256": "3f52b1902864445b089ca876302cb7dda0f2953c5def7c8517e98f0de1647e58",
+      "web": "docs/chapters/chapter08/images/chapter08_fig_8_13.svg"
+    },
+    {
+      "file": "chapter08_fig_8_14.svg",
+      "source_sha256": "87070ac6fd4e8e3bda6dde9da3e3812a568704f75539541a11088612db128d27",
+      "web": "docs/chapters/chapter08/images/chapter08_fig_8_14.svg"
+    },
+    {
+      "file": "chapter08_fig_8_15.svg",
+      "source_sha256": "42fe955319103de39835ddc55f94713a51c5a7b60c85e87c5dbc78271c19a542",
+      "web": "docs/chapters/chapter08/images/chapter08_fig_8_15.svg"
+    },
+    {
+      "file": "chapter08_fig_8_16.svg",
+      "source_sha256": "6a7109642b9b98bf6cc1d4e42bd23cd0bdf32543123eaf0208867dc96dc4bb52",
+      "web": "docs/chapters/chapter08/images/chapter08_fig_8_16.svg"
+    },
+    {
+      "file": "chapter08_fig_8_17.svg",
+      "source_sha256": "8c70156eea996f260c2f8e7ff4dd6f3a83e8fd7a2bc055aa2f6bf20beabc9928",
+      "web": "docs/chapters/chapter08/images/chapter08_fig_8_17.svg"
+    },
+    {
+      "file": "chapter08_fig_8_18.svg",
+      "source_sha256": "273d3e282505675acdee8ed37f5ed73a1c9ee1547e044ea1857c2d7f0674d8ba",
+      "web": "docs/chapters/chapter08/images/chapter08_fig_8_18.svg"
+    },
+    {
+      "file": "chapter08_fig_8_19.svg",
+      "source_sha256": "4fe13ef1c57d159590f091ab7dd6a9ae4dd8384dc2aa458305a48d2b3db589c2",
+      "web": "docs/chapters/chapter08/images/chapter08_fig_8_19.svg"
+    },
+    {
+      "file": "chapter08_fig_8_20.svg",
+      "source_sha256": "b303b78fadeb27effd365deaebcadb550d4b53e5501111e5d86686a6af28efd6",
+      "web": "docs/chapters/chapter08/images/chapter08_fig_8_20.svg"
+    },
+    {
+      "file": "chapter08_fig_8_21.svg",
+      "source_sha256": "53230e5e59e6e595a302c7fa029ef67b2040977f6ff87f7e48ed5df78662a8a9",
+      "web": "docs/chapters/chapter08/images/chapter08_fig_8_21.svg"
+    },
+    {
+      "file": "chapter08_fig_8_22.svg",
+      "source_sha256": "58c8fb1dbfae9df06e476572a444eb6e5235f0a2c0d982599b9ee29266d45551",
+      "web": "docs/chapters/chapter08/images/chapter08_fig_8_22.svg"
+    },
+    {
+      "file": "chapter08_fig_8_23.svg",
+      "source_sha256": "efb1adf1f192f7b87198e9be8b464303130f9603fb9e4a3f32a90c95c5ddf452",
+      "web": "docs/chapters/chapter08/images/chapter08_fig_8_23.svg"
+    },
+    {
+      "file": "chapter08_fig_8_24.svg",
+      "source_sha256": "5535b0b22c20cca877ef4584da17ee15fda91851aa56eca6ddd8cecf8d3f566b",
+      "web": "docs/chapters/chapter08/images/chapter08_fig_8_24.svg"
+    },
+    {
+      "file": "chapter08_fig_8_25.svg",
+      "source_sha256": "1769898de03745b4b632a5cf5a859289ae65334bf2641d10b6c3225649d2d2b1",
+      "web": "docs/chapters/chapter08/images/chapter08_fig_8_25.svg"
+    },
+    {
+      "file": "chapter08_fig_8_26.svg",
+      "source_sha256": "e499e334fc8597498a5aa12b931e645d375304a5ecea1ef3b5b8e24ddadefcc6",
+      "web": "docs/chapters/chapter08/images/chapter08_fig_8_26.svg"
+    },
+    {
+      "file": "chapter08_fig_8_27.svg",
+      "source_sha256": "ea0a47e7217671fbbf3d94f7d34a6c06fbb34599d66de5a6d1beb78be17edb17",
+      "web": "docs/chapters/chapter08/images/chapter08_fig_8_27.svg"
+    }
+  ],
+  "browser_review": "13个网页、2837个正文段落缩进、107幅图片加载通过；实际查看图1.5请求链与图4.12JWT链，已按栏宽显示，图号与内容对应。"
+}

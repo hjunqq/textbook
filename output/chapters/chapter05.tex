@@ -52,18 +52,18 @@ DELETE & 删除资源 & 删除尚未发布的规则 & 是 \\
 
 \begin{figure}[htbp]
 \centering
-\begin{tikzpicture}[>=Stealth,thick,node distance=0.35cm and 0.3cm]
-  \tikzset{layer/.style={draw=Primary,rounded corners=2pt,minimum width=2.05cm,minimum height=.68cm,align=center,fill=PrimaryLight,text=PrimaryDark,font=\scriptsize}}
+\begin{tikzpicture}[>=Stealth,thick,node distance=.45cm,
+  layer/.style={draw=Primary,rounded corners=2pt,text width=2.2cm,minimum height=.9cm,align=center,fill=PrimaryLight,text=PrimaryDark,font=\scriptsize}]
   \node[layer] (client) {浏览器/网关\\HTTP请求};
   \node[layer,right=of client] (controller) {Controller\\协议与校验};
   \node[layer,right=of controller] (service) {Application Service\\用例与规则};
   \node[layer,right=of service] (repo) {Repository\\查询与持久化};
-  \node[layer,right=of repo] (db) {PostgreSQL\\PostGIS/TimescaleDB};
-  \draw[->,draw=Primary] (client)--(controller);
-  \draw[->,draw=Primary] (controller)--(service);
-  \draw[->,draw=Primary] (service)--(repo);
-  \draw[->,draw=Primary] (repo)--(db);
-  \draw[->,draw=Accent] (db.south) to[bend right=35] node[below,font=\scriptsize]{结果沿原链路返回} (client.south);
+  \node[layer,right=of repo] (db) {PostgreSQL\\PostGIS\\TimescaleDB};
+  \foreach \a/\b in {client/controller,controller/service,service/repo,repo/db} {
+    \draw[->,Primary] ([yshift=2mm]\a.east)--([yshift=2mm]\b.west);
+    \draw[->,Accent] ([yshift=-2mm]\b.west)--([yshift=-2mm]\a.east);
+  }
+  \node[below=.35cm of service,font=\scriptsize,text=TextGray] {蓝色向右：调用\qquad 橙色向左：结果逐层返回};
 \end{tikzpicture}
 \caption{监测值写入分层链路}
 \label{fig:ch05-request-chain}
@@ -79,22 +79,22 @@ DELETE & 删除资源 & 删除尚未发布的规则 & 是 \\
 
 \begin{figure}[htbp]
 \centering
-\begin{tikzpicture}[>=Stealth,thick,node distance=0.52cm and 0.48cm]
-  \tikzset{boundary/.style={draw=Primary,rounded corners=2pt,minimum width=2.15cm,minimum height=.8cm,align=center,fill=PrimaryLight,text=PrimaryDark,font=\scriptsize},
-    error/.style={draw=Accent,rounded corners=2pt,minimum width=2.15cm,minimum height=.65cm,align=center,fill=white,text=PrimaryDark,font=\scriptsize}}
-  \node[boundary] (http) {HTTP请求\\JSON/状态码};
-  \node[boundary,right=of http] (validate) {Controller\\格式校验};
-  \node[boundary,right=of validate] (usecase) {Application\\Service用例};
-  \node[boundary,right=of usecase] (repo) {Repository\\事务与查询};
-  \node[boundary,right=of repo] (dto) {Response DTO\\稳定契约};
-  \node[error,below=of validate] (bad) {400/422\\输入错误};
-  \node[error,below=of usecase] (domain) {404/409\\领域冲突};
-  \draw[->,draw=Primary] (http)--(validate);
-  \draw[->,draw=Primary] (validate)--(usecase);
-  \draw[->,draw=Primary] (usecase)--(repo);
-  \draw[->,draw=Primary] (repo)--(dto);
-  \draw[->,draw=Accent] (validate)--(bad);
-  \draw[->,draw=Accent] (usecase)--(domain);
+\begin{tikzpicture}[>=Stealth,thick,
+  boundary/.style={draw=Primary,rounded corners=2pt,text width=2.7cm,minimum height=.85cm,align=center,fill=PrimaryLight,text=PrimaryDark,font=\scriptsize},
+  error/.style={boundary,draw=Accent,fill=white}]
+  \node[boundary] (http) at (0,0) {HTTP请求\\方法、路径、JSON};
+  \node[boundary] (validate) at (3.7,0) {Controller\\格式校验};
+  \node[boundary] (usecase) at (7.4,0) {Application Service\\用例、规则与事务};
+  \node[boundary] (dto) at (11.1,0) {响应映射与DTO\\稳定的外部字段};
+  \node[boundary] (repo) at (7.4,-1.8) {Repository\\查询与持久化};
+  \node[error] (bad) at (3.7,-1.8) {400/422\\输入错误};
+  \node[error] (domain) at (11.1,-1.8) {404/409\\对象不存在/状态冲突};
+  \draw[->,Primary] (http)--(validate);
+  \draw[->,Primary] (validate)--(usecase);
+  \draw[->,Primary] (usecase)--(dto);
+  \draw[<->,Primary] (usecase)--(repo);
+  \draw[->,Accent] (validate)--(bad);
+  \draw[->,Accent] (usecase.south east)--(domain.north west);
 \end{tikzpicture}
 \caption{REST接口的契约边界与失败返回}
 \label{fig:ch05-rest-contract}
@@ -324,7 +324,7 @@ GET …/readings?from=2026-07-02…\&to=2026-07-01… & 400 & \texttt{\{code:"IN
 \end{tabular}
 \end{table}
 
-\paragraph{S3 阶段包与契约核对脚本。}清单\ref{lst:ch05-first-controller}与清单\ref{lst:ch05-first-params}合起来就是配套工程里的\texttt{backend/src/main/java/edu/example/lesson52/}，它是 S3 的起点：一个类、没有数据库、没有认证。独立包\texttt{edu.example.lesson52}与完整工程的\texttt{edu.example.qingyuan}分开扫描；若将两组控制器放入同一扫描范围，两个\texttt{/api/assets}映射会冲突并导致启动失败。表\ref{tab:ch05-first-verify}的四行不必手工点，配套工程的\texttt{teaching-api/contract-check.mjs}把它们连同错误体形状写成了可执行检查：\texttt{node teaching-api/contract-check.mjs http://localhost:8080 --stage=lesson52}。同一个脚本把\texttt{--stage}换成\texttt{teaching}或\texttt{full}，就分别核对教学接口和接了数据库的完整后端。脚本分别检查各阶段已经实现的接口范围。若某项失败，应按报告核对该阶段的路径、状态码与字段；登录及完整持久化行为在 S3 终点另行联调。
+\paragraph{S3 阶段包与契约核对脚本。}清单\ref{lst:ch05-first-controller}与清单\ref{lst:ch05-first-params}对应配套目录\texttt{backend/src/main/java/edu/example/lesson52/}，它是 S3 的起点：一个类、没有数据库、没有认证。独立包\texttt{edu.example.lesson52}与完整工程的\texttt{edu.example.qingyuan}分开扫描；若将两组控制器放入同一扫描范围，两个\texttt{/api/assets}映射会冲突并导致启动失败。表\ref{tab:ch05-first-verify}的四行不必手工点，配套工程的\texttt{teaching-api/contract-check.mjs}把它们连同错误体形状写成了可执行检查：\texttt{node teaching-api/contract-check.mjs http://localhost:8080 --stage=lesson52}。同一个脚本把\texttt{--stage}换成\texttt{teaching}或\texttt{full}，就分别核对教学接口和接了数据库的完整后端。脚本分别检查各阶段已经实现的接口范围。若某项失败，应按报告核对该阶段的路径、状态码与字段；登录及完整持久化行为在 S3 终点另行联调。
 
 \paragraph{自测}（1）把清单\ref{lst:ch05-first-controller}中的\texttt{@RestController}换成\texttt{@Controller}，访问\texttt{/api/assets}会发生什么？为什么？（框架把返回值当视图名去找模板，得到 404 或 500；\texttt{@RestController} = \texttt{@Controller} + \texttt{@ResponseBody}。）（2）\texttt{latest}方法为什么返回\texttt{ResponseEntity}而\texttt{assets}方法直接返回\texttt{List}？（前者需要区分 200 与 204 两种状态码，后者永远 200。）（3）不看代码，说出契约里“错误体统一为\texttt{\{code, message, field?\}}”在本节由哪两个方法保证，还有哪一类错误它们接不住。
 
@@ -946,18 +946,21 @@ class ReadingCommandService {
 
 \begin{figure}[htbp]
 \centering
-\begin{tikzpicture}[>=Stealth,thick,node distance=0.5cm and 0.45cm]
-\node[draw,rounded corners,fill=blue!8,align=center] (http) {HTTP\\控制器};
-\node[draw,rounded corners,fill=green!10,align=center,right=of http] (proxy) {Spring\\事务代理};
-\node[draw,rounded corners,fill=yellow!18,align=center,right=of proxy] (tx) {主事务\\保存读数};
-\node[draw,rounded corners,fill=orange!18,align=center,below=of tx] (audit) {REQUIRES\_NEW\\审计事务};
-\node[draw,rounded corners,fill=purple!10,align=center,right=of tx] (commit) {提交成功\\AFTER\_COMMIT};
-\draw[->] (http) -- (proxy);
-\draw[->] (proxy) -- (tx);
-\draw[->] (tx) -- node[above,font=\scriptsize]{挂起/恢复} (audit);
-\draw[->] (tx) -- (commit);
+\begin{tikzpicture}[>=Stealth,thick,node distance=.65cm,
+  txbox/.style={draw=Primary,rounded corners=2pt,fill=PrimaryLight,text=PrimaryDark,align=center,text width=2.6cm,minimum height=.9cm,font=\small}]
+  \node[txbox] (http) {HTTP控制器\\调用服务};
+  \node[txbox,right=of http] (proxy) {Spring事务代理\\开启主事务};
+  \node[txbox,right=of proxy] (tx) {主事务\\保存读数};
+  \node[txbox,right=of tx] (commit) {主事务提交成功\\{\scriptsize AFTER\_COMMIT}};
+  \node[txbox,draw=Accent,fill=Accent!10,below=1.45cm of tx] (audit) {{\scriptsize REQUIRES\_NEW}\\独立审计事务};
+  \draw[->,Primary] (http)--(proxy);
+  \draw[->,Primary] (proxy)--(tx);
+  \draw[->,Primary] (tx)--(commit);
+  \draw[->,Accent] ([xshift=-7mm]tx.south)--node[left,font=\scriptsize]{挂起主事务}([xshift=-7mm]audit.north);
+  \draw[->,Accent] ([xshift=7mm]audit.north)--node[right,font=\scriptsize]{结束后恢复}([xshift=7mm]tx.south);
+  \node[below=.25cm of audit,font=\scriptsize,text=TextGray] {审计事务独立提交或回滚};
 \end{tikzpicture}
-\caption{事务代理、自调用与提交后事件的边界}
+\caption{事务代理、独立审计与提交后事件}
 \label{fig:ch05-tx-proxy}
 \end{figure}
 
@@ -1622,19 +1625,25 @@ public final class RefreshTokenVerifier {
 
 \begin{figure}[htbp]
 \centering
-\begin{tikzpicture}[>=Stealth,thick,node distance=0.45cm and 0.35cm]
-\node[draw,rounded corners,fill=blue!8,align=center] (login) {登录\\输入凭据};
-\node[draw,rounded corners,fill=green!10,align=center,right=of login] (issue) {认证服务\\签发令牌对};
-\node[draw,rounded corners,fill=yellow!15,align=center,right=of issue] (api) {API 请求\\Bearer access};
-\node[draw,rounded corners,fill=orange!18,align=center,below=of api] (filter) {过滤器\\验签/类型/jti};
-\node[draw,rounded corners,fill=purple!10,align=center,left=of filter] (decision) {方法授权\\角色与权限};
-\node[draw,rounded corners,fill=red!10,align=center,left=of decision] (refresh) {刷新端点\\仅 refresh};
-\draw[->] (login) -- (issue);
-\draw[->] (issue) -- (api);
-\draw[->] (api) -- (filter);
-\draw[->] (filter) -- (decision);
-\draw[->] (refresh) -- (issue);
-\draw[->,dashed] (filter) to[bend right=18] node[below,font=\scriptsize]{401/403} (refresh);
+\begin{tikzpicture}[>=Stealth,thick,
+  auth/.style={draw=Primary,rounded corners=2pt,fill=PrimaryLight,text=PrimaryDark,text width=2.05cm,minimum height=.9cm,align=center,font=\scriptsize},
+  reject/.style={auth,draw=Accent,fill=white}]
+  \node[auth] (login) at (0,0) {登录\\提交凭据};
+  \node[auth] (issue) at (2.75,0) {认证服务\\签发令牌对};
+  \node[auth] (api) at (5.5,0) {API请求\\Bearer access};
+  \node[auth] (filter) at (8.25,0) {JWT过滤器\\验签\\类型、有效期};
+  \node[auth] (decision) at (11,0) {URL/方法授权\\角色与权限};
+  \node[auth] (service) at (13.75,0) {业务服务\\执行用例};
+  \node[auth] (refresh) at (2.75,-2) {刷新端点\\验证refresh并轮换};
+  \node[reject] (unauth) at (8.25,-2) {401\\认证失败};
+  \node[reject] (denied) at (11,-2) {403\\权限不足};
+  \foreach \a/\b in {login/issue,issue/api,api/filter,filter/decision,decision/service}
+    \draw[->,Primary] (\a)--(\b);
+  \draw[->,Accent] (filter)--(unauth);
+  \draw[->,Accent] (decision)--(denied);
+  \draw[->,Accent,dashed] (unauth.west)--node[above,align=center,font=\scriptsize]{access过期且\\持有有效refresh}(refresh.east);
+  \draw[->,Primary] (refresh)--(issue);
+  \node[below=.3cm of denied,font=\scriptsize,text=TextGray] {403不触发令牌刷新};
 \end{tikzpicture}
 \caption{Spring Security 6 与 JWT 的认证授权时序}
 \label{fig:ch05-auth-sequence}

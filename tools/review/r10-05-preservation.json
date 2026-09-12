@@ -1,0 +1,98 @@
+{
+  "baseline": "c99f4b8",
+  "total_listings": 216,
+  "total_figures": 107,
+  "files": [
+    {
+      "file": "output/chapters/chapter01.tex",
+      "listings": 0,
+      "code_unchanged": true,
+      "figures_before": 8,
+      "figures_after": 8
+    },
+    {
+      "file": "output/chapters/chapter02.tex",
+      "listings": 0,
+      "code_unchanged": true,
+      "figures_before": 14,
+      "figures_after": 14
+    },
+    {
+      "file": "output/chapters/chapter03.tex",
+      "listings": 6,
+      "code_unchanged": true,
+      "figures_before": 10,
+      "figures_after": 10
+    },
+    {
+      "file": "output/chapters/chapter04.tex",
+      "listings": 57,
+      "code_unchanged": true,
+      "figures_before": 14,
+      "figures_after": 14
+    },
+    {
+      "file": "output/chapters/chapter05.tex",
+      "listings": 46,
+      "code_unchanged": true,
+      "figures_before": 6,
+      "figures_after": 6
+    },
+    {
+      "file": "output/chapters/chapter06.tex",
+      "listings": 24,
+      "code_unchanged": true,
+      "figures_before": 15,
+      "figures_after": 15
+    },
+    {
+      "file": "output/chapters/chapter07.tex",
+      "listings": 26,
+      "code_unchanged": true,
+      "figures_before": 13,
+      "figures_after": 13
+    },
+    {
+      "file": "output/chapters/chapter08.tex",
+      "listings": 47,
+      "code_unchanged": true,
+      "figures_before": 27,
+      "figures_after": 27
+    },
+    {
+      "file": "output/chapters/chapter09.tex",
+      "listings": 0,
+      "code_unchanged": true,
+      "figures_before": 0,
+      "figures_after": 0
+    },
+    {
+      "file": "output/chapters/preface.tex",
+      "listings": 0,
+      "code_unchanged": true,
+      "figures_before": 0,
+      "figures_after": 0
+    },
+    {
+      "file": "output/appendix/answers.tex",
+      "listings": 0,
+      "code_unchanged": true,
+      "figures_before": 0,
+      "figures_after": 0
+    },
+    {
+      "file": "output/appendix/extended.tex",
+      "listings": 5,
+      "code_unchanged": true,
+      "figures_before": 0,
+      "figures_after": 0
+    },
+    {
+      "file": "output/appendix/prep.tex",
+      "listings": 5,
+      "code_unchanged": true,
+      "figures_before": 0,
+      "figures_after": 0
+    }
+  ]
+}

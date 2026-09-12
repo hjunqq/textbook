@@ -127,30 +127,31 @@
 
 \begin{figure}[htbp]
 \centering
-\begin{tikzpicture}[>=Stealth, every node/.style={font=\small}]
-  \draw[thick, draw=Primary] (-1.8,-2.0) rectangle (5.2,2.0);
-  \node[font=\small\bfseries, text=PrimaryDark] at (1.7,1.62) {水利工程安全监测平台};
-  \node[draw, circle, minimum size=5mm] (operator) at (-3.4,0.8) {};
-  \draw (operator.south) -- ++(0,-0.6) coordinate (obody);
-  \draw ($(operator.south)+(0,-0.2)$) -- ++(-0.35,-0.25);
-  \draw ($(operator.south)+(0,-0.2)$) -- ++(0.35,-0.25);
-  \draw (obody) -- ++(-0.3,-0.45); \draw (obody) -- ++(0.3,-0.45);
+\begin{tikzpicture}[>={Stealth[open]},every node/.style={font=\small},
+  usecase/.style={draw=Primary,ellipse,fill=PrimaryLight,minimum width=2.9cm,minimum height=.75cm,align=center}]
+  \draw[thick,draw=Primary] (-1.9,-1.65) rectangle (7.55,2.65);
+  \node[font=\small\bfseries,text=PrimaryDark] at (2.8,2.3) {水利工程安全监测平台};
+  \node[draw,circle,minimum size=5mm] (operator) at (-3.2,.6) {};
+  \draw (operator.south)--++(0,-.6) coordinate (obody);
+  \draw ($(operator.south)+(0,-.2)$)--++(-.35,-.25);
+  \draw ($(operator.south)+(0,-.2)$)--++(.35,-.25);
+  \draw (obody)--++(-.3,-.45); \draw (obody)--++(.3,-.45);
   \node[below=1.15cm of operator] {值班员};
-  \node[draw=Primary, ellipse, fill=PrimaryLight, minimum width=2.4cm] (view) at (0,0.9) {查看监测态势};
-  \node[draw=Primary, ellipse, fill=PrimaryLight, minimum width=2.4cm] (ack) at (0,-0.8) {确认告警事件};
-  \node[draw=Primary, ellipse, fill=PrimaryLight, minimum width=2.4cm] (rule) at (3.0,0.2) {维护预警规则};
-  \node[draw=Primary, ellipse, fill=PrimaryLight, minimum width=2.4cm] (log) at (2.0,-0.8) {记录处置日志};
-  \node[draw, circle, minimum size=5mm] (managerHead) at (6.4,0.8) {};
-  \draw (managerHead.south) -- ++(0,-0.6) coordinate (managerBody);
-  \draw ($(managerHead.south)+(0,-0.2)$) -- ++(-0.35,-0.25);
-  \draw ($(managerHead.south)+(0,-0.2)$) -- ++(0.35,-0.25);
-  \draw (managerBody) -- ++(-0.3,-0.45); \draw (managerBody) -- ++(0.3,-0.45);
-  \node[below=1.15cm of managerHead] {专业分析员};
-  \draw (operator.east) -- (view.west); \draw (operator.east) -- (ack.west);
-  \draw (managerHead.west) -- (rule.east);
-  \draw[dashed,->] (ack) -- node[above, font=\scriptsize, fill=white, inner sep=1pt] {«include»} (log);
-  \node[draw=Primary, ellipse, fill=white, minimum width=2.4cm, font=\scriptsize] (hist) at (3.2,1.35) {查看历史同期对比};
-  \draw[dashed,->] (hist) -- node[right, font=\scriptsize, fill=white, inner sep=1pt] {«extend»} (view);
+  \node[usecase] (view) at (0,1.3) {查看监测态势};
+  \node[usecase] (ack) at (0,-.8) {确认告警事件};
+  \node[usecase] (rule) at (5.1,.2) {提出规则修订建议};
+  \node[usecase] (log) at (5.1,-.8) {记录处置日志};
+  \node[usecase,fill=white,font=\scriptsize] (hist) at (5.1,1.3) {查看历史同期对比};
+  \node[draw,circle,minimum size=5mm] (analyst) at (8.6,.6) {};
+  \draw (analyst.south)--++(0,-.6) coordinate (abody);
+  \draw ($(analyst.south)+(0,-.2)$)--++(-.35,-.25);
+  \draw ($(analyst.south)+(0,-.2)$)--++(.35,-.25);
+  \draw (abody)--++(-.3,-.45); \draw (abody)--++(.3,-.45);
+  \node[below=1.15cm of analyst] {专业分析员};
+  \draw (operator.east)--(view.west); \draw (operator.east)--(ack.west);
+  \draw (analyst.west)--(rule.east);
+  \draw[dashed,->] (ack)--node[above,font=\scriptsize,fill=white,inner sep=1pt]{«include»}(log);
+  \draw[dashed,->] (hist)--node[above,font=\scriptsize,fill=white,inner sep=1pt]{«extend»}(view);
 \end{tikzpicture}
 \caption{水利工程安全监测平台用例图示例}
 \label{fig:uml-usecase}
@@ -228,27 +229,26 @@
 
 状态图对于系统中如告警处置、巡检工单流转等具有多个阶段的过程非常有用。
 
-告警事件是案例水库平台中适合绘制状态图的对象：它从规则服务创建开始，经过通知、确认和处置，最终闭环或被专业分析员判为误报。图\ref{fig:alarm-event-state}把正常路径和超时升级放在同一张图中，读者应特别注意“已通知”到“处置中”的超时升级转移并不会跳过审批责任，升级事件仍要留下原事件号和升级原因。
+告警事件是案例水库平台中适合绘制状态图的对象：它从规则服务创建开始，经过通知、确认和处置，最终闭环或经专业复核、审批认定为误报。图\ref{fig:alarm-event-state}中的通知、处置等节点表示业务阶段，接口状态值以8.1节为准。超时催办只调整通知对象和渠道，保持原阶段；进入处置仍须完成确认、建立工单及相应审批。
 
 \begin{figure}[htbp]
 \centering
-\begin{tikzpicture}[node distance=7mm and 9mm,
-  state/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=2.2cm,
-    minimum height=.68cm,align=center,font=\small},
-  trans/.style={->,draw=Primary,thick}]
-\node[state] (new) {新建};
-\node[state,right=of new] (notified) {已通知};
-\node[state,right=of notified] (acked) {已确认};
-\node[state,below=of acked] (handling) {处置中};
-\node[state,left=of handling] (closed) {已闭环};
-\node[state,right=of handling] (false) {已误报};
-\draw[trans] (new)--node[above,font=\scriptsize]{发送通知}(notified);
-\draw[trans] (notified)--node[above,font=\scriptsize]{确认}(acked);
-\draw[trans] (acked)--node[right,font=\scriptsize]{生成工单}(handling);
-\draw[trans] (handling)--node[below,font=\scriptsize]{回执与复核}(closed);
-\draw[trans] (acked)--node[above right,font=\scriptsize]{判定误报}(false);
-\draw[trans,dashed] (notified) to[bend left=25] node[above,font=\scriptsize]{超时升级}(handling);
-\draw[trans,dashed] (handling) to[bend right=25] node[below,font=\scriptsize]{复核为误报}(false);
+\begin{tikzpicture}[
+  state/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=2.2cm,minimum height=.7cm,align=center,font=\small},
+  trans/.style={->,draw=Primary,thick},lbl/.style={font=\scriptsize,fill=white,inner sep=1pt}]
+\node[state] (new) at (0,0) {新建};
+\node[state] (notified) at (3.6,0) {已通知};
+\node[state] (acked) at (7.2,0) {已确认};
+\node[state] (handling) at (7.2,-2) {处置中};
+\node[state] (closed) at (3.6,-2) {已闭环};
+\node[state] (false) at (10.8,-2) {已误报};
+\draw[trans] (new)--node[above,lbl]{发送通知}(notified);
+\draw[trans] (notified)--node[above,lbl]{值班员确认}(acked);
+\draw[trans] (acked)--node[right,lbl,align=left]{建立工单\\按审批方案处置}(handling);
+\draw[trans] (handling)--node[below=2mm,lbl]{回执与复核}(closed);
+\draw[trans] (acked.east)-|node[above,pos=.45,lbl]{复核、审批认定误报}(false.north);
+\draw[trans] (handling)--node[below=2mm,lbl]{复核并审批}(false);
+\path[trans,dashed] (notified) edge[loop above,min distance=10mm] node[above,lbl]{超时催办，保持原状态}(notified);
 \end{tikzpicture}
 \caption{告警事件生命周期状态图}
 \label{fig:alarm-event-state}
@@ -256,28 +256,30 @@
 
 状态转换必须由事件、权限和证据共同决定。例如“已通知”不能仅因页面刷新就变成“已确认”，而要有值班员身份、确认时间和事件版本；“已闭环”需要处置回执与专业复核，“已误报”要保留误报原因并进入规则改进清单。超时升级可以改变责任岗位和通知渠道，但不能覆盖原状态历史。这样的状态模型能支撑幂等处理、重复确认和审计回放。
 
-活动图则强调“谁在什么泳道执行哪一步”。图\ref{fig:alarm-activity}将预警处置拆成平台和岗位两个泳道，展示事件创建、通知、确认、审批和回执的顺序；与状态图相比，它关注动作流和责任分工，而不是对象当前状态。
+活动图则强调“谁在什么泳道执行哪一步”。图\ref{fig:alarm-activity}按平台、值班员、专业分析员和审批人划分泳道，展示创建、通知、确认、研判、审批、执行与回执的顺序；与状态图相比，它关注动作流和责任分工，而不是对象当前状态。
 
 \begin{figure}[htbp]
 \centering
-\begin{tikzpicture}[node distance=6mm and 8mm,
-  act/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=2.55cm,
-    minimum height=.62cm,align=center,font=\small},
-  lane/.style={draw=TextGray,dashed,minimum width=5.9cm,minimum height=4.25cm},
-  flow/.style={->,draw=Primary,thick}]
-\node[lane] (platformLane) at (-3.1,0) {};
-\node[lane] (roleLane) at (3.1,0) {};
-\node[font=\small\bfseries] at (-3.1,1.85) {平台};
-\node[font=\small\bfseries] at (3.1,1.85) {值班员/审批人};
-\node[act] (create) at (-3.1,1.0) {创建事件};
-\node[act] (notify) at (-3.1,0.0) {发送通知};
-\node[act] (ack) at (3.1,0.0) {确认并研判};
-\node[act] (approve) at (3.1,-1.0) {审批处置};
-\node[act] (receipt) at (-3.1,-1.0) {记录回执};
+\begin{tikzpicture}[
+  act/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=2.65cm,minimum height=.7cm,align=center,font=\small},
+  lane/.style={draw=TextGray,dashed,minimum width=3.2cm,minimum height=4.6cm},flow/.style={->,draw=Primary,thick}]
+\foreach \x/\role in {0/平台,3.4/值班员,6.8/专业分析员,10.2/审批人}{
+  \node[lane] at (\x,0) {};
+  \node[font=\small\bfseries] at (\x,1.9) {\role};
+}
+\node[act] (create) at (0,1.05) {创建事件};
+\node[act] (notify) at (0,.05) {发送通知};
+\node[act] (ack) at (3.4,.05) {确认事件};
+\node[act] (analyse) at (6.8,.05) {复核数据与模型\\提出处置建议};
+\node[act] (approve) at (10.2,.05) {审批处置方案};
+\node[act] (execute) at (3.4,-1.35) {按批准方案处置\\提交回执};
+\node[act] (receipt) at (0,-1.35) {记录回执};
 \draw[flow] (create)--(notify);
 \draw[flow] (notify)--(ack);
-\draw[flow] (ack)--(approve);
-\draw[flow] (approve)--(receipt);
+\draw[flow] (ack)--(analyse);
+\draw[flow] (analyse)--(approve);
+\draw[flow] (approve.south)|-node[above,pos=.65,font=\scriptsize]{批准后}(execute.east);
+\draw[flow] (execute)--(receipt);
 \end{tikzpicture}
 \caption{预警处置泳道活动图}
 \label{fig:alarm-activity}
@@ -287,26 +289,26 @@
 
 \begin{figure}[htbp]
 \centering
-\begin{tikzpicture}[>=Stealth, every node/.style={font=\small}]
+\begin{tikzpicture}[>=Stealth,every node/.style={font=\small}]
   \foreach \x/\name in {0/分析服务,3/告警服务,6/消息服务,9/值班终端}{
-    \node[draw=Primary, fill=PrimaryLight, rounded corners=2pt, minimum width=2.0cm] (n\x) at (\x,0) {\name};
-    \draw[dashed, draw=TextGray] (\x,-0.4) -- (\x,-5.0);
+    \node[draw=Primary,fill=PrimaryLight,rounded corners=2pt,minimum width=2cm] at (\x,0) {\name};
+    \draw[dashed,draw=TextGray] (\x,-.4)--(\x,-5.0);
   }
-  \draw[draw=Primary, fill=PrimaryLight] (-0.08,-1.0) rectangle (0.08,-1.8);
-  \draw[draw=Primary, fill=PrimaryLight] (2.92,-1.9) rectangle (3.08,-4.0);
-  \draw[draw=Primary, fill=PrimaryLight] (5.92,-2.8) rectangle (6.08,-3.4);
-  \draw[draw=Primary, fill=PrimaryLight] (8.92,-2.8) rectangle (9.08,-4.0);
-  \draw[->, thick] (0,-1.0) -- node[above] {创建告警事件} (3,-1.0);
-  \draw[-{Stealth[open]}, thick] (3,-1.9) -- node[above, fill=white, inner sep=1pt] {异步推送} (6,-1.9);
-  \draw[-{Stealth[open]}, thick] (6,-2.8) -- node[above, fill=white, inner sep=1pt] {告警通知} (9,-2.8);
-  \draw[->, thick] (9,-3.7) -- node[above] {确认（事件号、版本）} (3,-3.7);
-  \draw[dashed,-{Stealth[open]}, thick] (3,-4.6) -- node[above, fill=white, inner sep=1pt] {确认结果} (9,-4.6);
+  \foreach \x/\top/\bottom in {0/-1.0/-2.0,3/-1.0/-2.0,6/-1.5/-2.8,9/-2.6/-3.0,9/-3.6/-4.5,3/-3.6/-4.5}{
+    \draw[draw=Primary,fill=PrimaryLight] (\x-.08,\top) rectangle (\x+.08,\bottom);
+  }
+  \draw[->,thick] (.08,-1.0)--node[above]{创建告警事件}(2.92,-1.0);
+  \draw[-{Stealth[open]},thick] (3.08,-1.5)--node[above,fill=white,inner sep=1pt]{异步推送}(5.92,-1.5);
+  \draw[dashed,-{Stealth[open]},thick] (2.92,-2.0)--node[above,fill=white,inner sep=1pt]{返回事件号}(.08,-2.0);
+  \draw[-{Stealth[open]},thick] (6.08,-2.6)--node[above,fill=white,inner sep=1pt]{告警通知}(8.92,-2.6);
+  \draw[->,thick] (8.92,-3.6)--node[above,fill=white,inner sep=1pt]{确认（事件号、版本）}(3.08,-3.6);
+  \draw[dashed,-{Stealth[open]},thick] (3.08,-4.5)--node[above,fill=white,inner sep=1pt]{确认结果}(8.92,-4.5);
 \end{tikzpicture}
 \caption{告警触发、推送与确认时序图（实心箭头为同步消息，开放箭头为异步或返回消息）}
 \label{fig:uml-sequence}
 \end{figure}
 
-案例水库的用例图、类图和行为视图描述同一系统的不同方面，建模时需要相互核对。建模评审应先从用例图开始：值班员确认预警、专业分析员维护规则分别对应哪些业务目标，系统边界外的角色是否都能找到责任人。随后把每个重要用例落实到类图中的职责，例如告警服务负责生成和更新事件，监测记录负责保存测值与质量码，监测点只维护自身标识和采集状态。若一个类同时承担通知、审批、历史查询等互不相干的职责，就应拆分服务或引入协作者，而不应靠增加更多方法掩盖耦合。
+案例水库的用例图、类图和行为视图描述同一系统的不同方面，建模时需要相互核对。建模评审应先从用例图开始：值班员确认预警、专业分析员提出规则修订建议分别对应哪些业务目标，系统边界外的角色是否都能找到责任人。随后把每个重要用例落实到类图中的职责，例如告警服务负责生成和更新事件，监测记录负责保存测值与质量码，监测点只维护自身标识和采集状态。若一个类同时承担通知、审批、历史查询等互不相干的职责，就应拆分服务或引入协作者，而不应靠增加更多方法掩盖耦合。
 
 类图中的多重性还要和数据约束、接口返回值保持一致。一个监测点可以产生零到多条记录，记录可以不触发告警，也可以在不同规则下触发多个事件；因此图中的数量不能被实现成一个必填的单值字段。对告警事件使用 $1..*$ 的一端，表示每个事件至少关联一条触发依据，审计时可以沿着事件号追溯到原始记录。若业务规则允许人工创建没有测值依据的事件，应在需求和数据库约束中明确例外，而不是悄悄把图上的多重性改成 $0..*$。
 
@@ -427,9 +429,9 @@
   \node[left,text=PrimaryDark] at (-2.4,-.9) {页面};
   \draw[->,draw=Primary] (0,-1.5) -- node[above]{核对令牌与角色后：latest(assetId)} (4.2,-1.5);
   \draw[->,draw=Primary] (4.2,-2.1) -- node[above]{对象存在？→ findLatest(assetId)} (8.4,-2.1);
-  \draw[->,draw=Accent] (8.4,-2.7) -- node[below]{Optional<Reading>（一行或空）} (4.2,-2.7);
-  \draw[->,draw=Accent] (4.2,-3.3) -- node[below]{DTO 或“无观测”} (0,-3.3);
-  \draw[->,draw=Accent] (0,-3.9) -- node[below]{200 + JSON，或 204 / 404} (-2.4,-3.9);
+  \draw[dashed,-{Stealth[open]},draw=Accent] (8.4,-2.7) -- node[below]{Optional<Reading>（一行或空）} (4.2,-2.7);
+  \draw[dashed,-{Stealth[open]},draw=Accent] (4.2,-3.3) -- node[below]{DTO 或“无观测”} (0,-3.3);
+  \draw[dashed,-{Stealth[open]},draw=Accent] (0,-3.9) -- node[below]{200 + JSON，或 204 / 404} (-2.4,-3.9);
 \end{tikzpicture}
 \caption{“查看最新观测”在三层之间的调用时序}
 \label{fig:ch03-layer-sequence}
@@ -473,11 +475,11 @@ Web 应用（如用户界面层、后端逻辑层、数据库层）。在典型�
 
 \begin{figure}[htbp]
 \centering
-\begin{tikzpicture}[>=Stealth, scale=0.9, thick]
-  \node[draw=Primary, rectangle, minimum width=5cm, minimum height=0.7cm, fill=PrimaryLight, text=PrimaryDark, rounded corners=2pt, thick] at (0,3) (ui) {\small\bfseries 表示层（用户界面）};
-  \node[draw=Primary, rectangle, minimum width=5cm, minimum height=0.7cm, fill=PrimaryLight, text=PrimaryDark, rounded corners=2pt, thick] at (0,2) (biz) {\small\bfseries 业务逻辑层};
-  \node[draw=Primary, rectangle, minimum width=5cm, minimum height=0.7cm, fill=PrimaryLight, text=PrimaryDark, rounded corners=2pt, thick] at (0,1) (data) {\small\bfseries 数据访问层};
-  \node[draw=Primary, rectangle, minimum width=5cm, minimum height=0.7cm, fill=PrimaryLight, text=PrimaryDark, rounded corners=2pt, thick] at (0,0) (db) {\small\bfseries 数据库层};
+\begin{tikzpicture}[>=Stealth, node distance=5mm, thick]
+  \node[draw=Primary, rectangle, minimum width=5cm, minimum height=0.7cm, fill=PrimaryLight, text=PrimaryDark, rounded corners=2pt, thick] at (0,0) (ui) {\small\bfseries 表示层（用户界面）};
+  \node[draw=Primary, rectangle, minimum width=5cm, minimum height=0.7cm, fill=PrimaryLight, text=PrimaryDark, rounded corners=2pt, thick] [below=of ui] (biz) {\small\bfseries 业务逻辑层};
+  \node[draw=Primary, rectangle, minimum width=5cm, minimum height=0.7cm, fill=PrimaryLight, text=PrimaryDark, rounded corners=2pt, thick] [below=of biz] (data) {\small\bfseries 数据访问层};
+  \node[draw=Primary, rectangle, minimum width=5cm, minimum height=0.7cm, fill=PrimaryLight, text=PrimaryDark, rounded corners=2pt, thick] [below=of data] (db) {\small\bfseries 数据库层};
   \draw[->,draw=Primary, thick,>=Stealth] (ui.south) -- (biz.north);
   \draw[->,draw=Primary, thick,>=Stealth] (biz.south) -- (data.north);
   \draw[->,draw=Primary, thick,>=Stealth] (data.south) -- (db.north);
@@ -584,8 +586,8 @@ MVC 的主要优势在于其高可维护性和可扩展性。由于各部分相�
   \draw[->,draw=Primary, thick,>=Stealth] (user.south) to[bend right=28] node[below,font=\scriptsize] {请求} (ctrl.south);
   \draw[->,draw=Primary, thick,>=Stealth] (ctrl) -- node[right,font=\scriptsize] {调用} (model);
   \draw[->,draw=Primary, thick,>=Stealth] (model) -- node[above,font=\scriptsize] {数据} (view);
-  \draw[->,draw=Primary, thick,>=Stealth] (ctrl) -- node[left,font=\scriptsize] {选择视图} (view);
-  \draw[->,draw=Primary, thick,>=Stealth] (view) -- node[below,font=\scriptsize] {页面数据} (user);
+  \draw[->,draw=Primary, thick,>=Stealth] (ctrl) -- node[above=2mm,font=\scriptsize,fill=white,inner sep=1pt] {选择视图} (view);
+  \draw[->,draw=Primary, thick,>=Stealth] (view) -- node[above=7mm,font=\scriptsize] {页面数据} (user);
 \end{tikzpicture}
 \caption{MVC架构模式}
 \label{fig:mvc-architecture}
@@ -1053,29 +1055,29 @@ public record AnomalyEvent(String eventId, String assetId,
 
 \begin{figure}[htbp]
 \centering
-\begin{tikzpicture}[>=Stealth, scale=0.85, thick]
+\begin{tikzpicture}[>=Stealth, thick]
   % API Gateway
-  \node[draw=Primary, rectangle, minimum width=5cm, minimum height=0.6cm, fill=PrimaryLight, text=PrimaryDark, rounded corners=2pt, thick] at (0,3.5) (gw) {\small\bfseries API Gateway};
+  \node[draw=Primary, rectangle, minimum width=8cm, minimum height=0.6cm, fill=PrimaryLight, text=PrimaryDark, rounded corners=2pt, thick] at (0,3.5) (gw) {\small\bfseries API Gateway};
 
   % Services
-  \node[draw=Primary, rectangle, minimum width=1.4cm, minimum height=0.5cm, fill=PrimaryLight, text=PrimaryDark, rounded corners=2pt, thick] at (-2,2) (s1) {\tiny\bfseries 接入服务};
-  \node[draw=Primary, rectangle, minimum width=1.4cm, minimum height=0.5cm, fill=PrimaryLight, text=PrimaryDark, rounded corners=2pt, thick] at (0,2) (s2) {\tiny\bfseries 告警服务};
-  \node[draw=Primary, rectangle, minimum width=1.4cm, minimum height=0.5cm, fill=PrimaryLight, text=PrimaryDark, rounded corners=2pt, thick] at (2,2) (s3) {\tiny\bfseries 数据服务};
+  \node[draw=Primary, rectangle, minimum width=2cm, minimum height=0.7cm, fill=PrimaryLight, text=PrimaryDark, rounded corners=2pt, thick] at (-3,2) (s1) {\small\bfseries 接入服务};
+  \node[draw=Primary, rectangle, minimum width=2cm, minimum height=0.7cm, fill=PrimaryLight, text=PrimaryDark, rounded corners=2pt, thick] at (0,2) (s2) {\small\bfseries 告警服务};
+  \node[draw=Primary, rectangle, minimum width=2cm, minimum height=0.7cm, fill=PrimaryLight, text=PrimaryDark, rounded corners=2pt, thick] at (3,2) (s3) {\small\bfseries 数据服务};
 
   % Databases
-  \node[draw=Primary, rectangle, minimum width=1.4cm, minimum height=0.5cm, fill=PrimaryLight, text=PrimaryDark, rounded corners=2pt, thick] at (-2,0.8) (d1) {\tiny\bfseries 数据库1};
-  \node[draw=Primary, rectangle, minimum width=1.4cm, minimum height=0.5cm, fill=PrimaryLight, text=PrimaryDark, rounded corners=2pt, thick] at (0,0.8) (d2) {\tiny\bfseries 数据库2};
-  \node[draw=Primary, rectangle, minimum width=1.4cm, minimum height=0.5cm, fill=PrimaryLight, text=PrimaryDark, rounded corners=2pt, thick] at (2,0.8) (d3) {\tiny\bfseries 数据库3};
+  \node[draw=Primary, rectangle, minimum width=2cm, minimum height=0.7cm, fill=PrimaryLight, text=PrimaryDark, rounded corners=2pt, thick] at (-3,0.5) (d1) {\small\bfseries 数据库1};
+  \node[draw=Primary, rectangle, minimum width=2cm, minimum height=0.7cm, fill=PrimaryLight, text=PrimaryDark, rounded corners=2pt, thick] at (0,0.5) (d2) {\small\bfseries 数据库2};
+  \node[draw=Primary, rectangle, minimum width=2cm, minimum height=0.7cm, fill=PrimaryLight, text=PrimaryDark, rounded corners=2pt, thick] at (3,0.5) (d3) {\small\bfseries 数据库3};
 
   % Lines
-  \draw[draw=Primary, thick] (gw) -- (s1);
-  \draw[draw=Primary, thick] (gw) -- (s2);
-  \draw[draw=Primary, thick] (gw) -- (s3);
-  \draw[draw=Primary, thick] (s1) -- (d1);
-  \draw[draw=Primary, thick] (s2) -- (d2);
-  \draw[draw=Primary, thick] (s3) -- (d3);
+  \draw[->,draw=Primary, thick] (gw) -- (s1);
+  \draw[->,draw=Primary, thick] (gw) -- (s2);
+  \draw[->,draw=Primary, thick] (gw) -- (s3);
+  \draw[->,draw=Primary, thick] (s1) -- (d1);
+  \draw[->,draw=Primary, thick] (s2) -- (d2);
+  \draw[->,draw=Primary, thick] (s3) -- (d3);
 \end{tikzpicture}
-\caption{微服务架构示意图}
+\caption{微服务的网关路由与独立存储（箭头表示访问依赖）}
 \label{fig:microservices-architecture}
 \end{figure}
 

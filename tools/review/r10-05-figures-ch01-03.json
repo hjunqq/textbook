@@ -1,0 +1,1547 @@
+{
+  "package": "R10-05",
+  "scope": "chapters01-03, 32 figures (30 TikZ + 2 original raster)",
+  "status": "complete",
+  "changed_tikz_count": 19,
+  "all_figures_seen": 32,
+  "source_contract": "仅编辑chapter01-03；不改共享宏、main、网站、PNG、代码清单、接口字段或参数；全书构建与站点重建由主代理执行。",
+  "source_counts": [
+    {
+      "chapter": 1,
+      "before": 14182,
+      "after": 14189,
+      "delta": 7,
+      "listing_blocks_unchanged": true,
+      "lf_only": true
+    },
+    {
+      "chapter": 2,
+      "before": 23161,
+      "after": 23175,
+      "delta": 14,
+      "listing_blocks_unchanged": true,
+      "lf_only": true
+    },
+    {
+      "chapter": 3,
+      "before": 35476,
+      "after": 35498,
+      "delta": 22,
+      "listing_blocks_unchanged": true,
+      "lf_only": true
+    }
+  ],
+  "website_identity_issue": {
+    "finding": "旧站SVG存在内容与图号错配，例如chapter01_fig_1_5.svg显示四层架构而当前图1.5应为请求追踪；chapter01_fig_1_6.svg显示平台形态。旧哈希缓存不能证明图号与内容对应。",
+    "action": "已通知主代理弃用旧SVG缓存，全部从最终TeX重新编译。"
+  },
+  "figures": [
+    {
+      "number": "1.1",
+      "label": "fig:ch01-monitoring-instruments",
+      "chapter": 1,
+      "source": "output/chapters/chapter01.tex",
+      "line": 81,
+      "type": "original_raster",
+      "changed": false,
+      "findings": "实际查看原创四联仪器PNG：雷达传感头朝向水面；雨量筒顶部为开口集雨口；GNSS天线罩与固定基座分明；渗压探头具有线缆端与滤水端。当前图未见器件粘连、错位文字或明显反向安装。",
+      "modification": "未改PNG；图注按四联顺序说明器件，并保留AI生成教学渲染标记。",
+      "visual_verification": "直接查看当前PNG并与图注顺序核对。仅作器件识读，未把渲染结构认定为施工详图。",
+      "figure_before_sha256": "948b2408b92bfce9edf21ce2251addc686579954c8b968e0311f3bb4d834ad64",
+      "figure_after_sha256": "948b2408b92bfce9edf21ce2251addc686579954c8b968e0311f3bb4d834ad64",
+      "method": "直接查看当前原创PNG，结合图注、引出段落及第8章案例三孔参数核对。",
+      "asset": "output/images/generated/monitoring-sensors.png",
+      "asset_sha256": "a9533178fa21e3851e212a01ee70fe9b98281cc5e7d7fda4472d09b393c0ec25",
+      "review_status": "checked_no_source_change_needed"
+    },
+    {
+      "number": "1.2",
+      "label": "fig:ch01-evolution",
+      "chapter": 1,
+      "source": "output/chapters/chapter01.tex",
+      "line": 100,
+      "type": "tikz",
+      "changed": false,
+      "findings": "四个阶段的信息化、数字化、智慧化、数字孪生顺序与正文对应；三条橙色箭头方向统一，框内三个层次的文字均未压边。",
+      "modification": "保留原图。",
+      "visual_verification": "当前TeX独立编译PNG中逐段检查节点、箭头和证据文字。",
+      "figure_before_sha256": "551abc94cea692c5af84e42cfd4e77666b48e7b525cea5a74272e036542881fc",
+      "figure_after_sha256": "551abc94cea692c5af84e42cfd4e77666b48e7b525cea5a74272e036542881fc",
+      "method": "从当前章TeX逐图提取；XeLaTeX独立编译，PDFium 2.5倍率渲染，并实际查看PNG；修改图再用书稿11pt字体与1.23行距独立复核。旧网站SVG不作为身份依据。",
+      "before_render": "temp/r10-05-ch01-03/current-before/1_2.png",
+      "after_render": "temp/r10-05-ch01-03/current-before/1_2.png",
+      "before_render_sha256": "ec3ef5e206e91008a0ff558f4169d7e20cbd2543a146d9729920e4fde08f9a24",
+      "after_render_sha256": "ec3ef5e206e91008a0ff558f4169d7e20cbd2543a146d9729920e4fde08f9a24",
+      "review_status": "checked_no_source_change_needed",
+      "final_tikz_snippet_sha256": "782f96c197d55669b5944846e11f318dd07a75b7129727c08721006b7629be49"
+    },
+    {
+      "number": "1.3",
+      "label": "fig:ch01-reservoir-physical",
+      "chapter": 1,
+      "source": "output/chapters/chapter01.tex",
+      "line": 167,
+      "type": "original_raster",
+      "changed": false,
+      "findings": "实际查看当前坝体PNG：三个泄流孔可辨认，库区位于坝上游，泄流自坝下向下游延伸；画面没有把水流画向上游，也没有题注覆盖工程对象。",
+      "modification": "未改PNG；保留三孔坝体教学渲染及非现场照片的图注属性。",
+      "visual_verification": "直接查看当前原创PNG；三孔数量与第8章案例参数一致。未把渲染图用于净宽、高程或结构尺度量测。",
+      "figure_before_sha256": "4e9b643dc762de6ad90a0935f637153e2d9c9229e2e935e128549ea9782616ab",
+      "figure_after_sha256": "4e9b643dc762de6ad90a0935f637153e2d9c9229e2e935e128549ea9782616ab",
+      "method": "直接查看当前原创PNG，结合图注、引出段落及第8章案例三孔参数核对。",
+      "asset": "output/images/generated/reservoir-dam.png",
+      "asset_sha256": "2e48a3e4de21f552c93a9687a565ecad449d0d538ef63d412d420cf2dbc6b7f1",
+      "review_status": "checked_no_source_change_needed"
+    },
+    {
+      "number": "1.4",
+      "label": "fig:flood-warning-loop",
+      "chapter": 1,
+      "source": "output/chapters/chapter01.tex",
+      "line": 176,
+      "type": "tikz",
+      "changed": true,
+      "findings": "原图“规则/模型校正”曲线与“处置与回执”节点相交；反馈只落在质量标记，未单独指向模型。11pt复看还发现两行节点高度差会使直接连接的反馈线倾斜。",
+      "modification": "加大两行间距，反馈改为统一水平通道，分别上行至质量标记、洪水预报；规则校正/模型校正标签分列横段。",
+      "visual_verification": "修改后的两根反馈箭头可见，标签不遮箭头、不进入节点；正常处理从监测顺时针走到实况复核。",
+      "figure_before_sha256": "beb0eca37ac5ba27c538996b9ba28c22ec8d9304432692095de0f9dceb4a3958",
+      "figure_after_sha256": "74ffb6558ba0ec40775a5eddad4b8d93c06c589b6e57a226ca77a629f5177f65",
+      "method": "从当前章TeX逐图提取；XeLaTeX独立编译，PDFium 2.5倍率渲染，并实际查看PNG；修改图再用书稿11pt字体与1.23行距独立复核。旧网站SVG不作为身份依据。",
+      "before_render": "temp/r10-05-ch01-03/current-before/1_4.png",
+      "after_render": "temp/r10-05-ch01-03/after/1_4.png",
+      "book_font_render": "temp/r10-05-ch01-03/after-book/1_4.png",
+      "before_render_sha256": "ee09a0b1bececb7f5f33e952d40e85bfb5cd25013787ace7e519a0b9e23cf77e",
+      "after_render_sha256": "9dd33772e20019749f38993826d9b466aa3413173de6688d9deaa36224ad6db0",
+      "book_font_render_sha256": "ca40a9ed530a6b41311517fb5232332f1d526526fddf4b2af9e3d4d105af7b9e",
+      "review_status": "checked_and_corrected",
+      "final_tikz_snippet_sha256": "0cba907dea2a81086276533f3df0ea8e13f626eaecf7792bc6a64592e1c06930"
+    },
+    {
+      "number": "1.5",
+      "label": "fig:ch01-request-trace",
+      "chapter": 1,
+      "source": "output/chapters/chapter01.tex",
+      "line": 221,
+      "type": "tikz",
+      "changed": true,
+      "findings": "原GET路径长标签横压前两个节点；数据库结果直接连回浏览器，未经过业务层与接口层；随文“按主键找到最新一条观测”也不能准确表达时间排序查询。",
+      "modification": "改为上下两行请求/返回链路，返回依次经过业务层组装JSON、接口HTTP响应和页面脚本更新；SQL查询说明改为按测点编码和观测时间检索。",
+      "visual_verification": "请求边使用HTTP GET、SQL短标签，完整路径保留在相邻正文；六个步骤及返回方向可连续追踪，数据库没有跨层直达页面。",
+      "figure_before_sha256": "1d80b8c8497690e4db1b6c0785d34d6523bb8b76b625305b8b94681adf031b16",
+      "figure_after_sha256": "e504e29927a96e4fd3e7827627b67d544f871bd1e316308d0967b69e89ae8416",
+      "method": "从当前章TeX逐图提取；XeLaTeX独立编译，PDFium 2.5倍率渲染，并实际查看PNG；修改图再用书稿11pt字体与1.23行距独立复核。旧网站SVG不作为身份依据。",
+      "before_render": "temp/r10-05-ch01-03/current-before/1_5.png",
+      "after_render": "temp/r10-05-ch01-03/after/1_5.png",
+      "book_font_render": "temp/r10-05-ch01-03/after-book/1_5.png",
+      "before_render_sha256": "375d97eda2e29e1803c434ebfd8d34ebfdcddbcc9396cd6418eec852e6841f09",
+      "after_render_sha256": "b1e5f076aabe3a79b350dabaa1fba2daaf9d4985dd8dcb3904d67b6cbd01f7d8",
+      "book_font_render_sha256": "154b7143478e166cbd74769a485285981c2a49353d3536c7d51ec06d30be22a6",
+      "review_status": "checked_and_corrected",
+      "final_tikz_snippet_sha256": "8b35408a4eba4346a0f202199f95880780c936b19c3b88704348225b2618dcf1"
+    },
+    {
+      "number": "1.6",
+      "label": "fig:smart-water-architecture",
+      "chapter": 1,
+      "source": "output/chapters/chapter01.tex",
+      "line": 269,
+      "type": "tikz",
+      "changed": true,
+      "findings": "原路径级xshift对已命名节点锚点未产生预期位移，上下箭头完全重叠，双向职责难以区分。",
+      "modification": "改用节点端点的显式xshift，左侧表示数据上行、右侧表示控制下行。",
+      "visual_verification": "三个层间均有相互分离的上、下方向箭头，框线与层名清楚。",
+      "figure_before_sha256": "f3cd487edb395ad01e02831528f5f0b5423cb43e47c27684722eec0ffad28423",
+      "figure_after_sha256": "581f7d73e2b887d41adac8a56650ab60832e96e8da366f10ac7d5d58aa224c18",
+      "method": "从当前章TeX逐图提取；XeLaTeX独立编译，PDFium 2.5倍率渲染，并实际查看PNG；修改图再用书稿11pt字体与1.23行距独立复核。旧网站SVG不作为身份依据。",
+      "before_render": "temp/r10-05-ch01-03/current-before/1_6.png",
+      "after_render": "temp/r10-05-ch01-03/after/1_6.png",
+      "book_font_render": "temp/r10-05-ch01-03/after-book/1_6.png",
+      "before_render_sha256": "71eb2710aaf1919e0b3d8d5db27724ed777600c3a8ddffa16f8f1dbe4b8c0a57",
+      "after_render_sha256": "2c68eba72227f26e5e7f181f52772e0b8c22703626c9b8f9e8039c4e7107f5f1",
+      "book_font_render_sha256": "4863513eddc4d53b9f48deaca22faefe8d6997a2a62d5877eb70a702568a9568",
+      "review_status": "checked_and_corrected",
+      "final_tikz_snippet_sha256": "f986d342f6771efa6f14c4b85d9a4bfff96bf930cc5fc7012e50bd84a01a671c"
+    },
+    {
+      "number": "1.7",
+      "label": "fig:ch01-platform-forms",
+      "chapter": 1,
+      "source": "output/chapters/chapter01.tex",
+      "line": 318,
+      "type": "tikz",
+      "changed": false,
+      "findings": "统一底座位于上方，流域级、区域级、工程级三分支均由底座指向应用；三类职责文字各自在节点内。",
+      "modification": "保留TeX图；原网站相同编号文件内容错配已报主代理，网站须从当前TeX重建。",
+      "visual_verification": "当前TeX独立图确认底座及三类平台一一对应，未以旧SVG文件名推断图身份。",
+      "figure_before_sha256": "a8dad96cb40e9a9b3fa502fbca617e7aae98943fa67562f64fbdafbe60ca39fd",
+      "figure_after_sha256": "a8dad96cb40e9a9b3fa502fbca617e7aae98943fa67562f64fbdafbe60ca39fd",
+      "method": "从当前章TeX逐图提取；XeLaTeX独立编译，PDFium 2.5倍率渲染，并实际查看PNG；修改图再用书稿11pt字体与1.23行距独立复核。旧网站SVG不作为身份依据。",
+      "before_render": "temp/r10-05-ch01-03/current-before/1_7.png",
+      "after_render": "temp/r10-05-ch01-03/current-before/1_7.png",
+      "before_render_sha256": "78a83ae70dd79da1074bd284c162d562789dfce3f385bc05ebe7516555ca2f26",
+      "after_render_sha256": "78a83ae70dd79da1074bd284c162d562789dfce3f385bc05ebe7516555ca2f26",
+      "review_status": "checked_no_source_change_needed",
+      "final_tikz_snippet_sha256": "56b40161f0f4148c0d0105af3e282215ca28c0933677cc6e0f67a097af30fd94"
+    },
+    {
+      "number": "1.8",
+      "label": "fig:sdlc-flow",
+      "chapter": 1,
+      "source": "output/chapters/chapter01.tex",
+      "line": 451,
+      "type": "tikz",
+      "changed": false,
+      "findings": "需求与范围→架构与设计→实现与集成→验证与确认→部署与运行顺序清楚；部署后进入反馈维护，再虚线返回需求。",
+      "modification": "保留原图。",
+      "visual_verification": "检查五段向前箭头及两段维护反馈，文字与连线无相交。",
+      "figure_before_sha256": "0e317acf6419c4cc87690e6b263d6dcbb3f60b8703d0e7362d9a0d841aad4336",
+      "figure_after_sha256": "0e317acf6419c4cc87690e6b263d6dcbb3f60b8703d0e7362d9a0d841aad4336",
+      "method": "从当前章TeX逐图提取；XeLaTeX独立编译，PDFium 2.5倍率渲染，并实际查看PNG；修改图再用书稿11pt字体与1.23行距独立复核。旧网站SVG不作为身份依据。",
+      "before_render": "temp/r10-05-ch01-03/current-before/1_8.png",
+      "after_render": "temp/r10-05-ch01-03/current-before/1_8.png",
+      "before_render_sha256": "ba4cff8c4bd4b791e794ffff63ecb7196c0a2f2160c85666f110b5514964985b",
+      "after_render_sha256": "ba4cff8c4bd4b791e794ffff63ecb7196c0a2f2160c85666f110b5514964985b",
+      "review_status": "checked_no_source_change_needed",
+      "final_tikz_snippet_sha256": "acde734a8969916101ccc52ca77d84a928b62d3af384b448754616a977460453"
+    },
+    {
+      "number": "2.1",
+      "label": "fig:waterfall-model",
+      "chapter": 2,
+      "source": "output/chapters/chapter02.tex",
+      "line": 77,
+      "type": "tikz",
+      "changed": false,
+      "findings": "瀑布阶段按正文自上而下展开，验证返回设计的反馈支路位于主链外侧。",
+      "modification": "保留原图。",
+      "visual_verification": "逐节点检查阶段名、主链方向及反馈落点，未见节点遮挡。",
+      "figure_before_sha256": "fd5a6c3eec962d108677962034e738b2d3acb1049b5e6eb5090a2aeb242979a1",
+      "figure_after_sha256": "fd5a6c3eec962d108677962034e738b2d3acb1049b5e6eb5090a2aeb242979a1",
+      "method": "从当前章TeX逐图提取；XeLaTeX独立编译，PDFium 2.5倍率渲染，并实际查看PNG；修改图再用书稿11pt字体与1.23行距独立复核。旧网站SVG不作为身份依据。",
+      "before_render": "temp/r10-05-ch01-03/current-before/2_1.png",
+      "after_render": "temp/r10-05-ch01-03/current-before/2_1.png",
+      "before_render_sha256": "93c5cda708e1b43d490f78e4a882525c0475612cb8e62a31cb42f6573a915384",
+      "after_render_sha256": "93c5cda708e1b43d490f78e4a882525c0475612cb8e62a31cb42f6573a915384",
+      "review_status": "checked_no_source_change_needed",
+      "final_tikz_snippet_sha256": "c0b034a40952b07443838274874aac609836d35bcf6910ab8f832eb5e86ac096"
+    },
+    {
+      "number": "2.2",
+      "label": "fig:prototype-model",
+      "chapter": 2,
+      "source": "output/chapters/chapter02.tex",
+      "line": 101,
+      "type": "tikz",
+      "changed": true,
+      "findings": "原“反馈修订”曲线位于评审与需求基线之间，与基线框线和向下箭头拥挤。",
+      "modification": "反馈改走上方，评审向下形成基线标注“达成一致”。",
+      "visual_verification": "反馈返回快速设计，达成一致才进入需求基线，两条不同含义的边不相交。",
+      "figure_before_sha256": "b1fd42d7f816294e0548ddb03e3feccd1a6c7ee2d889c5d9cd0131a4b77f0ae1",
+      "figure_after_sha256": "835e9d0bf31581bd89bc5c4d2f8aba74d343c65be0c0e5d12a3e3b17e3bc63a4",
+      "method": "从当前章TeX逐图提取；XeLaTeX独立编译，PDFium 2.5倍率渲染，并实际查看PNG；修改图再用书稿11pt字体与1.23行距独立复核。旧网站SVG不作为身份依据。",
+      "before_render": "temp/r10-05-ch01-03/current-before/2_2.png",
+      "after_render": "temp/r10-05-ch01-03/after/2_2.png",
+      "book_font_render": "temp/r10-05-ch01-03/after-book/2_2.png",
+      "before_render_sha256": "148f6da3d5ec6638913530c4e79f7ff8521138bcff6b34cc17907ae8140f7b98",
+      "after_render_sha256": "85fbbb2bdcf8a9fdfeff554a42057fc01df944525d316488386fa978d2d6de0f",
+      "book_font_render_sha256": "2322ba53ff2ae45b6ff3eee3382d92be2d6172016f70297523b4bdd989d8b292",
+      "review_status": "checked_and_corrected",
+      "final_tikz_snippet_sha256": "74e7c591ece696a3ef7685284e32faa8a8f7b8bb67e8c3f30b5a403ca09287db"
+    },
+    {
+      "number": "2.3",
+      "label": "fig:incremental-model",
+      "chapter": 2,
+      "source": "output/chapters/chapter02.tex",
+      "line": 125,
+      "type": "tikz",
+      "changed": false,
+      "findings": "三个增量依次加入查询、告警、模型能力；累计能力说明与正文的递增交付含义一致。",
+      "modification": "保留原图。",
+      "visual_verification": "逐框检查累计能力与向前箭头，未发现回退成相互独立版本的错误表达。",
+      "figure_before_sha256": "9f1cc9221ec80094b489f7f6259e5792e0a62307b3e39ba5af8fbcd316f318e5",
+      "figure_after_sha256": "9f1cc9221ec80094b489f7f6259e5792e0a62307b3e39ba5af8fbcd316f318e5",
+      "method": "从当前章TeX逐图提取；XeLaTeX独立编译，PDFium 2.5倍率渲染，并实际查看PNG；修改图再用书稿11pt字体与1.23行距独立复核。旧网站SVG不作为身份依据。",
+      "before_render": "temp/r10-05-ch01-03/current-before/2_3.png",
+      "after_render": "temp/r10-05-ch01-03/current-before/2_3.png",
+      "before_render_sha256": "40244e2f84f4b1e7c54cae49ff1e086ea1d8894418a79e91c04f9dcc3b040c95",
+      "after_render_sha256": "40244e2f84f4b1e7c54cae49ff1e086ea1d8894418a79e91c04f9dcc3b040c95",
+      "review_status": "checked_no_source_change_needed",
+      "final_tikz_snippet_sha256": "16eb9437d894b5defded9014584133408227190017cb9fb4d1bf481beb4817ac"
+    },
+    {
+      "number": "2.4",
+      "label": "fig:ch02-spiral-risk",
+      "chapter": 2,
+      "source": "output/chapters/chapter02.tex",
+      "line": 146,
+      "type": "tikz",
+      "changed": false,
+      "findings": "四个阶段围绕风险评估展开，末阶段到首阶段有独立虚线迭代边；中心风险节点未遮住外圈流程。",
+      "modification": "保留原图。",
+      "visual_verification": "当前独立图逐段检查四阶段方向与风险关注点，图文一致。",
+      "figure_before_sha256": "cbdad5a0dc16053a9ef1d7258d5f5b952221a3c9edad2564643c562c68de582e",
+      "figure_after_sha256": "cbdad5a0dc16053a9ef1d7258d5f5b952221a3c9edad2564643c562c68de582e",
+      "method": "从当前章TeX逐图提取；XeLaTeX独立编译，PDFium 2.5倍率渲染，并实际查看PNG；修改图再用书稿11pt字体与1.23行距独立复核。旧网站SVG不作为身份依据。",
+      "before_render": "temp/r10-05-ch01-03/current-before/2_4.png",
+      "after_render": "temp/r10-05-ch01-03/current-before/2_4.png",
+      "before_render_sha256": "5eb5ca599fe4c71d099b5cac540d885716baffc3e7c08f52c3511ef234cbb907",
+      "after_render_sha256": "5eb5ca599fe4c71d099b5cac540d885716baffc3e7c08f52c3511ef234cbb907",
+      "review_status": "checked_no_source_change_needed",
+      "final_tikz_snippet_sha256": "a4cfad00fe7e80f557ffba77b2330ac28c9fb4786e0959d1eb3bfaac5248a3d7"
+    },
+    {
+      "number": "2.5",
+      "label": "fig:ch02-devops-loop",
+      "chapter": 2,
+      "source": "output/chapters/chapter02.tex",
+      "line": 193,
+      "type": "tikz",
+      "changed": true,
+      "findings": "原一条多段draw命令只有末端带箭头，中间阶段连接未显示方向，影响DevOps循环识读。",
+      "modification": "将循环各段分开绘制，每段独立给箭头；保留监测回到需求的反馈。",
+      "visual_verification": "检查全部相邻阶段，六环节流向完整且标签未被连线穿过。",
+      "figure_before_sha256": "2527ca70f95e830423be86759bbb4dfcf6665195f32d0f15b52f43bdf8ec32a0",
+      "figure_after_sha256": "c0b03b2709ba7e0621ff2f06c1b09fd8ca35a9d24247c5012f68e7ba2b78840b",
+      "method": "从当前章TeX逐图提取；XeLaTeX独立编译，PDFium 2.5倍率渲染，并实际查看PNG；修改图再用书稿11pt字体与1.23行距独立复核。旧网站SVG不作为身份依据。",
+      "before_render": "temp/r10-05-ch01-03/current-before/2_5.png",
+      "after_render": "temp/r10-05-ch01-03/after/2_5.png",
+      "book_font_render": "temp/r10-05-ch01-03/after-book/2_5.png",
+      "before_render_sha256": "300f9a50f27f3ecf1e75354fa7f610b4cbc07a92b837a6127101c6ef925cde5f",
+      "after_render_sha256": "15709c4870427171ea98c9230b691f4f86f7d7d2fac1897f39b9e277ba5e5759",
+      "book_font_render_sha256": "f59fae93a9c1a9ea75540a050f78adf941838d4af85af896658f9cb4d3c8e7a8",
+      "review_status": "checked_and_corrected",
+      "final_tikz_snippet_sha256": "c8354aa8984ff2cabd6a2d05a37ab6b3724e5514b07c1228800bb7372b9f6b90"
+    },
+    {
+      "number": "2.6",
+      "label": "fig:ch02-requirement-evidence",
+      "chapter": 2,
+      "source": "output/chapters/chapter02.tex",
+      "line": 327,
+      "type": "tikz",
+      "changed": false,
+      "findings": "证据充分性判断的是/否分支分别进入需求与待补证据；待补证据返回来源采集，批准需求进入基线。",
+      "modification": "保留原图。",
+      "visual_verification": "逐条检查分支标签、回流方向和基线入口，未见旁路或标签碰撞。",
+      "figure_before_sha256": "eacd436842cacaa46503307dfdf358491d6620d51fe0f0f3831a58e695db8cd3",
+      "figure_after_sha256": "eacd436842cacaa46503307dfdf358491d6620d51fe0f0f3831a58e695db8cd3",
+      "method": "从当前章TeX逐图提取；XeLaTeX独立编译，PDFium 2.5倍率渲染，并实际查看PNG；修改图再用书稿11pt字体与1.23行距独立复核。旧网站SVG不作为身份依据。",
+      "before_render": "temp/r10-05-ch01-03/current-before/2_6.png",
+      "after_render": "temp/r10-05-ch01-03/current-before/2_6.png",
+      "before_render_sha256": "7f0ad16c66c776e585f4d489418395655bc555d7528590467c333fcea432e387",
+      "after_render_sha256": "7f0ad16c66c776e585f4d489418395655bc555d7528590467c333fcea432e387",
+      "review_status": "checked_no_source_change_needed",
+      "final_tikz_snippet_sha256": "159f40acc7ed64ac92b6cfc99d0503760c30cbf7c3b21743ec3a65e360e7d0ab"
+    },
+    {
+      "number": "2.7",
+      "label": "fig:order-process-flowchart",
+      "chapter": 2,
+      "source": "output/chapters/chapter02.tex",
+      "line": 520,
+      "type": "tikz",
+      "changed": true,
+      "findings": "原执行节点同时通向复核节点和结束节点，图上允许执行后跳过复核直接结束。",
+      "modification": "结束节点移到复核之后；正常流程执行→复核→结束，复核反馈仍能返回下一轮提交。",
+      "visual_verification": "沿是/否与回执路径走查，所有到结束的正常路径均先经过复核。",
+      "figure_before_sha256": "a5a86af180c3f98ce9f0d1f39452c7305e686727126ebabf7a8bb8ad11ccac98",
+      "figure_after_sha256": "c5aa1a95c7368fdb8e85e58232db7f472d1dfb33d463a07b2a8cf90395376886",
+      "method": "从当前章TeX逐图提取；XeLaTeX独立编译，PDFium 2.5倍率渲染，并实际查看PNG；修改图再用书稿11pt字体与1.23行距独立复核。旧网站SVG不作为身份依据。",
+      "before_render": "temp/r10-05-ch01-03/current-before/2_7.png",
+      "after_render": "temp/r10-05-ch01-03/after/2_7.png",
+      "book_font_render": "temp/r10-05-ch01-03/after-book/2_7.png",
+      "before_render_sha256": "0f996b85c3095017ad7de9525634a046f87c8d55bbc5aee7e94b94ec0bfe624c",
+      "after_render_sha256": "dd5727f46afdca6cc252e669ebb522fec1da53b286c40f82759cd22760c9cd2c",
+      "book_font_render_sha256": "cd2c38c7dd4e26bce22e40c7a4551f43afcd556f8cb74c61681cfc83c4aa6d21",
+      "review_status": "checked_and_corrected",
+      "final_tikz_snippet_sha256": "3f41225df971eafabc130810aa8ce49af0055d5f7d75f61dbca4ba6d4dcb0ce4"
+    },
+    {
+      "number": "2.8",
+      "label": "fig:dfd-level-zero",
+      "chapter": 2,
+      "source": "output/chapters/chapter02.tex",
+      "line": 561,
+      "type": "tikz",
+      "changed": true,
+      "findings": "外部实体与处理的两个方向画在同一条线上，视觉近似双向箭头，两组数据流名称难以对应。",
+      "modification": "分别为上下行设置独立端口和偏移；计量系统任务与回执也分成两条边。",
+      "visual_verification": "六条边可分别追踪来源与去向；上下文实体和数据流与一级图匹配。",
+      "figure_before_sha256": "eb8fd0cba080fa31f7f134f2a842b3013957a2490169bbc8708a421c65cc4b97",
+      "figure_after_sha256": "1a8c7b69e93481b53b2b51fcc4b0694d3eedd8e278dfd70ca5d9fa0ff9729f0b",
+      "method": "从当前章TeX逐图提取；XeLaTeX独立编译，PDFium 2.5倍率渲染，并实际查看PNG；修改图再用书稿11pt字体与1.23行距独立复核。旧网站SVG不作为身份依据。",
+      "before_render": "temp/r10-05-ch01-03/current-before/2_8.png",
+      "after_render": "temp/r10-05-ch01-03/after/2_8.png",
+      "book_font_render": "temp/r10-05-ch01-03/after-book/2_8.png",
+      "before_render_sha256": "74f57151933adb3e5c8280a7c27e71d27971ceaf23e642803d30c29da618a7b7",
+      "after_render_sha256": "1d4b07f9cdb9e5c3104abc765fbc61aa56776f8c889d0f8a22afe2f22f484614",
+      "book_font_render_sha256": "13ab00c34892390dcb8fc852eed8270e58a105e8102a720bbb1e362d85260a4a",
+      "review_status": "checked_and_corrected",
+      "final_tikz_snippet_sha256": "20c8674fb66a7108c836bae65643017346ce35e5085bcbd5032aefad50682179"
+    },
+    {
+      "number": "2.9",
+      "label": "fig:dfd-level-one",
+      "chapter": 2,
+      "source": "output/chapters/chapter02.tex",
+      "line": 583,
+      "type": "tikz",
+      "changed": true,
+      "findings": "原标签挤入处理椭圆，存储读写合成双向线，D3反馈沿存储框线穿行；接收处理直接输出批准计划却缺少批准输入；四边双矩形也不足以区分数据存储与外部实体。",
+      "modification": "重排四处理、三实体、三存储；批准结果从审批处理返回用水户；D1读写、D2能力、D3回执各自单向；存储统一上下平行线并补符号说明。 配水执行与回执登记由4.0处理承接，外部系统的执行回执经4.0后再写D3。",
+      "visual_verification": "复核上下文六条外部流一一对应，D1–D3每个读写端口清晰；待办/分析结果分行避开外侧返回路径；存储平行线不围成外部实体矩形。 最后一次复看将校核结论移到主边下方，批准计划上方返回线因此连续可见，且不压D1写入标签。 最终逐边核对：外部实体只连接处理，数据存储读写均经处理，不存在外部实体直连存储。",
+      "figure_before_sha256": "49a86ce979ba6815c7d89db96ede0a59b078ed2a891ee935868d0a5b968a8bbb",
+      "figure_after_sha256": "cef6f5a0c9792fced1dd936aff148cdb3d77a6af87d6b92ef141436248d6ac9f",
+      "method": "从当前章TeX逐图提取；XeLaTeX独立编译，PDFium 2.5倍率渲染，并实际查看PNG；修改图再用书稿11pt字体与1.23行距独立复核。旧网站SVG不作为身份依据。",
+      "before_render": "temp/r10-05-ch01-03/current-before/2_9.png",
+      "after_render": "temp/r10-05-ch01-03/after/2_9.png",
+      "book_font_render": "temp/r10-05-ch01-03/after-book/2_9.png",
+      "before_render_sha256": "db3ff45431febc471baa347526e0f41a3ce96a9f2737c529d60f18f24c7cc02d",
+      "after_render_sha256": "89089d1cd110852238716585fbc4d614d80cd76a782617920c8cffd2df625f2b",
+      "book_font_render_sha256": "8057d6d2f8b42ce214843ff6d3be42a6f987c2fb4ec38931625b4c13237fc62b",
+      "review_status": "checked_and_corrected",
+      "final_tikz_snippet_sha256": "9bfe9574e27327deebf7086232f07759c8d422ae9765000fdb2c1ba189ac7153",
+      "review_iteration_note": "复看中间布局时发现计量系统直接连接D3的DFD语义错误；最终改为计量系统→4.0回执登记→D3，并重新编译、目视确认。"
+    },
+    {
+      "number": "2.10",
+      "label": "fig:ch02-dfd-level-two",
+      "chapter": 2,
+      "source": "output/chapters/chapter02.tex",
+      "line": 627,
+      "type": "tikz",
+      "changed": true,
+      "findings": "原D1节点盖住2.4处理，2.4输出箭头穿过2.3；子图输入输出名称与父处理不同，D3被文字并入D2而在子图缺失；既有计划/能力参数/校核记录标签挤压端点。",
+      "modification": "重排为两行四处理，输出从2.4向下；明确规范化申请→校核结论，展开D1读写/D2能力/D3回执；标签移到空白处，D1–D3统一平行线存储符号。",
+      "visual_verification": "与一级2.0逐条核对边界名称、读写方向及D1–D3来源；独立渲染确认三个存储均不遮椭圆，既有计划标签位于横段中部，所有端点箭头可辨。",
+      "figure_before_sha256": "6b277325f3daee95bbe7f8069ef18525213179955da4030495ab8e71cf43fe37",
+      "figure_after_sha256": "d6fb627b28b799a9ce65aef91f262abdc5d755c3ef7f3345bd07b267a3d834fa",
+      "method": "从当前章TeX逐图提取；XeLaTeX独立编译，PDFium 2.5倍率渲染，并实际查看PNG；修改图再用书稿11pt字体与1.23行距独立复核。旧网站SVG不作为身份依据。",
+      "before_render": "temp/r10-05-ch01-03/current-before/2_10.png",
+      "after_render": "temp/r10-05-ch01-03/after/2_10.png",
+      "book_font_render": "temp/r10-05-ch01-03/after-book/2_10.png",
+      "before_render_sha256": "3f6df5f1e72ffd25c22d71e32bf76724c6b53f2ac63c6f9c0f6db10fb70737a1",
+      "after_render_sha256": "7257b3e8d24067649a530b335dcda13bcb4b0f99805340a434fdccb3af81c6aa",
+      "book_font_render_sha256": "711c820b3dc05e4909ff4ea45d2ce98079914d52103a56c662ce0e48c5ad6889",
+      "review_status": "checked_and_corrected",
+      "final_tikz_snippet_sha256": "32b4951b50f114e9dd18b5f05589e2409781a061d587f44006566e02d486f7c2"
+    },
+    {
+      "number": "2.11",
+      "label": "fig:ch02-er-water-plan",
+      "chapter": 2,
+      "source": "output/chapters/chapter02.tex",
+      "line": 694,
+      "type": "tikz",
+      "changed": false,
+      "findings": "WaterUser、Plot、WaterPlan、DispatchTask、ExecutionReceipt及Canal的PK/FK和1:N关系在各自边上，字段未压节点框线。",
+      "modification": "保留原图。",
+      "visual_verification": "按正文一计划多任务、一任务多回执与图中FK逐项核对，未改关系基数。",
+      "figure_before_sha256": "775f8db7abdf65063233c0f57d5c59c3688ae2cfdfe3af5c1b88b22afe09e609",
+      "figure_after_sha256": "775f8db7abdf65063233c0f57d5c59c3688ae2cfdfe3af5c1b88b22afe09e609",
+      "method": "从当前章TeX逐图提取；XeLaTeX独立编译，PDFium 2.5倍率渲染，并实际查看PNG；修改图再用书稿11pt字体与1.23行距独立复核。旧网站SVG不作为身份依据。",
+      "before_render": "temp/r10-05-ch01-03/current-before/2_11.png",
+      "after_render": "temp/r10-05-ch01-03/current-before/2_11.png",
+      "before_render_sha256": "c42c57ce9d4c037f5088beb56239788838409b891ef1a3605665dbfb51572f02",
+      "after_render_sha256": "c42c57ce9d4c037f5088beb56239788838409b891ef1a3605665dbfb51572f02",
+      "review_status": "checked_no_source_change_needed",
+      "final_tikz_snippet_sha256": "1a9cb9a7edaa2e1c5bd7104b5970aa2d7919f2ceb863c57accdb4ba12ce0bf4f"
+    },
+    {
+      "number": "2.12",
+      "label": "fig:ch02-plan-state",
+      "chapter": 2,
+      "source": "output/chapters/chapter02.tex",
+      "line": 739,
+      "type": "tikz",
+      "changed": true,
+      "findings": "待校核→已批准标作校核通过，未体现审批门槛；短间隙中的通过/进入时段标签贴框；受控中止弧线标签压近完成节点。",
+      "modification": "改为审批通过，增大横向间距；受控中止走下方折线路径，不经过完成节点。",
+      "visual_verification": "检查退回、再提交、正常完成及受控中止四路径，标签与节点分离；11pt自然宽度小于16.5cm版芯。",
+      "figure_before_sha256": "a8a0c61ad917df685dfe3f8e4c168b8606c99ee30b40f4b23503f5444af0afbb",
+      "figure_after_sha256": "98ac6160356f3156226ddc8043e5121721231fc37a6bcfbf6811450f7a8f98e4",
+      "method": "从当前章TeX逐图提取；XeLaTeX独立编译，PDFium 2.5倍率渲染，并实际查看PNG；修改图再用书稿11pt字体与1.23行距独立复核。旧网站SVG不作为身份依据。",
+      "before_render": "temp/r10-05-ch01-03/current-before/2_12.png",
+      "after_render": "temp/r10-05-ch01-03/after/2_12.png",
+      "book_font_render": "temp/r10-05-ch01-03/after-book/2_12.png",
+      "before_render_sha256": "73c70818f8f9f1609ff582e022d2c94865dc7447602b191b70ce38196013ba47",
+      "after_render_sha256": "4f030074c9d24ded450234be6dbb09f388cde01110c3dc9097bbfadd2a89ecf4",
+      "book_font_render_sha256": "17be5ee596414f704fe334dee44c4e2c54521fed7824a668968a03f913a15da9",
+      "review_status": "checked_and_corrected",
+      "final_tikz_snippet_sha256": "e54157ce13ffc45920295f823b58096dd2f6ef1e77085e56d6a373e9acdaf247"
+    },
+    {
+      "number": "2.13",
+      "label": "fig:ch02-approval-tree",
+      "chapter": 2,
+      "source": "output/chapters/chapter02.tex",
+      "line": 790,
+      "type": "tikz",
+      "changed": false,
+      "findings": "判定树按资料完整、水量满足、渠道可用依次分支，各否分支到补充或调整，批准叶节点仅在三个条件均满足时到达。",
+      "modification": "保留原图。",
+      "visual_verification": "与同节决策表8种条件组合对应检查，分支文字与端点未重叠。",
+      "figure_before_sha256": "70b719bafb541e95c3113b88ee5c39d997a837bdae59ffc72c2500a0e57c74f2",
+      "figure_after_sha256": "70b719bafb541e95c3113b88ee5c39d997a837bdae59ffc72c2500a0e57c74f2",
+      "method": "从当前章TeX逐图提取；XeLaTeX独立编译，PDFium 2.5倍率渲染，并实际查看PNG；修改图再用书稿11pt字体与1.23行距独立复核。旧网站SVG不作为身份依据。",
+      "before_render": "temp/r10-05-ch01-03/current-before/2_13.png",
+      "after_render": "temp/r10-05-ch01-03/current-before/2_13.png",
+      "before_render_sha256": "b84bc98321deb3040fe47a12e4c6c9a6108b362ca10fabea0d7936c5b669e3f9",
+      "after_render_sha256": "b84bc98321deb3040fe47a12e4c6c9a6108b362ca10fabea0d7936c5b669e3f9",
+      "review_status": "checked_no_source_change_needed",
+      "final_tikz_snippet_sha256": "7dd3e071b83eef43645071945ee2869f79f33262ae9a7d26108ccc4da956f844"
+    },
+    {
+      "number": "2.14",
+      "label": "fig:ch02-change-control",
+      "chapter": 2,
+      "source": "output/chapters/chapter02.tex",
+      "line": 935,
+      "type": "tikz",
+      "changed": true,
+      "findings": "原验证到影响分析的回线穿过暂缓/拒绝节点；“发现回归”也不能准确表示验证失败。",
+      "modification": "反馈下绕所有节点，标注发现偏差后回到影响分析。",
+      "visual_verification": "批准/拒绝两分支与实施后回归反馈分别可追踪，回线不穿暂缓节点。",
+      "figure_before_sha256": "ed205548c7e3f78307b7b0791b51308504546360da5587550bbb05f5e0f0c890",
+      "figure_after_sha256": "0f634aa576583b2c6ec03b5c79a9d354ee397edc0ce94e4f41efeb52ff3bbfa8",
+      "method": "从当前章TeX逐图提取；XeLaTeX独立编译，PDFium 2.5倍率渲染，并实际查看PNG；修改图再用书稿11pt字体与1.23行距独立复核。旧网站SVG不作为身份依据。",
+      "before_render": "temp/r10-05-ch01-03/current-before/2_14.png",
+      "after_render": "temp/r10-05-ch01-03/after/2_14.png",
+      "book_font_render": "temp/r10-05-ch01-03/after-book/2_14.png",
+      "before_render_sha256": "da63fdf3ceccc5e8860c186a414b67d6f45e27f09e195f15bcb96f560ac789d9",
+      "after_render_sha256": "1fcd127d8428b39b42c374fd9f7479369e233b26403c59eaf37bb9650518713f",
+      "book_font_render_sha256": "e3d36fa9c8e8d5a8ae5f069dad6636e7cfa67ea83df8a3f36f01a3b65863ffc3",
+      "review_status": "checked_and_corrected",
+      "final_tikz_snippet_sha256": "88722fba94afc4eac089bf5470d89063be1cba29e32c88640dcdd6f1bb1a6092"
+    },
+    {
+      "number": "3.1",
+      "label": "fig:uml-usecase",
+      "chapter": 3,
+      "source": "output/chapters/chapter03.tex",
+      "line": 128,
+      "type": "tikz",
+      "changed": true,
+      "findings": "原标题靠近历史椭圆，确认/日志节点及关系标签拥挤；专业分析员直接维护规则的表达超出第8章角色表的建议职责。11pt下长用例椭圆还需扩展系统边界留白。",
+      "modification": "重排节点与角色，包含和扩展使用虚线开放箭头；分析员用例改为提出规则修订建议；加宽系统边界。",
+      "visual_verification": "包含箭头指向日志，扩展箭头指向基础查看用例；标题、长椭圆、边界之间均有留白，角色仍在边界外。",
+      "figure_before_sha256": "d10dc75c61f50e8e2b98ed5e924dee6fc7ef32fc098bb4c6a45d189e5f67ef4b",
+      "figure_after_sha256": "7dbad832e1a58c637324bf5da8fdda78aa4619fb9b7de741b4a975bb3eb42fcc",
+      "method": "从当前章TeX逐图提取；XeLaTeX独立编译，PDFium 2.5倍率渲染，并实际查看PNG；修改图再用书稿11pt字体与1.23行距独立复核。旧网站SVG不作为身份依据。",
+      "before_render": "temp/r10-05-ch01-03/current-before/3_1.png",
+      "after_render": "temp/r10-05-ch01-03/after/3_1.png",
+      "book_font_render": "temp/r10-05-ch01-03/after-book/3_1.png",
+      "before_render_sha256": "fc588588d09444a11615f746963e46f1c553011d7c9db16a0a4f206e21fa8b4f",
+      "after_render_sha256": "39c6326f493acc12e2b5941b2ea942ef87cae60e09ad0f9581aad9009e297fe3",
+      "book_font_render_sha256": "3f07337cb2eb4cbb2276853f2e039d95cb460c59d21a972c58503f52761bcfa5",
+      "review_status": "checked_and_corrected",
+      "final_tikz_snippet_sha256": "01b96dd6970dffd302a6a49436e4ae2cd6ea178c627e7e03cb1609aa1c940b85"
+    },
+    {
+      "number": "3.2",
+      "label": "fig:uml-class",
+      "chapter": 3,
+      "source": "output/chapters/chapter03.tex",
+      "line": 200,
+      "type": "tikz",
+      "changed": false,
+      "findings": "三个类的名称/属性/操作分栏完整，监测点1对0..*记录，记录与告警的关联基数分别可读。",
+      "modification": "保留原图。",
+      "visual_verification": "逐一查看类框分隔线和两条关联的导航端、基数，符合正文一告警保留至少一条观测依据。",
+      "figure_before_sha256": "5a57d092f7235bbb4921691dac7f2fced085e91e77d500957a041276d99e24b8",
+      "figure_after_sha256": "5a57d092f7235bbb4921691dac7f2fced085e91e77d500957a041276d99e24b8",
+      "method": "从当前章TeX逐图提取；XeLaTeX独立编译，PDFium 2.5倍率渲染，并实际查看PNG；修改图再用书稿11pt字体与1.23行距独立复核。旧网站SVG不作为身份依据。",
+      "before_render": "temp/r10-05-ch01-03/current-before/3_2.png",
+      "after_render": "temp/r10-05-ch01-03/current-before/3_2.png",
+      "before_render_sha256": "59b60464215d94ab0dc877f7e64bdcfd4f35dd515667dd727287fe9ffc5a7365",
+      "after_render_sha256": "59b60464215d94ab0dc877f7e64bdcfd4f35dd515667dd727287fe9ffc5a7365",
+      "review_status": "checked_no_source_change_needed",
+      "final_tikz_snippet_sha256": "e644485dd58718b1deb8a23efe777936d06c8ec211c5de73ffdbb7a5221a1df0"
+    },
+    {
+      "number": "3.3",
+      "label": "fig:alarm-event-state",
+      "chapter": 3,
+      "source": "output/chapters/chapter03.tex",
+      "line": 234,
+      "type": "tikz",
+      "changed": true,
+      "findings": "原超时升级边从已通知直达处置中，跳过值班确认；多个转换标签贴近重合，误报认定责任不清。",
+      "modification": "超时改为已通知的催办自环，保持状态；处置须经过确认、工单与审批方案；误报路径明确复核与审批，正文说明图示业务阶段与8.1状态字段的关系。",
+      "visual_verification": "逐路径走查已通知不能凭超时进入处置；确认、误报、闭环各有独立边和标签，无新增接口或状态枚举。",
+      "figure_before_sha256": "8feca9af178960882e73942ec31d75ad4237ee8bbdf8bf26c9b4ed4525057899",
+      "figure_after_sha256": "2842b5645bff36fa3b865ed0035a4f04c12285bdc1f940efeca014fcec549fb1",
+      "method": "从当前章TeX逐图提取；XeLaTeX独立编译，PDFium 2.5倍率渲染，并实际查看PNG；修改图再用书稿11pt字体与1.23行距独立复核。旧网站SVG不作为身份依据。",
+      "before_render": "temp/r10-05-ch01-03/current-before/3_3.png",
+      "after_render": "temp/r10-05-ch01-03/after/3_3.png",
+      "book_font_render": "temp/r10-05-ch01-03/after-book/3_3.png",
+      "before_render_sha256": "bf5da6cce8efdcaa2694d1f7e9b917e2fb1c862b9a92144c50749d0e89f0b449",
+      "after_render_sha256": "d5d04d7e26d03c4fddad6323c9b571ce984d67a96ca80bdf79fa41d23af92eef",
+      "book_font_render_sha256": "79a1f8f7ba2ee8f657f10f5d25b59bd4032a57e14f4c4033c1d60270d15404b4",
+      "review_status": "checked_and_corrected",
+      "final_tikz_snippet_sha256": "5d037085c591db21914d8babe86a4629cdef5e07467b30366d992abbe01eeb79"
+    },
+    {
+      "number": "3.4",
+      "label": "fig:alarm-activity",
+      "chapter": 3,
+      "source": "output/chapters/chapter03.tex",
+      "line": 261,
+      "type": "tikz",
+      "changed": true,
+      "findings": "原泳道把值班员与审批人合并，审批后直接记录回执，图中没有实际执行动作，也没有专业分析环节。",
+      "modification": "分成平台、值班员、专业分析员、审批人四泳道；补足复核建议、审批、按方案执行、提交回执动作。",
+      "visual_verification": "每个动作位于责任角色泳道，批准后才回到值班员执行，平台最后记录回执；正文同步四角色顺序。",
+      "figure_before_sha256": "4f15f4afdb7b3b719fc0385f105a31b3df07cdcbf33c0be095c5d381dcffb9e3",
+      "figure_after_sha256": "693ed57f299673dded36ce28b3aeda9d09ab57e87dee7194c686e1945a1ce311",
+      "method": "从当前章TeX逐图提取；XeLaTeX独立编译，PDFium 2.5倍率渲染，并实际查看PNG；修改图再用书稿11pt字体与1.23行距独立复核。旧网站SVG不作为身份依据。",
+      "before_render": "temp/r10-05-ch01-03/current-before/3_4.png",
+      "after_render": "temp/r10-05-ch01-03/after/3_4.png",
+      "book_font_render": "temp/r10-05-ch01-03/after-book/3_4.png",
+      "before_render_sha256": "17d5ebf630f7fb53be9b66029fd937dc5122c2343245c641503ac56b217c0163",
+      "after_render_sha256": "938cc981c63947e192bf7e7dcff9620bf41e0751fc24670c578c49a02fa29ba5",
+      "book_font_render_sha256": "1ce7da5a26a009e2bac166daef202833d6fa5133e4de9a4ebb0e9f103f6ac518",
+      "review_status": "checked_and_corrected",
+      "final_tikz_snippet_sha256": "9e9afc7329fe5c8196bdbd4facfba16463769648068dd0e4a949b84a3af58eeb"
+    },
+    {
+      "number": "3.5",
+      "label": "fig:uml-sequence",
+      "chapter": 3,
+      "source": "output/chapters/chapter03.tex",
+      "line": 290,
+      "type": "tikz",
+      "changed": true,
+      "findings": "原激活条与消息时间点不齐，创建告警没有同步返回，确认结果返回时服务激活已结束。",
+      "modification": "按实际消息起止重画激活条；创建同步调用补返回事件号；异步推送用开放箭头，确认同步调用与虚线返回闭合。",
+      "visual_verification": "逐时间层查看箭头落点和激活区间，创建、异步推送、通知、确认及结果的先后清楚。",
+      "figure_before_sha256": "1faebb5a382138b26905924b29917d12330aeec85f3a13f0dd8655012a267162",
+      "figure_after_sha256": "47c0f1e26e42a15e2ecbd7725c04be0a94564e9bbf3c58b3481360e3d5c06b6a",
+      "method": "从当前章TeX逐图提取；XeLaTeX独立编译，PDFium 2.5倍率渲染，并实际查看PNG；修改图再用书稿11pt字体与1.23行距独立复核。旧网站SVG不作为身份依据。",
+      "before_render": "temp/r10-05-ch01-03/current-before/3_5.png",
+      "after_render": "temp/r10-05-ch01-03/after/3_5.png",
+      "book_font_render": "temp/r10-05-ch01-03/after-book/3_5.png",
+      "before_render_sha256": "b7b1c9624a1d079a48471f9cca25bd3f3c01f81f1dfbf85dca98d62652abbf86",
+      "after_render_sha256": "e3170b2266368ca631d876ec0b46857613ccd0e7141f23e0797ad8d513535495",
+      "book_font_render_sha256": "b1badaa5551b41eab77eb13daf2e58fc79ab675443b549d400de7b24954f3558",
+      "review_status": "checked_and_corrected",
+      "final_tikz_snippet_sha256": "187897ccdb69965a82bb4369cbe338f7bd8bd4c4dc66be49aad00ba928c0f35a"
+    },
+    {
+      "number": "3.6",
+      "label": "fig:ch03-layer-sequence",
+      "chapter": 3,
+      "source": "output/chapters/chapter03.tex",
+      "line": 420,
+      "type": "tikz",
+      "changed": true,
+      "findings": "响应线使用普通实线箭头，与本节顺序图所教的返回消息虚线约定不一致。",
+      "modification": "三个返回消息统一为橙色虚线开放箭头。",
+      "visual_verification": "GET与层间调用为蓝色实线，观测/DTO/HTTP返回为橙色虚线；字段与路径保持原契约。",
+      "figure_before_sha256": "90f634e57a5dbcb7bef6e6b17056744dce4f9d79529d537bb6a65671769bf5d0",
+      "figure_after_sha256": "08a5e38d89776ca18b335c0fbfdddbc1ad4057d2fe70354200eb0f8b9909d5a0",
+      "method": "从当前章TeX逐图提取；XeLaTeX独立编译，PDFium 2.5倍率渲染，并实际查看PNG；修改图再用书稿11pt字体与1.23行距独立复核。旧网站SVG不作为身份依据。",
+      "before_render": "temp/r10-05-ch01-03/current-before/3_6.png",
+      "after_render": "temp/r10-05-ch01-03/after/3_6.png",
+      "book_font_render": "temp/r10-05-ch01-03/after-book/3_6.png",
+      "before_render_sha256": "3c9e0abdf0539f12e49ed9646a78ad3e656883316c5132edf98db4bcd75bf974",
+      "after_render_sha256": "a53c669aec956ec2ca18feca6fd78d976dabf5728d28a6d5af01884bc1430398",
+      "book_font_render_sha256": "7435fcc054c2aa711faa3af65fcb17255cc72fcbe5793e635915a711172dee13",
+      "review_status": "checked_and_corrected",
+      "final_tikz_snippet_sha256": "f159cc2f80755ad1c7b2533a7b7a6008617191411792e7ee19f10f144e87b456"
+    },
+    {
+      "number": "3.7",
+      "label": "fig:layered-architecture",
+      "chapter": 3,
+      "source": "output/chapters/chapter03.tex",
+      "line": 476,
+      "type": "tikz",
+      "changed": true,
+      "findings": "原固定1cm层间中心距令箭头短到近乎只有三角端点，访问方向难读。",
+      "modification": "移除缩放，按节点外边界设置5mm纵向距离。",
+      "visual_verification": "四层之间都有可辨箭杆与端点，节点内容、层次与正文一致。",
+      "figure_before_sha256": "aab82bfb43f45af7f04d603cadb2a0a6ebb5fe06e5521f69ebe70d954849b145",
+      "figure_after_sha256": "ea002182e57cda9d16f553be8e8c08b144f574369d085f57c6a07283cfc97c52",
+      "method": "从当前章TeX逐图提取；XeLaTeX独立编译，PDFium 2.5倍率渲染，并实际查看PNG；修改图再用书稿11pt字体与1.23行距独立复核。旧网站SVG不作为身份依据。",
+      "before_render": "temp/r10-05-ch01-03/current-before/3_7.png",
+      "after_render": "temp/r10-05-ch01-03/after/3_7.png",
+      "book_font_render": "temp/r10-05-ch01-03/after-book/3_7.png",
+      "before_render_sha256": "971828600853ad1758316cbd301e9d47d2184abd15e219023fc1030e3ed317a7",
+      "after_render_sha256": "dda0772a28a7414715d33df8792a12d1ddc9000d6a705f7c79c24a48ac703b05",
+      "book_font_render_sha256": "b98b820b71adb58960d4ff26c04c190632412366d710511fc1bb378313640b30",
+      "review_status": "checked_and_corrected",
+      "final_tikz_snippet_sha256": "c39e948f65d3e09332925726cd70e3119ff026b22fa872b1cd6a1627091ed5d7"
+    },
+    {
+      "number": "3.8",
+      "label": "fig:mvc-architecture",
+      "chapter": 3,
+      "source": "output/chapters/chapter03.tex",
+      "line": 578,
+      "type": "tikz",
+      "changed": true,
+      "findings": "选择视图标签靠近View框线，页面数据挤在用户与视图间；第一次移到下方时又落在请求弧线上。",
+      "modification": "选择视图置于横线正上方；页面数据移到用户与视图上方空白，保留下方请求弧线。",
+      "visual_verification": "五条边的标签均不遮节点或其他边；用户请求到控制器、控制器调用模型并选择视图的方向一致。",
+      "figure_before_sha256": "ad3b24e0b5edd39c22e015940e6a3ac3ad2fa038d9ab7e606551a0afde8ff44e",
+      "figure_after_sha256": "8154679d32e4398ef0db968f6ed6290e34a4441f2c360145dae61217047553e3",
+      "method": "从当前章TeX逐图提取；XeLaTeX独立编译，PDFium 2.5倍率渲染，并实际查看PNG；修改图再用书稿11pt字体与1.23行距独立复核。旧网站SVG不作为身份依据。",
+      "before_render": "temp/r10-05-ch01-03/current-before/3_8.png",
+      "after_render": "temp/r10-05-ch01-03/after/3_8.png",
+      "book_font_render": "temp/r10-05-ch01-03/after-book/3_8.png",
+      "before_render_sha256": "16d4158a360b9874351a3cd5ff669e28d340dc6bd9eeb2d0598b0273674fff5d",
+      "after_render_sha256": "cd791fecdfcea300f1fe327caea137e86d724a8d2811ec2f0609314587ede261",
+      "book_font_render_sha256": "593212dd80112b01ef0780e240158ae12e00d9ef2291c4929fafbb2a4e07d41e",
+      "review_status": "checked_and_corrected",
+      "final_tikz_snippet_sha256": "1e07da5b66fb7389f4a9066921b0702835f5f4df8b2f714fd3bb7d62cdb21fde"
+    },
+    {
+      "number": "3.9",
+      "label": "fig:microservices-architecture",
+      "chapter": 3,
+      "source": "output/chapters/chapter03.tex",
+      "line": 1056,
+      "type": "tikz",
+      "changed": true,
+      "findings": "服务和数据库标签采用tiny字号，打印识读困难；网关连接与数据库连接均无方向符号。",
+      "modification": "取消整体缩放，提高节点字号和尺寸；各连接加箭头，图注明确箭头表示访问依赖。",
+      "visual_verification": "网关→三个服务→各自数据库的依赖可追踪，三个库分别属于服务，文字完整可辨。",
+      "figure_before_sha256": "9e00d9ad21fd5100577f1d32eddde634372a95df01e85d2d028354a18c3c8568",
+      "figure_after_sha256": "a6d410ee394d8ce05696667b991775025ddb6e3607ff753e8c9932735c39a49b",
+      "method": "从当前章TeX逐图提取；XeLaTeX独立编译，PDFium 2.5倍率渲染，并实际查看PNG；修改图再用书稿11pt字体与1.23行距独立复核。旧网站SVG不作为身份依据。",
+      "before_render": "temp/r10-05-ch01-03/current-before/3_9.png",
+      "after_render": "temp/r10-05-ch01-03/after/3_9.png",
+      "book_font_render": "temp/r10-05-ch01-03/after-book/3_9.png",
+      "before_render_sha256": "1f7165f755230cf1924e8a7303e9ee9cffc6ed72a5196bdf32612148ae42aabf",
+      "after_render_sha256": "304b53dbe10c669a0cbfe542427450528256ede36fbc84faa314e3b77e1eea77",
+      "book_font_render_sha256": "a2ce313f8442c369f7cbc7218b791bfe1660bd3c4915a5a9e599cf4402374b03",
+      "review_status": "checked_and_corrected",
+      "final_tikz_snippet_sha256": "51a71d225c5fc9fc3af08bc281d75116313250577168108b346fe4b97cc56db0"
+    },
+    {
+      "number": "3.10",
+      "label": "fig:atam-utility-tree",
+      "chapter": 3,
+      "source": "output/chapters/chapter03.tex",
+      "line": 1153,
+      "type": "tikz",
+      "changed": false,
+      "findings": "效用树从预警处置质量分出可靠性、性能效率、安全性，三类叶节点各对应可验证结果；告警生成P95≤5s与本节ATAM场景一致。",
+      "modification": "保留原图。",
+      "visual_verification": "独立渲染检查三分支及各叶节点，无交线遮字；告警生成时延与前文观测入库时延是两个独立度量。",
+      "figure_before_sha256": "4c754333a08d71f6db320bd7de16ba4a569f9ceaf50d056f0febcad5562b5fbb",
+      "figure_after_sha256": "4c754333a08d71f6db320bd7de16ba4a569f9ceaf50d056f0febcad5562b5fbb",
+      "method": "从当前章TeX逐图提取；XeLaTeX独立编译，PDFium 2.5倍率渲染，并实际查看PNG；修改图再用书稿11pt字体与1.23行距独立复核。旧网站SVG不作为身份依据。",
+      "before_render": "temp/r10-05-ch01-03/current-before/3_10.png",
+      "after_render": "temp/r10-05-ch01-03/current-before/3_10.png",
+      "before_render_sha256": "0c2c4d2b6d3afabd509aa07b6ae313ad40384cda6c82d2a596f42db00161cb70",
+      "after_render_sha256": "0c2c4d2b6d3afabd509aa07b6ae313ad40384cda6c82d2a596f42db00161cb70",
+      "review_status": "checked_no_source_change_needed",
+      "final_tikz_snippet_sha256": "00b1b339e76dfac38903ebf4b737e8e7251542e4e548dd3fc2e26ca684cc8bcd"
+    }
+  ],
+  "related_paragraph_changes": [
+    {
+      "chapter": 1,
+      "operation": "replace",
+      "before": [
+        "\\paragraph{过程追踪}图\\ref{fig:ch01-request-trace}把这次查询拆成六步。浏览器里运行的是页面脚本，它把用户动作翻译成一条 HTTP 请求：方法\\texttt{GET}，路径\\texttt{/api/assets/DAM-A-PZ-07/readings/latest}，头部带着登录时取得的令牌。请求到达服务端后，先由接口层核对令牌与角色，再交给业务层检查对象是否存在，业务层向数据库发出一条 SQL 查询，数据库按主键找到最新一条观测返回。业务层把数据库行整理成约定好的 JSON（字段名、时间格式、质量码都在第8章的接口契约里规定），接口层加上状态码 200 发回浏览器，页面脚本把 JSON 写进 DOM，用户看到那一行数字。"
+      ],
+      "after": [
+        "\\paragraph{过程追踪}图\\ref{fig:ch01-request-trace}把这次查询拆成六步。浏览器里运行的是页面脚本，它把用户动作翻译成一条 HTTP 请求：方法\\texttt{GET}，路径\\texttt{/api/assets/DAM-A-PZ-07/readings/latest}，头部带着登录时取得的令牌。请求到达服务端后，先由接口层核对令牌与角色，再交给业务层检查对象是否存在，业务层向数据库发出一条 SQL 查询，数据库按测点编码和观测时间检索，返回最新一条观测。业务层把数据库行整理成约定好的 JSON（字段名、时间格式、质量码都在第8章的接口契约里规定），接口层加上状态码 200 发回浏览器，页面脚本把 JSON 写进 DOM，用户看到那一行数字。"
+      ]
+    },
+    {
+      "chapter": 2,
+      "operation": "replace",
+      "before": [
+        "把上下文图中的单个处理展开，就得到图\\ref{fig:dfd-level-one}的一级数据流图。检查分解是否正确的办法是做平衡核对：一级图中所有跨越系统边界的数据流，必须与上下文图中进出系统的数据流逐条对应，既不能多出一条，也不能漏掉一条。",
+        "",
+        "一级图只说明四个主要处理之间的边界，不能直接替代接口和数据校验设计。以“2.0 校验与分析”为例，二级分解可以拆成完整性与重复检查、需水量计算、渠道能力匹配、生成校核结果四个处理，再把每个处理的输出写回统一的数据存储。图\\ref{fig:ch02-dfd-level-two}给出这一展开，同时保留从一级图传入的“申报资料”和传出的“校核结果”两个边界流；一级图中经 D3 的回执反馈在此层并入 D2 的工程能力更新，属于同一边界流的细化而非丢失。二级图新增的内部数据流可以更细，但不能改变父处理对外承诺的名称、方向和含义。"
+      ],
+      "after": [
+        "把上下文图中的单个处理展开，就得到图\\ref{fig:dfd-level-one}的一级数据流图。检查分解是否正确的办法是做平衡核对：一级图中所有跨越系统边界的数据流，必须与上下文图中进出系统的数据流逐条对应，既不能多出一条，也不能漏掉一条。图中上下两条平行线表示数据存储，D1–D3是存储编号。",
+        "",
+        "一级图只说明四个主要处理之间的边界，不能直接替代接口和数据校验设计。以“2.0 校验与分析”为例，二级分解可以拆成完整性与重复检查、需水量计算、渠道能力匹配、生成校核结果四个处理，分别标出既有计划、工程能力和执行记录的读取位置，以及校核记录的写入位置。图\\ref{fig:ch02-dfd-level-two}给出这一展开，同时保留从一级图传入的“规范化申请”和传出的“校核结论”，并逐项展开 D1 的读写、D2 的能力参数与 D3 的回执反馈。二级图新增的内部数据流可以更细，但不能改变父处理对外承诺的名称、方向和含义。"
+      ]
+    },
+    {
+      "chapter": 3,
+      "operation": "replace",
+      "before": [
+        "告警事件是案例水库平台中适合绘制状态图的对象：它从规则服务创建开始，经过通知、确认和处置，最终闭环或被专业分析员判为误报。图\\ref{fig:alarm-event-state}把正常路径和超时升级放在同一张图中，读者应特别注意“已通知”到“处置中”的超时升级转移并不会跳过审批责任，升级事件仍要留下原事件号和升级原因。"
+      ],
+      "after": [
+        "告警事件是案例水库平台中适合绘制状态图的对象：它从规则服务创建开始，经过通知、确认和处置，最终闭环或经专业复核、审批认定为误报。图\\ref{fig:alarm-event-state}中的通知、处置等节点表示业务阶段，接口状态值以8.1节为准。超时催办只调整通知对象和渠道，保持原阶段；进入处置仍须完成确认、建立工单及相应审批。"
+      ]
+    },
+    {
+      "chapter": 3,
+      "operation": "replace",
+      "before": [
+        "活动图则强调“谁在什么泳道执行哪一步”。图\\ref{fig:alarm-activity}将预警处置拆成平台和岗位两个泳道，展示事件创建、通知、确认、审批和回执的顺序；与状态图相比，它关注动作流和责任分工，而不是对象当前状态。"
+      ],
+      "after": [
+        "活动图则强调“谁在什么泳道执行哪一步”。图\\ref{fig:alarm-activity}按平台、值班员、专业分析员和审批人划分泳道，展示创建、通知、确认、研判、审批、执行与回执的顺序；与状态图相比，它关注动作流和责任分工，而不是对象当前状态。"
+      ]
+    },
+    {
+      "chapter": 3,
+      "operation": "replace",
+      "before": [
+        "案例水库的用例图、类图和行为视图描述同一系统的不同方面，建模时需要相互核对。建模评审应先从用例图开始：值班员确认预警、专业分析员维护规则分别对应哪些业务目标，系统边界外的角色是否都能找到责任人。随后把每个重要用例落实到类图中的职责，例如告警服务负责生成和更新事件，监测记录负责保存测值与质量码，监测点只维护自身标识和采集状态。若一个类同时承担通知、审批、历史查询等互不相干的职责，就应拆分服务或引入协作者，而不应靠增加更多方法掩盖耦合。"
+      ],
+      "after": [
+        "案例水库的用例图、类图和行为视图描述同一系统的不同方面，建模时需要相互核对。建模评审应先从用例图开始：值班员确认预警、专业分析员提出规则修订建议分别对应哪些业务目标，系统边界外的角色是否都能找到责任人。随后把每个重要用例落实到类图中的职责，例如告警服务负责生成和更新事件，监测记录负责保存测值与质量码，监测点只维护自身标识和采集状态。若一个类同时承担通知、审批、历史查询等互不相干的职责，就应拆分服务或引入协作者，而不应靠增加更多方法掩盖耦合。"
+      ]
+    }
+  ],
+  "changed_labels": [
+    "fig:alarm-activity",
+    "fig:alarm-event-state",
+    "fig:ch01-request-trace",
+    "fig:ch02-change-control",
+    "fig:ch02-devops-loop",
+    "fig:ch02-dfd-level-two",
+    "fig:ch02-plan-state",
+    "fig:ch03-layer-sequence",
+    "fig:dfd-level-one",
+    "fig:dfd-level-zero",
+    "fig:flood-warning-loop",
+    "fig:layered-architecture",
+    "fig:microservices-architecture",
+    "fig:mvc-architecture",
+    "fig:order-process-flowchart",
+    "fig:prototype-model",
+    "fig:smart-water-architecture",
+    "fig:uml-sequence",
+    "fig:uml-usecase"
+  ],
+  "pending": [],
+  "independent_compilation_web": [
+    {
+      "id": "1_4",
+      "label": "fig:flood-warning-loop",
+      "kind": "web",
+      "returncode": 0,
+      "issues": [],
+      "size_pt": [
+        391.17999267578125,
+        91.31999969482422
+      ],
+      "content_width_cm": 13.377,
+      "log_sha256": "d2c9033d8f8166fc04985cc53a99b83be4aa83a6437dbf564cfdf3520602b594",
+      "tex_sha256": "31cdb4c5009283aad6ccbbe43190d31847c6556c44f5cd05d8315b5a1ec63fa3",
+      "pdf_sha256": "e2ed1d7db6a865cf2b39765eaf789cf40909199b19235c19c3228d2250d2c188"
+    },
+    {
+      "id": "1_5",
+      "label": "fig:ch01-request-trace",
+      "returncode": 0,
+      "issues": [],
+      "size_pt": [
+        364.80999755859375,
+        96.63999938964844
+      ],
+      "log_sha256": "a940328b132d2b3e142abc9ac3f88b0575999e69304b054be0b6b4e708707ac1",
+      "tex_sha256": "03d2f468478f5dc966a0b7638fc5151f2fb5cd84b498f4dddbad39f3e0140142",
+      "pdf_sha256": "f2b86c8d5139768cc8d25b2d082a7ef1d549f4b33411450974ec40ea74000888",
+      "content_width_cm": 12.446
+    },
+    {
+      "id": "1_6",
+      "label": "fig:smart-water-architecture",
+      "returncode": 0,
+      "issues": [],
+      "size_pt": [
+        329.8299865722656,
+        152.4499969482422
+      ],
+      "log_sha256": "192c14d521a6e8a6fdfc9c6a454b8052cee3e849c398d20b86abda5793dc727e",
+      "tex_sha256": "12561097d962f0a4dd471f37c001ebaf24df6f858546c13769a5e262f392c800",
+      "pdf_sha256": "4f9992841cdcf9806d60f202d67e32660d2834ab685656a50ddcac013965352b",
+      "content_width_cm": 11.212
+    },
+    {
+      "id": "2_2",
+      "label": "fig:prototype-model",
+      "returncode": 0,
+      "issues": [],
+      "size_pt": [
+        331.0299987792969,
+        109.2300033569336
+      ],
+      "log_sha256": "a41a68590419d6f880cb405302555f4afea080a8fd07394decbfa63ed4b777a9",
+      "tex_sha256": "bc436441e8f9b01a400c2239e5b6b264a0bbaabc9b15e45d9409e764f9f3c237",
+      "pdf_sha256": "9313d8c3fe0e66fc3bb7d42217cb2003af43a61b9dc55421c2bdd608b6647346",
+      "content_width_cm": 11.255
+    },
+    {
+      "id": "2_5",
+      "label": "fig:ch02-devops-loop",
+      "returncode": 0,
+      "issues": [],
+      "size_pt": [
+        275.0199890136719,
+        76.25
+      ],
+      "log_sha256": "1429e8c294a832e9702128eea62ba86b4f97ca58006620e9c18e607cc923b1e5",
+      "tex_sha256": "924d5def89d2826e2f24c309d97cef513986354ef8b69a88732d64e2674b3f34",
+      "pdf_sha256": "72d65219f8d480bfbe02bb76f4746e4c08212c39d133ea47a43bd29dd31ca4f4",
+      "content_width_cm": 9.279
+    },
+    {
+      "id": "2_7",
+      "label": "fig:order-process-flowchart",
+      "returncode": 0,
+      "issues": [],
+      "size_pt": [
+        298.2699890136719,
+        320.3599853515625
+      ],
+      "log_sha256": "2f0625ad346c426cf58e446a80eccfe462f62d83c2566453ebf38b66d7db2932",
+      "tex_sha256": "bb050d8f8fd562686465fb116f34f21c143c4398736f28e143b4eb45359ef2ef",
+      "pdf_sha256": "2461a6629cee2b0669d36788a519817a6e24520e59ded2c972735e555788c265",
+      "content_width_cm": 10.099
+    },
+    {
+      "id": "2_8",
+      "label": "fig:dfd-level-zero",
+      "returncode": 0,
+      "issues": [],
+      "size_pt": [
+        379.04998779296875,
+        111.70999908447266
+      ],
+      "log_sha256": "672b7a2a26d82cab05fc3cbe80b72ed8679ca6864cb1fe478a0d516c952e401d",
+      "tex_sha256": "9af85b4e7d82649cfe597044a215b80899d5bcb46f3037e9f48706e076122fed",
+      "pdf_sha256": "181ef631835206190633d207d21b08b1c7f17bd41691a2bb52032f4683cae246",
+      "content_width_cm": 12.949
+    },
+    {
+      "id": "2_9",
+      "label": "fig:dfd-level-one",
+      "kind": "web",
+      "returncode": 0,
+      "issues": [],
+      "size_pt": [
+        423.0299987792969,
+        187.19000244140625
+      ],
+      "content_width_cm": 14.5,
+      "log_sha256": "706b710e021c65d81afcb797eaabc3e197e833be3cbd6ee5b92cedffec93f716",
+      "tex_sha256": "e82e76d1433847866ce133eb8cd8fb771f958667f87768bd728ea303ba904f7b",
+      "pdf_sha256": "cb5d98532e7c100122cc721abec4fd867f4005a5594f5d4dc79359034ce0af68"
+    },
+    {
+      "id": "2_10",
+      "label": "fig:ch02-dfd-level-two",
+      "kind": "web",
+      "returncode": 0,
+      "issues": [],
+      "size_pt": [
+        420.1000061035156,
+        153.49000549316406
+      ],
+      "content_width_cm": 14.397,
+      "log_sha256": "f5473da69a74f23727c84b9fd155ba50046602e3e1019dca6dcfb273e2f7ff77",
+      "tex_sha256": "758e3939ccf24f4a1e94a8ae2e9316169626b24448b629af4ce983e94771b418",
+      "pdf_sha256": "adef40890b1954b952f2c1055f8b82979bd02d9fa6b172a393b473bc569de0dc"
+    },
+    {
+      "id": "2_12",
+      "label": "fig:ch02-plan-state",
+      "returncode": 0,
+      "issues": [],
+      "size_pt": [
+        473.8800048828125,
+        110.51000213623047
+      ],
+      "log_sha256": "cbdf59fe89381953851cfde8d4da241b1a710cc4adf1af1dd1a1c9d4a510231d",
+      "tex_sha256": "cd876e28ae5ee341ce6fea677df09e8991b632e3f701e801559651ec58114e03",
+      "pdf_sha256": "55c25d6d8ec4ba16fd68685014a8fcdaf455d9a3deb6ebd3610760198868b50d",
+      "content_width_cm": 16.294
+    },
+    {
+      "id": "2_14",
+      "label": "fig:ch02-change-control",
+      "returncode": 0,
+      "issues": [],
+      "size_pt": [
+        321.1499938964844,
+        117.81999969482422
+      ],
+      "log_sha256": "e40b6ecfdf884eb7ec9f23155b7be56a56c3acf80aa7c9c88fb67ee43a212a53",
+      "tex_sha256": "18754e8c5251305ae11e0db66c4fabc1ec2cc188af5b4f0bd54e28270d0de08f",
+      "pdf_sha256": "45f800b2359070f2229d5bc17fcaed9c95a2867763979c8153adb3070422b74e",
+      "content_width_cm": 10.906
+    },
+    {
+      "id": "3_1",
+      "label": "fig:uml-usecase",
+      "kind": "web",
+      "returncode": 0,
+      "issues": [],
+      "size_pt": [
+        388.95001220703125,
+        134.63999938964844
+      ],
+      "content_width_cm": 13.298,
+      "log_sha256": "c8c261218760bfcd4117be3c6e64c96d7a34e843939c4d32026b2b20e2688db2",
+      "tex_sha256": "33959516e09ad9f7bf87bece0ba95490eaaf20ae47b550664598262fb68c3a14",
+      "pdf_sha256": "e5cdb6f2d7815558b33986e91f805afc842a836b0e27b2f7732e8c77600b5623"
+    },
+    {
+      "id": "3_3",
+      "label": "fig:alarm-event-state",
+      "returncode": 0,
+      "issues": [],
+      "size_pt": [
+        380.8599853515625,
+        122.9000015258789
+      ],
+      "log_sha256": "49ba7ecf49f87900a7c1a47f9edcc0b5d2de3f82411c5a3f6eebcdb5686f7147",
+      "tex_sha256": "585618364d8c42131104eb18b9a293b0f2d1cca176255bc42984e4a54d6b2ff1",
+      "pdf_sha256": "1653dc3b048a11c0c8ed3b6454dbb624e3373495b844fbc8f1eb7ed2e2e95478",
+      "content_width_cm": 13.013
+    },
+    {
+      "id": "3_4",
+      "label": "fig:alarm-activity",
+      "returncode": 0,
+      "issues": [],
+      "size_pt": [
+        392.20001220703125,
+        142.75
+      ],
+      "log_sha256": "f06b6adc90bff29170d0fdb652002a303eea591c7d50ba47a3db1b221556ac78",
+      "tex_sha256": "73b8ccc47dabb234246577cf6b474a34cb0fc9faba71af9dbe250221d6f781e8",
+      "pdf_sha256": "21272b576af9a421e6c54f02581c5437e5d9aac9efbd48c99277594819fc2b5f",
+      "content_width_cm": 13.413
+    },
+    {
+      "id": "3_5",
+      "label": "fig:uml-sequence",
+      "returncode": 0,
+      "issues": [],
+      "size_pt": [
+        324.1600036621094,
+        161.5800018310547
+      ],
+      "log_sha256": "72fdc53bbba10f88b99ef97f4cc07997a2a19458d11d9714b5fe8483f56a4241",
+      "tex_sha256": "59e2ecb47f71d2ae2062f76ba3bdb8fe46429167b26ff49cb88567c1bcbffea1",
+      "pdf_sha256": "1a49fa60698419f1264342cb09eb898080a60dce4e4b42f3cbc66aef91560c56",
+      "content_width_cm": 11.012
+    },
+    {
+      "id": "3_6",
+      "label": "fig:ch03-layer-sequence",
+      "returncode": 0,
+      "issues": [],
+      "size_pt": [
+        372.42999267578125,
+        147.52999877929688
+      ],
+      "log_sha256": "3ba18c5b1a96e08bd79e7c9109a5a22444e6147962a8f5101314fb20d734abfd",
+      "tex_sha256": "d3163c647201ca7393c5e536a08b4a76d3fae706245cc959fdbe752bb084a4b5",
+      "pdf_sha256": "881e4b7630ca2bce7355868f345356d3aa57199f6f9109ddb6409d1959106b33",
+      "content_width_cm": 12.715
+    },
+    {
+      "id": "3_7",
+      "label": "fig:layered-architecture",
+      "returncode": 0,
+      "issues": [],
+      "size_pt": [
+        154.47999572753906,
+        137.02999877929688
+      ],
+      "log_sha256": "f15e881898fd4d1164660b50b060ae99a1a7bf99bcdb460474c3350b55e67ee1",
+      "tex_sha256": "f68c04c870833e2cdc7eceb3788d195f6474670fa03053c3cde0916cf26f2725",
+      "pdf_sha256": "dc186aeb2b7ab8c85b6e8b6458c4d5f67c3a20942f266cdf09bce9d742b84d03",
+      "content_width_cm": 5.026
+    },
+    {
+      "id": "3_8",
+      "label": "fig:mvc-architecture",
+      "returncode": 0,
+      "issues": [],
+      "size_pt": [
+        206.02999877929688,
+        102.66999816894531
+      ],
+      "log_sha256": "4e09ef48e9aba9c4e629720f4427352c1d0a8d64ffa3f3f6276f308dd1c5f8de",
+      "tex_sha256": "fbd197fdf3c025cc4517f4ac346658e679a8beecdc14b0de433f347860846674",
+      "pdf_sha256": "c386abe59951a30b79576d69e2a74c0acc1d7301d58deb4fdaaa283dba7d7267",
+      "content_width_cm": 6.845
+    },
+    {
+      "id": "3_9",
+      "label": "fig:microservices-architecture",
+      "returncode": 0,
+      "issues": [],
+      "size_pt": [
+        239.52000427246094,
+        116.22000122070312
+      ],
+      "log_sha256": "75dc01821cbfbdf04a61d4fe6a26db3d255320f65b0c7eeb7573ef45bd58b04d",
+      "tex_sha256": "dfd74051b1a504ef2ddd3088119040d25e2349320275111f71ae8a3c327e74da",
+      "pdf_sha256": "febe4f85bf90f6dea897b55ce5d35abd9a3ccdd9cb344153e230a4f02a6c28c6",
+      "content_width_cm": 8.026
+    }
+  ],
+  "independent_compilation_book_font": [
+    {
+      "id": "1_4",
+      "label": "fig:flood-warning-loop",
+      "kind": "book",
+      "returncode": 0,
+      "issues": [],
+      "size_pt": [
+        402.489990234375,
+        99.5
+      ],
+      "content_width_cm": 13.776,
+      "log_sha256": "f99e282aa3bfb67929501d403d43171dc667c2120fea904b695c1907641a0034",
+      "tex_sha256": "bd62fa308b24b55a1ccd90847e3076bf1fa55daf90636facee6caa9c3af82035",
+      "pdf_sha256": "a1f937affe39e3700462702f4a4ffca394c79873ef77d98f964601d4fb1dfa17"
+    },
+    {
+      "id": "1_5",
+      "label": "fig:ch01-request-trace",
+      "kind": "book",
+      "returncode": 0,
+      "issues": [],
+      "size_pt": [
+        384.5400085449219,
+        104.94999694824219
+      ],
+      "content_width_cm": 13.142,
+      "log_sha256": "c9766caa8840e716c285d8183e4077ac0d084b01f51559e234a73ff73eb4f080",
+      "tex_sha256": "df28946611ba118ce5c8bc2454b2faadd186547141f4e4624f70a2f548c8253c",
+      "pdf_sha256": "68d6dea37804f63f89f3c39bfb3e97fa45383cf8d3e5b6790878165c789dba73"
+    },
+    {
+      "id": "1_6",
+      "label": "fig:smart-water-architecture",
+      "kind": "book",
+      "returncode": 0,
+      "issues": [],
+      "size_pt": [
+        335.989990234375,
+        152.4499969482422
+      ],
+      "content_width_cm": 11.43,
+      "log_sha256": "9719cb7c405641edb13f44be68d99b3ad864b69e72343ad78c61845d8455c6b7",
+      "tex_sha256": "36b83abea52431d60eaa5854ab82c687e9f4932968fdbf2dbaebf87a986dd4af",
+      "pdf_sha256": "8116c47ba4bbddf05199c9fa2a4d3a130bd562705f15c9e89d94f34533867a3f"
+    },
+    {
+      "id": "2_2",
+      "label": "fig:prototype-model",
+      "kind": "book",
+      "returncode": 0,
+      "issues": [],
+      "size_pt": [
+        331.0299987792969,
+        110.79000091552734
+      ],
+      "content_width_cm": 11.255,
+      "log_sha256": "9e1d7039e39cb918b195f8d361603f491615114404469c31ca29cf2dc76cacdf",
+      "tex_sha256": "cacaa2493d5fa859d14213b09cc2eb21e5fa673acba1c2e6f71c18367300ca63",
+      "pdf_sha256": "cf2bd0ec5542e4605536c22d05d522a008614d1739ae0071e8908805e67ffa60"
+    },
+    {
+      "id": "2_5",
+      "label": "fig:ch02-devops-loop",
+      "kind": "book",
+      "returncode": 0,
+      "issues": [],
+      "size_pt": [
+        281.19000244140625,
+        76.25
+      ],
+      "content_width_cm": 9.496,
+      "log_sha256": "2449a22dea693d5cba71b9cf60c7aaf89f1911ab013f6437d33db9272bcc2feb",
+      "tex_sha256": "0aa97f1211477b56d6d8ef51740acf9d1211853f305c3236e95e52e3228d0984",
+      "pdf_sha256": "879b2947f89fae5e943b25d90501711b1a3055d3849a0fb0fe5a8740aaaaf49b"
+    },
+    {
+      "id": "2_7",
+      "label": "fig:order-process-flowchart",
+      "kind": "book",
+      "returncode": 0,
+      "issues": [],
+      "size_pt": [
+        305.0899963378906,
+        325.7699890136719
+      ],
+      "content_width_cm": 10.34,
+      "log_sha256": "f501389dc5fefb1d46a0f7dc060a9d5620a61472a20ed34697c7a3229bf4c889",
+      "tex_sha256": "0ff5c43177fb2197bdf969dbf176f31937b38638c6c9b349963b7e367bef6080",
+      "pdf_sha256": "fa7f668d8b537251795e7c375bd5937a661a0420e726d72e76a71817b3b881cf"
+    },
+    {
+      "id": "2_8",
+      "label": "fig:dfd-level-zero",
+      "kind": "book",
+      "returncode": 0,
+      "issues": [],
+      "size_pt": [
+        395.2300109863281,
+        119.01000213623047
+      ],
+      "content_width_cm": 13.52,
+      "log_sha256": "dab01e12f44ba247ade4c7566869b62a6ae9419e76049f24b155d97931edb837",
+      "tex_sha256": "12bc8709b682b87795916d18b231610e34cf33501d49c0cb8ce3180d21746b7b",
+      "pdf_sha256": "d6eb86362bc37053a330d6047a45e10698add3e1d9721e9b7208642278737ef4"
+    },
+    {
+      "id": "2_9",
+      "label": "fig:dfd-level-one",
+      "kind": "book",
+      "returncode": 0,
+      "issues": [],
+      "size_pt": [
+        434.42999267578125,
+        189.36000061035156
+      ],
+      "content_width_cm": 14.902,
+      "log_sha256": "2940a756fa824fd23749a96aa92374b241e9f5bb6db1056e6dc9bd179e05b028",
+      "tex_sha256": "593b267a7632da67de12081664c0b1e5d3e3340f4ecf7a8142fee92b5f9e9455",
+      "pdf_sha256": "6484eaf1613e8d06ecc3eedd38d458c08f62379c320337e8f0f50f64336bbd0b"
+    },
+    {
+      "id": "2_10",
+      "label": "fig:ch02-dfd-level-two",
+      "kind": "book",
+      "returncode": 0,
+      "issues": [],
+      "size_pt": [
+        424.5199890136719,
+        157.2100067138672
+      ],
+      "content_width_cm": 14.553,
+      "log_sha256": "c92db053f5ee1f533a665418886ccacb549f4287de4eebfcf50ac7a5fa736ed4",
+      "tex_sha256": "41f3724ef4be0c4314c84c6efa5685624dc5271a0fbbb6165fc269ea7f32e2f5",
+      "pdf_sha256": "23316d663cd53ac7841473c2e4d1a20b808176960147aff38d96c590ad83cfae"
+    },
+    {
+      "id": "2_12",
+      "label": "fig:ch02-plan-state",
+      "kind": "book",
+      "returncode": 0,
+      "issues": [],
+      "size_pt": [
+        478.5,
+        113.30999755859375
+      ],
+      "content_width_cm": 16.457,
+      "log_sha256": "29dc7556d3ac3d38a3c03253351404e54247414ea054652553a83577cf7aba27",
+      "tex_sha256": "4127de12afe0062c553824d346fd7e54d9790113507a04703e9491ce3ccd193f",
+      "pdf_sha256": "0f775fbe3f8c9ddfb38edfe2b46cbce5ad939d0c24e9dafe3405474b0b6b4be2"
+    },
+    {
+      "id": "2_14",
+      "label": "fig:ch02-change-control",
+      "kind": "book",
+      "returncode": 0,
+      "issues": [],
+      "size_pt": [
+        325.8800048828125,
+        129.8000030517578
+      ],
+      "content_width_cm": 11.073,
+      "log_sha256": "eef701bc937bd5f661854300cf11fd3d0765847028fecf2e6ba1ac5c4161522f",
+      "tex_sha256": "fd39159f4e916e12a689f79362f80669ae9ae25fc059230bc5975d29430924f2",
+      "pdf_sha256": "263abfb8f8436b98ba2c1d9f879e2200ad9eb9d7063b23aa3de8070ecabf6ce9"
+    },
+    {
+      "id": "3_1",
+      "label": "fig:uml-usecase",
+      "kind": "book",
+      "returncode": 0,
+      "issues": [],
+      "size_pt": [
+        393.57000732421875,
+        134.63999938964844
+      ],
+      "content_width_cm": 13.461,
+      "log_sha256": "42ed7005e810580117c2cae566b8daf4f996f6c99a6a4c3c6f35710a4d4ba30d",
+      "tex_sha256": "521780c231f6096140a1f6430429db93c719aebbc8ad1d8d261c4da5c0768859",
+      "pdf_sha256": "77b4591cc69c125cbb38181142dc4473bd0b6e417dd1806e4e8332e3348e908a"
+    },
+    {
+      "id": "3_3",
+      "label": "fig:alarm-event-state",
+      "kind": "book",
+      "returncode": 0,
+      "issues": [],
+      "size_pt": [
+        380.8599853515625,
+        124.51000213623047
+      ],
+      "content_width_cm": 13.013,
+      "log_sha256": "cbc1699184d9d0eff72a34d7af61b35698fde06d3eb5141dec978d33adc099ec",
+      "tex_sha256": "5f6280c4f92289906a632a4c4bb081644298d6e2545d79fb110fdb64f5166605",
+      "pdf_sha256": "99ba0ccba32d70eca470c92bc9601bcf6f31e388418f467e6ec98e35dd4f2ce1"
+    },
+    {
+      "id": "3_4",
+      "label": "fig:alarm-activity",
+      "kind": "book",
+      "returncode": 0,
+      "issues": [],
+      "size_pt": [
+        392.20001220703125,
+        142.75
+      ],
+      "content_width_cm": 13.413,
+      "log_sha256": "e6910e2f7d36d062f2a7e48f45e0dea08a1daf44269034a1f884a3bf768c3a53",
+      "tex_sha256": "0b6936933010af03e19ca3c6cfa75417032bb888379a53657c7a53d20392a432",
+      "pdf_sha256": "754fa2d2ca06b29fc586f7e999d78630c0d05251bd617139ff1e1de7be8595da"
+    },
+    {
+      "id": "3_5",
+      "label": "fig:uml-sequence",
+      "kind": "book",
+      "returncode": 0,
+      "issues": [],
+      "size_pt": [
+        324.1600036621094,
+        162.3699951171875
+      ],
+      "content_width_cm": 11.012,
+      "log_sha256": "e70bdbe71009d555bc7290046ca9b7243bc632a542c00a6e817dbef0cf5f9326",
+      "tex_sha256": "feca2e3b42c25700ad6712f4bfceea434e1aa6e758086ee62c6d2ed2fb5e94fb",
+      "pdf_sha256": "e3679ad60607e770d0725d7402954e52adae4dae4dbd19b4f3b0ff0125a275f5"
+    },
+    {
+      "id": "3_6",
+      "label": "fig:ch03-layer-sequence",
+      "kind": "book",
+      "returncode": 0,
+      "issues": [],
+      "size_pt": [
+        384.5400085449219,
+        152.47000122070312
+      ],
+      "content_width_cm": 13.142,
+      "log_sha256": "94ba8f93373f2ad494025cb0f1029a837810468ea96c9301e67835367b44c560",
+      "tex_sha256": "fc488f3312cb6de80541d40986cbe2c93aafaa12a88841dce5e8da0cceae7559",
+      "pdf_sha256": "dbf03d8f8a808fa8ef7e141fe1644ae460dbabcce5ff65bd99aafc2601263f3b"
+    },
+    {
+      "id": "3_7",
+      "label": "fig:layered-architecture",
+      "kind": "book",
+      "returncode": 0,
+      "issues": [],
+      "size_pt": [
+        154.47999572753906,
+        137.02999877929688
+      ],
+      "content_width_cm": 5.026,
+      "log_sha256": "ea1558062575ad1813a93cd3f97fdb44b69659eb7f2919328fe1a71862c3b661",
+      "tex_sha256": "32f472c8ffe0712566f94c615959e1884f1f546bfaf5cd39a7621c3975cafbf5",
+      "pdf_sha256": "fd30c265e75c7c48bfa9878f8677648bb94ff6572d593b0c31516552ecefafc0"
+    },
+    {
+      "id": "3_8",
+      "label": "fig:mvc-architecture",
+      "kind": "book",
+      "returncode": 0,
+      "issues": [],
+      "size_pt": [
+        209.6999969482422,
+        104.80999755859375
+      ],
+      "content_width_cm": 6.974,
+      "log_sha256": "b00fc2752ea346489e6cb2bd174a8732ab0688aa2c9ea6dc537bebd9ebf4cdff",
+      "tex_sha256": "77d9d0ad90512580561afc4c38c99b6309d6e206f4ad6e2fdd3143422acfa3dc",
+      "pdf_sha256": "dfd525301aaded4761cc49768237c410ebed9a55bf735e6e5d731dc0d663828d"
+    },
+    {
+      "id": "3_9",
+      "label": "fig:microservices-architecture",
+      "kind": "book",
+      "returncode": 0,
+      "issues": [],
+      "size_pt": [
+        239.52000427246094,
+        116.22000122070312
+      ],
+      "content_width_cm": 8.026,
+      "log_sha256": "5a00250c5bb1c4aa363fe104ead2a8494c10093fe05808bd5595101d683e0668",
+      "tex_sha256": "0f13dc61875befb9d072e0f08899829c301535ed5b000908faeb690fd6258965",
+      "pdf_sha256": "d6dc6815352f44a0bc46bca1330982460cd2e410da93f5885bd376f494479e50"
+    }
+  ],
+  "baseline_independent_compilation": [
+    {
+      "name": "1_2",
+      "exit": 0,
+      "errors": []
+    },
+    {
+      "name": "1_4",
+      "exit": 0,
+      "errors": []
+    },
+    {
+      "name": "1_5",
+      "exit": 0,
+      "errors": []
+    },
+    {
+      "name": "1_6",
+      "exit": 0,
+      "errors": []
+    },
+    {
+      "name": "1_7",
+      "exit": 0,
+      "errors": []
+    },
+    {
+      "name": "1_8",
+      "exit": 0,
+      "errors": []
+    },
+    {
+      "name": "2_1",
+      "exit": 0,
+      "errors": []
+    },
+    {
+      "name": "2_2",
+      "exit": 0,
+      "errors": []
+    },
+    {
+      "name": "2_3",
+      "exit": 0,
+      "errors": []
+    },
+    {
+      "name": "2_4",
+      "exit": 0,
+      "errors": []
+    },
+    {
+      "name": "2_5",
+      "exit": 0,
+      "errors": []
+    },
+    {
+      "name": "2_6",
+      "exit": 0,
+      "errors": []
+    },
+    {
+      "name": "2_7",
+      "exit": 0,
+      "errors": []
+    },
+    {
+      "name": "2_8",
+      "exit": 0,
+      "errors": []
+    },
+    {
+      "name": "2_9",
+      "exit": 0,
+      "errors": []
+    },
+    {
+      "name": "2_10",
+      "exit": 0,
+      "errors": []
+    },
+    {
+      "name": "2_11",
+      "exit": 0,
+      "errors": []
+    },
+    {
+      "name": "2_12",
+      "exit": 0,
+      "errors": []
+    },
+    {
+      "name": "2_13",
+      "exit": 0,
+      "errors": []
+    },
+    {
+      "name": "2_14",
+      "exit": 0,
+      "errors": []
+    },
+    {
+      "name": "3_1",
+      "exit": 0,
+      "errors": []
+    },
+    {
+      "name": "3_2",
+      "exit": 0,
+      "errors": []
+    },
+    {
+      "name": "3_3",
+      "exit": 0,
+      "errors": []
+    },
+    {
+      "name": "3_4",
+      "exit": 0,
+      "errors": []
+    },
+    {
+      "name": "3_5",
+      "exit": 0,
+      "errors": []
+    },
+    {
+      "name": "3_6",
+      "exit": 0,
+      "errors": []
+    },
+    {
+      "name": "3_7",
+      "exit": 0,
+      "errors": []
+    },
+    {
+      "name": "3_8",
+      "exit": 0,
+      "errors": []
+    },
+    {
+      "name": "3_9",
+      "exit": 0,
+      "errors": []
+    },
+    {
+      "name": "3_10",
+      "exit": 0,
+      "errors": []
+    }
+  ],
+  "source_frozen": true,
+  "final_source_sha256": {
+    "output/chapters/chapter01.tex": "b269d0ee21575010da1f37e05c6542107c51c405cb683d5bd31f5bad3548df19",
+    "output/chapters/chapter02.tex": "50cfd5270b3fa7dc6aa62e9a8d094491ee2b1ff653c98fd96df3bcd79c32273b",
+    "output/chapters/chapter03.tex": "35fd9ff6e80dbfbdcf4da1bab2a4b85946fa2572a1369f7182f7971bd98d108d"
+  },
+  "book_font_width_check": {
+    "text_width_cm": 16.5,
+    "maximum_content_width_cm": 16.457,
+    "maximum_figure": "2.12",
+    "method": "独立standalone采用main.tex的11pt字体设置和1.23行距，PDF媒体框扣除两侧各6pt边距；ctex页眉功能不进入独立图。"
+  },
+  "whole_book_and_site_validation": "本子任务不编译全书、不修改网站；已向主代理交付冻结图源。最终PDF分页与94张站点SVG从最终TeX重建由主代理验收。"
+}

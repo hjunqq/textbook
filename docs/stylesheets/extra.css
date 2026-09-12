@@ -1,4 +1,19 @@
 /* 自定义样式 */
+/* 汉语正文段首空两个汉字，标题后的第一段同样处理。 */
+.md-typeset p {
+  text-indent: 2em;
+}
+
+/* 图题、表格单元、提示框标题和脚注编号各有自身的对齐方式。 */
+.md-typeset figure p,
+.md-typeset figcaption p,
+.md-typeset th p,
+.md-typeset td p,
+.md-typeset .admonition-title,
+.md-typeset .footnote p {
+  text-indent: 0;
+}
+
 .md-typeset h1 {
   color: #1976d2;
 }
@@ -25,6 +40,15 @@
 }
 
 /* 图片居中 */
+.md-typeset figure {
+  width: 100%;
+}
+
+.md-typeset figure img {
+  width: 100%;
+  height: auto;
+}
+
 .md-typeset img {
   display: block;
   margin: 1em auto;

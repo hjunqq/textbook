@@ -33,6 +33,7 @@
 \item 工单闭环（清单\ref{lst:ch08-workorder-chain}）——预警确认后的处置与回执；
 \item 编排与冒烟（清单\ref{lst:ch08-compose}，配合仓库 \texttt{smoke.sh}）——一条命令验证"启动—登录—取数—拒绝"。
 \end{enumerate}
+
 运行后，用事件标识核对观测、预警与工单的对应关系，再检查失败请求是否留下原因。空间查询、连续聚合、压缩保留、可观测性和备份演练等清单在实验课或课程设计中继续练习。
 \end{warningbox}
 
@@ -170,7 +171,11 @@
 \draw[->,draw=Primary,thick] (analysis)--(warning);
 \draw[->,draw=Primary,thick] (warning)--(ticket);
 \draw[->,draw=Primary,thick] (ticket)--(review);
-\draw[->,draw=Accent,dashed,thick,bend left=25] (review) to node[below,font=\scriptsize]{改进规则/模型} (analysis);
+\coordinate (feedbacklow) at ($(review.south)+(0,-.65)$);
+\coordinate (feedbackright) at ($(analysis.east)+(.55,0)$);
+\draw[->,draw=Accent,dashed,thick] (review.south)--(feedbacklow)
+  --node[below,font=\scriptsize]{复盘后改进规则/模型} (feedbackright |- feedbacklow)
+  --(feedbackright)--(analysis.east);
 \end{tikzpicture}
 \caption{水利工程安全监测业务闭环}
 \label{fig:smart-water-monitoring-architecture}
@@ -474,28 +479,27 @@ reading.version & integer & 非空、正数 & 无 & 同一事件的修订版本�
 \end{tabular}
 \end{table}
 
-图\ref{fig:ch08-database-er}用实体关系图呈现外键方向和审计边界。图中的箭头表示数据库中的
-可追溯关系，不表示消息一定同步到达；异步事件仍需通过事件标识和状态版本处理乱序。阅读图时先从
-\texttt{asset}向下追踪观测，再从观测和规则证据进入预警，最后沿工单回执闭合业务链；模型运行则以
-输入快照和结果独立留痕，避免把模型输出误当作原始观测。
+图\ref{fig:ch08-database-er}中的实线从主对象指向关联记录，标注一对多关系；虚线表示事件证据
+和输入快照的追溯关系。\texttt{asset}分别关联观测和预警，预警再关联工单；模型运行以输入快照
+和结果独立留痕。图中关系不表示消息同步到达，异步事件仍需用事件标识和状态版本处理乱序。
 
 \begin{figure}[htbp]
 \centering
-\begin{tikzpicture}[
+\begin{tikzpicture}[>=Stealth,font=\small,
   er/.style={draw=Primary,rounded corners,fill=PrimaryLight,align=center,
-    minimum width=2.65cm,minimum height=1.05cm,font=\small},
-  rel/.style={->,draw=PrimaryDark,thick},
-  node distance=12mm and 18mm]
-\node[er] (asset) {asset\\工程对象/测点};
-\node[er,right=of asset] (reading) {reading\\时序观测};
-\node[er,right=of reading] (warning) {warning\\预警事件};
-\node[er,below=of warning] (work) {work\_order\\处置工单};
-\node[er,below=of asset] (run) {model\_run\\模型运行};
-\draw[rel] (asset) -- node[above,font=\scriptsize]{1:N} (reading);
-\draw[rel] (asset) -- node[left,font=\scriptsize]{1:N} (run);
-\draw[rel] (asset) |- node[pos=.25,left,font=\scriptsize]{1:N} (warning);
-\draw[rel] (warning) -- node[right,font=\scriptsize]{1:N} (work);
-\draw[rel,dashed] (reading) -- node[above,font=\scriptsize]{event\_id证据} (warning);
+    minimum width=2.65cm,minimum height=1.05cm},
+  rel/.style={->,draw=PrimaryDark,thick}]
+\node[er] (asset) at (0,0) {asset\\工程对象/测点};
+\node[er] (reading) at (4.4,0) {reading\\时序观测};
+\node[er] (warning) at (8.8,0) {warning\\预警事件};
+\node[er] (run) at (4.4,-2.0) {model\_run\\模型运行};
+\node[er] (work) at (8.8,-2.0) {work\_order\\处置工单};
+\draw[rel] (asset)--node[above,font=\scriptsize]{1:N} (reading);
+\draw[rel] (asset.north)--++(0,.6)--node[above,font=\scriptsize]{1:N} ($(warning.north)+(0,.6)$)--(warning.north);
+\draw[rel] (warning)--node[right,font=\scriptsize]{1:N} (work);
+\draw[rel,dashed] (reading)--node[above,font=\scriptsize]{事件标识证据} (warning);
+\draw[rel,dashed] (reading)--node[left,font=\scriptsize]{输入快照} (run);
+\node[font=\scriptsize,text=TextGray,align=center] at (4.4,-3.0) {实线：主对象到关联记录的一对多关系；虚线：证据与快照追溯\\model\_run的input\_snapshot记录本次计算的输入范围};
 \end{tikzpicture}
 \caption{第8章核心实体关系与追溯路径}
 \label{fig:ch08-database-er}
@@ -1190,7 +1194,10 @@ JSONB 证据、备份副本和压缩后的增长系数；写入峰值还要考�
 \draw[->,draw=Primary,thick] (quality)--(store);
 \draw[->,draw=Primary,thick] (quality)--(risk);
 \draw[->,draw=Primary,thick] (risk)--(push);
-\draw[->,draw=Accent,dashed,thick] (push)-|(store);
+\coordinate (queryright) at ($(store.east)+(.6,0)$);
+\coordinate (querylow) at ($(push.south)+(0,-.6)$);
+\draw[->,draw=Accent,dashed,thick] (store.east)--(queryright)
+  --(queryright |- querylow)--node[below,font=\scriptsize]{历史观测查询结果} (querylow)--(push.south);
 \end{tikzpicture}
 \caption{监测数据接入、质量检查与展示流水线}
 \label{fig:monitoring-data-pipeline}
@@ -2503,23 +2510,25 @@ public final class QualityClassificationTest {
 \label{fig:ch08-work-order-results}
 \end{figure}
 
-图\ref{fig:warning-workorder-flow}把预警到工单的状态流转画成受控流程，每条转移边都标注了触发条件与责任角色。图中没有从“已发出”直接指向“已关闭”的边——关闭预警必须经过工单校验，这条约束正是防止预警被随手清空的机制。
+图\ref{fig:warning-workorder-flow}按预警和工单分别标出正常处置路径。值班员确认并派单，运维员提交回执后，服务校验关联工单是否完成，再关闭预警。图中英文状态与本章接口及数据库约束对应。
 
 \begin{figure}[htbp]
 \centering
-\begin{tikzpicture}[node distance=7mm,
-  state/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=2.2cm,
-    minimum height=.8cm,align=center}]
-\node[state] (new) {新建};
-\node[state,right=of new] (confirmed) {已确认};
-\node[state,right=of confirmed] (assigned) {已派单};
-\node[state,right=of assigned] (handled) {已处置};
-\node[state,right=of handled] (closed) {已复核关闭};
-\draw[->,draw=Primary,thick] (new)--(confirmed);
-\draw[->,draw=Primary,thick] (confirmed)--(assigned);
-\draw[->,draw=Primary,thick] (assigned)--(handled);
-\draw[->,draw=Primary,thick] (handled)--(closed);
-\draw[->,draw=Accent,dashed,thick,bend right=30] (handled) to node[below,font=\scriptsize]{证据不足/继续观察} (confirmed);
+\begin{tikzpicture}[>=Stealth,font=\small,
+  state/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=2.8cm,
+    minimum height=1cm,align=center},
+  ar/.style={->,Primary,thick}]
+\node[state] (open) at (0,0) {预警待确认\\open};
+\node[state] (ack) at (5.3,0) {预警已确认\\acknowledged};
+\node[state] (closed) at (10.6,0) {预警已关闭\\closed};
+\node[state,fill=white] (work) at (5.3,-2.25) {工单处理中\\in\_progress};
+\node[state,fill=white] (done) at (10.6,-2.25) {工单已完成\\completed};
+\draw[ar] (open)--node[above,font=\scriptsize,align=center]{值班员确认\\核对事件与证据} (ack);
+\draw[ar] (ack)--node[left,font=\scriptsize,align=right]{值班员派单\\指定责任与时限} (work);
+\draw[ar] (work)--node[below,font=\scriptsize,align=center]{运维员处理\\提交处置回执} (done);
+\draw[ar] (done)--node[right,font=\scriptsize,align=left]{服务校验\\关联工单已完成} (closed);
+\node[font=\scriptsize,text=TextGray,align=center] at (0,-2.25) {预警与工单\\分别保存状态};
+\node[font=\scriptsize,text=TextGray] at (5.3,-3.4) {正常处置路径：未确认不可派单，缺少完成回执不可关闭预警};
 \end{tikzpicture}
 \caption{预警与工单的受控状态流转}
 \label{fig:warning-workorder-flow}
@@ -2549,6 +2558,7 @@ public final class QualityClassificationTest {
 \bottomrule
 \end{tabular}
 \end{table}
+
 模型卡与场景版本、输入快照和人工审批绑定。只要改变初始水位、降雨情景、闸门约束或模型版本，就创建新的运行记录；只改变镜头和图层透明度，不产生新的计算版本。页面显示结果时同时显示“模拟”标签、模型版本和计算时刻，避免把预演动画误认为已经发生的观测。
 
 \subsubsection{闸门公式的代入与反算边界}
@@ -2687,7 +2697,7 @@ public final class QualityClassificationTest {
 \end{tabular}
 \end{table}
 
-图\ref{fig:typhoon-simulation-chain}把从场景输入到结果反馈的计算链画了出来，并在每一步标出携带的不确定性说明。链条越往后不确定性累积越多，因此淹没范围的置信度总是低于降雨输入本身。
+图\ref{fig:typhoon-simulation-chain}给出从降雨输入到预案比选的计算与反馈链。降雨误差、模型参数和地形分辨率会共同影响淹没结果；不同模型还可能放大或削弱某些误差，需要用敏感性分析或集合情景评估。
 
 \begin{figure}[htbp]
 \centering
@@ -2717,12 +2727,12 @@ public final class QualityClassificationTest {
 
 空间分析把淹没栅格与建筑、道路、学校、医院和避险点叠加。受影响对象的判定必须记录空间数据版本、阈值和分析时间。疏散路线不仅要“最短”，还需避开预计淹没路段、容量不足道路和已封闭区域。
 
-图\ref{fig:ch08-51wim-flood}是一次自定义暴雨情景的淹没仿真结果：绿色至红色的渐变表示淹没范围与相对水深，左侧面板保留了触发本次计算的降雨契约参数。读图时应带着证据链的眼光：画面本身只是结果的一帧，可复核的是它背后的输入快照、模型版本与空间数据版本。
+图\ref{fig:ch08-51wim-flood}展示淹没仿真的空间结果与时间轴，右侧面板提供情景选择和淹没分析入口，左侧保留水资源调度信息。阅读颜色分布时须同时核对图例、所选情景和预演时刻；复核计算还需要对应的输入快照、模型版本与空间数据版本。
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=\textwidth]{chapter08/51wim-flood.jpg}
-\caption{自定义暴雨情景的淹没仿真预演结果（颜色梯度表示淹没范围与相对水深）（图片来源：51WIM数字孪生水利平台，经授权使用）}
+\caption{淹没仿真预演的空间结果、情景选择与时间轴（图片来源：51WIM数字孪生水利平台，经授权使用）}
 \label{fig:ch08-51wim-flood}
 \end{figure}
 
@@ -2775,7 +2785,7 @@ public final class QualityClassificationTest {
 
 水库矩阵把多个水库的实时水位、入库流量、出库流量、库容、闸门状态和预警放在统一视图中，支持按流域、行政区和风险等级筛选。矩阵不是简单表格汇总；它还要把每个水库连接到三维场景、模型运行、预演方案和预案。
 
-图\ref{fig:ch08-51wim-dam-safety}展示了从矩阵下钻到单座水库后的工程安全视图：左上角给出安全性态综合评分，坝体以网格高亮标出评估范围，右侧同屏呈现预报预警面板。这是“四预”中工程安全能力的典型界面组织——评分只是入口，点开每一项都应能追溯到测点数据、模型版本和评估依据。
+图\ref{fig:ch08-51wim-dam-safety}展示了从矩阵下钻到单座水库后的工程安全视图：左上角给出安全性态综合评分，坝体以网格高亮标出评估范围，左侧同屏呈现预报预警面板。这是“四预”中工程安全能力的典型界面组织——评分只是入口，点开每一项都应能追溯到测点数据、模型版本和评估依据。
 
 \begin{figure}[htbp]
 \centering
@@ -2831,7 +2841,11 @@ public final class QualityClassificationTest {
 \draw[->,draw=Primary,thick] (warning)--(rehearsal);
 \draw[->,draw=Primary,thick] (rehearsal)--(plan);
 \draw[->,draw=Primary,thick] (plan)--(effect);
-\draw[->,draw=Accent,dashed,thick,bend right=35] (effect) to node[below,font=\scriptsize]{校正输入/模型} (forecast);
+\coordinate (effectlow) at ($(effect.south)+(0,-.6)$);
+\coordinate (forecastleft) at ($(forecast.west)+(-.5,0)$);
+\draw[->,draw=Accent,dashed,thick] (effect.south)--(effectlow)
+  --node[below,font=\scriptsize]{校正输入/模型} (forecastleft |- effectlow)
+  --(forecastleft)--(forecast.west);
 \end{tikzpicture}
 \caption{预报、预警、预演、预案的业务闭环}
 \label{fig:four-pre-loop}
@@ -2847,12 +2861,12 @@ Q=C_d\,b\,a\sqrt{2gH},
 
 其中$C_d$为流量系数，弧形闸门教学取值范围为$0.55\le C_d\le0.75$；$b$为单孔宽度，$a$为开度，$H$定义为自闸底板起算的闸前总水头，包含行近流速水头。自由出流简化式一般要求$a/H<0.65$；超过该范围应转用堰流或经批准的工程曲线。淹没出流还需引入淹没系数$\sigma$，将下游水位影响写入$Q=\sigma C_dba\sqrt{2gH}$。真实计算需考虑闸孔数量、启闭约束、下游水位和设备状态。
 
-图\ref{fig:ch08-51wim-spillway}是泄洪方案预演的三维模拟画面：闸门按方案开度开启，水流经溢洪道下泄。需要强调的是，水流动画只是计算结果的可视化表达，其背后是上文的孔流关系与约束校验；界面右侧面板中的开度与泄量数值必须与算法接口的返回值一致，否则画面越逼真，误导越严重。
+图\ref{fig:ch08-51wim-spillway}展示闸门设施、溢洪道水流和预演面板。单帧画面不能验证开度与泄量是否匹配，也不能确定产品采用的水力算法。实现教学预演时，应把开度、泄量、方案版本和时刻绑定到同一份计算结果，再检查数值与动画的一致性。
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=\textwidth]{chapter08/51wim-spillway.jpg}
-\caption{泄洪方案预演的三维模拟：闸门按方案开度开启，水流经溢洪道下泄（图片来源：51WIM数字孪生水利平台，经授权使用）}
+\caption{泄洪方案预演界面：闸门设施、溢洪道水流与业务面板（图片来源：51WIM数字孪生水利平台，经授权使用）}
 \label{fig:ch08-51wim-spillway}
 \end{figure}
 
@@ -2889,13 +2903,14 @@ Q=C_d\,b\,a\sqrt{2gH},
 \node[gate,right=of solve] (review) {专业复核\\约束与风险};
 \node[gate,right=of review] (approve) {授权审批\\有效期};
 \node[gate,below=of approve] (simulate) {三维模拟执行};
-\node[gate,left=of simulate] (receipt) {设备状态/回执};
+\node[gate,left=of simulate] (receipt) {模拟状态/回执};
 \draw[->,draw=Primary,thick] (target)--(solve);
 \draw[->,draw=Primary,thick] (solve)--(review);
 \draw[->,draw=Primary,thick] (review)--(approve);
 \draw[->,draw=Primary,thick] (approve)--(simulate);
 \draw[->,draw=Primary,thick] (simulate)--(receipt);
-\draw[->,draw=Accent,dashed,thick,bend left=30] (receipt) to node[below,font=\scriptsize]{复核与修正} (solve);
+\draw[->,draw=Accent,dashed,thick] (receipt.south)--++(0,-.6)
+  --node[below,font=\scriptsize]{复核与修正} ($(solve.south)+(0,-2.05)$)--(solve.south);
 \end{tikzpicture}
 \caption{闸门方案从反算到模拟回执的受控流程}
 \label{fig:gate-simulation-flow}
@@ -3049,21 +3064,17 @@ AI输出必须引用数据和模型证据。若工具失败、数据过期或权
 
 \begin{figure}[htbp]
 \centering
-\begin{tikzpicture}[node distance=6mm and 8mm,
-  state/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=2.6cm,
-    minimum height=.85cm,align=center}]
-\node[state] (object) {稳定对象编码};
-\node[state,right=of object] (observe) {观测状态流\\有效/知识时间};
-\node[state,right=of observe] (snapshot) {场景输入快照\\版本与来源};
-\node[state,below=of snapshot] (simulate) {模型推演状态\\模拟标识};
-\node[state,left=of simulate] (compare) {方案差异与证据};
-\node[state,left=of compare] (decision) {人工决策记录};
-\draw[->,draw=Primary,thick] (object)--(observe);
-\draw[->,draw=Primary,thick] (observe)--(snapshot);
-\draw[->,draw=Primary,thick] (snapshot)--(simulate);
-\draw[->,draw=Primary,thick] (simulate)--(compare);
-\draw[->,draw=Primary,thick] (compare)--(decision);
-\draw[->,draw=Accent,dashed,thick,bend right=28] (decision) to node[below,font=\scriptsize]{归档而非覆盖} (snapshot);
+\begin{tikzpicture}[>=Stealth,font=\small,
+  state/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=3cm,
+    minimum height=1.05cm,align=center}]
+\node[state] (object) at (0,0) {稳定对象编码};
+\node[state] (observe) at (4.2,0) {观测状态流\\随新观测更新};
+\node[state] (snapshot) at (8.4,0) {场景输入快照\\固定版本与来源};
+\node[state] (simulate) at (8.4,-1.9) {模型推演状态\\由该快照计算};
+\node[state] (compare) at (4.2,-1.9) {方案差异与证据};
+\node[state] (decision) at (0,-1.9) {人工决策记录};
+\foreach \a/\b in {object/observe,observe/snapshot,snapshot/simulate,simulate/compare,compare/decision}{\draw[->,Primary,thick] (\a)--(\b);}
+\node[font=\scriptsize,text=TextGray,align=center] at (4.2,-3) {推演结果与决策按快照版本归档；新观测更新实时状态，重新取数须创建新快照};
 \end{tikzpicture}
 \caption{观测状态、场景快照与推演状态的分离}
 \label{fig:twin-state-separation}
@@ -3083,25 +3094,22 @@ AI输出必须引用数据和模型证据。若工具失败、数据过期或权
 
 \begin{figure}[htbp]
 \centering
-\begin{tikzpicture}[node distance=5mm and 7mm,
-  run/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=2.0cm,
-    minimum height=.75cm,align=center,font=\small}]
-\node[run] (draft) {草稿};
-\node[run,right=of draft] (validated) {已校验};
-\node[run,right=of validated] (queued) {排队};
-\node[run,right=of queued] (running) {运行};
-\node[run,right=of running] (done) {完成};
-\node[run,below=of running] (failed) {失败};
-\node[run,below=of done] (reviewed) {复核/发布};
-\node[run,left=of reviewed] (archive) {归档};
-\draw[->,draw=Primary,thick] (draft)--(validated);
-\draw[->,draw=Primary,thick] (validated)--(queued);
-\draw[->,draw=Primary,thick] (queued)--(running);
-\draw[->,draw=Primary,thick] (running)--(done);
-\draw[->,draw=Primary,thick] (running)--(failed);
-\draw[->,draw=Primary,thick] (done)--(reviewed);
-\draw[->,draw=Primary,thick] (reviewed)--(archive);
-\draw[->,draw=Accent,dashed,thick,bend right=28] (failed) to node[below,font=\scriptsize]{修正后新运行} (draft);
+\begin{tikzpicture}[>=Stealth,font=\small,
+  run/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=2cm,
+    minimum height=.8cm,align=center}]
+\node[run] (draft) at (0,0) {草稿};
+\node[run] (validated) at (2.9,0) {已校验};
+\node[run] (queued) at (5.8,0) {排队};
+\node[run] (running) at (8.7,0) {运行};
+\node[run] (done) at (11.6,0) {完成};
+\node[run,fill=Accent!10,draw=Accent] (failed) at (8.7,-1.6) {失败};
+\node[run] (reviewed) at (11.6,-1.6) {复核/发布};
+\node[run] (archive) at (11.6,-3.15) {归档};
+\foreach \a/\b in {draft/validated,validated/queued,queued/running,running/done,running/failed,done/reviewed,reviewed/archive}{\draw[->,Primary,thick] (\a)--(\b);}
+\draw[->,Accent,dashed,thick] (failed.south)--++(0,-.55)
+  --node[below,font=\scriptsize]{保留失败记录，修正输入后新建任务} (0,-2.55)--(draft.south);
+\draw[->,Accent,dashed,thick] (reviewed.east)--++(.55,0)
+  --(13.15,1.1)--node[above,font=\scriptsize]{复核不通过：保留原结果，另建任务} (0,1.1)--(draft.north);
 \end{tikzpicture}
 \caption{模型任务的受控生命周期}
 \label{fig:model-run-lifecycle}
@@ -3165,7 +3173,8 @@ AI输出必须引用数据和模型证据。若工具失败、数据过期或权
 \node[net,right=of pump,yshift=-7mm] (branch) {分水节点};
 \node[net,right=of storage] (urban) {生活需水};
 \node[net,right=of branch] (eco) {生态/生产需水};
-\draw[->,draw=Primary,thick] (source1)--node[above,font=\scriptsize]{能力/水质} (pump);
+\draw[->,draw=Primary,thick] (source1)--(pump);
+\node[font=\scriptsize,text=TextGray] at ($(pump.south)+(0,-1.1)$) {输水链路记录输送能力与水质约束};
 \draw[->,draw=Primary,thick] (source2)--(pump);
 \draw[->,draw=Primary,thick] (pump)--(storage);
 \draw[->,draw=Primary,thick] (pump)--(branch);
@@ -3223,9 +3232,9 @@ AI输出必须引用数据和模型证据。若工具失败、数据过期或权
     minimum height=1.0cm,align=center,font=\scriptsize},
   ar/.style={->,draw=Primary,thick}]
 \node[base] (b) {基线场景\\版本 v1};
-\node[plan,right=of b] (p2) {方案B：提前12h预泄\\控泄 900\,m$^3$/s};
+\node[plan,right=of b] (p2) {方案B：提前预泄\\按方案限定泄量};
 \node[plan,above=of p2] (p1) {方案A：维持现状\\不预泄};
-\node[plan,below=of p2] (p3) {方案C：分级预泄\\控泄 600\,m$^3$/s};
+\node[plan,below=of p2] (p3) {方案C：分级预泄\\按阶段限定泄量};
 \node[judge,right=of p2] (cmp) {统一指标并排比较\\最高库水位、下游流量\\淹没面积、预留库容};
 \node[judge,right=of cmp] (pick) {人工选定\\记录选择理由\\与放弃原因};
 \draw[ar] (b)--(p1);
@@ -3391,24 +3400,24 @@ $T+60$ min & 比较预测与实况并复核 & 专业分析员 & 偏差、结论�
 
 \begin{figure}[htbp]
 \centering
-\begin{tikzpicture}[node distance=5mm and 7mm,
-  item/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=5.0cm,
-    minimum height=1.15cm,align=center,font=\scriptsize},
-  warn/.style={draw=Accent,rounded corners,fill=Accent!12,minimum width=5.0cm,
-    minimum height=1.15cm,align=center,font=\scriptsize},
+\begin{tikzpicture}[>=Stealth,font=\scriptsize,
+  item/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=5cm,
+    minimum height=1.15cm,align=center},
   sign/.style={draw=Primary,rounded corners,fill=white,minimum width=10.7cm,
-    minimum height=.9cm,align=center,font=\scriptsize},
-  ar/.style={->,draw=Primary,thick}]
-\node[item] (a) {当前态势\\水位、雨情、预警等级与趋势};
-\node[item,right=of a] (b) {未闭环任务\\待确认告警、在办工单、责任人};
-\node[warn,below=of a] (c) {已批准方案及有效期\\过期方案必须显式标红};
-\node[item,below=of b] (d) {失效服务与数据龄期\\离线测点、积压消息、最后更新时刻};
-\coordinate (mid) at ($(c)!0.5!(d)$);
-\node[sign,below=6mm of mid] (sig) {交班人与接班人双签，异常项转为交接工单并写入审计};
-\draw[ar] (a)--(c);
-\draw[ar] (b)--(d);
-\draw[ar] (c) -- (sig);
-\draw[ar] (d) -- (sig);
+    minimum height=.9cm,align=center}]
+\node[item] (a) at (0,0) {当前态势\\水位、雨情、预警等级与趋势};
+\node[item] (b) at (5.7,0) {在办任务\\待确认告警、在办工单、责任人};
+\node[item,draw=Accent,fill=Accent!12] (c) at (0,-1.7) {已批准方案及有效期\\过期方案标色并注明“已过期”};
+\node[item] (d) at (5.7,-1.7) {失效服务与数据龄期\\离线测点、积压消息、最后更新时刻};
+\coordinate (busleft) at (-2.9,-2.9);
+\coordinate (busright) at (8.6,-2.9);
+\node[sign] (sig) at (2.85,-4) {交班人与接班人双签，异常项转为交接工单并写入审计};
+\draw[Primary,thick] (a.west)--(-2.9,0)--(busleft);
+\draw[Primary,thick] (b.east)--(8.6,0)--(busright);
+\draw[Primary,thick] (c.south)--(0,-2.9);
+\draw[Primary,thick] (d.south)--(5.7,-2.9);
+\draw[Primary,thick] (busleft)--(busright);
+\draw[->,Primary,thick] (2.85,-2.9)--node[right]{四类内容共同核对} (sig.north);
 \end{tikzpicture}
 \caption{值守交接班必须覆盖的四类内容与双签确认}
 \label{fig:shift-handover-flow}
@@ -3479,22 +3488,18 @@ AI工具调用失败 & 明确失败并回到手工流程 & 错误信息与人工
 
 \begin{figure}[htbp]
 \centering
-\begin{tikzpicture}[node distance=6mm and 8mm,
-  deploy/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=2.45cm,
-    minimum height=.9cm,align=center}]
-\node[deploy] (browser) {浏览器/移动端\\Vue 3 + Three.js};
-\node[deploy,right=of browser] (gateway) {API入口\\认证/限流};
-\node[deploy,right=of gateway] (service) {Spring Boot\\业务服务};
-\node[deploy,below=of service] (kafka) {Kafka\\事件总线};
-\node[deploy,left=of kafka] (redis) {Redis\\可重建缓存};
-\node[deploy,right=of kafka] (db) {PostgreSQL\\PostGIS/TimescaleDB};
-\node[deploy,below=of kafka] (object) {对象存储\\模型/报告/备份};
-\draw[<->,draw=Primary,thick] (browser)--(gateway);
-\draw[<->,draw=Primary,thick] (gateway)--(service);
-\draw[<->,draw=Primary,thick] (service)--(kafka);
-\draw[<->,draw=Primary,thick] (service)--(redis);
-\draw[<->,draw=Primary,thick] (service)--(db);
-\draw[<->,draw=Accent,thick] (service)--(object);
+\begin{tikzpicture}[>=Stealth,font=\small,
+  deploy/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=2.6cm,
+    minimum height=1.05cm,align=center}]
+\node[deploy] (browser) at (0,0) {浏览器/移动端\\Vue 3 + Three.js};
+\node[deploy] (gateway) at (3.8,0) {API入口\\认证/限流};
+\node[deploy] (service) at (7.6,0) {Spring Boot\\业务服务};
+\node[deploy] (redis) at (0,-2.2) {Redis\\可重建缓存};
+\node[deploy] (kafka) at (4,-2.2) {Kafka\\事件总线};
+\node[deploy] (db) at (8,-2.2) {PostgreSQL\\PostGIS/TimescaleDB};
+\node[deploy] (object) at (12,-2.2) {对象存储\\模型/报告/备份};
+\foreach \a/\b in {browser/gateway,gateway/service,service/kafka,service/redis,service/db}{\draw[<->,Primary,thick] (\a)--(\b);}
+\draw[<->,Accent,thick] (service)--(object);
 \end{tikzpicture}
 \caption{案例水库平台部署架构}
 \label{fig:system-deployment-architecture}
@@ -3519,6 +3524,7 @@ services:
 secrets: {db_password: {file: ./secrets/db_password.txt}, kafka_password: {file: ./secrets/kafka_password.txt}}
 volumes: {pg-data: {}, redis-data: {}, kafka-data: {}}
 \end{lstlisting}
+
 代码清单\ref{lst:ch08-compose}中的 \texttt{depends\_on} 只保证启动顺序，就绪状态由健康检查判定。\texttt{readiness}不能把数据库迁移、Kafka消费延迟或磁盘容量隐藏在一个布尔值里；运维看板仍需采集细分指标。内部网络使数据库和消息总线不直接暴露给浏览器，外部流量只进入 Nginx 和 API。
 \subsubsection{环境变量、密钥与版本回滚}
 配置分为非敏感默认值、部署环境变量和容器 secret 三层。教学仓库仅保留变量名与格式校验，不提交真实凭据。部署前把镜像版本、迁移版本、前端静态资源版本和配置清单写入同一个发布记录；回滚先判断迁移是否向后兼容，再回退无状态服务。
@@ -3532,6 +3538,7 @@ SECRETS: {DB_PASSWORD_FILE: "/run/secrets/db_password", JWT_SIGNING_KEY: "inject
 ROTATION: {password_days: 90, signing_key_overlap_hours: 24}
 VALIDATION: {require_non_empty: [DB_USER, DB_NAME], reject_default_password: true}
 \end{lstlisting}
+
 清单\ref{lst:ch08-env-secrets}中的轮换字段是运维约束而不是业务参数。轮换数据库口令先创建新凭据并验证连接池，再撤销旧凭据；轮换JWT密钥保留重叠窗口，使正在处理的请求完成。变量缺失、示例口令或 latest 标签都应在流水线门禁阶段失败。
 \subsubsection{Nginx 反向代理与静态资源}
 Nginx负责 TLS 终止、静态文件缓存和 API 反向代理，不承载权限判断。对象级授权仍由 Spring Security 6 执行；代理转发请求号、用户代理和真实 IP，把浏览器、API 与数据库审计串成证据链。上传报告或模型时设置大小和超时上限，避免大请求阻塞观测接口。
@@ -3552,6 +3559,7 @@ http {
   }
 }
 \end{lstlisting}
+
 代码清单\ref{lst:ch08-nginx}把访问路径按静态资源、API、探针分开，浏览器只需记住一个域名。\texttt{try\_files}不把错误静态路径转给后端；生产环境增加 TLS、安全响应头和连接排空，保证滚动发布不截断工单提交。
 \subsubsection{健康检查、告警与容量边界}
 健康检查分存活、就绪和业务烟测三层。存活探针只回答进程是否响应，失败时允许重启；就绪探针还检查数据库连接、迁移版本和 Kafka 生产者，失败时摘除流量但不立即重启；业务烟测用只读测点请求验证认证、查询和质量码字段，在发布后及每日交接时执行。三层探针不能共用一个返回 200 的接口，否则数据库故障会被误判为应用正常。
@@ -3577,6 +3585,7 @@ groups:
         for: 5m
         labels: {severity: warning, owner: duty}
 \end{lstlisting}
+
 代码清单\ref{lst:ch08-alert-rules}把告警规则按基础设施、数据链路和业务闭环分开，每条告警都有责任角色与处置手册。阈值要结合补传最大重投周期、TimescaleDB压缩窗口和工单确认时限，再用历史分位数校准。告警和恢复都记录时间、规则版本、当前值和证据链接，同一根因的指标按服务和时间窗聚合，避免告警风暴。
 容量评估覆盖 API 并发、Kafka 分区、Redis 内存、数据库写入吞吐和时序增长。28 个测点的教学规模可以单节点运行，但不能推断生产容量；压测纳入补传、模型运行和备份并发。扩容前后使用同一场景复测，并记录消息最老年龄、WAL增长、磁盘剩余比例和查询P95，确保容量提升没有换来数据延迟或权限错误。
 \subsubsection{备份、恢复与演练记录}
@@ -3590,6 +3599,7 @@ rehearsal:
   steps: [stop-writes, restore-postgres-and-wal, restore-object-manifest, start-api-readonly, verify-trace, replay-with-event-id-deduplication, run-smoke-test]
   pass_conditions: [latest_reading_within_rpo, api_readiness_up, no_duplicate_warning, audit_trace_continuous]
 \end{lstlisting}
+
 代码清单\ref{lst:ch08-backup-rehearsal}把“有备份”改成可观察证据。开始前冻结变更窗口并记录最后一个观测、预警和工单 ID；恢复后先以只读模式校验对象关系、时序最新时间和审计链，再开放写入。Kafka只重放恢复点之后且数据库没有的事件，缓存由 API 根据数据库重建。任一条件失败，演练结果为不通过，并写明缺失备份、迁移错误或无法解释的事件。
 生产故障处置遵循观测、隔离、恢复、复盘顺序。运维员先确认探针和指标是否同时异常，避免把单个浏览器问题误判为全局故障；再依据 runbook 摘除异常实例或暂停消费，保护数据库和消息证据；恢复后用业务烟测验证测点到工单链路，专业分析员复核质量码和预警是否重复计算。每次演练沉淀恢复时长、数据丢失窗口、告警命中率和人工确认点，反过来校准保留策略、探针阈值和容量预算。
 上述配置与部署图、接口契约、数据库 DDL 共同构成部署交付物。学生提交时应同时提供编排文件、反代配置、变量清单、健康检查结果和一次恢复演练记录；只截图容器已启动不能证明数据可用、权限有效或故障可恢复。
@@ -3617,7 +3627,7 @@ Kafka 重放和定时补传都可能造成重复事件。服务端以 \texttt{ev
 
 恢复后的平台需要核对服务、数据、模型与在办业务。\ref{sec:ch06-twin-lineage}节的监控指标和血缘记录可用于查明恢复到哪个时刻、遗漏了哪些事件以及哪些任务需要重新处理。
 
-恢复演练按“冻结—恢复—只读核验—重放—放开写入—复盘”推进，而不是只检查备份文件是否存在。图\ref{fig:recovery-rehearsal-timeline}用时间轴标出每个阶段的责任人与放行条件，学生可据此填写一次可复核的演练记录。
+恢复演练按“冻结—恢复—只读核验—重放—放开写入—复盘”推进。图\ref{fig:recovery-rehearsal-timeline}给出恢复至开放写入的阶段顺序及主要检查项；演练记录还需补充各阶段责任人、起止时刻和放行结果。
 \begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[tl/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=2.1cm,minimum height=.75cm,align=center},node distance=6mm and 5mm]
@@ -3626,7 +3636,7 @@ Kafka 重放和定时补传都可能造成重复事件。服务端以 \texttt{ev
 \node[tl,right=of restore] (verify) {只读核验\\对象与审计};
 \node[tl,right=of verify] (replay) {重放消息\\eventId去重};
 \node[tl,right=of replay] (open) {放开写入\\业务烟测};
-\draw[->,draw=Primary,thick] (freeze)--(restore)--(verify)--(replay)--(open);
+\foreach \a/\b in {freeze/restore,restore/verify,verify/replay,replay/open}{\draw[->,draw=Primary,thick] (\a)--(\b);}
 \end{tikzpicture}
 \caption{备份恢复演练的阶段时间轴}
 \label{fig:recovery-rehearsal-timeline}

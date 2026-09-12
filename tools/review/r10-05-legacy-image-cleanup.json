@@ -1,0 +1,9 @@
+{
+  "reason": "旧生成图已无正文引用；移除避免MkDocs仍分发孤立旧资产。",
+  "files": [
+    "docs/chapters/chapter06/images/data_preprocessing_flow.svg",
+    "docs/chapters/chapter06/images/oblique_photogrammetry_system.svg",
+    "docs/chapters/images/chapter02/top_down_decomposition.svg",
+    "docs/chapters/images/chapter02/waterfall_model.svg"
+  ]
+}

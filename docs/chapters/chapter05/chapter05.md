@@ -298,7 +298,7 @@ ResponseEntity<Map<String, String>> badRequest(BadRequest e) {
 
 **S3 阶段包与契约核对脚本。**
 
-清单5.3与清单5.4合起来就是配套工程里的`backend/src/main/java/edu/example/lesson52/`，它是 S3 的起点：一个类、没有数据库、没有认证。独立包`edu.example.lesson52`与完整工程的`edu.example.qingyuan`分开扫描；若将两组控制器放入同一扫描范围，两个`/api/assets`映射会冲突并导致启动失败。表5.3的四行不必手工点，配套工程的`teaching-api/contract-check.mjs`把它们连同错误体形状写成了可执行检查：`node teaching-api/contract-check.mjs http://localhost:8080 –stage=lesson52`。同一个脚本把`–stage`换成`teaching`或`full`，就分别核对教学接口和接了数据库的完整后端。脚本分别检查各阶段已经实现的接口范围。若某项失败，应按报告核对该阶段的路径、状态码与字段；登录及完整持久化行为在 S3 终点另行联调。
+清单5.3与清单5.4对应配套目录`backend/src/main/java/edu/example/lesson52/`，它是 S3 的起点：一个类、没有数据库、没有认证。独立包`edu.example.lesson52`与完整工程的`edu.example.qingyuan`分开扫描；若将两组控制器放入同一扫描范围，两个`/api/assets`映射会冲突并导致启动失败。表5.3的四行不必手工点，配套工程的`teaching-api/contract-check.mjs`把它们连同错误体形状写成了可执行检查：`node teaching-api/contract-check.mjs http://localhost:8080 –stage=lesson52`。同一个脚本把`–stage`换成`teaching`或`full`，就分别核对教学接口和接了数据库的完整后端。脚本分别检查各阶段已经实现的接口范围。若某项失败，应按报告核对该阶段的路径、状态码与字段；登录及完整持久化行为在 S3 终点另行联调。
 
 **自测**
 
@@ -945,7 +945,7 @@ class ReadingCommandService {
 
 <figure markdown>
 ![图5.4](images/chapter05_fig_5_4.svg)
-<figcaption>图 5.4  事务代理、自调用与提交后事件的边界</figcaption>
+<figcaption>图 5.4  事务代理、独立审计与提交后事件</figcaption>
 </figure>
 
 如果控制器在同一个 Bean 中用`this.save()`调用另一个带事务注解的方法，调用不会穿过代理，传播属性、只读标志和回滚规则都不会被重新评估。解决办法是把用例拆到另一个 Spring Bean，通过构造器注入调用；或者在确实需要动态边界时使用`TransactionTemplate`。把代理对象注入自己、依靠反射或强制打开全局事务都会增加理解成本，教材示例优先采用清晰的 Bean 边界。

@@ -1,0 +1,11 @@
+{
+  "tool": "OpenAI built-in image_gen",
+  "input": "output/images/generated/acquisition-cabinet.png at c99f4b8",
+  "output": "output/images/generated/acquisition-cabinet.png",
+  "original_output": "exec-80fe9d2b-6fc2-4da8-98ce-f48f1215a677.png",
+  "date": "2026-09-12",
+  "prompt_summary": "保留柜体、门、接地线、设备布局、蓄电池和背景，只修复蓝色网络线及其接口。蓝线两端必须为带护套的矩形RJ45插头，连接采集器右侧RJ45网口与工业路由器前下方RJ45网口；移除原来误接蓝线的金色SMA圆形接头，路由器天线继续接独立SMA接口。保持写实材质、3:2画幅，不添加文字或水印。",
+  "finding": "上一图把蓝色网络线接到采集器金色圆形射频接头，通信接口画法相互矛盾。",
+  "visual_review": "实际查看修改前后图：蓝线两端呈RJ45插头，右端插入路由器下方矩形网口；上方天线仍为独立射频连接；未出现导线穿板。",
+  "scope": "设备识读教学渲染，不作为接线设计或产品规格依据。"
+}
