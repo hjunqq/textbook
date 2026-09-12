@@ -1,18 +1,18 @@
-\chapter{附录B 开发环境与语言衔接预备}
+\chapter{开发环境与语言衔接预备}
 \label{app:prep}
 
-本附录面向已经学过一门程序设计语言（Python、Java、C 或 C\#）、但没有做过 Web 工程的读者，只补第4、5章正文默认已经会的三件事：在终端里运行和观察一个服务（P0）、从“会写 Java 类”走到“能读懂 Spring Boot 工程”（P2）、从“知道表”走到“能写出第5章需要的 SQL 和事务”（P3）。每个单元末尾的自测题做得出来，就可以直接进入对应章节；做不出来，按标注回到该单元的小节。本附录不讲语言语法。
+预备单元承接Python、Java、C或C\#等程序设计基础，介绍第4、5章实验需要的三组知识：使用终端启动服务并观察请求（P0），阅读Spring Boot工程与依赖关系（P2），编写基础SQL并处理事务（P3）。学习时可先完成单元末尾的自测：能够解释结果并复现操作，即可进入对应章节；遇到目录、注解或事务问题时，再查阅相关小节。
 
 \section{P0 终端、端口与浏览器开发者工具}
 \label{app:prep-p0}
 
-\paragraph{要解决的问题}第4章第一次让你“启动教学接口，再启动开发服务器，然后在网络面板看请求”。这句话里有四个前提：知道当前目录在哪、知道两个程序为什么能同时运行、知道 8080 和 5173 是什么、知道去哪里看一次请求的状态码。
+\paragraph{要解决的问题}第4章实验需要启动教学接口和开发服务器，并在网络面板中检查请求。操作时应确认当前目录、两个服务进程及其端口，随后在浏览器中定位请求并读取状态码。
 
-\paragraph{目录与路径}终端里的每条命令都在“当前目录”执行。\texttt{pwd}（Windows PowerShell 同样可用）打印当前目录，\texttt{cd companion/water-platform-demo}进入配套工程，\texttt{ls}（PowerShell 亦可用\texttt{dir}）列出内容。教材中所有相对路径都以配套工程根目录为起点：\texttt{node teaching-api/server.mjs}必须在\texttt{water-platform-demo}目录下执行，否则报“找不到模块”。路径写错是第一次实验最常见的失败原因，报错信息里一定会打印它尝试打开的完整路径，先核对这一行。
+\paragraph{目录与路径}终端里的每条命令都在“当前目录”执行。\texttt{pwd}（Windows PowerShell 同样可用）打印当前目录，\texttt{cd companion/water-platform-demo}进入配套工程，\texttt{ls}（PowerShell 亦可用\texttt{dir}）列出内容。教材中所有相对路径都以配套工程根目录为起点：\texttt{node teaching-api/server.mjs}必须在\texttt{water-platform-demo}目录下执行，否则报“找不到模块”。发生“找不到模块”错误时，先核对报错中的目标路径，再检查终端当前目录与文件实际位置。
 
-\paragraph{进程与端口}一个正在运行的程序是一个进程；网络服务进程会“监听”一个端口号，浏览器通过\texttt{主机:端口}找到它。本书约定：教学接口与真实后端都监听 8080，Vite 开发服务器监听 5173。两个进程同时运行需要两个终端窗口（或一个窗口里先后启动并保持前台不退出）。端口被占用时会报\texttt{EADDRINUSE}，说明上一次的进程还没退出：在那个终端按 Ctrl+C 结束它，或换端口\texttt{node teaching-api/server.mjs 8081}并同步修改 Vite 代理目标。
+\paragraph{进程与端口}一个正在运行的程序是一个进程；网络服务进程会“监听”一个端口号，浏览器通过\texttt{主机:端口}找到它。本书约定：教学接口与真实后端都监听 8080，Vite 开发服务器监听 5173。实验时打开两个终端窗口或标签页，一个运行教学接口（或真实后端），另一个运行Vite，保持两个服务进程运行。出现\texttt{EADDRINUSE}表示端口已被占用：若占用者是本次实验遗留的服务，可在对应终端按Ctrl+C结束；也可改用\texttt{node teaching-api/server.mjs 8081}并同步修改Vite代理目标。
 
-\paragraph{读懂一条错误信息}错误信息从下往上读。清单\ref{lst:prep-p0-error}是把路径写错时 Node 打出的信息，最后几行是调用栈，可以忽略；关键是第一行的错误码\texttt{ERR\_MODULE\_NOT\_FOUND}和它后面的完整路径。浏览器控制台的错误同理：先看红色第一行的类型与文字，再看它指向的文件与行号。
+\paragraph{读懂一条错误信息}清单\ref{lst:prep-p0-error}展示路径错误时Node输出的信息。先定位错误码\texttt{ERR\_MODULE\_NOT\_FOUND}，再核对后面的完整路径；仍无法定位时，再查看调用栈中的文件与行号。浏览器控制台的错误同理：先看红色第一行的类型与文字，再看它指向的文件与行号。
 
 \begin{lstlisting}[label={lst:prep-p0-error},language=bash,caption={一条典型的错误信息：先看错误码与路径}]
 $ node teaching-api/server.mjs
@@ -73,7 +73,7 @@ Error [ERR_MODULE_NOT_FOUND]: Cannot find module
 </dependencies>
 \end{lstlisting}
 
-\paragraph{注解}以\texttt{@}开头的注解是附在类、方法或参数上的标记，本身不执行任何逻辑；框架启动时扫描这些标记来决定“这个类要作为 HTTP 入口”“这个方法响应 GET 请求”。清单\ref{lst:prep-p2-controller}是第5章第一个接口的最小形态，注解的含义写在注释里。\texttt{record}是 Java 17 的不可变数据类，一行声明就得到构造器、访问方法和\texttt{equals}，第5章用它表示接口的请求与响应。
+\paragraph{注解}以\texttt{@}开头的注解是附在类、方法或参数上的标记，本身不执行任何逻辑；框架启动时扫描这些标记来决定“这个类要作为 HTTP 入口”“这个方法响应 GET 请求”。清单\ref{lst:prep-p2-controller}展示一个返回资产列表的接口，注释说明各注解的作用。\texttt{record}是 Java 17 的不可变数据类，一行声明就得到构造器、访问方法和\texttt{equals}，第5章用它表示接口的请求与响应。
 
 \begin{lstlisting}[label={lst:prep-p2-controller},language=Java,caption={最小的 HTTP 接口：注解告诉框架“这是入口”}]
 package edu.example.qingyuan;
@@ -130,7 +130,7 @@ reading & asset\_id、occurred\_at、version、event\_id、value、unit、qualit
 \end{tabular}
 \end{table}
 
-\paragraph{四条基本语句}清单\ref{lst:prep-p3-sql}给出第5章需要的全部 SQL 形态：建表、插入、按条件查询、更新。\texttt{WHERE}里的条件决定影响哪些行；忘写\texttt{WHERE}的\texttt{UPDATE}会改掉整张表。\texttt{\$1}是参数占位符：程序里绝不把用户输入拼进 SQL 字符串，而是把值作为参数传给驱动，这是 5.4 节“参数化访问”的含义，也是防止 SQL 注入的唯一正确做法。
+\paragraph{四条基本语句}清单\ref{lst:prep-p3-sql}列出四类基础SQL操作：建表、插入、按条件查询、更新。\texttt{WHERE}里的条件决定影响哪些行；忘写\texttt{WHERE}的\texttt{UPDATE}会改掉整张表。\texttt{\$1}是参数占位符：程序把值作为参数传给驱动，使输入值与SQL语句结构分离。5.4节将据此实现参数化访问，防止输入值被解释为SQL指令。
 
 \begin{lstlisting}[label={lst:prep-p3-sql},language=SQL,caption={第5章需要的 SQL 形态：建表、插入、查询、更新}]
 CREATE TABLE asset (

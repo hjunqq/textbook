@@ -199,6 +199,8 @@
   sensitive=false
 }
 \lstalias{sql}{SQL}
+\renewcommand{\lstlistingname}{清单}
+\renewcommand{\lstlistlistingname}{代码清单}
 
 \definecolor{CodeBorder}{HTML}{90CAF9}
 
@@ -304,11 +306,10 @@
 \usepackage[labelfont=bf,font=small]{caption}
 \setcounter{tocdepth}{2}
 
-% 中文数字映射
-\def\chinesechapter#1{%
-  \ifcase#1\or 一\or 二\or 三\or 四\or 五\or 六\or 七\or 八\or 九\or 十\or
-  十一\or 十二\or 十三\or 十四\or 十五\or 十六\or 十七\or 十八\or 十九\or 二十\fi
-}
+% 章编号在正文、页眉和引用中采用同一体例。
+\newcommand{\BookChapterLabel}{第\thechapter 章}
+\apptocmd{\appendix}{\renewcommand{\BookChapterLabel}{附录\thechapter}}{}{}
+\renewcommand{\chaptermark}[1]{\markboth{\BookChapterLabel\quad #1}{}}
 
 % ── 章标题：大号蓝色编号 + 装饰线 ──
 \titleformat{\chapter}[display]
@@ -316,7 +317,7 @@
   {%
     \begin{flushright}
     \textcolor{PrimaryLight}{\rule{0.3\textwidth}{1.2pt}}\\[0.3ex]
-    {\fontsize{14pt}{16pt}\selectfont\textcolor{Primary}{第\chinesechapter{\value{chapter}}章}}
+    {\fontsize{14pt}{16pt}\selectfont\textcolor{Primary}{\BookChapterLabel}}
     \end{flushright}
   }
   {0pt}
@@ -433,21 +434,64 @@
 
 \begin{titlepage}
 \thispagestyle{empty}
-\centering
-\vspace*{2.8cm}
-{\sffamily\bfseries\fontsize{30}{38}\selectfont\color{PrimaryDark}智慧水利平台架构与开发\par}
-\vspace{1.2cm}
-{\Large 水利工程与软件工程融合教材\par}
+\setlength{\parindent}{0pt}
+\vspace*{1.0cm}
+{\sffamily\small\color{Primary}水利工程专业教材\par}
+\vspace{1.5cm}
+{\sffamily\bfseries\fontsize{36}{46}\selectfont\color{PrimaryDark}智慧水利平台\par}
+\vspace{0.15cm}
+{\sffamily\bfseries\fontsize{36}{46}\selectfont\color{PrimaryDark}架构与开发\par}
+\vspace{0.7cm}
+{\sffamily\large\color{TextGray}从业务需求到可运行的平台\par}
+\vspace{1.5cm}
+\noindent
+\begin{tikzpicture}[x=1cm,y=1cm,line cap=round,line join=round]
+  \path[use as bounding box] (0,0) rectangle (15.2,6.2);
+  \fill[PrimaryLight!55] (0,0.3) rectangle (15.2,5.9);
+  % 地形与库面：抽象等高线组成的工程场景。
+  \foreach \offset in {0,0.3,0.6,0.9} {
+    \draw[Primary!18,line width=.7pt]
+      (0,4.2+\offset) .. controls (2,5.4+\offset) and (3.5,3.7+\offset) ..
+      (5.2,4.4+\offset) .. controls (6.8,5.1+\offset) and (8.7,4.5+\offset) .. (9.5,5.3+\offset);
+  }
+  \fill[Primary!14] (0.6,2.8) .. controls (1.8,4.3) and (3.8,3.5) .. (5.4,4.2)
+    -- (8.5,3.3) -- (6.7,2.3) -- cycle;
+  \foreach \yy in {3.05,3.3,3.55} {
+    \draw[Primary!40] (1.4,\yy) .. controls (2.3,\yy+.3) and (3.1,\yy-.1) .. (4.4,\yy+.2);
+  }
+  % 混凝土坝的三个面，白色孔口与水流。
+  \filldraw[fill=Primary!27,draw=Primary!55] (5.4,4.2)--(8.5,3.3)--(8.2,1.45)--(4.8,2.35)--cycle;
+  \filldraw[fill=white,draw=Primary!55] (5.4,4.2)--(5.75,4.45)--(8.85,3.55)--(8.5,3.3)--cycle;
+  \filldraw[fill=Primary!45,draw=Primary!55] (8.5,3.3)--(8.85,3.55)--(8.8,1.7)--(8.2,1.45)--cycle;
+  \foreach \xx/\yy in {5.8/3.58,6.6/3.35,7.4/3.12} {
+    \fill[white] (\xx,\yy)--(\xx+.4,\yy-.12)--(\xx+.25,\yy-.93)--(\xx-.17,\yy-.82)--cycle;
+    \draw[Primary!55,line width=1.7pt] (\xx+.02,\yy-.82)
+      .. controls (\xx-.12,\yy-1.25) and (\xx+.35,\yy-1.5) .. (\xx+.8,\yy-1.75);
+  }
+  % 工程测点到数据图形。
+  \draw[Primary!65,dashed,line width=1pt] (6.8,4.05)--(10.1,4.05)--(10.1,2.1)--(11,2.1);
+  \fill[Accent] (6.8,4.05) circle (3pt);
+  \draw[white,line width=1pt] (6.8,4.05) circle (4.5pt);
+  \draw[Primary!60,line width=.8pt] (10.9,1.45)--(10.9,4.55) (10.9,1.45)--(14.3,1.45);
+  \foreach \yy in {2.2,3,3.8} {\draw[Primary!15] (11,\yy)--(14.3,\yy);}
+  \draw[Primary,line width=1.4pt] (11.15,2.1)--(11.7,2.5)--(12.25,2.35)--(12.8,3.6)--(13.4,3.85)--(14,3.45);
+  \foreach \xx/\yy in {11.15/2.1,11.7/2.5,12.25/2.35,12.8/3.6,13.4/3.85,14/3.45}
+    {\fill[white] (\xx,\yy) circle (2.5pt); \draw[Primary] (\xx,\yy) circle (2.5pt);}
+\end{tikzpicture}
+\par
+\vspace{0.7cm}
+{\sffamily\color{PrimaryDark}需求分析\quad /\quad 前后端开发\quad /\quad 三维场景\quad /\quad 数据展示\par}
 \vfill
-{\large 高等学校智慧水利课程教材\par}
-\vspace{1.2cm}
-\begin{minipage}{0.84\textwidth}
-\centering\small
-版权与商标声明：51WIM 及 51WORLD 为北京五一视界数字孪生科技股份有限公司的商标或注册商标，本书仅作技术说明性使用。第8.5节6幅产品界面截图经该公司书面授权刊出，仅限本书纸质版与出版社发行的电子版使用；其余图示均为按功能链路重新绘制的教学示意图。\par
-\end{minipage}
-\vspace{1.2cm}
-{\large 2026年8月\par}
+{\sffamily\color{TextGray}2026年9月\par}
 \end{titlepage}
+\thispagestyle{empty}
+\null\vfill
+\noindent\begin{minipage}{0.9\textwidth}
+{\sffamily\bfseries\color{PrimaryDark}版权与商标声明}\par\medskip
+\small
+51WIM 及 51WORLD 为北京五一视界数字孪生科技股份有限公司的商标或注册商标，本书仅作技术说明性使用。第8.5节6幅产品界面截图经该公司书面授权刊出，仅限本书纸质版与出版社发行的电子版使用；其余图示均为按功能链路重新绘制的教学示意图。
+\end{minipage}
+\vspace*{1.2cm}
 \cleardoublepage
 
 % 前言
@@ -466,6 +510,8 @@
 % ══════════════════════════════════════════
 \mainmatter
 \pagestyle{fancy}
+\renewcommand{\chaptermark}[1]{\markboth{\BookChapterLabel\quad #1}{}}
+\renewcommand{\sectionmark}[1]{\markright{\thesection\quad #1}}
 \input{chapters/chapter01.tex}
 \input{chapters/chapter02.tex}
 \input{chapters/chapter03.tex}
@@ -476,6 +522,7 @@
 \input{chapters/chapter08.tex}
 \input{chapters/chapter09.tex}
 
+\appendix
 \input{appendix/answers.tex}
 \input{appendix/prep.tex}
 \input{appendix/extended.tex}

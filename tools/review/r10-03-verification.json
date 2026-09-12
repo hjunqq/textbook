@@ -1,0 +1,279 @@
+{
+  "package": "R10-03",
+  "base_commit": "c0409b923342a283565acab5235fcc319e441d95",
+  "date": "2026-09-12",
+  "chapters": [
+    {
+      "file": "output/chapters/preface.tex",
+      "before": 4812,
+      "after": 4641,
+      "delta": -171,
+      "counted_in_gate": true
+    },
+    {
+      "file": "output/chapters/chapter01.tex",
+      "before": 14080,
+      "after": 13893,
+      "delta": -187,
+      "counted_in_gate": true
+    },
+    {
+      "file": "output/chapters/chapter02.tex",
+      "before": 23352,
+      "after": 23167,
+      "delta": -185,
+      "counted_in_gate": true
+    },
+    {
+      "file": "output/chapters/chapter03.tex",
+      "before": 35771,
+      "after": 35476,
+      "delta": -295,
+      "counted_in_gate": true
+    },
+    {
+      "file": "output/chapters/chapter04.tex",
+      "before": 29975,
+      "after": 29944,
+      "delta": -31,
+      "counted_in_gate": true
+    },
+    {
+      "file": "output/chapters/chapter05.tex",
+      "before": 29412,
+      "after": 29437,
+      "delta": 25,
+      "counted_in_gate": true
+    },
+    {
+      "file": "output/chapters/chapter06.tex",
+      "before": 30472,
+      "after": 30497,
+      "delta": 25,
+      "counted_in_gate": true
+    },
+    {
+      "file": "output/chapters/chapter07.tex",
+      "before": 22521,
+      "after": 22463,
+      "delta": -58,
+      "counted_in_gate": true
+    },
+    {
+      "file": "output/chapters/chapter08.tex",
+      "before": 41806,
+      "after": 41342,
+      "delta": -464,
+      "counted_in_gate": true
+    },
+    {
+      "file": "output/chapters/chapter09.tex",
+      "before": 6219,
+      "after": 6022,
+      "delta": -197,
+      "counted_in_gate": true
+    },
+    {
+      "file": "output/appendix/answers.tex",
+      "before": 14513,
+      "after": 14570,
+      "delta": 57,
+      "counted_in_gate": false
+    },
+    {
+      "file": "output/appendix/prep.tex",
+      "before": 2007,
+      "after": 1958,
+      "delta": -49,
+      "counted_in_gate": false
+    },
+    {
+      "file": "output/appendix/extended.tex",
+      "before": 2811,
+      "after": 2793,
+      "delta": -18,
+      "counted_in_gate": false
+    }
+  ],
+  "total_before": 238420,
+  "total_after": 236882,
+  "structure": [
+    {
+      "file": "output/chapters/chapter01.tex",
+      "sections": 3,
+      "subsections": 16,
+      "layers": 3,
+      "prereqs": 3
+    },
+    {
+      "file": "output/chapters/chapter02.tex",
+      "sections": 6,
+      "subsections": 33,
+      "layers": 6,
+      "prereqs": 6
+    },
+    {
+      "file": "output/chapters/chapter03.tex",
+      "sections": 6,
+      "subsections": 23,
+      "layers": 6,
+      "prereqs": 6
+    },
+    {
+      "file": "output/chapters/chapter04.tex",
+      "sections": 8,
+      "subsections": 38,
+      "layers": 8,
+      "prereqs": 8
+    },
+    {
+      "file": "output/chapters/chapter05.tex",
+      "sections": 9,
+      "subsections": 43,
+      "layers": 9,
+      "prereqs": 10
+    },
+    {
+      "file": "output/chapters/chapter06.tex",
+      "sections": 4,
+      "subsections": 30,
+      "layers": 4,
+      "prereqs": 4
+    },
+    {
+      "file": "output/chapters/chapter07.tex",
+      "sections": 4,
+      "subsections": 20,
+      "layers": 4,
+      "prereqs": 4
+    },
+    {
+      "file": "output/chapters/chapter08.tex",
+      "sections": 6,
+      "subsections": 35,
+      "layers": 6,
+      "prereqs": 6
+    },
+    {
+      "file": "output/chapters/chapter09.tex",
+      "sections": 3,
+      "subsections": 7,
+      "layers": 3,
+      "prereqs": 3
+    }
+  ],
+  "listing_preservation": [
+    {
+      "file": "output/chapters/preface.tex",
+      "listings": 0,
+      "unchanged": true
+    },
+    {
+      "file": "output/chapters/chapter01.tex",
+      "listings": 0,
+      "unchanged": true
+    },
+    {
+      "file": "output/chapters/chapter02.tex",
+      "listings": 0,
+      "unchanged": true
+    },
+    {
+      "file": "output/chapters/chapter03.tex",
+      "listings": 6,
+      "unchanged": true
+    },
+    {
+      "file": "output/chapters/chapter04.tex",
+      "listings": 57,
+      "unchanged": true
+    },
+    {
+      "file": "output/chapters/chapter05.tex",
+      "listings": 46,
+      "unchanged": true
+    },
+    {
+      "file": "output/chapters/chapter06.tex",
+      "listings": 24,
+      "unchanged": true
+    },
+    {
+      "file": "output/chapters/chapter07.tex",
+      "listings": 26,
+      "unchanged": true
+    },
+    {
+      "file": "output/chapters/chapter08.tex",
+      "listings": 47,
+      "unchanged": true
+    },
+    {
+      "file": "output/chapters/chapter09.tex",
+      "listings": 0,
+      "unchanged": true
+    },
+    {
+      "file": "output/appendix/answers.tex",
+      "listings": 0,
+      "unchanged": true
+    },
+    {
+      "file": "output/appendix/prep.tex",
+      "listings": 5,
+      "unchanged": true
+    },
+    {
+      "file": "output/appendix/extended.tex",
+      "listings": 5,
+      "unchanged": true
+    }
+  ],
+  "listing_pairs": 23,
+  "listing_allowed_lines": 11,
+  "new_textbook_figures": 1,
+  "redrawn_textbook_figures": 2,
+  "generated_supplemental_illustrations": 1,
+  "main_tex_sha256": "7312178e5741cbd3482fce8935bbc421d6b1b3b7708ffd0df01e77f6f7f90d27",
+  "full_build": "passed",
+  "pdf_pages": 479,
+  "final_compile_log": {
+    "errors": 0,
+    "overfull": 0,
+    "missing_characters": 0,
+    "undefined": 0
+  },
+  "pdf_sha256": "ddd1e82e3f613faea6ba7c42dd00bcc7c933c782a1991e095f7936f1eacc7b32",
+  "soft_gate_metrics": "all zero",
+  "headroom": 3118,
+  "print_sample_pages": [
+    1,
+    2,
+    3,
+    20,
+    154,
+    261,
+    312,
+    443,
+    461,
+    467
+  ],
+  "prose_audit_nine_chapters": 319,
+  "appendix_prose_audit": 22,
+  "source_preservation": "All 216 printed listings byte-identical to HEAD; all 49 layer markers identical",
+  "gate_files_modified": false,
+  "case_parameters_modified": false,
+  "study_plate_pages": 1,
+  "study_plate_visual_review": "passed",
+  "boundaries": [
+    "本包验证排版、结构、图像与代码内容一致性，未重新执行上一包的前后端应用测试",
+    "13幅SVG重新生成：2幅重绘图与第7章全部11幅图，避免图号顺延后残留旧图",
+    "生成场景插画属于配套概念导学素材，正文图保持TikZ；未使用51WIM授权截图作在线素材"
+  ],
+  "site_strict": "passed",
+  "site_config": "mkdocs-ci.yml",
+  "site_build_seconds": 3.0,
+  "inline_code_checks": 11,
+  "missing_local_markdown_images": [],
+  "legacy_optional_site_pdf": "mkdocs.yml with-pdf plugin failed with 11 errors; not used for delivery; existing CI config and XeLaTeX PDF both pass"
+}

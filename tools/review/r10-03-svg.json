@@ -1,0 +1,19 @@
+{
+  "package": "R10-03",
+  "rebuilt": [
+    "chapter04_fig_4_7",
+    "chapter06_fig_6_1",
+    "chapter07_fig_7_1",
+    "chapter07_fig_7_10",
+    "chapter07_fig_7_11",
+    "chapter07_fig_7_2",
+    "chapter07_fig_7_3",
+    "chapter07_fig_7_4",
+    "chapter07_fig_7_5",
+    "chapter07_fig_7_6",
+    "chapter07_fig_7_7",
+    "chapter07_fig_7_8",
+    "chapter07_fig_7_9"
+  ],
+  "reason": "4.7 and 6.1 redrawn; all ch7 diagrams regenerated after new fig7.3 shifted following numbering"
+}

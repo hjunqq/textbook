@@ -253,6 +253,22 @@ class Conv:
         t = re.sub(r"\\cite\{([^}]+)\}", lambda m: "QQCITE:%s:QQ" % m.group(1), t)
         return t
 
+    def protect_inline_quotes(self, t):
+        # Pandoc 3.1 会把 texttt 内的单引号排成弯引号；仅保护代码内的字面引号。
+        out, pos = [], 0
+        for mo in re.finditer(r"\\texttt\s*\{", t):
+            if mo.start() < pos:
+                continue  # 外层 texttt 已覆盖的嵌套内容。
+            body, end = balanced(t, mo.end() - 1)
+            out.append(t[pos:mo.end()])
+            for quote in ("'", '"'):
+                if quote in body:
+                    body = body.replace(quote, self.tok(quote).strip("\n"))
+            out.append(body + "}")
+            pos = end
+        out.append(t[pos:])
+        return "".join(out)
+
     def run(self, texpath):
         t = texpath.read_text(encoding="utf-8")
         t = expand_case_params(t)        # 案例参数宏先展开为数值
@@ -263,6 +279,7 @@ class Conv:
         t = self.mark_boxes(t)
         t = self.replace_refs(t)
         t = misc_tex_fix(t)
+        t = self.protect_inline_quotes(t)
         pre = ROOT / ("pre_%s.tex" % self.name)
         pre.write_text(t, encoding="utf-8")
         md = subprocess.run(

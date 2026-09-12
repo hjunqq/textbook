@@ -1,0 +1,24 @@
+{
+  "package": "R10-03",
+  "date": "2026-09-12",
+  "tool": "image_gen.imagegen (built-in)",
+  "purpose": "Supplementary Chinese textbook reservoir monitoring study illustration",
+  "source_original": "exec-e644ef39-a699-40fb-949d-3c7d820388f3.png",
+  "source_chosen": "exec-151d2718-2aa2-4b1c-ab0f-e0a6483c5284.png",
+  "dimensions": [
+    1536,
+    1024
+  ],
+  "prompt": "reservoir-monitoring-overview.prompt.txt",
+  "edit_prompt": "Preserve the complete illustration; remove only the dashed/dotted U-shaped bridge in the workstation curve, leaving a true empty gap for missing readings.",
+  "review": [
+    "Chinese labels legible",
+    "Three spillway gates shown",
+    "Sensor positions are conceptual and explicitly labelled as such",
+    "Water flow distinguished from data route",
+    "Chosen image has true gap in curve",
+    "No numerical project parameters introduced",
+    "No third-party 51WIM screenshots included"
+  ],
+  "sha256": "61b87061f2386e7764361502dd5a78c42551c081b58ced38815d32a074b40c3c"
+}

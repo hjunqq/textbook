@@ -1,0 +1,38 @@
+[
+  {
+    "file": "output/chapters/preface.tex",
+    "before": "每次实验先确认服务启动、浏览器请求和数据库查询均能返回预期结果。",
+    "after": "每次实验按当前阶段检查实际使用的页面、接口或数据库，记录其启动方式与预期输出。",
+    "reason": "避免把数据库前置为S1/S2实验依赖"
+  },
+  {
+    "file": "output/chapters/chapter04.tex",
+    "before": "先执行契约检查，再停掉教学接口并启动完整 Spring Boot 后端，核对页面的四种状态。",
+    "after": "先停掉教学接口并启动完整 Spring Boot 后端，再执行契约检查，核对页面的四种状态。",
+    "reason": "契约检查依赖后端先启动"
+  },
+  {
+    "file": "output/chapters/chapter06.tex",
+    "before": "相机方向、裁剪范围或画布尺寸设置错误时，程序可能正常执行却没有可见物体。因此，即使控制台没有异常，也要核对这三项设置。",
+    "after": "相机设置、材质与光照、画布与渲染循环分别对应三类排查。即使控制台没有异常，也要检查物体是否处于视锥内、材质是否有可用光照，以及画布是否实际绘制。",
+    "reason": "排查分类与紧邻表格三行对应"
+  },
+  {
+    "file": "output/chapters/chapter06.tex",
+    "before": "（3）为什么使用\\texttt{setAnimationLoop}？",
+    "after": "（3）\\texttt{setAnimationLoop}相比手写\\texttt{requestAnimationFrame}循环有什么作用？",
+    "reason": "补全答案中两种方式的指代"
+  },
+  {
+    "file": "output/appendix/answers.tex",
+    "before": "闸门可映射为具备启闭语义的门类/可动设备实体并以类型对象细化",
+    "after": "泄洪闸门按项目分类、\\texttt{IfcPropertySet}属性集和明确映射规则表达闸门及启闭设备，保留原始设计模型；\\texttt{IfcDoor}与船闸语境的\\texttt{GATEHEAD}均不适用",
+    "reason": "与6.3表tab:ifc-waterworks-mapping和紧邻说明一致"
+  },
+  {
+    "file": "output/chapters/chapter08.tex",
+    "before": "，而不是“打造行业领先数字大脑”。",
+    "after": "，并为每项结果规定输入条件、交付形式和验收方法。",
+    "reason": "用验收要求替代对宣传口号的否定式批评"
+  }
+]

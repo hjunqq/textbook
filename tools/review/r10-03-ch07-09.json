@@ -1,0 +1,694 @@
+{
+  "package": "R10-03",
+  "scope": "第7—9章教材语言审校",
+  "totals": [
+    {
+      "chapter": 7,
+      "before": 22521,
+      "after": 22371,
+      "delta": -150,
+      "paragraphs": 17
+    },
+    {
+      "chapter": 8,
+      "before": 41806,
+      "after": 41331,
+      "delta": -475,
+      "paragraphs": 56
+    },
+    {
+      "chapter": 9,
+      "before": 6219,
+      "after": 6022,
+      "delta": -197,
+      "paragraphs": 22
+    }
+  ],
+  "changes": [
+    {
+      "file": "output/chapters/chapter07.tex",
+      "line_before": 17,
+      "before": "第6章解决三维场景如何构建，本章进一步回答“监测数据怎样在场景中被准确、及时且可解释地展示”。数据接入、持久化和跨服务消息属于第5章的后端职责；本章只保留可视化所需的数据准备，重点讨论图表、空间定位、状态表达和人机交互。",
+      "after": "三维场景接入观测数据后，测点的位置、曲线和状态需要随时间同步更新。后端按第5章的方法完成数据接入、持久化和消息传递；前端再校验时间与质量码，选择图表和视觉符号，并把查询、定位与处置操作组织在同一界面中。",
+      "reason": "以展示任务引入内容，删除自述取舍"
+    },
+    {
+      "file": "output/chapters/chapter07.tex",
+      "line_before": 19,
+      "before": "本章使用“案例水库”作为教学虚构案例。坝高设为52\\,m，正常蓄水位168.0\\,m；平台接入12个渗压测点、8个位移测点、3个库水位测点和5个雨量测点，共28个观测点，另展示6个采集网关的在线状态。所有数值仅用于教学练习，不代表真实工程。",
+      "after": "案例水库为虚构工程，参数见表\\ref{tab:case-parameters}：坝高52\\,m，正常蓄水位168.0\\,m；平台接入12个渗压测点、8个位移测点、3个库水位测点和5个雨量测点，共28个观测点，另展示6个采集网关的在线状态。",
+      "reason": "一次交代虚构设定与参数出处，避免重复免责声明"
+    },
+    {
+      "file": "output/chapters/chapter07.tex",
+      "line_before": 33,
+      "before": "可视化输入不是一串没有语义的数值。每条记录至少要包含工程编码、测点编码、观测时间、监测项、数值、单位、质量码和来源。若数据经过插值、人工修订或模型估计，还应保留处理标记，避免界面把推算值当作原始观测。表\\ref{tab:ch7-data-types}按监测项把案例水库的四类观测与网关状态列开，并给出各自适合的展示方式。同样是随时间变化的量，渗压和水位适合连续过程线，雨量适合分时段柱状，设备状态则只能用离散符号——决定展示方式的是量本身的性质，不是页面版式是否好看。",
+      "after": "可视化输入不是一串没有语义的数值。每条记录至少要包含工程编码、测点编码、观测时间、监测项、数值、单位、质量码和来源。若数据经过插值、人工修订或模型估计，还应保留处理标记，避免界面把推算值当作原始观测。表\\ref{tab:ch7-data-types}按监测项把案例水库的四类观测与网关状态列开，并给出各自适合的展示方式。同样是随时间变化的量，渗压和水位适合连续过程线，雨量适合分时段柱状，设备状态则只能用离散符号——展示方式应与观测量的连续性、累计方式和取值类型相适应。",
+      "reason": "将反问式比较改成选图依据"
+    },
+    {
+      "file": "output/chapters/chapter07.tex",
+      "line_before": 52,
+      "before": "质量码应先于颜色映射。质量码本身只有 valid、suspect、missing 三个取值：有效数据可进入曲线和状态计算，可疑数据保留但降低视觉权重并提示复核，缺测不连接为连续曲线。人工修订与设备故障不是第四、第五个质量码——修订体现在与质量码并列的处理标记上，界面显示修订标识；设备故障属于设备状态维度，故障期间的数据不得参与风险判定。颜色只表达业务状态，不能掩盖数据质量。图\\ref{fig:data-visualization-process}把这条顺序画成处理链：接入、质检、时间对齐、降采样、视觉映射、渲染，质量判定位于颜色映射之前。链路顺序一旦颠倒，界面就会先把可疑值涂成正常色，再指望人去发现它其实不可信。",
+      "after": "质量码应先于颜色映射。质量码本身只有 valid、suspect、missing 三个取值：有效数据可进入曲线和状态计算，可疑数据保留但降低视觉权重并提示复核，缺测不连接为连续曲线。人工修订另设处理标记，界面显示修订标识；设备故障记录在设备状态中，故障期间的数据不得参与风险判定。颜色只表达业务状态，不能掩盖数据质量。图\\ref{fig:data-visualization-process}把这条顺序画成处理链：接入、质检、时间对齐、降采样、视觉映射、渲染，质量判定位于颜色映射之前。未经质检便映射颜色，可能把可疑值显示为正常状态。",
+      "reason": "正面说明字段语义，保留风险判定限制；删除口语化讥讽，保留失败后果"
+    },
+    {
+      "file": "output/chapters/chapter07.tex",
+      "line_before": 89,
+      "before": "清单\\ref{lst:ch07-lttb}把分桶、下一桶均值和最大面积选择写成可运行的数组函数。图\\ref{fig:lttb-principle}用一个桶画出$P_{\\mathrm{prev}}$、两个候选点和$\\overline{P}_{C}$，半透明三角形表示被选候选点对应的面积；桶边界只用于说明遍历范围，不代表真实时间采样间隔。",
+      "after": "清单\\ref{lst:ch07-lttb}把分桶、下一桶均值和最大面积选择写成可运行的数组函数。图\\ref{fig:lttb-principle}用一个桶画出$P_{\\mathrm{prev}}$、两个候选点和$\\overline{P}_{C}$，半透明三角形表示被选候选点对应的面积；桶边界表示算法的遍历范围，桶内相邻点的实际时间间隔可不同。",
+      "reason": "直接解释图中边界含义"
+    },
+    {
+      "file": "output/chapters/chapter07.tex",
+      "line_before": 256,
+      "before": "清单\\ref{lst:ch07-event-time-window}对应配套\\texttt{src/lesson71/event-window.js}，从前端目录执行\\texttt{node src/lesson71/event-window.js}输出1：第二条事件早于水印，进入修订队列。把接收日期改成当前日期，历史事件仍按原时间回放；使用接收墙钟作为水印则会把整批历史数据误判为迟到。该演示只有一个事件流，修订队列供课堂检查；工程实现另需持久化、去重、异常未来时间检查与多流空闲处理。清单中的25\\,h窗口来自“300个水位点×5\\,min”的教学约定。它是计数窗口与时间窗口恰好接近的示例，不代表所有测项都可照抄：渗压每1\\,h采样时，300点约等于12.5天；若需求是“最近24小时”，就必须按时间戳裁剪，而不能只写\\texttt{slice(-300)}。接口应同时声明\\texttt{windowType=count|duration}、窗口长度、时区和迟到容忍度，前端据此在标题中显示“300点（约25小时）”或“24小时”。",
+      "after": "清单\\ref{lst:ch07-event-time-window}对应配套\\texttt{src/lesson71/event-window.js}，从前端目录执行\\texttt{node src/lesson71/event-window.js}输出1：第二条事件早于水印，进入修订队列。把接收日期改成当前日期，历史事件仍按原时间回放；使用接收墙钟作为水印则会把整批历史数据误判为迟到。该演示只有一个事件流，修订队列供课堂检查；工程实现另需持久化、去重、异常未来时间检查与多流空闲处理。清单中的25\\,h窗口来自“300个水位点×5\\,min”的教学约定。计数窗口对应的时长随采样周期变化：渗压每1\\,h采样时，300点约等于12.5天；若需求是“最近24小时”，就必须按时间戳裁剪，而不能只写\\texttt{slice(-300)}。接口应同时声明\\texttt{windowType=count|duration}、窗口长度、时区和迟到容忍度，前端据此在标题中显示“300点（约25小时）”或“24小时”。",
+      "reason": "把劝诫式限制改成采样周期关系"
+    },
+    {
+      "file": "output/chapters/chapter07.tex",
+      "line_before": 262,
+      "before": "质量检验不是在图表画完后加一层颜色，而是决定记录能否进入后续计算的门。格式检查确认时间、数值和单位可解析；范围检查使用测项配置的工程上下限；时序检查识别时间倒退、重复事件和过长间隔；一致性检查比较同一测点相邻记录与关联测项。检查结果按缺测、无效、可疑的优先级合并：缺测表示没有可用观测，优先级最高；无效表示记录违反格式或物理约束；可疑表示记录可以展示但需要复核。一次记录同时出现单位错误和超范围时，应先标为无效并保留全部问题，而不是用最后一次检查结果覆盖前面的证据。",
+      "after": "质量检验决定记录能否进入后续计算，也决定图表如何呈现该记录。格式检查确认时间、数值和单位可解析；范围检查使用测项配置的工程上下限；时序检查识别时间倒退、重复事件和过长间隔；一致性检查比较同一测点相邻记录与关联测项。检查结果按缺测、无效、可疑的优先级合并：缺测表示没有可用观测，优先级最高；无效表示记录违反格式或物理约束；可疑表示记录可以展示但需要复核。一次记录同时出现单位错误和超范围时，应先标为无效并保留全部问题，而不是用最后一次检查结果覆盖前面的证据。",
+      "reason": "消除不是而是模板，保留先验检查含义"
+    },
+    {
+      "file": "output/chapters/chapter07.tex",
+      "line_before": 494,
+      "before": "图\\ref{fig:ch7-rain-level-combo}只展示编码关系，不替代工程分析。雨量柱从零基线向上绘制，水位线使用独立轴但共享时间索引；若为了突出“倒挂”效果将柱形向下绘制，也要在图例中说明向下方向代表降雨量而不是负值。真正的水位预警仍由第8章的规则、质量码和模型版本决定。",
+      "after": "图\\ref{fig:ch7-rain-level-combo}中，雨量柱从零基线向上绘制，水位线使用独立轴但共享时间索引；若为了突出“倒挂”效果将柱形向下绘制，也要在图例中说明向下方向代表降雨量而不是负值。水位预警由第8章的规则结合质量码与模型版本确定。",
+      "reason": "以图中具体编码引图；删除强调性虚词"
+    },
+    {
+      "file": "output/chapters/chapter07.tex",
+      "line_before": 526,
+      "before": "本书以Apache ECharts为图表主线。ECharts最初由百度团队开源，2018年捐赠给Apache软件基金会，2021年从孵化器毕业为顶级项目，现由ASF社区维护并持续发布版本\\cite{apacheECharts}。了解这段沿革有助于区分项目起源与当前治理主体。图\\ref{fig:chart-technology-selection}划出三者的职责边界：图表库负责二维统计视图，三维引擎负责场景与空间定位，中间由一个联动控制器负责转发选中对象与时间范围。把联动逻辑写进任意一侧，都会让两个库互相依赖，日后替换其中之一时牵连面很大。Three.js负责三维场景，图表与场景之间不直接互相调用，选中对象和时间范围一律由联动控制器转发。",
+      "after": "本书以Apache ECharts为图表主线。ECharts最初由百度团队开源，2018年捐赠给Apache软件基金会，2021年从孵化器毕业为顶级项目，现由ASF社区维护并持续发布版本\\cite{apacheECharts}。选用版本时应查阅Apache发布记录和对应的API文档。图\\ref{fig:chart-technology-selection}划出三者的职责边界：图表库负责二维统计视图，三维引擎负责场景与空间定位，中间由一个联动控制器负责转发选中对象与时间范围。把联动逻辑写进任意一侧，都会让两个库互相依赖，日后替换其中之一时牵连面很大。Three.js负责三维场景，图表与场景之间不直接互相调用，选中对象和时间范围一律由联动控制器转发。",
+      "reason": "将泛化知识价值改为版本查验动作"
+    },
+    {
+      "file": "output/chapters/chapter07.tex",
+      "line_before": 698,
+      "before": "图表和三维场景联动的关键不是让两个库互相调用，而是共享稳定的对象标识和时间窗口。ECharts点击事件的\\texttt{params.data}保存当前点的原始数组或对象，\\texttt{params.seriesId}说明来自哪条序列，\\texttt{params.dataIndex}用于定位应用状态中的索引；控制器据此取出\\texttt{assetId}，再调用三维场景的高亮接口。反向点击三维对象时，从\\texttt{object.userData.assetId}查找图表序列和数据索引，使用\\texttt{dispatchAction}发送\\texttt{highlight}与\\texttt{showTip}。多张图表可通过\\texttt{echarts.connect([a,b])}或相同的\\texttt{group}共享缩放和提示，但对象定位仍由业务控制器完成。",
+      "after": "图表和三维场景通过稳定的对象标识和时间窗口联动。ECharts点击事件的\\texttt{params.data}保存当前点的原始数组或对象，\\texttt{params.seriesId}说明来自哪条序列，\\texttt{params.dataIndex}用于定位应用状态中的索引；控制器据此取出\\texttt{assetId}，再调用三维场景的高亮接口。反向点击三维对象时，从\\texttt{object.userData.assetId}查找图表序列和数据索引，使用\\texttt{dispatchAction}发送\\texttt{highlight}与\\texttt{showTip}。多张图表可通过\\texttt{echarts.connect([a,b])}或相同的\\texttt{group}共享缩放和提示，但对象定位仍由业务控制器完成。",
+      "reason": "直接陈述联动机制"
+    },
+    {
+      "file": "output/chapters/chapter07.tex",
+      "line_before": 889,
+      "before": "色彩不是越多越好，而是要与数据的语义结构相匹配。顺序型色板用于从低到高的单调量，例如雨量、淹没深度或模型残差；颜色明度或饱和度应沿一个方向变化，读者可以据此判断相对大小。发散型色板用于有明确中心的偏差，例如“低于基线—接近基线—高于基线”，中心值应使用中性颜色，两端使用对称或可解释的色相。定性色板用于类别区分，例如渗压、位移、水位和雨量四类测项，颜色之间不应暗示高低顺序。把三类色板混用会让读者误以为类别颜色代表数值大小，或把接近中心的偏差看成“没有数据”。",
+      "after": "色板的类型取决于数据表示数量、偏差还是类别。顺序型色板用于从低到高的单调量，例如雨量、淹没深度或模型残差；颜色明度或饱和度应沿一个方向变化，读者可以据此判断相对大小。发散型色板用于有明确中心的偏差，例如“低于基线—接近基线—高于基线”，中心值应使用中性颜色，两端使用对称或可解释的色相。定性色板用于类别区分，例如渗压、位移、水位和雨量四类测项，颜色之间不应暗示高低顺序。把三类色板混用会让读者误以为类别颜色代表数值大小，或把接近中心的偏差看成“没有数据”。",
+      "reason": "用三类映射引出下文"
+    },
+    {
+      "file": "output/chapters/chapter07.tex",
+      "line_before": 934,
+      "before": "对打印和数据导出也要保留语义。黑白打印时，等级可以用不同线型、填充纹理和缩写文字区分；导出的表格把颜色转换为“等级”与“质量码”两列，并在表头给出解释；PDF 或图片的替代文本按“对象—数值—质量—预警—时间”顺序生成。这样，读者即使没有彩色屏幕、无法使用鼠标或通过屏幕阅读器访问，也能复核同一条监测记录。颜色设计的完成标准不是一张漂亮的截图，而是在不同设备、不同用户和不同输出媒介中都能得到一致的业务结论。",
+      "after": "对打印和数据导出也要保留语义。黑白打印时，等级可以用不同线型、填充纹理和缩写文字区分；导出的表格把颜色转换为“等级”与“质量码”两列，并在表头给出解释；PDF 或图片的替代文本按“对象—数值—质量—预警—时间”顺序生成。这样，读者即使没有彩色屏幕、无法使用鼠标或通过屏幕阅读器访问，也能复核同一条监测记录。验收时应比较屏幕、打印和导出结果，检查等级、质量与时间能否被一致识别。",
+      "reason": "用具体检查替代收尾评价"
+    },
+    {
+      "file": "output/chapters/chapter07.tex",
+      "line_before": 1302,
+      "before": "本章最容易踩的三个坑是：把缺测当成零值连线、把 LTTB 结果当成统计原始数据、把屏幕像素半径直接当作场景世界单位。三个坑都会让值班员看到看似连续却无法追溯的曲线，或让三维拾取在不同缩放级别下漂移。处理方法是保留质量码和时间轴断点、为降采样结果标注用途、在相机缩放变化时重新换算像素与世界长度。",
+      "after": "观测曲线需要保留数值之外的时间与质量信息。缺测用空值占据原时间位置，可疑值附复核提示；LTTB压缩后的序列用于绘图，统计仍读取原始观测。空间显示还涉及另一组换算：工程坐标先转换为场景坐标，拾取半径再由像素长度换算为世界长度，并随相机缩放更新。忽略前者会掩盖观测中断，忽略后者会使拾取范围随视角漂移。",
+      "reason": "把统一踩坑模板改为本章知识关系与后果"
+    },
+    {
+      "file": "output/chapters/chapter07.tex",
+      "line_before": 1304,
+      "before": "本章最该记住的五个判断是：第一，图表先回答业务问题再选择编码；第二，颜色之外必须有文字、形状或图标；第三，坐标转换要同时记录基准、单位和精度；第四，三维对象必须携带稳定 assetId 并能回到数据详情；第五，任何性能优化都要用峰谷保留率、帧时间和失败场景验收。沿着“质量与时间校验—图表表达—空间定位—拾取交互”链路，ECharts 与 Three.js 才能共同服务于可复核的监测判断。",
+      "after": "图表编码应服务于趋势比较、异常定位或处置确认等具体任务，颜色同时配合文字、形状或图标。坐标转换记录基准、单位和精度；三维对象携带稳定的assetId，使拾取结果能够查询对应测点与观测。ECharts与Three.js通过控制器共享对象和时间窗，优化时检查峰谷保留率、帧时间及失败后的提示，确认性能改善没有改变数据含义。",
+      "reason": "去掉最该记住与泛化闭合句，保留五项要点"
+    },
+    {
+      "file": "output/chapters/chapter08.tex",
+      "line_before": 53,
+      "before": "表\\ref{tab:case-parameters}给出本案例的全部教学参数。这张表是全书引用案例水库数据的唯一来源：后续章节出现的坝高、蓄水位、测点数量和网关数量都应回到这里核对，案例参数在不同章节各说各话是同类教材最常见的硬伤。",
+      "after": "表\\ref{tab:case-parameters}给出本案例的全部教学参数。坝高、蓄水位、测点数量和网关数量均由该表确定，需求说明、数据库、三维场景与测试数据共用这组参数。",
+      "reason": "删除面向编者的硬伤评论，明确参数复用位置"
+    },
+    {
+      "file": "output/chapters/chapter08.tex",
+      "line_before": 80,
+      "before": "值班员查看实时状态、确认告警并创建工单；专业分析员检查数据质量、模型结果和相邻测点；运维员处理设备与通信故障；审批人确认高风险处置或调度建议；审计员只读查询关键操作与证据链。角色不是菜单分组，而是权限与责任的边界。",
+      "after": "值班员查看实时状态、确认告警并创建工单；专业分析员检查数据质量、模型结果和相邻测点；运维员处理设备与通信故障；审批人确认高风险处置或调度建议；审计员只读查询关键操作与证据链。每项操作都与责任角色及其授权范围对应。",
+      "reason": "以正面定义说明角色"
+    },
+    {
+      "file": "output/chapters/chapter08.tex",
+      "line_before": 82,
+      "before": "本书前几章统一使用值班员、专业分析员、审批人、运维员四种基本角色；本章在此基础上增加第五个只读扩展角色——审计员，它不参与任何处置动作，因此不改变四角色的职责边界。表\\ref{tab:case-roles}把五类角色与其关键权限并列。注意审计员只有只读权限却不可省略：没有一个独立于处置链条之外的查询角色，事后复核就只能依赖处置者自己提供的记录。",
+      "after": "本书前几章统一使用值班员、专业分析员、审批人、运维员四种基本角色；本章在此基础上增加第五个只读扩展角色——审计员，它不参与任何处置动作，因此不改变四角色的职责边界。表\\ref{tab:case-roles}把五类角色与其关键权限并列。审计员独立查询操作记录，用于复核处置过程；该角色没有修改、审批或执行权限。",
+      "reason": "去说教语气，保留职责分离"
+    },
+    {
+      "file": "output/chapters/chapter08.tex",
+      "line_before": 2562,
+      "before": "模型运行、闸门反算和水网平衡共享同一追踪号。追踪号串起输入水位、闸门开度、公式版本、输出流量、未满足需求、闭合残差和审批回执。这样即使后来替换了水力模型，审计人员仍可依据旧版本重现当时的计算，而不是用最新模型解释历史处置。参数、公式和证据一旦形成闭环，章节中的计算式才真正成为可执行的工程契约。\n工程参数还要进入接口和前端的校验提示。用户输入闸门开度时，页面显示来自版本化参数集的最小值、最大值、单位和生效时间；输入水位时，页面同时显示死水位、汛限水位、正常蓄水位、设计洪水位和校核洪水位，避免只给一个“超限”布尔值。接口拒绝越界参数时返回字段路径、参数版本和建议动作，调用方可以把错误回显给专业人员，而不是把后端异常堆栈直接展示给值班员。测试夹具固定三类边界：刚好等于阈值、略低于阈值和略高于阈值，并验证蓝黄橙红分级、闸门公式适用性和水量闭合残差在同一版本下保持一致。",
+      "after": "模型运行、闸门反算和水网平衡共享同一追踪号。追踪号串起输入水位、闸门开度、公式版本、输出流量、未满足需求、闭合残差和审批回执。这样即使后来替换了水力模型，审计人员仍可依据旧版本重现当时的计算，而不是用最新模型解释历史处置。输入快照与公式版本共同确定一次计算的复现条件。\n工程参数还要进入接口和前端的校验提示。用户输入闸门开度时，页面显示来自版本化参数集的最小值、最大值、单位和生效时间；输入水位时，页面同时显示死水位、汛限水位、正常蓄水位、设计洪水位和校核洪水位，避免只给一个“超限”布尔值。接口拒绝越界参数时返回字段路径、参数版本和建议动作，调用方可以把错误回显给专业人员，而不是把后端异常堆栈直接展示给值班员。测试夹具固定三类边界：刚好等于阈值、略低于阈值和略高于阈值，并验证蓝黄橙红分级、闸门公式适用性和水量闭合残差在同一版本下保持一致。",
+      "reason": "以复现条件替代泛化收尾"
+    },
+    {
+      "file": "output/chapters/chapter08.tex",
+      "line_before": 2565,
+      "before": "对于降雨情景，平台把流域面积320\\,km$^2$作为输入范围与结果解释的背景，不把面积直接当作瞬时来水量。三种降雨情景共享同一初始水位和闸门设备参数，只改变降雨过程与不确定性说明；输出的水位包络线标注情景名、时间步长和模型版本。若情景结果超过校核洪水位，系统先生成会商任务，再允许专业人员比较提前泄洪、维持水位和分时调度等方案。这样，参数补全不只是增加表格行，而是把工程边界、算法调用和责任流程连成可审计的链路。 每次发布还应把参数快照和计算结果校验和写入审计日志，供恢复演练与课程验收复核。",
+      "after": "对于降雨情景，平台把流域面积320\\,km$^2$作为输入范围与结果解释的背景，不把面积直接当作瞬时来水量。三种降雨情景共享同一初始水位和闸门设备参数，只改变降雨过程与不确定性说明；输出的水位包络线标注情景名、时间步长和模型版本。若情景结果超过校核洪水位，系统先生成会商任务，再允许专业人员比较提前泄洪、维持水位和分时调度等方案。情景、参数和批准方案按版本关联。每次发布还应把参数快照和计算结果校验和写入审计日志，供恢复演练与课程验收复核。",
+      "reason": "删除修稿自述与不是而是模板"
+    },
+    {
+      "file": "output/chapters/chapter08.tex",
+      "line_before": 2567,
+      "before": "人在回路不是“模型算完后让人点确定”，而是把专业判断嵌入目标设定、边界条件、方案比选、审批与效果复核。红色预警和高风险调度建议必须由授权角色按照工程规程处置。",
+      "after": "人在回路要求专业人员参与目标设定、边界条件检查、方案比选、审批与效果复核。红色预警和高风险调度建议必须由授权角色按照工程规程处置。",
+      "reason": "正面定义专业参与环节"
+    },
+    {
+      "file": "output/chapters/chapter08.tex",
+      "line_before": 2583,
+      "before": "水利部关于智慧水利建设的指导文件把预报、预警、预演、预案作为面向业务闭环的能力组合，并要求建设过程围绕数据、模型、知识和业务协同展开\\cite{smartWaterGuidance2021,twinWater2023}。面向水库、水闸和蓄滞洪区的数字孪生运行管理指导意见进一步强调对象底账、运行场景、模型服务和过程留痕的衔接\\cite{twinProject2024}。因此，本节把厂商手册中的功能链路放入公开政策与工程管理语境中讲解，读者应先理解业务目标和证据要求，再比较具体产品的界面组织方式。",
+      "after": "水利部关于智慧水利建设的指导文件把预报、预警、预演、预案作为面向业务闭环的能力组合，并要求建设过程围绕数据、模型、知识和业务协同展开\\cite{smartWaterGuidance2021,twinWater2023}。面向水库、水闸和蓄滞洪区的数字孪生运行管理指导意见进一步强调对象底账、运行场景、模型服务和过程留痕的衔接\\cite{twinProject2024}。分析产品功能时，可据此检查对象底账是否完整、模型输入能否追溯、方案是否经过审批，以及执行回执能否关联到批准版本。",
+      "reason": "将编排自述改成产品分析问题"
+    },
+    {
+      "file": "output/chapters/chapter08.tex",
+      "line_before": 2585,
+      "before": "安全监测平台主要回答“当前是否异常、谁来处置”；数字孪生平台还要回答“未来可能怎样、不同方案后果如何、应准备什么预案”。新增能力不是一个三维门户，而是数据底板、模型平台、场景服务和业务闭环的组合。",
+      "after": "安全监测平台主要回答“当前是否异常、谁来处置”；数字孪生平台还要回答“未来可能怎样、不同方案后果如何、应准备什么预案”。这些能力由数据底板、模型平台、场景服务及预报、会商、审批和执行流程共同支撑。",
+      "reason": "直接解释数字孪生新增组成"
+    },
+    {
+      "file": "output/chapters/chapter08.tex",
+      "line_before": 2589,
+      "before": "图\\ref{fig:ch08-51wim-portal}是平台一体化门户的实际界面。三个入口卡片与表\\ref{tab:twin-three-portals}的三类业务视角一一对应；读者进入任一入口后看到的都是同一套数据底板，只是聚合粒度和默认视图不同。对照真实界面可以体会：门户设计传达的是业务组织方式，而不是功能清单。",
+      "after": "图\\ref{fig:ch08-51wim-portal}是平台一体化门户的实际界面。三个入口卡片与表\\ref{tab:twin-three-portals}的三类业务视角一一对应；读者进入任一入口后看到的都是同一套数据底板，只是聚合粒度和默认视图不同。入口按流域、水网和工程组织，便于用户从业务对象进入相应分析视图。",
+      "reason": "用具体界面组织替代评价句"
+    },
+    {
+      "file": "output/chapters/chapter08.tex",
+      "line_before": 2893,
+      "before": "表\\ref{tab:warning-rehearsal}按预警等级列出预演的关注点差异。等级越高，预演要检验的越不是模型精度，而是人的动作：责任人是否在岗、资源是否到位、操作清单是否可执行。",
+      "after": "表\\ref{tab:warning-rehearsal}按预警等级列出预演的关注点差异。随预警等级提高，预演还需逐项检查责任人是否在岗、资源是否到位、操作清单是否可执行。",
+      "reason": "去除排他式比较，保留响应要求"
+    },
+    {
+      "file": "output/chapters/chapter08.tex",
+      "line_before": 2975,
+      "before": "本节把\\ref{sec:ch06-twin-permission}节的安全、权限和降级原则落到案例的数据底板、算法服务和模拟标注，任何高风险动作仍需授权角色确认并保留回滚证据。",
+      "after": "数据底板、算法服务和模拟结果分别设置访问与操作权限，具体原则见\\ref{sec:ch06-twin-permission}节。高风险动作由授权角色确认，并记录执行版本与回滚结果。",
+      "reason": "以权限对象引入，保留交叉引用"
+    },
+    {
+      "file": "output/chapters/chapter08.tex",
+      "line_before": 2997,
+      "before": "模拟数据与结果的标注要求可以归纳为一组规则。演示环境的水位、流量必须带明确标记，否则截图一旦流出，很容易被当作真实工程结论引用，这类误用发生之后极难澄清。情景输入应标明观测、设定或插值来源与时间；模型结果标明“模拟”、版本和运行时间；推荐方案标明目标、约束、有效期和审批状态；演示数据注明单位和非工程结论；AI输出附工具证据、生成时间和复核状态。",
+      "after": "水位、流量及其导出图表均应标明数据来源，使读者能区分观测记录、设定情景与模型计算。情景输入应标明观测、设定或插值来源与时间；模型结果标明“模拟”、版本和运行时间；推荐方案标明目标、约束、有效期和审批状态；演示数据注明单位和非工程结论；AI输出附工具证据、生成时间和复核状态。",
+      "reason": "删除夸张风险铺垫，说明标注用途"
+    },
+    {
+      "file": "output/chapters/chapter08.tex",
+      "line_before": 3003,
+      "before": "本节把\\ref{sec:ch06-twin-event-quality}节的事件时间、质量码和状态估计框架落到案例对象编码、时间基线和孪生状态快照，质量不合格的数据沿同一优先级进入隔离或降级流程。",
+      "after": "孪生状态快照把对象编码、观测时刻和质量判定关联起来。按照\\ref{sec:ch06-twin-event-quality}节的处理顺序，质量不合格的数据进入隔离或降级流程。",
+      "reason": "去除重复本节把框架落到句式"
+    },
+    {
+      "file": "output/chapters/chapter08.tex",
+      "line_before": 3007,
+      "before": "孪生状态不是数据库中某一行最新值，而是给定有效时刻和知识时刻后的可解释快照。有效时刻表示状态在现实世界中发生的时间，知识时刻表示平台何时获知该状态。迟到数据到达后，系统可以重建过去时刻的状态，但不得悄悄改写已经审批的预演结论。",
+      "after": "孪生状态由有效时刻与知识时刻共同确定。有效时刻表示状态在现实世界中发生的时间，知识时刻表示平台何时获知该状态。迟到数据到达后，系统可以重建过去时刻的状态，但不得悄悄改写已经审批的预演结论。",
+      "reason": "直接定义双时态"
+    },
+    {
+      "file": "output/chapters/chapter08.tex",
+      "line_before": 3059,
+      "before": "本节把\\ref{sec:ch06-twin-contract}节的事件与接口契约落到模型任务编排、输入快照、运行状态和结果回执，任务事件与控制命令分别保留幂等键、审批和审计字段。",
+      "after": "模型任务从提交输入到返回结果经历多个状态。任务事件与控制命令按\\ref{sec:ch06-twin-contract}节的契约记录幂等键、审批和审计字段，输入快照随任务保存。",
+      "reason": "用任务过程引入小节"
+    },
+    {
+      "file": "output/chapters/chapter08.tex",
+      "line_before": 3065,
+      "before": "图\\ref{fig:model-run-lifecycle}把这些状态连成受控生命周期，并标出失败与复核两条回路。任务失败不是终点，而应回到校验环节并保留失败原因，否则同一类失败会反复出现却查不到记录。",
+      "after": "图\\ref{fig:model-run-lifecycle}把这些状态连成受控生命周期，并标出失败与复核两条回路。失败任务保留输入与错误记录，修正原因后再从校验环节发起运行。",
+      "reason": "将拟人化收尾改为处理步骤"
+    },
+    {
+      "file": "output/chapters/chapter08.tex",
+      "line_before": 3164,
+      "before": "方案发布后，执行回执持续进入平台。若实际流量与计划偏差超过容限，系统发出“方案偏离”事件，提示重新评估，而不是直接反复求解并自动改变控制指令。这样可以保持模型建议、批准计划和现场执行三者的边界。",
+      "after": "方案发布后，执行回执持续进入平台。若实际流量与计划偏差超过容限，系统发出“方案偏离”事件，提示重新评估，而不是直接反复求解并自动改变控制指令。新方案经重新审批后才可替换正在执行的计划。",
+      "reason": "用批准条件说明边界"
+    },
+    {
+      "file": "output/chapters/chapter08.tex",
+      "line_before": 3168,
+      "before": "本节把\\ref{sec:ch06-twin-model-card}节的模型卡框架落到案例水库的场景版本、方案比较和不确定性表达，具体字段与审批证据按案例数据和模型运行记录生成。",
+      "after": "比较案例水库的预演方案时，需要同时读取场景版本、模型卡与运行记录。模型卡字段按\\ref{sec:ch06-twin-model-card}节组织，用于解释方案差异和计算的不确定性。",
+      "reason": "用比较任务引入模型卡"
+    },
+    {
+      "file": "output/chapters/chapter08.tex",
+      "line_before": 3230,
+      "before": "本节把\\ref{sec:ch06-twin-course}节的课程迭代路线落到可运行的端到端切片和验收脚本，学生按对象编码、数据契约、模型卡和业务闭环逐轮提交证据。",
+      "after": "按\\ref{sec:ch06-twin-course}节的迭代安排，可先实现一条从创建场景到结果复核的运行流程，再逐步增加模型与业务对象。每轮提交相应的数据、代码及验收记录。",
+      "reason": "改为实际实施顺序"
+    },
+    {
+      "file": "output/chapters/chapter08.tex",
+      "line_before": 3350,
+      "before": "表\\ref{tab:consultation-timeline}给出一次橙色预警会商的完整时间线示例。逐行看这张表会发现，从数据异常到效果复核之间的绝大多数节点都是人的动作，平台的作用是把这些动作固定下来并留下证据，而不是替人做决定。",
+      "after": "表\\ref{tab:consultation-timeline}给出一次橙色预警会商的完整时间线示例。表中每个节点对应责任角色、操作时间和记录内容，平台据此跟踪方案从提交到执行、复核的全过程。",
+      "reason": "删除引导读者认同的评价语"
+    },
+    {
+      "file": "output/chapters/chapter08.tex",
+      "line_before": 3404,
+      "before": "本节把\\ref{sec:ch06-twin-acceptance}节的六类验收框架落到案例的失效降级、阶段门禁和课程实现；端到端切片与脚本按同一组输入快照和追踪号复核。",
+      "after": "案例验收按\\ref{sec:ch06-twin-acceptance}节的六类检查组织，重点验证服务失效后的降级行为。运行流程与验收脚本使用同一组输入快照和追踪号，便于比较预期与实际结果。",
+      "reason": "以验收行为替代编排说明"
+    },
+    {
+      "file": "output/chapters/chapter08.tex",
+      "line_before": 3461,
+      "before": "图\\ref{fig:system-deployment-architecture}把这些组件按部署单元画开，并标出对外暴露的入口。部署图与前面的技术架构图关注点不同：后者关心职责划分，前者关心进程、端口和数据卷，是运维交接时真正要用的那一张。",
+      "after": "图\\ref{fig:system-deployment-architecture}把这些组件按部署单元画开，并标出对外暴露的入口。部署图与前面的技术架构图关注点不同：后者关心职责划分，前者关心进程、端口和数据卷，用于核对运维交接中的服务入口和持久化位置。",
+      "reason": "去口语化强调"
+    },
+    {
+      "file": "output/chapters/chapter08.tex",
+      "line_before": 3486,
+      "before": "开发、测试和生产环境使用相同的配置结构，差异通过外部参数和密钥管理注入。禁止把JWT密钥、数据库口令或地图令牌写入镜像和教材示例。发布流水线与配置项应分别受持续交付和配置管理约束\\cite{humble2010,tichy1994}。\n\\subsubsection{从部署图到可执行编排}\n部署图只有转换为可重复执行的配置才具有运维价值。案例水库平台的最小闭环由前端静态资源、Spring Boot API、PostgreSQL 及其 PostGIS 与 TimescaleDB 扩展、Redis、Kafka 五类运行单元组成。前端只依赖 API 入口，业务服务通过内部网络访问数据库、缓存和消息总线；数据库数据卷、Kafka 日志卷和备份卷与容器生命周期分离，重新创建容器不能丢失观测、预警、工单和审计证据。\n编排文件表达网络、卷、依赖和健康条件，而不是把参数硬编码在镜像里。数据库镜像明确包含 PostGIS 与 TimescaleDB 扩展，启动脚本执行与 8.3 节相同的迁移版本；Kafka 只有健康检查通过后才接收业务事件，Spring Boot 同时等待数据库和消息总线就绪。生产环境应把镜像标签、资源上限、节点亲和性和日志驱动器按压测结果替换。\n\\begin{lstlisting}[language=YAML,caption={案例水库平台 Docker Compose 编排基线},label={lst:ch08-compose}]\nservices:\n  web: {image: registry.example.com/qingyuan-web:APP_VERSION, ports: [\"8080:80\"], depends_on: {api: {condition: service_healthy}}}\n  api:\n    image: registry.example.com/qingyuan-api:APP_VERSION\n    environment: {SPRING_PROFILES_ACTIVE: production, DB_URL: jdbc:postgresql://postgres:5432/qingyuan, DB_PASSWORD_FILE: /run/secrets/db_password, KAFKA_BOOTSTRAP_SERVERS: kafka:9092, REDIS_URL: redis://redis:6379}\n    secrets: [db_password, kafka_password]\n    depends_on: {postgres: {condition: service_healthy}, kafka: {condition: service_healthy}, redis: {condition: service_healthy}}\n    healthcheck: {test: [\"CMD-SHELL\", \"wget -qO- http://localhost:8080/actuator/health/readiness | grep -q UP\"], interval: 10s, timeout: 3s, retries: 12}\n  postgres: {image: timescale/timescaledb-ha:pg16, volumes: [pg-data:/var/lib/postgresql/data], healthcheck: {test: [\"CMD-SHELL\", \"pg_isready -U qingyuan_app -d qingyuan\"]}}\n  redis: {image: redis:7.2-alpine, command: [\"redis-server\", \"--appendonly\", \"yes\"], volumes: [redis-data:/data], healthcheck: {test: [\"CMD\", \"redis-cli\", \"ping\"], interval: 10s, timeout: 3s, retries: 5}}\n  kafka: {image: apache/kafka:3.7.2, volumes: [kafka-data:/var/lib/kafka/data], healthcheck: {test: [\"CMD-SHELL\", \"/opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --list >/dev/null 2>&1\"], interval: 15s, timeout: 10s, retries: 8}}\nsecrets: {db_password: {file: ./secrets/db_password.txt}, kafka_password: {file: ./secrets/kafka_password.txt}}\nvolumes: {pg-data: {}, redis-data: {}, kafka-data: {}}\n\\end{lstlisting}\n代码清单\\ref{lst:ch08-compose}中的 \\texttt{depends\\_on} 只保证启动顺序，真正的就绪判定由健康检查完成。\\texttt{readiness}不能把数据库迁移、Kafka消费延迟或磁盘容量隐藏在一个布尔值里；运维看板仍需采集细分指标。内部网络使数据库和消息总线不直接暴露给浏览器，外部流量只进入 Nginx 和 API。\n\\subsubsection{环境变量、密钥与版本回滚}\n配置分为非敏感默认值、部署环境变量和容器 secret 三层。教学仓库仅保留变量名与格式校验，不提交真实凭据。部署前把镜像版本、迁移版本、前端静态资源版本和配置清单写入同一个发布记录；回滚先判断迁移是否向后兼容，再回退无状态服务。\n\\begin{lstlisting}[language=YAML,caption={环境变量与密钥示例},label={lst:ch08-env-secrets}]\nAPP_VERSION: \"2026.08.07-rc1\"\nSPRING_PROFILE: \"production\"\nDB_USER: \"qingyuan_app\"\nDB_NAME: \"qingyuan\"\nKAFKA_TOPIC_READING: \"qingyuan.reading.v1\"\nSECRETS: {DB_PASSWORD_FILE: \"/run/secrets/db_password\", JWT_SIGNING_KEY: \"injected-by-secret-manager\"}\nROTATION: {password_days: 90, signing_key_overlap_hours: 24}\nVALIDATION: {require_non_empty: [DB_USER, DB_NAME], reject_default_password: true}\n\\end{lstlisting}\n清单\\ref{lst:ch08-env-secrets}中的轮换字段是运维约束而不是业务参数。轮换数据库口令先创建新凭据并验证连接池，再撤销旧凭据；轮换JWT密钥保留重叠窗口，使正在处理的请求完成。变量缺失、示例口令或 latest 标签都应在流水线门禁阶段失败。\n\\subsubsection{Nginx 反向代理与静态资源}\nNginx负责 TLS 终止、静态文件缓存和 API 反向代理，不承载权限判断。对象级授权仍由 Spring Security 6 执行；代理转发请求号、用户代理和真实 IP，把浏览器、API 与数据库审计串成证据链。上传报告或模型时设置大小和超时上限，避免大请求阻塞观测接口。\n\\begin{lstlisting}[language=Nginx,caption={前端静态资源与 Spring Boot API 的 Nginx 配置},label={lst:ch08-nginx}]\nworker_processes auto;\nevents { worker_connections 1024; }\nhttp {\n  upstream qingyuan_api { server api:8080; keepalive 32; }\n  server {\n    listen 80; server_name water.example.edu; root /usr/share/nginx/html;\n    client_max_body_size 20m;\n    location /assets/ { try_files $uri =404; }\n    # Vue Router history 模式：非资源路径回退到入口页\n    location / { try_files $uri $uri/ /index.html; }\n    location /api/ { proxy_pass http://qingyuan_api; proxy_set_header Host $host; proxy_set_header X-Request-Id $request_id; proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for; proxy_read_timeout 30s; }\n    location /healthz { proxy_pass http://qingyuan_api/actuator/health/liveness; access_log off; }\n    location /readyz { proxy_pass http://qingyuan_api/actuator/health/readiness; access_log off; }\n  }\n}\n\\end{lstlisting}\n代码清单\\ref{lst:ch08-nginx}把访问路径按静态资源、API、探针分开，浏览器只需记住一个域名。\\texttt{try\\_files}不把错误静态路径转给后端；生产环境增加 TLS、安全响应头和连接排空，保证滚动发布不截断工单提交。\n\\subsubsection{健康检查、告警与容量边界}\n健康检查分存活、就绪和业务烟测三层。存活探针只回答进程是否响应，失败时允许重启；就绪探针还检查数据库连接、迁移版本和 Kafka 生产者，失败时摘除流量但不立即重启；业务烟测用只读测点请求验证认证、查询和质量码字段，在发布后及每日交接时执行。三层探针不能共用一个返回 200 的接口，否则数据库故障会被误判为应用正常。\n\\begin{lstlisting}[language=YAML,caption={监控指标与告警规则基线},label={lst:ch08-alert-rules}]\ngroups:\n  - name: qingyuan-platform\n    interval: 30s\n    rules:\n      - alert: ApiReadinessFailed\n        expr: api_readiness == 0\n        for: 2m\n        labels: {severity: critical, owner: ops}\n      - alert: ReadingIngestLag\n        expr: qingyuan_reading_ingest_lag_seconds > 300\n        for: 5m\n        labels: {severity: warning, owner: duty}\n      - alert: TimescaleDiskPressure\n        expr: qingyuan_db_free_bytes < 20000000000\n        for: 10m\n        labels: {severity: critical, owner: ops}\n      - alert: WarningAckTimeout\n        expr: qingyuan_warning_unacked_seconds > 900\n        for: 5m\n        labels: {severity: warning, owner: duty}\n\\end{lstlisting}\n代码清单\\ref{lst:ch08-alert-rules}把告警规则按基础设施、数据链路和业务闭环分开，每条告警都有责任角色与处置手册。阈值要结合补传最大重投周期、TimescaleDB压缩窗口和工单确认时限，再用历史分位数校准。告警和恢复都记录时间、规则版本、当前值和证据链接，同一根因的指标按服务和时间窗聚合，避免告警风暴。\n容量评估覆盖 API 并发、Kafka 分区、Redis 内存、数据库写入吞吐和时序增长。28 个测点的教学规模可以单节点运行，但不能推断生产容量；压测纳入补传、模型运行和备份并发。扩容前后使用同一场景复测，并记录消息最老年龄、WAL增长、磁盘剩余比例和查询P95，确保容量提升没有换来数据延迟或权限错误。\n\\subsubsection{备份、恢复与演练记录}\n备份策略回答可接受的数据丢失窗口、一致性点和恢复验证方法。PostgreSQL使用全量加WAL归档，TimescaleDB压缩和分区策略与备份窗口错开；对象存储保存模型、纹理、报告和备份清单版本；Kafka保留足够日志以便重放，重放前依据 \\texttt{event\\_id} 幂等约束清理重复风险。Redis只保存可重建缓存，不进入唯一备份范围。\n\\begin{lstlisting}[language=YAML,caption={备份恢复演练与健康检查清单},label={lst:ch08-backup-rehearsal}]\nbackup: {schedule: \"15 2 * * *\", retention_days: 35, mode: \"base-plus-wal\", verify: [checksum, restore-schema, latest-reading-time]}\nobject_store: {versioning: true, retention_days: 90}\nkafka: {topic: qingyuan.reading.v1, replay_window_hours: 72}\nrehearsal:\n  target: isolated-restore\n  steps: [stop-writes, restore-postgres-and-wal, restore-object-manifest, start-api-readonly, verify-trace, replay-with-event-id-deduplication, run-smoke-test]\n  pass_conditions: [latest_reading_within_rpo, api_readiness_up, no_duplicate_warning, audit_trace_continuous]\n\\end{lstlisting}\n代码清单\\ref{lst:ch08-backup-rehearsal}把“有备份”改成可观察证据。开始前冻结变更窗口并记录最后一个观测、预警和工单 ID；恢复后先以只读模式校验对象关系、时序最新时间和审计链，再开放写入。Kafka只重放恢复点之后且数据库没有的事件，缓存由 API 根据数据库重建。任一条件失败，演练结果为不通过，并写明缺失备份、迁移错误或无法解释的事件。\n生产故障处置遵循观测、隔离、恢复、复盘顺序。运维员先确认探针和指标是否同时异常，避免把单个浏览器问题误判为全局故障；再依据 runbook 摘除异常实例或暂停消费，保护数据库和消息证据；恢复后用业务烟测验证测点到工单链路，专业分析员复核质量码和预警是否重复计算。每次演练沉淀恢复时长、数据丢失窗口、告警命中率和人工确认点，反过来校准保留策略、探针阈值和容量预算。\n上述配置与部署图、接口契约、数据库 DDL 共同构成部署交付物。学生提交时应同时提供编排文件、反代配置、变量清单、健康检查结果和一次恢复演练记录；只截图容器已启动不能证明数据可用、权限有效或故障可恢复。\n环境一致性还需要检查时区、字符集、容器用户和文件权限。数据库统一使用 UTC 保存发生时间，展示层按照值班员时区转换；所有容器以非 root 用户运行，备份目录只授予备份进程写权限。发布前用同一份配置渲染开发、测试和生产三套文件，比较渲染结果的键集合，发现多余或缺失变量就停止发布。配置差异要写入决策记录，不能靠运维员记忆。",
+      "after": "开发、测试和生产环境使用相同的配置结构，差异通过外部参数和密钥管理注入。禁止把JWT密钥、数据库口令或地图令牌写入镜像和教材示例。发布流水线与配置项应分别受持续交付和配置管理约束\\cite{humble2010,tichy1994}。\n\\subsubsection{从部署图到可执行编排}\n案例水库平台按部署图配置前端静态资源、Spring Boot API、PostgreSQL 及其 PostGIS 与 TimescaleDB 扩展、Redis、Kafka 五类运行单元。前端只依赖 API 入口，业务服务通过内部网络访问数据库、缓存和消息总线；数据库数据卷、Kafka 日志卷和备份卷与容器生命周期分离，重新创建容器不能丢失观测、预警、工单和审计证据。\n编排文件表达网络、卷、依赖和健康条件，而不是把参数硬编码在镜像里。数据库镜像明确包含 PostGIS 与 TimescaleDB 扩展，启动脚本执行与 8.3 节相同的迁移版本；Kafka 只有健康检查通过后才接收业务事件，Spring Boot 同时等待数据库和消息总线就绪。生产环境应把镜像标签、资源上限、节点亲和性和日志驱动器按压测结果替换。\n\\begin{lstlisting}[language=YAML,caption={案例水库平台 Docker Compose 编排基线},label={lst:ch08-compose}]\nservices:\n  web: {image: registry.example.com/qingyuan-web:APP_VERSION, ports: [\"8080:80\"], depends_on: {api: {condition: service_healthy}}}\n  api:\n    image: registry.example.com/qingyuan-api:APP_VERSION\n    environment: {SPRING_PROFILES_ACTIVE: production, DB_URL: jdbc:postgresql://postgres:5432/qingyuan, DB_PASSWORD_FILE: /run/secrets/db_password, KAFKA_BOOTSTRAP_SERVERS: kafka:9092, REDIS_URL: redis://redis:6379}\n    secrets: [db_password, kafka_password]\n    depends_on: {postgres: {condition: service_healthy}, kafka: {condition: service_healthy}, redis: {condition: service_healthy}}\n    healthcheck: {test: [\"CMD-SHELL\", \"wget -qO- http://localhost:8080/actuator/health/readiness | grep -q UP\"], interval: 10s, timeout: 3s, retries: 12}\n  postgres: {image: timescale/timescaledb-ha:pg16, volumes: [pg-data:/var/lib/postgresql/data], healthcheck: {test: [\"CMD-SHELL\", \"pg_isready -U qingyuan_app -d qingyuan\"]}}\n  redis: {image: redis:7.2-alpine, command: [\"redis-server\", \"--appendonly\", \"yes\"], volumes: [redis-data:/data], healthcheck: {test: [\"CMD\", \"redis-cli\", \"ping\"], interval: 10s, timeout: 3s, retries: 5}}\n  kafka: {image: apache/kafka:3.7.2, volumes: [kafka-data:/var/lib/kafka/data], healthcheck: {test: [\"CMD-SHELL\", \"/opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --list >/dev/null 2>&1\"], interval: 15s, timeout: 10s, retries: 8}}\nsecrets: {db_password: {file: ./secrets/db_password.txt}, kafka_password: {file: ./secrets/kafka_password.txt}}\nvolumes: {pg-data: {}, redis-data: {}, kafka-data: {}}\n\\end{lstlisting}\n代码清单\\ref{lst:ch08-compose}中的 \\texttt{depends\\_on} 只保证启动顺序，就绪状态由健康检查判定。\\texttt{readiness}不能把数据库迁移、Kafka消费延迟或磁盘容量隐藏在一个布尔值里；运维看板仍需采集细分指标。内部网络使数据库和消息总线不直接暴露给浏览器，外部流量只进入 Nginx 和 API。\n\\subsubsection{环境变量、密钥与版本回滚}\n配置分为非敏感默认值、部署环境变量和容器 secret 三层。教学仓库仅保留变量名与格式校验，不提交真实凭据。部署前把镜像版本、迁移版本、前端静态资源版本和配置清单写入同一个发布记录；回滚先判断迁移是否向后兼容，再回退无状态服务。\n\\begin{lstlisting}[language=YAML,caption={环境变量与密钥示例},label={lst:ch08-env-secrets}]\nAPP_VERSION: \"2026.08.07-rc1\"\nSPRING_PROFILE: \"production\"\nDB_USER: \"qingyuan_app\"\nDB_NAME: \"qingyuan\"\nKAFKA_TOPIC_READING: \"qingyuan.reading.v1\"\nSECRETS: {DB_PASSWORD_FILE: \"/run/secrets/db_password\", JWT_SIGNING_KEY: \"injected-by-secret-manager\"}\nROTATION: {password_days: 90, signing_key_overlap_hours: 24}\nVALIDATION: {require_non_empty: [DB_USER, DB_NAME], reject_default_password: true}\n\\end{lstlisting}\n清单\\ref{lst:ch08-env-secrets}中的轮换字段是运维约束而不是业务参数。轮换数据库口令先创建新凭据并验证连接池，再撤销旧凭据；轮换JWT密钥保留重叠窗口，使正在处理的请求完成。变量缺失、示例口令或 latest 标签都应在流水线门禁阶段失败。\n\\subsubsection{Nginx 反向代理与静态资源}\nNginx负责 TLS 终止、静态文件缓存和 API 反向代理，不承载权限判断。对象级授权仍由 Spring Security 6 执行；代理转发请求号、用户代理和真实 IP，把浏览器、API 与数据库审计串成证据链。上传报告或模型时设置大小和超时上限，避免大请求阻塞观测接口。\n\\begin{lstlisting}[language=Nginx,caption={前端静态资源与 Spring Boot API 的 Nginx 配置},label={lst:ch08-nginx}]\nworker_processes auto;\nevents { worker_connections 1024; }\nhttp {\n  upstream qingyuan_api { server api:8080; keepalive 32; }\n  server {\n    listen 80; server_name water.example.edu; root /usr/share/nginx/html;\n    client_max_body_size 20m;\n    location /assets/ { try_files $uri =404; }\n    # Vue Router history 模式：非资源路径回退到入口页\n    location / { try_files $uri $uri/ /index.html; }\n    location /api/ { proxy_pass http://qingyuan_api; proxy_set_header Host $host; proxy_set_header X-Request-Id $request_id; proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for; proxy_read_timeout 30s; }\n    location /healthz { proxy_pass http://qingyuan_api/actuator/health/liveness; access_log off; }\n    location /readyz { proxy_pass http://qingyuan_api/actuator/health/readiness; access_log off; }\n  }\n}\n\\end{lstlisting}\n代码清单\\ref{lst:ch08-nginx}把访问路径按静态资源、API、探针分开，浏览器只需记住一个域名。\\texttt{try\\_files}不把错误静态路径转给后端；生产环境增加 TLS、安全响应头和连接排空，保证滚动发布不截断工单提交。\n\\subsubsection{健康检查、告警与容量边界}\n健康检查分存活、就绪和业务烟测三层。存活探针只回答进程是否响应，失败时允许重启；就绪探针还检查数据库连接、迁移版本和 Kafka 生产者，失败时摘除流量但不立即重启；业务烟测用只读测点请求验证认证、查询和质量码字段，在发布后及每日交接时执行。三层探针不能共用一个返回 200 的接口，否则数据库故障会被误判为应用正常。\n\\begin{lstlisting}[language=YAML,caption={监控指标与告警规则基线},label={lst:ch08-alert-rules}]\ngroups:\n  - name: qingyuan-platform\n    interval: 30s\n    rules:\n      - alert: ApiReadinessFailed\n        expr: api_readiness == 0\n        for: 2m\n        labels: {severity: critical, owner: ops}\n      - alert: ReadingIngestLag\n        expr: qingyuan_reading_ingest_lag_seconds > 300\n        for: 5m\n        labels: {severity: warning, owner: duty}\n      - alert: TimescaleDiskPressure\n        expr: qingyuan_db_free_bytes < 20000000000\n        for: 10m\n        labels: {severity: critical, owner: ops}\n      - alert: WarningAckTimeout\n        expr: qingyuan_warning_unacked_seconds > 900\n        for: 5m\n        labels: {severity: warning, owner: duty}\n\\end{lstlisting}\n代码清单\\ref{lst:ch08-alert-rules}把告警规则按基础设施、数据链路和业务闭环分开，每条告警都有责任角色与处置手册。阈值要结合补传最大重投周期、TimescaleDB压缩窗口和工单确认时限，再用历史分位数校准。告警和恢复都记录时间、规则版本、当前值和证据链接，同一根因的指标按服务和时间窗聚合，避免告警风暴。\n容量评估覆盖 API 并发、Kafka 分区、Redis 内存、数据库写入吞吐和时序增长。28 个测点的教学规模可以单节点运行，但不能推断生产容量；压测纳入补传、模型运行和备份并发。扩容前后使用同一场景复测，并记录消息最老年龄、WAL增长、磁盘剩余比例和查询P95，确保容量提升没有换来数据延迟或权限错误。\n\\subsubsection{备份、恢复与演练记录}\n备份策略回答可接受的数据丢失窗口、一致性点和恢复验证方法。PostgreSQL使用全量加WAL归档，TimescaleDB压缩和分区策略与备份窗口错开；对象存储保存模型、纹理、报告和备份清单版本；Kafka保留足够日志以便重放，重放前依据 \\texttt{event\\_id} 幂等约束清理重复风险。Redis只保存可重建缓存，不进入唯一备份范围。\n\\begin{lstlisting}[language=YAML,caption={备份恢复演练与健康检查清单},label={lst:ch08-backup-rehearsal}]\nbackup: {schedule: \"15 2 * * *\", retention_days: 35, mode: \"base-plus-wal\", verify: [checksum, restore-schema, latest-reading-time]}\nobject_store: {versioning: true, retention_days: 90}\nkafka: {topic: qingyuan.reading.v1, replay_window_hours: 72}\nrehearsal:\n  target: isolated-restore\n  steps: [stop-writes, restore-postgres-and-wal, restore-object-manifest, start-api-readonly, verify-trace, replay-with-event-id-deduplication, run-smoke-test]\n  pass_conditions: [latest_reading_within_rpo, api_readiness_up, no_duplicate_warning, audit_trace_continuous]\n\\end{lstlisting}\n代码清单\\ref{lst:ch08-backup-rehearsal}把“有备份”改成可观察证据。开始前冻结变更窗口并记录最后一个观测、预警和工单 ID；恢复后先以只读模式校验对象关系、时序最新时间和审计链，再开放写入。Kafka只重放恢复点之后且数据库没有的事件，缓存由 API 根据数据库重建。任一条件失败，演练结果为不通过，并写明缺失备份、迁移错误或无法解释的事件。\n生产故障处置遵循观测、隔离、恢复、复盘顺序。运维员先确认探针和指标是否同时异常，避免把单个浏览器问题误判为全局故障；再依据 runbook 摘除异常实例或暂停消费，保护数据库和消息证据；恢复后用业务烟测验证测点到工单链路，专业分析员复核质量码和预警是否重复计算。每次演练沉淀恢复时长、数据丢失窗口、告警命中率和人工确认点，反过来校准保留策略、探针阈值和容量预算。\n上述配置与部署图、接口契约、数据库 DDL 共同构成部署交付物。学生提交时应同时提供编排文件、反代配置、变量清单、健康检查结果和一次恢复演练记录；只截图容器已启动不能证明数据可用、权限有效或故障可恢复。\n环境一致性还需要检查时区、字符集、容器用户和文件权限。数据库统一使用 UTC 保存发生时间，展示层按照值班员时区转换；所有容器以非 root 用户运行，备份目录只授予备份进程写权限。发布前用同一份配置渲染开发、测试和生产三套文件，比较渲染结果的键集合，发现多余或缺失变量就停止发布。配置差异要写入决策记录，不能靠运维员记忆。",
+      "reason": "直接说明部署对象；配合前句语法调整；删除强调性虚词"
+    },
+    {
+      "file": "output/chapters/chapter08.tex",
+      "line_before": 3597,
+      "before": "把这些步骤纳入课程项目后，学生提交的不是一张“容器已启动”的截图，而是一组可复核证据：编排文件的版本、渲染后的非敏感配置、探针响应、告警触发与恢复时间、备份校验摘要、恢复后的业务烟测和变更审批号。教师可以据此判断部署是否可重复、数据是否可恢复、权限是否有效以及运维责任是否清晰。生产系统也沿用同一证据链，只把单节点 Compose 替换为等价的编排环境。",
+      "after": "部署实验应提交以下记录：编排文件的版本、渲染后的非敏感配置、探针响应、告警触发与恢复时间、备份校验摘要、恢复后的业务烟测和变更审批号。教师可以据此判断部署是否可重复、数据是否可恢复、权限是否有效以及运维责任是否清晰。迁移到多节点编排环境时，还应补充节点故障、持久卷调度与跨节点网络的恢复测试。",
+      "reason": "去除批评式提交要求；消除仅替换编排即可投产的收敛式表述"
+    },
+    {
+      "file": "output/chapters/chapter08.tex",
+      "line_before": 3601,
+      "before": "本节把\\ref{sec:ch06-twin-lineage}节的可观测性、血缘和值守框架落到案例的备份、恢复、交接和复盘，恢复判断同时检查服务、数据、模型和业务闭环。",
+      "after": "恢复后的平台需要核对服务、数据、模型与在办业务。\\ref{sec:ch06-twin-lineage}节的监控指标和血缘记录可用于查明恢复到哪个时刻、遗漏了哪些事件以及哪些任务需要重新处理。",
+      "reason": "将抽象落到改成恢复诊断问题"
+    },
+    {
+      "file": "output/chapters/chapter08.tex",
+      "line_before": 3624,
+      "before": "案例做到什么程度算完成，需要在动手之前就写清楚。表\\ref{tab:chapter8-acceptance}把需求、架构、数据、三维、预警、孪生和运维七个阶段各自要回答的问题与必须交出的证据并列。表中“证据”列的需求编号回指第3章登记的 REQ-MON 系列（编号规则源自第2章追踪矩阵），使“需求—架构—实现—验收”成为一条可回查的证据链。这张表的用法是自查而不是打分：每一行的“证据”列如果拿不出对应文件，说明那个阶段并未真正通过，无论页面看起来多完整。",
+      "after": "案例做到什么程度算完成，需要在动手之前就写清楚。表\\ref{tab:chapter8-acceptance}把需求、架构、数据、三维、预警、孪生和运维七个阶段各自要回答的问题与必须交出的证据并列。表中“证据”列的需求编号回指第3章登记的 REQ-MON 系列（编号规则源自第2章追踪矩阵），使“需求—架构—实现—验收”成为一条可回查的证据链。自查时逐行核对文件和测试记录；缺失项目应补做对应步骤，并记录补验结果。",
+      "reason": "把训诫式收尾改为自查动作"
+    },
+    {
+      "file": "output/chapters/chapter08.tex",
+      "line_before": 3649,
+      "before": "本章最容易踩的三个坑是：把设备故障值送入风险评分、把无预警和未评估折叠成同一个颜色、把模型或容器“运行成功”当成业务链路已经可靠。前一个坑会制造误报，第二个坑会掩盖缺测，第三个坑会让恢复演练只验证进程而没有验证数据。对应的修复路径是质量码门禁、显式 Classification 结果、模型卡与输入快照、健康探针和端到端烟测。",
+      "after": "平台集成后，应同时验证数据判定和业务流转。设备故障值经质量检查隔离，避免进入风险评分；分类结果分别记录可否评估与预警等级，防止缺测被显示为无预警。模型任务保存输入快照和版本，部署恢复则通过健康探针与端到端烟测检查：服务重新启动后，原始观测、预警、工单和审计记录能否继续关联。",
+      "reason": "去统一踩坑模板，以系统关系组织小结"
+    },
+    {
+      "file": "output/chapters/chapter08.tex",
+      "line_before": 3651,
+      "before": "本章最该记住的五个判断是：第一，参数表是案例唯一工程来源，代码、数据集和习题都要回指同一版本；第二，观测必须经过格式、单位、范围、时序和重复检查才可评分；第三，蓝黄橙红预警描述业务关注程度，NONE 与未评估分别表达正常和证据不足；第四，闸门和水量平衡公式必须给出适用条件、单位和残差；第五，数字孪生的价值在模型、权限、证据和人在回路的可复核闭环，而不在三维动画本身。",
+      "after": "工程参数、接口契约与规则版本贯穿代码、数据集和习题。观测通过格式、单位、范围、时序和重复检查后进入评估，蓝、黄、橙、红四级表达关注程度；NONE表示当前规则下无预警，未评估表示缺少合格数据。闸门与水量平衡计算还需说明适用条件、单位和残差。数字孪生进一步连接场景、模型与方案，专业人员参与条件检查、方案比较、审批和效果复核。",
+      "reason": "去最该记住与排比收尾，保留技术条件"
+    },
+    {
+      "file": "output/chapters/chapter08.tex",
+      "line_before": 3653,
+      "before": "一次演练中，某站点把 suspect 数据当 valid 参与评分，系统连续产生蓝色事件，值班员关闭推送后真正的黄色趋势无人确认；另一次恢复只启动了 API 容器，却没有恢复 TimescaleDB 的 WAL 和对象清单，页面显示“服务正常”但无法追溯工单证据。把失败路径写进测试、告警和复盘记录，才能让平台从“能启动”走向“可负责”。",
+      "after": "可安排两项故障演练检验上述要求：输入带suspect质量码的读数，检查它是否被隔离并给出复核原因；只恢复API容器而暂不恢复数据库，检查页面是否提示数据服务不可用，以及工单查询是否返回可识别的错误。补齐数据库及对象清单后，再验证观测到工单的关联。演练记录同时保留输入、预期结果、实际响应与恢复步骤。",
+      "reason": "将无来源故事改成可复现实验，删除人格化收敛句"
+    },
+    {
+      "file": "output/chapters/chapter09.tex",
+      "line_before": 7,
+      "before": "\\begin{enumerate}\n\\item 从业务目标、数据链路、模型能力和运行责任四个方面回顾智慧水利平台的整体架构；\n\\item 根据标准依据、开源成熟度、可复现基准和迁移成本，判断一项新技术是否值得投入课程项目或工程试点；\n\\item 为偏远监测站比较LoRaWAN与NB-IoT的覆盖、功耗、时延、运维边界和数据安全约束；\n\\item 把新技术选型转化为可验证的需求、接口、数据、测试和回退方案，而不是停留在名词罗列；\n\\item 独立完成一份课程总结报告，说明系统已经具备的能力、尚未覆盖的边界以及下一步验证计划。\n\\end{enumerate}",
+      "after": "\\begin{enumerate}\n\\item 从业务目标、数据链路、模型能力和运行责任四个方面回顾智慧水利平台的整体架构；\n\\item 根据标准依据、开源成熟度、可复现基准和迁移成本，判断一项新技术是否值得投入课程项目或工程试点；\n\\item 为偏远监测站比较LoRaWAN与NB-IoT的覆盖、功耗、时延、运维边界和数据安全约束；\n\\item 把新技术选型转化为需求、接口、数据、测试和回退方案，并规定验证方法；\n\\item 独立完成一份课程总结报告，说明系统已经具备的能力、尚未覆盖的边界以及下一步验证计划。\n\\end{enumerate}",
+      "reason": "删除无实际对象的反向比较"
+    },
+    {
+      "file": "output/chapters/chapter09.tex",
+      "line_before": 27,
+      "before": "第8章把前述能力放入水利工程安全监测平台，要求观测进入、质量检查、预警分级、工单处置、三维定位和审计归档能够相互追踪；8.5节进一步把场景、模型、方案版本和人工审批连接为“四预”闭环。第9章的任务不是增加更多名词，而是训练你在需求和证据约束下安排学习顺序、评估技术投入，并为下一轮迭代写出可检查的计划。",
+      "after": "第8章把前述能力放入水利工程安全监测平台，要求观测进入、质量检查、预警分级、工单处置、三维定位和审计归档能够相互追踪；8.5节进一步把场景、模型、方案版本和人工审批连接为“四预”闭环。后续学习可从运行中尚未解决的问题出发，比较技术方案、评估投入，并制定下一轮迭代计划。",
+      "reason": "去教材自我说明，衔接后续学习"
+    },
+    {
+      "file": "output/chapters/chapter09.tex",
+      "line_before": 29,
+      "before": "可以对照水利工程安全监测平台从v0到v5的建设历程，用以下四个问题检查自己的学习成果：能否说明一条观测如何变成可追溯的预警事件；能否解释一次技术选型对接口、数据和运维的影响；能否为失败和降级路径准备验收证据；能否把模型输出放在人工复核和权限边界内。若其中任何问题只能回答概念，说明还需要回到相应章节完成一个最小实验。",
+      "after": "可以对照水利工程安全监测平台从v0到v5的建设历程，用以下四个问题检查自己的学习成果：能否说明一条观测如何变成可追溯的预警事件；能否解释一次技术选型对接口、数据和运维的影响；能否为失败和降级路径准备验收证据；能否把模型输出放在人工复核和权限边界内。对缺少运行记录的问题，可回到相应章节补做实验，保存输入、结果与问题定位过程。",
+      "reason": "将训诫式判断改成补学动作"
+    },
+    {
+      "file": "output/chapters/chapter09.tex",
+      "line_before": 31,
+      "before": "全书的学习成果按表\\ref{tab:ch09-outcomes}的七条核对，每条都对应一份你已经做出来的东西，而不是“了解”“掌握”这类无法检验的动词。第二列是证据所在的章节与交付物，第三列是自查题：做不出来，就回到该章重做对应的核心小节。",
+      "after": "表\\ref{tab:ch09-outcomes}列出七项课程成果及其对应的章节、交付物和自查问题。核对时先运行已有项目或查阅作业，再回答自查问题；遇到困难，可按末列指引复习相关小节，并用新的运行记录确认问题已解决。",
+      "reason": "去教育目标编写的自评，修正表列位置措辞"
+    },
+    {
+      "file": "output/chapters/chapter09.tex",
+      "line_before": 58,
+      "before": "本节先梳理政策与建设背景，再给出教材主线之外的延伸方向，最后提供一套判断新技术是否值得投入的方法；涉及案例时注明资料来源、统计口径与适用范围。读者可以据此把趋势判断转化为可验证的架构问题，而不是只记忆项目名称。",
+      "after": "技术发展可以从建设需求、工程应用和试验结果三个方面观察：政策文件说明拟解决的业务问题，建设资料说明已采用的系统方案，基准实验说明方案在特定条件下的表现。阅读这些材料时，应分别记录发布时间、适用范围和验证方法。",
+      "reason": "用观察方法替代本节安排与价值宣称"
+    },
+    {
+      "file": "output/chapters/chapter09.tex",
+      "line_before": 64,
+      "before": "这意味着，教材中的“平台开发”不能仅理解为前端页面和后台接口的拼接，而应理解为一个贯通感知、数据、模型、应用和运行管理的完整体系。对学习者而言，真正需要建立的是链路意识：监测点如何接入，数据如何治理，模型如何调用，结果如何展示，业务如何闭环。",
+      "after": "上述建设任务涉及感知、数据、模型、应用和运行管理。分析一个平台时，可以沿观测数据追踪：监测点怎样接入，数据经过哪些检查，模型使用哪一版输入，结果呈现给谁，处置意见与执行回执保存在哪里。",
+      "reason": "改为可操作的系统分析方法"
+    },
+    {
+      "file": "output/chapters/chapter09.tex",
+      "line_before": 66,
+      "before": "从公开建设信息看，数字孪生黄河已经形成了较为典型的行业样本。官方专题和建设报道表明，其工作重点并不只是“三维可视化”，而是围绕信息采集、通信传输、数据管理、应用开发和运行维护，服务于防汛会商、水资源调度等业务场景\\cite{twinYellowRiver2024,twinYellowRiverInfo2024}。这也说明，第6章的三维场景、第7章的观测数据展示、第8章的数字孪生“四预”案例，只有与具体业务目标绑定，才真正构成“数字孪生平台”。",
+      "after": "从公开建设信息看，数字孪生黄河已经形成了较为典型的行业样本。官方专题和建设报道表明，其建设涉及信息采集、通信传输、数据管理、应用开发和运行维护，服务于防汛会商、水资源调度等业务场景\\cite{twinYellowRiver2024,twinYellowRiverInfo2024}。分析此类应用时，可联系第6章的空间场景、第7章的观测展示和第8章的“四预”流程，检查数据如何支撑会商与调度。",
+      "reason": "保留有来源事实，去非此即彼修辞；不以泛化结论收尾，给出阅读任务"
+    },
+    {
+      "file": "output/chapters/chapter09.tex",
+      "line_before": 74,
+      "before": "人工智能在智慧水利中的价值，更多体现在“增强分析能力”而不是“替代业务判断”。在平台侧，机器学习更适合用于时序预测、异常检测、遥感解译和辅助评估；大语言模型更适合用于规范检索、知识问答、运维辅助和文档生成。无论采用哪类模型，工程实现上都应保留人工复核、结果追踪、版本管理和回退机制，避免把尚未稳定验证的模型输出直接当成最终结论。",
+      "after": "人工智能可辅助处理观测、影像和业务文档。在平台侧，机器学习更适合用于时序预测、异常检测、遥感解译和辅助评估；大语言模型更适合用于规范检索、知识问答、运维辅助和文档生成。无论采用哪类模型，工程实现上都应保留人工复核、结果追踪、版本管理和回退机制，避免把尚未稳定验证的模型输出直接当成最终结论。",
+      "reason": "去抽象价值对照，保留后续复核要求"
+    },
+    {
+      "file": "output/chapters/chapter09.tex",
+      "line_before": 78,
+      "before": "对偏远监测站点而言，通信与算力布局往往比算法本身更先成为约束。LoRaWAN 和 NB-IoT 都属于教材中值得了解的低功耗广域网技术路线：前者强调低功耗、广覆盖和灵活组网，后者来自蜂窝体系，适合借助运营商网络开展接入\\cite{lorawan104,nbiot3gpp2016}。在教学上，更重要的是引导学生按覆盖范围、功耗预算、时延要求、运维边界和网络所有权进行选型，而不是机械记忆某一种技术“最好”。",
+      "after": "对偏远监测站点而言，通信与算力布局往往比算法本身更先成为约束。LoRaWAN 和 NB-IoT 是两种低功耗广域网技术路线：前者强调低功耗、广覆盖和灵活组网，后者来自蜂窝体系，适合借助运营商网络开展接入\\cite{lorawan104,nbiot3gpp2016}。选型时应测量站点覆盖与链路时延，估算供电条件下的续航时间，并明确网络所有权和故障维护责任。",
+      "reason": "删除教材推介口吻；把面向教师的说明改为学生的选型步骤"
+    },
+    {
+      "file": "output/chapters/chapter09.tex",
+      "line_before": 80,
+      "before": "云边端协同的分层部署详见\\ref{sec:ch06-twin-edge-cloud}节；本节只聚焦感知网络接入，避免把网络制式、边缘职责和云端治理混成一个选型问题。",
+      "after": "网络接入方案确定后，还需安排边缘缓存与云端处理职责，分层部署方法见\\ref{sec:ch06-twin-edge-cloud}节。",
+      "reason": "去自述范围限制，说明与部署的连接"
+    },
+    {
+      "file": "output/chapters/chapter09.tex",
+      "line_before": 84,
+      "before": "智慧水利平台一旦进入跨部门协同，就绕不开空间数据互操作问题。OGC 标准体系仍是理解 GIS 服务接口的重要入口，其中 WMS 面向地图影像服务，WFS 面向矢量要素访问，WCS 面向覆盖数据访问；同时，OGC 也在持续推进更现代的 OGC API 路线\\cite{ogcStandardsOverview,ogcWMS,ogcWFS,ogcWCS}。因此，第6章和第7章中的地图服务、监测点叠加和三维场景联动，应尽量按“可交换、可复用、可扩展”的思路组织，而不是绑定某一个私有平台。",
+      "after": "智慧水利平台一旦进入跨部门协同，就绕不开空间数据互操作问题。OGC 标准体系仍是理解 GIS 服务接口的重要入口，其中 WMS 面向地图影像服务，WFS 面向矢量要素访问，WCS 面向覆盖数据访问；同时，OGC 也在持续推进更现代的 OGC API 路线\\cite{ogcStandardsOverview,ogcWMS,ogcWFS,ogcWCS}。第6章和第7章的地图服务、监测点叠加及三维联动可据此约定坐标系、图层格式和查询接口，便于不同部门交换和更新数据。",
+      "reason": "以具体互操作要求替代三词口号"
+    },
+    {
+      "file": "output/chapters/chapter09.tex",
+      "line_before": 102,
+      "before": "本教材覆盖的技术领域较广，初学者在学习过程中可能面临知识整合的挑战。结合本章介绍的发展趋势，提供以下建议：",
+      "after": "后续学习可沿两条线展开：一条补齐课程项目中尚未完成的功能与测试，另一条围绕新的水利问题开展模型、数据或运行维护实验。",
+      "reason": "删除泛化困难与建议引语"
+    },
+    {
+      "file": "output/chapters/chapter09.tex",
+      "line_before": 106,
+      "before": "\\paragraph{注重实践与动手能力}软件开发是一门实践性极强的学科，仅靠阅读教材难以真正掌握。建议读者在学习每章内容后，完成对应的思考题与练习，并尝试在本地环境中搭建和运行示例项目。特别是对于第4、5、6、7章的前后端与可视化技术，应该自己动手写代码、调试系统，培养解决实际问题的能力。",
+      "after": "\\paragraph{注重实践与动手能力}完成章末练习后，在本地运行配套项目，选择一项输入或配置进行修改，预测结果后再验证。例如，第4、5章可改变查询时间窗或登录权限，观察页面与接口响应；第6、7章可切换测点、缩放相机或注入缺测，检查定位与曲线。记录预测和实际结果的差异，再定位产生差异的代码。",
+      "reason": "用具体实验替代学科价值和培养能力套话"
+    },
+    {
+      "file": "output/chapters/chapter09.tex",
+      "line_before": 108,
+      "before": "\\paragraph{循序渐进的学习路径}本教材按照由浅入深的顺序编排，第1--3章为后续内容提供必要的基础。如果在后续章节中遇到困难，不妨回顾前面的相关内容。建议学习完全书后，选择一个感兴趣的应用场景（如防洪预警、水质监测、工程安全监测），尝试设计一个完整的小型智慧水利应用，将各章知识融会贯通。",
+      "after": "\\paragraph{循序渐进的学习路径}把运行问题按需求、设计、实现和验证分类，再回查对应章节。需求含糊时返回第2章补充验收条件，模块职责不清时返回第3章画出数据流。完成课程项目后，可选择防洪预警、水质监测或工程安全监测中的一个场景，复用已有模块，并标出需要新增的数据与规则。",
+      "reason": "去编排自赞，提供按问题复习的路径"
+    },
+    {
+      "file": "output/chapters/chapter09.tex",
+      "line_before": 110,
+      "before": "\\paragraph{培养系统思维}智慧水利平台开发需要将水利专业知识、软件工程方法和信息技术进行有机融合。建议读者在学习具体技术的同时，多思考不同模块之间的协作关系与数据流向。例如，在设计数据库时考虑后续的可视化需求，在进行三维场景构建时考虑与物理模型的耦合方式。",
+      "after": "\\paragraph{培养系统思维}修改一个模块时，追踪它的上游输入和下游使用者。例如，数据库增加聚合字段后，要检查图表的单位与时间轴；三维场景改变坐标原点后，要检查测点定位与模型输入。把受影响的接口、数据文件和测试列成清单，可以在联调前发现跨模块的不一致。",
+      "reason": "把系统思维口号改为变更影响分析"
+    },
+    {
+      "file": "output/chapters/chapter09.tex",
+      "line_before": 114,
+      "before": "\\paragraph{数字孪生技术深化}对于对数字孪生感兴趣的读者，建议进一步学习系统建模与仿真理论、参数率定和并行计算。可关注《水利学报》《水科学进展》、Water Resources Research、Journal of Hydrology、Environmental Modelling \\& Software等水利水文主刊，并用案例中的输入、模型版本和误差指标复现实验，而不是只摘录论文结论。",
+      "after": "\\paragraph{数字孪生技术深化}对于对数字孪生感兴趣的读者，建议进一步学习系统建模与仿真理论、参数率定和并行计算。可关注《水利学报》《水科学进展》、Water Resources Research、Journal of Hydrology、Environmental Modelling \\& Software等水利水文主刊，阅读论文时记录输入、模型版本和误差指标，选择数据可获得的案例复现实验。",
+      "reason": "改为正面研究步骤"
+    },
+    {
+      "file": "output/chapters/chapter09.tex",
+      "line_before": 118,
+      "before": "\\paragraph{能力—问题—技术路径}下面的对照表把学习方向落实到可检验的问题，帮助读者按瓶颈选择技术，而不是按名词热度安排课程；表\\ref{tab:ch09-technology-paths}中的每一行都可以转化为一次小型基准实验：",
+      "after": "\\paragraph{能力—问题—技术路径}表\\ref{tab:ch09-technology-paths}按性能、预测、事件处理、存储和运维列出待解决的问题与技术路径。可从项目中的一个瓶颈选取实验，记录改进前后的指标：",
+      "reason": "用表格内容与用法引出，去反向评价"
+    },
+    {
+      "file": "output/chapters/chapter09.tex",
+      "line_before": 163,
+      "before": "本章把“学完全书以后能做什么”落实为四类能力：把水利目标转换为需求和验收证据，把观测、质量码、模型和预警组织成可追溯链路，把前端、后端、空间场景和数据服务集成为可运行切片，以及在新技术出现时用标准、开源、基准和迁移成本进行审慎决策。趋势判断必须附带时间、来源和适用范围；技术试点必须有成功条件、退出条件和责任人；模型输出必须保留版本、输入快照、人工复核和回退记录。",
+      "after": "智慧水利平台开发从业务需求出发，经对象与数据设计、前后端实现、空间展示，进入预警处置和运行维护。课程项目可沿这一路径检查：需求是否有验收条件，观测能否追溯到质量判定与处置记录，各模块能否按契约协作。评估新技术时，还需查阅标准与实现，固定基准实验条件，计算迁移成本；涉及模型时，保留版本、输入快照、复核意见和回退记录。",
+      "reason": "将本章成果宣告改为全书技术关系回顾"
+    },
+    {
+      "file": "output/chapters/chapter09.tex",
+      "line_before": 165,
+      "before": "把这些能力落到接下来的三个月，可以从三件具体的事开始。第一，挑一个自己熟悉的水利场景——防洪预警、灌区配水或工程安全监测都行——按第2章的方法写出一份两页的需求说明，其中至少有五条能设计出通过/失败判据。第二，把第4章和第5章的最小链路在本地跑通：登录、取回受保护接口的数据、把一条带质量码的观测写进库并触发一次预警评估；出问题时按第5章的分层诊断顺序排查，而不是逐行猜。第三，为其中一项新技术写一页决策记录，写清基准数据、试点范围、成功条件、退出条件和责任人。",
+      "after": "把这些能力落到接下来的三个月，可以从三件具体的事开始。第一，挑一个自己熟悉的水利场景——防洪预警、灌区配水或工程安全监测都行——按第2章的方法写出一份两页的需求说明，其中至少有五条能设计出通过/失败判据。第二，把第4章和第5章的最小链路在本地跑通：登录、取回受保护接口的数据、把一条带质量码的观测写进库并触发一次预警评估；出问题时按第5章的分层诊断顺序排查，并记录定位依据。第三，为其中一项新技术写一页决策记录，写清基准数据、试点范围、成功条件、退出条件和责任人。",
+      "reason": "去贬低式比较，增加记录动作"
+    },
+    {
+      "file": "output/chapters/chapter09.tex",
+      "line_before": 167,
+      "before": "三件事做完，全书的方法就从读过变成了可以拿给别人看的证据。这也是本书希望留给读者的东西：不是一套记住的名词，而是一条自己能走一遍、并且能向别人解释清楚的路径。\n\\section*{思考题与练习题}",
+      "after": "完成后，将需求说明、运行步骤和决策记录交给另一名同学复现。对方能否按记录取得相同结果、能否根据错误提示继续排查，可帮助你发现文档遗漏和实现中尚未处理的情况。\n\\section*{思考题与练习题}",
+      "reason": "去作者愿景与收敛腔，以同伴复现收尾"
+    },
+    {
+      "file": "output/chapters/chapter09.tex",
+      "line_before": 192,
+      "before": "报告还应附一页“证据索引”，把需求编号、接口路径、数据文件、代码提交、测试日志、演示步骤和结论逐一对应。若某项指标没有实测值，应明确写出待测原因、拟采用的采样方法和负责人，不用估计数字填空。对于模型或规则产生的预警，应保存输入时间窗、质量码筛选结果、阈值版本、输出摘要和人工处置意见；对于页面和三维场景，应记录浏览器、设备、坐标基准、资源版本和失败时的降级表现。这样，课程报告既是学习成果，也是下一轮需求评审可以直接使用的工程档案。",
+      "after": "报告还应附一页“证据索引”，把需求编号、接口路径、数据文件、代码提交、测试日志、演示步骤和结论逐一对应。若某项指标没有实测值，应明确写出待测原因、拟采用的采样方法和负责人，不用估计数字填空。对于模型或规则产生的预警，应保存输入时间窗、质量码筛选结果、阈值版本、输出摘要和人工处置意见；对于页面和三维场景，应记录浏览器、设备、坐标基准、资源版本和失败时的降级表现。后续需求评审可按索引查询这些记录，核对已实现功能与待验证事项。",
+      "reason": "以索引用途替代双重价值判断"
+    },
+    {
+      "file": "output/chapters/chapter09.tex",
+      "line_before": 194,
+      "before": "评审时可以采用“演示—追问—复现”三步法：先按报告步骤运行一条正常链路，再随机抽取一条缺测、超时或无权限记录追问系统行为，最后由另一名同学在干净环境中依据版本清单复现结果。若复现失败，应区分代码缺陷、数据版本差异、环境配置差异和需求理解差异，并把判断过程写入问题单。对课程设计而言，这种可复现性比展示更多页面更能说明工程质量，也能帮助团队在毕业设计或实习项目中形成共同的交付语言。",
+      "after": "评审时可以采用“演示—追问—复现”三步法：先按报告步骤运行一条正常链路，再随机抽取一条缺测、超时或无权限记录追问系统行为，最后由另一名同学在干净环境中依据版本清单复现结果。若复现失败，应区分代码缺陷、数据版本差异、环境配置差异和需求理解差异，并把判断过程写入问题单。复现过程发现的问题应回填到运行说明与测试用例中，并在再次提交时附上处理结果。",
+      "reason": "删除泛化评价，说明反馈如何落实"
+    },
+    {
+      "file": "output/chapters/chapter08.tex",
+      "line_before": 21,
+      "before": "\\begin{notebox}\n\\paragraph{本章分为两篇}8.1--8.4为\\textbf{核心案例篇}：把前七章的方法与技术落成一个可运行的安全监测平台，交付物是\"观测入库—质量检查—预警评估—工单处置\"的完整闭环，属于48学时方案的课堂内容。8.5--8.6为\\textbf{数字孪生拓展篇（选学）}：在核心平台之上叠加预演、会商与生产运维能力，适合课程设计与自学进阶。两篇可独立验收，学生完成核心篇即达到本章的基本要求。\n\\end{notebox}",
+      "after": "\\begin{notebox}\n\\paragraph{学习安排}按全书56学时课程安排，8.1--8.4完成\\textbf{平台集成与预警}：观测入库、质量检查、预警评估和工单处置；8.5为\\textbf{数字孪生拓展选读}，学习预演与会商；8.6为\\textbf{部署指导实践}，完成启动、降级和恢复验证。各阶段按对应验收表提交运行记录。\n\\end{notebox}",
+      "reason": "按已确定56学时课程和实际层次修正旧48学时分篇说明"
+    },
+    {
+      "file": "output/chapters/chapter08.tex",
+      "line_before": 25,
+      "before": "\\begin{warningbox}\n\\paragraph{课堂最小路径（4学时）}核心篇约2.5万字、41个代码清单，课堂内不可能也不需要逐个讲完。4学时的讲授只走下面8个清单构成的最小闭环，其余清单全部归入实验课任务包或自学材料，验收仍以8.4节验收表为准：\n\\begin{enumerate}\n\\item 数据模型：对象表与观测超表（清单\\ref{lst:ch08-sql-asset}、\\ref{lst:ch08-sql-reading}）——质量码与复合主键是后面一切环节的地基；\n\\item 幂等写入（清单\\ref{lst:ch08-sql-idempotent-insert}）——同一事件重复到达不产生重复观测；\n\\item 消息消费（清单\\ref{lst:ch08-kafka-consumer}）——观测从Kafka进入数据库的唯一入口；\n\\item 质量检查（清单\\ref{lst:ch08-quality-java}）——valid/suspect/missing 的判定落点；\n\\item 预警队列（清单\\ref{lst:ch08-sql-warning-queue}）——从观测异常到待确认预警；\n\\item 工单闭环（清单\\ref{lst:ch08-workorder-chain}）——预警确认后的处置与回执；\n\\item 编排与冒烟（清单\\ref{lst:ch08-compose}，配合仓库 \\texttt{smoke.sh}）——一条命令验证\"启动—登录—取数—拒绝\"。\n\\end{enumerate}\n按此路径讲完，学生即具备运行和检验 v5 骨架的能力；其余清单（空间查询、连续聚合、压缩保留、可观测性、备份演练等）在实验课或课程设计中按需展开。\n\\end{warningbox}",
+      "after": "\\begin{warningbox}\n\\paragraph{课堂示例（4学时）}课堂依次运行以下8个清单，追踪一条观测从写入到预警处置的过程，并检查重复消息、质量异常和无权限请求的响应。其余清单结合实验课任务练习，按相应验收表记录结果：\n\\begin{enumerate}\n\\item 数据模型：对象表与观测超表（清单\\ref{lst:ch08-sql-asset}、\\ref{lst:ch08-sql-reading}）——检查质量码约束与复合主键；\n\\item 幂等写入（清单\\ref{lst:ch08-sql-idempotent-insert}）——同一事件重复到达不产生重复观测；\n\\item 消息消费（清单\\ref{lst:ch08-kafka-consumer}）——跟踪观测从Kafka写入数据库；\n\\item 质量检查（清单\\ref{lst:ch08-quality-java}）——检查valid/suspect/missing的判定；\n\\item 预警队列（清单\\ref{lst:ch08-sql-warning-queue}）——从观测异常到待确认预警；\n\\item 工单闭环（清单\\ref{lst:ch08-workorder-chain}）——预警确认后的处置与回执；\n\\item 编排与冒烟（清单\\ref{lst:ch08-compose}，配合仓库 \\texttt{smoke.sh}）——一条命令验证\"启动—登录—取数—拒绝\"。\n\\end{enumerate}\n运行后，用事件标识核对观测、预警与工单的对应关系，再检查失败请求是否留下原因。空间查询、连续聚合、压缩保留、可观测性和备份演练等清单在实验课或课程设计中继续练习。\n\\end{warningbox}",
+      "reason": "删除篇幅辩解和最小闭环，说明课堂操作；去地基比喻与绝对化；删除不必要的唯一性断言；以动作说明示例目的；以运行结果取代完成授课即可具备能力的自述"
+    },
+    {
+      "file": "output/chapters/chapter08.tex",
+      "line_before": 39,
+      "before": "\\begin{tipbox}\n\\paragraph{工程版本线：v4（观测展示与联动） $\\rightarrow$ v5（完整平台）}起点是 v4 的展示层。本章核心篇结束时你应交付 \\textbf{v5}：加上质量检查、四级预警、工单闭环与部署编排的完整平台——仓库 \\texttt{db/001\\_init.sql}、\\texttt{ReadingConsumer}、\\texttt{docker-compose.yml} 与 \\texttt{smoke.sh} 是 v5 的骨架，本章清单把它们扩展为完整实现；拓展篇（8.5起）在 v5 之上叠加预演与会商，不修改 v5 的既有契约。\n\\end{tipbox}",
+      "after": "\\begin{tipbox}\n\\paragraph{工程版本线：v4（观测展示与联动） $\\rightarrow$ v5（完整平台）}起点是 v4 的展示层。完成集成与部署实践后交付 \\textbf{v5}：在展示层加入质量检查、四级预警、工单处置和部署编排。相关实现见仓库 \\texttt{db/001\\_init.sql}、\\texttt{ReadingConsumer}、\\texttt{docker-compose.yml} 与 \\texttt{smoke.sh}。8.5节在 v5 之上扩展预演与会商，沿用已有接口契约。\n\\end{tipbox}",
+      "reason": "与部署指导实践和拓展小节范围对齐"
+    },
+    {
+      "file": "output/chapters/chapter08.tex",
+      "line_before": 990,
+      "before": "最后一个练习把事件链完整串起来。代码清单\\ref{lst:ch08-sql-trace-event}使用同一事件标识关联观测、\n预警和工单，并把模型运行的输入快照作为独立结果返回。若某一步没有记录，报告应明确显示“链路缺口”，\n而不是用空字符串伪造闭环。这种查询是课程项目验收时最有价值的可复现证据之一。",
+      "after": "最后一个练习把事件链完整串起来。代码清单\\ref{lst:ch08-sql-trace-event}使用同一事件标识关联观测、\n预警和工单，并把模型运行的输入快照作为独立结果返回。若某一步没有记录，报告应明确显示“链路缺口”，\n并列出缺失的记录类型和关联字段，供后续定位。",
+      "reason": "删除伪造指责与最高级评价"
+    },
+    {
+      "file": "output/chapters/chapter08.tex",
+      "line_before": 1007,
+      "before": "以上练习覆盖迁移、空间检索、时序读取、质量统计、幂等写入、预警处置、聚合刷新、生命周期管理、\n并发控制、备份恢复、权限隔离、修订审计和链路追溯。它们与三段基础 DDL 形成由“结构—查询—运维”\n组成的最小闭环。教学时可以先让学生阅读执行计划，再让学生改变时间窗、质量码或状态条件，观察\n结果如何变化；只有能够解释每个条件为什么存在，才算真正掌握数据库设计，而不是记住几条 SQL。",
+      "after": "这些查询练习对应数据迁移、空间与时序检索、质量统计、幂等写入、预警处置和聚合刷新；运行维护还\n包括保留策略、并发控制、备份恢复、权限隔离和修订审计。练习时先阅读执行计划，再分别改变时间窗、\n质量码或状态条件，比较返回行数、索引使用和耗时。将观察结果与三段基础DDL中的类型、约束和索引\n逐项对应，记录哪些条件影响查询正确性，哪些条件影响执行效率。",
+      "reason": "把复述价值和对教师指导改成具体练习"
+    },
+    {
+      "file": "output/chapters/chapter08.tex",
+      "line_before": 1014,
+      "before": "数据库设计的起点不是“选哪一种数据库”，而是列出业务事实、事实发生的时间、事实的责任边界以及\n事实被谁查询。以水利工程安全监测平台为例，测点编码是跨系统共享的事实，不能因为前端换了树形目录\n就改写；观测时间是设备事件的事实，不能用服务器接收时间替代；质量码是校验结论，不能与原始数值\n混为一列；预警等级是规则输出，必须携带规则版本和证据；工单是处置过程，需要责任人和回执；模型\n运行是一次可复现计算，需要输入快照和版本。把这些事实逐一写成字段，才会得到本节的五张核心表。",
+      "after": "数据库设计先列出业务事实、发生时间、责任角色和查询需求，再确定字段、约束与存储结构。\n以水利工程安全监测平台为例，测点编码是跨系统共享的事实，不能因为前端换了树形目录\n就改写；观测时间是设备事件的事实，不能用服务器接收时间替代；质量码是校验结论，不能与原始数值\n混为一列；预警等级是规则输出，必须携带规则版本和证据；工单是处置过程，需要责任人和回执；模型\n运行是一次可复现计算，需要输入快照和版本。把这些事实逐一写成字段，才会得到本节的五张核心表。",
+      "reason": "以正面步骤说明设计起点"
+    },
+    {
+      "file": "output/chapters/chapter08.tex",
+      "line_before": 1060,
+      "before": "备份策略要同时覆盖结构、数据、权限和扩展。PostGIS 的空间列、TimescaleDB 的超表元数据、连续\n聚合策略和角色授权缺一项都可能导致恢复后查询失败。全量备份之外还要保留增量或归档日志，并定期在\n隔离环境恢复。恢复演练的验收不是“服务能启动”，而是能否用一条事件标识查到测点、原始观测、质量\n结论、预警证据、工单回执和模型输入；能否按角色隐藏不应查看的字段；能否在恢复后继续写入新的时间块。",
+      "after": "备份策略要同时覆盖结构、数据、权限和扩展。PostGIS 的空间列、TimescaleDB 的超表元数据、连续\n聚合策略和角色授权缺一项都可能导致恢复后查询失败。全量备份之外还要保留增量或归档日志，并定期在\n隔离环境恢复。恢复后按事件标识查询测点、原始观测、质量结论、预警记录、工单回执和模型输入，\n再检查角色授权是否正确、新的时间块能否继续写入；任一项失败，都应记录恢复缺口。",
+      "reason": "正面列出恢复检查"
+    },
+    {
+      "file": "output/chapters/chapter08.tex",
+      "line_before": 1089,
+      "before": "通过以上推导，数据库设计和 DDL 不再是孤立的 SQL 片段，而是从业务事实、质量口径、空间关系、时序\n性能、权限边界、审计要求和运维生命周期共同推导出的可验证契约。后续章节可以在此基础上讨论实体\n映射、接口实现和示例数据，而不必重新发明字段或偷偷改变工程参数。",
+      "after": "实体映射与接口实现应沿用这组数据定义：对象表提供稳定编码，观测表保留时间与质量，预警和工单表\n记录评估与处置，模型运行表保存输入快照和版本。实现时逐列核对Java类型、JSON字段和数据库约束，\n再用查询练习检查相同输入是否得到一致结果。",
+      "reason": "删除推导自评与对改稿者的训斥，转为实体映射检查"
+    },
+    {
+      "file": "output/chapters/chapter08.tex",
+      "line_before": 1109,
+      "before": "数据库契约还应服务于教学复盘。学生可以从事件追溯查询出发，逐个删除或改变查询条件，观察外键、质量\n码、状态和索引如何影响结果；也可以故意发送重复事件、未来时间戳和缺少单位的记录，验证系统是否在\n正确的位置拒绝或标记。实验报告要写清“哪一层发现问题、哪一层保存证据、哪一层向用户解释”，而不\n只是贴出一条 SQL 的执行结果。能够回答这些问题，才说明学生理解了关系模型与水利业务之间的映射。",
+      "after": "数据库契约还应服务于教学复盘。学生可以从事件追溯查询出发，逐个删除或改变查询条件，观察外键、质量\n码、状态和索引如何影响结果；也可以故意发送重复事件、未来时间戳和缺少单位的记录，验证系统是否在\n正确的位置拒绝或标记。实验报告要写清“哪一层发现问题、哪一层保存证据、哪一层向用户解释”，而不\n只是贴出一条 SQL 的执行结果。将观察结果对应到外键、状态约束和查询条件，说明各项约束的作用。",
+      "reason": "去泛化学习评价"
+    },
+    {
+      "file": "output/chapters/chapter08.tex",
+      "line_before": 1114,
+      "before": "工程交付时还要把数据库契约交给不同角色共同评审：业务人员检查字段是否能表达处置流程，测量人员\n检查单位和精度，开发人员检查实体与 DTO 映射，运维人员检查分区、备份和恢复，安全人员检查角色与\n审计范围。评审结论写入版本记录，后续修改沿用同一流程。这样，DDL 既是可执行的初始化脚本，也是\n业务、技术和运维之间的共同语言；当教材示例迁移到真实项目时，读者知道哪些内容可以复用，哪些内容\n必须经过项目审批和压测后才能确定。",
+      "after": "工程交付时还要把数据库契约交给不同角色共同评审：业务人员检查字段是否能表达处置流程，测量人员\n检查单位和精度，开发人员检查实体与 DTO 映射，运维人员检查分区、备份和恢复，安全人员检查角色与\n审计范围。评审结论写入版本记录，后续修改沿用同一流程。进入实际项目时，\n字段类型、关系与约束可作为设计起点；工程阈值、角色授权、分区规模和保留期限应按项目规程、审批结果\n与压测数据重新核定。",
+      "reason": "以具体复用与核定项替代共同语言套话"
+    },
+    {
+      "file": "output/chapters/chapter08.tex",
+      "line_before": 1161,
+      "before": "最后，数据库指标应反映用户关心的业务体验。除了写入吞吐和查询延迟，还要观察最近数据滞后、合格数据\n比例、未评估预警数量、待处理工单时长、连续聚合刷新延迟和恢复演练成功率。监控看板把这些指标按测点、\n工程和时间窗分组，运维员可以区分“设备没有上报”“数据到达但质量不合格”“规则未运行”和“工单没有\n及时关闭”。只有把技术指标与业务状态连起来，数据库设计才真正支撑安全监测平台的运行闭环。",
+      "after": "最后，数据库指标应反映用户关心的业务体验。除了写入吞吐和查询延迟，还要观察最近数据滞后、合格数据\n比例、未评估预警数量、待处理工单时长、连续聚合刷新延迟和恢复演练成功率。监控看板把这些指标按测点、\n工程和时间窗分组，运维员可以区分“设备没有上报”“数据到达但质量不合格”“规则未运行”和“工单没有\n及时关闭”。不同状态对应不同处置入口：检查设备、复核数据、恢复规则任务或催办工单。",
+      "reason": "将泛化价值收尾改成诊断与操作关系"
+    },
+    {
+      "file": "output/chapters/chapter08.tex",
+      "line_before": 1151,
+      "before": "工单与预警的关联不是简单的“多一张表”。预警可能被多次确认、转派和补充回执，工单需要记录责任角色、\n截止时间、动作、结果和完成时间。状态更新必须使用当前状态条件和追踪号，若并发更新失败则返回最新状态\n供用户刷新。处置结果应包含测点、时间、操作前后状态和依据，不能只写“已处理”。这些字段支持事后\n统计处置时延和重复工单，也能帮助模型评估哪些预警经常被人工驳回。",
+      "after": "工单记录预警发生后的处置过程。预警可能被多次确认、转派和补充回执，工单需要记录责任角色、\n截止时间、动作、结果和完成时间。状态更新必须使用当前状态条件和追踪号，若并发更新失败则返回最新状态\n供用户刷新。处置结果应包含测点、时间、操作前后状态和依据，不能只写“已处理”。这些字段支持事后\n统计处置时延和重复工单，也能帮助模型评估哪些预警经常被人工驳回。",
+      "reason": "直接解释工单职责"
+    },
+    {
+      "file": "output/chapters/chapter07.tex",
+      "line_before": 496,
+      "before": "ECharts 配置项与 API 随版本演进，本章写法以官方手册为准\\cite{echartsDocs}。本章示例统一沿用第4章的 Vite 工程：ECharts 与坐标库通过 \\texttt{npm install echarts proj4} 安装、以 \\texttt{import * as echarts from 'echarts'} 与 \\texttt{import proj4 from 'proj4'} 引入；Three.js 沿用第6章工程的安装与导入方式。无构建环境的课堂演示可改用官方 CDN 的全局构建，此时 \\texttt{echarts}、\\texttt{THREE}、\\texttt{proj4} 为全局变量，后文清单不再逐个重复引入语句。清单\\ref{lst:ch07-rain-level-dualaxis}给出可运行的雨量倒挂柱与水位过程线组合，显式声明两个y轴、单位、tooltip格式和数据缩放；真实项目还要从服务端响应读取质量码并对缺测点设置空值，不把缺测当作零雨量或零水位。",
+      "after": "ECharts 配置项与 API 随版本演进，本章写法以官方手册为准\\cite{echartsDocs}。本章示例统一沿用第4章的 Vite 工程：ECharts 与坐标库通过 \\texttt{npm install echarts proj4} 安装、以 \\texttt{import * as echarts from 'echarts'} 与 \\texttt{import proj4 from 'proj4'} 引入；Three.js 沿用第6章工程的安装与导入方式。无构建环境的课堂演示可改用官方 CDN 的全局构建，此时 \\texttt{echarts}、\\texttt{THREE}、\\texttt{proj4} 为全局变量，使用前应确认这三个变量已由对应脚本加载。清单\\ref{lst:ch07-rain-level-dualaxis}给出可运行的雨量倒挂柱与水位过程线组合，显式声明两个y轴、单位、tooltip格式和数据缩放；真实项目还要从服务端响应读取质量码并对缺测点设置空值，不把缺测当作零雨量或零水位。",
+      "reason": "将省略声明自述改为依赖检查"
+    },
+    {
+      "file": "output/chapters/chapter07.tex",
+      "line_before": 1029,
+      "before": "国内水利工程的主线是CGCS2000地理坐标或其高斯--克吕格投影坐标。CGCS2000地理二维坐标系代码为EPSG:4490\\cite{epsg4490}。第6章已经说明分带、中央经线和高程基准；本节只处理“工程平面坐标如何进入三维场景”。表\\ref{tab:ch7-coordinate-units}把这一过程涉及的四种量并列：地理坐标以度为单位，投影坐标与场景世界坐标以米为单位，屏幕坐标以像素为单位。多数定位错误源于跨栏套用——例如把度当作米直接相减，或用像素半径去做世界空间的距离判断。",
+      "after": "国内水利工程的主线是CGCS2000地理坐标或其高斯--克吕格投影坐标。CGCS2000地理二维坐标系代码为EPSG:4490\\cite{epsg4490}。沿用第6章的分带、中央经线和高程基准，可将工程平面坐标换算为三维场景中的局部坐标。表\\ref{tab:ch7-coordinate-units}把这一过程涉及的四种量并列：地理坐标以度为单位，投影坐标与场景世界坐标以米为单位，屏幕坐标以像素为单位。多数定位错误源于跨栏套用——例如把度当作米直接相减，或用像素半径去做世界空间的距离判断。",
+      "reason": "直接说明坐标转换与前置知识的关系"
+    },
+    {
+      "file": "output/chapters/chapter07.tex",
+      "line_before": 1073,
+      "before": "国内测绘成果有时把带号前缀拼接到东坐标左侧。例如3度带39号的成果可能写成\\texttt{39500000.00}，其中前两位是带号，真正参与局部原点相减的东坐标是\\texttt{500000.00}。如果把带号坐标直接送入场景，局部坐标会突然增加三千多万米，单精度顶点和相机裁剪都会失效。剥离带号必须依据元数据中的带宽和带号，不要按字符串长度盲切；剥离后的结果要与中央经线、\\texttt{+x\\_0=500000}和控制点复核。清单\\ref{lst:ch07-strip-zone-prefix}按这个原则实现：带号来自元数据参数，函数在数值不落在合理范围时直接抛错，而不是返回一个看起来正常的坐标。",
+      "after": "国内测绘成果有时把带号前缀拼接到东坐标左侧。例如3度带39号的成果可能写成\\texttt{39500000.00}，其中前两位是带号，参与局部原点相减的东坐标是\\texttt{500000.00}。如果把带号坐标直接送入场景，局部坐标会突然增加三千多万米，单精度顶点和相机裁剪都会失效。剥离带号必须依据元数据中的带宽和带号，不要按字符串长度盲切；剥离后的结果要与中央经线、\\texttt{+x\\_0=500000}和控制点复核。清单\\ref{lst:ch07-strip-zone-prefix}按这个原则实现：带号来自元数据参数，函数在数值不落在合理范围时直接抛错，而不是返回一个看起来正常的坐标。",
+      "reason": "删除强调性虚词"
+    },
+    {
+      "file": "output/chapters/chapter08.tex",
+      "line_before": 393,
+      "before": "上一张表描述的是业务实体，真正落地时还必须回答三个问题：一条观测由谁产生、在什么时刻产生，\n它的空间位置如何检索；一条预警如何追溯到证据，并在处置后形成可审计的工单；一次模型运行使用了\n哪一批输入，结果是否可以复现。为此，本节采用“关系主表保存事实、PostGIS 保存空间、TimescaleDB\n管理时间分区、JSONB 保存可演化证据”的组合。关系主表中的稳定字段承担约束和连接职责，JSONB 只承载\n版本化的扩展属性，不能把核心字段全部塞进无结构文档。这样既能让 SQL 查询得到类型检查，也能让\n新传感器的附加元数据在不频繁改表的情况下演进。",
+      "after": "将业务实体转换为数据表时，需要回答三个问题：一条观测由谁产生、在什么时刻产生，\n它的空间位置如何检索；一条预警如何追溯到证据，并在处置后形成可审计的工单；一次模型运行使用了\n哪一批输入，结果是否可以复现。为此，本节采用“关系主表保存事实、PostGIS 保存空间、TimescaleDB\n管理时间分区、JSONB 保存可演化证据”的组合。关系主表中的稳定字段承担约束和连接职责，JSONB 只承载\n版本化的扩展属性，不能把核心字段全部塞进无结构文档。这样既能让 SQL 查询得到类型检查，也能让\n新传感器的附加元数据在不频繁改表的情况下演进。",
+      "reason": "去承前自述和强调性虚词"
+    },
+    {
+      "file": "output/chapters/chapter08.tex",
+      "line_before": 400,
+      "before": "\\texttt{asset} 是工程对象和测点的主索引。\\texttt{asset\\_id} 使用业务编码而不是数据库自增号，\n因为网关、三维模型、工单和报表都要用同一个编码关联对象；\\texttt{geometry} 使用带高程的\n\\texttt{PointZ}，坐标系固定为案例水库项目约定的 EPSG:4490，避免平面距离和经纬度混用。空间\n检索通过 GiST 索引完成，例如“查询某个影响区内的测点”可以由\\texttt{ST\\_Within} 使用索引候选集，\n再对候选集做精确判断。若测点迁移，不覆盖原几何，而是新增版本或写入变更审计表；本包的五张核心表\n先保存当前有效对象，历史版本通过\\texttt{metadata}中的\\texttt{validFrom}、\\texttt{validTo}\n和变更事件追溯。",
+      "after": "\\texttt{asset} 是工程对象和测点的主索引。\\texttt{asset\\_id} 使用业务编码而不是数据库自增号，\n因为网关、三维模型、工单和报表都要用同一个编码关联对象；\\texttt{geometry} 使用带高程的\n\\texttt{PointZ}，坐标系固定为案例水库项目约定的 EPSG:4490，避免平面距离和经纬度混用。空间\n检索通过 GiST 索引完成，例如“查询某个影响区内的测点”可以由\\texttt{ST\\_Within} 使用索引候选集，\n再对候选集做精确判断。若测点迁移，不覆盖原几何，而是新增版本或写入变更审计表；以下五张核心表\n先保存当前有效对象，历史版本通过\\texttt{metadata}中的\\texttt{validFrom}、\\texttt{validTo}\n和变更事件追溯。",
+      "reason": "删除工作包编辑术语"
+    },
+    {
+      "file": "output/chapters/chapter08.tex",
+      "line_before": 408,
+      "before": "\\texttt{reading} 是高频追加表。主键包含\\texttt{asset\\_id}、\\texttt{occurred\\_at}和版本号，\n保证同一测点同一时刻的修订值可以共存；\\texttt{event\\_id}具有唯一约束，用于消费者幂等。缺测\n记录允许\\texttt{value}为空，但必须把质量码写为\\texttt{missing}；单位不匹配、时间倒序和重复\n事件由质量服务标记为\\texttt{suspect}。这一约束将第7章的三值质量码落实到了数据库层，而不是只靠\nJava 代码约定。原始记录只追加不更新，修订操作产生新版本并写入\\texttt{revision\\_reason}，\n因此任何一条报表数值都可以回到原始事件和修订责任人。",
+      "after": "\\texttt{reading} 是高频追加表。主键包含\\texttt{asset\\_id}、\\texttt{occurred\\_at}和版本号，\n保证同一测点同一时刻的修订值可以共存；\\texttt{event\\_id}具有唯一约束，用于消费者幂等。缺测\n记录允许\\texttt{value}为空，但必须把质量码写为\\texttt{missing}；单位不匹配、时间倒序和重复\n事件由质量服务标记为\\texttt{suspect}。数据库约束与第7章的三值质量码一致，Java实体与接口响应也使用相同取值。\n原始记录只追加不更新，修订操作产生新版本并写入\\texttt{revision\\_reason}，\n因此任何一条报表数值都可以回到原始事件和修订责任人。",
+      "reason": "正面说明不同层之间的取值关系"
+    },
+    {
+      "file": "output/chapters/chapter08.tex",
+      "line_before": 421,
+      "before": "\\texttt{reading\\_15m}连续聚合视图只纳入\\texttt{valid}观测，并保留样本数、最小值、最大值和平均值。\n这样，预警服务可以快速读取趋势，而审计人员仍可回查所有原始值。连续聚合不是“把原表删掉”，而是\n在原始数据之上维护可重建的派生结果。刷新策略设置一个覆盖迟到消息的时间回看窗口，例中回看 30 天、\n延迟 5 分钟只是教学参数；实际窗口应覆盖通信补传和消息重投的最大时长。若补传超出窗口，运维员应\n手工触发一次重算，并在模型运行记录中写明重算范围。",
+      "after": "\\texttt{reading\\_15m}连续聚合视图只纳入\\texttt{valid}观测，并保留样本数、最小值、最大值和平均值。\n这样，预警服务可以快速读取趋势，而审计人员仍可回查所有原始值。连续聚合在原始数据之上维护可重建的派生结果，\n其保留策略与原始观测分别配置。刷新策略设置一个覆盖迟到消息的时间回看窗口，例中回看 30 天、\n延迟 5 分钟只是教学参数；实际窗口应覆盖通信补传和消息重投的最大时长。若补传超出窗口，运维员应\n手工触发一次重算，并在模型运行记录中写明重算范围。",
+      "reason": "直接定义连续聚合，保留原始数据关系"
+    },
+    {
+      "file": "output/chapters/chapter08.tex",
+      "line_before": 683,
+      "before": "DDL 解决了“表能否创建”的问题，平台上线还需要回答“数据能否安全地进入、查询和恢复”。本小节把\n常用操作拆成短小而完整的 SQL 练习，所有语句都假定在只读副本或隔离的迁移事务中执行。练习的目的\n不是让应用直接拼接字符串，而是让学生看懂索引、约束和查询条件之间的因果关系。每段语句都配有\n输入前提、结果解释和回滚边界，后续 Java Repository 可以把它们转成参数化查询。",
+      "after": "DDL 解决了“表能否创建”的问题，平台上线还需要回答“数据能否安全地进入、查询和恢复”。本小节把\n常用操作拆成短小而完整的 SQL 练习，所有语句都假定在只读副本或隔离的迁移事务中执行。练习时比较\n索引、约束和查询条件对结果与执行计划的影响。每段语句都配有\n输入前提、结果解释和回滚边界，后续 Java Repository 可以把它们转成参数化查询。",
+      "reason": "去教学目的自述"
+    },
+    {
+      "file": "output/chapters/chapter08.tex",
+      "line_before": 688,
+      "before": "迁移脚本必须可重复执行，并把版本写入数据库。代码清单\\ref{lst:ch08-sql-migration}示例用一个轻量\n版本表记录迁移名称和校验摘要；真正的发布工具还应记录执行人、开始时间、结束时间和失败日志。若\n迁移中途失败，恢复脚本只回滚本次版本，不直接删除已有业务数据。",
+      "after": "迁移脚本必须可重复执行，并把版本写入数据库。代码清单\\ref{lst:ch08-sql-migration}示例用一个轻量\n版本表记录迁移名称和校验摘要；发布工具还应记录执行人、开始时间、结束时间和失败日志。若\n迁移中途失败，恢复脚本只回滚本次版本，不直接删除已有业务数据。",
+      "reason": "删除强调性虚词"
+    },
+    {
+      "file": "output/chapters/chapter08.tex",
+      "line_before": 801,
+      "before": "工单到期查询需要使用数据库当前时间和明确的状态集合。代码清单\\ref{lst:ch08-sql-due-work-order}把已经\n取消或完成的工单排除，并返回预警等级，值班员可以先处理高等级且临近截止时间的事项。真正更新状态\n时还要携带版本号，防止两个角色互相覆盖。",
+      "after": "工单到期查询需要使用数据库当前时间和明确的状态集合。代码清单\\ref{lst:ch08-sql-due-work-order}把已经\n取消或完成的工单排除，并返回预警等级，值班员可以先处理高等级且临近截止时间的事项。更新状态\n时还要携带版本号，防止两个角色互相覆盖。",
+      "reason": "删除强调性虚词"
+    },
+    {
+      "file": "output/chapters/chapter08.tex",
+      "line_before": 1120,
+      "before": "因此，数据库评审记录应成为发布包的一部分，与代码、配置和数据样例共同归档，并在每次迁移后更新。\n归档内容还应包含执行计划、失败重试记录和恢复演练的校验结果，保证后来接手系统的人员能够复现设计\n依据并判断一次变更是否真正达到了预期效果。这些材料同时构成课程答辩的证据链：学生在报告中引用对应的\n迁移版本和查询清单，并注明每条证据的生成时间，评审者即可逐项复核。",
+      "after": "因此，数据库评审记录应成为发布包的一部分，与代码、配置和数据样例共同归档，并在每次迁移后更新。\n归档内容还应包含执行计划、失败重试记录和恢复演练的校验结果，保证后来接手系统的人员能够复现设计\n依据并核对变更后的查询结果与性能。这些材料同时构成课程答辩的证据链：学生在报告中引用对应的\n迁移版本和查询清单，并注明每条证据的生成时间，评审者即可逐项复核。",
+      "reason": "用可核对对象取代预期效果套语"
+    },
+    {
+      "file": "output/chapters/chapter08.tex",
+      "line_before": 1251,
+      "before": "本节把前端实现切片与 8.3 节的接口契约逐一对齐。API 层只负责把参数编码为 HTTP 请求，Pinia 保存跨\n组件共享的测点、时间窗和读数，页面组件负责筛选、图表和交互，三维桥接对象负责把选中的资产定位到\nThree.js 场景。数据流从“筛选条件”开始，经由请求层和后端接口返回观测，再以同一个\\texttt{assetId}\n同时驱动 ECharts 曲线和三维相机；因此用户点击曲线或测点列表时，看到的是同一对象的两个视图。",
+      "after": "前端实现使用表\\ref{tab:api-contract}的接口路径与字段。API 层只负责把参数编码为 HTTP 请求，Pinia 保存跨\n组件共享的测点、时间窗和读数，页面组件负责筛选、图表和交互，三维桥接对象负责把选中的资产定位到\nThree.js 场景。数据流从“筛选条件”开始，经由请求层和后端接口返回观测，再以同一个\\texttt{assetId}\n同时驱动 ECharts 曲线和三维相机；因此用户点击曲线或测点列表时，看到的是同一对象的两个视图。",
+      "reason": "删除编排自述，回指8.1统一接口契约"
+    },
+    {
+      "file": "output/chapters/chapter08.tex",
+      "line_before": 1256,
+      "before": "第4章已经提供带认证、超时和统一错误处理的\\texttt{request.js}封装，本节不重复实现 fetch\n或 axios。代码清单\\ref{lst:ch08-frontend-api}只声明监测领域 API，并把时间、质量码和聚合粒度作为\n显式参数传给后端接口。调用方可以在单元测试中替换这个模块，模拟 401、409、网络超时和空数据。",
+      "after": "请求层复用第4章的\\texttt{request.js}，由它处理认证、超时与统一错误。代码清单\\ref{lst:ch08-frontend-api}只声明监测领域 API，并把时间、质量码和聚合粒度作为\n显式参数传给后端接口。调用方可以在单元测试中替换这个模块，模拟 401、409、网络超时和空数据。",
+      "reason": "改为依赖复用关系"
+    },
+    {
+      "file": "output/chapters/chapter08.tex",
+      "line_before": 1482,
+      "before": "前端安全边界与后端一致：路由守卫用于减少无权限页面的暴露，真正的数据范围由后端根据角色和工程关系\n过滤；接口返回的 evidence、原始 JSON 和设备元数据按权限分层，不先发送到浏览器再隐藏。Pinia 中的\n状态也不等于可信数据，页面显示的预警等级、质量码和工单状态都来自服务器响应，操作成功后重新读取\n服务器状态而不是本地乐观修改。这样，多个值班员同时处理同一条预警时，第二个页面会得到 409 并提示刷新。",
+      "after": "前端安全边界与后端一致：路由守卫用于减少无权限页面的暴露，数据访问范围由后端根据角色和工程关系\n过滤；接口返回的 evidence、原始 JSON 和设备元数据按权限分层，不先发送到浏览器再隐藏。Pinia 中的\n状态也不等于可信数据，页面显示的预警等级、质量码和工单状态都来自服务器响应，操作成功后重新读取\n服务器状态而不是本地乐观修改。这样，多个值班员同时处理同一条预警时，第二个页面会得到 409 并提示刷新。",
+      "reason": "删除强调性虚词"
+    },
+    {
+      "file": "output/chapters/chapter08.tex",
+      "line_before": 2142,
+      "before": "Controller 的分页对象和日期格式由 Spring MVC 解析，统一异常处理器应把参数错误、权限错误、状态冲突\n和数据库约束冲突转换为稳定的 HTTP 错误码。确认接口的\\texttt{requestId}用于日志和链路追踪；真正\n的幂等保证仍由 warning 的状态条件和客户端重复提交处理共同完成。",
+      "after": "Controller 的分页对象和日期格式由 Spring MVC 解析，统一异常处理器应把参数错误、权限错误、状态冲突\n和数据库约束冲突转换为稳定的 HTTP 错误码。确认接口的\\texttt{requestId}用于日志和链路追踪；幂等保证由\nwarning 的状态条件和客户端重复提交处理共同完成。",
+      "reason": "删除强调性虚词"
+    },
+    {
+      "file": "output/chapters/chapter08.tex",
+      "line_before": 2414,
+      "before": "示例阈值仅用于单元测试。生产阈值应版本化，并记录适用工程、工况、审批人和生效时间。本例的四个分界为 0.30、0.50、0.70 和 0.85，下界闭、上界开：$0.30\\le S<0.50$为蓝色，$0.50\\le S<0.70$为黄色，$0.70\\le S<0.85$为橙色，$S\\ge0.85$为红色，$S<0.30$才是当前规则下的无预警。配套数据集\\texttt{warnings.json}的四条样例（0.36、0.58、0.74、0.92）正是按这组分界生成的。蓝色不是“没有变化”，而是把轻度变化交给值班员确认。分类结果中的\\texttt{evaluable=false}表示“未评估”，即质量不满足风险判定条件；\\texttt{evaluable=true}且\\texttt{level=NONE}才表示“无预警”。这两个业务态不能折叠进颜色维度，界面应分别显示质量原因和预警状态。",
+      "after": "示例阈值仅用于单元测试。生产阈值应版本化，并记录适用工程、工况、审批人和生效时间。本例的四个分界为 0.30、0.50、0.70 和 0.85，下界闭、上界开：$0.30\\le S<0.50$为蓝色，$0.50\\le S<0.70$为黄色，$0.70\\le S<0.85$为橙色，$S\\ge0.85$为红色，$S<0.30$才是当前规则下的无预警。配套数据集\\texttt{warnings.json}的四条样例（0.36、0.58、0.74、0.92）正是按这组分界生成的。蓝色提示轻度变化，需要值班员确认。分类结果中的\\texttt{evaluable=false}表示“未评估”，即质量不满足风险判定条件；\\texttt{evaluable=true}且\\texttt{level=NONE}才表示“无预警”。这两个业务态不能折叠进颜色维度，界面应分别显示质量原因和预警状态。",
+      "reason": "正面解释预警等级"
+    },
+    {
+      "file": "output/chapters/chapter08.tex",
+      "line_before": 2513,
+      "before": "模型卡记录身份、适用范围、输入输出、校准数据、误差、不确定性、负责人、版本和回滚方法。模型输入超出适用范围或数据质量不足时，平台应降低可信等级或停算，不得静默给出看似精确的结果。\n表\\ref{tab:ch08-model-card-template}给出本章模型卡的最小模板。九个字段不是形式化元数据，而是决定结果能否复现和能否进入审批的证据边界。模型名称和版本用于定位实现，适用范围与输入单位用于阻止越界调用，校准数据与误差指标用于说明可信度，不确定性和负责人用于安排人工复核，回滚方法用于在新版本异常时恢复上一版本。学生在实践题中至少填写一张完整模型卡，并为每个字段提供来源。\n\\begin{table}[htbp]\n\\centering\n\\caption{案例水库模型卡模板}\n\\label{tab:ch08-model-card-template}\n\\begin{tabular}{p{2.7cm}p{5.0cm}p{4.5cm}}\n\\toprule\n字段 & 必填内容 & 验收证据 \\\\\n\\midrule\n身份与版本 & 模型名称、版本号、代码提交号 & 可追溯构建产物 \\\\\n适用范围 & 水位、降雨、流量、时间步长边界 & 输入契约与越界测试 \\\\\n输入输出 & 字段、单位、坐标、时间基准 & 数据字典与样例 \\\\\n校准数据 & 时段、样本来源、清洗规则 & 数据快照与质量报告 \\\\\n误差指标 & 指标定义、统计区间、基准值 & 复核脚本与结果 \\\\\n不确定性 & 参数敏感性、置信区间、缺测影响 & 风险说明与情景结果 \\\\\n责任与审批 & 负责人、复核人、审批有效期 & 操作记录与电子签名 \\\\\n发布与回滚 & 发布条件、兼容性、回退版本 & 发布单与回滚演练 \\\\\n证据链接 & 日志、输入快照、输出清单位置 & 校验和与对象版本 \\\\\n\\bottomrule\n\\end{tabular}\n\\end{table}\n模型卡与场景版本、输入快照和人工审批绑定。只要改变初始水位、降雨情景、闸门约束或模型版本，就创建新的运行记录；只改变镜头和图层透明度，不产生新的计算版本。页面显示结果时同时显示“模拟”标签、模型版本和计算时刻，避免把预演动画误认为已经发生的观测。",
+      "after": "模型卡记录身份、适用范围、输入输出、校准数据、误差、不确定性、负责人、版本和回滚方法。模型输入超出适用范围或数据质量不足时，平台应降低可信等级或停算，不得静默给出看似精确的结果。\n表\\ref{tab:ch08-model-card-template}给出本章模型卡的最小模板。九个字段共同说明计算的复现条件和审批所需依据。模型名称和版本用于定位实现，适用范围与输入单位用于阻止越界调用，校准数据与误差指标用于说明可信度，不确定性和负责人用于安排人工复核，回滚方法用于在新版本异常时恢复上一版本。学生在实践题中至少填写一张完整模型卡，并为每个字段提供来源。\n\\begin{table}[htbp]\n\\centering\n\\caption{案例水库模型卡模板}\n\\label{tab:ch08-model-card-template}\n\\begin{tabular}{p{2.7cm}p{5.0cm}p{4.5cm}}\n\\toprule\n字段 & 必填内容 & 验收证据 \\\\\n\\midrule\n身份与版本 & 模型名称、版本号、代码提交号 & 可追溯构建产物 \\\\\n适用范围 & 水位、降雨、流量、时间步长边界 & 输入契约与越界测试 \\\\\n输入输出 & 字段、单位、坐标、时间基准 & 数据字典与样例 \\\\\n校准数据 & 时段、样本来源、清洗规则 & 数据快照与质量报告 \\\\\n误差指标 & 指标定义、统计区间、基准值 & 复核脚本与结果 \\\\\n不确定性 & 参数敏感性、置信区间、缺测影响 & 风险说明与情景结果 \\\\\n责任与审批 & 负责人、复核人、审批有效期 & 操作记录与电子签名 \\\\\n发布与回滚 & 发布条件、兼容性、回退版本 & 发布单与回滚演练 \\\\\n证据链接 & 日志、输入快照、输出清单位置 & 校验和与对象版本 \\\\\n\\bottomrule\n\\end{tabular}\n\\end{table}\n模型卡与场景版本、输入快照和人工审批绑定。只要改变初始水位、降雨情景、闸门约束或模型版本，就创建新的运行记录；只改变镜头和图层透明度，不产生新的计算版本。页面显示结果时同时显示“模拟”标签、模型版本和计算时刻，避免把预演动画误认为已经发生的观测。",
+      "reason": "去不是而是和抽象边界表达"
+    },
+    {
+      "file": "output/chapters/chapter08.tex",
+      "line_before": 2712,
+      "before": "表\\ref{tab:inundation-evidence}列出淹没影响分析必须留存的证据项。缺少“空间数据版本”这一项时，同一场预演在半年后重跑可能得到不同的受影响对象清单——不是模型变了，而是底图上的建筑和道路更新过。",
+      "after": "表\\ref{tab:inundation-evidence}列出淹没影响分析必须留存的证据项。缺少“空间数据版本”这一项时，同一场预演在半年后重跑可能得到不同的受影响对象清单，原因可能是底图中的建筑和道路发生了更新。",
+      "reason": "以具体原因替代非此即彼例证"
+    }
+  ]
+}

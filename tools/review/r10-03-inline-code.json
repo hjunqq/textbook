@@ -1,0 +1,81 @@
+{
+  "package": "R10-03",
+  "pandoc": "pandoc.exe 3.1.11",
+  "official_source": "https://pandoc.org/MANUAL.html#extension-smart",
+  "local_extensions": [
+    "-ascii_identifiers",
+    "+auto_identifiers",
+    "-east_asian_line_breaks",
+    "-gfm_auto_identifiers",
+    "+latex_macros",
+    "-literate_haskell",
+    "-raw_tex",
+    "+smart",
+    "-task_lists"
+  ],
+  "smart_trial": {
+    "latex": "`quality === ’missing’ ? [t, null] : [t, v]`",
+    "latex-smart": "`quality === ’missing’ ? [t, null] : [t, v]`"
+  },
+  "approach": "在提取完整清单和图之后、Pandoc调用之前，按balanced范围保护texttt内ASCII引号；复用现有token后处理还原，不改全局smart设置。",
+  "source_line": "清单\\ref{lst:ch07-missing-disconnect}按图\\ref{fig:ch07-missing-gap}保留缺测位置，使用表达式\\texttt{quality === 'missing' ? [t, null] : [t, v]}生成序列。阴影区间由固定时间格网确定，起止时间与横轴对齐。运行后可检查两项结果：缺测位置没有数据点，相邻有效点没有跨空值连接。设备离线造成长缺测时，还应显示网关状态与最后一次有效时间，帮助值班员判断是通信故障还是传感器静默。",
+  "before_inline": "`quality === ’missing’ ? [t, null] : [t, v]`",
+  "after_inline": "`quality === 'missing' ? [t, null] : [t, v]`",
+  "node_output": [
+    [
+      1,
+      null
+    ],
+    [
+      1,
+      9
+    ]
+  ],
+  "checks": [
+    {
+      "name": "真实片段在修改前复现弯单引号",
+      "passed": true
+    },
+    {
+      "name": "真实片段在修改后保留ASCII单引号",
+      "passed": true
+    },
+    {
+      "name": "JS双引号保留",
+      "passed": true
+    },
+    {
+      "name": "转义下划线与连续texttt保留",
+      "passed": true
+    },
+    {
+      "name": "转义花括号内的引号不截断",
+      "passed": true
+    },
+    {
+      "name": "中文弯引号保留",
+      "passed": true
+    },
+    {
+      "name": "数学表达式逐字不变",
+      "passed": true
+    },
+    {
+      "name": "完整清单逐字不变",
+      "passed": true
+    },
+    {
+      "name": "所有非代码正文完全不变",
+      "passed": true
+    },
+    {
+      "name": "复制表达式经Node执行得到预期缺测与有效结果",
+      "passed": true
+    },
+    {
+      "name": "gfm回退格式保留ASCII引号",
+      "passed": true
+    }
+  ],
+  "scope": "仅运行真实段落、清单与合成边界片段；没有写docs，也未运行全量转换。"
+}
