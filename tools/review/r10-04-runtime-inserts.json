@@ -1,0 +1,65 @@
+[
+  {
+    "chapter": 4,
+    "label": "fig:ch04-s1-list",
+    "asset": "output/images/runtime/s1-asset-list.png",
+    "width_cm": 16,
+    "caption": "S1测点列表的筛选与排序（配套阶段页实际运行截图）"
+  },
+  {
+    "chapter": 4,
+    "label": "fig:ch04-http-observe",
+    "asset": "output/images/runtime/http-network-json.png",
+    "width_cm": 16,
+    "caption": "请求状态与JSON响应对照（教学查看器，调用配套教学接口）"
+  },
+  {
+    "chapter": 4,
+    "label": "fig:ch04-state-results",
+    "asset": "output/images/runtime/s2-four-states.png",
+    "width_cm": 16,
+    "caption": "加载、有数据、空数据与错误状态（教学查看器，调用S2模块）"
+  },
+  {
+    "chapter": 4,
+    "label": "fig:ch04-switch-results",
+    "asset": "output/images/runtime/s2-switch-trace.png",
+    "width_cm": 16,
+    "caption": "切换测点后的取消记录与最终页面（教学查看器，调用S2模块）"
+  },
+  {
+    "chapter": 5,
+    "label": "fig:ch05-error-results",
+    "asset": "output/images/runtime/http-responses.png",
+    "width_cm": 16,
+    "caption": "400与404错误体的实际响应（教学查看器，配套教学接口）"
+  },
+  {
+    "chapter": 6,
+    "label": "fig:ch06-bound-scene",
+    "asset": "output/images/runtime/s4-scene.png",
+    "width_cm": 15,
+    "caption": "简化坝体与测点的场景绑定（S4阶段页实际运行截图）"
+  },
+  {
+    "chapter": 7,
+    "label": "fig:ch07-gap-results",
+    "asset": "output/images/runtime/s5-missing-gap.png",
+    "width_cm": 16,
+    "caption": "缺测记录与曲线断线逐项核对（教学查看器，调用S5曲线模块）"
+  },
+  {
+    "chapter": 7,
+    "label": "fig:ch07-scene-chart",
+    "asset": "output/images/runtime/s5-scene-chart.png",
+    "width_cm": 16,
+    "caption": "三维对象与时序曲线的联合展示（S5阶段页运行截图，显示放大）"
+  },
+  {
+    "chapter": 8,
+    "label": "fig:ch08-work-order-results",
+    "asset": "output/images/runtime/s6-work-order.png",
+    "width_cm": 16,
+    "caption": "预警与工单状态的实际响应（教学查看器，配套教学接口）"
+  }
+]

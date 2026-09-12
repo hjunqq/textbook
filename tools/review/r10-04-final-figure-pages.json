@@ -1,0 +1,84 @@
+{
+  "pdf_pages": 400,
+  "body_offset": 12,
+  "figures": [
+    {
+      "label": "fig:ch01-monitoring-instruments",
+      "number": "1.1",
+      "printed_page": 3,
+      "pdf_page": 15
+    },
+    {
+      "label": "fig:ch01-reservoir-physical",
+      "number": "1.3",
+      "printed_page": 6,
+      "pdf_page": 18
+    },
+    {
+      "label": "fig:ch04-s1-list",
+      "number": "4.2",
+      "printed_page": 82,
+      "pdf_page": 94
+    },
+    {
+      "label": "fig:ch04-http-observe",
+      "number": "4.8",
+      "printed_page": 107,
+      "pdf_page": 119
+    },
+    {
+      "label": "fig:ch04-state-results",
+      "number": "4.9",
+      "printed_page": 109,
+      "pdf_page": 121
+    },
+    {
+      "label": "fig:ch04-switch-results",
+      "number": "4.11",
+      "printed_page": 111,
+      "pdf_page": 123
+    },
+    {
+      "label": "fig:ch05-error-results",
+      "number": "5.3",
+      "printed_page": 147,
+      "pdf_page": 159
+    },
+    {
+      "label": "fig:ch06-bound-scene",
+      "number": "6.3",
+      "printed_page": 209,
+      "pdf_page": 221
+    },
+    {
+      "label": "fig:ch06-appearance-components",
+      "number": "6.8",
+      "printed_page": 224,
+      "pdf_page": 236
+    },
+    {
+      "label": "fig:ch07-gap-results",
+      "number": "7.4",
+      "printed_page": 249,
+      "pdf_page": 261
+    },
+    {
+      "label": "fig:ch07-scene-chart",
+      "number": "7.9",
+      "printed_page": 261,
+      "pdf_page": 273
+    },
+    {
+      "label": "fig:ch08-acquisition-cabinet",
+      "number": "8.3",
+      "printed_page": 281,
+      "pdf_page": 293
+    },
+    {
+      "label": "fig:ch08-work-order-results",
+      "number": "8.6",
+      "printed_page": 325,
+      "pdf_page": 337
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "package": "R10-04",
+  "change": "新增三幅已授权原创教学渲染；无删除",
+  "added_body_chars": 426,
+  "insertions": [
+    {
+      "file": "output/chapters/chapter01.tex",
+      "label": "fig:ch01-monitoring-instruments",
+      "line": 79,
+      "added_tex": "图\\ref{fig:ch01-monitoring-instruments}从左上起按行排列雷达水位计、雨量计、GNSS监测天线和渗压计。水位计朝向水面，雨量计保持承雨口无遮挡；GNSS通过不同时刻的位置比较分析位移；渗压计探头埋设在待测部位，图中展示的是器件外观。识别仪器后，还需核对测点编码、观测量与单位：把渗压读数当作水位输入，数值即使能够显示，也失去了正确的物理含义。\n\n\\begin{figure}[htbp]\n\\centering\n\\includegraphics[width=13.5cm]{images/generated/monitoring-sensors.png}\n\\caption{四类监测仪器的外观识读（AI生成的教学渲染）}\n\\label{fig:ch01-monitoring-instruments}\n\\end{figure}",
+      "added_body_chars": 147
+    },
+    {
+      "file": "output/chapters/chapter01.tex",
+      "label": "fig:ch01-reservoir-physical",
+      "line": 165,
+      "added_tex": "图\\ref{fig:ch01-reservoir-physical}展示混凝土坝、上游库面、三孔泄洪设施及下游河道的位置关系。读图时先沿水流方向辨认上下游，再找出坝顶、闸墩和闸门。平台中的工程对象需与这些实体对应：水位属于具体断面的观测，闸门开度属于指定孔口的状态；对象位置混淆时，显示正确的数值也可能指向错误的处置地点。\n\n\\begin{figure}[htbp]\n\\centering\n\\includegraphics[width=11.5cm]{images/generated/reservoir-dam.png}\n\\caption{混凝土坝与泄洪设施的工程识读（AI生成的虚构案例教学渲染）}\n\\label{fig:ch01-reservoir-physical}\n\\end{figure}",
+      "added_body_chars": 142
+    },
+    {
+      "file": "output/chapters/chapter08.tex",
+      "label": "fig:ch08-acquisition-cabinet",
+      "line": 211,
+      "added_tex": "分层架构中的边缘设备可结合图\\ref{fig:ch08-acquisition-cabinet}识读。柜内下部为电源与蓄电池区域，中部为采集设备，右侧带天线与网口的模块承担通信，上部端子排连接现场电缆。按供电、采集、通信三条路径检查，可区分设备未上电、没有取得读数与数据未传出的故障；随后再查对应日志和接口状态。\n\n\\begin{figure}[htbp]\n\\centering\n\\includegraphics[width=10cm]{images/generated/acquisition-cabinet.png}\n\\caption{按供电、采集与通信识读采集柜（AI生成的教学渲染，非接线设计图）}\n\\label{fig:ch08-acquisition-cabinet}\n\\end{figure}",
+      "added_body_chars": 137
+    }
+  ]
+}

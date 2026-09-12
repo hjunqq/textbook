@@ -1,0 +1,88 @@
+{
+  "package": "R10-04",
+  "file": "tools/tex2site/convert.py",
+  "full_site_generated": false,
+  "tex_modified": false,
+  "docs_modified": false,
+  "test_method": "Isolated TemporaryDirectory; real Pandoc on a two-image figure; original six licensed LaTeX blocks from baseline6037b49; no PDF/TikZ compilation.",
+  "checks": [
+    {
+      "name": "two_images_in_source_order",
+      "result": "pass",
+      "actual": [
+        "images/chapter04_fig_4_1_1.png",
+        "images/chapter04_fig_4_1_2.png"
+      ]
+    },
+    {
+      "name": "two_rasters_copied_byte_exact",
+      "result": "pass",
+      "hashes": [
+        "211f24cb4d19fee58970bdd6052ba796ee252e1a7621c839b4dfc27d42b02a7c",
+        "c3bbdeb351869352f2ff61ad9acf7c30e4ffd612a12d5ede4dacc5c6ddc5a965"
+      ]
+    },
+    {
+      "name": "one_figure_caption_retained",
+      "result": "pass"
+    },
+    {
+      "name": "inline_quotes_and_listing_unchanged",
+      "result": "pass",
+      "markdown_excerpt": "# 第4章 图像测试\n\n## 4.1 按顺序显示\n\n正文使用“中文弯引号”，代码为`quality === 'missing' ? [t,null]`，数学式为$x'$。\n\n<figure markdown>\n![图4.1](images/chapter04_fig_4_1_1.png)\n\n![图4.1](images/chapter04_fig_4_1_2.png)\n<figcaption>图 4.1  先红图，再蓝图</figcaption>\n</figure>\n\n**清单 4.1**\n\n```javascript\nconst quality = 'missing';\nconsole.log(\"keep ASCII quotes\");\n```\n"
+    },
+    {
+      "name": "single_raster_graphicspath_shorthand",
+      "result": "pass"
+    },
+    {
+      "name": "six_51wim_figures_use_only_webfigs",
+      "result": "pass",
+      "original_figure_count": 6,
+      "tikz_jobs": [
+        "chapter08_fig_8_6.svg",
+        "chapter08_fig_8_8.svg",
+        "chapter08_fig_8_10.svg",
+        "chapter08_fig_8_12.svg",
+        "chapter08_fig_8_14.svg",
+        "chapter08_fig_8_20.svg"
+      ],
+      "raster_jobs": 0
+    },
+    {
+      "name": "missing_51wim_replacement_fails_closed",
+      "result": "pass",
+      "error": "51WIM 授权截图缺少网站重绘替代，禁止复制: chapter08/51wim-no-replacement.jpg"
+    },
+    {
+      "name": "known_51wim_missing_webfig_fails_closed",
+      "result": "pass",
+      "error": "51WIM 授权截图缺少网站重绘替代，禁止复制: chapter08/51wim-portal.jpg"
+    },
+    {
+      "name": "reject_unapproved_source_images/generated/../../outside.png",
+      "result": "pass",
+      "error": "栅格图路径越界: images/generated/../../outside.png"
+    },
+    {
+      "name": "reject_unapproved_source_images/chapter08/unapproved.png",
+      "result": "pass",
+      "error": "网站栅格图仅允许 images/generated 或 images/runtime 下的 PNG: images/chapter08/unapproved.png"
+    },
+    {
+      "name": "licensed_source_embedded_in_tikz_fails_closed",
+      "result": "pass",
+      "error": "网站图不能同时包含 TikZ 与外部栅格图，请拆分: 8.1",
+      "queued_jobs": 0
+    },
+    {
+      "name": "existing_pure_tikz_path_unchanged",
+      "result": "pass",
+      "queued_svg": "chapter02_fig_2_1.svg"
+    }
+  ],
+  "check_count": 12,
+  "behavior": "Original PNGs under output/images/generated and output/images/runtime are queued and copied to the chapter Markdown images directory, in includegraphics source order. 51WIM sources exclusively schedule WEBFIGS TikZ replacements and missing replacements raise before copy.",
+  "scope_limit": "Existing pure TikZ figures keep their extraction path; raster figures support multiple includegraphics/minipages. Mixing TikZ with external raster images in one figure raises explicitly to avoid loss or embedding a licensed screenshot in SVG. Arbitrary unregistered raster directories are rejected.",
+  "diff_check": "git diff --check passed for converter; evidence JSON parses as UTF-8."
+}

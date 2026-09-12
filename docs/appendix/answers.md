@@ -180,7 +180,7 @@ B。跨服务、需持久化与重放的事件应通过Kafka主题传递，进�
 `@Transactional`依赖Spring为Bean生成的代理对象拦截方法调用；同Bean内`this.methodB()`是对原始对象的直接调用，绕过代理，事务通知不会生效。改进一：把事务方法拆分到另一个Bean，通过依赖注入调用，走代理。改进二：自注入自身代理（或`AopContext.currentProxy()`）后经代理调用，亦可改用`TransactionTemplate`编程式事务显式控制。*常见错误：*以为把方法改成`public`或加`REQUIRES_NEW`就能解决自调用失效。
 
 第9题·要点  
-路径与状态码以 8.1 节的接口契约表为准。查询最新观测：`GET /api/assets/{assetId}/readings/latest`，200 返回含质量码（valid/suspect/missing）的单条观测；对象不存在返回404，对象存在但尚无观测返回204（两者必须分开，页面据此区分“编码打错了”和“这个测点还没上报”）。写入观测：`POST /api/readings`，请求体含`assetId`、`occurredAt`、`value`、`unit`、`quality`，头部携带`Idempotency-Key`；成功创建返回201并带Location头；参数非法返回400（错误体指出出错字段），未登录401，角色无权（如值班员越权写入）403，对象不存在404，重复幂等键返回同一记录，命中`(occurred_at, event_id)`复合唯一索引时不重复入库。写入端点采用`/api/readings`：观测有自己的生命周期（可订正、加版本），不随测站路径变动。*常见错误：*所有失败一律返回200加错误字段，或用GET承载写操作。
+路径与状态码以 8.1 节的接口契约表为准。查询最新观测：`GET /api/assets/{assetId}/readings/latest`，200 返回含质量码（valid/suspect/missing）的单条观测；对象不存在返回404，对象存在但尚无观测返回204（两者必须分开，页面据此区分“编码打错了”和“这个测点还没上报”）。写入观测：`POST /api/readings`，请求体含`assetId`、`occurredAt`、`value`、`unit`、`quality`，头部携带`Idempotency-Key`；成功创建返回201并带Location头；参数非法返回400（错误体指出出错字段），未登录401，角色无权（如值班员越权写入）403，对象不存在404，重复幂等键返回同一记录，命中`(occurred_at, event_id)`复合唯一索引时不重复入库。写入端点采用`/api/readings`：观测有自己的生命周期（可订正、加版本），不随测站路径变动。*常见错误：*所有失败一律返回200加错误字段，或用GET承载写操作。
 
 第10题·要点  
 `@TransactionalEventListener(AFTER_COMMIT)`是进程内机制：事务提交后在同一应用内触发监听器，适合发送缓存刷新、站内通知等本地副作用，事件不持久化，应用重启即丢失。Kafka监听器面向跨服务集成：事件持久化在主题中，支持多消费组、重放与削峰，适合预警事件分发到短信、审批等下游服务。原则：单体内部解耦用前者，跨服务边界用Kafka主题，并在消费端以`eventId`幂等。*常见错误：*用AFTER_COMMIT监听器直接执行跨服务调用且无重试补偿，误以为它有投递保证。

@@ -1,0 +1,461 @@
+{
+  "http": [
+    {
+      "title": "最新观测",
+      "url": "/api/assets/DAM-A-PZ-07/readings/latest",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "rawBody": "{\"assetId\":\"DAM-A-PZ-07\",\"occurredAt\":\"2026-07-01T23:55:00+08:00\",\"value\":185.091,\"unit\":\"kPa\",\"quality\":\"valid\",\"eventId\":\"evt-pz-0287-6\",\"version\":1}",
+      "body": {
+        "assetId": "DAM-A-PZ-07",
+        "occurredAt": "2026-07-01T23:55:00+08:00",
+        "value": 185.091,
+        "unit": "kPa",
+        "quality": "valid",
+        "eventId": "evt-pz-0287-6",
+        "version": 1
+      }
+    },
+    {
+      "title": "尚无观测",
+      "url": "/api/assets/DAM-A-D-01/readings/latest",
+      "status": 204,
+      "contentType": "application/json; charset=utf-8",
+      "rawBody": "",
+      "body": null
+    },
+    {
+      "title": "时间范围错误",
+      "url": "/api/assets/DAM-A-PZ-07/readings?from=2026-07-02T00%3A00%3A00%2B08%3A00&to=2026-07-01T00%3A00%3A00%2B08%3A00",
+      "status": 400,
+      "contentType": "application/json; charset=utf-8",
+      "rawBody": "{\"code\":\"INVALID_RANGE\",\"message\":\"from 必须早于 to\",\"field\":\"from\"}",
+      "body": {
+        "code": "INVALID_RANGE",
+        "message": "from 必须早于 to",
+        "field": "from"
+      }
+    },
+    {
+      "title": "未知对象",
+      "url": "/api/assets/DAM-A-XX-99/readings/latest",
+      "status": 404,
+      "contentType": "application/json; charset=utf-8",
+      "rawBody": "{\"code\":\"ASSET_NOT_FOUND\",\"message\":\"对象 DAM-A-XX-99 不存在\"}",
+      "body": {
+        "code": "ASSET_NOT_FOUND",
+        "message": "对象 DAM-A-XX-99 不存在"
+      }
+    }
+  ],
+  "network": [
+    {
+      "method": "GET",
+      "url": "/api/assets/DAM-A-PZ-07/readings/latest",
+      "status": 200,
+      "rawBody": "{\"assetId\":\"DAM-A-PZ-07\",\"occurredAt\":\"2026-07-01T23:55:00+08:00\",\"value\":185.091,\"unit\":\"kPa\",\"quality\":\"valid\",\"eventId\":\"evt-pz-0287-6\",\"version\":1}",
+      "body": {
+        "assetId": "DAM-A-PZ-07",
+        "occurredAt": "2026-07-01T23:55:00+08:00",
+        "value": 185.091,
+        "unit": "kPa",
+        "quality": "valid",
+        "eventId": "evt-pz-0287-6",
+        "version": 1
+      }
+    },
+    {
+      "method": "GET",
+      "url": "/api/assets/DAM-A-D-01/readings/latest",
+      "status": 204,
+      "rawBody": "",
+      "body": null
+    },
+    {
+      "method": "GET",
+      "url": "/api/assets/DAM-A-PZ-07/readings?from=2026-07-02T00%3A00%3A00%2B08%3A00&to=2026-07-01T00%3A00%3A00%2B08%3A00",
+      "status": 400,
+      "rawBody": "{\"code\":\"INVALID_RANGE\",\"message\":\"from 必须早于 to\",\"field\":\"from\"}",
+      "body": {
+        "code": "INVALID_RANGE",
+        "message": "from 必须早于 to",
+        "field": "from"
+      }
+    },
+    {
+      "method": "GET",
+      "url": "/api/assets/DAM-A-XX-99/readings/latest",
+      "status": 404,
+      "rawBody": "{\"code\":\"ASSET_NOT_FOUND\",\"message\":\"对象 DAM-A-XX-99 不存在\"}",
+      "body": {
+        "code": "ASSET_NOT_FOUND",
+        "message": "对象 DAM-A-XX-99 不存在"
+      }
+    }
+  ],
+  "workflow": [
+    {
+      "method": "GET",
+      "url": "/api/warnings",
+      "requestBody": null,
+      "status": 200,
+      "location": null,
+      "rawBody": "[{\"warningId\":\"w-0001\",\"assetId\":\"DAM-A-WL-01\",\"level\":\"BLUE\",\"evaluable\":true,\"score\":0.36,\"reason\":\"水位出现需关注变化\",\"status\":\"open\"},{\"warningId\":\"w-0002\",\"assetId\":\"DAM-A-PZ-07\",\"level\":\"YELLOW\",\"evaluable\":true,\"score\":0.58,\"reason\":\"渗压趋势超过黄色阈值\",\"status\":\"acknowledged\"},{\"warningId\":\"w-0003\",\"assetId\":\"DAM-A-WL-02\",\"level\":\"ORANGE\",\"evaluable\":true,\"score\":0.74,\"reason\":\"水位包络接近设计洪水位\",\"status\":\"open\"},{\"warningId\":\"w-0004\",\"assetId\":\"DAM-A-WL-03\",\"level\":\"RED\",\"evaluable\":true,\"score\":0.92,\"reason\":\"校核洪水位情景需人工会商\",\"status\":\"open\"},{\"warningId\":\"w-0005\",\"assetId\":\"DAM-A-WL-01\",\"level\":\"NONE\",\"evaluable\":false,\"score\":null,\"reason\":\"缺测导致未评估\",\"status\":\"closed\"}]",
+      "body": [
+        {
+          "warningId": "w-0001",
+          "assetId": "DAM-A-WL-01",
+          "level": "BLUE",
+          "evaluable": true,
+          "score": 0.36,
+          "reason": "水位出现需关注变化",
+          "status": "open"
+        },
+        {
+          "warningId": "w-0002",
+          "assetId": "DAM-A-PZ-07",
+          "level": "YELLOW",
+          "evaluable": true,
+          "score": 0.58,
+          "reason": "渗压趋势超过黄色阈值",
+          "status": "acknowledged"
+        },
+        {
+          "warningId": "w-0003",
+          "assetId": "DAM-A-WL-02",
+          "level": "ORANGE",
+          "evaluable": true,
+          "score": 0.74,
+          "reason": "水位包络接近设计洪水位",
+          "status": "open"
+        },
+        {
+          "warningId": "w-0004",
+          "assetId": "DAM-A-WL-03",
+          "level": "RED",
+          "evaluable": true,
+          "score": 0.92,
+          "reason": "校核洪水位情景需人工会商",
+          "status": "open"
+        },
+        {
+          "warningId": "w-0005",
+          "assetId": "DAM-A-WL-01",
+          "level": "NONE",
+          "evaluable": false,
+          "score": null,
+          "reason": "缺测导致未评估",
+          "status": "closed"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "url": "/api/work-orders",
+      "requestBody": {
+        "warningId": "w-0001",
+        "ownerRole": "运维员",
+        "dueAt": "2026-07-06T12:00:00+08:00",
+        "action": "教学演练：现场核查预警对应的监测点"
+      },
+      "status": 409,
+      "location": null,
+      "rawBody": "{\"code\":\"ILLEGAL_TRANSITION\",\"message\":\"必须先确认预警才能派单\",\"field\":\"warningId\"}",
+      "body": {
+        "code": "ILLEGAL_TRANSITION",
+        "message": "必须先确认预警才能派单",
+        "field": "warningId"
+      }
+    },
+    {
+      "method": "POST",
+      "url": "/api/warnings/w-0001/ack",
+      "requestBody": null,
+      "status": 200,
+      "location": null,
+      "rawBody": "{\"warningId\":\"w-0001\",\"assetId\":\"DAM-A-WL-01\",\"level\":\"BLUE\",\"evaluable\":true,\"score\":0.36,\"reason\":\"水位出现需关注变化\",\"status\":\"acknowledged\",\"acknowledgedAt\":\"2026-09-12T02:43:33.664Z\"}",
+      "body": {
+        "warningId": "w-0001",
+        "assetId": "DAM-A-WL-01",
+        "level": "BLUE",
+        "evaluable": true,
+        "score": 0.36,
+        "reason": "水位出现需关注变化",
+        "status": "acknowledged",
+        "acknowledgedAt": "2026-09-12T02:43:33.664Z"
+      }
+    },
+    {
+      "method": "POST",
+      "url": "/api/work-orders",
+      "requestBody": {
+        "warningId": "w-0001",
+        "ownerRole": "运维员",
+        "dueAt": "2026-07-06T12:00:00+08:00",
+        "action": "教学演练：现场核查预警对应的监测点"
+      },
+      "status": 201,
+      "location": "/api/work-orders/wo-0001",
+      "rawBody": "{\"workOrderId\":\"wo-0001\",\"warningId\":\"w-0001\",\"ownerRole\":\"运维员\",\"dueAt\":\"2026-07-06T12:00:00+08:00\",\"action\":\"教学演练：现场核查预警对应的监测点\",\"status\":\"in_progress\"}",
+      "body": {
+        "workOrderId": "wo-0001",
+        "warningId": "w-0001",
+        "ownerRole": "运维员",
+        "dueAt": "2026-07-06T12:00:00+08:00",
+        "action": "教学演练：现场核查预警对应的监测点",
+        "status": "in_progress"
+      }
+    },
+    {
+      "method": "POST",
+      "url": "/api/work-orders/wo-0001/complete",
+      "requestBody": {
+        "result": "教学演练：完成现场核查并登记处理结果"
+      },
+      "status": 200,
+      "location": null,
+      "rawBody": "{\"workOrderId\":\"wo-0001\",\"warningId\":\"w-0001\",\"ownerRole\":\"运维员\",\"dueAt\":\"2026-07-06T12:00:00+08:00\",\"action\":\"教学演练：现场核查预警对应的监测点\",\"status\":\"completed\",\"result\":\"教学演练：完成现场核查并登记处理结果\",\"completedAt\":\"2026-09-12T02:43:33.678Z\"}",
+      "body": {
+        "workOrderId": "wo-0001",
+        "warningId": "w-0001",
+        "ownerRole": "运维员",
+        "dueAt": "2026-07-06T12:00:00+08:00",
+        "action": "教学演练：现场核查预警对应的监测点",
+        "status": "completed",
+        "result": "教学演练：完成现场核查并登记处理结果",
+        "completedAt": "2026-09-12T02:43:33.678Z"
+      }
+    },
+    {
+      "method": "GET",
+      "url": "/api/warnings?assetId=DAM-A-WL-01",
+      "requestBody": null,
+      "status": 200,
+      "location": null,
+      "rawBody": "[{\"warningId\":\"w-0001\",\"assetId\":\"DAM-A-WL-01\",\"level\":\"BLUE\",\"evaluable\":true,\"score\":0.36,\"reason\":\"水位出现需关注变化\",\"status\":\"closed\",\"acknowledgedAt\":\"2026-09-12T02:43:33.664Z\"},{\"warningId\":\"w-0005\",\"assetId\":\"DAM-A-WL-01\",\"level\":\"NONE\",\"evaluable\":false,\"score\":null,\"reason\":\"缺测导致未评估\",\"status\":\"closed\"}]",
+      "body": [
+        {
+          "warningId": "w-0001",
+          "assetId": "DAM-A-WL-01",
+          "level": "BLUE",
+          "evaluable": true,
+          "score": 0.36,
+          "reason": "水位出现需关注变化",
+          "status": "closed",
+          "acknowledgedAt": "2026-09-12T02:43:33.664Z"
+        },
+        {
+          "warningId": "w-0005",
+          "assetId": "DAM-A-WL-01",
+          "level": "NONE",
+          "evaluable": false,
+          "score": null,
+          "reason": "缺测导致未评估",
+          "status": "closed"
+        }
+      ]
+    }
+  ],
+  "quality": {
+    "assetId": "DAM-A-WL-01",
+    "sourceCount": 288,
+    "windowStart": 15,
+    "count": 48,
+    "missingIndex": 37,
+    "records": [
+      {
+        "assetId": "DAM-A-WL-01",
+        "occurredAt": "2026-07-01T03:00:00+08:00",
+        "value": 165.504,
+        "unit": "m",
+        "quality": "valid",
+        "eventId": "evt-wl-0036-0",
+        "version": 1
+      },
+      {
+        "assetId": "DAM-A-WL-01",
+        "occurredAt": "2026-07-01T03:05:00+08:00",
+        "value": null,
+        "unit": "m",
+        "quality": "missing",
+        "eventId": "evt-wl-0037-0",
+        "version": 1
+      },
+      {
+        "assetId": "DAM-A-WL-01",
+        "occurredAt": "2026-07-01T03:10:00+08:00",
+        "value": 165.521,
+        "unit": "m",
+        "quality": "valid",
+        "eventId": "evt-wl-0038-0",
+        "version": 1
+      }
+    ],
+    "chartPoints": [
+      {
+        "value": [
+          "2026-07-01T03:00:00+08:00",
+          165.504
+        ],
+        "quality": "valid"
+      },
+      {
+        "value": [
+          "2026-07-01T03:05:00+08:00",
+          null
+        ],
+        "quality": "missing"
+      },
+      {
+        "value": [
+          "2026-07-01T03:10:00+08:00",
+          165.521
+        ],
+        "quality": "valid"
+      }
+    ]
+  },
+  "switch": [
+    {
+      "action": "开始读取 DAM-A-PZ-07",
+      "result": "等待响应"
+    },
+    {
+      "action": "开始读取 DAM-A-WL-01",
+      "result": "等待响应"
+    },
+    {
+      "action": "DAM-A-PZ-07",
+      "result": "AbortError：旧请求被取消"
+    },
+    {
+      "action": "DAM-A-WL-01",
+      "result": "HTTP 200"
+    }
+  ],
+  "s5Display": {
+    "actualModuleUrl": "http://127.0.0.1:5194/node_modules/.vite/deps/echarts.js?v=ad8ef531",
+    "seriesDataUnchanged": true,
+    "dataCount": 288,
+    "textSpans": [
+      {
+        "text": "kPa",
+        "font": "normal normal 22px Microsoft YaHei",
+        "boundingBoxHeight": 22,
+        "scaleY": 1
+      },
+      {
+        "text": "176",
+        "font": "normal normal 22px Microsoft YaHei",
+        "boundingBoxHeight": 22,
+        "scaleY": 1
+      },
+      {
+        "text": "178",
+        "font": "normal normal 22px Microsoft YaHei",
+        "boundingBoxHeight": 22,
+        "scaleY": 1
+      },
+      {
+        "text": "180",
+        "font": "normal normal 22px Microsoft YaHei",
+        "boundingBoxHeight": 22,
+        "scaleY": 1
+      },
+      {
+        "text": "182",
+        "font": "normal normal 22px Microsoft YaHei",
+        "boundingBoxHeight": 22,
+        "scaleY": 1
+      },
+      {
+        "text": "184",
+        "font": "normal normal 22px Microsoft YaHei",
+        "boundingBoxHeight": 22,
+        "scaleY": 1
+      },
+      {
+        "text": "186",
+        "font": "normal normal 22px Microsoft YaHei",
+        "boundingBoxHeight": 22,
+        "scaleY": 1
+      },
+      {
+        "text": "188",
+        "font": "normal normal 22px Microsoft YaHei",
+        "boundingBoxHeight": 22,
+        "scaleY": 1
+      },
+      {
+        "text": "7月",
+        "font": "normal normal 22px Microsoft YaHei",
+        "boundingBoxHeight": 22,
+        "scaleY": 1
+      },
+      {
+        "text": "04:00",
+        "font": "normal normal 22px Microsoft YaHei",
+        "boundingBoxHeight": 22,
+        "scaleY": 1
+      },
+      {
+        "text": "08:00",
+        "font": "normal normal 22px Microsoft YaHei",
+        "boundingBoxHeight": 22,
+        "scaleY": 1
+      },
+      {
+        "text": "12:00",
+        "font": "normal normal 22px Microsoft YaHei",
+        "boundingBoxHeight": 22,
+        "scaleY": 1
+      },
+      {
+        "text": "16:00",
+        "font": "normal normal 22px Microsoft YaHei",
+        "boundingBoxHeight": 22,
+        "scaleY": 1
+      },
+      {
+        "text": "20:00",
+        "font": "normal normal 22px Microsoft YaHei",
+        "boundingBoxHeight": 22,
+        "scaleY": 1
+      }
+    ],
+    "statusComputedFontPx": 22,
+    "statusLineHeightPx": 33,
+    "panelBounds": {
+      "x": 482,
+      "y": 12,
+      "width": 626,
+      "height": 357,
+      "top": 12,
+      "right": 1108,
+      "bottom": 369,
+      "left": 482
+    },
+    "chartBounds": {
+      "x": 495,
+      "y": 25,
+      "width": 600,
+      "height": 290,
+      "top": 25,
+      "right": 1095,
+      "bottom": 315,
+      "left": 495
+    },
+    "displaySettings": {
+      "axisFontCssPx": 22,
+      "statusFontCssPx": 22,
+      "chartHeightCssPx": 290,
+      "panelWidthCssPx": 600,
+      "background": "#ffffff",
+      "dataAndModulesUnchanged": true
+    },
+    "seriesSha256Before": "62012d2b5ad81e172c64a20f14692fad6968187e9083d783c7e44bb213bd5a42",
+    "seriesSha256After": "62012d2b5ad81e172c64a20f14692fad6968187e9083d783c7e44bb213bd5a42",
+    "equivalentPointSizeAt16cm": 8.91,
+    "fontEvidenceMethod": "读取原 ECharts 实例的 ZRender tspan 实际 font 与变换比例，以及状态条的 getComputedStyle；等效 pt = CSS px × 16 cm × 72 ÷ (1120 CSS px × 2.54)。"
+  }
+}

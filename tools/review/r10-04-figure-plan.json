@@ -1,0 +1,868 @@
+{
+  "package": "R10-04",
+  "date": "2026-09-12",
+  "mode": "布点方案及三幅已执行插入记录；其余候选尚未全部制作",
+  "scope": "第1—9章；优先第4—8章概念与实际操作的对应关系",
+  "source_commit": "6037b49c940114e91499adf8d1ba13362b0ec07d",
+  "summary": {
+    "total_candidates": 14,
+    "AI_scene_candidates": 4,
+    "running_ui_composites": 8,
+    "detail_comparisons": 2,
+    "P1_candidates": [
+      "F01",
+      "F02",
+      "F03",
+      "F04",
+      "F05",
+      "F06",
+      "F07",
+      "F08",
+      "F10",
+      "F11",
+      "F12",
+      "F14"
+    ],
+    "P2_candidates": [
+      "F09",
+      "F13"
+    ],
+    "important": "不为达到14而添加装饰图片。F09/F13未实测则暂不制作，F14不重复刊图。",
+    "already_generated_reported_by_root": [
+      "F01",
+      "F02",
+      "F03"
+    ],
+    "recommended_fourth_realistic_image": "F04 弧形闸门剖视识读：直接帮助理解a、H和下游水位条件，教学价值高于再增加一幅坝区全景或机房照片。",
+    "first_batch": [
+      "F01",
+      "F02",
+      "F03",
+      "F04",
+      "F05",
+      "F06",
+      "F07",
+      "F08",
+      "F10",
+      "F11",
+      "F12"
+    ],
+    "optional_or_existing_detail": [
+      "F09（权限实测条件成立再补）",
+      "F13（真实数据库实验可运行再补）",
+      "F14（已有缺测图升级，不另计新图）"
+    ],
+    "counting_rule": "14项是布点方案总数；优先批为4幅写实图（其中3幅已生成）+7幅真实操作组合图，共11次制作/排版决策。F05/F11优先替换旧图，F14保留旧编号作细节升级，均不得虚报为新增编号；最终新增图数量以主稿新label和PDF实见图号核对。"
+  },
+  "page_budget_rules": [
+    "最多14.6cm宽，单幅通常2.7–4.0cm高，全部使用短图题；禁止每节放一张整屏或整页照片。",
+    "先替换和合并，再新增；4幅写实图最高13.9cm图高，须由旧图替换、51WIM截图拼版及浮动留白回收相应空间。",
+    "图片内字体按最终印刷尺寸不小于8pt；宁可截取局部，也不把终端或页面压缩到无法阅读。",
+    "不以删掉完整清单、公式推导、失败判据和参数表来给图片腾空间；成段删减超过门禁限制须登记并保存去向。",
+    "编译前后比较实际页数与对应图页；本方案没有测得实际节省页数，不承诺14图必然减页。"
+  ],
+  "asset_integrity_rules": [
+    "AI底图必须在图题/图注标为AI生成教学渲染；不能冒充现场实拍、测绘成果或产品实际截图。",
+    "接口、字段、测点编码、质量码和角色均取自8.1契约及配套程序；AI不得绘制可作为依据的虚假数值。",
+    "实际运行截图保存代码提交、数据fixture、启动命令、请求日志、浏览器与视口；只裁切无关区域，不修改程序输出。",
+    "参数标注、中文标签、尺寸线和编号由排版程序叠加，避免依赖AI文字与几何计算。",
+    "本轮用户已授权写实图与运行图；引入外部图片的具体TeX实现由主代理落实，既有51WIM授权边界继续保留。"
+  ],
+  "chapter_audit": [
+    {
+      "chapter": 1,
+      "sections_reviewed": [
+        "智慧水利的概念与发展",
+        "智慧水利平台架构体系",
+        "软件工程方法概述"
+      ],
+      "existing_figure_environments": 6,
+      "decision": "补实物与工程空间认识，现有政策/架构图保留，不加概念性科技照片。"
+    },
+    {
+      "chapter": 2,
+      "sections_reviewed": [
+        "软件生命周期",
+        "软件生命周期模型与选型",
+        "需求获取与理解",
+        "需求分析的任务与原则",
+        "结构化分析",
+        "软件需求规格说明与验收"
+      ],
+      "existing_figure_environments": 14,
+      "decision": "不新增场景照片；本章案例为灌区，需求表、DFD、ER与状态图承担教学，优先合并相邻模型对照图、保留方法信息。"
+    },
+    {
+      "chapter": 3,
+      "sections_reviewed": [
+        "从需求到模块",
+        "分层与职责",
+        "接口与数据流",
+        "模块化与依赖",
+        "架构选择",
+        "架构评审"
+      ],
+      "existing_figure_environments": 10,
+      "decision": "不新增机房/大屏装饰图；本章难点是模块职责与消息关系，类图、时序图和接口例子更有效。可回指F02实体链路。"
+    },
+    {
+      "chapter": 4,
+      "sections_reviewed": [
+        "Web基础概念与浏览器架构",
+        "HTML基础与语义化",
+        "CSS样式与响应式布局",
+        "JavaScript基础编程",
+        "数据请求与页面状态",
+        "Vue 3组件化开发",
+        "Vue Router与Pinia应用组织",
+        "调试、构建与阶段验收"
+      ],
+      "existing_figure_environments": 10,
+      "decision": "用实际页面和Network局部替代抽象占位图；同一状态只出现一次。"
+    },
+    {
+      "chapter": 5,
+      "sections_reviewed": [
+        "后端服务与REST接口概述",
+        "第一个 HTTP 接口：从固定数据到契约",
+        "Spring Boot企业级开发基础",
+        "Jakarta Persistence与事务管理",
+        "服务层与异常处理",
+        "Spring Security 6与JWT",
+        "事务事件与消息队列",
+        "性能诊断与可观测性专题",
+        "测试策略与质量门禁"
+      ],
+      "existing_figure_environments": 5,
+      "decision": "增加真实响应与SQL细节，拒绝伪造IDE、日志和压测结果。"
+    },
+    {
+      "chapter": 6,
+      "sections_reviewed": [
+        "WebGL2与Three.js三维渲染基础",
+        "GIS服务、坐标与二三维集成",
+        "倾斜摄影与BIM模型构建",
+        "数字孪生水利平台架构概览"
+      ],
+      "existing_figure_environments": 13,
+      "decision": "本批不再生成BIM/点云写实对照，优先使用S4实际几何体运行图；既有渲染坐标原理图保留，避免将模拟纹理冒充测绘成果。"
+    },
+    {
+      "chapter": 7,
+      "sections_reviewed": [
+        "面向可视化的数据准备",
+        "图表与实时联动",
+        "三维场景中的监测点绘制",
+        "监测点互动与拾取技术"
+      ],
+      "existing_figure_environments": 11,
+      "decision": "补四类监测仪器写实图，并围绕缺测、对象选择与单位变化制作局部比较；不重复刊整屏看板。"
+    },
+    {
+      "chapter": 8,
+      "sections_reviewed": [
+        "需求分析与业务闭环",
+        "总体架构与三维场景设计",
+        "数据模型、前端展示与后端处理",
+        "智能分析、预警与业务闭环",
+        "数字孪生水利平台案例",
+        "系统部署、运维与验收"
+      ],
+      "existing_figure_environments": 25,
+      "decision": "重点补闸门参数识读与工单响应；既有6张授权51WIM截图只做组合排版优化，授权仍仅纸质/PDF，网站保留TikZ替代。"
+    },
+    {
+      "chapter": 9,
+      "sections_reviewed": [
+        "全书回顾",
+        "技术发展趋势与展望",
+        "对读者的建议与后续学习指引"
+      ],
+      "existing_figure_environments": 0,
+      "decision": "不新增结语图片；课程报告回指F11/F12的操作要求，保留成果自查表，减少重复图示。"
+    }
+  ],
+  "figures": [
+    {
+      "id": "F01",
+      "priority": "P1",
+      "category": "AI写实场景",
+      "title": "案例水库的工程对象与监测位置",
+      "chapter": 1,
+      "section": "1.1.8 贯穿场景：一次洪水预警如何形成闭环",
+      "source_file": "output/chapters/chapter01.tex",
+      "insert_anchor": "图\\ref{fig:ch01-reservoir-physical}",
+      "anchor_line": 165,
+      "learning_goal": "让首次接触本书的学生看清坝体、上下游、泄洪设施与监测对象在空间中的关系。",
+      "must_show": [
+        "横幅三分之四俯视：混凝土坝、上游库面、下游河道和坝肩，水流方向清楚",
+        "三个弧形闸门孔口，坝顶及岸边各类测点用后加编号定位",
+        "仅点出渗压、位移、库水位、雨量及采集网关的位置类型，不把28点逐个挤进全景",
+        "图注写“AI生成的虚构案例水库教学渲染”，编号图例由排版程序后加"
+      ],
+      "acquisition": {
+        "mode": "AI生成后人工审图，标注另行排版",
+        "inputs": [
+          "output/case-params.tex",
+          "chapter08.tex的tab:case-parameters"
+        ],
+        "caption_disclosure": "AI生成的虚构案例水库教学渲染；位置关系为示意"
+      },
+      "accuracy_risks": [
+        "坝体不得变成土石坝或拱坝；不新增工程名称和尺寸",
+        "渗压点应表现为埋设/剖面示意，不能画成坝顶装饰杆；图中水位不标作实测值",
+        "写实图用于辨认对象，不能被用来读取坝高或洪水淹没线"
+      ],
+      "compact_layout": {
+        "width_cm": 14.6,
+        "image_height_cm_max": 3.4,
+        "panels": "一幅宽景+图外5个短标注",
+        "caption_lines_max": 2
+      },
+      "replace_or_merge": {
+        "strategy": "替换第1章引言或场景节的装饰性留白；与既有闭环图合排在同页",
+        "retain": [
+          "fig:flood-warning-loop",
+          "tab:case-parameters"
+        ],
+        "do_not_duplicate": "第8章直接引用本图，不再刊同一全景；不增设满页章首图",
+        "page_effect": "纯新增图高约3.4cm，须由后续图形合并回收等量空间，不能宣称自然减页"
+      },
+      "status": "已按主代理指定位置插入TeX并完成源文件自检；整书编译与版面复核由主代理执行",
+      "actual_label": "fig:ch01-reservoir-physical",
+      "actual_image_path": "output/images/generated/reservoir-dam.png",
+      "actual_width_cm": 11.5
+    },
+    {
+      "id": "F02",
+      "priority": "P1",
+      "category": "AI写实场景",
+      "title": "四类观测对应的监测仪器",
+      "chapter": 1,
+      "section": "1.1.3 感知、通信与数据交换",
+      "source_file": "output/chapters/chapter01.tex",
+      "insert_anchor": "图\\ref{fig:ch01-monitoring-instruments}",
+      "anchor_line": 79,
+      "learning_goal": "把水位、雨量、位移与渗压四种观测量对应到实际仪器形态，理解其数据含义不同。",
+      "must_show": [
+        "雷达水位计对准水面、雨量筒开口无遮挡、GNSS天线设于稳定测点、渗压计探头与引线",
+        "四个面板与库水位、雨量、位移、渗压逐一对应；型号、精度、数量不由图片臆造",
+        "渗压探头若在地面展示，注明为器件外观；不要误导为工作时放在坝顶"
+      ],
+      "acquisition": {
+        "mode": "使用主代理已生成的四联传感器图",
+        "inputs": [
+          "第7章观测数据与展示方式表",
+          "tab:case-parameters"
+        ],
+        "caption_disclosure": "AI生成的监测仪器教学渲染；器件外观不代表指定型号"
+      },
+      "accuracy_risks": [
+        "GNSS不直接测量渗压；雷达水位计不是浸水压力传感器",
+        "GNSS位移由多历元或基准比较得到，不能图示单次信号直接产生位移",
+        "雨量筒口不能被天线、顶棚或横梁遮挡；渗压计工作位置按剖面/文字交代"
+      ],
+      "compact_layout": {
+        "width_cm": 14.6,
+        "image_height_cm_max": 3.2,
+        "panels": "四幅同高近景，共用一个图题与一行类别名",
+        "caption_lines_max": 2
+      },
+      "replace_or_merge": {
+        "strategy": "与案例水库观测数据与展示方式表同页；表留数据语义，图片补仪器识别",
+        "retain": [
+          "观测数据类型表与质量码说明"
+        ],
+        "do_not_duplicate": "第1章和第8章回指本图，不复印整幅四联图",
+        "page_effect": "新增约3.2cm；裁掉底图多余边缘，禁止四个面板纵排"
+      },
+      "status": "已按主代理指定位置插入TeX并完成源文件自检；整书编译与版面复核由主代理执行",
+      "actual_label": "fig:ch01-monitoring-instruments",
+      "actual_image_path": "output/images/generated/monitoring-sensors.png",
+      "actual_width_cm": 13.5
+    },
+    {
+      "id": "F03",
+      "priority": "P1",
+      "category": "AI写实场景",
+      "title": "采集柜内部与一条观测的接入路径",
+      "chapter": 8,
+      "section": "8.2.1 统一技术栈与分层架构",
+      "source_file": "output/chapters/chapter08.tex",
+      "insert_anchor": "分层架构中的边缘设备可结合图\\ref{fig:ch08-acquisition-cabinet}",
+      "anchor_line": 211,
+      "learning_goal": "辨认采集、接线、供电、通信的实物位置，并理解网关位于传感器与平台之间。",
+      "must_show": [
+        "主代理已生成的打开的采集柜内部，选择采集器、通信模块、电源和接线端子四处局部",
+        "后加编号标明“传感器接入”“采集与缓存”“通信上送”“供电”，不臆造内部型号",
+        "用短箭头说明数据方向，与供电线区分"
+      ],
+      "acquisition": {
+        "mode": "使用主代理已生成的采集柜内部图",
+        "inputs": [
+          "第1章感知、通信与数据交换正文"
+        ],
+        "caption_disclosure": "AI生成的采集柜教学渲染；接线不作为安装依据"
+      },
+      "accuracy_risks": [
+        "AI接线可能不符合真实电气规范；不添加可照接的端子编号和电压数值",
+        "通信模块、数据采集器和电源应经人工辨认后标注，不靠外观猜设备型号",
+        "这不是案例水库现场实拍，不写运维事故或生产性能结论"
+      ],
+      "compact_layout": {
+        "width_cm": 14.6,
+        "image_height_cm_max": 3.3,
+        "panels": "左侧柜体局部+右侧两个部件放大框，整体横幅",
+        "caption_lines_max": 2
+      },
+      "replace_or_merge": {
+        "strategy": "置于监测链路三类规范表之前或之后，图示实物位置、表说明规范职责",
+        "retain": [
+          "监测链路中三类规范的不同职责表"
+        ],
+        "do_not_duplicate": "第5章网关/消息队列处回指，不再刊机房大屏装饰图",
+        "page_effect": "新增约3.3cm；避免纵向整柜照片占半页，可用柜内组件横向组合"
+      },
+      "status": "已按主代理指定位置插入TeX并完成源文件自检；整书编译与版面复核由主代理执行",
+      "actual_label": "fig:ch08-acquisition-cabinet",
+      "actual_image_path": "output/images/generated/acquisition-cabinet.png",
+      "actual_width_cm": 10
+    },
+    {
+      "id": "F04",
+      "priority": "P1",
+      "category": "AI写实场景",
+      "title": "弧形闸门开度与水头的剖视识读",
+      "chapter": 8,
+      "section": "8.4.3 模型可信度与人在回路；8.5.5 闸门调度正算、反算与方案约束",
+      "source_file": "output/chapters/chapter08.tex",
+      "insert_anchor": "案例水库的三孔弧形闸门参数来自表",
+      "anchor_line": 2537,
+      "learning_goal": "解决学生把开度a、闸前水深及总水头H混为同一个尺寸的问题。",
+      "must_show": [
+        "左为一孔弧形闸门的真实材质剖视：弧形面板、支臂、支铰、闸底、上游水面和自由出流方向",
+        "右为同机位下游水位抬高的对照，只说明下游条件变化",
+        "a、闸底起算水深、行近流速水头与总水头H用校核后的矢量尺寸线后加",
+        "图内不放流量计算结果；流量系数、孔数和正式数值沿用邻接正文和参数表"
+      ],
+      "acquisition": {
+        "mode": "AI生成不带文字的工程剖视底图+人工校核后叠加矢量标注",
+        "inputs": [
+          "tab:case-parameters",
+          "8.4.3的Q与H定义",
+          "8.5.5的适用条件"
+        ],
+        "caption_disclosure": "AI生成的弧形闸门剖视教学示意；非工程水力计算结果"
+      },
+      "accuracy_risks": [
+        "AI不能准确决定自由/淹没出流判别；人工校对上下游水位和收缩断面关系",
+        "H不能只画成闸底至静水面的长度而遗漏行近流速水头",
+        "不能画成平板直升门；右图不凭外观给出淹没系数sigma"
+      ],
+      "compact_layout": {
+        "width_cm": 14.6,
+        "image_height_cm_max": 4.0,
+        "panels": "两幅剖视并排，标注在白色边栏，不覆盖水流",
+        "caption_lines_max": 2
+      },
+      "replace_or_merge": {
+        "strategy": "置于首次算例前，与算式同页；8.5.5复用引用，不再刊第二幅相似闸门图",
+        "retain": [
+          "公式、单位、适用条件和工程复核要求",
+          "fig:gate-simulation-flow"
+        ],
+        "do_not_duplicate": "不得以图取代必须保留的计算与判别步骤",
+        "page_effect": "新增约4cm；优先通过8.5厂商截图拼版及多余浮动留白回收空间"
+      },
+      "status": "拟制作；尚未生成或截取，不作为已完成素材",
+      "recommended_generation_prompt": "Create a precise, photorealistic engineering teaching illustration as a wide landscape diptych, approximately 3.5:1. Two equal side-by-side panels show the SAME single-bay radial (tainter) spillway gate in vertical side cutaway, viewed from the same downstream-facing side angle. Clean off-white background, realistic restrained concrete and galvanized steel, crisp readable surfaces, soft daylight, no dramatic flood or cinematic effects. Upstream is LEFT, downstream is RIGHT. Clearly show the curved steel gate skin, radial support arms leading to a downstream trunnion on a concrete pier, concrete sill and horizontal channel floor. The gate is partly open, leaving a visible vertical clearance between its bottom edge and the sill. Upper-left upstream reservoir water level is identical in both panels. LEFT PANEL: low downstream water and a visibly free under-gate jet, the jet and the vertical gate clearance are easy to distinguish. RIGHT PANEL: raised downstream tailwater submerges the outlet region, with no free jet into air. Keep gate geometry, opening, floor elevation and viewpoint identical; only downstream water level changes. Use transparent cutaway water near the gate so the opening remains visible, and subtle natural flow texture, not physically claimed CFD streamlines. Leave a narrow clean margin above and beside the water surfaces for later vector annotations. The image is conceptual teaching rendering, not an existing real engineering site. NO text, NO labels, NO letters, NO numbers, NO dimensions, NO equations, NO legend, NO logo, NO watermark, NO invented instruments. Do not depict a vertically sliding flat sluice gate. Ensure mechanical parts connect plausibly. The result must remain legible when printed at 14.6 cm wide.",
+      "review_before_use": [
+        "确认为弧形闸门而非直升平板门；支臂与支铰在机械关系上合理",
+        "左右两幅只有下游水位变化，闸前水位、开度与闸底一致",
+        "后加a、闸前水深及行近流速水头的矢量标注；总水头H不要被误画为静水深",
+        "如果无法通过机械/水流条件校核，只采用正确的单面板剖视并用正文解释淹没条件，勿强用错误右图"
+      ]
+    },
+    {
+      "id": "F05",
+      "priority": "P1",
+      "category": "程序运行组合图",
+      "title": "同一监测页面在宽屏与窄屏下的实际重排",
+      "chapter": 4,
+      "section": "4.3.5 Grid：二维的监测仪表盘；4.3.6 响应式断点与大屏适配",
+      "source_file": "output/chapters/chapter04.tex",
+      "insert_anchor": "\\subsection{响应式断点与大屏适配}",
+      "anchor_line": 589,
+      "learning_goal": "让学生看到媒体查询改变的是列数与顺序，而非把整张页面缩小。",
+      "must_show": [
+        "左：宽屏中的侧栏、主图和告警区；右：窄屏单列中同一批信息的顺序",
+        "在裁图上标明实际视口宽度，不把截屏的印刷宽度当CSS像素",
+        "保留页面标题、同一条测点读数和操作按钮；用一处框线指出断点前后的布局变化"
+      ],
+      "acquisition": {
+        "mode": "从lst:ch04-a43-grid-dashboard提取完整HTML到临时目录并真实渲染",
+        "inputs": [
+          "lst:ch04-a43-grid-dashboard",
+          "lst:ch04-css-responsive"
+        ],
+        "capture_requirement": "按清单真实断点两侧各取一次；不得用拼图伪造现有页面尚未实现的响应式"
+      },
+      "accuracy_risks": [
+        "lesson45.html使用固定三列，不能拿它假称响应式Grid示例",
+        "截图中的数据、空状态和按钮必须来自同一份页面输入",
+        "无真实3840联屏环境时不制造“多区联屏实测”截图"
+      ],
+      "compact_layout": {
+        "width_cm": 14.6,
+        "image_height_cm_max": 3.6,
+        "panels": "宽屏局部9.2cm+窄屏局部4.8cm，不拍浏览器外壳",
+        "caption_lines_max": 2
+      },
+      "replace_or_merge": {
+        "strategy": "替换fig:ch04-responsive-breakpoints的横轴概念图；保留对应label",
+        "retain": [
+          "完整HTML与媒体查询清单",
+          "断点推导文字"
+        ],
+        "do_not_duplicate": "不再为1920/2560/3840分别刊整屏图",
+        "page_effect": "截图可能比旧图略高，控制在3.6cm；不增加第四个面板"
+      },
+      "status": "拟制作；尚未生成或截取，不作为已完成素材"
+    },
+    {
+      "id": "F06",
+      "priority": "P1",
+      "category": "程序运行组合图",
+      "title": "页面中的一条读数与Network响应逐项对应",
+      "chapter": 4,
+      "section": "4.5.2 完整例子：读取对象列表与最新观测",
+      "source_file": "output/chapters/chapter04.tex",
+      "insert_anchor": "\\subsection{完整例子：读取对象列表与最新观测}",
+      "anchor_line": 1112,
+      "learning_goal": "把fetch、HTTP响应、JSON字段和DOM显示放到同一次实际操作中。",
+      "must_show": [
+        "左：lesson45选中DAM-A-PZ-07后的详情局部",
+        "右：浏览器Network中该latest请求的路径、200状态、Preview中的value/unit/quality/occurredAt",
+        "用编号连到读数、单位、质量码与时间，不显示完整Authorization令牌"
+      ],
+      "acquisition": {
+        "mode": "运行teaching-api/server.mjs和Vite，真实访问/lesson45.html",
+        "inputs": [
+          "frontend/src/lesson45/main.js",
+          "frontend/src/lesson45/detail.js",
+          "teaching-api/server.mjs"
+        ],
+        "capture_requirement": "保存HAR或请求摘要、同次操作截图、代码提交和数据集版本"
+      },
+      "accuracy_risks": [
+        "截图字段必须与tab:api-contract一致，不能残留/api/stations等旧路径",
+        "教学接口固定数据不是实时水库观测；图注注明教学接口和固定数据集",
+        "截图不能把不同请求的页面与响应拼成一对"
+      ],
+      "compact_layout": {
+        "width_cm": 14.6,
+        "image_height_cm_max": 3.6,
+        "panels": "页面局部5.7cm+Network局部8.5cm，等高",
+        "caption_lines_max": 2
+      },
+      "replace_or_merge": {
+        "strategy": "与tab:ch04-r1-run合为同一个“运行结果”版块，表保留200/空数据等判据，去重复的整段逐字段复述",
+        "retain": [
+          "lst:ch04-r1-load",
+          "tab:ch04-r1-run中的失败与边界行"
+        ],
+        "do_not_duplicate": "第5章仅拍Java服务端新增部分，不再重复整页前端",
+        "page_effect": "目标在原运行记录版块内替换排版，不新增独立整页"
+      },
+      "status": "拟制作；尚未生成或截取，不作为已完成素材"
+    },
+    {
+      "id": "F07",
+      "priority": "P1",
+      "category": "程序运行组合图",
+      "title": "加载、空数据、故障与恢复的真实页面局部",
+      "chapter": 4,
+      "section": "4.5.3 页面四种状态；4.5.4 迟到响应故障",
+      "source_file": "output/chapters/chapter04.tex",
+      "insert_anchor": "\\subsection{页面的四种状态：加载、空数据、错误与过期}",
+      "anchor_line": 1184,
+      "learning_goal": "帮助学生区分“请求还没结束”“成功但没有记录”和“请求失败”。",
+      "must_show": [
+        "四个仅截详情框的小面板：loading、empty、error、成功恢复",
+        "每个面板标实际触发方式与状态值；颜色以文字和图标补充",
+        "同一对象、同一时间窗；恢复面板显示可验证的新读数或更新时间"
+      ],
+      "acquisition": {
+        "mode": "真实运行lesson45；用临时代理/浏览器route按teach契约注入故障，不修改书中源文件",
+        "inputs": [
+          "tab:api-teach-faults",
+          "frontend/src/lesson45/controller.js",
+          "frontend/src/lesson45/state.js"
+        ],
+        "capture_requirement": "逐状态保存触发参数和实际响应；未有重试按钮就拍真实再次选择操作，不画虚构按钮"
+      },
+      "accuracy_risks": [
+        "URL地址栏加入teach参数不会自动注入lesson45内部请求，必须实际改到请求或受控拦截",
+        "不要用一张红色文字截图同时代表404/500/网络中断",
+        "不能把missing质量码画成HTTP失败；两者属于不同维度"
+      ],
+      "compact_layout": {
+        "width_cm": 14.6,
+        "image_height_cm_max": 3.2,
+        "panels": "2×2详情框，去掉重复标题/菜单，字不小于8pt",
+        "caption_lines_max": 2
+      },
+      "replace_or_merge": {
+        "strategy": "替代tab:ch04-r1-states附近纯视觉描述；保留触发方式表并压成紧凑列宽",
+        "retain": [
+          "fig:ch04-r1-race（上一包已重绘的竞态原理图）",
+          "状态迁移与取消逻辑代码"
+        ],
+        "do_not_duplicate": "不重拍竞态整页；原理图和状态截图各承担一项学习任务",
+        "page_effect": "四状态共享同一图题，避免四个独立浮动体"
+      },
+      "status": "拟制作；尚未生成或截取，不作为已完成素材"
+    },
+    {
+      "id": "F08",
+      "priority": "P1",
+      "category": "程序运行组合图",
+      "title": "Java接口启动、成功响应与契约错误",
+      "chapter": 5,
+      "section": "5.2.1 返回固定数据的接口；5.2.2 路径参数、查询参数与错误体",
+      "source_file": "output/chapters/chapter05.tex",
+      "insert_anchor": "\\subsection{返回固定数据的接口}",
+      "anchor_line": 196,
+      "learning_goal": "让学生确认自己启动的是第一个固定数据接口，并能从真实响应识别成功与错误。",
+      "must_show": [
+        "左：Lesson52Application启动成功的终端局部，含主类和端口",
+        "中：GET /api/assets返回四个固定对象的JSON局部",
+        "右：一个实际非法参数/不存在对象请求及其HTTP状态、code与message"
+      ],
+      "acquisition": {
+        "mode": "运行配套backend的edu.example.lesson52.Lesson52Application，以curl发起真实请求",
+        "inputs": [
+          "backend/src/main/java/edu/example/lesson52",
+          "第5章5.2配套启动命令"
+        ],
+        "capture_requirement": "日志须显示实际启动主类；保留一份命令与响应文本供核对"
+      },
+      "accuracy_risks": [
+        "不能误启动完整qingyuan后端却声称固定数据示例",
+        "lesson52阶段没有认证/数据库/完整历史记录，不应在图中加入登录或SQL结果",
+        "终端的异常堆栈不要假扮契约JSON；截图不得把失败命令改成成功"
+      ],
+      "compact_layout": {
+        "width_cm": 14.6,
+        "image_height_cm_max": 3.5,
+        "panels": "三块裁切；启动日志约3cm，成功/错误各约5.5cm",
+        "caption_lines_max": 2
+      },
+      "replace_or_merge": {
+        "strategy": "放在首次启动命令与验证段之后，合并重复的“看到什么”文字；完整代码与调用步骤保留",
+        "retain": [
+          "lst:ch05-first-controller",
+          "lst:ch05-first-params"
+        ],
+        "do_not_duplicate": "不刊整页IDE或Maven下载过程，只保留可判断运行状态的行",
+        "page_effect": "用3.5cm图替换约等量运行结果说明；不足时只截成功与错误两面板"
+      },
+      "status": "拟制作；尚未生成或截取，不作为已完成素材"
+    },
+    {
+      "id": "F09",
+      "priority": "P2",
+      "category": "程序运行组合图",
+      "title": "未认证、已认证与权限不足的请求对照",
+      "chapter": 5,
+      "section": "5.6 Spring Security 6与JWT，结合4.5.7联调",
+      "source_file": "output/chapters/chapter05.tex",
+      "insert_anchor": "\\section{Spring Security 6与JWT}",
+      "anchor_line": 1374,
+      "learning_goal": "区分401与403，并理解页面路由守卫不能替代服务端授权。",
+      "must_show": [
+        "同一受保护资源的未携带令牌请求与真实401响应",
+        "登录后取得资源的200响应；Authorization仅保留字段名，令牌遮盖",
+        "选择已实现权限规则的端点，用实际受限角色触发403，并显示契约错误体"
+      ],
+      "acquisition": {
+        "mode": "运行完整Spring Boot后端，或明确标注教学接口；两种来源不能混在同一未标注组合图",
+        "inputs": [
+          "backend的SecurityConfig与方法级授权实现",
+          "frontend/src/utils/auth.js",
+          "lst:ch05-method-security"
+        ],
+        "capture_requirement": "403端点与角色先由现有测试确认；找不到可复现规则时只制作401/200两面板"
+      },
+      "accuracy_risks": [
+        "不要借故障注入直接返回403却声称验证了权限配置",
+        "不展示可用令牌、真实账号或私有服务地址",
+        "图中角色用值班员、专业分析员、审批人、运维员；不可造管理员万能角色"
+      ],
+      "compact_layout": {
+        "width_cm": 14.6,
+        "image_height_cm_max": 3.4,
+        "panels": "三列请求摘要+响应局部，完整请求命令留正文",
+        "caption_lines_max": 2
+      },
+      "replace_or_merge": {
+        "strategy": "替换fig:ch05-auth-sequence附近重复的请求报文叙述，保留fig:ch05-security-filter的过滤器原理图",
+        "retain": [
+          "认证与授权定义",
+          "JWT签名/过期/撤销条件"
+        ],
+        "do_not_duplicate": "4.5.7仅引用这组响应，不再刊相同完整登录画面",
+        "page_effect": "原理图与实证图合计高度不得超过旧认证两图合计；必要时只保留两状态"
+      },
+      "status": "拟制作；尚未生成或截取，不作为已完成素材"
+    },
+    {
+      "id": "F10",
+      "priority": "P1",
+      "category": "程序运行组合图",
+      "title": "从台账记录到Three.js中的指定测点",
+      "chapter": 6,
+      "section": "6.1.5 把测点挂到坝体上：对象绑定与查找",
+      "source_file": "output/chapters/chapter06.tex",
+      "insert_anchor": "\\subsection{把测点挂到坝体上：对象绑定与查找}",
+      "anchor_line": 440,
+      "learning_goal": "把台账坐标、assetId、Mesh和可见小球建立一一对应。",
+      "must_show": [
+        "左：/lesson61.html实际几何体与测点，圈出DAM-A-PZ-07",
+        "右上：stations.json中同一测点的坐标字段局部",
+        "右下：控制台bound.find或window.bound.find返回对象，其userData.assetId与position可读",
+        "标注“配套程序实际运行画面；坝体为教学几何体”"
+      ],
+      "acquisition": {
+        "mode": "运行S4阶段页面/lesson61.html与教学接口",
+        "inputs": [
+          "frontend/src/lesson61/main.js",
+          "frontend/src/lesson61/bind-assets.js",
+          "datasets/stations.json"
+        ],
+        "capture_requirement": "使用真实OrbitControls改变视角，使目标点可见；记录台账版本与浏览器"
+      },
+      "accuracy_risks": [
+        "不能用AI写实坝体替换浏览器中的长方体而仍称运行截图",
+        "28个对象已经绑定不等于同一视角可见28个球；不人工粘贴不可见测点",
+        "S4经纬度近似转换不应被标为已完成CGCS2000高斯投影"
+      ],
+      "compact_layout": {
+        "width_cm": 14.6,
+        "image_height_cm_max": 3.8,
+        "panels": "真实场景约8cm宽，右侧两块数据局部约6cm",
+        "caption_lines_max": 2
+      },
+      "replace_or_merge": {
+        "strategy": "与对象绑定检查表同页；替换紧邻的重复字段解释，不删坐标转换代码",
+        "retain": [
+          "fig:ch06-render-pipeline",
+          "tab:ch06-bind-check"
+        ],
+        "do_not_duplicate": "场景图不重复出现在章末交付物；7章联动截图只新增交互差异",
+        "page_effect": "控制图高3.8cm，右侧文本局部与场景等高，避免逐屏纵排"
+      },
+      "status": "拟制作；尚未生成或截取，不作为已完成素材"
+    },
+    {
+      "id": "F11",
+      "priority": "P1",
+      "category": "程序运行组合图",
+      "title": "一次拾取如何同时更新测点、曲线和详情",
+      "chapter": 7,
+      "section": "7.2.4 图表与三维对象的双向联动；7.4.4 案例联调与验收",
+      "source_file": "output/chapters/chapter07.tex",
+      "insert_anchor": "\\subsection{图表与三维对象的双向联动}",
+      "anchor_line": 741,
+      "learning_goal": "显示双向联动的实际结果，并暴露对象错配或迟到响应覆盖的症状。",
+      "must_show": [
+        "主画面使用/lesson74.html，真实点击球体后显示同一assetId和曲线",
+        "小面板对比选择PZ-07与WL-01后的状态文案、单位和曲线",
+        "圈出被高亮对象、曲线标题和状态栏，三个编号指向同一测点",
+        "若演示迟到响应，用真实受控延迟并保存时序，不画虚假加载动画"
+      ],
+      "acquisition": {
+        "mode": "运行S5阶段页/lesson74.html，真实点击Three.js画布",
+        "inputs": [
+          "frontend/src/lesson74/main.js",
+          "frontend/src/lesson74/series-controller.js",
+          "frontend/src/lesson74/picker.js"
+        ],
+        "capture_requirement": "优先从真实点击事件采集；图注写明固定数据日期与对象"
+      },
+      "accuracy_risks": [
+        "不能只用控制台focusAsset就声称验证了射线拾取",
+        "PZ与水位单位不同，切换后的轴与标题必须一起更新",
+        "该页面没有完整生产看板布局，不应人为补上未实现的工单/审批按钮"
+      ],
+      "compact_layout": {
+        "width_cm": 14.6,
+        "image_height_cm_max": 4.0,
+        "panels": "主画面横裁+右下小局部，最多两次状态",
+        "caption_lines_max": 2
+      },
+      "replace_or_merge": {
+        "strategy": "替换fig:chart-technology-selection的通用三方职责框图；其控制器职责用图中短标注保留",
+        "retain": [
+          "联动控制器与资源释放代码",
+          "fig:ray-picking的几何原理"
+        ],
+        "do_not_duplicate": "7.4.4与第8章直接引用本图，勿重复整屏",
+        "page_effect": "以实证组合替换旧概念图，不另建一页“运行效果展示”"
+      },
+      "status": "拟制作；尚未生成或截取，不作为已完成素材"
+    },
+    {
+      "id": "F12",
+      "priority": "P1",
+      "category": "程序运行组合图",
+      "title": "预警确认、工单创建和完成回执的实际响应",
+      "chapter": 8,
+      "section": "8.4.2 从预警到工单与复盘",
+      "source_file": "output/chapters/chapter08.tex",
+      "insert_anchor": "\\subsection{从预警到工单与复盘}",
+      "anchor_line": 2484,
+      "learning_goal": "展示系统确实阻止非法状态流转，并让学生看到同一warningId贯穿工单。",
+      "must_show": [
+        "左：未评估事件确认被拒的409及NOT_EVALUABLE",
+        "中：有效预警ack后状态acknowledged，并创建工单",
+        "右：工单进入允许状态后完成，回执关联同一warningId/workOrderId",
+        "在响应字段旁标出关联ID；截取真实JSON或终端，不虚构现成的业务审批界面"
+      ],
+      "acquisition": {
+        "mode": "优先复用teaching-api/closeloop-check.mjs或record-demo.mjs的真实运行记录",
+        "inputs": [
+          "teaching-api/closeloop-check.mjs",
+          "teaching-api/record-demo.mjs",
+          "tab:api-contract"
+        ],
+        "capture_requirement": "在临时独立教学接口实例运行，明确其工单是内存态；若使用完整后端则记录数据库版本"
+      },
+      "accuracy_risks": [
+        "教学API重启清空状态，不能把截图描述为数据库灾备验证",
+        "不能剪掉中间状态而让学生误以为open可直接completed",
+        "接口没有的审批界面不可由AI伪造；未评估不能表现成绿色正常"
+      ],
+      "compact_layout": {
+        "width_cm": 14.6,
+        "image_height_cm_max": 3.4,
+        "panels": "三列响应局部，正文保留完整步骤；只突出4–6个字段",
+        "caption_lines_max": 2
+      },
+      "replace_or_merge": {
+        "strategy": "与8.4.2的工单状态说明合排；以真实响应取代一部分重复的状态流转文字",
+        "retain": [
+          "预警/工单状态图与契约",
+          "非法流转失败判据"
+        ],
+        "do_not_duplicate": "不同时刊终端全屏和相同JSON表格；选择一种载体",
+        "page_effect": "三阶段共享一幅图，禁止三幅纵排截图"
+      },
+      "status": "拟制作；尚未生成或截取，不作为已完成素材"
+    },
+    {
+      "id": "F13",
+      "priority": "P2",
+      "category": "技术细节对照",
+      "title": "N+1查询在SQL日志中长什么样",
+      "chapter": 5,
+      "section": "5.4.3 N+1 查询与fetch join；5.4.7 查询测试、执行计划与观测",
+      "source_file": "output/chapters/chapter05.tex",
+      "insert_anchor": "\\subsection{N+1 查询与 fetch join}",
+      "anchor_line": 686,
+      "learning_goal": "把“访问每条关联对象触发额外SQL”从抽象定义变成可观察的重复查询。",
+      "must_show": [
+        "左：同一列表请求中的主查询及多条相同结构的关联查询局部",
+        "右：fetch join后同一数据与请求对应的查询日志",
+        "高亮参数变化、SQL条数和请求号；按实际日志计数，不预填性能倍数"
+      ],
+      "acquisition": {
+        "mode": "实际JPA/PostgreSQL集成实验截图或等宽摘录排版；不是AI生成日志",
+        "inputs": [
+          "lst:ch05-fetch-join",
+          "tab:ch05-jpa-query-strategies"
+        ],
+        "capture_requirement": "同一数据规模、请求条件、缓存状态，保存完整SQL日志；无法复现时暂不制作"
+      },
+      "accuracy_risks": [
+        "单元测试通过不代表产生实际SQL；无数据库运行就不能伪造SQL日志",
+        "fetch join与集合分页可能存在限制，不把一张日志推广为所有查询的通用修复",
+        "H2或内存替身不能冒充PostgreSQL实测"
+      ],
+      "compact_layout": {
+        "width_cm": 14.6,
+        "image_height_cm_max": 2.7,
+        "panels": "两列等宽日志局部，每列8–12行；不缩小为不可读终端全屏",
+        "caption_lines_max": 2
+      },
+      "replace_or_merge": {
+        "strategy": "与现有查询策略表合成“现象—策略—验证”紧凑版块，保留清单全部内容",
+        "retain": [
+          "lst:ch05-fetch-join",
+          "分页与去重注意事项"
+        ],
+        "do_not_duplicate": "具体耗时不再另画无信息增量的柱状图",
+        "page_effect": "若本轮数据库实验不可用，将此项放线上实验说明，不向纸版塞假截图"
+      },
+      "status": "拟制作；尚未生成或截取，不作为已完成素材"
+    },
+    {
+      "id": "F14",
+      "priority": "P1",
+      "category": "技术细节对照",
+      "title": "缺测断线的运行放大图与原始记录",
+      "chapter": 7,
+      "section": "7.1.4 数据质量检验、缺测断线与异常处理",
+      "source_file": "output/chapters/chapter07.tex",
+      "insert_anchor": "\\label{fig:ch07-missing-gap}",
+      "anchor_line": 310,
+      "learning_goal": "让学生同时看到missing记录仍占据时间位置、曲线断开和错误填零造成的假趋势。",
+      "must_show": [
+        "保留上一包正确/错误两幅曲线的比较，只增加局部字段与轴刻度",
+        "在对应时刻放大实际输入{occurredAt, value:null, quality:missing}的短记录",
+        "错误侧必须明确标为反例，不能把输入missing转换为0后称为修复",
+        "若制作ECharts实图，沿用window-chart与toChartPoints的真实输出；图题注明固定输入"
+      ],
+      "acquisition": {
+        "mode": "优先优化既有TikZ细节；也可真实运行现有ECharts模块后替换曲线面板",
+        "inputs": [
+          "fig:ch07-missing-gap",
+          "frontend/src/utils/readings.js",
+          "frontend/src/lesson74/window-chart.js"
+        ],
+        "capture_requirement": "保留输入fixture与渲染版本，tooltip值和轴刻度需要逐项核对"
+      },
+      "accuracy_risks": [
+        "不可把无预警NONE与missing相等同",
+        "反例要有醒目标注，截图单独传播仍能识别对错",
+        "曲线是固定数据示意，不应标为真实洪水过程"
+      ],
+      "compact_layout": {
+        "width_cm": 14.6,
+        "image_height_cm_max": 3.0,
+        "panels": "两幅短曲线并排，下方共用一条数据记录",
+        "caption_lines_max": 2
+      },
+      "replace_or_merge": {
+        "strategy": "替换现有fig:ch07-missing-gap，不新增同题图；保留原label",
+        "retain": [
+          "缺测保位与质量码代码",
+          "时间格网说明"
+        ],
+        "do_not_duplicate": "不同时保留原TikZ和同内容ECharts截图",
+        "page_effect": "图高上限3cm，目标比现图更紧凑；实际减页以重新编译为准"
+      },
+      "status": "拟制作；尚未生成或截取，不作为已完成素材"
+    }
+  ],
+  "executed_insertions": {
+    "ids": [
+      "F01",
+      "F02",
+      "F03"
+    ],
+    "body_chars_added": 426,
+    "deletions": 0,
+    "detail_record": "tools/review/r10-04-physical-inserts.json"
+  }
+}

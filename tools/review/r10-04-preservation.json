@@ -1,0 +1,85 @@
+{
+  "chapters": {
+    "chapter01": {
+      "listings": 0,
+      "code_unchanged": true,
+      "headings_unchanged": true,
+      "old_figures": 6,
+      "new_figures": 8
+    },
+    "chapter02": {
+      "listings": 0,
+      "code_unchanged": true,
+      "headings_unchanged": true,
+      "old_figures": 14,
+      "new_figures": 14
+    },
+    "chapter03": {
+      "listings": 6,
+      "code_unchanged": true,
+      "headings_unchanged": true,
+      "old_figures": 10,
+      "new_figures": 10
+    },
+    "chapter04": {
+      "listings": 57,
+      "code_unchanged": true,
+      "headings_unchanged": true,
+      "old_figures": 10,
+      "new_figures": 14
+    },
+    "chapter05": {
+      "listings": 46,
+      "code_unchanged": true,
+      "headings_unchanged": true,
+      "old_figures": 5,
+      "new_figures": 6
+    },
+    "chapter06": {
+      "listings": 24,
+      "code_unchanged": true,
+      "headings_unchanged": true,
+      "old_figures": 13,
+      "new_figures": 15
+    },
+    "chapter07": {
+      "listings": 26,
+      "code_unchanged": true,
+      "headings_unchanged": true,
+      "old_figures": 11,
+      "new_figures": 13
+    },
+    "chapter08": {
+      "listings": 47,
+      "code_unchanged": true,
+      "headings_unchanged": true,
+      "old_figures": 25,
+      "new_figures": 27
+    },
+    "chapter09": {
+      "listings": 0,
+      "code_unchanged": true,
+      "headings_unchanged": true,
+      "old_figures": 0,
+      "new_figures": 0
+    }
+  },
+  "figures_before": 94,
+  "figures_after": 107,
+  "added_figures": 13,
+  "appendices": {
+    "answers.tex": {
+      "listings": 0,
+      "code_unchanged": true
+    },
+    "extended.tex": {
+      "listings": 5,
+      "code_unchanged": true
+    },
+    "prep.tex": {
+      "listings": 5,
+      "code_unchanged": true
+    }
+  },
+  "total_listings": 216
+}

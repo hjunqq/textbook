@@ -276,6 +276,13 @@ ResponseEntity<Map<String, String>> badRequest(BadRequest e) {
 
 `from=2026-07-01T00:00:00+08:00`直接放进地址栏，加号会被浏览器当作空格，服务端解析时报 400，错误体却不是契约格式而是 Spring 的默认页面。原因是类型转换失败发生在进入方法之前，`@ExceptionHandler(BadRequest.class)`接不到它。两件事要做：客户端把`+`编码成`%2B`（第4章的`URLSearchParams`会自动做）；服务端在 5.5 节用`@ControllerAdvice`接住`MethodArgumentTypeMismatchException`，统一翻译成契约错误体。复现时分别观察参数转换前后发生的错误，确认类型转换异常与业务异常都返回约定的错误体。
 
+图5.3是配套教学接口的两个错误响应。时间区间非法与对象不存在使用不同`code`；`field`只在需要指出具体输入项时出现。开发Java接口时，用相同请求核对这些字段。
+
+<figure markdown>
+![图5.3](images/chapter05_fig_5_3.png)
+<figcaption>图 5.3  400与404错误体的实际响应（教学查看器，配套教学接口）</figcaption>
+</figure>
+
 ### 5.2.3 用第4章的页面和故障表验证接口
 
 接口验证分起点与终点两次进行。起点按表5.3直接请求本节已实现的接口，检查固定数据、204、400与404；此时无登录端点，历史查询也只是空列表骨架。终点完成5.4节存储、5.5节全局异常处理和5.6节认证后，再把 S2 页面接入完整后端，重做表4.9的界面验收。教学接口的`teach=`由表8.4约定；真实后端用不带令牌、非法时间范围、不存在的对象和无观测对象触发相应行为。输入`from`晚于`to`应得到400且`field`为`from`；错误体尚未统一的类型转换失败在5.5节补齐。字段一致允许复用页面，认证和数据能力齐备才允许替换整个服务。
@@ -934,11 +941,11 @@ class ReadingCommandService {
 
 事务将一个业务用例中的多步数据库操作组织为共同提交或回滚的单元。原子性要求保存读数、更新最新值和写入审计要么全部成功、要么全部回滚；一致性要求外键、唯一键、非空和业务检查在提交点成立；隔离性控制并发事务之间能看到哪些中间状态；持久性要求提交后的数据在进程重启后仍可恢复。应用服务应围绕一个可说明的业务结果划定边界，例如“接收一个测站读数并生成审计事件”，而不是让控制器、Repository 和异步线程各自开启一段互不相干的事务。
 
-清单5.18中的`save`由外部调用进入事务代理，Repository 写入和审计调用共享默认事务；`AuditService.record`使用`REQUIRES_NEW`时会挂起外层事务，形成独立审计提交。图5.3把代理边界、挂起和提交后事件画成一条时序，读者可以据此判断“代码出现了注解”是否真的意味着运行时开启了新事务。
+清单5.18中的`save`由外部调用进入事务代理，Repository 写入和审计调用共享默认事务；`AuditService.record`使用`REQUIRES_NEW`时会挂起外层事务，形成独立审计提交。图5.4把代理边界、挂起和提交后事件画成一条时序，读者可以据此判断“代码出现了注解”是否真的意味着运行时开启了新事务。
 
 <figure markdown>
-![图5.3](images/chapter05_fig_5_3.svg)
-<figcaption>图 5.3  事务代理、自调用与提交后事件的边界</figcaption>
+![图5.4](images/chapter05_fig_5_4.svg)
+<figcaption>图 5.4  事务代理、自调用与提交后事件的边界</figcaption>
 </figure>
 
 如果控制器在同一个 Bean 中用`this.save()`调用另一个带事务注解的方法，调用不会穿过代理，传播属性、只读标志和回滚规则都不会被重新评估。解决办法是把用例拆到另一个 Spring Bean，通过构造器注入调用；或者在确实需要动态边界时使用`TransactionTemplate`。把代理对象注入自己、依靠反射或强制打开全局事务都会增加理解成本，教材示例优先采用清晰的 Bean 边界。
@@ -1387,14 +1394,14 @@ MockMvc 或 WebTestClient 可以在没有真实网络的情况下验证控制器
 
 认证回答“用户是谁”，授权回答“允许做什么”。Spring Security 6使用`@EnableMethodSecurity`启用方法授权，并采用Lambda DSL配置过滤链。无状态API关闭服务器会话并在JWT过滤器中建立认证上下文。
 
-图5.4把一次受保护请求经过过滤器链的决策点展开。认证过滤器只负责从 Bearer 令牌得到可信主体和权限，授权规则再决定该主体能否访问具体方法；两者分开后，过期令牌应得到 401，权限不足应得到 403，业务方法不必重复解析令牌。图中的“拒绝”分支还提醒读者：过滤器不能把异常吞掉后继续当作匿名用户执行写操作，审计日志要记录拒绝原因和请求追踪 ID。
+图5.5把一次受保护请求经过过滤器链的决策点展开。认证过滤器只负责从 Bearer 令牌得到可信主体和权限，授权规则再决定该主体能否访问具体方法；两者分开后，过期令牌应得到 401，权限不足应得到 403，业务方法不必重复解析令牌。图中的“拒绝”分支还提醒读者：过滤器不能把异常吞掉后继续当作匿名用户执行写操作，审计日志要记录拒绝原因和请求追踪 ID。
 
 <figure markdown>
-![图5.4](images/chapter05_fig_5_4.svg)
-<figcaption>图 5.4  Spring Security 6 的 JWT 认证与方法授权边界</figcaption>
+![图5.5](images/chapter05_fig_5_5.svg)
+<figcaption>图 5.5  Spring Security 6 的 JWT 认证与方法授权边界</figcaption>
 </figure>
 
-清单5.28是图5.4中那条过滤链的配置：会话置为无状态，认证端点放行，其余请求交给 JWT 过滤器。
+清单5.28是图5.5中那条过滤链的配置：会话置为无状态，认证端点放行，其余请求交给 JWT 过滤器。
 
 **清单 5.28  Spring Security过滤链**
 
@@ -1606,11 +1613,11 @@ public final class RefreshTokenVerifier {
 
     版本迁移提示：jjwt 0.12.x 将解析器接口拆为`Jwts.parser().verifyWith(key).build()`与`parseSignedClaims(token).getPayload()`两步，对应本章 0.11.x 的`parserBuilder().setSigningKey(key).build()`和`parseClaimsJws(token).getBody()`。迁移时逐项核对签名算法、issuer、type、过期处理和异常类型，不能只做方法名替换。
 
-认证链路可以拆成“凭据校验—令牌签发—请求认证—权限决策—撤销与轮换”五个环节。图5.5把访问令牌和刷新令牌的边界画出：访问令牌短期有效，携带权限进入过滤器；刷新令牌只发送到刷新端点，服务端验证类型和撤销状态后签发新的令牌对。前端不能把刷新令牌当作普通 API 凭据，也不能在浏览器日志、URL 或错误消息中输出完整令牌。
+认证链路可以拆成“凭据校验—令牌签发—请求认证—权限决策—撤销与轮换”五个环节。图5.6把访问令牌和刷新令牌的边界画出：访问令牌短期有效，携带权限进入过滤器；刷新令牌只发送到刷新端点，服务端验证类型和撤销状态后签发新的令牌对。前端不能把刷新令牌当作普通 API 凭据，也不能在浏览器日志、URL 或错误消息中输出完整令牌。
 
 <figure markdown>
-![图5.5](images/chapter05_fig_5_5.svg)
-<figcaption>图 5.5  Spring Security 6 与 JWT 的认证授权时序</figcaption>
+![图5.6](images/chapter05_fig_5_6.svg)
+<figcaption>图 5.6  Spring Security 6 与 JWT 的认证授权时序</figcaption>
 </figure>
 
 令牌的声明应最小化。`sub`标识用户或服务主体，`iss`限制签发者，`aud`限制使用方，`iat`和`exp`描述有效时间，`jti`用于撤销和审计，`type`区分 access 与 refresh，权限集合只携带授权决策需要的稳定代码。不要把身份证号、手机号、设备密钥或完整业务对象放入 JWT；JWT 是带签名的可读载荷，不是加密容器。
@@ -2451,32 +2458,32 @@ class ReadingRepositoryIT {
 
 ## 5.12 思考题与练习题
 
-1.  
+**客观题**
 
-2.  创建新资源最常使用（）。A. GETB. POSTC. PATCHD. DELETE
+1.  创建新资源最常使用（）。A. GETB. POSTC. PATCHD. DELETE
 
-3.  Spring同一Bean内部自调用一定会触发方法上的事务代理。（判断：对／错）
+2.  Spring同一Bean内部自调用一定会触发方法上的事务代理。（判断：对／错）
 
-4.  加入第$n+1$个样本时，增量均值的分母应为（）。A. $n-1$B. $n$C. $n+1$D. $2n$
+3.  加入第$n+1$个样本时，增量均值的分母应为（）。A. $n-1$B. $n$C. $n+1$D. $2n$
 
-5.  Spring Security 6启用方法授权使用（）。A. `@EnableMethodSecurity`B. `@EnableGlobalMethodSecurity`C. `@EnableEurekaClient`D. `@Async`
+4.  Spring Security 6启用方法授权使用（）。A. `@EnableMethodSecurity`B. `@EnableGlobalMethodSecurity`C. `@EnableEurekaClient`D. `@Async`
 
-6.  跨服务告警事件适合使用（）。A. 进程内普通事件B. Kafka主题C. 浏览器DOM事件D. CSS媒体查询
+5.  跨服务告警事件适合使用（）。A. 进程内普通事件B. Kafka主题C. 浏览器DOM事件D. CSS媒体查询
 
-7.  消费者记录并检查`eventId`有助于实现幂等处理。（判断：对／错）
+6.  消费者记录并检查`eventId`有助于实现幂等处理。（判断：对／错）
 
-8.  
+**简答与设计题**
 
-9.  说明控制器、应用服务、Repository和数据库之间的职责边界。
+7.  说明控制器、应用服务、Repository和数据库之间的职责边界。
 
-10. 解释为什么同Bean事务自调用可能失效，并给出两种改进思路。
+8.  解释为什么同Bean事务自调用可能失效，并给出两种改进思路。
 
-11. 设计测站最新水位查询与监测值写入接口，列出方法、路径和主要状态码。
+9.  设计测站最新水位查询与监测值写入接口，列出方法、路径和主要状态码。
 
-12. 比较`@TransactionalEventListener(AFTER_COMMIT)`与Kafka监听器的适用范围。
+10. 比较`@TransactionalEventListener(AFTER_COMMIT)`与Kafka监听器的适用范围。
 
-13. 设计JWT密钥管理和刷新流程，说明如何校验`type=refresh`、`issuer`、`jti`及有效期，并拒绝过期刷新令牌，并用 Redis TTL 撤销记录与令牌轮换防止重放。
+11. 设计JWT密钥管理和刷新流程，说明如何校验`type=refresh`、`issuer`、`jti`及有效期，并拒绝过期刷新令牌，并用 Redis TTL 撤销记录与令牌轮换防止重放。
 
-14. 
+**实践题**
 
-15. 使用Spring Boot实现本章章末交付物；所有单元测试和接口测试均须包含正常、参数错误、无权限和资源不存在场景。
+12. 使用Spring Boot实现本章章末交付物；所有单元测试和接口测试均须包含正常、参数错误、无权限和资源不存在场景。

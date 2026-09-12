@@ -1,0 +1,70 @@
+{
+  "package": "R10-04",
+  "date": "2026-09-12",
+  "prompts": [
+    "tools/review/r10-04-image-prompts.json",
+    "tools/review/r10-04-components-prompt.json"
+  ],
+  "images": [
+    {
+      "file": "output/images/generated/reservoir-dam.png",
+      "original": "exec-da9b97d8-59cf-4b44-9ed8-f9988283235b.png",
+      "prompt_key": "dam",
+      "label": "fig:ch01-reservoir-physical",
+      "pixels": [
+        1536,
+        1024
+      ],
+      "sha256": "2e48a3e4de21f552c93a9687a565ecad449d0d538ef63d412d420cf2dbc6b7f1",
+      "source": "OpenAI built-in image_gen",
+      "disclosure": "AI生成教学渲染",
+      "use": "工程对象外观与空间关系识读；不作为实测、模型成果或接线设计",
+      "review": "主代理目视检查：坝体与3孔闸门、监测仪器姿态、采集柜功能区、双联构件对应。照片式纹理仅表达外观。"
+    },
+    {
+      "file": "output/images/generated/monitoring-sensors.png",
+      "original": "exec-4d7db0a6-1c6f-4dae-8a1f-7d7d3dda2b77.png",
+      "prompt_key": "sensors",
+      "label": "fig:ch01-monitoring-instruments",
+      "pixels": [
+        1536,
+        1024
+      ],
+      "sha256": "a9533178fa21e3851e212a01ee70fe9b98281cc5e7d7fda4472d09b393c0ec25",
+      "source": "OpenAI built-in image_gen",
+      "disclosure": "AI生成教学渲染",
+      "use": "工程对象外观与空间关系识读；不作为实测、模型成果或接线设计",
+      "review": "主代理目视检查：坝体与3孔闸门、监测仪器姿态、采集柜功能区、双联构件对应。照片式纹理仅表达外观。"
+    },
+    {
+      "file": "output/images/generated/acquisition-cabinet.png",
+      "original": "exec-cf3a1c27-fdd6-4031-acf0-1bcf13d028aa.png",
+      "prompt_key": "cabinet",
+      "label": "fig:ch08-acquisition-cabinet",
+      "pixels": [
+        1536,
+        1024
+      ],
+      "sha256": "6e4ccc9311cdd9f10ca1af8842d2c5d6316e42fa2e3ab2604774015deab4be5d",
+      "source": "OpenAI built-in image_gen",
+      "disclosure": "AI生成教学渲染",
+      "use": "工程对象外观与空间关系识读；不作为实测、模型成果或接线设计",
+      "review": "主代理目视检查：坝体与3孔闸门、监测仪器姿态、采集柜功能区、双联构件对应。照片式纹理仅表达外观。"
+    },
+    {
+      "file": "output/images/generated/appearance-components.png",
+      "original": "exec-55d3ff9c-07f4-48a5-941c-f510f20483f3.png",
+      "prompt_key": "bim",
+      "label": "fig:ch06-appearance-components",
+      "pixels": [
+        2164,
+        727
+      ],
+      "sha256": "29933ccc7bde8cf362ceeed6b167156a22340913e391190a7dac50f5b5966edd",
+      "source": "OpenAI built-in image_gen",
+      "disclosure": "AI生成教学渲染",
+      "use": "工程对象外观与空间关系识读；不作为实测、模型成果或接线设计",
+      "review": "主代理目视检查：坝体与3孔闸门、监测仪器姿态、采集柜功能区、双联构件对应。照片式纹理仅表达外观。"
+    }
+  ]
+}

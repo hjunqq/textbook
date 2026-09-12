@@ -76,6 +76,15 @@
 \end{tabular}
 \end{table}
 
+图\ref{fig:ch01-monitoring-instruments}从左上起按行排列雷达水位计、雨量计、GNSS监测天线和渗压计。水位计朝向水面，雨量计保持承雨口无遮挡；GNSS通过不同时刻的位置比较分析位移；渗压计探头埋设在待测部位，图中展示的是器件外观。识别仪器后，还需核对测点编码、观测量与单位：把渗压读数当作水位输入，数值即使能够显示，也失去了正确的物理含义。
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=13.5cm]{images/generated/monitoring-sensors.png}
+\caption{四类监测仪器的外观识读（AI生成的教学渲染）}
+\label{fig:ch01-monitoring-instruments}
+\end{figure}
+
 \subsection{发展脉络：从信息化到数字孪生}
 
 智慧水利的发展伴随着水利治理对象、数据组织方式和决策职责的变化。信息化阶段首先解决“有没有数据、能不能查到”的问题：单位工程建立数据库和报表系统，把纸质台账、人工抄录和分散文件转换为可检索记录。这个阶段的价值是形成基本的信息资产，但数据常按部门或项目分散保存，跨系统关联仍依赖人工整理，业务人员看到的是结果页面而不是连续的证据链。
@@ -88,7 +97,7 @@
 
 图\ref{fig:ch01-evolution}列出四个阶段的主要问题、关键能力和验收证据。分析建设方案时，应先核查现有台账、接口、模型与运行记录，再判断需要补充基础数据、改进计算方法，还是完善处置流程。
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[node distance=5mm and 5mm,
   stage/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=3.15cm,
@@ -153,9 +162,18 @@
 
 水利工程安全监测平台是本书的贯穿教学案例，载体为虚构的案例水库：第1章建立业务闭环认知，第3章完成架构设计，第4--8章沿v0到v5的版本线逐步实现，第9章据此复盘；第2章另用案例灌区示例练习需求方法。平台接入雨量、水位和闸门状态，案例水库设溢洪道弧形闸门3孔（详细参数见8.1节）；以下预警过程用于分析数据链路与岗位职责，实际工程的判定需依据现场数据和批准规则。
 
+图\ref{fig:ch01-reservoir-physical}展示混凝土坝、上游库面、三孔泄洪设施及下游河道的位置关系。读图时先沿水流方向辨认上下游，再找出坝顶、闸墩和闸门。平台中的工程对象需与这些实体对应：水位属于具体断面的观测，闸门开度属于指定孔口的状态；对象位置混淆时，显示正确的数值也可能指向错误的处置地点。
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=11.5cm]{images/generated/reservoir-dam.png}
+\caption{混凝土坝与泄洪设施的工程识读（AI生成的虚构案例教学渲染）}
+\label{fig:ch01-reservoir-physical}
+\end{figure}
+
 汛期某时刻，库区雨量站上报分钟雨量。遥测终端按通信规约编码，接入服务校验站码、时间和单位；质量服务标记缺测、突变或回补；洪水预报模型读取同一输入快照并输出过程线；规则服务结合批准阈值生成黄色预警。值班员确认后创建工单，专业分析员复核模型与现场情况，审批人决定是否启动预案，处置结果再与后续实况比较。图\ref{fig:flood-warning-loop}把这条链路画成闭环：上半行是数据从监测、接入校验、质量标记到模型计算与预警生成的路径，下半行是人的确认、会商、处置与复核，虚线表示复核结论反过来校正质量规则与模型参数。读图时要留意，链路既没有在“预警发出”处结束，也没有在“处置完成”处结束。
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[node distance=6mm and 6mm,
   casebox/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=2.15cm,
@@ -197,7 +215,7 @@
 
 \paragraph{过程追踪}图\ref{fig:ch01-request-trace}把这次查询拆成六步。浏览器里运行的是页面脚本，它把用户动作翻译成一条 HTTP 请求：方法\texttt{GET}，路径\texttt{/api/assets/DAM-A-PZ-07/readings/latest}，头部带着登录时取得的令牌。请求到达服务端后，先由接口层核对令牌与角色，再交给业务层检查对象是否存在，业务层向数据库发出一条 SQL 查询，数据库按主键找到最新一条观测返回。业务层把数据库行整理成约定好的 JSON（字段名、时间格式、质量码都在第8章的接口契约里规定），接口层加上状态码 200 发回浏览器，页面脚本把 JSON 写进 DOM，用户看到那一行数字。
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[>=Stealth,thick,font=\scriptsize,node distance=4mm and 6mm,
   box/.style={draw=Primary,rounded corners=2pt,fill=PrimaryLight,text=PrimaryDark,minimum width=2.5cm,minimum height=.8cm,align=center}]
@@ -242,7 +260,7 @@
 
 为便于学习，本书把平台划分为感知层、平台层、应用层和用户层。分层是职责边界，不代表必须部署为四套系统。图\ref{fig:smart-water-architecture}中左右两组箭头分别表示观测与回执上行、授权指令下行：两条链路穿过的是同样四层，安全要求却并不对等，下一段说明为什么下行需要额外的身份、审批、有效期与回滚条件。
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[node distance=5mm,
   layer/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=11.2cm,
@@ -291,7 +309,7 @@
 
 图\ref{fig:ch01-platform-forms}展示一种从公共底座向三种服务形态分流的逻辑结构。三种服务形态共用对象目录、质量码和审计机制，并分别组织各业务域的功能；因此同一条水位观测可以被流域模型读取、被区域报表统计，也被工程值班页面展示，但每个消费者都必须声明用途、时效和质量门槛。
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[node distance=5mm and 5mm,
   base/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=4.4cm,
@@ -424,7 +442,7 @@
 
 软件工程用系统化、可验证的方法组织软件生命周期。核心活动包括需求获取与分析、架构和详细设计、实现与集成、验证与确认、部署运行、维护演化以及最终退役\cite{ISO12207,sommerville2015}。图\ref{fig:sdlc-flow}把这些活动排成主链，并用一条虚线从“反馈、维护与演化”回到“需求与范围”——这条回边表示运行变化会触发新的开发任务：汛期规则调整、测点增减、工程状态变化和模型换版，每一次都要重新走一遍从需求到验证的短回路。
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[node distance=6mm and 5mm,
   life/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=2.0cm,

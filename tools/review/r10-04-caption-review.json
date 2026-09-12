@@ -1,0 +1,360 @@
+{
+  "package": "R10-04",
+  "date": "2026-09-12",
+  "reviewer": "prose_ch07_09",
+  "mode": "只读复核；未修改TeX、程序或图片",
+  "scope": "13幅新增图片的图注、引出文字、图片实际内容及manifest/provenance一致性",
+  "result": {
+    "reviewed_figures": 13,
+    "material_caption_mismatches": 0,
+    "evidence_semantic_mismatches": 0,
+    "all_new_labels_referenced": true,
+    "runtime_image_hashes_passed": 9,
+    "generated_image_hashes_passed": 4,
+    "source_hashes_passed": 12,
+    "resolved_evidence_findings": 1,
+    "status": "pass"
+  },
+  "evidence_capture_time": "2026-09-12T02:43:37.996Z",
+  "items": [
+    {
+      "label": "fig:ch01-monitoring-instruments",
+      "chapter_file": "output/chapters/chapter01.tex",
+      "label_line": 85,
+      "image": "output/images/generated/monitoring-sensors.png",
+      "caption": "四类监测仪器的外观识读（AI生成的教学渲染）",
+      "introduction": "图\\ref{fig:ch01-monitoring-instruments}从左上起按行排列雷达水位计、雨量计、GNSS监测天线和渗压计。水位计朝向水面，雨量计保持承雨口无遮挡；GNSS通过不同时刻的位置比较分析位移；渗压计探头埋设在待测部位，图中展示的是器件外观。识别仪器后，还需核对测点编码、观测量与单位：把渗压读数当作水位输入，数值即使能够显示，也失去了正确的物理含义。",
+      "referenced_in_text": true,
+      "caption_and_image": "pass",
+      "review": "四格顺序与正文一致：雷达水位计、雨量计、GNSS天线、渗压计探头。正文将埋设条件与器件外观区分，未称现场安装实拍。"
+    },
+    {
+      "label": "fig:ch01-reservoir-physical",
+      "chapter_file": "output/chapters/chapter01.tex",
+      "label_line": 171,
+      "image": "output/images/generated/reservoir-dam.png",
+      "caption": "混凝土坝与泄洪设施的工程识读（AI生成的虚构案例教学渲染）",
+      "introduction": "图\\ref{fig:ch01-reservoir-physical}展示混凝土坝、上游库面、三孔泄洪设施及下游河道的位置关系。读图时先沿水流方向辨认上下游，再找出坝顶、闸墩和闸门。平台中的工程对象需与这些实体对应：水位属于具体断面的观测，闸门开度属于指定孔口的状态；对象位置混淆时，显示正确的数值也可能指向错误的处置地点。",
+      "referenced_in_text": true,
+      "caption_and_image": "pass",
+      "review": "图中混凝土坝、三孔泄洪设施、上下游关系与引出文字一致；图注声明虚构案例教学渲染，未增加工程尺寸参数。"
+    },
+    {
+      "label": "fig:ch04-s1-list",
+      "chapter_file": "output/chapters/chapter04.tex",
+      "label_line": 102,
+      "image": "output/images/runtime/s1-asset-list.png",
+      "caption": "S1测点列表的筛选与排序（配套阶段页实际运行截图）",
+      "introduction": "图\\ref{fig:ch04-s1-list}展示S1页面筛选库水位对象后的列表。对象编码、读数与排序结果应能逐项对应；这一阶段使用静态数据，刷新页面不会取得新观测。",
+      "referenced_in_text": true,
+      "caption_and_image": "pass",
+      "review": "运行记录筛选DAM-A-WL并按读数降序，截图显示WL03/02/01及166.97/166.91/166.84 m，显示3个、共28个；正文准确说明静态数据。"
+    },
+    {
+      "label": "fig:ch04-http-observe",
+      "chapter_file": "output/chapters/chapter04.tex",
+      "label_line": 1199,
+      "image": "output/images/runtime/http-network-json.png",
+      "caption": "请求状态与JSON响应对照（教学查看器，调用配套教学接口）",
+      "introduction": "图\\ref{fig:ch04-http-observe}把实际请求的状态码与选中响应并列。先定位请求，再读状态码和响应字段；图中时间范围错误返回400，错误体的\\texttt{field}指向\\texttt{from}。",
+      "referenced_in_text": true,
+      "caption_and_image": "pass",
+      "review": "截图的200/204/400/404及400 INVALID_RANGE、field=from与实际请求记录一致；图注明确为教学查看器，未冒称浏览器开发者工具截图。"
+    },
+    {
+      "label": "fig:ch04-state-results",
+      "chapter_file": "output/chapters/chapter04.tex",
+      "label_line": 1262,
+      "image": "output/images/runtime/s2-four-states.png",
+      "caption": "加载、有数据、空数据与错误状态（教学查看器，调用S2模块）",
+      "introduction": "图\\ref{fig:ch04-state-results}给出同一状态渲染函数的四种运行结果。204表示对象尚无观测，404表示对象不存在；两者分别进入空状态与错误状态。",
+      "referenced_in_text": true,
+      "caption_and_image": "pass",
+      "review": "四面板使用S2模块，分别为延迟等待、200有效数据、204空状态和404错误状态；状态文字及单位与manifest一致。"
+    },
+    {
+      "label": "fig:ch04-switch-results",
+      "chapter_file": "output/chapters/chapter04.tex",
+      "label_line": 1372,
+      "image": "output/images/runtime/s2-switch-trace.png",
+      "caption": "切换测点后的取消记录与最终页面（教学查看器，调用S2模块）",
+      "introduction": "图\\ref{fig:ch04-switch-results}记录先选渗压点、再选水位点的请求次序。旧请求取消后，页面保持最后选中的水位对象；核对过程记录与最终文字，才能判断取消逻辑是否生效。",
+      "referenced_in_text": true,
+      "caption_and_image": "pass",
+      "review": "S2控制器先请求PZ07，随后选择WL01，旧请求AbortError，WL01返回200；截图最终为库水位01 166.837 m，与过程记录一致。"
+    },
+    {
+      "label": "fig:ch05-error-results",
+      "chapter_file": "output/chapters/chapter05.tex",
+      "label_line": 304,
+      "image": "output/images/runtime/http-responses.png",
+      "caption": "400与404错误体的实际响应（教学查看器，配套教学接口）",
+      "introduction": "图\\ref{fig:ch05-error-results}是配套教学接口的两个错误响应。时间区间非法与对象不存在使用不同\\texttt{code}；\\texttt{field}只在需要指出具体输入项时出现。开发Java接口时，用相同请求核对这些字段。",
+      "referenced_in_text": true,
+      "caption_and_image": "pass",
+      "review": "两个实际错误响应分别为INVALID_RANGE/from与ASSET_NOT_FOUND，图注限定配套教学接口；正文将Java接口列为学生后续核对对象，未声称Java后端已运行验证。"
+    },
+    {
+      "label": "fig:ch06-bound-scene",
+      "chapter_file": "output/chapters/chapter06.tex",
+      "label_line": 508,
+      "image": "output/images/runtime/s4-scene.png",
+      "caption": "简化坝体与测点的场景绑定（S4阶段页实际运行截图）",
+      "introduction": "图\\ref{fig:ch06-bound-scene}展示S4阶段页的简化坝体与当前视野内的测点。场景中的对象数量、当前可见数量和成功绑定数量应分别核对；相机视野外的测点仍可能已经正确载入。",
+      "referenced_in_text": true,
+      "caption_and_image": "pass",
+      "review": "运行图为S4简化坝体及视野内少数测点；正文明确区分对象总数、可见数量、成功绑定数量，没有声称全部28个测点均在截图内可见。"
+    },
+    {
+      "label": "fig:ch06-appearance-components",
+      "chapter_file": "output/chapters/chapter06.tex",
+      "label_line": 1040,
+      "image": "output/images/generated/appearance-components.png",
+      "caption": "工程外观与构件分区对照（AI生成教学渲染，非测绘或BIM软件输出）",
+      "introduction": "图\\ref{fig:ch06-appearance-components}把同一坝体的外观纹理与构件分区并列。左侧帮助辨认表面和周边环境，右侧用颜色区分闸门、支承结构和启闭设备。颜色分区只是构件识别的入口；能否查询某扇闸门的编码、开度和检修记录，还取决于模型对象与业务数据的绑定。",
+      "referenced_in_text": true,
+      "caption_and_image": "pass",
+      "review": "双联图的同一坝体视角、闸门、支承结构及启闭设备对应；图注明确AI教学渲染且非测绘或BIM软件输出，正文没有把颜色分区等同于语义属性绑定。"
+    },
+    {
+      "label": "fig:ch07-gap-results",
+      "chapter_file": "output/chapters/chapter07.tex",
+      "label_line": 385,
+      "image": "output/images/runtime/s5-missing-gap.png",
+      "caption": "缺测记录与曲线断线逐项核对（教学查看器，调用S5曲线模块）",
+      "introduction": "图\\ref{fig:ch07-gap-results}使用配套数据中2026年7月1日的库水位记录。03:05的质量码为\\texttt{missing}，值映射为\\texttt{null}；该时刻仍占据横轴位置，曲线在两侧断开。",
+      "referenced_in_text": true,
+      "caption_and_image": "pass",
+      "review": "48条截取记录中的03:05为missing/null，03:00与03:10记录及曲线断线与manifest一致；时间位置保留，非插值或零值连接。"
+    },
+    {
+      "label": "fig:ch07-scene-chart",
+      "chapter_file": "output/chapters/chapter07.tex",
+      "label_line": 864,
+      "image": "output/images/runtime/s5-scene-chart.png",
+      "caption": "三维对象与时序曲线的联合展示（S5阶段页运行截图，显示放大）",
+      "introduction": "图\\ref{fig:ch07-scene-chart}展示S5阶段页中的对象与曲线。核对场景中的选择、状态栏的对象编码及纵轴单位，可以发现“选中了一个对象，却显示另一个对象曲线”的错配。",
+      "referenced_in_text": true,
+      "caption_and_image": "pass",
+      "review": "S5原阶段页同屏显示简化场景与PZ07曲线，状态栏DAM-A-PZ-07及kPa单位一致；图注明确“显示放大”。最终采集将图表轴标签和状态条调整为22 CSS px，显示前后288条序列SHA-256相同；采集为默认加载后相机平移，图只支持联合展示，不能单凭此图证明射线拾取成功。"
+    },
+    {
+      "label": "fig:ch08-acquisition-cabinet",
+      "chapter_file": "output/chapters/chapter08.tex",
+      "label_line": 217,
+      "image": "output/images/generated/acquisition-cabinet.png",
+      "caption": "按供电、采集与通信识读采集柜（AI生成的教学渲染，非接线设计图）",
+      "introduction": "分层架构中的边缘设备可结合图\\ref{fig:ch08-acquisition-cabinet}识读。柜内下部为电源与蓄电池区域，中部为采集设备，右侧带天线与网口的模块承担通信，上部端子排连接现场电缆。按供电、采集、通信三条路径检查，可区分设备未上电、没有取得读数与数据未传出的故障；随后再查对应日志和接口状态。",
+      "referenced_in_text": true,
+      "caption_and_image": "pass",
+      "review": "柜内供电/电池、采集模块、右侧带天线通信模块及上部端子区与文字观察路线对应；图注明确教学渲染及非接线设计图。"
+    },
+    {
+      "label": "fig:ch08-work-order-results",
+      "chapter_file": "output/chapters/chapter08.tex",
+      "label_line": 2503,
+      "image": "output/images/runtime/s6-work-order.png",
+      "caption": "预警与工单状态的实际响应（教学查看器，配套教学接口）",
+      "introduction": "图\\ref{fig:ch08-work-order-results}记录配套教学接口中的一次处置：确认预警、创建工单、完成处理、回查归档。未确认就派单的请求返回409；预警编码与工单编码把后续记录关联起来。教学接口采用内存状态，重启后需重新执行这一过程。",
+      "referenced_in_text": true,
+      "caption_and_image": "pass",
+      "review": "截图409失败例及200/201/200/200成功结果、acknowledged/in_progress/completed/closed状态与最终manifest一致。工单action已改为“教学演练：现场核查预警对应的监测点”，与预警关联库水位测点相符；重新采集的manifest记录与request-evidence.workflow逐项一致。图注和正文限定教学接口内存状态，未声称Java后端、数据库持久化或真实工程处置。"
+    }
+  ],
+  "findings": [
+    {
+      "id": "R10-04-CAP-01",
+      "severity": "medium",
+      "scope": "运行证据中的工单请求语义；当前印刷图未显示action",
+      "label": "fig:ch08-work-order-results",
+      "files": [
+        "companion/illustrations/runtime/capture.cjs",
+        "companion/illustrations/runtime/work-order.html",
+        "companion/illustrations/runtime/manifest.json",
+        "companion/illustrations/runtime/request-evidence.json"
+      ],
+      "observed": "选中预警w-0001属于DAM-A-WL-01，创建工单action却是“教学演练：现场核查渗压计”。",
+      "recommendation": "将采集脚本工单action改为对应库水位测点的检查任务，重录并同步manifest/request-evidence；保留旧记录可追溯，不手工伪造请求记录。",
+      "reported_to_parent": true,
+      "status": "resolved",
+      "resolution": {
+        "capture_time": "2026-09-12T02:43:37.996Z",
+        "action": "教学演练：现场核查预警对应的监测点",
+        "asset_id": "DAM-A-WL-01",
+        "method": "截图代理修改采集脚本后真实重录；复核最终PNG及两份请求记录，未手工改写响应证据。",
+        "manifest_and_request_evidence_identical": true
+      }
+    }
+  ],
+  "interpretation_limits": [
+    "S5联合展示图不是射线拾取的独立验证证据；采集记录没有实际选择另一个三维测点的操作。",
+    "S4当前视野只显示少数测点，28个是源数据/对象数量，现有正文已作区分。",
+    "HTTP/S6来自teaching-api/server.mjs；不证明Java后端、持久化或真实权限审批。",
+    "4幅生成图只支持外观/功能区域/构件识读，不是实拍、测绘成果或BIM软件输出。"
+  ],
+  "integrity": {
+    "image_hashes": [
+      {
+        "file": "output/images/runtime/s2-four-states.png",
+        "matches": true,
+        "sha256": "72dbcffb2cecc9d9a2327b935b6356f2cdef1c48c8c39a5aee6a6353ed45134d"
+      },
+      {
+        "file": "output/images/runtime/http-responses.png",
+        "matches": true,
+        "sha256": "e61cb95b1a11dcb4515978017b99c3e97b2627dc159c34655a9d3ae242e5ed2a"
+      },
+      {
+        "file": "output/images/runtime/http-network-json.png",
+        "matches": true,
+        "sha256": "8fe63e4f19d5bef677c83267658e31dc04d61375b71cb00cff48dc2b3af7eec5"
+      },
+      {
+        "file": "output/images/runtime/s2-switch-trace.png",
+        "matches": true,
+        "sha256": "fb69054cdddec821d195d842868e52cfef0d2e0d913d58e89ebd03f78ea97873"
+      },
+      {
+        "file": "output/images/runtime/s5-missing-gap.png",
+        "matches": true,
+        "sha256": "75a421d9a71eba89021f80ea539a88767ab8a5e2ccfcc3b00b81148a5db8f15f"
+      },
+      {
+        "file": "output/images/runtime/s6-work-order.png",
+        "matches": true,
+        "sha256": "257fae959151588842fb199816f85dee01dfa2ae162891f8eff28448638f4624"
+      },
+      {
+        "file": "output/images/runtime/s1-asset-list.png",
+        "matches": true,
+        "sha256": "f79167da602b3881b77c25487f6919c206712f90c33c766e2eb489cf425f9093"
+      },
+      {
+        "file": "output/images/runtime/s4-scene.png",
+        "matches": true,
+        "sha256": "b31525a0590fba43088d618d566fa8b05f5656323ad89f3f52e9c429281fb189"
+      },
+      {
+        "file": "output/images/runtime/s5-scene-chart.png",
+        "matches": true,
+        "sha256": "dba3bca09df9a5b4e9683d7428c9e1cd283ab2b5228ecde163567fac0ab1cdc9"
+      },
+      {
+        "file": "output/images/generated/reservoir-dam.png",
+        "matches": true,
+        "sha256": "2e48a3e4de21f552c93a9687a565ecad449d0d538ef63d412d420cf2dbc6b7f1"
+      },
+      {
+        "file": "output/images/generated/monitoring-sensors.png",
+        "matches": true,
+        "sha256": "a9533178fa21e3851e212a01ee70fe9b98281cc5e7d7fda4472d09b393c0ec25"
+      },
+      {
+        "file": "output/images/generated/acquisition-cabinet.png",
+        "matches": true,
+        "sha256": "6e4ccc9311cdd9f10ca1af8842d2c5d6316e42fa2e3ab2604774015deab4be5d"
+      },
+      {
+        "file": "output/images/generated/appearance-components.png",
+        "matches": true,
+        "sha256": "29933ccc7bde8cf362ceeed6b167156a22340913e391190a7dac50f5b5966edd"
+      }
+    ],
+    "source_hashes": [
+      {
+        "file": "companion/water-platform-demo/teaching-api/server.mjs",
+        "matches": true,
+        "sha256": "27869474e1255aed3f0a07d306320901d110989abc4e2bf707ade83be93625f7"
+      },
+      {
+        "file": "companion/water-platform-demo/frontend/src/lesson45/detail.js",
+        "matches": true,
+        "sha256": "e863e3fb8a9f92465b215606ee162b9fc7790317311242a25fdf265b1b386143"
+      },
+      {
+        "file": "companion/water-platform-demo/frontend/src/lesson45/state.js",
+        "matches": true,
+        "sha256": "85b0355041743e7e20feca414a4c14083f9d6aa5210723265d73b7120b0f9ee7"
+      },
+      {
+        "file": "companion/water-platform-demo/frontend/src/lesson45/controller.js",
+        "matches": true,
+        "sha256": "7c127ea660cf8824ab9f4256be7f5c33225bb4717d1a873b511905dea95b6c27"
+      },
+      {
+        "file": "companion/water-platform-demo/frontend/src/lesson61/first-scene.js",
+        "matches": true,
+        "sha256": "78969c8f6d2b4e633e89b6684e2d4eaae66e80756f1567650ed5479e5a8a3222"
+      },
+      {
+        "file": "companion/water-platform-demo/frontend/src/lesson61/bind-assets.js",
+        "matches": true,
+        "sha256": "bd0c385002717c72b2e96e1579a7266304072beb0c0834d0121e1bdd31148336"
+      },
+      {
+        "file": "companion/water-platform-demo/frontend/src/lesson74/series-controller.js",
+        "matches": true,
+        "sha256": "ae30c75ab29a1e47332a8887d3f61813db119368657430df0688b071d74aca89"
+      },
+      {
+        "file": "companion/water-platform-demo/frontend/src/utils/readings.js",
+        "matches": true,
+        "sha256": "b70430e5bf9b6c0b601b0035f719a3b82cf21db5402b6a134bfb8022e9646c32"
+      },
+      {
+        "file": "companion/water-platform-demo/frontend/src/lesson44/assets.js",
+        "matches": true,
+        "sha256": "f7b08dd35be9c59dcb7648ef9e33545abfba75ed4f5062e7e37220ed34845b61"
+      },
+      {
+        "file": "companion/datasets/stations.csv",
+        "matches": true,
+        "sha256": "64c2ae2d77e910cc85ca1a0723739663a5ba8d130502098d078cc40b0e0b96b6"
+      },
+      {
+        "file": "companion/datasets/water_level.csv",
+        "matches": true,
+        "sha256": "9af3e648cfd5a42a99ac1a6ea28a898ce7ae470903fa3cb304f680463a88d4eb"
+      },
+      {
+        "file": "companion/datasets/warnings.json",
+        "matches": true,
+        "sha256": "c615aa383264d1b1bf3f738b254814c029a0277cb79ec74725863fedbac0a24c"
+      }
+    ],
+    "page_errors": []
+  },
+  "sources": [
+    "companion/illustrations/runtime/manifest.json",
+    "companion/illustrations/runtime/request-evidence.json",
+    "companion/illustrations/runtime/capture.cjs",
+    "companion/illustrations/runtime/README.md",
+    "output/images/generated/provenance.json"
+  ],
+  "history": [
+    {
+      "capture_time": "2026-09-12T02:31:38.236Z",
+      "material_caption_mismatches": 0,
+      "evidence_semantic_mismatches": 1,
+      "finding_ids": [
+        "R10-04-CAP-01"
+      ]
+    }
+  ],
+  "display_review": {
+    "s5": {
+      "axis_and_status_css_px": 22,
+      "data_count": 288,
+      "series_sha256_before": "62012d2b5ad81e172c64a20f14692fad6968187e9083d783c7e44bb213bd5a42",
+      "series_sha256_after": "62012d2b5ad81e172c64a20f14692fad6968187e9083d783c7e44bb213bd5a42",
+      "zrender_actual_font_checked": true,
+      "caption_discloses_enlargement": true,
+      "image_visually_reviewed": true
+    },
+    "fixtures": {
+      "main_content_css_px": 20,
+      "source": "companion/illustrations/runtime/capture.cjs writeHtml overrides",
+      "note": "主要状态、请求、响应字段为20px及以上；底部“教学查看器”来源注仍为12px，不作为操作内容。"
+    }
+  }
+}

@@ -125,7 +125,7 @@
 
 图\ref{fig:uml-usecase}给出一个最小用例图。系统边界内放置业务能力，边界外放置参与者；连线表示参与关系，而不是调用顺序。
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[>=Stealth, every node/.style={font=\small}]
   \draw[thick, draw=Primary] (-1.8,-2.0) rectangle (5.2,2.0);
@@ -196,7 +196,7 @@
 
 图\ref{fig:uml-class}把“测点产生监测记录、监测记录可触发告警事件”的领域关系落实为类、属性、操作和多重性。读图时先检查职责，再检查关联方向和数量约束。
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[>=Stealth, node distance=1.0cm and 1.2cm,
   class/.style={draw=Primary, fill=PrimaryLight, text width=3.6cm, align=left, font=\small}]
@@ -230,7 +230,7 @@
 
 告警事件是案例水库平台中适合绘制状态图的对象：它从规则服务创建开始，经过通知、确认和处置，最终闭环或被专业分析员判为误报。图\ref{fig:alarm-event-state}把正常路径和超时升级放在同一张图中，读者应特别注意“已通知”到“处置中”的超时升级转移并不会跳过审批责任，升级事件仍要留下原事件号和升级原因。
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[node distance=7mm and 9mm,
   state/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=2.2cm,
@@ -258,7 +258,7 @@
 
 活动图则强调“谁在什么泳道执行哪一步”。图\ref{fig:alarm-activity}将预警处置拆成平台和岗位两个泳道，展示事件创建、通知、确认、审批和回执的顺序；与状态图相比，它关注动作流和责任分工，而不是对象当前状态。
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[node distance=6mm and 8mm,
   act/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=2.55cm,
@@ -285,7 +285,7 @@
 
 \paragraph{（4）时序图（Sequence Diagram）}时序图按时间顺序描述参与者与构件之间的消息交互，适合核对跨模块责任、同步与异步边界以及异常分支。图\ref{fig:uml-sequence}展示“告警触发—推送—确认”的主路径：分析服务生成事件，消息服务推送通知，值班员确认后由告警服务持久化状态并返回结果。实际设计还应补充推送失败、重复确认和超时升级分支。
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[>=Stealth, every node/.style={font=\small}]
   \foreach \x/\name in {0/分析服务,3/告警服务,6/消息服务,9/值班终端}{
@@ -415,7 +415,7 @@
 
 \paragraph{用同一个查询任务看三层}第1章追踪过“查看某测点最新观测”这一次请求（图\ref{fig:ch01-request-trace}）。把它放到软件内部看，服务端至少分成三层，每层只回答一个问题：界面层回答“这是谁、要什么、回什么格式”，服务层回答“业务上允许吗、该拿哪条数据”，数据访问层回答“怎样从表里取出来”。图\ref{fig:ch03-layer-sequence}是这次查询在三层之间的调用时序，表\ref{tab:ch03-layer-duties}是每层的职责与不该做的事。分层的价值不在于“看起来整齐”，而在于每层可以单独替换和单独测试：第4章的页面先对着教学接口开发，第5章再换成真实后端，界面层以下全换了，页面一行不改，靠的就是这条边界。
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[>=Stealth,thick,font=\scriptsize]
   \tikzset{life/.style={draw=Primary,rounded corners=2pt,fill=PrimaryLight,text=PrimaryDark,minimum width=2.3cm,minimum height=.6cm,align=center}}
@@ -471,7 +471,7 @@ Web 应用（如用户界面层、后端逻辑层、数据库层）。在典型�
 
 水利工程安全监测平台：将监测接入、预警分析、用户界面分离。在该平台中，分层架构也被有效应用。监测接入层负责与各类监测设备通信，获取原始数据；预警分析层根据监测数据和预设规则进行分析判断，决定是否触发告警；用户界面层则为用户提供监测总览、趋势曲线和告警处置界面。这种层次划分使系统的各个功能模块相互独立，便于开发、测试和后续维护升级。典型的分层架构模式如图\ref{fig:layered-architecture}所示。
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[>=Stealth, scale=0.9, thick]
   \node[draw=Primary, rectangle, minimum width=5cm, minimum height=0.7cm, fill=PrimaryLight, text=PrimaryDark, rounded corners=2pt, thick] at (0,3) (ui) {\small\bfseries 表示层（用户界面）};
@@ -573,7 +573,7 @@ MVC 的主要优势在于其高可维护性和可扩展性。由于各部分相�
 
 以一个水库安全监测平台为例，测站信息、监测记录和告警规则等属于模型部分；用户看到的监测大屏、趋势图页面和测站详情页等是视图；而处理查询条件、图层切换、告警确认等操作的部分则是控制器。通过 MVC 模式，系统的结构清晰，开发和维护变得更加高效（见图\ref{fig:mvc-architecture}）。
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[>=Stealth, scale=0.9, thick]
   \node[draw=Primary, rectangle, minimum width=1.3cm, minimum height=0.8cm, fill=PrimaryLight, text=PrimaryDark, rounded corners=2pt, thick] at (0,1.2) (model) {\small\bfseries Model};
@@ -915,7 +915,7 @@ public record AnomalyEvent(String eventId, String assetId,
 
 将内部数据和实现逻辑设为私有，仅通过接口提供服务。例如，在监测接入模块的实现中，将设备驱动程序、通信协议处理等内部数据和逻辑设为私有成员，外部模块无法直接访问，只能通过\texttt{MonitoringDataProvider}接口中的方法进行操作。
 
-\paragraph{示例}监测接入模块内部可使用Modbus、MQTT或厂商协议通信，但外部只通过\texttt{MonitoringDataProvider}调用，无需了解数据帧和重连等实现细节。
+\paragraph{示例}监测接入模块内部可使用Modbus、MQTT或厂商协议通信，但外部只通过\texttt{Monitoring\allowbreak DataProvider}调用，无需了解数据帧和重连等实现细节。
 
 \paragraph{版本控制}
 
@@ -1051,7 +1051,7 @@ public record AnomalyEvent(String eventId, String assetId,
 
 以省级智慧水利平台为例，监测接入、告警分析、工单管理和专题分析等功能都可以通过微服务架构实现。每个微服务独立开发、部署和扩展，能够快速响应业务需求的变化，保证系统的高可用性和高性能。微服务架构的整体结构如图\ref{fig:microservices-architecture}所示。
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[>=Stealth, scale=0.85, thick]
   % API Gateway
@@ -1148,7 +1148,7 @@ ADR 的评审顺序是先确认上下文和需求，再比较备选方案的质�
 ATAM 是一种架构评估方法，着重分析多个质量属性之间的权衡。首先把可靠性、安全性和响应时间等目标改写成带刺激、环境、响应和度量的场景；其次说明构件、连接和部署决策如何影响场景；最后识别敏感点、权衡点与风险，并为高风险假设安排验证。若设备故障场景暴露恢复时间不达标，就应修改冗余或恢复策略并重新测量，而不能只给出“提高可靠性”的定性结论。
 
 ATAM 的效用树把质量属性按业务重要性和实现难度排序，帮助团队先验证最可能影响工程安全的场景。图\ref{fig:atam-utility-tree}以“预警处置”作为根节点，向下展开可靠性、性能和安全性，再落到可测的叶节点；叶节点的优先级应在需求评审中确认，不能由架构师单方面决定。
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[node distance=8mm and 13mm, every node/.style={font=\small}, box/.style={draw=Primary,rounded corners,fill=PrimaryLight,align=center,minimum width=2.4cm,minimum height=.55cm}, leaf/.style={draw=TextGray,fill=white,align=center,minimum width=3.0cm,minimum height=.48cm}]
 \node[box] (root) {预警处置质量};

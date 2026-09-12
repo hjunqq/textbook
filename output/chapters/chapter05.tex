@@ -50,7 +50,7 @@ DELETE & 删除资源 & 删除尚未发布的规则 & 是 \\
 
 表\ref{tab:http-methods}中的幂等性描述的是同一请求重复执行后的资源最终状态，而不是网络层只发送一次。值班员在弱网环境下可能重复点击“提交处置”，客户端可以为一次业务操作生成\texttt{Idempotency-Key}，服务端以“用户+键+资源类型”建立唯一约束并缓存第一次响应；这样重试不会创建两条处置单。\texttt{POST}本身通常不是幂等的，只有把业务键、去重窗口和冲突响应写进契约，才能把它安全地用于设备重投。
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[>=Stealth,thick,node distance=0.35cm and 0.3cm]
   \tikzset{layer/.style={draw=Primary,rounded corners=2pt,minimum width=2.05cm,minimum height=.68cm,align=center,fill=PrimaryLight,text=PrimaryDark,font=\scriptsize}}
@@ -77,7 +77,7 @@ DELETE & 删除资源 & 删除尚未发布的规则 & 是 \\
 
 分层结构的依赖由接口层指向业务与数据访问抽象：Controller 依赖 Application Service，Service 依赖领域对象和 Repository 接口，Repository 的具体实现依赖 PostgreSQL、PostGIS 或 TimescaleDB。领域对象不依赖 HTTP、JSON 和 Spring 注解，便于在单元测试中用内存对象验证规则。若把数据库实体直接作为响应体，内部字段、懒加载关系和审计信息可能泄露到外部契约；DTO 映射应在控制器或应用服务边界完成，并为时间、单位和质量码提供稳定格式。图\ref{fig:ch05-rest-contract}把“请求进入—校验—用例—响应”四个边界与失败返回位置标出，便于把接口测试从状态码断言扩展到字段、事务和审计证据。
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[>=Stealth,thick,node distance=0.52cm and 0.48cm]
   \tikzset{boundary/.style={draw=Primary,rounded corners=2pt,minimum width=2.15cm,minimum height=.8cm,align=center,fill=PrimaryLight,text=PrimaryDark,font=\scriptsize},
@@ -294,6 +294,15 @@ ResponseEntity<Map<String, String>> badRequest(BadRequest e) {
 \end{lstlisting}
 
 \paragraph{一个会遇到的失败}\texttt{from=2026-07-01T00:00:00+08:00}直接放进地址栏，加号会被浏览器当作空格，服务端解析时报 400，错误体却不是契约格式而是 Spring 的默认页面。原因是类型转换失败发生在进入方法之前，\texttt{@ExceptionHandler(BadRequest.class)}接不到它。两件事要做：客户端把\texttt{+}编码成\texttt{\%2B}（第4章的\texttt{URLSearchParams}会自动做）；服务端在 5.5 节用\texttt{@ControllerAdvice}接住\texttt{MethodArgumentTypeMismatchException}，统一翻译成契约错误体。复现时分别观察参数转换前后发生的错误，确认类型转换异常与业务异常都返回约定的错误体。
+
+图\ref{fig:ch05-error-results}是配套教学接口的两个错误响应。时间区间非法与对象不存在使用不同\texttt{code}；\texttt{field}只在需要指出具体输入项时出现。开发Java接口时，用相同请求核对这些字段。
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=16cm]{images/runtime/http-responses.png}
+\caption{400与404错误体的实际响应（教学查看器，配套教学接口）}
+\label{fig:ch05-error-results}
+\end{figure}
 
 \subsection{用第4章的页面和故障表验证接口}
 
@@ -734,7 +743,7 @@ DTO 投影 & 只取列表需要的列 & 避免把实体关系带出事务；字�
 
 \subsection{派生查询、Pageable 与稳定分页}
 
-Spring Data 的派生查询名称按“动词 + 属性 + 条件 + 排序”组合，例如\texttt{findByStationIdAndQualityOrderByMeasuredAtDescIdDesc}。属性名必须与实体字段对应，重命名时编译器会提示错误；查询含义复杂或涉及时间半开区间时，优先使用\texttt{@Query}明确写出条件。所有列表接口都应限制\texttt{size}，默认排序追加唯一 ID 作为 tie-breaker，保证追加新读数时不会在页边界重复或漏掉记录。
+Spring Data 的派生查询名称按“动词 + 属性 + 条件 + 排序”组合，例如\texttt{findByStationId\allowbreak AndQuality\allowbreak OrderByMeasuredAt\allowbreak DescIdDesc}。属性名必须与实体字段对应，重命名时编译器会提示错误；查询含义复杂或涉及时间半开区间时，优先使用\texttt{@Query}明确写出条件。所有列表接口都应限制\texttt{size}，默认排序追加唯一 ID 作为 tie-breaker，保证追加新读数时不会在页边界重复或漏掉记录。
 
 \begin{lstlisting}[label={lst:ch05-pageable-repository},language=Java,caption={Pageable 分页查询与服务层上限}]
 import org.springframework.data.domain.*;
@@ -935,7 +944,7 @@ class ReadingCommandService {
 
 清单\ref{lst:ch05-repository}中的\texttt{save}由外部调用进入事务代理，Repository 写入和审计调用共享默认事务；\texttt{AuditService.record}使用\texttt{REQUIRES\_NEW}时会挂起外层事务，形成独立审计提交。图\ref{fig:ch05-tx-proxy}把代理边界、挂起和提交后事件画成一条时序，读者可以据此判断“代码出现了注解”是否真的意味着运行时开启了新事务。
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[>=Stealth,thick,node distance=0.5cm and 0.45cm]
 \node[draw,rounded corners,fill=blue!8,align=center] (http) {HTTP\\控制器};
@@ -1382,7 +1391,7 @@ MockMvc 或 WebTestClient 可以在没有真实网络的情况下验证控制器
 
 图\ref{fig:ch05-security-filter}把一次受保护请求经过过滤器链的决策点展开。认证过滤器只负责从 Bearer 令牌得到可信主体和权限，授权规则再决定该主体能否访问具体方法；两者分开后，过期令牌应得到 401，权限不足应得到 403，业务方法不必重复解析令牌。图中的“拒绝”分支还提醒读者：过滤器不能把异常吞掉后继续当作匿名用户执行写操作，审计日志要记录拒绝原因和请求追踪 ID。
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[>=Stealth,thick,node distance=0.5cm and 0.45cm]
   \tikzset{stage/.style={draw=Primary,rounded corners=2pt,minimum width=2.35cm,minimum height=.78cm,align=center,fill=PrimaryLight,text=PrimaryDark,font=\scriptsize},
@@ -1611,7 +1620,7 @@ public final class RefreshTokenVerifier {
 
 认证链路可以拆成“凭据校验—令牌签发—请求认证—权限决策—撤销与轮换”五个环节。图\ref{fig:ch05-auth-sequence}把访问令牌和刷新令牌的边界画出：访问令牌短期有效，携带权限进入过滤器；刷新令牌只发送到刷新端点，服务端验证类型和撤销状态后签发新的令牌对。前端不能把刷新令牌当作普通 API 凭据，也不能在浏览器日志、URL 或错误消息中输出完整令牌。
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[>=Stealth,thick,node distance=0.45cm and 0.35cm]
 \node[draw,rounded corners,fill=blue!8,align=center] (login) {登录\\输入凭据};
@@ -2440,8 +2449,8 @@ FastAPI & 类型提示驱动的 API、异步 I/O 或需要自动 OpenAPI 文档�
 
 \section*{思考题与练习题}
 
+\paragraph{客观题}
 \begin{enumerate}
-\item[\textbf{客观题}]
 \item 创建新资源最常使用（\quad）。A. GET\quad B. POST\quad C. PATCH\quad D. DELETE
 \item Spring同一Bean内部自调用一定会触发方法上的事务代理。（判断：对／错）
 \item 加入第$n+1$个样本时，增量均值的分母应为（\quad）。A. $n-1$\quad B. $n$\quad C. $n+1$\quad D. $2n$
@@ -2449,13 +2458,19 @@ FastAPI & 类型提示驱动的 API、异步 I/O 或需要自动 OpenAPI 文档�
 \item 跨服务告警事件适合使用（\quad）。A. 进程内普通事件\quad B. Kafka主题\quad C. 浏览器DOM事件\quad D. CSS媒体查询
 \item 消费者记录并检查\texttt{eventId}有助于实现幂等处理。（判断：对／错）
 
-\item[\textbf{简答与设计题}]
+\end{enumerate}
+
+\paragraph{简答与设计题}
+\begin{enumerate}[resume]
 \item 说明控制器、应用服务、Repository和数据库之间的职责边界。
 \item 解释为什么同Bean事务自调用可能失效，并给出两种改进思路。
 \item 设计测站最新水位查询与监测值写入接口，列出方法、路径和主要状态码。
 \item 比较\texttt{@TransactionalEventListener(AFTER\_COMMIT)}与Kafka监听器的适用范围。
 \item 设计JWT密钥管理和刷新流程，说明如何校验\texttt{type=refresh}、\texttt{issuer}、\texttt{jti}及有效期，并拒绝过期刷新令牌，并用 Redis TTL 撤销记录与令牌轮换防止重放。
 
-\item[\textbf{实践题}]
+\end{enumerate}
+
+\paragraph{实践题}
+\begin{enumerate}[resume]
 \item 使用Spring Boot实现本章章末交付物；所有单元测试和接口测试均须包含正常、参数错误、无权限和资源不存在场景。
 \end{enumerate}

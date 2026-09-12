@@ -147,7 +147,7 @@ void main() {
 
 图形管线的每一级都应有可观测的输入和输出。模型矩阵错误通常表现为整体位置或朝向异常，观察矩阵错误表现为相机方向和“上下颠倒”，投影矩阵错误则表现为远近比例、裁剪或深度顺序异常。把问题定位到管线阶段，比盲目调节模型坐标更可靠。图\ref{fig:ch06-render-pipeline}以同一橙色顶点展示构件、相机视锥与屏幕像素的关系，底部列出坐标变换与裁剪步骤。
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[
   x=1cm,y=1cm,>=Stealth,
@@ -342,7 +342,7 @@ const material = new THREE.MeshStandardMaterial({map: colorMap, normalMap});
 
 图\ref{fig:ch06-scene-graph}展示了这一层级。将业务标识与渲染节点分离后，模型替换、LOD切换和实时数据更新都不会破坏监测对象的引用；反之，如果把“DamGateMesh001”这样的显示名称当成主键，模型导出时重命名就会使告警联动失效。
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[level 1/.style={sibling distance=38mm},
   level 2/.style={sibling distance=18mm}, every node/.style={draw,rounded corners,align=center,font=\small,fill=green!6},
@@ -498,6 +498,15 @@ export function bindAssets(scene, assets) {
 \bottomrule
 \end{tabular}
 \end{table}
+
+图\ref{fig:ch06-bound-scene}展示S4阶段页的简化坝体与当前视野内的测点。场景中的对象数量、当前可见数量和成功绑定数量应分别核对；相机视野外的测点仍可能已经正确载入。
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=15cm]{images/runtime/s4-scene.png}
+\caption{简化坝体与测点的场景绑定（S4阶段页实际运行截图）}
+\label{fig:ch06-bound-scene}
+\end{figure}
 
 \section{GIS服务、坐标与二三维集成}
 
@@ -679,7 +688,7 @@ CGCS2000的EPSG代码还要区分地理坐标、带号前缀和无前缀东坐�
 
 图\ref{fig:ch06-coordinate-chain}把“经度—分带—投影—场景原点”的关系画成一条可审计链。任何一步缺少带宽或中央经线，后续三维定位都只能算近似结果。
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[node distance=8mm, every node/.style={font=\small},
   box/.style={draw,rounded corners,align=center,minimum width=2.6cm,minimum height=9mm,fill=orange!8},
@@ -877,7 +886,7 @@ try {
 
 倾斜摄影通过垂直与多个倾斜视角获取影像，用于恢复工程及周边地表。系统由飞行平台、航摄仪、地面控制和内业处理组成，如图\ref{fig:uav-oblique-system}所示。
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \uavObliquePhotographySystem
 \caption{无人机倾斜摄影测量系统组成}
@@ -892,7 +901,7 @@ try {
 
 图\ref{fig:ch06-aerial-control-network}给出了控制网络的教学化布设：连接点负责把相邻影像锁定到同一块地物，像控点把模型约束到工程坐标，检查点保持独立用于验收。控制点应覆盖坝轴线两端、坝顶与坝脚、高程变化明显的坡面、闸室和场景边界；检查点宜与像控点分区布设，避免所有点落在同一小区域。图中不同符号区分点的用途；平差文件还需逐点记录角色、测量方法、坐标基准、精度等级和是否参与平差。
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[>=Stealth,node distance=1.4cm and 1.5cm]
 \tikzset{flight/.style={draw=Primary,rounded corners,minimum width=8.2cm,minimum height=.42cm,fill=PrimaryLight},
@@ -994,7 +1003,7 @@ function evaluateCheckPoints(points, rmse) {
 
 图\ref{fig:oblique-preprocess}把其中的预处理与质量控制环节展开：完整性核查、影像质量检查、匀光匀色、拼接检查、质量判定，以及不合格时的返工回路。返工回路是这张图的重点——质量判定不通过时退回的是采集或匀色环节，而不是带着问题继续走到成果发布。
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \obliqueImagePreprocessQC
 \caption{倾斜影像预处理与质量控制流程}
@@ -1021,6 +1030,15 @@ function evaluateCheckPoints(points, rmse) {
 \subsection{BIM语义与IFC 4.3}
 
 BIM强调构件语义、属性和工程关系，倾斜摄影强调表面真实感，两者不能互相替代。闸门启闭机、监测仪器等关键对象宜保留可查询语义；大范围地形和周边建筑可用倾斜摄影或地形瓦片表达。
+
+图\ref{fig:ch06-appearance-components}把同一坝体的外观纹理与构件分区并列。左侧帮助辨认表面和周边环境，右侧用颜色区分闸门、支承结构和启闭设备。颜色分区只是构件识别的入口；能否查询某扇闸门的编码、开度和检修记录，还取决于模型对象与业务数据的绑定。
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=15.5cm]{images/generated/appearance-components.png}
+\caption{工程外观与构件分区对照（AI生成教学渲染，非测绘或BIM软件输出）}
+\label{fig:ch06-appearance-components}
+\end{figure}
 
 IFC 4.3 的 Ports and Waterways Domain 面向航道、运河、船闸与升船机、港口码头等通航与港工设施。与水利工程建模最相关的实体是\texttt{IfcMarineFacility}和\texttt{IfcMarinePart}，设施类型通过\texttt{PredefinedType}表达。buildingSMART 的范围说明把 Dams/levees、Weirs、seawalls、groynes 列在该域之外，并将 coastal protection、erosion protection、flood protection 三类复合类型列为范围之外\cite{ifc43Ports}。因此，水库坝体、溢洪道、泄洪闸门、廊道和监测仪器都不能为了追求“有一个实体”而强行套用海事设施语义。
 
@@ -1088,7 +1106,7 @@ NASA文献强调物理模型、传感器更新和运行历史的综合映射\cit
 \]
 其中$PE$为物理实体、$VE$为虚拟实体、$Ss$为服务、$DD$为孪生数据、$CN$为连接。孪生数据 $DD$ 包括观测、状态和模型运行所需的数据；各维度在水利平台中的对应关系如下图所示。图\ref{fig:dt-five-dimensions}把五个维度画在一起，并用连接维$CN$把其余四维两两串起来。连接维承载观测更新与执行反馈；双向连接中断时，虚拟状态可能落后于现场，指令结果也无法得到确认。
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[>=Stealth,node distance=1.2cm and 1.4cm]
 \tikzset{d/.style={draw=Primary,rounded corners=2pt,fill=PrimaryLight,
@@ -1134,7 +1152,7 @@ NASA文献强调物理模型、传感器更新和运行历史的综合映射\cit
 
 平台可划分为物理对象层、感知连接层、数据底板层、模型与知识层、服务层和交互应用层。各层分别承担数据校验、模型运行、结果解释与指令审批等职责。图\ref{fig:dt-layered-architecture}把这六层自下而上排开，并在层间标出数据上行与指令下行两条通道。层间接口规定输入、输出和失败响应；保持接口兼容时，可替换一层的实现而继续使用相邻层。
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[node distance=.35cm]
 \tikzset{layer/.style={draw=Primary,rounded corners=2pt,fill=PrimaryLight,
@@ -1303,7 +1321,7 @@ NASA文献强调物理模型、传感器更新和运行历史的综合映射\cit
 
 状态着色与几何材质分离。原始模型材质属于资产表现，风险着色属于临时业务覆盖层；退出专题模式后应恢复原材质。这样既避免反复修改模型文件，也能同时支持渗压、位移、巡检等多个专题。图\ref{fig:dt-evidence-chain}把从三维对象一路回溯到业务处置的链条画了出来：点选构件、查看测点、调阅原始序列与质量码、比对模型残差与阈值依据、生成告警事件与工单。这条链缺任何一环，界面上的颜色就只是颜色，无法作为处置依据。
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[>=Stealth,node distance=.75cm and 1.0cm]
 \tikzset{evidence/.style={draw=Primary,rounded corners=2pt,fill=PrimaryLight,
@@ -1333,7 +1351,7 @@ NASA文献强调物理模型、传感器更新和运行历史的综合映射\cit
 
 一次完整闭环包括“感知—质检—状态更新—模型计算—风险解释—人工确认—指令下发—执行反馈—效果评估”。并非所有场景都允许自动控制：大坝安全和防洪调度通常需要权限、会商和人工确认。图\ref{fig:dt-closed-loop}把这些环节连成回路，并把需要人工确认的位置单独标出。指令下发后还需核对执行回执，并用后续观测评估效果；缺少任一项时，只能记录已完成的步骤，无法确认执行结果。
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[>=Stealth,node distance=.55cm]
 \tikzset{dtstep/.style={draw=Primary,rounded corners=2pt,fill=PrimaryLight,
@@ -1404,7 +1422,7 @@ def update_twin(reading, repository, model, publisher):
 
 控制命令比状态事件要求更严格。命令包含发起人、审批记录、目标设备、期望状态、有效期和幂等键；执行端返回接收、拒绝、执行中、成功或失败状态。超时不等于未执行，调用方必须查询最终状态，避免重复启闭设备。图\ref{fig:dt-event-contract}把状态事件与控制命令两条链路并排画出，并标出各自写入审计的位置。两者的差别集中在幂等键与审批记录上：状态事件重复投递不产生副作用，控制命令重复投递则可能让设备二次动作。
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[>=Stealth,node distance=.9cm and 1.0cm]
 \tikzset{svc/.style={draw=Primary,rounded corners=2pt,fill=PrimaryLight,
@@ -1487,7 +1505,7 @@ def update_twin(reading, repository, model, publisher):
 
 现场边缘节点适合完成协议接入、缓存、初步质检和断网续传；中心平台负责全局数据治理、模型调度和综合应用。控制指令采用最小权限、双向认证和可审计通道，不能因引入“数字孪生”而绕过原有安全规程。图\ref{fig:dt-edge-cloud}把边缘与中心的职责画在同一张图上，并标出断网期间边缘侧的续传缓存位置。设计时要特别留意断网恢复后的补传顺序：先补的应是原始观测而不是模型结果，因为模型结果需要在完整输入到齐之后重新计算。
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[>=Stealth,node distance=.8cm and .9cm]
 \tikzset{box/.style={draw=Primary,rounded corners=2pt,fill=PrimaryLight,
@@ -1566,7 +1584,7 @@ def update_twin(reading, repository, model, publisher):
 
 图\ref{fig:dt-lineage}把血缘链从原始观测一直画到处置复盘：每一步都记录输入摘要、规则版本和执行状态，因此复盘时可以沿链反向定位，判断偏差究竟来自数据、规则还是模型。
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[node distance=5mm and 7mm,
   item/.style={draw=Primary,rounded corners,fill=PrimaryLight,align=center,minimum width=2.25cm,minimum height=0.85cm,font=\small}]
@@ -1670,8 +1688,8 @@ WebGL2 和 Three.js 将工程对象转换为可交互的场景，OGC 服务提�
 
 \section*{思考题与练习题}
 
+\paragraph{客观题}
 \begin{enumerate}
-\item[\textbf{客观题}]
 \item MVP矩阵中的$V$表示（\quad）。A. 模型矩阵\quad B. 观察矩阵\quad C. 投影矩阵\quad D. 纹理矩阵
 \item CGCS2000地理二维坐标系的EPSG代码是（\quad）。A. 4326\quad B. 3857\quad C. 4490\quad D. 4547
 \item WMS以预定义瓦片矩阵为核心。（判断：对／错）
@@ -1679,7 +1697,10 @@ WebGL2 和 Three.js 将工程对象转换为可交互的场景，OGC 服务提�
 \item 像控点的坐标来自外业测量，可参与空三约束。（判断：对／错）
 \item 数字孪生数据维度只包含清洗算法，不包含实时和历史数据。（判断：对／错）
 
-\item[\textbf{简答与设计题}]
+\end{enumerate}
+
+\paragraph{简答与设计题}
+\begin{enumerate}[resume]
 \item 说明模型、世界、观察和裁剪坐标系的变换关系。
 \item 比较WMS、WMTS和WFS的返回内容及水利应用场景。
 \item 解释椭球高与1985国家高程基准正常高的区别，并列出数据入库所需元数据。
@@ -1689,7 +1710,10 @@ WebGL2 和 Three.js 将工程对象转换为可交互的场景，OGC 服务提�
 \item 结合IFC 4.3官方范围，说明闸门、坝体和廊道应如何避免错误实体映射。
 \item 为某水库绘制数字孪生五维映射，说明模型结果如何进入人工确认和处置闭环。
 
-\item[\textbf{实践题}]
+\end{enumerate}
+
+\paragraph{实践题}
+\begin{enumerate}[resume]
 \item 在一课时内完成一个GLB模型加载、定位和业务标识绑定，并记录包围盒与加载错误处理。
 \item 使用5个以上独立检查点计算$m_x$、$m_y$、$m_p$和$m_h$，依据适用规范给出的平面点位与高程限差判断成果是否合格；对绝对残差超过2倍中误差的点建立复核记录，对超过3倍中误差的粗差候选说明复核、剔除理由及前后统计量。
 \item 以模板补全表\ref{tab:dt-acceptance}，为一个大坝渗压异常场景设计最小验收用例集。

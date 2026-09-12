@@ -31,7 +31,7 @@
 
 现代浏览器通常采用多进程架构。图\ref{fig:browser-architecture}强调各模块的协作关系：浏览器引擎负责协调，渲染引擎使用网络模块取得的资源，调用JavaScript引擎执行脚本，并通过UI后端绘制；存储模块为浏览器引擎及页面脚本提供受控的数据持久化能力。
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[>=Stealth,thick,node distance=0.9cm and 1.0cm]
   \tikzset{box/.style={draw=Primary,rectangle,rounded corners=2pt,
@@ -93,13 +93,22 @@ HTML描述内容的结构和语义。\texttt{header}、\texttt{nav}、\texttt{ma
 
 表格适合表达二维数据，不应用于页面布局。水位表至少应包含表头、单位和测量时间；表单提交前还需结合业务规则校验站点、时间范围和数值边界。
 
+图\ref{fig:ch04-s1-list}展示S1页面筛选库水位对象后的列表。对象编码、读数与排序结果应能逐项对应；这一阶段使用静态数据，刷新页面不会取得新观测。
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=16cm]{images/runtime/s1-asset-list.png}
+\caption{S1测点列表的筛选与排序（配套阶段页实际运行截图）}
+\label{fig:ch04-s1-list}
+\end{figure}
+
 \subsection{文档流、渲染流程与页面地标}
 
 HTML 文件被浏览器接收后，先经过字节解码和词法分析，再形成 DOM 树；CSS 规则形成 CSSOM，二者合并为渲染树，随后经历样式计算、布局、绘制和合成。这个过程解释了为什么标签的先后顺序会影响页面的阅读顺序，也解释了为什么在首屏反复改动大量节点会触发重排和重绘。对监测页面而言，文档流首先保证“标题—导航—数据—说明”的阅读路径，然后再由 CSS 决定列数、间距和颜色。只有把结构和表现分开，地图、曲线等高频更新区域才不会破坏键盘操作和屏幕阅读器的上下文。
 
 图\ref{fig:ch04-document-flow}把“源代码—浏览器处理—可访问页面”串成一条链：左侧是开发者写入的结构，中央是浏览器逐步生成的对象，右侧是值班员实际使用的地标区域。图中三个阶段表示同一份 HTML 从源文件到页面的处理过程；调试时应先判断问题属于结构、样式还是脚本，再选择对应工具。
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[>=Stealth,thick,node distance=0.65cm and 0.9cm]
   \tikzset{flow/.style={draw=Primary,rounded corners=2pt,minimum width=3.0cm,minimum height=0.62cm,align=center,fill=PrimaryLight,text=PrimaryDark,font=\small},
@@ -293,7 +302,7 @@ Grid适合仪表盘的二维区域布局，Flexbox适合工具栏等一维排列
 
 工程中通常在全局使用\texttt{box-sizing: border-box}，让声明的宽高包含内边距和边框。这样设计稿给出的 320 像素就是盒子的外部尺寸，组件之间的对齐更容易推导；只有需要精确控制内容区的排版组件，才保留\texttt{content-box}并在接口文档中写明。图\ref{fig:ch04-css-box-model}从外到内标出四层区域，读者可以据此判断 DevTools 中高亮的颜色对应哪一个尺寸。
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[font=\small]
   \draw[fill=PrimaryLight,draw=Primary] (0,0) rectangle (10,3.3);
@@ -508,7 +517,7 @@ Grid 同时管理行和列，适合把侧栏、地图、曲线、告警列表和
 
 图\ref{fig:ch04-layout-choice}把两种布局的决策边界画成“轴”与“平面”：工具栏只需要沿一条轴分配空间时用 Flexbox；页面骨架要同时控制行列时用 Grid；Grid 区域内部的按钮组仍可继续使用 Flexbox。混用不是问题，关键是每一层只承担一种几何职责，避免在同一个元素上堆叠互相冲突的定位规则。
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[>=Stealth,thick,node distance=0.7cm and 1.2cm]
   \tikzset{choice/.style={draw=Primary,rounded corners=2pt,minimum width=3.5cm,minimum height=1.0cm,align=center,fill=PrimaryLight,text=PrimaryDark,font=\small},
@@ -592,7 +601,7 @@ Grid 同时管理行和列，适合把侧栏、地图、曲线、告警列表和
 
 图\ref{fig:ch04-responsive-breakpoints}用内容状态标出三个大屏档位和一个移动档位。1920 宽度可以容纳侧栏、主图和告警栏，2560 与 3840 主要增加留白和信息密度，而不是把同一张卡片无限拉宽；移动端则优先保留水位、预警和更新时间，将次要筛选条件折叠。断点之间采用流式尺寸，避免窗口略微变化就出现跳跃。
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[>=Stealth,thick]
   \draw[->,draw=Primary] (0,0)--(12,0);
@@ -908,7 +917,7 @@ list.querySelector('[data-asset-id="DAM-A-PZ-07"]').textContent = '案例渗压0
 
 图\ref{fig:ch04-a44-event-flow}展示一个测站列表项被点击时的三阶段路径。捕获监听器适合做全局审计或焦点准备，目标监听器处理当前控件，冒泡监听器适合事件委托；在同一元素上注册多个监听器时，还要注意注册顺序和是否调用了\texttt{stopImmediatePropagation}。
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[>=Stealth,thick,node distance=0.85cm]
   \tikzset{event/.style={draw=Primary,rounded corners=2pt,minimum width=3.7cm,minimum height=.65cm,align=center,fill=PrimaryLight,text=PrimaryDark,font=\small}}
@@ -1181,6 +1190,15 @@ GET /api/assets/DAM-A-PZ-07/readings/latest & 200 & value 185.091、unit kPa、q
 \end{tabular}
 \end{table}
 
+图\ref{fig:ch04-http-observe}把实际请求的状态码与选中响应并列。先定位请求，再读状态码和响应字段；图中时间范围错误返回400，错误体的\texttt{field}指向\texttt{from}。
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=16cm]{images/runtime/http-network-json.png}
+\caption{请求状态与JSON响应对照（教学查看器，调用配套教学接口）}
+\label{fig:ch04-http-observe}
+\end{figure}
+
 \subsection{页面的四种状态：加载、空数据、错误与过期}
 
 清单\ref{lst:ch04-r1-load}只处理了“成功”这一条路。真实页面在任一时刻只能处于一种状态：正在加载、有数据、没有数据、出了错。把状态显式写成一个对象，渲染函数只看状态不看网络，是后面 Vue 组件与 Pinia 仓库的共同做法。表\ref{tab:ch04-r1-states}列出四种状态、用教学接口触发它的方式（参数含义见表\ref{tab:api-teach-faults}）和页面应有的表现；已失效的请求即使返回结果，也应丢弃其响应并保持当前状态，处理方法见 4.5.4 节。
@@ -1235,13 +1253,22 @@ export function messageFor(error) {
 }
 \end{lstlisting}
 
+图\ref{fig:ch04-state-results}给出同一状态渲染函数的四种运行结果。204表示对象尚无观测，404表示对象不存在；两者分别进入空状态与错误状态。
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=16cm]{images/runtime/s2-four-states.png}
+\caption{加载、有数据、空数据与错误状态（教学查看器，调用S2模块）}
+\label{fig:ch04-state-results}
+\end{figure}
+
 \subsection{故障单元：切换测点时旧数据覆盖新数据}
 
 \paragraph{现象}把清单\ref{lst:ch04-r1-load}改成“点击列表中的对象就读取它的最新观测”后，做如下操作：先点击 \texttt{DAM-A-PZ-07}，并让教学接口对它延迟 3 秒（请求地址加\texttt{?teach=delay:3000}）；不等结果出来，立即点击 \texttt{DAM-A-WL-01}。页面先正确显示“案例库水位01：166.837 m”，约 3 秒后却变成“案例渗压07：185.091 kPa”——值班员看着水位计的标题，读到的是渗压计的数。
 
 \paragraph{时序}图\ref{fig:ch04-r1-race}将两次请求及页面结果放在同一时间轴上。第二次请求先返回，第一次请求随后到达。比较下方两行：无序号校验时，旧响应覆盖当前页面；校验最新请求序号后，迟到响应被丢弃，页面继续显示当前选择的对象。
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[x=1cm,y=1cm,>=Stealth,font=\small,line cap=round]
   \path[use as bounding box] (0,0) rectangle (14.8,6.25);
@@ -1335,6 +1362,15 @@ export function bindList(listEl, outputEl, assets) {
 \end{table}
 
 \paragraph{延伸}同一个模式在本书后面反复出现：4.7 节 Pinia 仓库的\texttt{loadReadings}要加同样的序号校验，否则切换测点时曲线会闪回；7.4 节切换三维对象时，详情面板也不能显示上一个对象的观测；第8章预警确认属于写操作，取消请求并不能撤销服务端已完成的确认，那里要靠幂等键而不是序号。
+
+图\ref{fig:ch04-switch-results}记录先选渗压点、再选水位点的请求次序。旧请求取消后，页面保持最后选中的水位对象；核对过程记录与最终文字，才能判断取消逻辑是否生效。
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=16cm]{images/runtime/s2-switch-trace.png}
+\caption{切换测点后的取消记录与最终页面（教学查看器，调用S2模块）}
+\label{fig:ch04-switch-results}
+\end{figure}
 
 \subsection{request.js：JWT、401 与超时的统一入口}
 
@@ -1431,7 +1467,7 @@ export default defineConfig(({ mode }) => {
 
 受保护的测站列表需要前端携带令牌，并由后端依次完成验签和权限检查。第5章的登录控制器返回访问令牌，令牌至少包含主体、发行者、有效期、令牌类型和权限代码；前端登录页保存访问令牌，\texttt{request.js}在每次受保护请求中注入 Bearer 头，后端的 \texttt{SecurityFilterChain} 和 JWT 过滤器验签后把主体放入安全上下文，控制器再依据方法权限决定是否执行。图\ref{fig:ch04-jwt-integration}把这条链路与失败分支并列画出，调试时可逐段定位是凭据错误、令牌过期、权限不足还是网络转发问题。
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[>=Stealth,thick,node distance=0.55cm and 0.45cm]
   \tikzset{authstage/.style={draw=Primary,rounded corners=2pt,minimum width=2.2cm,minimum height=.75cm,align=center,fill=PrimaryLight,text=PrimaryDark,font=\scriptsize},
@@ -1640,7 +1676,7 @@ const status = computed(() => props.value >= 165.5 ? 'warning' : 'normal')
 
 组件在创建、挂载、更新和卸载阶段提供生命周期钩子。Vue 3中卸载阶段使用\texttt{beforeUnmount}/\texttt{unmounted}或组合式API的\texttt{onBeforeUnmount}/\texttt{onUnmounted}，不使用Vue 2的\texttt{beforeDestroy}/\texttt{destroyed}。图\ref{fig:vue-lifecycle}把这些钩子按创建、挂载、更新、卸载四个阶段串起来。需要在组件内启动的定时刷新、消息订阅和三维场景实例，都应在挂载阶段建立、在卸载阶段释放；忘记释放是监测页面反复切换之后内存持续增长的最常见原因。
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[>=Stealth,node distance=0.6cm]
   \tikzset{life/.style={draw=Primary,rounded corners=2pt,fill=PrimaryLight,
@@ -1756,7 +1792,7 @@ provide('fallbackUnit', readonly(fallbackUnit));
 
 图\ref{fig:ch04-a46-lifecycle-cleanup}把“建立资源—使用资源—释放资源”与组件钩子对应起来。离开测站页面时，即使网络回调稍后到达，也不应再修改已卸载的组件；取消信号和布尔标记可以共同防止竞态。对于定时器，清理函数必须保存创建时返回的句柄，不能重新调用一个相同参数的\texttt{setInterval}来“猜测”旧句柄。
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[>=Stealth,thick,node distance=0.85cm and 1.0cm]
   \tikzset{lifeitem/.style={draw=Primary,rounded corners=2pt,minimum width=3.1cm,minimum height=.7cm,align=center,fill=PrimaryLight,text=PrimaryDark,font=\small}}
@@ -2431,8 +2467,8 @@ SPA 的深链接是部署验收的重点。浏览器直接打开\texttt{/assets/
 
 \section*{思考题与练习题}
 
+\paragraph{客观题}
 \begin{enumerate}
-\item[\textbf{客观题}]
 \item HTML的主要职责是（\quad）。A. 表达内容结构与语义\quad B. 管理数据库\quad C. 编译Java代码\quad D. 配置消息队列
 \item CSS Grid最适合（\quad）。A. 二维仪表盘布局\quad B. 发送HTTP请求\quad C. 解析JSON\quad D. 定义路由守卫
 \item Promise进入fulfilled状态后仍可再次变为rejected。（判断：对／错）
@@ -2440,7 +2476,10 @@ SPA 的深链接是部署验收的重点。浏览器直接打开\texttt{/assets/
 \item Pinia最适合保存（\quad）。A. 跨页面共享的当前测站\quad B. 单个按钮的悬停颜色\quad C. HTML标题级别\quad D. CSS媒体查询
 \item 使用动态\texttt{import()}可以支持页面级代码分割。（判断：对／错）
 
-\item[\textbf{简答与设计题}]
+\end{enumerate}
+
+\paragraph{简答与设计题}
+\begin{enumerate}[resume]
 \item 说明DOM树、CSSOM树、JavaScript引擎与渲染过程之间的关系。
 \item 为水位、流量、雨量三类监测卡片设计语义化HTML和响应式Grid布局。
 \item 分别用Promise链和async/await实现测站最新水位加载，并处理HTTP错误。

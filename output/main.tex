@@ -1,5 +1,5 @@
 
-\documentclass[11pt,a4paper,openright]{book}
+\documentclass[11pt,a4paper,openany]{book}
 
 % ══════════════════════════════════════════
 % 基础与中文支持
@@ -45,16 +45,17 @@
 % ══════════════════════════════════════════
 \usepackage[
   a4paper,
-  inner=2.8cm, outer=2.2cm,
-  top=2.5cm, bottom=2.5cm,
+  inner=2.5cm, outer=2.0cm,
+  top=2.2cm, bottom=2.2cm,
   headheight=22pt,
   headsep=0.8cm,
   footskip=1.2cm
 ]{geometry}
 
-% 行间距：中文教材推荐1.5倍
+% 正文11pt，行距与标题留白按R10-04整书试排确定
 \usepackage{setspace}
-\setstretch{1.45}
+\setstretch{1.23}
+\raggedbottom
 
 % 排版微调
 \usepackage{microtype}
@@ -74,6 +75,22 @@
 % 图片与浮动
 \usepackage{float}
 \usepackage[section]{placeins}
+\renewcommand{\topfraction}{.88}
+\renewcommand{\bottomfraction}{.72}
+\renewcommand{\textfraction}{.08}
+\renewcommand{\floatpagefraction}{.72}
+\setcounter{topnumber}{3}
+\setcounter{bottomnumber}{2}
+\setcounter{totalnumber}{4}
+\setlength{\textfloatsep}{10pt plus 2pt minus 2pt}
+\setlength{\intextsep}{10pt plus 2pt minus 2pt}
+\setlength{\floatsep}{8pt plus 2pt minus 2pt}
+% 浮动页靠上排，图间保持固定留白，避免短图被拉到页面两端。
+\makeatletter
+\setlength{\@fptop}{0pt}
+\setlength{\@fpsep}{12pt}
+\setlength{\@fpbot}{0pt plus 1fil}
+\makeatother
 \usepackage{subcaption}
 
 % ══════════════════════════════════════════
@@ -255,7 +272,7 @@
   admonition/.style={
     enhanced,
     breakable,
-    left=10pt, right=10pt, top=8pt, bottom=8pt,
+    left=10pt, right=10pt, top=5pt, bottom=5pt,
     boxrule=0pt,
     leftrule=3.5pt,
     arc=3pt,
@@ -304,7 +321,7 @@
 \usepackage{tocloft}
 \usepackage{enumitem}
 \usepackage[labelfont=bf,font=small]{caption}
-\setcounter{tocdepth}{2}
+\setcounter{tocdepth}{1}
 
 % 章编号在正文、页眉和引用中采用同一体例。
 \newcommand{\BookChapterLabel}{第\thechapter 章}
@@ -323,28 +340,28 @@
   {0pt}
   {\Huge\bfseries\sffamily\color{PrimaryDark}}
   [\vspace{0.5ex}{\color{Primary}\rule{\textwidth}{1.5pt}}]
-\titlespacing*{\chapter}{0pt}{-10pt}{30pt}
+\titlespacing*{\chapter}{0pt}{-10pt}{18pt}
 
 % ── 节标题：编号色块 + 标题 ──
 \titleformat{\section}
   {\bfseries\Large\sffamily\color{PrimaryDark}}
   {\colorbox{PrimaryLight}{\makebox[2.2em][c]{\color{Primary}\thesection}}}
   {0.7em}{}
-\titlespacing*{\section}{0pt}{2.5ex plus 1ex minus .2ex}{1.2ex plus .2ex}
+\titlespacing*{\section}{0pt}{1.8ex plus .4ex minus .2ex}{.8ex plus .2ex}
 
 % ── 小节标题 ──
 \titleformat{\subsection}
   {\bfseries\large\sffamily\color{Primary}}
   {\thesubsection}{0.6em}{}
-\titlespacing*{\subsection}{0pt}{2ex plus 0.8ex minus .2ex}{0.8ex plus .2ex}
+\titlespacing*{\subsection}{0pt}{1.4ex plus .4ex minus .2ex}{.6ex plus .2ex}
 
 \titleformat{\subsubsection}{\bfseries\normalsize\sffamily}{\thesubsubsection}{0.5em}{}
 
 % ── paragraph：用于不编号的小标题 ──
 \titleformat{\paragraph}[hang]{\bfseries\normalsize\sffamily\color{TextGray}}{}{0em}{}
-\titlespacing*{\paragraph}{0pt}{1.8ex plus 0.5ex minus .2ex}{0.5em}
+\titlespacing*{\paragraph}{0pt}{1.1ex plus .3ex minus .2ex}{.35em}
 
-% ── 目录美化 ──
+% ── 目录美化：纸面列到节，PDF书签保留小节 ──
 \renewcommand{\cftdotsep}{2}
 \setlength{\cftbeforechapskip}{10pt}
 \setlength{\cftbeforesecskip}{3pt}
@@ -358,7 +375,7 @@
 
 % ── 列表与段落 ──
 \setlength{\parindent}{2em}
-\setlength{\parskip}{0.4ex plus 0.2ex minus 0.1ex}
+\setlength{\parskip}{0.2ex plus 0.1ex minus 0.1ex}
 \setlist{nosep, topsep=0.3ex, itemsep=0.2ex}
 \setlist[itemize]{leftmargin=2em, label=\textcolor{Primary}{\textbullet}}
 \setlist[enumerate]{leftmargin=2em}
@@ -411,6 +428,7 @@
   citecolor=PrimaryDark,
   urlcolor=Accent,
   pdfborder={0 0 0},
+  bookmarksdepth=2,
   pdftitle={智慧水利平台架构与开发},
   pdfauthor={编者},
   pdfsubject={水利工程专业教材},
@@ -489,21 +507,21 @@
 \noindent\begin{minipage}{0.9\textwidth}
 {\sffamily\bfseries\color{PrimaryDark}版权与商标声明}\par\medskip
 \small
-51WIM 及 51WORLD 为北京五一视界数字孪生科技股份有限公司的商标或注册商标，本书仅作技术说明性使用。第8.5节6幅产品界面截图经该公司书面授权刊出，仅限本书纸质版与出版社发行的电子版使用；其余图示均为按功能链路重新绘制的教学示意图。
+51WIM 及 51WORLD 为北京五一视界数字孪生科技股份有限公司的商标或注册商标，本书仅作技术说明性使用。第8.5节6幅产品界面截图经该公司书面授权刊出，仅限本书纸质版与出版社发行的电子版使用。书中另有原创原理图、AI生成教学渲染与配套程序运行图，图注分别说明来源；生成场景用于教学识读，不作为现场照片或工程测量成果。
 \end{minipage}
 \vspace*{1.2cm}
 \cleardoublepage
 
 % 前言
 \input{chapters/preface.tex}
-\cleardoublepage
+\clearpage
 
 % 目录
 {
 \pagestyle{plain}
 \tableofcontents
 }
-\cleardoublepage
+\clearpage
 
 % ══════════════════════════════════════════
 % 正文

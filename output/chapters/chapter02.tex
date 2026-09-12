@@ -74,7 +74,7 @@
 
 瀑布模型按需求、设计、实现、验证和运行依次推进，阶段评审和文档边界清楚。它适用于需求相对稳定、合规审查严格、软硬件接口明确的部分，但反馈较晚，早期误解可能在后期放大。图\ref{fig:waterfall-model}中那条从“验证”折回“设计”的虚线，正是为缓解这一点而加的评审反馈；但它只跨越一个阶段，如果误解发生在需求环节，回退距离仍然很长。
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[node distance=6mm and 7mm,
   model/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=2.0cm,
@@ -98,7 +98,7 @@
 
 原型用于澄清用户难以直接表达的交互、报表或空间展示需求。团队快速构造可评估版本，收集反馈后修订需求。原型必须注明是探索性还是演化性；探索性原型不应在缺少架构、安全和测试的情况下直接上线。图\ref{fig:prototype-model}把这一过程画成小循环：构造、演示、收集反馈、修订需求，若干轮之后才进入正式开发。循环次数与退出条件应当事先约定，否则原型容易变成没有验收标准的长期返工。
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[node distance=6mm and 8mm,
   model/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=2.2cm,
@@ -122,7 +122,7 @@
 
 增量模型把能力分成若干可运行交付，例如先交付测点查询，再交付质量标记、预警和工单。迭代模型允许同一能力反复改进。两者常结合使用：每个增量经过需求、设计、实现和验证，小步获得真实反馈。图\ref{fig:incremental-model}中，每个增量都经历需求到验证的完整过程，并形成能够独立运行和验收的功能。例如，测点查询增量应同时具备查询入口、接口处理、结果显示与失败提示。
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[node distance=5mm,
   inc/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=10cm,
@@ -143,7 +143,7 @@
 
 螺旋模型的每一轮围绕一个可度量的风险问题，安排分析、试验与评审。第一象限确定本轮目标、约束、候选方案和成功判据；第二象限列出风险并估计发生概率、影响范围和剩余不确定性，决定是否需要原型、仿真或现场试验；第三象限用最小可行实现验证方案，记录测试输入、环境和失败原因；第四象限由业务代表、专业分析员和运维员共同评审证据，决定进入下一轮、调整范围还是停止该方案。每一轮结束都要留下风险清单、决策记录和下一轮入口条件，不能只留下“已完成”的进度状态。
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[node distance=10mm and 13mm,
   quad/.style={draw=Primary,rounded corners,fill=PrimaryLight,align=center,
@@ -190,7 +190,7 @@ Sprint和需求基线共存的关键是分层管理。基线约束系统边界�
 
 DevOps把开发、测试、发布和运行看作一条有反馈的交付链。对水利平台而言，持续集成至少要完成代码编译、单元测试、接口契约检查、数据库迁移演练和安全扫描；持续交付还要生成可追踪的制品、记录配置版本、执行部署前审批，并提供可验证的回滚路径。自动化检查随每次变更执行，保存制品与测试结果的关联。出现问题时，可以沿记录定位到具体提交、配置和数据迁移。
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[node distance=6mm and 7mm,
   devstep/.style={draw=Primary,rounded corners,fill=PrimaryLight,align=center,
@@ -495,27 +495,25 @@ Won't & 本期自动下发闸门控制 & 控制安全论证不在当前范围 \\
 
 绘制流程图之前先统一符号，否则同一个菱形在不同人笔下可能表示条件判断，也可能表示人工审核环节，图就失去了作为交流依据的价值。表\ref{tab:system-flow-symbols}给出本书采用的符号约定。
 
-\begin{longtable}{p{2.5cm}p{3.2cm}p{6.6cm}}
-\caption{系统流程图常用符号}\label{tab:system-flow-symbols}\\
+\begin{table}[htbp]
+\centering
+\caption{系统流程图常用符号}\label{tab:system-flow-symbols}
+\begin{tabular}{p{2.5cm}p{3.2cm}p{6.6cm}}
 \toprule
 符号 & 名称 & 用途 \\
 \midrule
-\endfirsthead
-\toprule
-符号 & 名称 & 用途 \\
-\midrule
-\endhead
 圆角矩形 & 开始/结束 & 表示流程入口、正常结束或受控终止 \\
 矩形 & 处理 & 表示申报、校验、审批、生成任务等活动 \\
 菱形 & 判断 & 表示资料是否完整、方案是否批准等条件 \\
 平行四边形 & 输入/输出 & 表示表单输入、报告输出或外部消息 \\
 箭头 & 流向 & 表示业务执行顺序；回退箭头应标明条件 \\
 \bottomrule
-\end{longtable}
+\end{tabular}
+\end{table}
 
 按上述符号约定绘制的用水计划流程见图\ref{fig:order-process-flowchart}。图中两条回退箭头都标注了触发条件，每条回退路径都说明触发条件和目标节点，负责处理异常的岗位才能据此接手。若只有回退箭头而没有条件，应返回业务规程或访谈记录补充依据。
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[node distance=6mm and 12mm,
   term/.style={draw=Primary,rounded corners=8pt,fill=PrimaryLight,minimum width=1.9cm,
@@ -556,7 +554,7 @@ Won't & 本期自动下发闸门控制 & 控制安全论证不在当前范围 \\
 
 数据流图（DFD）只表达数据如何在外部实体、处理和数据存储之间流动。上下文图把系统视为一个处理，先确定边界；再逐层分解，但父图输入输出必须与子图保持平衡。图\ref{fig:dfd-level-zero}是本例的上下文图：整个系统被画成单个处理，围绕它的外部实体确定了系统边界，后续任何一层分解都不能凭空引入图中没有出现的外部实体。
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[node distance=12mm and 23mm,
   entity/.style={draw=Primary,fill=PrimaryLight,minimum width=2.3cm,minimum height=.8cm,align=center},
@@ -578,7 +576,7 @@ Won't & 本期自动下发闸门控制 & 控制安全论证不在当前范围 \\
 
 把上下文图中的单个处理展开，就得到图\ref{fig:dfd-level-one}的一级数据流图。检查分解是否正确的办法是做平衡核对：一级图中所有跨越系统边界的数据流，必须与上下文图中进出系统的数据流逐条对应，既不能多出一条，也不能漏掉一条。
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[node distance=5mm and 3mm,
   entity/.style={draw=Primary,fill=PrimaryLight,minimum width=1.5cm,minimum height=.65cm,align=center,font=\scriptsize},
@@ -618,7 +616,7 @@ Won't & 本期自动下发闸门控制 & 控制安全论证不在当前范围 \\
 
 绘制二级图时要做三项平衡检查。第一，边界平衡：父图的每条输入和输出在子图中都必须找到对应流；第二，处理守恒：每个处理不能凭空产生业务数据，也不能吞掉没有去向的输入；第三，存储责任：读取和写入哪个数据存储要明确，不能用一条双向箭头掩盖读写时序。若子图需要引入“外部信用评分”一类新实体，应先回到上下文图讨论系统边界，而不是直接画进二级图。
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[node distance=8mm and 7mm,
   process/.style={ellipse,draw=Primary,fill=PrimaryLight,minimum width=2.25cm,minimum height=.75cm,align=center,font=\small},
@@ -678,7 +676,7 @@ version & 整数 & — & 每次修订递增，批准后不可覆盖 \\
 
 数据流图回答“数据如何移动”，实体关系模型回答“数据对象如何长期保存以及彼此如何关联”。案例灌区至少要区分用水户、地块、渠道、用水计划、配水任务和执行回执；一个用水户可以拥有多个地块，一个计划可以拆成多个任务，一个任务可以产生多条带时间的回执。图\ref{fig:ch02-er-water-plan}用主键、外键和基数表达这些关系，图中英文实体名分别对应“用水户、地块、用水计划、渠道、配水任务、执行回执”。实体名称对应业务对象，属性名称对应数据字典，二者不一致时应先修订概念模型再写表结构。
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[node distance=9mm and 12mm,
   ent/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=2.5cm,minimum height=.85cm,align=center,font=\small\CJKfamily{zhsong}},
@@ -723,7 +721,7 @@ version & 整数 & — & 每次修订递增，批准后不可覆盖 \\
 
 实体关系描述“有什么”，状态转换描述“对象在什么事件下如何变化”。用水计划至少经历草稿、已提交、待校核、已批准、执行中、已完成和已退回等状态；每条转换都应标出触发事件、前置条件和操作者。状态图能暴露两个常见遗漏：退回后是否允许修改并再次提交，以及执行中发现水量偏差后回到哪个受控状态。图\ref{fig:ch02-plan-state}把正常路径、退回路径和撤回边界画在一起，读者可以据此编写状态转换测试。
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[node distance=9mm and 9mm,
   state/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=2.0cm,minimum height=.62cm,align=center,font=\small}]
@@ -774,7 +772,7 @@ version & 整数 & — & 每次修订递增，批准后不可覆盖 \\
 
 把同一规则改画成判定树，可以帮助审批人按固定顺序阅读。图\ref{fig:ch02-approval-tree}先判断资料完整性，再判断水量是否满足；只有水量满足时才继续判断渠道是否可用。这样，规则2的渠道状态不会被错误地当作必填条件，树上的每个叶节点都能对应表中的一个动作。
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[node distance=7mm and 12mm,
   decision/.style={draw=Accent,diamond,aspect=2.0,fill=Accent!10,align=center,inner sep=1pt,font=\scriptsize},
@@ -919,7 +917,7 @@ SRS中的功能需求最好采用“条件—动作—结果—证据”的句�
 
 需求基线为后续变更提供比较依据，变更流程则规定申请入口、影响分析、批准和回退方式。任何变更申请至少包含提出人、业务理由、受影响需求、紧急程度、期望版本和验证证据；涉及水量规则、权限、数据结构或设备接口时，还要标注安全与合规影响。图\ref{fig:ch02-change-control}把申请、分析、决策、实施和验证连成闭环，拒绝或暂缓的申请也保留记录，便于以后复盘。
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[node distance=7mm and 9mm,
   ctrlstep/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=2.25cm,minimum height=.68cm,align=center,font=\small},

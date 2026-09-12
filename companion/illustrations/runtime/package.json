@@ -1,0 +1,12 @@
+{
+  "name": "water-platform-runtime-illustrations",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Reproducible screenshots of the textbook companion runtime",
+  "scripts": {
+    "capture": "node capture.cjs"
+  },
+  "devDependencies": {
+    "playwright": "1.62.1"
+  }
+}

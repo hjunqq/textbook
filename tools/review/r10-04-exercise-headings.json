@@ -1,0 +1,140 @@
+{
+  "package": "R10-04",
+  "date": "2026-09-12",
+  "change": "第4–8章章末练习的自定义item分组标签改为paragraph标题；后续enumerate使用resume保持连续编号",
+  "compiled": false,
+  "records": [
+    {
+      "file": "output/chapters/chapter04.tex",
+      "groups": [
+        {
+          "title": "客观题",
+          "questions_before": 6,
+          "questions_after": 6
+        },
+        {
+          "title": "简答与设计题",
+          "questions_before": 5,
+          "questions_after": 5
+        }
+      ],
+      "questions_before": 11,
+      "questions_after": 11,
+      "question_text_sha256_before": "cd40e79c8494ac60919eece9e7679221b74a5b153fef381f5e7588015ef260ed",
+      "question_text_sha256_after": "cd40e79c8494ac60919eece9e7679221b74a5b153fef381f5e7588015ef260ed",
+      "all_content_tokens_preserved": true,
+      "non_exercise_content_unchanged": true,
+      "resume_lists": 1
+    },
+    {
+      "file": "output/chapters/chapter05.tex",
+      "groups": [
+        {
+          "title": "客观题",
+          "questions_before": 6,
+          "questions_after": 6
+        },
+        {
+          "title": "简答与设计题",
+          "questions_before": 5,
+          "questions_after": 5
+        },
+        {
+          "title": "实践题",
+          "questions_before": 1,
+          "questions_after": 1
+        }
+      ],
+      "questions_before": 12,
+      "questions_after": 12,
+      "question_text_sha256_before": "eeb306c19aea9e062f959f35840dce2fda4405663329b20e143a645547efcc7b",
+      "question_text_sha256_after": "eeb306c19aea9e062f959f35840dce2fda4405663329b20e143a645547efcc7b",
+      "all_content_tokens_preserved": true,
+      "non_exercise_content_unchanged": true,
+      "resume_lists": 2
+    },
+    {
+      "file": "output/chapters/chapter06.tex",
+      "groups": [
+        {
+          "title": "客观题",
+          "questions_before": 6,
+          "questions_after": 6
+        },
+        {
+          "title": "简答与设计题",
+          "questions_before": 8,
+          "questions_after": 8
+        },
+        {
+          "title": "实践题",
+          "questions_before": 3,
+          "questions_after": 3
+        }
+      ],
+      "questions_before": 17,
+      "questions_after": 17,
+      "question_text_sha256_before": "3bfaef170fc03ebc1f4214218ccc5ba39f56318166c15995b802fbe89ac08c94",
+      "question_text_sha256_after": "3bfaef170fc03ebc1f4214218ccc5ba39f56318166c15995b802fbe89ac08c94",
+      "all_content_tokens_preserved": true,
+      "non_exercise_content_unchanged": true,
+      "resume_lists": 2
+    },
+    {
+      "file": "output/chapters/chapter07.tex",
+      "groups": [
+        {
+          "title": "客观题",
+          "questions_before": 5,
+          "questions_after": 5
+        },
+        {
+          "title": "简答与设计题",
+          "questions_before": 5,
+          "questions_after": 5
+        },
+        {
+          "title": "实践题",
+          "questions_before": 5,
+          "questions_after": 5
+        }
+      ],
+      "questions_before": 15,
+      "questions_after": 15,
+      "question_text_sha256_before": "8e1f96e85dfa677ac4a996925d5f4066265a40cd476bc1d4d2a02084e0329a1c",
+      "question_text_sha256_after": "8e1f96e85dfa677ac4a996925d5f4066265a40cd476bc1d4d2a02084e0329a1c",
+      "all_content_tokens_preserved": true,
+      "non_exercise_content_unchanged": true,
+      "resume_lists": 2
+    },
+    {
+      "file": "output/chapters/chapter08.tex",
+      "groups": [
+        {
+          "title": "客观题",
+          "questions_before": 5,
+          "questions_after": 5
+        },
+        {
+          "title": "简答与设计题",
+          "questions_before": 6,
+          "questions_after": 6
+        },
+        {
+          "title": "实践题",
+          "questions_before": 5,
+          "questions_after": 5
+        }
+      ],
+      "questions_before": 16,
+      "questions_after": 16,
+      "question_text_sha256_before": "a12e0d0f0765717aff8a39879bac70c2b29ff0774c13f6a15c82cd176c427352",
+      "question_text_sha256_after": "a12e0d0f0765717aff8a39879bac70c2b29ff0774c13f6a15c82cd176c427352",
+      "all_content_tokens_preserved": true,
+      "non_exercise_content_unchanged": true,
+      "resume_lists": 2
+    }
+  ],
+  "total_questions_before": 71,
+  "total_questions_after": 71
+}

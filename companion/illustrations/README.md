@@ -2,6 +2,8 @@
 
 本组图用于《智慧水利平台架构与开发》的课堂导入与读图练习。
 
+R10-04新增入书素材：工程识读渲染见 `../../output/images/generated/`；真实程序运行截图见 `../../output/images/runtime/`，采集与复现见本目录 `runtime/README.md`。下列场景插画是上一包保留的补充导学材料。
+
 - reservoir-monitoring-overview.png：1536 × 1024 场景插画，展示代表性水位、雨量、位移、渗压测点，采集网关与监测平台。
 - reservoir-monitoring-study.pdf：可打印的导学页，含读图顺序、缺测情境与自测要点。
 - reservoir-monitoring-study.tex：导学页的排版源，使用 XeLaTeX 编译。

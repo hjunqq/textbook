@@ -1,0 +1,30 @@
+[
+  {
+    "name": "compact",
+    "stretch": "1.28",
+    "inner": "2.5",
+    "outer": "2.0",
+    "top": "2.2",
+    "bottom": "2.2",
+    "paragraph": "1.1ex",
+    "exit_code": 0,
+    "pages": 415,
+    "overfull": 4,
+    "errors": 0,
+    "path": "E:\\2026\\教材\\智慧水利平台架构与开发\\temp\\r10-04-layout\\compact\\main.pdf"
+  },
+  {
+    "name": "moderate",
+    "stretch": "1.33",
+    "inner": "2.6",
+    "outer": "2.1",
+    "top": "2.3",
+    "bottom": "2.3",
+    "paragraph": "1.3ex",
+    "exit_code": 0,
+    "pages": 429,
+    "overfull": 4,
+    "errors": 0,
+    "path": "E:\\2026\\教材\\智慧水利平台架构与开发\\temp\\r10-04-layout\\moderate\\main.pdf"
+  }
+]

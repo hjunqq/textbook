@@ -51,7 +51,7 @@
 
 质量码应先于颜色映射。质量码本身只有 valid、suspect、missing 三个取值：有效数据可进入曲线和状态计算，可疑数据保留但降低视觉权重并提示复核，缺测不连接为连续曲线。人工修订另设处理标记，界面显示修订标识；设备故障记录在设备状态中，故障期间的数据不得参与风险判定。颜色只表达业务状态，不能掩盖数据质量。图\ref{fig:data-visualization-process}把这条顺序画成处理链：接入、质检、时间对齐、降采样、视觉映射、渲染，质量判定位于颜色映射之前。未经质检便映射颜色，可能把可疑值显示为正常状态。
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[node distance=8mm and 4mm,
   dataflow/.style={draw=Primary,rounded corners,fill=PrimaryLight,align=center,
@@ -88,7 +88,7 @@
 
 清单\ref{lst:ch07-lttb}把分桶、下一桶均值和最大面积选择写成可运行的数组函数。图\ref{fig:lttb-principle}用一个桶画出$P_{\mathrm{prev}}$、两个候选点和$\overline{P}_{C}$，半透明三角形表示被选候选点对应的面积；桶边界表示算法的遍历范围，桶内相邻点的实际时间间隔可不同。
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[x=.9cm,y=.75cm]
 \draw[->,gray] (0,0)--(11,0) node[right]{时间};
@@ -253,7 +253,7 @@ export function windowExample() {
 console.log(windowExample().revisions.length); // 输出 1：历史回放中一次过迟事件
 \end{lstlisting}
 
-清单\ref{lst:ch07-event-time-window}对应配套\texttt{src/lesson71/event-window.js}，从前端目录执行\texttt{node src/lesson71/event-window.js}输出1：第二条事件早于水印，进入修订队列。把接收日期改成当前日期，历史事件仍按原时间回放；使用接收墙钟作为水印则会把整批历史数据误判为迟到。该演示只有一个事件流，修订队列供课堂检查；工程实现另需持久化、去重、异常未来时间检查与多流空闲处理。清单中的25\,h窗口来自“300个水位点×5\,min”的教学约定。计数窗口对应的时长随采样周期变化：渗压每1\,h采样时，300点约等于12.5天；若需求是“最近24小时”，就必须按时间戳裁剪，而不能只写\texttt{slice(-300)}。接口应同时声明\texttt{windowType=count|duration}、窗口长度、时区和迟到容忍度，前端据此在标题中显示“300点（约25小时）”或“24小时”。
+清单\ref{lst:ch07-event-time-window}对应配套\texttt{src/lesson71/event-window.js}，从前端目录执行\texttt{node\allowbreak\ src/lesson71/\allowbreak event-window.js}输出1：第二条事件早于水印，进入修订队列。把接收日期改成当前日期，历史事件仍按原时间回放；使用接收墙钟作为水印则会把整批历史数据误判为迟到。该演示只有一个事件流，修订队列供课堂检查；工程实现另需持久化、去重、异常未来时间检查与多流空闲处理。清单中的25\,h窗口来自“300个水位点×5\,min”的教学约定。计数窗口对应的时长随采样周期变化：渗压每1\,h采样时，300点约等于12.5天；若需求是“最近24小时”，就必须按时间戳裁剪，而不能只写\texttt{slice(-300)}。接口应同时声明\texttt{windowType=count|duration}、窗口长度、时区和迟到容忍度，前端据此在标题中显示“300点（约25小时）”或“24小时”。
 
 跨日和夏令时会使本地时间的“当天”不等于固定的24小时。平台内部统一使用带时区的ISO 8601时间，存储和比较使用UTC毫秒；界面按照工程所在时区格式化，并把时区名称写在坐标轴或导出文件头。日统计先按本地日历边界切桶，再将桶边界转换成UTC查询，不能直接对UTC的零点切桶后声称那是当地日。遇到闰秒或设备时钟回拨，应保留原始字符串和解析状态，并用单调递增的接收序号辅助排序，不能静默丢弃重复的本地时间。
 
@@ -376,6 +376,15 @@ export function inspectReading(r, rules, previous) {
 
 质量结果还要进入统计口径。日均值、最大值和超阈次数应分别给出“仅valid”“valid+suspect”和“全部到达记录”三种选择，默认统计只使用valid；suspect值可以在趋势图中显示，却不能悄悄混入风险评分。报表页要显示有效率、缺测率、可疑率、迟到率和修订次数，并把分母写清楚。例如某天有288个5\,min格网，若其中24格missing，完整率是264/288，而不是用264个有效点的平均值冒充完整率。跨测项比较时还要统一时间格网和过滤条件，否则水位的288个点与渗压的24个点会产生看似可比、实则分母不同的曲线。质量指标本身也应带时间窗和规则版本，方便在规则调整后复算历史报表。
 
+图\ref{fig:ch07-gap-results}使用配套数据中2026年7月1日的库水位记录。03:05的质量码为\texttt{missing}，值映射为\texttt{null}；该时刻仍占据横轴位置，曲线在两侧断开。
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=16cm]{images/runtime/s5-missing-gap.png}
+\caption{缺测记录与曲线断线逐项核对（教学查看器，调用S5曲线模块）}
+\label{fig:ch07-gap-results}
+\end{figure}
+
 \subsection{多源异构数据的标准化与融合}
 
 同一个测点可能同时来自串口网关、HTTP适配器和人工录入，字段命名、单位、坐标和精度都可能不同。标准化流程应先建立来源适配器，再转换为统一展示记录，最后才进行融合；不能把三个来源的数组按位置拼在一起。最小标准化契约包括\texttt{assetId}、\texttt{occurredAt}、\texttt{ingestTime}、\texttt{value}、\texttt{unit}、\texttt{quality}、\texttt{source}和\texttt{schemaVersion}。单位转换要写出换算因子和偏置，坐标转换要写出源坐标系、目标坐标系与轴序，编码映射要保留源系统的原始编号。
@@ -441,7 +450,7 @@ console.log(inspectReading({...normalized, value: Infinity}, {unit: 'kPa'}).issu
 
 图\ref{fig:ch07-time-quality-pipeline}把实时流和历史回放共用的处理边界画出来：来源适配器负责字段和单位，时间服务负责格网与水印，质量服务负责码值和问题，窗口服务保留原始与聚合序列，展示层最后才决定颜色、断线和交互。任何一层都不能用“显示方便”作为理由改写原始观测。
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[node distance=5mm and 5mm,
   flowstep/.style={draw=Primary,rounded corners,fill=PrimaryLight,align=center,
@@ -519,7 +528,7 @@ console.log(inspectReading({...normalized, value: Infinity}, {unit: 'kPa'}).issu
 
 双轴图需要特别谨慎。把降雨量和水位放在同一张图上可以节省空间，但左右坐标轴若分别选择不同的起点、比例或时间聚合，视觉上的“同步”可能只是坐标变换造成的假象。双轴图必须在图例和轴标题中写出单位、范围、采样周期和数据质量，并在正文或提示中说明两条曲线是否具有因果关系。若目标是比较雨量过程与水位响应，建议保留原始时间戳，在雨量柱上方标出累计窗口，在水位线上标出洪峰和响应延迟；若目标是比较不同测点的绝对值，则应使用分面图或标准化后的同轴图，避免用两条轴掩盖量纲差异。
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[x=1cm,y=0.65cm]
 \draw[->,gray] (0,0)--(9,0) node[right]{时间};
@@ -570,7 +579,7 @@ chart.setOption({
 
 本书以Apache ECharts为图表主线。ECharts最初由百度团队开源，2018年捐赠给Apache软件基金会，2021年从孵化器毕业为顶级项目，现由ASF社区维护并持续发布版本\cite{apacheECharts}。选用版本时应查阅Apache发布记录和对应的API文档。图\ref{fig:chart-technology-selection}划出三者的职责边界：图表库负责二维统计视图，三维引擎负责场景与空间定位，中间由一个联动控制器负责转发选中对象与时间范围。把联动逻辑写进任意一侧，都会让两个库互相依赖，日后替换其中之一时牵连面很大。Three.js负责三维场景，图表与场景之间不直接互相调用，选中对象和时间范围一律由联动控制器转发。
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[node distance=8mm and 14mm,
   tech/.style={draw=Primary,rounded corners,fill=PrimaryLight,align=center,
@@ -720,7 +729,7 @@ function mountChart(container, option, subscribe) {
 
 清单\ref{lst:ch07-responsive-dispose}把“创建—订阅—调整—销毁”作为一个可测试的闭环。移动端旋转、侧栏收起和大屏窗口切换都会触发尺寸变化；如果只在\texttt{window.resize}上监听，容器在网格布局中改变宽度时可能没有回调。销毁函数应由Vue 3的\texttt{onUnmounted}调用，不能等待浏览器自动回收。
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[node distance=6mm and 9mm,
   life/.style={draw=Primary,rounded corners,fill=PrimaryLight,align=center,
@@ -846,6 +855,15 @@ function cancelLongPress() {
 
 短按时\texttt{pointerup}的处理器会先取消定时器，因此不会误触发长按；\texttt{pointercancel}覆盖系统手势或窗口切换导致的中断；\texttt{pointerdown}入口先清理旧定时器，保证多指按下时前一个定时器不会失控触发。
 
+图\ref{fig:ch07-scene-chart}展示S5阶段页中的对象与曲线。核对场景中的选择、状态栏的对象编码及纵轴单位，可以发现“选中了一个对象，却显示另一个对象曲线”的错配。
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=16cm]{images/runtime/s5-scene-chart.png}
+\caption{三维对象与时序曲线的联合展示（S5阶段页运行截图，显示放大）}
+\label{fig:ch07-scene-chart}
+\end{figure}
+
 \subsection{响应式与异常状态}
 
 大屏可同时呈现工程总览、关键曲线和告警列表；桌面端优先支持查询与研判；移动端优先显示待办、定位和确认。屏幕缩小时应调整信息优先级，而不是简单等比缩放全部组件。
@@ -858,7 +876,7 @@ function cancelLongPress() {
 
 地图表达中的“颜色”仍遵循视觉变量原则。连续高程或雨量使用顺序型色带，正负偏差使用以零为中心的发散型色带，设备类型使用定性色板。色带分级应在服务端或配置文件中固定，图例显示最小值、最大值、单位和时间窗；用户缩放时可以改变符号大小和标签密度，但不能悄悄改变数值分级。对于异常值和缺测，使用独立纹理、斜线或灰色遮罩，并在统计中保留缺测率，不能用低值颜色替代“没有数据”。
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[x=0.85cm,y=0.65cm]
 \draw[fill=PrimaryLight,draw=Primary] (0,0) rectangle (10,5);
@@ -978,7 +996,7 @@ function encodeReading(reading, task) {
 
 对打印和数据导出也要保留语义。黑白打印时，等级可以用不同线型、填充纹理和缩写文字区分；导出的表格把颜色转换为“等级”与“质量码”两列，并在表头给出解释；PDF 或图片的替代文本按“对象—数值—质量—预警—时间”顺序生成。这样，读者即使没有彩色屏幕、无法使用鼠标或通过屏幕阅读器访问，也能复核同一条监测记录。验收时应比较屏幕、打印和导出结果，检查等级、质量与时间能否被一致识别。
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[node distance=5mm and 7mm,
   enc/.style={draw=Primary,rounded corners,fill=PrimaryLight,align=center,
@@ -1157,7 +1175,7 @@ const arrow = displacementVector(0.012, 35, 1000);
 
 案例水库的28个观测点规模较小，可以逐点绘制；流域级场景可能包含成千上万个对象，需要LOD和聚合。近距离显示图标、方向和标签，中距离只显示状态符号，远距离按空间网格或工程对象聚合。LOD阈值应按屏幕占用和交互任务实测，不以固定“米数”套用所有相机。图\ref{fig:lod-cluster}把三档表达画在同一场景中：近处逐点带标签，中距离只保留状态符号，远距离按空间网格聚合并标注数量。切换阈值应当用实际屏幕占用和交互任务实测确定，图中标注的距离只是示意。
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[node distance=11mm,
   level/.style={draw=Primary,rounded corners,fill=PrimaryLight,minimum width=3.1cm,
@@ -1245,7 +1263,7 @@ class PointPicker {
 
 图\ref{fig:ray-picking}把这段计算画成一条射线：屏幕点击位置先换算到归一化设备坐标，再由相机位置和该方向构成世界空间中的射线，与场景对象求交后取距离相机最近的交点作为拾取结果。
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[x=1cm,y=1cm]
 \draw[fill=PrimaryLight,draw=Primary] (0,0) rectangle (3.2,2.4);
@@ -1364,22 +1382,28 @@ raycaster.params.Points.threshold = pickingRadiusWorld;
 
 \section*{思考题与练习题}
 
+\paragraph{客观题}
 \begin{enumerate}
-\item[\textbf{客观题}]
 \item 场景局部坐标的常用单位是像素。（判断：对／错）
 \item CGCS2000地理二维坐标系代码是（\quad）。A. 3857\quad B. 4326\quad C. 4490\quad D. 32650
 \item \texttt{Raycaster.params.Points.threshold}的量纲与（\quad）一致。A. 屏幕像素\quad B. 场景世界单位\quad C. 时间戳\quad D. 颜色值
 \item LTTB降采样结果可以替代原始数据计算统计报表。（判断：对／错）
 \item 实时ECharts序列在增量更新前应先建立初始配置。（判断：对／错）
 
-\item[\textbf{简答与设计题}]
+\end{enumerate}
+
+\paragraph{简答与设计题}
+\begin{enumerate}[resume]
 \item 说明质量码如何影响曲线连线、测点颜色和风险判定。
 \item 解释“地理坐标—高斯--克吕格平面坐标—局部场景坐标—屏幕坐标”的转换链。
 \item 比较折线图、柱状图、散点图和三维测点在水库监测中的适用任务。
 \item 说明为什么聚合半径和触控半径必须进行像素到世界长度的换算。
 \item 设计正常、关注、告警、离线和可疑数据的颜色、形状与文字组合。
 
-\item[\textbf{实践题}]
+\end{enumerate}
+
+\paragraph{实践题}
+\begin{enumerate}[resume]
 \item 使用配套仓库\texttt{companion/datasets/}提供的水位数据中截取1000条连续记录生成一张曲线，并在一课时内实现300点滑动窗口和缺测断线。
 \item 为案例水库28个观测点建立局部坐标映射，抽查5点并记录定位误差。
 \item 实现“点击曲线异常点—定位三维测点—打开同一时刻详情”的联动，并完成一条失败场景测试。

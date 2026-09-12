@@ -101,6 +101,7 @@ class Conv:
         self.name, self.chap = name, chap
         self.tokens = {}   # token -> markdown 替换文本
         self.tikz_jobs = []  # (fname, snippet)
+        self.raster_jobs = []  # (source, fname), 仅复制原创图与配套程序截图
         self.cnt = {"fig": 0, "tab": 0, "lst": 0}
         self.missing_ref = set()
 
@@ -156,6 +157,27 @@ class Conv:
         return "".join(out)
 
     # ---- figure ----
+    def raster_source(self, tex_path):
+        rel = pathlib.Path(tex_path.replace(r"\_", "_").replace("\\", "/"))
+        if not rel.parts or rel.parts[0] != "images":
+            rel = pathlib.Path("images") / rel
+        allowed = {("images", "generated"), ("images", "runtime")}
+        if tuple(rel.parts[:2]) not in allowed or rel.suffix.lower() != ".png":
+            raise ValueError("网站栅格图仅允许 images/generated 或 images/runtime 下的 PNG: " + tex_path)
+        source = (SRC.parent / rel).resolve()
+        if not source.is_relative_to((SRC.parent / rel.parts[0] / rel.parts[1]).resolve()):
+            raise ValueError("栅格图路径越界: " + tex_path)
+        if not source.is_file():
+            raise FileNotFoundError(source)
+        return source
+
+    def copy_rasters(self, dest):
+        if self.raster_jobs:
+            image_dir = dest.parent / "images"
+            image_dir.mkdir(parents=True, exist_ok=True)
+            for source, fname in self.raster_jobs:
+                shutil.copy2(source, image_dir / fname)
+
     def extract_fig(self, t):
         out, pos = [], 0
         while True:
@@ -176,18 +198,31 @@ class Conv:
             n = self.num("fig", lab)
             cap = latex_inline_to_md(cap)
             # includegraphics?
-            mo = re.search(r"\\includegraphics(?:\[[^\]]*\])?\{([^}]+)\}", block)
-            if mo and "tikzpicture" not in block:
-                src = pathlib.Path(mo.group(1)).name  # e.g. 51wim-basin.jpg
-                web = WEBFIGS / (src.replace(".jpg", ".tex"))
-                if web.exists():
-                    # 授权截图仅限纸质版:线上用重绘示意图替换
-                    fname = "%s_fig_%s.svg" % (self.name, n.replace(".", "_"))
-                    self.tikz_jobs.append((fname, web.read_text(encoding="utf-8")))
-                    img = "images/" + fname
+            graphics = re.findall(r"\\includegraphics(?:\[[^\]]*\])?\{([^}]+)\}", block)
+            for path in graphics:
+                if "51wim" in path.lower():
+                    web = WEBFIGS / (pathlib.Path(path).stem + ".tex")
+                    if not web.is_file():
+                        raise FileNotFoundError("51WIM 授权截图缺少网站重绘替代，禁止复制: " + path)
+            if graphics and "tikzpicture" in block:
+                raise ValueError("网站图不能同时包含 TikZ 与外部栅格图，请拆分: " + (lab or n))
+            if graphics:
+                imgs, has_licensed = [], False
+                for i, path in enumerate(graphics, 1):
+                    suffix = "_%d" % i if len(graphics) > 1 else ""
+                    fname = "%s_fig_%s%s" % (self.name, n.replace(".", "_"), suffix)
+                    if "51wim" in path.lower():
+                        # 授权截图仅限纸质/PDF版，线上只排入重绘任务。
+                        web = WEBFIGS / (pathlib.Path(path).stem + ".tex")
+                        fname += ".svg"
+                        self.tikz_jobs.append((fname, web.read_text(encoding="utf-8")))
+                        has_licensed = True
+                    else:
+                        fname += ".png"
+                        self.raster_jobs.append((self.raster_source(path), fname))
+                    imgs.append("images/" + fname)
+                if has_licensed:
                     cap = re.sub(r"（图片来源：[^）]*）", "", cap) + "（教学示意图，界面布局据51WIM产品重绘；产品截图经授权仅刊于纸质版）"
-                else:
-                    img = "images/" + src
             else:
                 # tikzpicture 或宏调用
                 rr = find_env(block, "tikzpicture")
@@ -201,8 +236,9 @@ class Conv:
                     pos = e2; continue
                 fname = "%s_fig_%s.svg" % (self.name, n.replace(".", "_"))
                 self.tikz_jobs.append((fname, snippet))
-                img = "images/" + fname
-            md = "<figure markdown>\n![图%s](%s)\n<figcaption>图 %s  %s</figcaption>\n</figure>" % (n, img, n, cap)
+                imgs = ["images/" + fname]
+            images_md = "\n\n".join("![图%s](%s)" % (n, img) for img in imgs)
+            md = "<figure markdown>\n%s\n<figcaption>图 %s  %s</figcaption>\n</figure>" % (images_md, n, cap)
             out.append(self.tok(md))
             pos = e2
         return "".join(out)
@@ -371,11 +407,41 @@ def latex_inline_to_md(s):
     return s.strip()
 
 def misc_tex_fix(t):
+    t = expand_enumerate_resume(t)
     t = t.replace(r"\htmltag{", r"\texttt{<")  # 粗略: 后面手查
     t = re.sub(r"\\code\{", r"\\texttt{", t)
     t = re.sub(r"\\label\{[^}]*\}", "", t)  # 编号已由 aux 解析,标签一律清除
     t = t.replace("~", " ")
     return t
+
+
+def expand_enumerate_resume(t):
+    """把 enumitem 的 resume 转成 Pandoc 可识别的标准计数器命令。"""
+    pattern = re.compile(
+        r"\\(?P<edge>begin|end)\{(?P<env>enumerate|itemize|description)\}"
+        r"(?P<opts>\[[^\]]*\])?|\\item\b(?P<label>\s*\[[^\]]*\])?")
+    stack, previous = [], {}
+
+    def replace(m):
+        env, edge = m.group("env"), m.group("edge")
+        if edge == "begin":
+            depth = 1 + sum(x["env"] == "enumerate" for x in stack)
+            resume = env == "enumerate" and (m.group("opts") or "") == "[resume]"
+            count = previous.get(depth, 0) if resume else 0
+            stack.append({"env": env, "depth": depth, "count": count})
+            if resume:
+                counter = ("enumi", "enumii", "enumiii", "enumiv")[depth - 1]
+                return r"\begin{enumerate}" + "\n" + r"\setcounter{%s}{%d}" % (counter, count)
+        elif edge == "end":
+            if stack and stack[-1]["env"] == env:
+                item = stack.pop()
+                if env == "enumerate":
+                    previous[item["depth"]] = item["count"]
+        elif stack and stack[-1]["env"] == "enumerate" and not m.group("label"):
+            stack[-1]["count"] += 1
+        return m.group(0)
+
+    return pattern.sub(replace, t)
 
 # ---------- 参考文献 ----------
 
@@ -479,12 +545,14 @@ def main():
         else:
             dest = OUT / "chapters" / name / (name + ".md")
         dest.parent.mkdir(parents=True, exist_ok=True)
+        c.copy_rasters(dest)
         # 保持现有docs的CRLF约定，避免不同平台重新生成时改动整份文件。
         dest.write_text(md, encoding="utf-8", newline="\r\n")
         for fname, snip in c.tikz_jobs:
             (TIKZ / (fname[:-4] + ".tex")).write_text(snip, encoding="utf-8")
         report[name] = {"figs": c.cnt["fig"], "tabs": c.cnt["tab"], "lsts": c.cnt["lst"],
-                        "tikz": len(c.tikz_jobs), "missing_ref": sorted(c.missing_ref)}
+                        "tikz": len(c.tikz_jobs), "raster": len(c.raster_jobs),
+                        "missing_ref": sorted(c.missing_ref)}
     # 参考文献页
     refs = ["# 参考文献", ""]
     for i, k in enumerate(CITE_ORDER, 1):
