@@ -4,9 +4,13 @@ import json
 from pathlib import Path
 
 
-def source_hash(snippet, preamble, definitions):
+def source_hash(snippet, preamble, definitions, dependencies=None):
     values = [snippet, preamble, definitions]
-    canonical = json.dumps([s.replace('\r\n', '\n') for s in values], ensure_ascii=False)
+    values = [s.replace('\r\n', '\n') for s in values]
+    # Keep the original digest for pure vector figures; raster bytes are inputs too.
+    if dependencies:
+        values.append(dict(sorted(dependencies.items())))
+    canonical = json.dumps(values, ensure_ascii=False)
     return hashlib.sha256(canonical.encode('utf-8')).hexdigest()
 
 

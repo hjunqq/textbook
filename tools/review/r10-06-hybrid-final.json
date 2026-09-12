@@ -1,0 +1,22 @@
+{
+  "figures": {
+    "3_1": {
+      "svg_sha256": "a21a2119615c44b80350313485530253f6ed51a1ed49a4f8d3698cbfa82a3f1f",
+      "embedded_portraits": [
+        "personnel-duty-officer.png",
+        "personnel-analyst.png"
+      ],
+      "pixels_match_originals": true
+    },
+    "3_8": {
+      "svg_sha256": "0a07ccb4f8123375f5049e4822c8313cf5ce8f287ebc205adff0940e761b12a2",
+      "embedded_portraits": [
+        "personnel-duty-officer.png"
+      ],
+      "pixels_match_originals": true
+    }
+  },
+  "standalone_raster_images": 13,
+  "all_website_figures": 107,
+  "licensed_51wim_images_in_docs": []
+}

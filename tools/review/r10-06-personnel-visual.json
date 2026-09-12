@@ -1,0 +1,51 @@
+{
+  "package": "R10-06",
+  "date": "2026-09-12",
+  "reviewer": "independent-personnel-inventory-agent",
+  "result": "pass",
+  "scope": "只读复核两幅最终候选独立渲染图，并核对当前章文件中的角色、连线、图注及参与者说明。未编辑源图或正文。",
+  "figures": [
+    {
+      "number": "3.1",
+      "label": "fig:uml-usecase",
+      "preview": "temp/r10-06-preview/3_1.png",
+      "png_dimensions": [1141, 377],
+      "png_sha256": "5210c010210a9bae3145a5e0bb05808796f59f9a545c8491fcdc1f02a57a1f7e",
+      "pdf": "temp/r10-06-preview/3_1.pdf",
+      "pdf_dimensions_pt": [407.36, 134.64],
+      "pdf_sha256": "03796f8cba10c5e0a3aee0a1ade2da55a46e37c143b220ebead15f53f2b5f143",
+      "checks": {
+        "realism": "通过。两个头像具有自然的面部结构、头肩比例及服装褶皱，在图示尺寸下清晰可辨。没有手部、设备操作等容易误导学生的细节。",
+        "roles": "通过。值班员与专业分析员分别位于系统边界外，姓名式身份信息未引入；角色名称完整可读。",
+        "associations": "通过。无箭头实线从肖像边框连接用例；没有穿过人物面部、服装或角色名称。值班员关联查看态势、确认事件，分析员关联提出修订建议。",
+        "include": "通过。从确认告警事件指向记录处置日志，标签与箭头均清晰。",
+        "extend": "通过。从查看历史同期对比指向查看监测态势，标签与箭头均清晰。",
+        "print_legibility": "通过。预览使用 11pt 文档基准及书籍字体，独立图约 143.7×47.5 mm，含预览边距即可放入 165 mm 正文版心，无需为适配宽度进一步缩小。角色图片宽 17 mm，文字与线条清楚。",
+        "disclosure_and_prose": "通过。当前图注注明人物为 AI生成教学渲染；参与者段落明确图中人物代表角色，并说明外部系统也可担任参与者。"
+      }
+    },
+    {
+      "number": "3.8",
+      "label": "fig:mvc-architecture",
+      "preview": "temp/r10-06-preview/3_8.png",
+      "png_dimensions": [878, 281],
+      "png_sha256": "dd1f8c05c4bc94fcdb6830250d3763a6987a784bd9d53ee897f83eccbc19eef1",
+      "pdf": "temp/r10-06-preview/3_8.pdf",
+      "pdf_dimensions_pt": [313.33, 100.01],
+      "pdf_sha256": "e4976aac1395f26a6c21fc7d0e3e73ed8a60575b76165d7d13128823b6a2d896",
+      "source_position": "用户节点 x=-4.9；模型节点 y=1.05；请求曲线两个控制点 y=-1.05",
+      "review_iteration": "第二轮紧凑候选；保持 16 mm 人物宽度，减少上下空隙。",
+      "checks": {
+        "realism": "通过。复用图 3.1 的人物素材，图面风格一致；用户肖像与软件组件矩形容易区分。",
+        "labels": "通过。用户、模型、视图、控制器均有中英名称；页面数据文字位于肖像与 View 之间，不叠加边框。",
+        "user_request": "通过。请求曲线由肖像右下角发出，绕开“用户 User”标签，从下方指向 Controller；压缩后仍不穿过肖像、用户标签或组件。",
+        "view_response": "通过。页面数据箭头从 View 指向用户肖像右侧。",
+        "component_connections": "通过。Controller 指向 Model 的调用、Model 指向 View 的数据、Controller 指向 View 的选择视图均可辨认且无遮挡。",
+        "print_legibility": "通过。预览使用 11pt 文档基准及书籍字体，独立图约 110.5×35.3 mm，含预览边距即可放入正文版心。头像仍宽 16 mm；组件中英文、请求和数据标签保持原字号可读，没有通过整体缩小牺牲辨识度。",
+        "disclosure": "通过。当前图注注明人物为 AI生成教学渲染。"
+      }
+    }
+  ],
+  "remaining_verification_by_root": "本审查针对独立候选图；整书编译后的浮动位置、分页、最终 PDF 和网站嵌入资源由主代理继续验证。",
+  "blocking_findings": []
+}

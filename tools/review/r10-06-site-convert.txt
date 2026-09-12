@@ -1,0 +1,107 @@
+{
+ "preface": {
+  "figs": 0,
+  "tabs": 7,
+  "lsts": 0,
+  "tikz": 0,
+  "raster": 0,
+  "missing_ref": []
+ },
+ "chapter01": {
+  "figs": 8,
+  "tabs": 7,
+  "lsts": 0,
+  "tikz": 6,
+  "raster": 2,
+  "missing_ref": []
+ },
+ "chapter02": {
+  "figs": 14,
+  "tabs": 15,
+  "lsts": 0,
+  "tikz": 14,
+  "raster": 0,
+  "missing_ref": []
+ },
+ "chapter03": {
+  "figs": 10,
+  "tabs": 9,
+  "lsts": 6,
+  "tikz": 10,
+  "raster": 0,
+  "missing_ref": []
+ },
+ "chapter04": {
+  "figs": 14,
+  "tabs": 9,
+  "lsts": 57,
+  "tikz": 10,
+  "raster": 4,
+  "missing_ref": []
+ },
+ "chapter05": {
+  "figs": 6,
+  "tabs": 6,
+  "lsts": 46,
+  "tikz": 5,
+  "raster": 1,
+  "missing_ref": []
+ },
+ "chapter06": {
+  "figs": 15,
+  "tabs": 17,
+  "lsts": 24,
+  "tikz": 13,
+  "raster": 2,
+  "missing_ref": []
+ },
+ "chapter07": {
+  "figs": 13,
+  "tabs": 7,
+  "lsts": 26,
+  "tikz": 11,
+  "raster": 2,
+  "missing_ref": []
+ },
+ "chapter08": {
+  "figs": 27,
+  "tabs": 25,
+  "lsts": 47,
+  "tikz": 25,
+  "raster": 2,
+  "missing_ref": []
+ },
+ "chapter09": {
+  "figs": 0,
+  "tabs": 2,
+  "lsts": 0,
+  "tikz": 0,
+  "raster": 0,
+  "missing_ref": []
+ },
+ "answers": {
+  "figs": 0,
+  "tabs": 0,
+  "lsts": 0,
+  "tikz": 0,
+  "raster": 0,
+  "missing_ref": []
+ },
+ "prep": {
+  "figs": 0,
+  "tabs": 2,
+  "lsts": 5,
+  "tikz": 0,
+  "raster": 0,
+  "missing_ref": []
+ },
+ "extended": {
+  "figs": 0,
+  "tabs": 1,
+  "lsts": 5,
+  "tikz": 0,
+  "raster": 0,
+  "missing_ref": []
+ }
+}
+cited keys: 70 | verified SVG distributed: 94 | pending rebuild: 0

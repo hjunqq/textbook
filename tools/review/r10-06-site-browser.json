@@ -1,0 +1,99 @@
+{
+  "pages": 13,
+  "paragraphs": 2837,
+  "images": 107,
+  "method": "本地构建产物在Edge中逐页加载，检查实际computedStyle的textIndent=2×fontSize及全部正文图像加载。",
+  "results": [
+    {
+      "entry": "前言",
+      "paragraphs": 60,
+      "bad": [],
+      "images": 0,
+      "broken": []
+    },
+    {
+      "entry": "chapters/chapter01/chapter01",
+      "paragraphs": 127,
+      "bad": [],
+      "images": 8,
+      "broken": []
+    },
+    {
+      "entry": "chapters/chapter02/chapter02",
+      "paragraphs": 203,
+      "bad": [],
+      "images": 14,
+      "broken": []
+    },
+    {
+      "entry": "chapters/chapter03/chapter03",
+      "paragraphs": 497,
+      "bad": [],
+      "images": 10,
+      "broken": []
+    },
+    {
+      "entry": "chapters/chapter04/chapter04",
+      "paragraphs": 361,
+      "bad": [],
+      "images": 14,
+      "broken": []
+    },
+    {
+      "entry": "chapters/chapter05/chapter05",
+      "paragraphs": 327,
+      "bad": [],
+      "images": 6,
+      "broken": []
+    },
+    {
+      "entry": "chapters/chapter06/chapter06",
+      "paragraphs": 310,
+      "bad": [],
+      "images": 15,
+      "broken": []
+    },
+    {
+      "entry": "chapters/chapter07/chapter07",
+      "paragraphs": 246,
+      "bad": [],
+      "images": 13,
+      "broken": []
+    },
+    {
+      "entry": "chapters/chapter08/chapter08",
+      "paragraphs": 443,
+      "bad": [],
+      "images": 27,
+      "broken": []
+    },
+    {
+      "entry": "chapters/chapter09/chapter09",
+      "paragraphs": 85,
+      "bad": [],
+      "images": 0,
+      "broken": []
+    },
+    {
+      "entry": "appendix/answers",
+      "paragraphs": 111,
+      "bad": [],
+      "images": 0,
+      "broken": []
+    },
+    {
+      "entry": "appendix/prep",
+      "paragraphs": 40,
+      "bad": [],
+      "images": 0,
+      "broken": []
+    },
+    {
+      "entry": "appendix/extended",
+      "paragraphs": 27,
+      "bad": [],
+      "images": 0,
+      "broken": []
+    }
+  ]
+}

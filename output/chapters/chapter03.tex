@@ -109,7 +109,7 @@
 
 \paragraph{用例}用例代表系统所提供的一个功能或服务，它是系统行为的抽象描述。每个用例都应当满足某种业务需求或用户需求。在用例图中，用例通常用椭圆形表示，标注出其名称。用例能够清晰展示系统的业务功能或处理过程，比如在智慧水利平台中，常见的用例有“查看监测大屏”、“查询测站数据”、“确认告警事件”等。
 
-\paragraph{参与者}参与者是指与系统交互的外部实体，可以是人、外部系统或其他软件组件。参与者通过与用例的交互来触发系统的行为。在用例图中，参与者用带有小人图标的角色表示，如“值班员”“专业分析员”“审批人”“运维员”或外部监测设备平台。
+\paragraph{参与者}参与者表示与系统交互的外部角色，可以由人、外部系统或其他软件组件承担。UML通常用人形符号表示参与者，也可使用体现其类型的图标，并标注角色名称。图中的人物表示“值班员”“专业分析员”等角色；外部监测设备平台也可以作为参与者。
 
 \paragraph{关系}
 
@@ -131,29 +131,23 @@
   usecase/.style={draw=Primary,ellipse,fill=PrimaryLight,minimum width=2.9cm,minimum height=.75cm,align=center}]
   \draw[thick,draw=Primary] (-1.9,-1.65) rectangle (7.55,2.65);
   \node[font=\small\bfseries,text=PrimaryDark] at (2.8,2.3) {水利工程安全监测平台};
-  \node[draw,circle,minimum size=5mm] (operator) at (-3.2,.6) {};
-  \draw (operator.south)--++(0,-.6) coordinate (obody);
-  \draw ($(operator.south)+(0,-.2)$)--++(-.35,-.25);
-  \draw ($(operator.south)+(0,-.2)$)--++(.35,-.25);
-  \draw (obody)--++(-.3,-.45); \draw (obody)--++(.3,-.45);
-  \node[below=1.15cm of operator] {值班员};
+  \node[inner sep=1pt,draw=Primary!35,rounded corners=2pt] (operator) at (-3.2,.35)
+    {\includegraphics[width=1.7cm]{images/generated/personnel-duty-officer.png}};
+  \node[below=2mm of operator] {值班员};
   \node[usecase] (view) at (0,1.3) {查看监测态势};
   \node[usecase] (ack) at (0,-.8) {确认告警事件};
   \node[usecase] (rule) at (5.1,.2) {提出规则修订建议};
   \node[usecase] (log) at (5.1,-.8) {记录处置日志};
   \node[usecase,fill=white,font=\scriptsize] (hist) at (5.1,1.3) {查看历史同期对比};
-  \node[draw,circle,minimum size=5mm] (analyst) at (8.6,.6) {};
-  \draw (analyst.south)--++(0,-.6) coordinate (abody);
-  \draw ($(analyst.south)+(0,-.2)$)--++(-.35,-.25);
-  \draw ($(analyst.south)+(0,-.2)$)--++(.35,-.25);
-  \draw (abody)--++(-.3,-.45); \draw (abody)--++(.3,-.45);
-  \node[below=1.15cm of analyst] {专业分析员};
+  \node[inner sep=1pt,draw=Primary!35,rounded corners=2pt] (analyst) at (8.85,.35)
+    {\includegraphics[width=1.7cm]{images/generated/personnel-analyst.png}};
+  \node[below=2mm of analyst] {专业分析员};
   \draw (operator.east)--(view.west); \draw (operator.east)--(ack.west);
   \draw (analyst.west)--(rule.east);
   \draw[dashed,->] (ack)--node[above,font=\scriptsize,fill=white,inner sep=1pt]{«include»}(log);
   \draw[dashed,->] (hist)--node[above,font=\scriptsize,fill=white,inner sep=1pt]{«extend»}(view);
 \end{tikzpicture}
-\caption{水利工程安全监测平台用例图示例}
+\caption[水利工程安全监测平台用例图示例]{水利工程安全监测平台用例图示例（人物为AI生成教学渲染）}
 \label{fig:uml-usecase}
 \end{figure}
 
@@ -577,19 +571,22 @@ MVC 的主要优势在于其高可维护性和可扩展性。由于各部分相�
 
 \begin{figure}[htbp]
 \centering
-\begin{tikzpicture}[>=Stealth, scale=0.9, thick]
-  \node[draw=Primary, rectangle, minimum width=1.3cm, minimum height=0.8cm, fill=PrimaryLight, text=PrimaryDark, rounded corners=2pt, thick] at (0,1.2) (model) {\small\bfseries Model};
-  \node[draw=Primary, rectangle, minimum width=1.3cm, minimum height=0.8cm, fill=PrimaryLight, text=PrimaryDark, rounded corners=2pt, thick] at (-2,0) (view) {\small\bfseries View};
-  \node[draw=Primary, rectangle, minimum width=1.3cm, minimum height=0.8cm, fill=PrimaryLight, text=PrimaryDark, rounded corners=2pt, thick] at (2,0) (ctrl) {\small\bfseries Controller};
-  \node[draw=Primary, circle, minimum size=0.9cm, fill=PrimaryLight, text=PrimaryDark, thick] at (-4,0) (user) {User};
+\begin{tikzpicture}[>=Stealth,thick,
+  component/.style={draw=Primary,minimum width=1.9cm,minimum height=.8cm,fill=PrimaryLight,text=PrimaryDark,rounded corners=2pt,font=\small\bfseries,align=center}]
+  \node[component] (model) at (.9,1.05) {模型 Model};
+  \node[component] (view) at (-1.6,0) {视图 View};
+  \node[component] (ctrl) at (3.3,0) {控制器 Controller};
+  \node[inner sep=1pt,draw=Primary!35,rounded corners=2pt] (user) at (-4.9,0)
+    {\includegraphics[width=1.6cm]{images/generated/personnel-duty-officer.png}};
+  \node[below=2mm of user,font=\small] {用户 User};
 
-  \draw[->,draw=Primary, thick,>=Stealth] (user.south) to[bend right=28] node[below,font=\scriptsize] {请求} (ctrl.south);
-  \draw[->,draw=Primary, thick,>=Stealth] (ctrl) -- node[right,font=\scriptsize] {调用} (model);
-  \draw[->,draw=Primary, thick,>=Stealth] (model) -- node[above,font=\scriptsize] {数据} (view);
-  \draw[->,draw=Primary, thick,>=Stealth] (ctrl) -- node[above=2mm,font=\scriptsize,fill=white,inner sep=1pt] {选择视图} (view);
-  \draw[->,draw=Primary, thick,>=Stealth] (view) -- node[above=7mm,font=\scriptsize] {页面数据} (user);
+  \draw[->,draw=Primary] (user.south east) .. controls (-2.7,-1.05) and (2.8,-1.05) .. node[below,font=\scriptsize] {请求} (ctrl.south);
+  \draw[->,draw=Primary] (ctrl.north) -- node[right,font=\scriptsize] {调用} (model.east);
+  \draw[->,draw=Primary] (model.west) -- node[above,font=\scriptsize] {数据} (view.north);
+  \draw[->,draw=Primary] (ctrl.west) -- node[above=2mm,font=\scriptsize,fill=white,inner sep=1pt] {选择视图} (view.east);
+  \draw[->,draw=Primary] (view.west) -- node[above=2mm,font=\scriptsize] {页面数据} (user.east);
 \end{tikzpicture}
-\caption{MVC架构模式}
+\caption[MVC架构模式]{MVC架构模式（人物为AI生成教学渲染）}
 \label{fig:mvc-architecture}
 \end{figure}
 

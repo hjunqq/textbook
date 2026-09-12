@@ -1,0 +1,100 @@
+{
+  "review": "R10-06 第3章最终版面复核",
+  "scope": "物理页82–92（印刷页70–80）：已逐页检查前一排版稿，MVC紧凑后对刷新PNG的最终contactsheet再次确认裁切、图表位置、标题孤立与异常留白。",
+  "pdf_sha256": "102c8032afff65e97fab8d54d6b144b74aa317e090f1f8d6a61e94b198f71652",
+  "result": "pass",
+  "actionable_findings": [],
+  "limitations": "此记录仅评价指定页面的版面，不替代全书内容或技术正确性审核。",
+  "pages": [
+    {
+      "physical_page": 82,
+      "printed_page": 70,
+      "image": "temp/r10-06-final-pages/changed-page-082.png",
+      "image_sha256": "0d46671a9ae37ce70d52b3a715a4a0aca1da3e2adb77272338df36519d0b1756",
+      "result": "pass",
+      "observation": "表3.8位于页首且完整落在版心内，表题与表格同页，下方正文连续，无裁切。"
+    },
+    {
+      "physical_page": 83,
+      "printed_page": 71,
+      "image": "temp/r10-06-final-pages/changed-page-083.png",
+      "image_sha256": "82830aa0fe364d004e5d45cd9e7c8a5e5067cd222de69f6e42ef9919590a5153",
+      "result": "pass",
+      "observation": "复用设计及3.4.4段落完整，各小标题后均有足够正文。"
+    },
+    {
+      "physical_page": 84,
+      "printed_page": 72,
+      "image": "temp/r10-06-final-pages/changed-page-084.png",
+      "image_sha256": "1504b1ccec08e2f147355e2b7f463167f5e385f72a58dd788876f57ec890ba0a",
+      "result": "pass",
+      "observation": "3.5节及3.5.1、3.5.2层级清晰，正文与页眉页脚保持间距。"
+    },
+    {
+      "physical_page": 85,
+      "printed_page": 73,
+      "image": "temp/r10-06-final-pages/changed-page-085.png",
+      "image_sha256": "b5a8a84bd3474678e3b93f0fc3f1d4d67db7ea7f389d907a0f7c596aa5f5e186",
+      "result": "pass",
+      "observation": "图3.9与图题完整；页底3.5.4标题后有定义及正文，不构成孤立标题。"
+    },
+    {
+      "physical_page": 86,
+      "printed_page": 74,
+      "image": "temp/r10-06-final-pages/changed-page-086.png",
+      "image_sha256": "d063d0b75d9b3d5abfb7a189c1c01ff6a5adcb929afe123486fb3b5830582379",
+      "result": "pass",
+      "observation": "3.5.5与3.6正常排版，3.6标题后有层次及预备知识说明，留白正常。"
+    },
+    {
+      "physical_page": 87,
+      "printed_page": 75,
+      "image": "temp/r10-06-final-pages/changed-page-087.png",
+      "image_sha256": "6a5766560c79011edd1cddb00a1c2d2e06d8f9abda952cb062963885b6662680",
+      "result": "pass",
+      "observation": "3.6.1、3.6.2正文连续，行末及页底均无裁切。"
+    },
+    {
+      "physical_page": 88,
+      "printed_page": 76,
+      "image": "temp/r10-06-final-pages/changed-page-088.png",
+      "image_sha256": "53facdd55ba0e9c3ffcac73323bbf92589b9801dd90952e8cf7ac2ac04dd0648",
+      "result": "pass",
+      "observation": "3.6.3正文完整，页底3.6.4标题后有完整说明段，无孤立标题。"
+    },
+    {
+      "physical_page": 89,
+      "printed_page": 77,
+      "image": "temp/r10-06-final-pages/changed-page-089.png",
+      "image_sha256": "154e744ac6e5c16c3713fb4c1cf8c25972310fb87b6bd972ac63b672a558de79",
+      "result": "pass",
+      "observation": "图3.10及表3.9完整，图文及图表题间距正常；页底SAAM标题后有正文。"
+    },
+    {
+      "physical_page": 90,
+      "printed_page": 78,
+      "image": "temp/r10-06-final-pages/changed-page-090.png",
+      "image_sha256": "d8b65c3f661792a4d71066657292d10d611866c1f4ec4967e4958ed11cd960be",
+      "result": "pass",
+      "observation": "各级小标题均与正文相随，正文和页脚无压叠或裁切。"
+    },
+    {
+      "physical_page": 91,
+      "printed_page": 79,
+      "image": "temp/r10-06-final-pages/changed-page-091.png",
+      "image_sha256": "2baf9e01d6ccb8011195e6343bcb9894880271eb894a650bf0d2f70b3584e3c3",
+      "result": "pass",
+      "observation": "小结及章末交付物完整；交付物4个条目已全部容纳于本页，不再跨页。"
+    },
+    {
+      "physical_page": 92,
+      "printed_page": 80,
+      "image": "temp/r10-06-final-pages/changed-page-092.png",
+      "image_sha256": "39984ae2829725e3701d0f84bf2836e1d6b7dfd127cf36e697a49790b3528976",
+      "result": "pass",
+      "observation": "思考题与练习题标题及12道题完整；页底留白为第3章章末正常分页。"
+    }
+  ],
+  "final_contactsheet": "temp/r10-06-final-pages/final-contactsheet-82-92.png",
+  "final_contactsheet_sha256": "0e6709bf6cbd3bbc38c36447b12d537217bbc9c8724d62617a692c889bf3b274"
+}

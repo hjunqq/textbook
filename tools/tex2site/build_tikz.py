@@ -8,6 +8,7 @@ from pathlib import Path
 import shutil
 import subprocess
 from svg_provenance import source_hash, file_hash, verified_svg
+from hybrid_graphics import graphics_dependencies, stage_graphics, verify_embedded_images
 
 HERE = Path(__file__).resolve().parent
 REPO = Path(os.environ.get('TEX2SITE_REPO', HERE.parent.parent))
@@ -32,19 +33,27 @@ def main():
     jobs = json.loads((BUILD/'expected-jobs.json').read_text(encoding='utf-8'))
     preamble = (HERE/'preamble.tex').read_text(encoding='utf-8')
     definitions = (REPO/'output/tikz-diagrams.tex').read_text(encoding='utf-8')
-    (BUILD/'tikz-diagrams.tex').write_text(definitions, encoding='utf-8')
+    (BUILD/'tikz-diagrams.tex').write_text(definitions, encoding='utf-8', newline='\n')
     xelatex, cairo = executable('xelatex'), executable('pdftocairo')
+    # Stage shared portrait files before parallel compilation to avoid copy races.
+    for job in jobs:
+        snippet = (BUILD/(Path(job['file']).stem+'.tex')).read_text(encoding='utf-8')
+        dependencies = graphics_dependencies(snippet, REPO/'output')
+        if dependencies != job.get('graphics_sha256', {}):
+            raise ValueError('Graphics changed after convert.py: '+job['file'])
+        stage_graphics(dependencies, REPO/'output', BUILD)
 
     def compile_one(job):
         name = job['file']
         stem = Path(name).stem
         snippet = (BUILD/(stem+'.tex')).read_text(encoding='utf-8')
-        digest = source_hash(snippet, preamble, definitions)
+        dependencies = graphics_dependencies(snippet, REPO/'output')
+        digest = source_hash(snippet, preamble, definitions, dependencies)
         if digest != job['source_sha256']:
             raise ValueError('Source changed after convert.py: '+name)
         cached = None if args.force else verified_svg(BUILD, name, digest, require_pdf=True)
         if cached is None:
-            (BUILD/('build_'+stem+'.tex')).write_text(preamble+'\n'+snippet+'\n\\end{document}\n', encoding='utf-8')
+            (BUILD/('build_'+stem+'.tex')).write_text(preamble+'\n'+snippet+'\n\\end{document}\n', encoding='utf-8', newline='\n')
             result = subprocess.run([xelatex, '-interaction=nonstopmode', '-halt-on-error',
                                      '-jobname='+stem, 'build_'+stem+'.tex'], cwd=BUILD,
                                     stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=120)
@@ -55,8 +64,13 @@ def main():
             if 'Missing character:' in log or 'Overfull' in log:
                 raise RuntimeError('Missing glyph or overflow: '+name)
             subprocess.run([cairo, '-svg', stem+'.pdf', name], cwd=BUILD, check=True, timeout=30)
-        return name, dict(source_sha256=digest, svg_sha256=file_hash(BUILD/name),
-                          pdf_sha256=file_hash(BUILD/(stem+'.pdf')), rebuilt=cached is None)
+        if dependencies:
+            verify_embedded_images(BUILD/name, required=True)
+        record = dict(source_sha256=digest, svg_sha256=file_hash(BUILD/name),
+                      pdf_sha256=file_hash(BUILD/(stem+'.pdf')), rebuilt=cached is None)
+        if dependencies:
+            record['graphics_sha256'] = dependencies
+        return name, record
 
     results, errors = {}, []
     with ThreadPoolExecutor(max_workers=max(1,args.jobs)) as pool:

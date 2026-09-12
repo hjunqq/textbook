@@ -1,0 +1,59 @@
+{
+  "package": "R10-06",
+  "date": "2026-09-12",
+  "reviewer": "independent-personnel-inventory-agent",
+  "stage": "紧凑图 3.8 修正后，第二轮 402 页最终 PDF 复核",
+  "final_pdf": "output/main.pdf",
+  "final_pdf_sha256": "102c8032afff65e97fab8d54d6b144b74aa317e090f1f8d6a61e94b198f71652",
+  "physical_pages": [70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81],
+  "printed_pages": [58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69],
+  "input_pattern": "temp/r10-06-final-pages/changed-page-NNN.png",
+  "method": "逐张以原页纵横比查看全部 12 页渲染，检查版心、页眉页脚、段落首行缩进、标题后随文、清单行号连续性和跨页情况。",
+  "result": "pass",
+  "revision": "在保持人物 16 mm 宽度和文字字号的前提下，压缩图 3.8 上下空隙，使独立图高度由 121.11 pt 降至 100.01 pt；正文与代码未删减。",
+  "initial_findings_and_final_resolution": [
+    {
+      "physical_page": 73,
+      "printed_page": 61,
+      "type": "orphan-heading",
+      "severity": "fix",
+      "text": "接口设计",
+      "detail": "该小标题位于页底，下一页才开始“传感器接口设计”及正文，标题与内容分离。",
+      "suggestion": "为这组连续小标题及其首段保留足够空间，使“接口设计”随下一页内容一起排版。",
+      "final_status": "resolved",
+      "final_observation": "最终第 73 页“接口设计”“传感器接口设计”两个标题后均有同页正文，首段已排 3 行后续至第 74 页，孤标题消失。"
+    },
+    {
+      "physical_page": 78,
+      "printed_page": 66,
+      "type": "introductory-line-at-page-end",
+      "severity": "minor",
+      "text": "实践建议：",
+      "detail": "这是普通缩进引导句，不是独立格式标题；后续建议正文续至下一页。没有裁切或丢字。",
+      "suggestion": "如同一局部排版修正可兼顾，可让引导句与下一段同页。",
+      "final_status": "resolved",
+      "final_observation": "最终第 78 页“实践建议：”之后的首段建议正文完整排在同页。"
+    },
+    {
+      "physical_page": 79,
+      "printed_page": 67,
+      "type": "short-listing-split",
+      "severity": "minor",
+      "text": "清单3.2：监测数据传输对象",
+      "detail": "短清单共 6 行，第 1 行留在本页页底，第 2–6 行续至下一页。代码和行号完整，但阅读被打断。",
+      "suggestion": "短清单可整体移至下一页；无需改变或删减代码。",
+      "final_status": "resolved",
+      "final_observation": "最终第 79 页清单 3.2 的图题与第 1–6 行完整同页，没有短代码拆分。"
+    }
+  ],
+  "passed_checks": [
+    "70–81 页没有正文、代码或页脚裁切，没有图文叠压。",
+    "正文可见段落首行缩进；页顶跨页续排段落不另作首行缩进，符合连续段落排版。",
+    "最终 70–81 页均无独立标题孤行。76 页底“平衡内聚与耦合”后有完整短段；77 页底 3.4.2 标题后有两行正文。",
+    "页面填充正常，无新增空白页或大面积空白。",
+    "最终第 80 页清单 3.5 的第 1–14 行完整同页；第 81 页由完整清单 3.6 开始。"
+  ],
+  "source_changes_by_reviewer": "none",
+  "blocking_findings": [],
+  "next_step": "本审查范围已通过，可随主代理其他最终检查一并交付。"
+}

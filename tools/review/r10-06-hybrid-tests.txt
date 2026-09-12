@@ -1,0 +1,14 @@
+test_changed_portrait_invalidates_cached_svg_without_tex_changes (test_hybrid_figures.HybridFigureTest.test_changed_portrait_invalidates_cached_svg_without_tex_changes) ... ok
+test_licensed_runtime_and_traversal_assets_cannot_enter_hybrid_svg (test_hybrid_figures.HybridFigureTest.test_licensed_runtime_and_traversal_assets_cannot_enter_hybrid_svg) ... ok
+test_optional_short_caption_keeps_full_caption_and_ai_disclosure (test_hybrid_figures.HybridFigureTest.test_optional_short_caption_keeps_full_caption_and_ai_disclosure) ... ok
+test_portraits_and_connectors_produce_one_vector_job (test_hybrid_figures.HybridFigureTest.test_portraits_and_connectors_produce_one_vector_job) ... ok
+test_pure_vector_hash_stays_compatible (test_hybrid_figures.HybridFigureTest.test_pure_vector_hash_stays_compatible) ... ok
+test_staged_assets_and_embedded_svg_need_no_external_image_file (test_hybrid_figures.HybridFigureTest.test_staged_assets_and_embedded_svg_need_no_external_image_file) ... ok
+test_builder_rebuilds_when_intermediate_pdf_is_missing_or_changed (test_svg_provenance.StaleFigureTest.test_builder_rebuilds_when_intermediate_pdf_is_missing_or_changed) ... ok
+test_renumbering_and_shared_macro_change_require_rebuild (test_svg_provenance.StaleFigureTest.test_renumbering_and_shared_macro_change_require_rebuild) ... ok
+test_unrecorded_legacy_svg_is_rejected (test_svg_provenance.StaleFigureTest.test_unrecorded_legacy_svg_is_rejected) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 0.048s
+
+OK

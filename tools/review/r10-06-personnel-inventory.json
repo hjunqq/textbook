@@ -1,0 +1,61 @@
+{
+  "package": "R10-06",
+  "date": "2026-09-12",
+  "scope": ["output/chapters/*.tex", "output/tikz-diagrams.tex"],
+  "method": "完整读取 AGENTS.md；筛查 10 个章文件中的 107 个 figure 块和共享 TikZ 定义，检索人物名称、节点名、头身肢体绘制模式；视觉复核图 3.1、3.4、3.8 的 R10-05 实际字号渲染。",
+  "actual_human_icon_figures": 1,
+  "actual_stick_figures": 2,
+  "recommended": [
+    {
+      "number": "3.1",
+      "label": "fig:uml-usecase",
+      "file": "output/chapters/chapter03.tex",
+      "line": 128,
+      "caption": "水利工程安全监测平台用例图示例",
+      "current": "值班员与专业分析员各用圆头、单线躯干和四肢构成，角色轮廓完全相同。",
+      "action": "将两个火柴人替换为清晰、比例自然、服装得体的原创人物肖像；角色名称保留在人物下方，所有用例、系统边界和关系继续由 TikZ 精确绘制。",
+      "preserve": [
+        "值班员关联查看监测态势和确认告警事件。",
+        "专业分析员关联提出规则修订建议；不可改成直接修改或发布规则。",
+        "include 的箭头从确认告警事件指向记录处置日志。",
+        "extend 的箭头从查看历史同期对比指向查看监测态势。",
+        "人物位于系统边界外，角色与用例关联为无箭头实线。"
+      ],
+      "risks": [
+        "原文“参与者用带有小人图标的角色表示”应同步核对，与新图例保持一致；人物形象代表角色，不应暗示具体自然人身份。",
+        "人物连接点应在肖像外缘，避免线条穿过脸部、服装或角色名称。",
+        "若使用生成肖像，需登记来源并在图注说明“AI生成教学渲染”。"
+      ]
+    },
+    {
+      "number": "3.8",
+      "label": "fig:mvc-architecture",
+      "file": "output/chapters/chapter03.tex",
+      "line": 578,
+      "caption": "MVC架构模式",
+      "current": "用户是写有 User 的浅蓝圆圈，旁边是 Model、View、Controller 三个矩形组件。",
+      "action": "可将 User 圆圈替换为与图 3.1 一致的用户肖像，并保留用户文字；这能直接区分实际使用者与三个软件组件。",
+      "preserve": [
+        "用户请求指向 Controller。",
+        "View 页面数据指向用户。",
+        "Controller 调用 Model，并选择 View；Model 数据指向 View。"
+      ],
+      "risks": [
+        "下方请求弧线须绕过肖像及名称；不宜为加肖像扩大整幅图到新页。",
+        "图中是一般用户，可复用人物素材，但不要额外赋予该图未讲解的专门权限。"
+      ]
+    }
+  ],
+  "retain_semantic_boxes": [
+    {"number": "1.6", "label": "fig:smart-water-architecture", "reason": "用户层是四层架构中的一整层，列出四种角色，肖像会挤占层次信息。"},
+    {"number": "2.8", "label": "fig:dfd-level-zero", "reason": "用水户、调度与审批人员是 DFD 外部实体，矩形用于教学约定，应保持与设备系统实体一致。"},
+    {"number": "2.9", "label": "fig:dfd-level-one", "reason": "与上下文图的实体和输入输出逐条平衡，保留外部实体矩形。"},
+    {"number": "3.3", "label": "fig:alarm-event-state", "reason": "值班员仅出现在状态转换的动作标签中，图的主体是告警事件状态。"},
+    {"number": "3.4", "label": "fig:alarm-activity", "reason": "角色已由泳道名称准确区分；增加三个肖像会显著增高图面，挤占活动与返回路径。"},
+    {"number": "3.5", "label": "fig:uml-sequence", "reason": "值班终端是发送确认消息的软件终端生命线，不等同于人，不宜以肖像替换。"},
+    {"number": "8.7", "label": "fig:warning-workorder-flow", "reason": "角色名称位于状态转换标签，主对象是预警和工单，应保留状态机语义。"},
+    {"number": "8.18", "label": "fig:ai-consultation-flow", "reason": "人工审批框是权限、有效期和控制检查组成的流程门，不能以某一个人的肖像替代。"}
+  ],
+  "shared_tikz": "共享库没有实际人形图标。waterAlertProcessFlowchart 的“值班人员确认”和 dfdLevelZero 的“通知值班人员”只是过程节点，且当前章文件 figure 块未调用这两项。其他 circle 节点为树节点、连接符和数据点。",
+  "source_changes_by_inventory_agent": "none"
+}

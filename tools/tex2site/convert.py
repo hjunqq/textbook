@@ -5,6 +5,7 @@
 """
 import re, sys, os, pathlib, subprocess, json, shutil
 from svg_provenance import source_hash, verified_svg
+from hybrid_graphics import graphics_paths, graphics_dependencies
 
 # 仓库路径约定:本脚本位于 tools/tex2site/,唯一事实来源是 output/ 下的 LaTeX。
 HERE = pathlib.Path(__file__).resolve().parent
@@ -192,7 +193,7 @@ class Conv:
             out.append(t[pos:b])
             block = t[b:e2]
             cap = ""
-            mo = re.search(r"\\caption\{", block)
+            mo = re.search(r"\\caption\s*(?:\[[^\]]*\]\s*)?\{", block)
             if mo:
                 cap, _ = balanced(block, mo.end()-1)
             lab = ""
@@ -202,15 +203,23 @@ class Conv:
             n = self.num("fig", lab)
             cap = latex_inline_to_md(cap)
             # includegraphics?
-            graphics = re.findall(r"\\includegraphics(?:\[[^\]]*\])?\{([^}]+)\}", block)
+            graphics = graphics_paths(block)
             for path in graphics:
                 if "51wim" in path.lower():
                     web = WEBFIGS / (pathlib.Path(path).stem + ".tex")
                     if not web.is_file():
                         raise FileNotFoundError("51WIM 授权截图缺少网站重绘替代，禁止复制: " + path)
-            if graphics and "tikzpicture" in block:
-                raise ValueError("网站图不能同时包含 TikZ 与外部栅格图，请拆分: " + (lab or n))
-            if graphics:
+            rr = find_env(block, "tikzpicture")
+            if graphics and rr:
+                # Keep portraits, exact connectors and labels in one composed SVG.
+                snippet = block[rr[0]:rr[1]]
+                if graphics_paths(snippet) != graphics:
+                    raise ValueError("混合图的全部图片必须位于同一个 TikZ 环境内: " + (lab or n))
+                graphics_dependencies(snippet, SRC.parent)
+                fname = "%s_fig_%s.svg" % (self.name, n.replace(".", "_"))
+                self.tikz_jobs.append((fname, snippet))
+                imgs = ["images/" + fname]
+            elif graphics:
                 imgs, has_licensed = [], False
                 for i, path in enumerate(graphics, 1):
                     suffix = "_%d" % i if len(graphics) > 1 else ""
@@ -258,7 +267,7 @@ class Conv:
             out.append(t[pos:b])
             block = t[b:e2]
             cap = ""
-            mo = re.search(r"\\caption\{", block)
+            mo = re.search(r"\\caption\s*(?:\[[^\]]*\]\s*)?\{", block)
             if mo:
                 cap, _ = balanced(block, mo.end()-1)
             lab = ""
@@ -556,8 +565,12 @@ def main():
         # 保持现有docs的CRLF约定，避免不同平台重新生成时改动整份文件。
         dest.write_text(md, encoding="utf-8", newline="\r\n")
         for fname, snip in c.tikz_jobs:
-            (TIKZ / (fname[:-4] + ".tex")).write_text(snip, encoding="utf-8")
-            expected_jobs.append({"file": fname, "source_sha256": source_hash(snip, preamble, definitions)})
+            dependencies = graphics_dependencies(snip, SRC.parent)
+            (TIKZ / (fname[:-4] + ".tex")).write_text(snip, encoding="utf-8", newline="\n")
+            job = {"file": fname, "source_sha256": source_hash(snip, preamble, definitions, dependencies)}
+            if dependencies:
+                job["graphics_sha256"] = dependencies
+            expected_jobs.append(job)
         if name.startswith("chapter"):
             active_images = {fname for fname, _ in c.tikz_jobs} | {fname for _, fname in c.raster_jobs}
             image_dir = dest.parent / "images"

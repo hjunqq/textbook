@@ -1,0 +1,46 @@
+{
+  "package": "R10-06",
+  "pages_before": 402,
+  "pages_after": 402,
+  "pdf": "output/智慧水利平台架构与开发-人物图示提升版-R10-06.pdf",
+  "pdf_sha256": "102c8032afff65e97fab8d54d6b144b74aa317e090f1f8d6a61e94b198f71652",
+  "figure_count": 107,
+  "reviewed_figures": {
+    "fig:uml-usecase": {
+      "number": "3.1",
+      "printed_page": "45",
+      "physical_page": 57,
+      "render": "E:\\2026\\教材\\智慧水利平台架构与开发\\temp\\r10-06-final-pages\\figure-3.1-page.png"
+    },
+    "fig:mvc-architecture": {
+      "number": "3.8",
+      "printed_page": "57",
+      "physical_page": 69,
+      "render": "E:\\2026\\教材\\智慧水利平台架构与开发\\temp\\r10-06-final-pages\\figure-3.8-page.png"
+    }
+  },
+  "unchanged_listing_count": 216,
+  "listings_by_chapter": {
+    "output/appendix/answers.tex": 0,
+    "output/appendix/extended.tex": 5,
+    "output/appendix/prep.tex": 5,
+    "output/chapters/chapter01.tex": 0,
+    "output/chapters/chapter02.tex": 0,
+    "output/chapters/chapter03.tex": 6,
+    "output/chapters/chapter04.tex": 57,
+    "output/chapters/chapter05.tex": 46,
+    "output/chapters/chapter06.tex": 24,
+    "output/chapters/chapter07.tex": 26,
+    "output/chapters/chapter08.tex": 47,
+    "output/chapters/chapter09.tex": 0
+  },
+  "main_tex_unchanged": true,
+  "text_comparison_physical_range": [
+    54,
+    93
+  ],
+  "text_changed_physical_pages": [
+    57,
+    69
+  ]
+}

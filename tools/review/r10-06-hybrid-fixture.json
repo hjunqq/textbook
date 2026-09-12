@@ -1,0 +1,15 @@
+{
+  "actual_compile": [
+    {
+      "phase": "build",
+      "output": "BUILT chapter03_fig_3_1.svg\nVerified SVGs: 1"
+    },
+    {
+      "phase": "cached",
+      "output": "VERIFIED chapter03_fig_3_1.svg\nVerified SVGs: 1"
+    }
+  ],
+  "embedded_images": 1,
+  "pure_vector_hashes_unchanged": 94,
+  "fixture": "E:\\2026\\教材\\智慧水利平台架构与开发\\temp\\r10-06-hybrid-fixture"
+}

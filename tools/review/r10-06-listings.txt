@@ -1,0 +1,25 @@
+OK lst:ch07-resample-align      书中 41 行与 resample.js 一致
+OK lst:ch07-quality-check       书中 27 行与 quality.js 一致
+OK lst:ch07-standardize-readings 书中 27 行与 standardize.js 一致
+OK lst:ch07-data-examples       书中 15 行与 examples.js 一致
+OK lst:ch04-a45-request         书中 40 行与 request.js 一致
+OK lst:ch04-a47-asset-api       书中 9 行与 assets.js 一致
+OK lst:ch04-js-pinia            书中 32 行与 asset.js 一致
+OK lst:ch04-a47-setup-store     书中 33 行与 asset-setup.js 一致
+OK lst:ch04-a47-login           书中 34 行与 Login.vue 一致
+OK lst:ch04-a47-station-detail  书中 21 行与 AssetDetail.vue 一致
+OK lst:ch04-a47-store-usage     书中 15 行与 WaterLevelSummary.vue 一致
+OK lst:ch05-refresh-verifier    书中 35 行与 RefreshTokenVerifier.java 一致
+OK lst:ch07-event-time-window   书中 32 行与 event-window.js 一致
+OK lst:ch07-append-data         书中 25 行与 window-chart.js 一致
+OK lst:ch04-r1-load             书中 36 行与 detail.js 一致（5 行为已确认差异）
+OK lst:ch04-r1-state            书中 26 行与 state.js 一致
+OK lst:ch04-r1-race             书中 27 行与 controller.js 一致
+OK lst:ch06-first-scene         书中 29 行与 first-scene.js 一致
+OK lst:ch06-bind-assets         书中 30 行与 bind-assets.js 一致
+OK lst:ch07-link-controller     书中 22 行与 link.js 一致（1 行为已确认差异）
+OK lst:ch07-point-picker        书中 17 行与 picker.js 一致（1 行为已确认差异）
+OK lst:ch05-first-controller    书中 20 行与 AssetController.java 一致（4 行为已确认差异）
+OK lst:ch05-first-params        书中 37 行与 AssetController.java 一致
+
+核验 23 组清单，不一致 0 组，已确认差异 11 行

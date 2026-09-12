@@ -1,0 +1,22 @@
+{
+  "package": "R10-06",
+  "date": "2026-09-12",
+  "tool": "OpenAI built-in image_gen",
+  "use_case": "scientific-educational",
+  "portraits": [
+    {
+      "key": "duty_officer",
+      "file": "output/images/generated/personnel-duty-officer.png",
+      "original": "exec-5dbb6d5e-5f46-408b-bfbe-6386e4a4ba67.png",
+      "prompt": "Use case: scientific-educational. Asset type: a single personnel portrait to replace a stick figure in a Chinese university textbook use-case diagram. Create a photorealistic studio head-and-upper-torso portrait of a fictional Chinese water-monitoring duty officer, an adult man around 35 with neatly trimmed black hair, wearing a plain navy blue zip-front operations work jacket over a light gray shirt. Calm attentive expression, looking directly at camera, believable natural facial proportions and skin texture, realistic matte cotton fabric and seams. Front facing symmetrical centered composition, square image, head fully included with a little white clearance above, shoulders fully included, torso cropped just below chest, arms relaxed and hands outside image. Pure clean white background, diffuse professional neutral daylight, crisp natural photographic detail readable when printed 18 mm wide. No safety helmet indoors, no headset, no badge, no epaulets, no logos, no text, no labels, no symbols, no props, no diagram, no decorative border, no plastic 3D avatar look. This is a fictional educational rendering, not a real employee photograph."
+    },
+    {
+      "key": "analyst",
+      "file": "output/images/generated/personnel-analyst.png",
+      "original": "exec-ebbef2d3-403a-41dc-adf3-5ef8b3efe805.png",
+      "prompt": "Use case: scientific-educational. Asset type: a single personnel portrait for a Chinese university textbook use-case diagram. Create a photorealistic studio head-and-upper-torso portrait of a fictional Chinese engineering data analyst, an adult woman around 36 with neatly tied-back black hair, wearing a plain pale blue collared button shirt and a charcoal gray unstructured jacket. Calm attentive expression, looking directly at camera, believable natural facial proportions and skin texture, realistic matte woven fabric and neat seams, minimal natural makeup. Front facing centered composition, square image, head fully included with a little white clearance above, both shoulders fully included, torso cropped just below chest, arms relaxed and hands outside image. Pure clean white background, diffuse professional neutral daylight, crisp natural photographic detail readable when printed 18 mm wide. No safety helmet indoors, no headset, no badge, no logos, no epaulets, no jewelry, no text, no labels, no symbols, no props, no diagram, no decorative border, no plastic 3D avatar look. This is a fictional educational rendering, not a real employee photograph."
+    }
+  ],
+  "notation_source": "https://issues.omg.org/issues/task-force/UML25",
+  "notation_section": "UML25-426: 18.1.4 Notation, icons for Actors"
+}
