@@ -55,6 +55,14 @@ describe('质量码门禁', () => {
     expect(classify(0.95, 'unknown').evaluable).toBe(false);
   });
 
+  it.each(['toString', 'constructor', '__proto__'])('原型属性 %s 不是质量码', quality => {
+    expect(classify(0.95, quality)).toMatchObject({evaluable: false, level: WarningLevel.NONE});
+  });
+
+  it.each([Infinity, -Infinity, NaN])('非有限评分 %s 应为未评估', value => {
+    expect(classify(value, 'valid')).toMatchObject({evaluable: false, level: WarningLevel.NONE});
+  });
+
   it('有效但没有分数时也是未评估，不能当成无预警', () => {
     const r = classify(null, 'valid');
     expect(r.evaluable).toBe(false);
@@ -71,6 +79,14 @@ describe('综合评分', () => {
     expect(() => score([0.2, 0.8], [0.5, 0.6])).toThrow(/权重之和/);
     expect(() => score([0.2], [-1])).toThrow(/不能为负/);
     expect(() => score([0.2, 0.8], [1])).toThrow(/个数不一致/);
+  });
+
+  it.each([Infinity, -Infinity, NaN, '0.5'])('拒绝非有限数值指标 %s', value => {
+    expect(() => score([value], [1])).toThrow(/指标必须为有限数值/);
+  });
+
+  it.each([Infinity, -Infinity, NaN, '1'])('拒绝非有限数值权重 %s', weight => {
+    expect(() => score([0.5], [weight])).toThrow(/权重必须为有限数值/);
   });
 });
 

@@ -13,7 +13,7 @@ public class ReadingService {
 
     @Transactional(readOnly = true)
     public List<ReadingEntity> find(String assetId, OffsetDateTime from, OffsetDateTime to) {
-        return repository.findByIdAssetIdAndIdOccurredAtBetweenOrderByIdOccurredAt(assetId, from, to);
+        return repository.findInWindow(assetId, from, to);
     }
 
     /** 最新一条观测；对象存在但尚无观测时返回空，由控制层按契约转成 204。 */

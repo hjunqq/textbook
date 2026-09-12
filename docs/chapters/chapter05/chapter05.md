@@ -1494,7 +1494,7 @@ class JwtAuthenticationFilter extends OncePerRequestFilter {
 }
 ```
 
-JWT 密钥通过配置注入并以足够长度的 Base64 值提供。本章示例锁定 jjwt 0.11.x：`parseClaimsJws` 返回 Claims 之前已经完成签名验证，签名不合法会抛出异常，应用不能先手工解码 Base64 再“验证”字段。刷新流程若需要接受已过期的刷新令牌，只能在捕获`ExpiredJwtException`后读取其 Claims；由于解析器已经验证签名，随后还要检查`type=refresh`、issuer、audience、subject、jti 和服务端撤销状态，绝不能把过期 access token 当作刷新凭据。清单5.30给出 jjwt 0.11.x 的正确调用顺序，注意签名验证发生在读取任何 Claim 之前。
+JWT 密钥通过配置注入并以足够长度的 Base64 值提供。本章示例锁定 jjwt 0.11.x：`parseClaimsJws` 返回 Claims 之前已经完成签名验证，签名不合法会抛出异常，应用不能先手工解码 Base64 再“验证”字段。刷新凭据须在有效期内使用，校验签名、`type=refresh`、issuer、subject、jti 和服务端会话状态；到期后重新登录。访问令牌到期可以触发刷新请求，刷新令牌本身到期则拒绝签发新令牌。清单5.30给出 jjwt 0.11.x 的正确调用顺序，注意签名验证发生在读取任何 Claim 之前。
 
 **清单 5.30  jjwt 0.11.x 签名验证与访问令牌解析**
 
@@ -1504,17 +1504,30 @@ import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.io.Decoders;
 import javax.crypto.SecretKey;
 import java.util.List;
+import java.time.Clock;
+import org.springframework.stereotype.Service;
+import edu.example.lesson56.RefreshTokenVerifier;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 // JwtProperties 复用清单 lst:ch05-config-validation 中带
 // @Validated 启动校验的定义，此处不再重复声明
+
+@Configuration
+class JwtClockConfiguration {
+    @Bean
+    Clock jwtClock() { return Clock.systemUTC(); }
+}
 
 @Service
 class JwtService {
     private final SecretKey key;
     private final JwtProperties properties;
+    private final Clock clock;
 
-    JwtService(JwtProperties properties) {
+    JwtService(JwtProperties properties, Clock clock) {
         this.properties = properties;
+        this.clock = clock;
         this.key = Keys.hmacShaKeyFor(
                 Decoders.BASE64.decode(properties.secret()));
     }
@@ -1532,19 +1545,56 @@ class JwtService {
         return claims.get("permissions", List.class);
     }
 
-    /** 解析刷新令牌：签名必须有效，但允许令牌已过期（用于轮换）。 */
-    Claims parseRefreshAllowExpired(String token) {
-        Claims claims;
-        try {
-            claims = Jwts.parserBuilder().setSigningKey(key)
-                    .requireIssuer(properties.issuer()).build()
-                    .parseClaimsJws(token).getBody();
-        } catch (ExpiredJwtException expired) {
-            // 签名校验已通过才会走到过期分支，Claims 仍可信
-            claims = expired.getClaims();
-        }
-        if (!"refresh".equals(claims.get("type", String.class)))
-            throw new JwtException("token type is not refresh");
+    /** 刷新令牌的签名、声明和有效期统一交给完整校验器。 */
+    Claims parseRefresh(String token) {
+        return new RefreshTokenVerifier(key, properties.issuer(),
+                clock).parse(token);
+    }
+}
+```
+
+清单5.31给出完整校验器，文件位于配套后端的`edu.example.lesson56`包。运行`mvn -Dtest=RefreshTokenVerifierTest test`可观察有效令牌通过、到期及篡改令牌被拒绝；固定时钟使边界测试可复现。该工具不新增HTTP端点，轮换会话由后续持久化实践实现。
+
+**清单 5.31  拒绝到期刷新令牌的完整校验器**
+
+```java
+package edu.example.lesson56;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.Jwts;
+import java.time.Clock;
+import java.time.Instant;
+import java.util.Date;
+import java.util.Objects;
+import javax.crypto.SecretKey;
+
+/** jjwt 0.11.x：只验证刷新令牌，轮换与撤销记录由调用方在事务中处理。 */
+public final class RefreshTokenVerifier {
+    private final SecretKey key;
+    private final String issuer;
+    private final Clock clock;
+
+    public RefreshTokenVerifier(SecretKey key, String issuer, Clock clock) {
+        this.key = Objects.requireNonNull(key);
+        if (issuer == null || issuer.isBlank()) throw new IllegalArgumentException("issuer is required");
+        this.issuer = issuer;
+        this.clock = Objects.requireNonNull(clock);
+    }
+
+    public Claims parse(String token) {
+        Instant now = clock.instant();
+        Claims claims = Jwts.parserBuilder().setSigningKey(key)
+                .requireIssuer(issuer).require("type", "refresh")
+                .setClock(() -> Date.from(now)).build()
+                .parseClaimsJws(token).getBody();
+        Date expiry = claims.getExpiration();
+        if (expiry == null || !expiry.toInstant().isAfter(now))
+            throw new JwtException("refresh token must have a future expiration");
+        if (claims.getSubject() == null || claims.getSubject().isBlank())
+            throw new JwtException("refresh token subject is required");
+        if (claims.getId() == null || claims.getId().isBlank())
+            throw new JwtException("refresh token jti is required");
         return claims;
     }
 }
@@ -1565,7 +1615,7 @@ class JwtService {
 
 令牌的声明应最小化。`sub`标识用户或服务主体，`iss`限制签发者，`aud`限制使用方，`iat`和`exp`描述有效时间，`jti`用于撤销和审计，`type`区分 access 与 refresh，权限集合只携带授权决策需要的稳定代码。不要把身份证号、手机号、设备密钥或完整业务对象放入 JWT；JWT 是带签名的可读载荷，不是加密容器。
 
-**清单 5.31  jjwt 0.11.x 签发访问与刷新令牌**
+**清单 5.32  jjwt 0.11.x 签发访问与刷新令牌**
 
 ```java
 import io.jsonwebtoken.Jwts;
@@ -1605,9 +1655,9 @@ class TokenIssuer {
 }
 ```
 
-清单5.31用不同的 jti 生成访问与刷新令牌，刷新令牌不携带业务权限，减少权限变更后的残留窗口。签发时间由注入的时钟提供，测试可以固定`Instant`验证过期边界；生产环境要考虑设备与服务器时钟偏差，允许的时钟容差必须写入安全配置并监控。密钥轮换时保留短暂的旧密钥验证窗口，并给每个密钥版本设置撤销和淘汰日期。清单5.32把这些约束落到登录端点上：密码比对走`PasswordEncoder`，成功后一次签发访问令牌与刷新令牌。
+清单5.32用不同的 jti 生成访问与刷新令牌，刷新令牌不携带业务权限，减少权限变更后的残留窗口。签发时间由注入的时钟提供，测试可以固定`Instant`验证过期边界；生产环境要考虑设备与服务器时钟偏差，允许的时钟容差必须写入安全配置并监控。密钥轮换时保留短暂的旧密钥验证窗口，并给每个密钥版本设置撤销和淘汰日期。清单5.33把这些约束落到登录端点上：密码比对走`PasswordEncoder`，成功后一次签发访问令牌与刷新令牌。
 
-**清单 5.32  登录端点、密码校验与令牌签发**
+**清单 5.33  登录端点、密码校验与令牌签发**
 
 ```java
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -1648,14 +1698,26 @@ class LoginController {
 }
 ```
 
-密码只保存经过适当成本因子哈希后的结果，登录错误统一返回“凭据无效”，不区分用户名不存在还是密码错误，避免账号枚举。登录端点应有速率限制、失败计数和审计事件；密码重置、二次认证和设备绑定属于更高层的身份系统，不能用把字段塞进 JWT 的方式替代。刷新端点的检查比登录更容易写漏，清单5.33把三项必查列全：签名、`type`是否为`refresh`、旧 jti 是否已在轮换中作废。
+密码只保存经过适当成本因子哈希后的结果，登录错误统一返回“凭据无效”，不区分用户名不存在还是密码错误，避免账号枚举。登录端点应有速率限制、失败计数和审计事件；密码重置、二次认证和设备绑定属于更高层的身份系统，不能用把字段塞进 JWT 的方式替代。刷新端点的检查比登录更容易写漏，清单5.34把三项必查列全：签名、`type`是否为`refresh`、旧 jti 是否已在轮换中作废。
 
-**清单 5.33  刷新令牌的签名、类型和轮换检查**
+**清单 5.34  刷新令牌的签名、类型和轮换检查**
 
 ```java
 import io.jsonwebtoken.*;
 import java.time.Instant;
+import java.time.Clock;
+import org.springframework.security.authentication.BadCredentialsException;
 
+// 实现须以事务中的条件更新消费未过期且主体匹配的会话，返回旧会话；
+// 同一 jti 的并发调用至多一个成功。登录时也须登记新 refresh 会话。
+record RefreshSession(String subject, java.util.List<String> permissions) {}
+interface RefreshSessionRepository {
+    java.util.Optional<RefreshSession> consumeActive(
+        String jti, String subject, Instant now);
+    void saveActive(String jti, RefreshSession session, Instant expiresAt);
+}
+
+@org.springframework.stereotype.Service
 class RefreshService {
     private final JwtService jwtService;
     private final TokenIssuer issuer;
@@ -1673,23 +1735,28 @@ class RefreshService {
         this.clock = clock;
     }
 
+    @org.springframework.transaction.annotation.Transactional
     TokenPair refresh(String token) {
-        Claims claims = jwtService.parseRefreshAllowExpired(token);
+        Claims claims = jwtService.parseRefresh(token);
         String jti = claims.getId();
         if (jti == null || revocations.isRevoked(jti))
             throw new BadCredentialsException("刷新会话已撤销");
-        RefreshSession session = sessions.findActive(jti)
+        Instant now = Instant.now(clock);
+        RefreshSession session = sessions.consumeActive(jti, claims.getSubject(), now)
                 .orElseThrow(() -> new BadCredentialsException("刷新会话不存在"));
         revocations.revoke(jti, claims.getExpiration().toInstant());
-        return issuer.issue(session.subject(), session.permissions(),
-                Instant.now(clock));
+        TokenPair next = issuer.issue(session.subject(), session.permissions(), now);
+        Claims nextClaims = jwtService.parseRefresh(next.refreshToken());
+        sessions.saveActive(nextClaims.getId(), session,
+                nextClaims.getExpiration().toInstant());
+        return next;
     }
 }
 ```
 
-JWT 的声明字段、签名与校验语义以 RFC 7519 为规范依据<sup>[[38]](../../references.md#ref38)</sup>。刷新采用轮换策略：每次成功使用旧 refresh jti 后立即撤销，并生成新的 refresh jti；若同一旧令牌再次出现，系统可以判定重放并撤销整个会话族。解析过期刷新令牌时只允许捕获签名已验证的`ExpiredJwtException`，还要检查过期时间、issuer、type、jti 和服务端会话，不能使用`parseClaimsJwt`或手工拼接 Claims。
+JWT 的声明字段、签名与校验语义以 RFC 7519 为规范依据<sup>[[38]](../../references.md#ref38)</sup>。刷新采用轮换策略：每次成功使用旧 refresh jti 后立即撤销，并生成新的 refresh jti；若同一旧令牌再次出现，系统可以判定重放并撤销整个会话族。过期刷新令牌直接拒绝。会话仓储的`consumeActive`须以条件更新原子地消费旧会话，且在同一数据库事务中登记新会话；先查询再写Redis不能保证并发轮换唯一。该仓储由持久化练习实现，Redis撤销缓存不替代会话事实。
 
-**清单 5.34  基于 jti 与版本号的令牌撤销**
+**清单 5.35  基于 jti 与版本号的令牌撤销**
 
 ```java
 import java.time.Duration;
@@ -1714,17 +1781,16 @@ class RedisTokenRevocationService implements TokenRevocationService {
     }
 
     public void revoke(String jti, Instant expiresAt) {
-        long seconds = Math.max(1, Duration.between(
-                Instant.now(), expiresAt).getSeconds());
-        redis.opsForValue().set("jwt:revoked:" + jti, "1",
-                Duration.ofSeconds(seconds));
+        Duration remaining = Duration.between(Instant.now(), expiresAt);
+        if (!remaining.isNegative() && !remaining.isZero())
+            redis.opsForValue().set("jwt:revoked:" + jti, "1", remaining);
     }
 }
 ```
 
-清单5.34让撤销记录的 TTL 不超过原令牌剩余寿命，避免黑名单永久增长。高并发平台还可以使用用户令牌版本号：用户注销或改密时递增版本，过滤器比较令牌中的版本与当前账户版本；jti 黑名单适合撤销单个设备，版本号适合撤销用户全部会话，两者可以组合。撤销状态读取失败时要按安全策略拒绝请求或进入受限降级，不能把 Redis 不可达默认为“令牌有效”。过滤链解决“是谁”，方法级注解解决“能做什么”：清单5.35用`@PreAuthorize`把角色判断写在服务方法上，跨域策略集中在一处配置，不散落在各个控制器。
+清单5.35让撤销记录的 TTL 覆盖原令牌剩余寿命，避免黑名单永久增长。高并发平台还可以使用用户令牌版本号：用户注销或改密时递增版本，过滤器比较令牌中的版本与当前账户版本；jti 黑名单适合撤销单个设备，版本号适合撤销用户全部会话，两者可以组合。撤销状态读取失败时要按安全策略拒绝请求或进入受限降级，不能把 Redis 不可达默认为“令牌有效”。过滤链解决“是谁”，方法级注解解决“能做什么”：清单5.36用`@PreAuthorize`把角色判断写在服务方法上，跨域策略集中在一处配置，不散落在各个控制器。
 
-**清单 5.35  方法级权限与跨域策略**
+**清单 5.36  方法级权限与跨域策略**
 
 ```java
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -1837,9 +1903,9 @@ CORS 预检请求只是在浏览器侧询问“是否允许这个源访问”，
 
 先读5.4节事务基础与5.5节服务职责，能说明提交成功和处理成功的区别。
 
-同一应用进程内的领域事件可降低模块耦合。若处理必须在数据库事务成功后执行，应使用`@TransactionalEventListener`并指定`AFTER_COMMIT`，不能用普通`@EventListener`声称“提交后执行”。清单5.36用这个注解在观测入库提交之后才更新指标，事务回滚时监听器不会被触发，指标也就不会记录一条并不存在的观测。
+同一应用进程内的领域事件可降低模块耦合。若处理必须在数据库事务成功后执行，应使用`@TransactionalEventListener`并指定`AFTER_COMMIT`，不能用普通`@EventListener`声称“提交后执行”。清单5.37用这个注解在观测入库提交之后才更新指标，事务回滚时监听器不会被触发，指标也就不会记录一条并不存在的观测。
 
-**清单 5.36  事务提交后的指标事件监听**
+**清单 5.37  事务提交后的指标事件监听**
 
 ```java
 import org.springframework.context.event.EventListener;
@@ -1865,9 +1931,9 @@ class ReadingEventHandler {
 }
 ```
 
-跨服务通信必须使用网络可达的消息基础设施。清单5.37的 Kafka 监听器位于告警服务，消费数据服务发布的事件；它不是进程内事件监听器，两者的区别在于消息跨进程后必须自己处理重复投递。
+跨服务通信必须使用网络可达的消息基础设施。清单5.38的 Kafka 监听器位于告警服务，消费数据服务发布的事件；它不是进程内事件监听器，两者的区别在于消息跨进程后必须自己处理重复投递。
 
-**清单 5.37  Kafka 消息监听与告警评估**
+**清单 5.38  Kafka 消息监听与告警评估**
 
 ```java
 record ReadingMessage(String eventId, String assetId,
@@ -1900,7 +1966,7 @@ class AlertMessageListener {
 
 消息队列不是“异步就一定可靠”。生产者要处理发送失败、确认超时和序列化异常，消费者要处理重复投递、处理失败、顺序和重平衡；主题还要设置副本、保留时间、分区数和消费者组。事件体必须包含事件 ID、主体 ID、发生时间、模式版本和追踪 ID，不能只发送一个无法解释的数值。事件版本向后兼容时新增可选字段，破坏性变更发布新主题或新版本。
 
-**清单 5.38  Spring Kafka 生产与消费配置**
+**清单 5.39  Spring Kafka 生产与消费配置**
 
 ```yaml
 spring:
@@ -1926,13 +1992,13 @@ spring:
       concurrency: 3
 ```
 
-清单5.38把生产者确认设为`acks=all`并打开 Kafka 的幂等生产者，减少网络重试造成的重复记录；消费者关闭自动提交，让业务处理成功后再提交偏移量。`spring.json.trusted.packages`只允许教材事件包，不能为了省事写`*`，否则恶意消息可能诱导反序列化不应实例化的类型。生产配置还应通过机密变量注入 SASL、TLS 和凭据，日志不得输出连接密码。
+清单5.39把生产者确认设为`acks=all`并打开 Kafka 的幂等生产者，减少网络重试造成的重复记录；消费者关闭自动提交，让业务处理成功后再提交偏移量。`spring.json.trusted.packages`只允许教材事件包，不能为了省事写`*`，否则恶意消息可能诱导反序列化不应实例化的类型。生产配置还应通过机密变量注入 SASL、TLS 和凭据，日志不得输出连接密码。
 
 ### 5.7.2 生产者、事件模式与发送确认
 
 生产者把领域对象转换为事件 DTO，再通过`KafkaTemplate`发送。发送成功只表示 broker 接受并按确认策略写入，不表示消费者已经处理；因此接口若需要立即反馈，只返回本地保存结果和事件 ID，消费者处理状态通过状态查询或通知接口提供。发送回调记录分区、偏移量和耗时，失败进入重试或发件箱，而不是在 HTTP 线程中无限阻塞。
 
-**清单 5.39  KafkaTemplate 生产者与发送回调**
+**清单 5.40  KafkaTemplate 生产者与发送回调**
 
 ```java
 import org.springframework.kafka.core.KafkaTemplate;
@@ -1970,13 +2036,13 @@ class ReadingEventPublisher {
 }
 ```
 
-清单5.39使用测站 ID 作为消息键，使同一测站的事件在同一分区内保持顺序；分区数量和热点测站要通过压测评估。生产者不能在回调里直接修改主业务记录，因为回调可能在另一个线程执行且原事务早已结束；发送失败应写入可重试存储，后台任务按照退避策略再次发送。事件 ID 在数据库和消息体中保持一致，便于消费者去重和运维追踪。
+清单5.40使用测站 ID 作为消息键，使同一测站的事件在同一分区内保持顺序；分区数量和热点测站要通过压测评估。生产者不能在回调里直接修改主业务记录，因为回调可能在另一个线程执行且原事务早已结束；发送失败应写入可重试存储，后台任务按照退避策略再次发送。事件 ID 在数据库和消息体中保持一致，便于消费者去重和运维追踪。
 
 ### 5.7.3 消费者幂等与去重约束
 
 Kafka 至少一次投递意味着消费者可能在业务提交后、偏移量提交前崩溃，重启后再次收到同一消息。幂等处理要把“是否处理过”与业务写入放进同一个数据库事务，并用事件 ID 唯一约束作为并发闸门。先插入去重表，若违反唯一约束则返回“已处理”；插入成功后执行预警评估和状态更新，事务提交后再提交偏移量。只在内存 Set 中去重会在重启或多实例之间失效。
 
-**清单 5.40  事件去重表与消费者事务**
+**清单 5.41  事件去重表与消费者事务**
 
 ```java
 import jakarta.persistence.*;
@@ -2026,13 +2092,13 @@ class ReadingAlertConsumer {
 }
 ```
 
-清单5.40的去重表应设置保留窗口，覆盖消息最大重投和人工补发周期；过期清理必须与审计要求协调，不能在仍可能重投时删除记录。若业务更新跨越多个数据库或调用外部系统，去重记录、状态更新和外部副作用需要事务发件箱、幂等 API 或补偿流程共同保证。消费者组扩容只改变分区分配，不会自动消除重复消息。
+清单5.41的去重表应设置保留窗口，覆盖消息最大重投和人工补发周期；过期清理必须与审计要求协调，不能在仍可能重投时删除记录。若业务更新跨越多个数据库或调用外部系统，去重记录、状态更新和外部副作用需要事务发件箱、幂等 API 或补偿流程共同保证。消费者组扩容只改变分区分配，不会自动消除重复消息。
 
 ### 5.7.4 重试、退避与死信队列
 
 失败要先分类。网络瞬断、数据库连接暂时耗尽和下游503属于可重试错误，应使用有限次数、指数退避和抖动；JSON 格式错误、未知事件版本、违反业务约束属于不可重试错误，应立即进入死信并通知值班员。无限重试会让一个坏消息长期阻塞分区，重试主题或死信主题要保留原事件、异常类型、首次失败时间、重试次数和原始追踪 ID。
 
-**清单 5.41  DefaultErrorHandler 与死信发布**
+**清单 5.42  DefaultErrorHandler 与死信发布**
 
 ```java
 import org.apache.kafka.common.TopicPartition;
@@ -2064,13 +2130,13 @@ class KafkaErrorHandlingConfig {
 }
 ```
 
-清单5.41把不可重试异常直接送入死信，把瞬态异常限制在30秒窗口内。生产环境还要监控重试次数、死信增长、消费延迟和分区积压；死信处理界面允许专业分析员查看原因、修复数据后按原事件 ID 补发，补发仍经过去重约束。重试任务不能绕过认证和审计，也不能把死信内容原样展示给无权限用户。
+清单5.42把不可重试异常直接送入死信，把瞬态异常限制在30秒窗口内。生产环境还要监控重试次数、死信增长、消费延迟和分区积压；死信处理界面允许专业分析员查看原因、修复数据后按原事件 ID 补发，补发仍经过去重约束。重试任务不能绕过认证和审计，也不能把死信内容原样展示给无权限用户。
 
 ### 5.7.5 事务发件箱与可靠发布
 
-数据库提交和 Kafka 发送是两个资源，直接在事务中先保存再发送可能出现“数据库已提交、消息发送失败”，先发送再提交则可能出现“消息已消费、数据库回滚”。事务发件箱把待发送事件作为业务事务的一部分写入`outbox_event`表，提交后由发布器轮询或使用 CDC 读取，发送成功后更新状态。发布器崩溃可以从状态为 pending 的记录继续，消费者仍需幂等，因为发送确认和状态更新之间也可能重试。清单5.42分两段：写入段与业务数据同一个事务，发布段是独立的定时任务，两段之间只通过`outbox_event`表的状态字段交接。
+数据库提交和 Kafka 发送是两个资源，直接在事务中先保存再发送可能出现“数据库已提交、消息发送失败”，先发送再提交则可能出现“消息已消费、数据库回滚”。事务发件箱把待发送事件作为业务事务的一部分写入`outbox_event`表，提交后由发布器轮询或使用 CDC 读取，发送成功后更新状态。发布器崩溃可以从状态为 pending 的记录继续，消费者仍需幂等，因为发送确认和状态更新之间也可能重试。清单5.43分两段：写入段与业务数据同一个事务，发布段是独立的定时任务，两段之间只通过`outbox_event`表的状态字段交接。
 
-**清单 5.42  事务发件箱写入与发布任务**
+**清单 5.43  事务发件箱写入与发布任务**
 
 ```java
 import jakarta.persistence.*;
@@ -2172,9 +2238,9 @@ Kafka 主题由多个分区组成，分区是并行度和顺序边界。同一�
 
 单元测试关注一个类在依赖替身下的决策：例如服务层收到越界水位时是否拒绝写入、重复的幂等键是否返回同一结果、乐观锁冲突是否转换为409。它不启动 Servlet 容器，也不依赖真实网络。集成测试则验证多个边界的协作，包括 Spring MVC 参数绑定、Spring Security 过滤链、JPA 事务和 PostgreSQL 约束；这类测试允许启动应用上下文，但必须明确清理数据。端到端测试再覆盖 Kafka、Redis 或反向代理等外部依赖，数量应少而稳定，不能把所有业务分支都塞进一条慢测试。
 
-服务层的单元测试可以用 Mockito 构造仓储和时钟替身，重点断言“调用了什么”以及“拒绝了什么”。清单5.43给出一个可独立阅读的例子：测试使用固定时钟和明确的质量码，避免依赖当前时间导致偶发失败。异常断言应检查稳定的领域错误码，而不是绑定完整中文消息，这样日志文案调整不会破坏协议测试。
+服务层的单元测试可以用 Mockito 构造仓储和时钟替身，重点断言“调用了什么”以及“拒绝了什么”。清单5.44给出一个可独立阅读的例子：测试使用固定时钟和明确的质量码，避免依赖当前时间导致偶发失败。异常断言应检查稳定的领域错误码，而不是绑定完整中文消息，这样日志文案调整不会破坏协议测试。
 
-**清单 5.43  服务层单元测试：质量码与幂等决策**
+**清单 5.44  服务层单元测试：质量码与幂等决策**
 
 ```java
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -2226,9 +2292,9 @@ class ReadingCommandServiceTest {
 }
 ```
 
-接口集成测试使用`@SpringBootTest`加载真实配置和安全过滤链，再用`MockMvc`发出 HTTP 请求。测试配置应使用专门的 Profile，令牌签名密钥、数据库 URL 和 Kafka 地址全部由测试环境注入，禁止读取开发机的生产变量。清单5.44把四种最小场景写成独立测试方法，并验证响应体中的错误码；无权限场景必须真的经过过滤链，不能只调用控制器方法绕过授权。
+接口集成测试使用`@SpringBootTest`加载真实配置和安全过滤链，再用`MockMvc`发出 HTTP 请求。测试配置应使用专门的 Profile，令牌签名密钥、数据库 URL 和 Kafka 地址全部由测试环境注入，禁止读取开发机的生产变量。清单5.45把四种最小场景写成独立测试方法，并验证响应体中的错误码；无权限场景必须真的经过过滤链，不能只调用控制器方法绕过授权。
 
-**清单 5.44  MockMvc 接口测试：四种基础场景**
+**清单 5.45  MockMvc 接口测试：四种基础场景**
 
 ```java
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -2284,14 +2350,14 @@ class ReadingControllerIT {
                 .with(SecurityMockMvcRequestPostProcessors.user("analyst")
                         .roles("ANALYST")))
             .andExpect(status().isNotFound())
-            .andExpect(jsonPath("$.code").value("STATION_NOT_FOUND"));
+            .andExpect(jsonPath("$.code").value("ASSET_NOT_FOUND"));
     }
 }
 ```
 
-Testcontainers 用一次性容器提供接近生产版本的 PostgreSQL、Redis 或 Kafka，避免开发机服务残留造成“本地通过、流水线失败”。容器启动后先执行版本化迁移，再插入最小数据集；每个测试用例使用事务回滚或唯一的测试批次 ID 清理数据，不能依赖测试执行顺序。清单5.45展示 PostgreSQL 容器与 Spring 测试属性的绑定；CI 应缓存镜像层但不缓存业务数据，容器退出时收集日志和数据库诊断信息。
+Testcontainers 用一次性容器提供接近生产版本的 PostgreSQL、Redis 或 Kafka，避免开发机服务残留造成“本地通过、流水线失败”。容器启动后先执行版本化迁移，再插入最小数据集；每个测试用例使用事务回滚或唯一的测试批次 ID 清理数据，不能依赖测试执行顺序。清单5.46展示 PostgreSQL 容器与 Spring 测试属性的绑定；CI 应缓存镜像层但不缓存业务数据，容器退出时收集日志和数据库诊断信息。
 
-**清单 5.45  Testcontainers：隔离 PostgreSQL 集成环境**
+**清单 5.46  Testcontainers：隔离 PostgreSQL 集成环境**
 
 ```java
 import org.junit.jupiter.api.AfterEach;
@@ -2409,7 +2475,7 @@ class ReadingRepositoryIT {
 
 12. 比较`@TransactionalEventListener(AFTER_COMMIT)`与Kafka监听器的适用范围。
 
-13. 设计JWT密钥管理和刷新流程，说明如何在验证`type=refresh`、`issuer`和`jti`后处理过期刷新令牌，并用 Redis TTL 撤销记录与令牌轮换防止重放。
+13. 设计JWT密钥管理和刷新流程，说明如何校验`type=refresh`、`issuer`、`jti`及有效期，并拒绝过期刷新令牌，并用 Redis TTL 撤销记录与令牌轮换防止重放。
 
 14. 
 

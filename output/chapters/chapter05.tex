@@ -1501,7 +1501,7 @@ class JwtAuthenticationFilter extends OncePerRequestFilter {
 }
 \end{lstlisting}
 
-JWT 密钥通过配置注入并以足够长度的 Base64 值提供。本章示例锁定 jjwt 0.11.x：\texttt{parseClaimsJws} 返回 Claims 之前已经完成签名验证，签名不合法会抛出异常，应用不能先手工解码 Base64 再“验证”字段。刷新流程若需要接受已过期的刷新令牌，只能在捕获\texttt{ExpiredJwtException}后读取其 Claims；由于解析器已经验证签名，随后还要检查\texttt{type=refresh}、issuer、audience、subject、jti 和服务端撤销状态，绝不能把过期 access token 当作刷新凭据。清单\ref{lst:ch05-jwt-parse}给出 jjwt 0.11.x 的正确调用顺序，注意签名验证发生在读取任何 Claim 之前。
+JWT 密钥通过配置注入并以足够长度的 Base64 值提供。本章示例锁定 jjwt 0.11.x：\texttt{parseClaimsJws} 返回 Claims 之前已经完成签名验证，签名不合法会抛出异常，应用不能先手工解码 Base64 再“验证”字段。刷新凭据须在有效期内使用，校验签名、\texttt{type=refresh}、issuer、subject、jti 和服务端会话状态；到期后重新登录。访问令牌到期可以触发刷新请求，刷新令牌本身到期则拒绝签发新令牌。清单\ref{lst:ch05-jwt-parse}给出 jjwt 0.11.x 的正确调用顺序，注意签名验证发生在读取任何 Claim 之前。
 
 \begin{lstlisting}[label={lst:ch05-jwt-parse},language=Java,caption={jjwt 0.11.x 签名验证与访问令牌解析}]
 import io.jsonwebtoken.*;
@@ -1509,17 +1509,30 @@ import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.io.Decoders;
 import javax.crypto.SecretKey;
 import java.util.List;
+import java.time.Clock;
+import org.springframework.stereotype.Service;
+import edu.example.lesson56.RefreshTokenVerifier;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 // JwtProperties 复用清单 lst:ch05-config-validation 中带
 // @Validated 启动校验的定义，此处不再重复声明
+
+@Configuration
+class JwtClockConfiguration {
+    @Bean
+    Clock jwtClock() { return Clock.systemUTC(); }
+}
 
 @Service
 class JwtService {
     private final SecretKey key;
     private final JwtProperties properties;
+    private final Clock clock;
 
-    JwtService(JwtProperties properties) {
+    JwtService(JwtProperties properties, Clock clock) {
         this.properties = properties;
+        this.clock = clock;
         this.key = Keys.hmacShaKeyFor(
                 Decoders.BASE64.decode(properties.secret()));
     }
@@ -1537,19 +1550,54 @@ class JwtService {
         return claims.get("permissions", List.class);
     }
 
-    /** 解析刷新令牌：签名必须有效，但允许令牌已过期（用于轮换）。 */
-    Claims parseRefreshAllowExpired(String token) {
-        Claims claims;
-        try {
-            claims = Jwts.parserBuilder().setSigningKey(key)
-                    .requireIssuer(properties.issuer()).build()
-                    .parseClaimsJws(token).getBody();
-        } catch (ExpiredJwtException expired) {
-            // 签名校验已通过才会走到过期分支，Claims 仍可信
-            claims = expired.getClaims();
-        }
-        if (!"refresh".equals(claims.get("type", String.class)))
-            throw new JwtException("token type is not refresh");
+    /** 刷新令牌的签名、声明和有效期统一交给完整校验器。 */
+    Claims parseRefresh(String token) {
+        return new RefreshTokenVerifier(key, properties.issuer(),
+                clock).parse(token);
+    }
+}
+\end{lstlisting}
+
+清单\ref{lst:ch05-refresh-verifier}给出完整校验器，文件位于配套后端的\texttt{edu.example.lesson56}包。运行\texttt{mvn -Dtest=RefreshTokenVerifierTest test}可观察有效令牌通过、到期及篡改令牌被拒绝；固定时钟使边界测试可复现。该工具不新增HTTP端点，轮换会话由后续持久化实践实现。
+
+\begin{lstlisting}[label={lst:ch05-refresh-verifier},language=Java,breaklines=true,caption={拒绝到期刷新令牌的完整校验器}]
+package edu.example.lesson56;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.Jwts;
+import java.time.Clock;
+import java.time.Instant;
+import java.util.Date;
+import java.util.Objects;
+import javax.crypto.SecretKey;
+
+/** jjwt 0.11.x：只验证刷新令牌，轮换与撤销记录由调用方在事务中处理。 */
+public final class RefreshTokenVerifier {
+    private final SecretKey key;
+    private final String issuer;
+    private final Clock clock;
+
+    public RefreshTokenVerifier(SecretKey key, String issuer, Clock clock) {
+        this.key = Objects.requireNonNull(key);
+        if (issuer == null || issuer.isBlank()) throw new IllegalArgumentException("issuer is required");
+        this.issuer = issuer;
+        this.clock = Objects.requireNonNull(clock);
+    }
+
+    public Claims parse(String token) {
+        Instant now = clock.instant();
+        Claims claims = Jwts.parserBuilder().setSigningKey(key)
+                .requireIssuer(issuer).require("type", "refresh")
+                .setClock(() -> Date.from(now)).build()
+                .parseClaimsJws(token).getBody();
+        Date expiry = claims.getExpiration();
+        if (expiry == null || !expiry.toInstant().isAfter(now))
+            throw new JwtException("refresh token must have a future expiration");
+        if (claims.getSubject() == null || claims.getSubject().isBlank())
+            throw new JwtException("refresh token subject is required");
+        if (claims.getId() == null || claims.getId().isBlank())
+            throw new JwtException("refresh token jti is required");
         return claims;
     }
 }
@@ -1669,7 +1717,19 @@ class LoginController {
 \begin{lstlisting}[label={lst:ch05-jwt-refresh},language=Java,caption={刷新令牌的签名、类型和轮换检查}]
 import io.jsonwebtoken.*;
 import java.time.Instant;
+import java.time.Clock;
+import org.springframework.security.authentication.BadCredentialsException;
 
+// 实现须以事务中的条件更新消费未过期且主体匹配的会话，返回旧会话；
+// 同一 jti 的并发调用至多一个成功。登录时也须登记新 refresh 会话。
+record RefreshSession(String subject, java.util.List<String> permissions) {}
+interface RefreshSessionRepository {
+    java.util.Optional<RefreshSession> consumeActive(
+        String jti, String subject, Instant now);
+    void saveActive(String jti, RefreshSession session, Instant expiresAt);
+}
+
+@org.springframework.stereotype.Service
 class RefreshService {
     private final JwtService jwtService;
     private final TokenIssuer issuer;
@@ -1687,21 +1747,26 @@ class RefreshService {
         this.clock = clock;
     }
 
+    @org.springframework.transaction.annotation.Transactional
     TokenPair refresh(String token) {
-        Claims claims = jwtService.parseRefreshAllowExpired(token);
+        Claims claims = jwtService.parseRefresh(token);
         String jti = claims.getId();
         if (jti == null || revocations.isRevoked(jti))
             throw new BadCredentialsException("刷新会话已撤销");
-        RefreshSession session = sessions.findActive(jti)
+        Instant now = Instant.now(clock);
+        RefreshSession session = sessions.consumeActive(jti, claims.getSubject(), now)
                 .orElseThrow(() -> new BadCredentialsException("刷新会话不存在"));
         revocations.revoke(jti, claims.getExpiration().toInstant());
-        return issuer.issue(session.subject(), session.permissions(),
-                Instant.now(clock));
+        TokenPair next = issuer.issue(session.subject(), session.permissions(), now);
+        Claims nextClaims = jwtService.parseRefresh(next.refreshToken());
+        sessions.saveActive(nextClaims.getId(), session,
+                nextClaims.getExpiration().toInstant());
+        return next;
     }
 }
 \end{lstlisting}
 
-JWT 的声明字段、签名与校验语义以 RFC 7519 为规范依据\cite{rfc7519}。刷新采用轮换策略：每次成功使用旧 refresh jti 后立即撤销，并生成新的 refresh jti；若同一旧令牌再次出现，系统可以判定重放并撤销整个会话族。解析过期刷新令牌时只允许捕获签名已验证的\texttt{ExpiredJwtException}，还要检查过期时间、issuer、type、jti 和服务端会话，不能使用\texttt{parseClaimsJwt}或手工拼接 Claims。
+JWT 的声明字段、签名与校验语义以 RFC 7519 为规范依据\cite{rfc7519}。刷新采用轮换策略：每次成功使用旧 refresh jti 后立即撤销，并生成新的 refresh jti；若同一旧令牌再次出现，系统可以判定重放并撤销整个会话族。过期刷新令牌直接拒绝。会话仓储的\texttt{consumeActive}须以条件更新原子地消费旧会话，且在同一数据库事务中登记新会话；先查询再写Redis不能保证并发轮换唯一。该仓储由持久化练习实现，Redis撤销缓存不替代会话事实。
 
 \begin{lstlisting}[label={lst:ch05-revocation},language=Java,caption={基于 jti 与版本号的令牌撤销}]
 import java.time.Duration;
@@ -1726,15 +1791,14 @@ class RedisTokenRevocationService implements TokenRevocationService {
     }
 
     public void revoke(String jti, Instant expiresAt) {
-        long seconds = Math.max(1, Duration.between(
-                Instant.now(), expiresAt).getSeconds());
-        redis.opsForValue().set("jwt:revoked:" + jti, "1",
-                Duration.ofSeconds(seconds));
+        Duration remaining = Duration.between(Instant.now(), expiresAt);
+        if (!remaining.isNegative() && !remaining.isZero())
+            redis.opsForValue().set("jwt:revoked:" + jti, "1", remaining);
     }
 }
 \end{lstlisting}
 
-清单\ref{lst:ch05-revocation}让撤销记录的 TTL 不超过原令牌剩余寿命，避免黑名单永久增长。高并发平台还可以使用用户令牌版本号：用户注销或改密时递增版本，过滤器比较令牌中的版本与当前账户版本；jti 黑名单适合撤销单个设备，版本号适合撤销用户全部会话，两者可以组合。撤销状态读取失败时要按安全策略拒绝请求或进入受限降级，不能把 Redis 不可达默认为“令牌有效”。过滤链解决“是谁”，方法级注解解决“能做什么”：清单\ref{lst:ch05-method-security}用\texttt{@PreAuthorize}把角色判断写在服务方法上，跨域策略集中在一处配置，不散落在各个控制器。
+清单\ref{lst:ch05-revocation}让撤销记录的 TTL 覆盖原令牌剩余寿命，避免黑名单永久增长。高并发平台还可以使用用户令牌版本号：用户注销或改密时递增版本，过滤器比较令牌中的版本与当前账户版本；jti 黑名单适合撤销单个设备，版本号适合撤销用户全部会话，两者可以组合。撤销状态读取失败时要按安全策略拒绝请求或进入受限降级，不能把 Redis 不可达默认为“令牌有效”。过滤链解决“是谁”，方法级注解解决“能做什么”：清单\ref{lst:ch05-method-security}用\texttt{@PreAuthorize}把角色判断写在服务方法上，跨域策略集中在一处配置，不散落在各个控制器。
 
 \begin{lstlisting}[label={lst:ch05-method-security},language=Java,caption={方法级权限与跨域策略}]
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -2266,7 +2330,7 @@ class ReadingControllerIT {
                 .with(SecurityMockMvcRequestPostProcessors.user("analyst")
                         .roles("ANALYST")))
             .andExpect(status().isNotFound())
-            .andExpect(jsonPath("$.code").value("STATION_NOT_FOUND"));
+            .andExpect(jsonPath("$.code").value("ASSET_NOT_FOUND"));
     }
 }
 \end{lstlisting}
@@ -2390,7 +2454,7 @@ FastAPI & 类型提示驱动的 API、异步 I/O 或需要自动 OpenAPI 文档�
 \item 解释为什么同Bean事务自调用可能失效，并给出两种改进思路。
 \item 设计测站最新水位查询与监测值写入接口，列出方法、路径和主要状态码。
 \item 比较\texttt{@TransactionalEventListener(AFTER\_COMMIT)}与Kafka监听器的适用范围。
-\item 设计JWT密钥管理和刷新流程，说明如何在验证\texttt{type=refresh}、\texttt{issuer}和\texttt{jti}后处理过期刷新令牌，并用 Redis TTL 撤销记录与令牌轮换防止重放。
+\item 设计JWT密钥管理和刷新流程，说明如何校验\texttt{type=refresh}、\texttt{issuer}、\texttt{jti}及有效期，并拒绝过期刷新令牌，并用 Redis TTL 撤销记录与令牌轮换防止重放。
 
 \item[\textbf{实践题}]
 \item 使用Spring Boot实现本章章末交付物；所有单元测试和接口测试均须包含正常、参数错误、无权限和资源不存在场景。

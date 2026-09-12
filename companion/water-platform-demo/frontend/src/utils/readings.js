@@ -1,4 +1,5 @@
 // 与图表和列表共享的纯函数，便于单元测试（vitest）
+import {parseInstantMs} from '../../../shared/time.mjs';
 
 export const qualityText = {valid: '有效', suspect: '可疑', missing: '缺测'};
 
@@ -13,6 +14,9 @@ export function toChartPoints(readings) {
 /** 观测查询参数：左闭右开时间窗，时间必须是 ISO 8601 字符串。 */
 export function readingQuery(range) {
   if (!range?.from || !range?.to) throw new Error('时间窗 from/to 不能为空');
-  if (range.from >= range.to) throw new Error('时间窗起点必须早于终点');
+  const from = parseInstantMs(range.from), to = parseInstantMs(range.to);
+  if (!Number.isFinite(from) || !Number.isFinite(to))
+    throw new Error('时间窗 from/to 必须是带时区的 ISO-8601 时间');
+  if (from >= to) throw new Error('时间窗起点必须早于终点');
   return {from: range.from, to: range.to};
 }

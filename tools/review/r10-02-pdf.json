@@ -1,0 +1,29 @@
+{
+  "pages": 479,
+  "samples": {
+    "登录成功后的安全回跳": {
+      "physical_page": 176,
+      "image": "temp/r10-02-pdf-176.png"
+    },
+    "拒绝到期刷新令牌的完整校验器": {
+      "physical_page": 232,
+      "image": "temp/r10-02-pdf-232.png"
+    },
+    "按采样周期对齐水位": {
+      "physical_page": 309,
+      "image": "temp/r10-02-pdf-309.png"
+    },
+    "展示前的质量检验与优先级合并": {
+      "physical_page": 313,
+      "image": "temp/r10-02-pdf-313.png"
+    },
+    "标准化、质量检验与重采样的完整调用": {
+      "physical_page": 315,
+      "image": "temp/r10-02-pdf-315.png"
+    },
+    "统一预警等级与处置要求": {
+      "physical_page": 397,
+      "image": "temp/r10-02-pdf-397.png"
+    }
+  }
+}

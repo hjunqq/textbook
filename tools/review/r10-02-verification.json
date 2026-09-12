@@ -1,0 +1,145 @@
+{
+  "package": "R10-02",
+  "date": "2026-09-12",
+  "base_commit": "e4e1597",
+  "chapters": [
+    {
+      "file": "preface.tex",
+      "before": 4812,
+      "after": 4812,
+      "delta": 0
+    },
+    {
+      "file": "chapter01.tex",
+      "before": 14080,
+      "after": 14080,
+      "delta": 0
+    },
+    {
+      "file": "chapter02.tex",
+      "before": 23352,
+      "after": 23352,
+      "delta": 0
+    },
+    {
+      "file": "chapter03.tex",
+      "before": 35771,
+      "after": 35771,
+      "delta": 0
+    },
+    {
+      "file": "chapter04.tex",
+      "before": 29852,
+      "after": 29975,
+      "delta": 123
+    },
+    {
+      "file": "chapter05.tex",
+      "before": 29301,
+      "after": 29412,
+      "delta": 111
+    },
+    {
+      "file": "chapter06.tex",
+      "before": 30472,
+      "after": 30472,
+      "delta": 0
+    },
+    {
+      "file": "chapter07.tex",
+      "before": 22452,
+      "after": 22521,
+      "delta": 69
+    },
+    {
+      "file": "chapter08.tex",
+      "before": 41775,
+      "after": 41806,
+      "delta": 31
+    },
+    {
+      "file": "chapter09.tex",
+      "before": 6219,
+      "after": 6219,
+      "delta": 0
+    }
+  ],
+  "total_before": 238086,
+  "total_after": 238420,
+  "frontend_tests": {
+    "files": 11,
+    "passed": 112,
+    "failed": 0
+  },
+  "backend_tests": [
+    {
+      "name": "edu.example.lesson56.RefreshTokenVerifierTest",
+      "tests": "14",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "edu.example.qingyuan.JwtServiceTest",
+      "tests": "3",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "edu.example.qingyuan.ReadingEventJsonTest",
+      "tests": "2",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "edu.example.qingyuan.ReadingWindowTest",
+      "tests": "3",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    }
+  ],
+  "listing_pairs": 23,
+  "listing_allowed_lines": 11,
+  "teaching_contract": {
+    "passed": 27,
+    "failed": 0
+  },
+  "teaching_closed_loop": {
+    "passed": 20,
+    "failed": 0
+  },
+  "browser": {
+    "checks": 12,
+    "page_errors": 0
+  },
+  "exercise_numbering": {
+    "questions": 110,
+    "answers": 110
+  },
+  "boundaries": [
+    "H2查询测试验证JPQL边界，不代替PostgreSQL/TimescaleDB整栈验收",
+    "14项刷新测试验证完整校验器，不宣称提供持久化轮换端点",
+    "Java21宿主编译source/target17；未在本轮另跑Java17宿主",
+    "23组清单一致性检查不能外推为所有印刷清单已运行"
+  ],
+  "full_build": "passed",
+  "pdf_pages": 479,
+  "site_strict": "passed",
+  "final_compile_log": {
+    "errors": 0,
+    "overfull": 0,
+    "missing_characters": 0,
+    "undefined": 0
+  },
+  "pdf_samples": [
+    176,
+    232,
+    309,
+    313,
+    315,
+    397
+  ]
+}

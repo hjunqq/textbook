@@ -166,64 +166,94 @@ LTTB适合视觉浏览，不应用其结果替代原始数据计算统计指标�
 实现重采样时要区分瞬时量、区间量和状态量。水位和渗压是近似瞬时量，短时间缺一两个点可以标记为缺测，只有在业务规则允许时才可插值；雨量记录常常表示一个区间内的增量，重采样应求和，不能把两个累计端点的差值再次求和；网关在线状态是离散状态，只能采用前值保持并记录状态持续时间。任何插值都必须在结果中保留\texttt{derived=true}、原始点范围和算法版本，以便历史回放时区分原始观测与推算值。
 
 \begin{lstlisting}[label={lst:ch07-resample-align},language=JavaScript,breaklines=true,caption={按采样周期对齐水位、渗压与雨量记录}]
-const FIVE_MIN = 5 * 60 * 1000;
-const HOUR = 60 * 60 * 1000;
+import {parseInstantMs} from '../../../shared/time.mjs';
 
-function floorToGrid(iso, gridMs) {
-  const ms = Date.parse(iso);
-  return new Date(Math.floor(ms / gridMs) * gridMs).toISOString();
-}
-
-function alignReadings(readings, gridMs, kind) {
-  const buckets = new Map();
+export function alignReadings(readings, gridMs, kind, sampleMs) {
+  if (!Number.isSafeInteger(gridMs) || gridMs <= 0) throw new Error('格网须为正整数毫秒');
+  if (!['level', 'porePressure', 'rainfall'].includes(kind)) throw new Error('未知测项');
+  const isRain = kind === 'rainfall';
+  if (isRain && (!Number.isSafeInteger(sampleMs) || sampleMs <= 0
+      || gridMs % sampleMs !== 0)) throw new Error('雨量采样周期须整除格网');
+  const buckets = new Map(), times = new Set();
+  const first = readings[0];
   for (const r of readings) {
-    const t = floorToGrid(r.occurredAt, gridMs);
-    const row = buckets.get(t) ?? {time: t, values: [], quality: 'valid'};
-    row.values.push(r);
-    // 桶内质量按 suspect 优先合并；missing 是否成立要等取值后判断
-    if (r.quality === 'suspect') row.quality = 'suspect';
-    buckets.set(t, row);
+    if (!r.assetId || !r.unit || !Number.isInteger(r.version) || r.version < 1
+        || r.assetId !== first.assetId || r.unit !== first.unit
+        || r.version !== first.version) throw new Error('须为同一对象、单位和版本');
+    if (!['valid', 'suspect', 'missing'].includes(r.quality)) throw new Error('未知质量码');
+    const ms = parseInstantMs(r.occurredAt);
+    if (!Number.isFinite(ms)) throw new Error('观测时间须为带时区的有效时间');
+    if (times.has(ms)) throw new Error('重复观测时间，请先解决重复记录');
+    times.add(ms);
+    if (isRain && ms % sampleMs !== 0) throw new Error('雨量时间须位于采样格网上');
+    const start = Math.floor(ms / gridMs) * gridMs;
+    const rows = buckets.get(start) ?? [];
+    rows.push({...r, ms});
+    buckets.set(start, rows);
   }
-  return [...buckets.values()].sort((a, b) => a.time.localeCompare(b.time))
-    .map(row => {
-      const values = row.values.map(v => v.value).filter(Number.isFinite);
-      // 桶内没有任何可用数值才是 missing；有值时质量取合并结果
-      if (values.length === 0) return {...row, value: null, quality: 'missing'};
-      const value = kind === 'rainfall'
-        ? values.reduce((sum, v) => sum + v, 0)
-        : values.at(-1);   // 状态量与连续量都取最近一条可用观测
-      return {...row, value, aggregated: values.length > 1, gridMs};
-    });
+  return [...buckets].sort(([a], [b]) => a - b).map(([start, rows]) => {
+    rows.sort((a, b) => a.ms - b.ms);
+    const usable = rows.filter(r => r.quality !== 'missing'
+      && Number.isFinite(r.value) && !r.rejected);
+    const expectedSamples = isRain ? gridMs / sampleMs : null;
+    const complete = !isRain || usable.length === expectedSamples;
+    const clean = rows.every(r => r.quality === 'valid'
+      && Number.isFinite(r.value) && !r.rejected);
+    const value = usable.length === 0 ? null : isRain
+      ? usable.reduce((sum, r) => sum + r.value, 0) : usable.at(-1).value;
+    if (value !== null && !Number.isFinite(value)) throw new Error('聚合结果溢出');
+    return {assetId: first.assetId, unit: first.unit, version: first.version,
+      time: new Date(start).toISOString(), value, gridMs, expectedSamples,
+      sampleCount: usable.length, aggregated: true,
+      quality: !usable.length ? 'missing' : complete && clean ? 'valid' : 'suspect'};
+  });
 }
-
-const level5m = alignReadings(levelReadings, FIVE_MIN, 'level');
-const rain1h = alignReadings(rainReadings, HOUR, 'rainfall');
-const pore1h = alignReadings(poreReadings, HOUR, 'porePressure');
 \end{lstlisting}
 
-清单\ref{lst:ch07-resample-align}只演示格网与聚合的最小闭环，生产实现还应把单位、时区、传感器时钟偏差和来源版本写入结果。若某小时只有一条雨量增量，不能把它当作整小时完整累计；若渗压在5\,min格网中重复显示，图例应标注“最近观测”，并显示观测年龄。这样读者看到一条平直的渗压曲线时，知道它可能是采样周期造成的保持值，而不是传感器在每5\,min都真的采集了新值。
+清单\ref{lst:ch07-resample-align}保存为\texttt{frontend/src/lesson71/resample.js}，只处理同一对象、单位和观测版本中已有输入的桶，不自动生成缺桶。先按实际时刻排序，再取最近可用值；缺测、非有限数和拒收记录均排除，同一时刻重复记录直接报错。雨量输入以时段起点标时，\texttt{sampleMs}给出原始周期；缺少任一时段时，部分累计标为suspect。渗压若在5\,min格网中保持显示，图例仍须标注最近观测时间与年龄。
 
-事件时间\texttt{occurredAt}表示传感器实际观测时间，处理时间\texttt{ingestTime}表示平台收到消息的时间。网络抖动、网关缓存和重试会使二者相差数分钟甚至更久，排序和绘图必须使用事件时间；处理延迟监控则使用处理时间。流处理器可以设置水印，表示在水印之前到达的记录可以参与当前窗口，超过水印的迟到记录进入修订队列，不直接覆盖已经确认的预警。修订后的图形要显示“迟到修订”标记并保留前后版本，避免值班员误以为系统曾经实时看到过后来补传的数据。
+事件时间\texttt{occurredAt}表示传感器实际观测时间，处理时间\texttt{ingestTime}表示平台收到消息的时间。网络抖动、网关缓存和重试会使二者相差数分钟甚至更久，排序和绘图必须使用事件时间；处理延迟监控则使用处理时间。水印表示事件时间的处理进度。本例以已见最大事件时间减去乱序容忍度推进水印；新记录的事件时间早于此前水印时进入修订队列，其余记录参与当前窗口，不直接覆盖已经确认的预警。修订后的图形要显示“迟到修订”标记并保留前后版本，避免值班员误以为系统曾经实时看到过后来补传的数据。
 
 \begin{lstlisting}[label={lst:ch07-event-time-window},language=JavaScript,breaklines=true,caption={按事件时间维护带水印的滑动窗口}]
-function acceptEvent(state, reading, nowMs, allowedLatenessMs) {
-  const eventMs = Date.parse(reading.occurredAt);
-  const ingestMs = Date.parse(reading.ingestTime);
-  const watermark = nowMs - allowedLatenessMs;
-  const item = {...reading, eventMs, ingestMs, late: eventMs < watermark};
-  if (item.late) state.revisions.push(item);
-  else state.events.push(item);
-  state.events.sort((a, b) => a.eventMs - b.eventMs);
-  const start = watermark - state.windowMs;
-  state.events = state.events.filter(e => e.eventMs >= start);
-  return {events: state.events, revisions: state.revisions};
+import {parseInstantMs} from '../../../shared/time.mjs';
+
+export function createEventWindow(windowMs, allowedLatenessMs) {
+  if (!Number.isFinite(windowMs) || windowMs <= 0
+      || !Number.isFinite(allowedLatenessMs) || allowedLatenessMs < 0)
+    throw new Error('窗口长度须为正数，乱序容忍度须为非负数');
+  return {windowMs, allowedLatenessMs, maxEventMs: -Infinity,
+    watermark: -Infinity, events: [], revisions: []};
 }
 
-const streamState = {windowMs: 25 * 60 * 60 * 1000, events: [], revisions: []};
-const view = acceptEvent(streamState, reading, Date.now(), 10 * 60 * 1000);
+export function acceptEvent(state, reading) {
+  const eventMs = parseInstantMs(reading.occurredAt);
+  const ingestMs = parseInstantMs(reading.ingestTime);
+  if (!Number.isFinite(eventMs) || !Number.isFinite(ingestMs))
+    throw new Error('观测与接收时间必须有效且带时区');
+  // 用此前的水印判断迟到；处理时间只用于测量延迟。
+  const item = {...reading, eventMs, ingestMs, late: eventMs < state.watermark};
+  if (item.late) state.revisions.push(item);
+  else state.events.push(item);
+  state.maxEventMs = Math.max(state.maxEventMs, eventMs);
+  state.watermark = state.maxEventMs - state.allowedLatenessMs;
+  const start = state.maxEventMs - state.windowMs;
+  state.events = state.events.filter(e => e.eventMs >= start)
+    .sort((a, b) => a.eventMs - b.eventMs);
+  return {events: state.events, revisions: state.revisions,
+    watermark: state.watermark};
+}
+
+export function windowExample() {
+  const state = createEventWindow(25 * 60 * 60 * 1000, 10 * 60 * 1000);
+  const reading = {assetId: 'DAM-A-PZ-07', occurredAt: '2026-07-01T00:20:00Z',
+    ingestTime: '2026-09-12T00:00:00Z', value: 185.091, quality: 'valid'};
+  acceptEvent(state, reading);
+  return acceptEvent(state, {...reading, occurredAt: '2026-07-01T00:05:00Z'});
+}
+console.log(windowExample().revisions.length); // 输出 1：历史回放中一次过迟事件
 \end{lstlisting}
 
-清单\ref{lst:ch07-event-time-window}中的25\,h窗口来自“300个水位点×5\,min”的教学约定。它是计数窗口与时间窗口恰好接近的示例，不代表所有测项都可照抄：渗压每1\,h采样时，300点约等于12.5天；若需求是“最近24小时”，就必须按时间戳裁剪，而不能只写\texttt{slice(-300)}。接口应同时声明\texttt{windowType=count|duration}、窗口长度、时区和迟到容忍度，前端据此在标题中显示“300点（约25小时）”或“24小时”。
+清单\ref{lst:ch07-event-time-window}对应配套\texttt{src/lesson71/event-window.js}，从前端目录执行\texttt{node src/lesson71/event-window.js}输出1：第二条事件早于水印，进入修订队列。把接收日期改成当前日期，历史事件仍按原时间回放；使用接收墙钟作为水印则会把整批历史数据误判为迟到。该演示只有一个事件流，修订队列供课堂检查；工程实现另需持久化、去重、异常未来时间检查与多流空闲处理。清单中的25\,h窗口来自“300个水位点×5\,min”的教学约定。它是计数窗口与时间窗口恰好接近的示例，不代表所有测项都可照抄：渗压每1\,h采样时，300点约等于12.5天；若需求是“最近24小时”，就必须按时间戳裁剪，而不能只写\texttt{slice(-300)}。接口应同时声明\texttt{windowType=count|duration}、窗口长度、时区和迟到容忍度，前端据此在标题中显示“300点（约25小时）”或“24小时”。
 
 跨日和夏令时会使本地时间的“当天”不等于固定的24小时。平台内部统一使用带时区的ISO 8601时间，存储和比较使用UTC毫秒；界面按照工程所在时区格式化，并把时区名称写在坐标轴或导出文件头。日统计先按本地日历边界切桶，再将桶边界转换成UTC查询，不能直接对UTC的零点切桶后声称那是当地日。遇到闰秒或设备时钟回拨，应保留原始字符串和解析状态，并用单调递增的接收序号辅助排序，不能静默丢弃重复的本地时间。
 
@@ -267,26 +297,37 @@ chart.setOption({series: [{id: 'level', data, connectNulls: false,
 异常值处理应保守。突跳检测可以用相邻差值、局部中位数或物理变化速率做候选筛选，但候选异常不能直接删除；系统先写入suspect，保留原值并通知复核。若专家确认是设备故障，质量服务记录拒收标记或missing并记录原因；对外展示仍映射为三值质量码。若确认是洪峰、地震或闸门操作造成的真实突变，则保留valid并关联事件。图表同时显示原始点和修订点时，采用不同形状或线型，不用“修订后颜色更鲜艳”暗示哪个值一定正确。
 
 \begin{lstlisting}[label={lst:ch07-quality-check},language=JavaScript,breaklines=true,caption={展示前的质量检验与优先级合并}]
-function inspectReading(r, rules, previous) {
-  const issues = [];
-  let quality = r.value == null ? 'missing' : 'valid';
-  let rejected = false;
-  // 缺测优先级最高：后续检查只补充问题码，不把 missing 覆写成 suspect
-  const downgrade = () => { if (quality === 'valid') quality = 'suspect'; };
-  if (r.unit !== rules.unit) { issues.push('unit'); rejected = true; downgrade(); }
-  if (Number.isFinite(r.value) && (r.value < rules.min || r.value > rules.max)) {
-    issues.push('range'); rejected = true; downgrade();
-  }
-  if (previous && r.occurredAt <= previous.occurredAt) {
-    issues.push('time-order'); rejected = true; downgrade();
-  }
-  return {...r, quality, issues, rejected, participates: quality === 'valid' && !rejected};
-}
+import {parseInstantMs} from '../../../shared/time.mjs';
 
-const checked = inspectReading(reading, {unit: 'm', min: 130, max: 180}, previous);
+export function inspectReading(r, rules, previous) {
+  if (!rules.unit || (rules.min !== undefined && !Number.isFinite(rules.min))
+      || (rules.max !== undefined && !Number.isFinite(rules.max))
+      || rules.min > rules.max) throw new Error('质量规则配置非法');
+  const issues = [];
+  let quality = r.quality, rejected = false;
+  const reject = issue => {
+    issues.push(issue); rejected = true;
+    if (quality !== 'missing') quality = 'suspect';
+  };
+  if (!['valid', 'suspect', 'missing'].includes(quality)) reject('quality');
+  if (r.value == null) quality = 'missing';
+  else if (!Number.isFinite(r.value)) reject('value');
+  if (r.unit !== rules.unit) reject('unit');
+  if (quality !== 'missing' && Number.isFinite(r.value)
+      && (r.value < rules.min || r.value > rules.max)) reject('range');
+  const ms = parseInstantMs(r.occurredAt);
+  if (!Number.isFinite(ms)) reject('time');
+  if (previous) {
+    const previousMs = parseInstantMs(previous.occurredAt);
+    if (!Number.isFinite(previousMs)) reject('previous-time');
+    else if (Number.isFinite(ms) && ms <= previousMs) reject('time-order');
+  }
+  return {...r, quality, issues, rejected,
+    participates: quality === 'valid' && !rejected};
+}
 \end{lstlisting}
 
-清单\ref{lst:ch07-quality-check}展示了优先级合并的一个直观实现：缺测先得到missing，单位、范围和时序错误把记录降为suspect并设置拒收标记，其他无法确认但仍可展示的情况也使用suspect。具体工程可根据行业字典把拒收标记映射到后端的无效分支，但对外展示契约仍保持valid、suspect、missing三值，避免本章和第8章出现两套枚举。必须保留问题数组，便于在详情卡中解释为什么一条记录没有参与打分。质量码在前端只读，修订由后端质量服务完成并通过版本号推送，避免浏览器各自采用不同的阈值。
+清单\ref{lst:ch07-quality-check}保存为\texttt{frontend/src/lesson71/quality.js}，保留上游suspect和missing，未知质量码、非有限数、字符串数值、单位或时序错误均留下问题码并拒收。\texttt{rules}由测点台账提供单位及可选量程，示例不另设工程阈值。只有valid且未拒收的记录参与评分；质量码在前端只读，正式订正仍由后端留痕。
 
 质量结果还要进入统计口径。日均值、最大值和超阈次数应分别给出“仅valid”“valid+suspect”和“全部到达记录”三种选择，默认统计只使用valid；suspect值可以在趋势图中显示，却不能悄悄混入风险评分。报表页要显示有效率、缺测率、可疑率、迟到率和修订次数，并把分母写清楚。例如某天有288个5\,min格网，若其中24格missing，完整率是264/288，而不是用264个有效点的平均值冒充完整率。跨测项比较时还要统一时间格网和过滤条件，否则水位的288个点与渗压的24个点会产生看似可比、实则分母不同的曲线。质量指标本身也应带时间窗和规则版本，方便在规则调整后复算历史报表。
 
@@ -297,25 +338,61 @@ const checked = inspectReading(reading, {unit: 'm', min: 130, max: 180}, previou
 融合前还要做实体对齐。同一设备在不同系统中可能被写成“PZ07”“DAM-A-PZ-07”或一串厂商序列号，平台应使用受控映射表生成稳定的\texttt{assetId}，并把映射生效时间纳入版本。时间融合以事件时间为主，若两条记录落在同一时间桶，应按照来源优先级、质量码和时间距离选取代表值，同时保留被合并记录的数量和来源列表。雨量的多源融合可以求和前先确认各来源是否已经是累计量；水位的多源融合则通常取质量较高且时间更近的观测，不能把两个传感器的读数相加。
 
 \begin{lstlisting}[label={lst:ch07-standardize-readings},language=JavaScript,breaklines=true,caption={多源测点记录标准化与单位转换}]
-const assetMap = new Map([['PZ07', 'DAM-A-PZ-07'], ['pore-07', 'DAM-A-PZ-07']]);
-const unitFactor = {kPa: {kPa: 1}, Pa: {kPa: 0.001}, m: {m: 1}, cm: {m: 0.01}};
+import {parseInstantMs} from '../../../shared/time.mjs';
 
-function standardize(raw, source, schemaVersion) {
-  const assetId = assetMap.get(raw.sensorId) ?? `UNMAPPED:${raw.sensorId}`;
-  const targetUnit = raw.kind === 'pore' ? 'kPa' : 'm';
-  const factor = unitFactor[raw.unit]?.[targetUnit];
-  const value = factor == null ? null : Number(raw.value) * factor;
-  const quality = value == null ? 'missing' : raw.quality ?? 'valid';
-  return {assetId, occurredAt: new Date(raw.time).toISOString(),
-    ingestTime: new Date().toISOString(), value, unit: targetUnit,
-    quality, source, schemaVersion, sourceId: raw.sensorId,
-    conversion: {from: raw.unit, to: targetUnit, factor}};
+const pore07 = {assetId: 'DAM-A-PZ-07', kind: 'pore', unit: 'kPa'};
+const assetMap = new Map([['PZ07', pore07], ['pore-07', pore07]]);
+const factors = {kPa: {kPa: 1}, Pa: {kPa: 0.001},
+  m: {m: 1}, cm: {m: 0.01}, mm: {mm: 1}};
+
+export function standardize(raw, source, schemaVersion,
+    ingestTime = new Date().toISOString()) {
+  const asset = assetMap.get(raw.sensorId);
+  if (!asset) throw new Error('设备编码尚未映射');
+  if (raw.kind !== asset.kind) throw new Error('测项与设备台账不一致');
+  const {assetId, unit} = asset, factor = factors[raw.unit]?.[unit];
+  if (!Number.isFinite(factor)) throw new Error('未知测项或不支持的单位转换');
+  if (!['valid', 'suspect', 'missing'].includes(raw.quality)) throw new Error('未知质量码');
+  if (!Number.isInteger(raw.version) || raw.version < 1) throw new Error('观测版本须为正整数');
+  const ms = parseInstantMs(raw.time), received = parseInstantMs(ingestTime);
+  if (!Number.isFinite(ms) || !Number.isFinite(received)) throw new Error('时间须有效且带时区');
+  const empty = raw.value == null
+    || (typeof raw.value === 'string' && raw.value.trim() === '');
+  if (!empty && !Number.isFinite(raw.value)) throw new Error('数值须为有限数字');
+  const quality = empty || raw.quality === 'missing' ? 'missing' : raw.quality;
+  const value = quality === 'missing' ? null : raw.value * factor;
+  if (value !== null && !Number.isFinite(value)) throw new Error('换算结果溢出');
+  return {assetId, occurredAt: new Date(ms).toISOString(),
+    ingestTime: new Date(received).toISOString(), value, unit, quality,
+    version: raw.version, source, schemaVersion, sourceId: raw.sensorId,
+    conversion: {from: raw.unit, to: unit, factor}};
 }
-
-const normalized = standardize(message, 'gateway-02', 'v3');
 \end{lstlisting}
 
-清单\ref{lst:ch07-standardize-readings}对未映射设备使用明显的占位标识，迫使运维人员补齐数据字典，而不是把不同设备误合并。生产实现还要拒绝未知单位、检查时间解析和记录轴序；示例中的\texttt{Date}只用于说明字段流向，水利平台应在服务端使用带时区的时间库并把转换规则纳入配置版本。标准化后的记录才可以进入\texttt{assetId}维度的滑动窗口和图表联动。
+清单\ref{lst:ch07-standardize-readings}保存为\texttt{frontend/src/lesson71/standardize.js}，未映射设备、未知单位和非法时间均报错；空值与空字符串归为missing，数字字符串交由来源适配器明确解析。转换保留来源、版本和单位因子，上游可疑值仍为suspect。
+
+三模块的调用见清单\ref{lst:ch07-data-examples}，保存为同目录的\texttt{examples.js}后，在\texttt{frontend/}执行\texttt{node src/lesson71/examples.js}。185091\,Pa来自PZ-07已有教学观测185.091\,kPa的单位换算，仅演示数据语义。输出应保留suspect且禁止评分；未知设备、重复时间与无限值分别触发失败分支。三模块均使用配套\texttt{shared/time.mjs}解析带时区时间，回归验证见\texttt{tests/lesson71.test.js}。
+
+\begin{lstlisting}[label={lst:ch07-data-examples},language=JavaScript,breaklines=true,caption={标准化、质量检验与重采样的完整调用及失败例}]
+import {alignReadings} from './resample.js';
+import {inspectReading} from './quality.js';
+import {standardize} from './standardize.js';
+
+const raw = {sensorId: 'PZ07', kind: 'pore', unit: 'Pa', value: 185091,
+  time: '2026-07-01T08:00:00+08:00', quality: 'suspect', version: 1};
+const normalized = standardize(raw, 'gateway-02', 'v3', '2026-07-01T00:00:01Z');
+const checked = inspectReading(normalized, {unit: 'kPa'});
+const buckets = alignReadings([checked], 60 * 60 * 1000, 'porePressure');
+console.log(JSON.stringify({value: normalized.value, quality: checked.quality,
+  participates: checked.participates, bucketQuality: buckets[0].quality}));
+// 预期：185.091、suspect、false、suspect；上游可疑标记不会被升级。
+try { standardize({...raw, sensorId: 'unknown'}, 'gateway-02', 'v3'); }
+catch (error) { console.log(error.message); } // 设备编码尚未映射
+try { alignReadings([checked, checked], 3600000, 'porePressure'); }
+catch (error) { console.log(error.message); } // 重复观测时间
+console.log(inspectReading({...normalized, value: Infinity}, {unit: 'kPa'}).issues);
+// 预期包含 value，记录被拒收，不参与评分。
+\end{lstlisting}
 
 图\ref{fig:ch07-time-quality-pipeline}把实时流和历史回放共用的处理边界画出来：来源适配器负责字段和单位，时间服务负责格网与水印，质量服务负责码值和问题，窗口服务保留原始与聚合序列，展示层最后才决定颜色、断线和交互。任何一层都不能用“显示方便”作为理由改写原始观测。
 

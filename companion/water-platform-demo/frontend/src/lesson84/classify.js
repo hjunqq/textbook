@@ -7,8 +7,8 @@
 // 因此 evaluable 与 level 是两个维度：evaluable=false 表示质量不足以判定，
 // evaluable=true 且 level=NONE 才是“当前规则下无预警”。
 //
-// 阈值是示例值，与 companion/datasets/warnings.json 一致（0.36 蓝 / 0.58 黄 /
-// 0.74 橙 / 0.92 红）。生产阈值必须版本化，并记录适用工程、工况、审批人与生效时间。
+// 阈值是 0.30 / 0.50 / 0.70 / 0.85；companion/datasets/warnings.json 中的
+// 0.36 / 0.58 / 0.74 / 0.92 是各级样例评分。生产阈值必须版本化并经过审批。
 
 /** 预警等级。NONE 表示规则算过且未触发，不表示“没算”。 */
 export const WarningLevel = {
@@ -35,6 +35,8 @@ export function score(indicators, weights) {
   if (indicators.length !== weights.length) {
     throw new Error('指标与权重个数不一致');
   }
+  if (indicators.some(f => !Number.isFinite(f))) throw new Error('指标必须为有限数值');
+  if (weights.some(w => !Number.isFinite(w))) throw new Error('权重必须为有限数值');
   if (weights.some(w => w < 0)) throw new Error('权重不能为负');
   const sum = weights.reduce((a, b) => a + b, 0);
   if (Math.abs(sum - 1) > 1e-9) throw new Error(`权重之和必须为 1，当前为 ${sum}`);
@@ -46,14 +48,14 @@ export function score(indicators, weights) {
  * 返回 { evaluable, level, reason }，三者一起构成界面要显示的完整状态。
  */
 export function classify(scoreValue, quality) {
-  if (!(quality in SCORABLE)) {
+  if (!Object.hasOwn(SCORABLE, quality)) {
     return { evaluable: false, level: WarningLevel.NONE, reason: `未评估：未知质量码 ${quality}` };
   }
   if (!SCORABLE[quality]) {
     const why = quality === 'missing' ? '记录缺测' : '数值存疑，仅供复核';
     return { evaluable: false, level: WarningLevel.NONE, reason: `未评估：${why}` };
   }
-  if (typeof scoreValue !== 'number' || Number.isNaN(scoreValue)) {
+  if (!Number.isFinite(scoreValue)) {
     return { evaluable: false, level: WarningLevel.NONE, reason: '未评估：没有可用的综合评分' };
   }
   for (const [bound, level] of THRESHOLDS) {

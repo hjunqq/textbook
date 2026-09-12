@@ -1330,7 +1330,7 @@ export function bindList(listEl, outputEl, assets) {
 
 第5章后端签发的 JWT 必须在浏览器请求中形成闭环：登录接口成功后，前端保存短期访问令牌，后续请求在\texttt{Authorization: Bearer <token>}中携带它；收到 401 时清除令牌并跳转登录页，不能继续用旧令牌重试。教学示例把令牌放入\texttt{sessionStorage}，浏览器标签页关闭后令牌消失，代价是同源脚本若发生 XSS 可能读取它；生产系统应结合严格的 CSP、短过期时间、刷新策略和更安全的 HttpOnly Cookie 方案评估，绝不能把签名密钥放入以\texttt{VITE\_}开头的前端变量。
 
-统一请求封装还应处理 JSON 解析、204 空响应、超时和错误代码，避免每个组件各自复制一套\texttt{fetch}。清单\ref{lst:ch04-a45-request}给出可直接放入 Vite 5 项目的\texttt{src/utils/request.js}；请求函数只负责传输和认证，页面层根据错误代码决定显示“重新登录”“稍后重试”还是“检查测站输入”。
+统一请求封装还应处理 JSON 解析、204 空响应、超时和错误代码，避免每个组件各自复制一套\texttt{fetch}。清单\ref{lst:ch04-a45-request}给出可直接放入 Vite 5 项目的\texttt{src/api/request.js}；请求函数只负责传输和认证，页面层根据错误代码决定显示“重新登录”“稍后重试”还是“检查测站输入”。
 
 \begin{lstlisting}[label={lst:ch04-a45-request},language=JavaScript,caption={request.js：令牌注入、401 跳转与超时}]
 const API_BASE = import.meta.env.VITE_API_ORIGIN ?? '';   // 契约路径已含 /api 前缀
@@ -2034,8 +2034,8 @@ function safeRedirect(value) {
 async function submit() {
   errorMessage.value = '';
   try {
-    const result = await request('/auth/login', {
-      method: 'POST', body: JSON.stringify({ account: account.value, password: password.value })
+    const result = await request('/api/auth/login', {
+      method: 'POST', body: JSON.stringify({ username: account.value, password: password.value })
     });
     sessionStorage.setItem(TOKEN_KEY, result.accessToken);
     await router.replace(safeRedirect(route.query.redirect));
@@ -2057,28 +2057,53 @@ async function submit() {
 
 跨页面共享的当前测点、最新读数和加载状态放进 Pinia 后，列表页、地图页和详情页读的是同一份数据。清单\ref{lst:ch04-js-pinia}是选项式写法的测点仓库：\texttt{state}存数据，\texttt{getters}算派生值，\texttt{actions}管异步加载与错误。
 
+清单\ref{lst:ch04-a47-asset-api}把统一请求封装接到最新观测接口；水位提示只作界面筛查，正式预警读取服务端结果。汛限水位引用表\ref{tab:case-parameters}。下列参考文件位于配套工程相同的\texttt{src/}路径，详情路由仍由本节练习接入。
+
+\begin{lstlisting}[label={lst:ch04-a47-asset-api},language=JavaScript,caption={api/assets.js：观测请求与水位提示}]
+import { request } from './request.js';
+
+export const loadLatest = assetId =>
+  request(`/api/assets/${encodeURIComponent(assetId)}/readings/latest`);
+
+// 唯一参数源：output/case-params.tex 的 cpFloodLimitLevel，见 8.1 节。
+export const FLOOD_LIMIT_LEVEL = 165.5;
+export function needsWaterLevelAttention(reading) {
+  return reading?.assetId === 'DAM-A-WL-01' && reading.quality === 'valid'
+    && reading.unit === 'm' && Number.isFinite(reading.value)
+    && reading.value >= FLOOD_LIMIT_LEVEL;
+}
+\end{lstlisting}
+
 \begin{lstlisting}[label={lst:ch04-js-pinia},language=JavaScript,caption={Pinia测站状态管理}]
 import { defineStore } from 'pinia';
-import { loadLatest as fetchLatest } from '../api/assets.js';   // 4.5.2 节的 loadLatest
+import { loadLatest as fetchLatest, needsWaterLevelAttention } from '../api/assets.js';
 
 export const useAssetStore = defineStore('asset', {
-  state: () => ({ currentId: null, latest: null, loading: false, error: null }),
+  state: () => ({ currentId: null, latest: null, loading: false, error: null,
+    requestVersion: 0 }),
   getters: {
-    isWarning: state => (state.latest?.value ?? 0) >= 165.5   // 汛限水位，见 8.1 节
+    needsAttention: state => needsWaterLevelAttention(state.latest)
   },
   actions: {
+    cancelLatest() {
+      this.requestVersion++;
+      this.currentId = null; this.latest = null;
+      this.loading = false; this.error = null;
+    },
     async loadLatest(id) {
-      this.loading = true;
-      this.error = null;
+      const mine = ++this.requestVersion;
+      this.currentId = id; this.latest = null;
+      this.loading = true; this.error = null;
       try {
-        this.latest = await fetchLatest(id);
-        this.currentId = id;
+        const reading = await fetchLatest(id);
+        if (mine !== this.requestVersion) return null;
+        this.latest = reading;
+        return reading;
       } catch (error) {
-        this.error = error;
-        this.latest = null;
-        throw error;
+        if (mine === this.requestVersion) this.error = error;
+        return null;
       } finally {
-        this.loading = false;
+        if (mine === this.requestVersion) this.loading = false;
       }
     }
   }
@@ -2089,20 +2114,21 @@ Pinia集中管理跨组件共享且具有业务含义的状态，如当前测站
 
 \begin{lstlisting}[label={lst:ch04-a47-store-usage},language=Vue,caption={组件内使用 Pinia 与 storeToRefs}]
 <script setup>
-import { onMounted } from 'vue';
+import { onMounted, onUnmounted } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useAssetStore } from '../stores/asset.js';
 
 const assetStore = useAssetStore();
-const { latest, loading, isWarning } = storeToRefs(assetStore);
+const { latest, loading, needsAttention } = storeToRefs(assetStore);
 const { loadLatest } = assetStore;
 
 onMounted(() => loadLatest('DAM-A-WL-01'));
+onUnmounted(() => assetStore.cancelLatest());
 </script>
 
 <template>
   <p v-if="loading" role="status">正在读取最新水位……</p>
-  <p v-else-if="latest">{{ latest.value }} {{ latest.unit }} <strong v-if="isWarning">需要关注</strong></p>
+  <p v-else-if="latest">{{ latest.value }} {{ latest.unit }} <strong v-if="needsAttention">需要关注</strong></p>
   <p v-else>暂无读数</p>
 </template>
 \end{lstlisting}
@@ -2111,7 +2137,7 @@ onMounted(() => loadLatest('DAM-A-WL-01'));
 
 \subsection{AssetDetail 的动态参数与数据加载}
 
-路由配置中的\texttt{props: true}会把\texttt{:id}动态段作为组件 prop 注入。这样，详情组件不必依赖全局路由对象，单元测试可以直接传入\texttt{id}；查询参数仍可通过\texttt{useRoute}读取。\texttt{defineProps}应明确类型和必填约束，收到参数后再调用 store 动作加载数据，并在参数变化时重新加载。组件卸载时沿用前面的取消信号和清理模式。清单\ref{lst:ch04-a47-station-detail}就是这样一个详情组件：对象编码来自 prop 而不是全局路由对象，\texttt{watch}负责在编码变化时重新取数。
+路由配置中的\texttt{props: true}会把\texttt{:id}动态段作为组件 prop 注入。这样，详情组件不必依赖全局路由对象，单元测试可以直接传入\texttt{id}；查询参数仍可通过\texttt{useRoute}读取。\texttt{defineProps}应明确类型和必填约束，收到参数后再调用 store 动作加载数据，并在参数变化时重新加载。参数变化或组件卸载时递增请求序号，使旧响应失效。清单\ref{lst:ch04-a47-station-detail}就是这样一个详情组件：对象编码来自 prop 而不是全局路由对象，\texttt{watch}负责在编码变化时重新取数。
 
 \begin{lstlisting}[label={lst:ch04-a47-station-detail},language=Vue,caption={AssetDetail.vue 接收动态路由参数}]
 <script setup>
@@ -2123,7 +2149,10 @@ const props = defineProps({ id: { type: String, required: true } });
 const assetStore = useAssetStore();
 const { latest, loading, error } = storeToRefs(assetStore);
 
-watch(() => props.id, id => assetStore.loadLatest(id), { immediate: true });
+watch(() => props.id, (id, previous, onCleanup) => {
+  void assetStore.loadLatest(id);
+  onCleanup(() => assetStore.cancelLatest());
+}, { immediate: true });
 </script>
 
 <template>
@@ -2137,39 +2166,47 @@ watch(() => props.id, id => assetStore.loadLatest(id), { immediate: true });
 </template>
 \end{lstlisting}
 
-选项式 store 适合把状态、getter 和动作按对象分栏展示，便于刚接触 Pinia 的读者建立映射；setup 式 store 使用\texttt{ref}、\texttt{computed}和普通函数，适合复用组合式函数和精确控制公开成员。两种写法都通过\texttt{defineStore}注册，组件侧的\texttt{storeToRefs}用法一致。选择时以团队可读性和测试边界为依据，不要在同一个 store 中混用两套状态来源。清单\ref{lst:ch04-a47-setup-store}把同一个测点仓库改写成 setup 式，可与清单\ref{lst:ch04-js-pinia}逐行对照。
+选项式 store 适合把状态、getter 和动作按对象分栏展示，便于刚接触 Pinia 的读者建立映射；setup 式 store 使用\texttt{ref}、\texttt{computed}和普通函数，适合复用组合式函数和精确控制公开成员。两种写法都通过\texttt{defineStore}注册，组件侧的\texttt{storeToRefs}用法一致。验收时让后选测点先返回，页面应一直保持后选对象；再让旧请求失败，当前读数与加载状态均不受影响。网络失败时显示错误，重试成功后恢复读数。选择时以团队可读性和测试边界为依据，不要在同一个 store 中混用两套状态来源。清单\ref{lst:ch04-a47-setup-store}把同一个测点仓库改写成 setup 式，可与清单\ref{lst:ch04-js-pinia}逐行对照。
 
 \begin{lstlisting}[label={lst:ch04-a47-setup-store},language=JavaScript,caption={Pinia setup 式 store 对照}]
 import { computed, ref } from 'vue';
 import { defineStore } from 'pinia';
-import { loadLatest as fetchLatest } from '../api/assets.js';   // 别名避免与下面的动作同名
+import { loadLatest as fetchLatest, needsWaterLevelAttention } from '../api/assets.js';
 
 export const useAssetSetupStore = defineStore('asset-setup', () => {
   const currentId = ref(null);
   const latest = ref(null);
   const loading = ref(false);
   const error = ref(null);
-  const isWarning = computed(() => (latest.value?.value ?? 0) >= 165.5);
+  const needsAttention = computed(() => needsWaterLevelAttention(latest.value));
+  let requestVersion = 0;
 
+  function cancelLatest() {
+    requestVersion++;
+    currentId.value = null; latest.value = null;
+    loading.value = false; error.value = null;
+  }
   async function loadLatest(id) {
-    loading.value = true;
-    error.value = null;
+    const mine = ++requestVersion;
+    currentId.value = id; latest.value = null;
+    loading.value = true; error.value = null;
     try {
-      latest.value = await fetchLatest(id);
-      currentId.value = id;
+      const reading = await fetchLatest(id);
+      if (mine !== requestVersion) return null;
+      latest.value = reading;
+      return reading;
     } catch (cause) {
-      error.value = cause;
-      latest.value = null;
-      throw cause;
+      if (mine === requestVersion) error.value = cause;
+      return null;
     } finally {
-      loading.value = false;
+      if (mine === requestVersion) loading.value = false;
     }
   }
-  return { currentId, latest, loading, error, isWarning, loadLatest };
+  return { currentId, latest, loading, error, needsAttention, loadLatest, cancelLatest };
 });
 \end{lstlisting}
 
-路由和状态仓库的联调可以按一条链路验收：从未登录状态访问详情，守卫应把路径保存到登录页；登录成功后回到原详情，\texttt{StationDetail}收到 ID 并触发加载；列表、地图和详情同时打开时，Pinia 的最新读数同步变化；刷新浏览器后，令牌和路由状态按约定恢复或清空。测试还要覆盖无效测站 ID、令牌过期、后端返回空读数和用户快速切换测站等情况。这样既验证了组件，又验证了路由、守卫和 store 之间的契约。
+路由和状态仓库的联调可以按一条链路验收：从未登录状态访问详情，守卫应把路径保存到登录页；登录成功后回到原详情，\texttt{AssetDetail}收到 ID 并触发加载；列表、地图和详情同时打开时，Pinia 的最新读数同步变化；刷新浏览器后，令牌和路由状态按约定恢复或清空。测试还要覆盖无效测站 ID、令牌过期、后端返回空读数和用户快速切换测站等情况。这样既验证了组件，又验证了路由、守卫和 store 之间的契约。
 
 \subsection{路由参数、查询状态与可恢复导航}
 
@@ -2183,13 +2220,13 @@ export const useAssetSetupStore = defineStore('asset-setup', () => {
 
 \subsection{Pinia 状态建模、错误恢复与持久化边界}
 
-一个清晰的 store 至少区分四类字段：资源数据、请求状态、错误对象和用户选择。\texttt{latest}代表后端数据，\texttt{loading}代表当前请求，\texttt{error}说明失败原因，\texttt{currentId}表示用户正在查看的资源。动作负责改变这些字段的顺序：开始请求时清空旧错误并置为加载中，成功时一次性提交新数据，失败时保留可诊断错误并清理不再可信的旧数据，最后无论成功失败都恢复加载标志。这样的状态机可以直接映射到模板的加载、成功、空结果和错误四个分支。
+一个清晰的 store 至少区分四类字段：资源数据、请求状态、错误对象和用户选择。\texttt{latest}代表后端数据，\texttt{loading}代表当前请求，\texttt{error}说明失败原因，\texttt{currentId}表示用户正在查看的资源。动作负责改变这些字段的顺序：开始请求时清空旧错误并置为加载中，成功时一次性提交新数据，失败时保留可诊断错误并清理不再可信的旧数据，最后仅由当前请求恢复加载标志。这样的状态机可以直接映射到模板的加载、成功、空结果和错误四个分支。
 
 实时读数还需要定义“旧数据是否可见”的策略。短暂网络抖动时可以保留带时间戳的上一笔读数，同时在界面标注“数据更新时间”和“正在重试”；权限失败、测点被删除或质量码为 missing 时，旧读数不能继续伪装成当前值。store 可以保存\texttt{lastUpdatedAt}和\texttt{quality}，由计算属性决定是否允许展示趋势线。业务阈值和质量判定由后端服务给出，Pinia 只保存结果与请求上下文，避免前端和后端使用两套阈值。
 
 缓存策略要与路由粒度匹配。测站列表可以按筛选条件缓存短时间结果，详情页的实时读数应以测站 ID 和时间窗口组成缓存键；切换测站时清理与旧 ID 相关的请求控制器，登出时清理所有含敏感信息的 store。持久化插件只适合保存非敏感的界面偏好，例如列表列宽和主题；访问令牌、测站读数和告警详情不写入 localStorage。若确需跨刷新恢复筛选条件，优先使用 URL 查询参数，以便审计和复现。
 
-Pinia 动作可以返回领域结果，让调用方决定提示方式。比如\texttt{loadLatest}返回成功的读数或抛出带错误码的异常，详情页显示可读提示，后台轮询则记录指标并安排下一次重试。错误码应区分\texttt{AUTH\_EXPIRED}、\texttt{NOT\_FOUND}、\texttt{QUALITY\_MISSING}和\texttt{NETWORK\_TIMEOUT}，不要在 store 内把所有异常拼成一段不可检索的字符串。日志中只记录测站编号、请求追踪 ID 和错误类别，令牌与个人信息禁止进入浏览器控制台。
+Pinia 动作可以返回领域结果，让调用方决定提示方式。比如\texttt{loadLatest}返回读数或\texttt{null}，失败原因写入\texttt{error}，详情页显示提示，后台轮询按错误类别重试。错误码应区分\texttt{AUTH\_EXPIRED}、\texttt{NOT\_FOUND}、\texttt{QUALITY\_MISSING}和\texttt{NETWORK\_TIMEOUT}，不要在 store 内把所有异常拼成一段不可检索的字符串。日志中只记录测站编号、请求追踪 ID 和错误类别，令牌与个人信息禁止进入浏览器控制台。
 
 组件、路由和 store 的职责可以用一次“故障演练”检验：先让列表请求超时，页面显示重试按钮且路由仍保持；点击重试后只发起一个新请求，旧请求的回调不会覆盖新结果；再让详情接口返回 404，页面显示资源不存在并提供回列表链接；最后让令牌失效，守卫带着原路径跳到登录页，登录完成后只恢复一次导航。演练记录请求时间线、路由变化和 store 状态变化，能把竞态问题从偶然现象变成可复核证据。
 

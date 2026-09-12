@@ -1,0 +1,12 @@
+{
+  "contract": {
+    "file": "teaching-api/contract-check.mjs",
+    "code": 0,
+    "output": "  OK   POST /api/auth/login 返回 200 与 accessToken\n  OK   登录响应含 expiresInSeconds 与 authorities\n  OK   GET /api/assets 返回 200 与数组\n  OK   对象字段为 assetId/displayName/assetType/unit（驼峰，不是下划线）\n  OK   GET …/DAM-A-PZ-07/readings/latest 返回 200\n  OK   观测字段为 assetId/occurredAt/value/unit/quality\n  OK   质量码取 valid/suspect/missing 之一\n  OK   GET …/DAM-A-D-01/readings/latest 返回 204（无观测，不是 404 也不是 200）\n  OK   204 响应体为空\n  OK   GET …/DAM-A-XX-99/readings/latest 返回 404\n  OK   404 错误体为 {code:\"ASSET_NOT_FOUND\", message}\n  OK   from 晚于 to 返回 400\n  OK   400 错误体为 {code:\"INVALID_RANGE\", field:\"from\"}\n  OK   拒绝无时区或非法日期 2026-07-01\n  OK   拒绝无时区或非法日期 2026-07-01T00:00:00\n  OK   拒绝无时区或非法日期 2026-02-30T00:00:00Z\n  OK   不同时区表示同一时刻时拒绝零长度时间窗\n  OK   左窗排除恰好位于to的观测\n  OK   右窗包含恰好位于from的观测\n  OK   UTC与带偏移的查询得到相同观测\n  OK   时间参数无法解析时返回 400\n  OK   该 400 也必须是契约错误体，而不是框架默认页面\n  OK   不带令牌访问返回 401\n  OK   401 错误体为契约形状\n  OK   teach=delay:800 延迟后仍正常返回\n  OK   teach=unauthorized 返回 401 与契约错误体\n  OK   teach=invalid 返回 400 且 field 为 from\n\n阶段 teaching @ http://127.0.0.1:18102：通过 27，失败 0\n"
+  },
+  "closedLoop": {
+    "file": "teaching-api/closeloop-check.mjs",
+    "code": 0,
+    "output": "  OK   值班员登录成功\n  OK   PZ-07 有最新观测\n  OK   观测带质量码且取值合法\n  OK   预警列表可读\n  OK   等级取 NONE/BLUE/YELLOW/ORANGE/RED\n  OK   存在 evaluable=false 的“未评估”事件，且其 level 为 NONE\n  OK   未评估事件不允许确认（409）\n  OK   该 409 是契约错误体\n  OK   存在待处理的 open 预警\n  OK   未确认就派单被拒（409）\n  OK   该 409 是契约错误体\n  OK   值班员确认成功，状态转为 acknowledged\n  OK   重复确认被拒（409）\n  OK   派单缺字段返回 400 且指出字段\n  OK   派单成功返回 201 与工单号\n  OK   工单初始状态为 in_progress\n  OK   完成工单缺 result 返回 400\n  OK   工单完成返回 200 且状态为 completed\n  OK   处置回写后预警归档为 closed\n  OK   已完成的工单不能重复完成（409）\n\n第8章闭环 @ http://127.0.0.1:18102：通过 20，失败 0\n"
+  }
+}

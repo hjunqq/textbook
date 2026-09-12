@@ -7,6 +7,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
+import { parseInstantMs } from '../shared/time.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const DATA = path.resolve(HERE, '../../datasets');
@@ -27,7 +28,7 @@ const readings = ['piezometer.csv', 'water_level.csv', 'rainfall.csv'].flatMap(c
 }));
 const byAsset = new Map();
 for (const r of readings) (byAsset.get(r.assetId) ?? byAsset.set(r.assetId, []).get(r.assetId)).push(r);
-for (const list of byAsset.values()) list.sort((a, b) => a.occurredAt.localeCompare(b.occurredAt));
+for (const list of byAsset.values()) list.sort((a, b) => parseInstantMs(a.occurredAt) - parseInstantMs(b.occurredAt));
 const warnings = JSON.parse(fs.readFileSync(path.join(DATA, 'warnings.json'), 'utf8')).map(w => ({
   warningId: w.warning_id, assetId: w.asset_id, level: w.level, evaluable: w.evaluable,
   score: w.score, reason: w.reason, status: w.status,
@@ -99,13 +100,13 @@ async function handle(req, res) {
       return send(res, 200, list[list.length - 1]);
     }
     const from = url.searchParams.get('from'), to = url.searchParams.get('to');
-    const badFrom = !from || Number.isNaN(Date.parse(from));
-    if (badFrom || !to || Number.isNaN(Date.parse(to)))
+    const f = parseInstantMs(from), t = parseInstantMs(to);
+    const badFrom = !Number.isFinite(f);
+    if (badFrom || !Number.isFinite(t))
       return fail(res, 400, 'INVALID_RANGE', 'from/to 必须是带时区的 ISO-8601 时间', badFrom ? 'from' : 'to');
-    if (Date.parse(from) >= Date.parse(to)) return fail(res, 400, 'INVALID_RANGE', 'from 必须早于 to', 'from');
+    if (f >= t) return fail(res, 400, 'INVALID_RANGE', 'from 必须早于 to', 'from');
     if (teach === 'empty') return send(res, 200, []);
-    const f = Date.parse(from), t = Date.parse(to);   // 左闭右开
-    return send(res, 200, list.filter(r => { const x = Date.parse(r.occurredAt); return x >= f && x < t; }));
+    return send(res, 200, list.filter(r => { const x = parseInstantMs(r.occurredAt); return x >= f && x < t; }));
   }
 
   if (req.method === 'GET' && url.pathname === '/api/warnings') {

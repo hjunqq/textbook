@@ -53,7 +53,7 @@ psql "postgresql://qingyuan_app:<密码>@localhost:5432/qingyuan" -f db/load-s3-
 
 ```bash
 cd frontend && npm ci && npm test     # vitest：令牌契约、缺测断线与时间窗，以及 S1/S2/S5/S6 四个阶段包的验收用例
-cd backend  && mvn -q test            # JUnit：JWT 签发/过期/篡改 + 事件契约反序列化
+cd backend  && mvn -q test            # JUnit：访问/刷新令牌校验 + JPA时间窗边界 + 事件契约反序列化
 ```
 
 测试不依赖数据库与 Kafka，可在任何装有 Node 20+ 与 JDK 17 的机器上直接运行。
@@ -90,3 +90,5 @@ node teaching-api/closeloop-check.mjs http://localhost:8080                    #
 
 前两个跑在教学接口上，不需要数据库。`--stage` 换成 `lesson52` 或 `full`，
 同一套契约断言就对 S3 的起点和终点各跑一遍——这是“页面一行不改就能换数据源”的证据。
+
+第7章数据处理参考模块位于 `frontend/src/lesson71/`，在前端目录运行 `node src/lesson71/examples.js` 与 `node src/lesson71/event-window.js`；对应测试覆盖乱序、缺测、非法值与历史回放。

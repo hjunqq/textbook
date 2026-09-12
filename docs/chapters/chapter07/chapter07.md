@@ -124,66 +124,96 @@ LTTB适合视觉浏览，不应用其结果替代原始数据计算统计指标�
 **清单 7.2  按采样周期对齐水位、渗压与雨量记录**
 
 ```javascript
-const FIVE_MIN = 5 * 60 * 1000;
-const HOUR = 60 * 60 * 1000;
+import {parseInstantMs} from '../../../shared/time.mjs';
 
-function floorToGrid(iso, gridMs) {
-  const ms = Date.parse(iso);
-  return new Date(Math.floor(ms / gridMs) * gridMs).toISOString();
-}
-
-function alignReadings(readings, gridMs, kind) {
-  const buckets = new Map();
+export function alignReadings(readings, gridMs, kind, sampleMs) {
+  if (!Number.isSafeInteger(gridMs) || gridMs <= 0) throw new Error('格网须为正整数毫秒');
+  if (!['level', 'porePressure', 'rainfall'].includes(kind)) throw new Error('未知测项');
+  const isRain = kind === 'rainfall';
+  if (isRain && (!Number.isSafeInteger(sampleMs) || sampleMs <= 0
+      || gridMs % sampleMs !== 0)) throw new Error('雨量采样周期须整除格网');
+  const buckets = new Map(), times = new Set();
+  const first = readings[0];
   for (const r of readings) {
-    const t = floorToGrid(r.occurredAt, gridMs);
-    const row = buckets.get(t) ?? {time: t, values: [], quality: 'valid'};
-    row.values.push(r);
-    // 桶内质量按 suspect 优先合并；missing 是否成立要等取值后判断
-    if (r.quality === 'suspect') row.quality = 'suspect';
-    buckets.set(t, row);
+    if (!r.assetId || !r.unit || !Number.isInteger(r.version) || r.version < 1
+        || r.assetId !== first.assetId || r.unit !== first.unit
+        || r.version !== first.version) throw new Error('须为同一对象、单位和版本');
+    if (!['valid', 'suspect', 'missing'].includes(r.quality)) throw new Error('未知质量码');
+    const ms = parseInstantMs(r.occurredAt);
+    if (!Number.isFinite(ms)) throw new Error('观测时间须为带时区的有效时间');
+    if (times.has(ms)) throw new Error('重复观测时间，请先解决重复记录');
+    times.add(ms);
+    if (isRain && ms % sampleMs !== 0) throw new Error('雨量时间须位于采样格网上');
+    const start = Math.floor(ms / gridMs) * gridMs;
+    const rows = buckets.get(start) ?? [];
+    rows.push({...r, ms});
+    buckets.set(start, rows);
   }
-  return [...buckets.values()].sort((a, b) => a.time.localeCompare(b.time))
-    .map(row => {
-      const values = row.values.map(v => v.value).filter(Number.isFinite);
-      // 桶内没有任何可用数值才是 missing；有值时质量取合并结果
-      if (values.length === 0) return {...row, value: null, quality: 'missing'};
-      const value = kind === 'rainfall'
-        ? values.reduce((sum, v) => sum + v, 0)
-        : values.at(-1);   // 状态量与连续量都取最近一条可用观测
-      return {...row, value, aggregated: values.length > 1, gridMs};
-    });
+  return [...buckets].sort(([a], [b]) => a - b).map(([start, rows]) => {
+    rows.sort((a, b) => a.ms - b.ms);
+    const usable = rows.filter(r => r.quality !== 'missing'
+      && Number.isFinite(r.value) && !r.rejected);
+    const expectedSamples = isRain ? gridMs / sampleMs : null;
+    const complete = !isRain || usable.length === expectedSamples;
+    const clean = rows.every(r => r.quality === 'valid'
+      && Number.isFinite(r.value) && !r.rejected);
+    const value = usable.length === 0 ? null : isRain
+      ? usable.reduce((sum, r) => sum + r.value, 0) : usable.at(-1).value;
+    if (value !== null && !Number.isFinite(value)) throw new Error('聚合结果溢出');
+    return {assetId: first.assetId, unit: first.unit, version: first.version,
+      time: new Date(start).toISOString(), value, gridMs, expectedSamples,
+      sampleCount: usable.length, aggregated: true,
+      quality: !usable.length ? 'missing' : complete && clean ? 'valid' : 'suspect'};
+  });
 }
-
-const level5m = alignReadings(levelReadings, FIVE_MIN, 'level');
-const rain1h = alignReadings(rainReadings, HOUR, 'rainfall');
-const pore1h = alignReadings(poreReadings, HOUR, 'porePressure');
 ```
 
-清单7.2只演示格网与聚合的最小闭环，生产实现还应把单位、时区、传感器时钟偏差和来源版本写入结果。若某小时只有一条雨量增量，不能把它当作整小时完整累计；若渗压在5 min格网中重复显示，图例应标注“最近观测”，并显示观测年龄。这样读者看到一条平直的渗压曲线时，知道它可能是采样周期造成的保持值，而不是传感器在每5 min都真的采集了新值。
+清单7.2保存为`frontend/src/lesson71/resample.js`，只处理同一对象、单位和观测版本中已有输入的桶，不自动生成缺桶。先按实际时刻排序，再取最近可用值；缺测、非有限数和拒收记录均排除，同一时刻重复记录直接报错。雨量输入以时段起点标时，`sampleMs`给出原始周期；缺少任一时段时，部分累计标为suspect。渗压若在5 min格网中保持显示，图例仍须标注最近观测时间与年龄。
 
-事件时间`occurredAt`表示传感器实际观测时间，处理时间`ingestTime`表示平台收到消息的时间。网络抖动、网关缓存和重试会使二者相差数分钟甚至更久，排序和绘图必须使用事件时间；处理延迟监控则使用处理时间。流处理器可以设置水印，表示在水印之前到达的记录可以参与当前窗口，超过水印的迟到记录进入修订队列，不直接覆盖已经确认的预警。修订后的图形要显示“迟到修订”标记并保留前后版本，避免值班员误以为系统曾经实时看到过后来补传的数据。
+事件时间`occurredAt`表示传感器实际观测时间，处理时间`ingestTime`表示平台收到消息的时间。网络抖动、网关缓存和重试会使二者相差数分钟甚至更久，排序和绘图必须使用事件时间；处理延迟监控则使用处理时间。水印表示事件时间的处理进度。本例以已见最大事件时间减去乱序容忍度推进水印；新记录的事件时间早于此前水印时进入修订队列，其余记录参与当前窗口，不直接覆盖已经确认的预警。修订后的图形要显示“迟到修订”标记并保留前后版本，避免值班员误以为系统曾经实时看到过后来补传的数据。
 
 **清单 7.3  按事件时间维护带水印的滑动窗口**
 
 ```javascript
-function acceptEvent(state, reading, nowMs, allowedLatenessMs) {
-  const eventMs = Date.parse(reading.occurredAt);
-  const ingestMs = Date.parse(reading.ingestTime);
-  const watermark = nowMs - allowedLatenessMs;
-  const item = {...reading, eventMs, ingestMs, late: eventMs < watermark};
-  if (item.late) state.revisions.push(item);
-  else state.events.push(item);
-  state.events.sort((a, b) => a.eventMs - b.eventMs);
-  const start = watermark - state.windowMs;
-  state.events = state.events.filter(e => e.eventMs >= start);
-  return {events: state.events, revisions: state.revisions};
+import {parseInstantMs} from '../../../shared/time.mjs';
+
+export function createEventWindow(windowMs, allowedLatenessMs) {
+  if (!Number.isFinite(windowMs) || windowMs <= 0
+      || !Number.isFinite(allowedLatenessMs) || allowedLatenessMs < 0)
+    throw new Error('窗口长度须为正数，乱序容忍度须为非负数');
+  return {windowMs, allowedLatenessMs, maxEventMs: -Infinity,
+    watermark: -Infinity, events: [], revisions: []};
 }
 
-const streamState = {windowMs: 25 * 60 * 60 * 1000, events: [], revisions: []};
-const view = acceptEvent(streamState, reading, Date.now(), 10 * 60 * 1000);
+export function acceptEvent(state, reading) {
+  const eventMs = parseInstantMs(reading.occurredAt);
+  const ingestMs = parseInstantMs(reading.ingestTime);
+  if (!Number.isFinite(eventMs) || !Number.isFinite(ingestMs))
+    throw new Error('观测与接收时间必须有效且带时区');
+  // 用此前的水印判断迟到；处理时间只用于测量延迟。
+  const item = {...reading, eventMs, ingestMs, late: eventMs < state.watermark};
+  if (item.late) state.revisions.push(item);
+  else state.events.push(item);
+  state.maxEventMs = Math.max(state.maxEventMs, eventMs);
+  state.watermark = state.maxEventMs - state.allowedLatenessMs;
+  const start = state.maxEventMs - state.windowMs;
+  state.events = state.events.filter(e => e.eventMs >= start)
+    .sort((a, b) => a.eventMs - b.eventMs);
+  return {events: state.events, revisions: state.revisions,
+    watermark: state.watermark};
+}
+
+export function windowExample() {
+  const state = createEventWindow(25 * 60 * 60 * 1000, 10 * 60 * 1000);
+  const reading = {assetId: 'DAM-A-PZ-07', occurredAt: '2026-07-01T00:20:00Z',
+    ingestTime: '2026-09-12T00:00:00Z', value: 185.091, quality: 'valid'};
+  acceptEvent(state, reading);
+  return acceptEvent(state, {...reading, occurredAt: '2026-07-01T00:05:00Z'});
+}
+console.log(windowExample().revisions.length); // 输出 1：历史回放中一次过迟事件
 ```
 
-清单7.3中的25 h窗口来自“300个水位点×5 min”的教学约定。它是计数窗口与时间窗口恰好接近的示例，不代表所有测项都可照抄：渗压每1 h采样时，300点约等于12.5天；若需求是“最近24小时”，就必须按时间戳裁剪，而不能只写`slice(-300)`。接口应同时声明`windowType=count|duration`、窗口长度、时区和迟到容忍度，前端据此在标题中显示“300点（约25小时）”或“24小时”。
+清单7.3对应配套`src/lesson71/event-window.js`，从前端目录执行`node src/lesson71/event-window.js`输出1：第二条事件早于水印，进入修订队列。把接收日期改成当前日期，历史事件仍按原时间回放；使用接收墙钟作为水印则会把整批历史数据误判为迟到。该演示只有一个事件流，修订队列供课堂检查；工程实现另需持久化、去重、异常未来时间检查与多流空闲处理。清单中的25 h窗口来自“300个水位点×5 min”的教学约定。它是计数窗口与时间窗口恰好接近的示例，不代表所有测项都可照抄：渗压每1 h采样时，300点约等于12.5天；若需求是“最近24小时”，就必须按时间戳裁剪，而不能只写`slice(-300)`。接口应同时声明`windowType=count|duration`、窗口长度、时区和迟到容忍度，前端据此在标题中显示“300点（约25小时）”或“24小时”。
 
 跨日和夏令时会使本地时间的“当天”不等于固定的24小时。平台内部统一使用带时区的ISO 8601时间，存储和比较使用UTC毫秒；界面按照工程所在时区格式化，并把时区名称写在坐标轴或导出文件头。日统计先按本地日历边界切桶，再将桶边界转换成UTC查询，不能直接对UTC的零点切桶后声称那是当地日。遇到闰秒或设备时钟回拨，应保留原始字符串和解析状态，并用单调递增的接收序号辅助排序，不能静默丢弃重复的本地时间。
 
@@ -231,26 +261,37 @@ chart.setOption({series: [{id: 'level', data, connectNulls: false,
 **清单 7.5  展示前的质量检验与优先级合并**
 
 ```javascript
-function inspectReading(r, rules, previous) {
-  const issues = [];
-  let quality = r.value == null ? 'missing' : 'valid';
-  let rejected = false;
-  // 缺测优先级最高：后续检查只补充问题码，不把 missing 覆写成 suspect
-  const downgrade = () => { if (quality === 'valid') quality = 'suspect'; };
-  if (r.unit !== rules.unit) { issues.push('unit'); rejected = true; downgrade(); }
-  if (Number.isFinite(r.value) && (r.value < rules.min || r.value > rules.max)) {
-    issues.push('range'); rejected = true; downgrade();
-  }
-  if (previous && r.occurredAt <= previous.occurredAt) {
-    issues.push('time-order'); rejected = true; downgrade();
-  }
-  return {...r, quality, issues, rejected, participates: quality === 'valid' && !rejected};
-}
+import {parseInstantMs} from '../../../shared/time.mjs';
 
-const checked = inspectReading(reading, {unit: 'm', min: 130, max: 180}, previous);
+export function inspectReading(r, rules, previous) {
+  if (!rules.unit || (rules.min !== undefined && !Number.isFinite(rules.min))
+      || (rules.max !== undefined && !Number.isFinite(rules.max))
+      || rules.min > rules.max) throw new Error('质量规则配置非法');
+  const issues = [];
+  let quality = r.quality, rejected = false;
+  const reject = issue => {
+    issues.push(issue); rejected = true;
+    if (quality !== 'missing') quality = 'suspect';
+  };
+  if (!['valid', 'suspect', 'missing'].includes(quality)) reject('quality');
+  if (r.value == null) quality = 'missing';
+  else if (!Number.isFinite(r.value)) reject('value');
+  if (r.unit !== rules.unit) reject('unit');
+  if (quality !== 'missing' && Number.isFinite(r.value)
+      && (r.value < rules.min || r.value > rules.max)) reject('range');
+  const ms = parseInstantMs(r.occurredAt);
+  if (!Number.isFinite(ms)) reject('time');
+  if (previous) {
+    const previousMs = parseInstantMs(previous.occurredAt);
+    if (!Number.isFinite(previousMs)) reject('previous-time');
+    else if (Number.isFinite(ms) && ms <= previousMs) reject('time-order');
+  }
+  return {...r, quality, issues, rejected,
+    participates: quality === 'valid' && !rejected};
+}
 ```
 
-清单7.5展示了优先级合并的一个直观实现：缺测先得到missing，单位、范围和时序错误把记录降为suspect并设置拒收标记，其他无法确认但仍可展示的情况也使用suspect。具体工程可根据行业字典把拒收标记映射到后端的无效分支，但对外展示契约仍保持valid、suspect、missing三值，避免本章和第8章出现两套枚举。必须保留问题数组，便于在详情卡中解释为什么一条记录没有参与打分。质量码在前端只读，修订由后端质量服务完成并通过版本号推送，避免浏览器各自采用不同的阈值。
+清单7.5保存为`frontend/src/lesson71/quality.js`，保留上游suspect和missing，未知质量码、非有限数、字符串数值、单位或时序错误均留下问题码并拒收。`rules`由测点台账提供单位及可选量程，示例不另设工程阈值。只有valid且未拒收的记录参与评分；质量码在前端只读，正式订正仍由后端留痕。
 
 质量结果还要进入统计口径。日均值、最大值和超阈次数应分别给出“仅valid”“valid+suspect”和“全部到达记录”三种选择，默认统计只使用valid；suspect值可以在趋势图中显示，却不能悄悄混入风险评分。报表页要显示有效率、缺测率、可疑率、迟到率和修订次数，并把分母写清楚。例如某天有288个5 min格网，若其中24格missing，完整率是264/288，而不是用264个有效点的平均值冒充完整率。跨测项比较时还要统一时间格网和过滤条件，否则水位的288个点与渗压的24个点会产生看似可比、实则分母不同的曲线。质量指标本身也应带时间窗和规则版本，方便在规则调整后复算历史报表。
 
@@ -263,25 +304,63 @@ const checked = inspectReading(reading, {unit: 'm', min: 130, max: 180}, previou
 **清单 7.6  多源测点记录标准化与单位转换**
 
 ```javascript
-const assetMap = new Map([['PZ07', 'DAM-A-PZ-07'], ['pore-07', 'DAM-A-PZ-07']]);
-const unitFactor = {kPa: {kPa: 1}, Pa: {kPa: 0.001}, m: {m: 1}, cm: {m: 0.01}};
+import {parseInstantMs} from '../../../shared/time.mjs';
 
-function standardize(raw, source, schemaVersion) {
-  const assetId = assetMap.get(raw.sensorId) ?? `UNMAPPED:${raw.sensorId}`;
-  const targetUnit = raw.kind === 'pore' ? 'kPa' : 'm';
-  const factor = unitFactor[raw.unit]?.[targetUnit];
-  const value = factor == null ? null : Number(raw.value) * factor;
-  const quality = value == null ? 'missing' : raw.quality ?? 'valid';
-  return {assetId, occurredAt: new Date(raw.time).toISOString(),
-    ingestTime: new Date().toISOString(), value, unit: targetUnit,
-    quality, source, schemaVersion, sourceId: raw.sensorId,
-    conversion: {from: raw.unit, to: targetUnit, factor}};
+const pore07 = {assetId: 'DAM-A-PZ-07', kind: 'pore', unit: 'kPa'};
+const assetMap = new Map([['PZ07', pore07], ['pore-07', pore07]]);
+const factors = {kPa: {kPa: 1}, Pa: {kPa: 0.001},
+  m: {m: 1}, cm: {m: 0.01}, mm: {mm: 1}};
+
+export function standardize(raw, source, schemaVersion,
+    ingestTime = new Date().toISOString()) {
+  const asset = assetMap.get(raw.sensorId);
+  if (!asset) throw new Error('设备编码尚未映射');
+  if (raw.kind !== asset.kind) throw new Error('测项与设备台账不一致');
+  const {assetId, unit} = asset, factor = factors[raw.unit]?.[unit];
+  if (!Number.isFinite(factor)) throw new Error('未知测项或不支持的单位转换');
+  if (!['valid', 'suspect', 'missing'].includes(raw.quality)) throw new Error('未知质量码');
+  if (!Number.isInteger(raw.version) || raw.version < 1) throw new Error('观测版本须为正整数');
+  const ms = parseInstantMs(raw.time), received = parseInstantMs(ingestTime);
+  if (!Number.isFinite(ms) || !Number.isFinite(received)) throw new Error('时间须有效且带时区');
+  const empty = raw.value == null
+    || (typeof raw.value === 'string' && raw.value.trim() === '');
+  if (!empty && !Number.isFinite(raw.value)) throw new Error('数值须为有限数字');
+  const quality = empty || raw.quality === 'missing' ? 'missing' : raw.quality;
+  const value = quality === 'missing' ? null : raw.value * factor;
+  if (value !== null && !Number.isFinite(value)) throw new Error('换算结果溢出');
+  return {assetId, occurredAt: new Date(ms).toISOString(),
+    ingestTime: new Date(received).toISOString(), value, unit, quality,
+    version: raw.version, source, schemaVersion, sourceId: raw.sensorId,
+    conversion: {from: raw.unit, to: unit, factor}};
 }
-
-const normalized = standardize(message, 'gateway-02', 'v3');
 ```
 
-清单7.6对未映射设备使用明显的占位标识，迫使运维人员补齐数据字典，而不是把不同设备误合并。生产实现还要拒绝未知单位、检查时间解析和记录轴序；示例中的`Date`只用于说明字段流向，水利平台应在服务端使用带时区的时间库并把转换规则纳入配置版本。标准化后的记录才可以进入`assetId`维度的滑动窗口和图表联动。
+清单7.6保存为`frontend/src/lesson71/standardize.js`，未映射设备、未知单位和非法时间均报错；空值与空字符串归为missing，数字字符串交由来源适配器明确解析。转换保留来源、版本和单位因子，上游可疑值仍为suspect。
+
+三模块的调用见清单7.7，保存为同目录的`examples.js`后，在`frontend/`执行`node src/lesson71/examples.js`。185091 Pa来自PZ-07已有教学观测185.091 kPa的单位换算，仅演示数据语义。输出应保留suspect且禁止评分；未知设备、重复时间与无限值分别触发失败分支。三模块均使用配套`shared/time.mjs`解析带时区时间，回归验证见`tests/lesson71.test.js`。
+
+**清单 7.7  标准化、质量检验与重采样的完整调用及失败例**
+
+```javascript
+import {alignReadings} from './resample.js';
+import {inspectReading} from './quality.js';
+import {standardize} from './standardize.js';
+
+const raw = {sensorId: 'PZ07', kind: 'pore', unit: 'Pa', value: 185091,
+  time: '2026-07-01T08:00:00+08:00', quality: 'suspect', version: 1};
+const normalized = standardize(raw, 'gateway-02', 'v3', '2026-07-01T00:00:01Z');
+const checked = inspectReading(normalized, {unit: 'kPa'});
+const buckets = alignReadings([checked], 60 * 60 * 1000, 'porePressure');
+console.log(JSON.stringify({value: normalized.value, quality: checked.quality,
+  participates: checked.participates, bucketQuality: buckets[0].quality}));
+// 预期：185.091、suspect、false、suspect；上游可疑标记不会被升级。
+try { standardize({...raw, sensorId: 'unknown'}, 'gateway-02', 'v3'); }
+catch (error) { console.log(error.message); } // 设备编码尚未映射
+try { alignReadings([checked, checked], 3600000, 'porePressure'); }
+catch (error) { console.log(error.message); } // 重复观测时间
+console.log(inspectReading({...normalized, value: Infinity}, {unit: 'kPa'}).issues);
+// 预期包含 value，记录被拒收，不参与评分。
+```
 
 图7.3把实时流和历史回放共用的处理边界画出来：来源适配器负责字段和单位，时间服务负责格网与水印，质量服务负责码值和问题，窗口服务保留原始与聚合序列，展示层最后才决定颜色、断线和交互。任何一层都不能用“显示方便”作为理由改写原始观测。
 
@@ -349,9 +428,9 @@ const normalized = standardize(message, 'gateway-02', 'v3');
 
 图7.4只展示编码关系，不替代工程分析。雨量柱从零基线向上绘制，水位线使用独立轴但共享时间索引；若为了突出“倒挂”效果将柱形向下绘制，也要在图例中说明向下方向代表降雨量而不是负值。真正的水位预警仍由第8章的规则、质量码和模型版本决定。
 
-ECharts 配置项与 API 随版本演进，本章写法以官方手册为准<sup>[[57]](../../references.md#ref57)</sup>。本章示例统一沿用第4章的 Vite 工程：ECharts 与坐标库通过 `npm install echarts proj4` 安装、以 `import * as echarts from ’echarts’` 与 `import proj4 from ’proj4’` 引入；Three.js 沿用第6章工程的安装与导入方式。无构建环境的课堂演示可改用官方 CDN 的全局构建，此时 `echarts`、`THREE`、`proj4` 为全局变量，后文清单不再逐个重复引入语句。清单7.7给出可运行的雨量倒挂柱与水位过程线组合，显式声明两个y轴、单位、tooltip格式和数据缩放；真实项目还要从服务端响应读取质量码并对缺测点设置空值，不把缺测当作零雨量或零水位。
+ECharts 配置项与 API 随版本演进，本章写法以官方手册为准<sup>[[57]](../../references.md#ref57)</sup>。本章示例统一沿用第4章的 Vite 工程：ECharts 与坐标库通过 `npm install echarts proj4` 安装、以 `import * as echarts from ’echarts’` 与 `import proj4 from ’proj4’` 引入；Three.js 沿用第6章工程的安装与导入方式。无构建环境的课堂演示可改用官方 CDN 的全局构建，此时 `echarts`、`THREE`、`proj4` 为全局变量，后文清单不再逐个重复引入语句。清单7.8给出可运行的雨量倒挂柱与水位过程线组合，显式声明两个y轴、单位、tooltip格式和数据缩放；真实项目还要从服务端响应读取质量码并对缺测点设置空值，不把缺测当作零雨量或零水位。
 
-**清单 7.7  雨量倒挂柱与水位过程线ECharts配置**
+**清单 7.8  雨量倒挂柱与水位过程线ECharts配置**
 
 ```javascript
 const chart = echarts.init(document.querySelector('#rain-level'));
@@ -404,7 +483,7 @@ ECharts的`setOption`不是“把新对象覆盖到旧对象”这么简单。�
 | 替换集合 | `replaceMerge`      | 删除或重排序列时使用；必须重新提供完整序列集合                                    |
 | 流式追加 | `appendData(...)`   | 限支持的系列且不用`dataset`；水位折线用局部合并，排序、去重和窗口裁剪由应用层处理 |
 
-**清单 7.8  基于应用状态的实时水位曲线更新**
+**清单 7.9  基于应用状态的实时水位曲线更新**
 
 ```javascript
 const chart = echarts.init(document.querySelector('#level'));
@@ -430,13 +509,13 @@ function appendReading(reading) {
 }
 ```
 
-清单7.8把数据缓冲放在`state.level`中，图表只承担渲染职责，因此加入阈值带、第二条曲线或重新排序时不会依赖`series[0]`的下标。缺测点明确写成空值并保持`connectNulls:false`；排序、去重和300点窗口裁剪在应用状态中完成。300点对5 min水位采样约为25 h，若查询窗口是固定24小时，应改用时间戳裁剪而不是照搬点数。
+清单7.9把数据缓冲放在`state.level`中，图表只承担渲染职责，因此加入阈值带、第二条曲线或重新排序时不会依赖`series[0]`的下标。缺测点明确写成空值并保持`connectNulls:false`；排序、去重和300点窗口裁剪在应用状态中完成。300点对5 min水位采样约为25 h，若查询窗口是固定24小时，应改用时间戳裁剪而不是照搬点数。
 
 **内置LTTB与历史浏览**
 
 本章前面推导的LTTB可以直接对应到ECharts的`sampling:’lttb’`。库在折线点数超过像素宽度时按桶保留峰谷，前端只需声明采样策略；原始数据仍保存在后端，统计和质量审计不能使用降采样后的视觉序列。初次加载历史曲线时可同时设置`sampling:’lttb’`、`showSymbol:false`和`progressive`，在不改变业务数值的前提下减少绘制压力。
 
-**清单 7.9  历史曲线的降采样、缩放与阈值带**
+**清单 7.10  历史曲线的降采样、缩放与阈值带**
 
 ```javascript
 const historyOption = {
@@ -459,13 +538,13 @@ const historyOption = {
 chart.setOption(historyOption);
 ```
 
-清单7.9同时展示了`dataZoom`、`markLine`、`markArea`和`visualMap.pieces`的职责：缩放改变可见时间范围，标线标出单一基准，阴影标出阈值带，分段映射控制曲线颜色。阈值来源、适用工况和规则版本必须显示在图例或详情中；不能用一条红色水平线代替第8章的质量检查和预警规则。颜色分段只服务于阅读，风险计算仍读取原始数值和质量码。
+清单7.10同时展示了`dataZoom`、`markLine`、`markArea`和`visualMap.pieces`的职责：缩放改变可见时间范围，标线标出单一基准，阴影标出阈值带，分段映射控制曲线颜色。阈值来源、适用工况和规则版本必须显示在图例或详情中；不能用一条红色水平线代替第8章的质量检查和预警规则。颜色分段只服务于阅读，风险计算仍读取原始数值和质量码。
 
 **尾部更新与结构变更**
 
-水位折线收到新观测时，先把记录追加到应用缓冲，再用`setOption`更新`line`系列；缓冲负责保持300点窗口。迟到消息应先按事件时间排序、去重，再重建序列。若图表从一条水位曲线切换为水位与雨量两条序列，应在一次`replaceMerge`中提供完整集合和对应坐标轴。清单7.10给出可独立使用的更新模块。调用方在导入后传入已初始化的图表，收到一条按时间递增的观测就调用`appendTail`；需要切换序列时调用`replaceWithTwoSeries`。验证时追加一个`missing`点，应保留空值并断线；再追加超过300点，缓冲应只保留末尾300点。将折线更新误换为追加接口时，先核对系列类型是否支持增量渲染。
+水位折线收到新观测时，先把记录追加到应用缓冲，再用`setOption`更新`line`系列；缓冲负责保持300点窗口。迟到消息应先按事件时间排序、去重，再重建序列。若图表从一条水位曲线切换为水位与雨量两条序列，应在一次`replaceMerge`中提供完整集合和对应坐标轴。清单7.11给出可独立使用的更新模块。调用方在导入后传入已初始化的图表，收到一条按时间递增的观测就调用`appendTail`；需要切换序列时调用`replaceWithTwoSeries`。验证时追加一个`missing`点，应保留空值并断线；再追加超过300点，缓冲应只保留末尾300点。将折线更新误换为追加接口时，先核对系列类型是否支持增量渲染。
 
-**清单 7.10  水位折线的尾部更新与序列切换**
+**清单 7.11  水位折线的尾部更新与序列切换**
 
 ```javascript
 export function createWindowChart(chart) {
@@ -503,7 +582,7 @@ Canvas适合连续折线、数千个点和频繁刷新，绘制由一个位图�
 
 组件生命周期同样是性能的一部分。创建图表时保存实例，使用`ResizeObserver`监听容器尺寸并调用`chart.resize()`；组件卸载时解除观察器、消息订阅和事件监听，最后调用`chart.dispose()`。不销毁旧实例会让Canvas、定时器和闭包继续占用内存，切换测点几百次后才暴露为卡顿，难以从单次截图发现。
 
-**清单 7.11  响应式尺寸与ECharts实例销毁**
+**清单 7.12  响应式尺寸与ECharts实例销毁**
 
 ```javascript
 function mountChart(container, option, subscribe) {
@@ -521,7 +600,7 @@ function mountChart(container, option, subscribe) {
 }
 ```
 
-清单7.11把“创建—订阅—调整—销毁”作为一个可测试的闭环。移动端旋转、侧栏收起和大屏窗口切换都会触发尺寸变化；如果只在`window.resize`上监听，容器在网格布局中改变宽度时可能没有回调。销毁函数应由Vue 3的`onUnmounted`调用，不能等待浏览器自动回收。
+清单7.12把“创建—订阅—调整—销毁”作为一个可测试的闭环。移动端旋转、侧栏收起和大屏窗口切换都会触发尺寸变化；如果只在`window.resize`上监听，容器在网格布局中改变宽度时可能没有回调。销毁函数应由Vue 3的`onUnmounted`调用，不能等待浏览器自动回收。
 
 <figure markdown>
 ![图7.6](images/chapter07_fig_7_6.svg)
@@ -534,7 +613,7 @@ function mountChart(container, option, subscribe) {
 
 图表和三维场景联动的关键不是让两个库互相调用，而是共享稳定的对象标识和时间窗口。ECharts点击事件的`params.data`保存当前点的原始数组或对象，`params.seriesId`说明来自哪条序列，`params.dataIndex`用于定位应用状态中的索引；控制器据此取出`assetId`，再调用三维场景的高亮接口。反向点击三维对象时，从`object.userData.assetId`查找图表序列和数据索引，使用`dispatchAction`发送`highlight`与`showTip`。多张图表可通过`echarts.connect([a,b])`或相同的`group`共享缩放和提示，但对象定位仍由业务控制器完成。
 
-**清单 7.12  ECharts与Three.js对象的双向联动控制器**
+**清单 7.13  ECharts与Three.js对象的双向联动控制器**
 
 ```javascript
 function createLinkController(chart, scene, readings) {
@@ -563,19 +642,19 @@ function createLinkController(chart, scene, readings) {
 }
 ```
 
-清单7.12没有把`assetId`写死在图表下标里：筛选、排序或插入阈值带后，控制器仍可通过应用状态查找对象。真实项目还要把时间窗口作为`focusAsset`的参数，三维场景显示同一时刻的质量码和预警等级；若该点是missing，图表应定位到空值区间并打开质量详情，而不是强行显示最近的有效点。解绑函数必须在组件卸载时执行，否则每次进入页面都会叠加一组点击处理器。
+清单7.13没有把`assetId`写死在图表下标里：筛选、排序或插入阈值带后，控制器仍可通过应用状态查找对象。真实项目还要把时间窗口作为`focusAsset`的参数，三维场景显示同一时刻的质量码和预警等级；若该点是missing，图表应定位到空值区间并打开质量详情，而不是强行显示最近的有效点。解绑函数必须在组件卸载时执行，否则每次进入页面都会叠加一组点击处理器。
 
 **S5 阶段包。**
 
-清单7.12中的`scene`由`src/lesson74/scene-bus.js`提供事件总线和对象高亮；`lesson74.html`与`main.js`完成装配，使用教学接口或 S3 完整后端以及 S4 场景。点球后应显示该对象曲线，点曲线上的数据点应高亮对应测点。`series-controller.js`负责异步切换，复用4.5.4节的取消请求与序号校验：一开始切换就解绑并清空旧曲线，当前请求成功后再建立联动。
+清单7.13中的`scene`由`src/lesson74/scene-bus.js`提供事件总线和对象高亮；`lesson74.html`与`main.js`完成装配，使用教学接口或 S3 完整后端以及 S4 场景。点球后应显示该对象曲线，点曲线上的数据点应高亮对应测点。`series-controller.js`负责异步切换，复用4.5.4节的取消请求与序号校验：一开始切换就解绑并清空旧曲线，当前请求成功后再建立联动。
 
 **故障验证与自测**
 
 先让渗压测点的请求延迟，再立即选择库水位测点，最终曲线、单位和状态文字应全部属于后选对象；接着选择无观测的位移测点，应显示“暂无观测”且旧曲线无法响应点击。断网时应显示失败原因，恢复后重新选择可重试。若旧图恢复或旧监听器仍生效，检查序号校验和解绑是否位于所有返回分支之前。`tests/series-controller.test.js`覆盖这些异常路径及卸载后迟到的响应，`tests/lesson74.test.js`验证对象映射、下标越界和拾取。自测：取消请求后为什么还需要序号？答案要点：取消不能撤回已经完成的异步计算，只有当前选择的结果才有更新权限。
 
-水位、雨量和渗压往往分成上下几张图。清单7.13用`echarts.connect`让它们共享缩放和提示，读者拖动其中一张的时间轴，另外几张同步跟随；但对象定位仍由业务控制器完成，图表库不认识`assetId`。
+水位、雨量和渗压往往分成上下几张图。清单7.14用`echarts.connect`让它们共享缩放和提示，读者拖动其中一张的时间轴，另外几张同步跟随；但对象定位仍由业务控制器完成，图表库不认识`assetId`。
 
-**清单 7.13  多图表缩放联动与组标识**
+**清单 7.14  多图表缩放联动与组标识**
 
 ```javascript
 const levelChart = echarts.init(document.querySelector('#level'));
@@ -630,9 +709,9 @@ ECharts工程验收至少准备五组数据：单点连续到达、同一事件�
 
 用户点击图表上的异常点时，联动控制器读取`assetId`和时间，定位场景中的测点并打开同一时刻的详情；反向点击三维测点时，曲线切换到对应监测项并标出当前事件。联动状态放在页面状态管理中，图表对象只使用库提供的事件接口，便于测试和解绑。
 
-交互事件可能很密集。指针移动使用节流，时间范围查询使用防抖，告警确认则不得被节流丢弃。触控长按必须在抬起或取消时清理定时器，清单7.14把`touchend`与`touchcancel`都接上——只处理前者，用户手指滑出屏幕时长按菜单仍会弹出：
+交互事件可能很密集。指针移动使用节流，时间范围查询使用防抖，告警确认则不得被节流丢弃。触控长按必须在抬起或取消时清理定时器，清单7.15把`touchend`与`touchcancel`都接上——只处理前者，用户手指滑出屏幕时长按菜单仍会弹出：
 
-**清单 7.14  触控长按的定时器与取消**
+**清单 7.15  触控长按的定时器与取消**
 
 ```javascript
 let longPressTimer = null;
@@ -673,7 +752,7 @@ function cancelLongPress() {
 
 图7.7中的虚线表示等值线，底色表示分区或栅格，箭头表示流向，带字母的圆点表示站点。发布地图前，学生应检查底图、专题图层和测点是否使用同一CRS与时间窗；如果站点位置正确而色斑图整体偏移，优先检查栅格范围、轴序和瓦片矩阵，而不是在前端给点位增加固定偏移。
 
-**清单 7.15  专题地图图层与站点符号配置**
+**清单 7.16  专题地图图层与站点符号配置**
 
 ```javascript
 const stationLayer = readings
@@ -699,9 +778,9 @@ const thematicOption = {
 };
 ```
 
-清单7.15把质量状态与业务预警分开：可疑点改变形状，预警等级改变颜色，缺测点从数值散点中排除但可在独立缺测图层中显示。若底图服务返回的是WMS渲染图，专题数值仍应来自可查询的要素或覆盖服务，不能从图片像素反推原始监测值。
+清单7.16把质量状态与业务预警分开：可疑点改变形状，预警等级改变颜色，缺测点从数值散点中排除但可在独立缺测图层中显示。若底图服务返回的是WMS渲染图，专题数值仍应来自可查询的要素或覆盖服务，不能从图片像素反推原始监测值。
 
-**清单 7.16  按任务选择视觉变量**
+**清单 7.17  按任务选择视觉变量**
 
 ```javascript
 function encodeReading(reading, task) {
@@ -721,7 +800,7 @@ function encodeReading(reading, task) {
 }
 ```
 
-清单7.16把质量码转换为线型、纹理或形状，并把单位保留在标签中。它不直接决定蓝黄橙红预警颜色；预警服务返回等级和规则版本，展示层只负责依据图例渲染。这样，数据质量和业务风险两个维度即使同时出现在一张图上，也能被用户分别解释。
+清单7.17把质量码转换为线型、纹理或形状，并把单位保留在标签中。它不直接决定蓝黄橙红预警颜色；预警服务返回等级和规则版本，展示层只负责依据图例渲染。这样，数据质量和业务风险两个维度即使同时出现在一张图上，也能被用户分别解释。
 
 ### 7.2.7 色彩体系与可读性
 
@@ -772,7 +851,7 @@ function encodeReading(reading, task) {
 
 图7.8强调色彩设计不是调色板选择的单一步骤。先确定业务语义，再选色板和对比度，随后补充形状、纹理、文字与替代文本，最后在不同显示条件下验收；若验收发现红绿色差异在灰度打印中消失，应回到冗余编码环节补充图标或线型，而不是继续调换色相。
 
-**清单 7.17  预警等级与质量状态的双维度色彩配置**
+**清单 7.18  预警等级与质量状态的双维度色彩配置**
 
 ```javascript
 const warningPalette = {
@@ -795,9 +874,9 @@ function styleReading(reading) {
 }
 ```
 
-清单7.17中的两套配置互不覆盖：预警等级提供业务颜色和图标，质量状态提供边框、纹理和文字。`styleReading`的标签把二者组合为可读短语，详情面板再展开规则版本、检查时刻和处置入口。若颜色加载失败，图标和文字仍能表达状态；若质量服务返回missing，界面不得把它回退为NONE。颜色之外还要有替代文本：清单7.18给图表配上`aria`描述与数据表格入口，读屏用户不必依赖视觉编码也能取到同一份数值。
+清单7.18中的两套配置互不覆盖：预警等级提供业务颜色和图标，质量状态提供边框、纹理和文字。`styleReading`的标签把二者组合为可读短语，详情面板再展开规则版本、检查时刻和处置入口。若颜色加载失败，图标和文字仍能表达状态；若质量服务返回missing，界面不得把它回退为NONE。颜色之外还要有替代文本：清单7.19给图表配上`aria`描述与数据表格入口，读屏用户不必依赖视觉编码也能取到同一份数值。
 
-**清单 7.18  ECharts图表的无障碍与替代文本配置**
+**清单 7.19  ECharts图表的无障碍与替代文本配置**
 
 ```javascript
 const option = {
@@ -868,9 +947,9 @@ chart.getDom().setAttribute('aria-label', option.aria.description);
 
 $$x=E-E_0,\qquad y=H-H_0,\qquad z=-(N-N_0).$$
 
-负号来自Three.js常用的相机与地面坐标约定，项目也可采用其他轴向，但数据、模型和交互必须统一。清单7.19把上式实现为一对互逆函数，并把局部原点作为参数传入而不是写死成常量，换工程时只改调用处。
+负号来自Three.js常用的相机与地面坐标约定，项目也可采用其他轴向，但数据、模型和交互必须统一。清单7.20把上式实现为一对互逆函数，并把局部原点作为参数传入而不是写死成常量，换工程时只改调用处。
 
-**清单 7.19  坐标与单位转换**
+**清单 7.20  坐标与单位转换**
 
 ```javascript
 const cgcs2000 = '+proj=longlat +ellps=GRS80 +no_defs +type=crs';
@@ -889,9 +968,9 @@ const world = {
 
 中央经线`lon_0`必须按工程所在投影带确定，不能照抄示例。UTM同属横轴墨卡托投影体系，适合某些国际数据交换，但不是国内水利工程坐标的默认主线；输入若为UTM，应先核对带号、半球、基准和元数据，再转换到项目统一坐标。
 
-国内测绘成果有时把带号前缀拼接到东坐标左侧。例如3度带39号的成果可能写成`39500000.00`，其中前两位是带号，真正参与局部原点相减的东坐标是`500000.00`。如果把带号坐标直接送入场景，局部坐标会突然增加三千多万米，单精度顶点和相机裁剪都会失效。剥离带号必须依据元数据中的带宽和带号，不要按字符串长度盲切；剥离后的结果要与中央经线、`+x_0=500000`和控制点复核。清单7.20按这个原则实现：带号来自元数据参数，函数在数值不落在合理范围时直接抛错，而不是返回一个看起来正常的坐标。
+国内测绘成果有时把带号前缀拼接到东坐标左侧。例如3度带39号的成果可能写成`39500000.00`，其中前两位是带号，真正参与局部原点相减的东坐标是`500000.00`。如果把带号坐标直接送入场景，局部坐标会突然增加三千多万米，单精度顶点和相机裁剪都会失效。剥离带号必须依据元数据中的带宽和带号，不要按字符串长度盲切；剥离后的结果要与中央经线、`+x_0=500000`和控制点复核。清单7.21按这个原则实现：带号来自元数据参数，函数在数值不落在合理范围时直接抛错，而不是返回一个看起来正常的坐标。
 
-**清单 7.20  剥离国内测绘成果的带号前缀**
+**清单 7.21  剥离国内测绘成果的带号前缀**
 
 ```javascript
 function stripZonePrefix(easting, zoneWidth, zoneNumber) {
@@ -907,9 +986,9 @@ function stripZonePrefix(easting, zoneWidth, zoneNumber) {
 const east = stripZonePrefix('39500000.00', 3, 39);
 ```
 
-位移箭头也要把工程方位角转换为场景向量。规定北为0°、方位角顺时针增加，位移量为$d$、方位角为$\alpha$时，在本章$x$向东、$z$向南的约定下有 $$\boldsymbol v=(d\sin\alpha,\;0,\;-d\cos\alpha).$$ 因此向北位移的$z$分量为负，向东位移的$x$分量为正。角度必须先由度转换为弧度，箭头长度还应设置可视化比例并在图例中标注真实位移，避免把放大的绘制长度误读成工程量。清单7.21把方位角和位移量转成场景向量，缩放比例作为单独参数传入，绘制长度与真实位移因此始终可以互相反算。
+位移箭头也要把工程方位角转换为场景向量。规定北为0°、方位角顺时针增加，位移量为$d$、方位角为$\alpha$时，在本章$x$向东、$z$向南的约定下有 $$\boldsymbol v=(d\sin\alpha,\;0,\;-d\cos\alpha).$$ 因此向北位移的$z$分量为负，向东位移的$x$分量为正。角度必须先由度转换为弧度，箭头长度还应设置可视化比例并在图例中标注真实位移，避免把放大的绘制长度误读成工程量。清单7.22把方位角和位移量转成场景向量，缩放比例作为单独参数传入，绘制长度与真实位移因此始终可以互相反算。
 
-**清单 7.21  按北起顺时针方位角生成位移箭头向量**
+**清单 7.22  按北起顺时针方位角生成位移箭头向量**
 
 ```javascript
 function displacementVector(distance, azimuthDeg, displayScale = 1) {
@@ -946,9 +1025,9 @@ LOD不只是“近处多画、远处少画”，而是要为每一级定义可�
 
 聚合不能把质量状态和业务等级混为一个颜色。一个簇内只要存在橙色预警，就可以用橙色边框提示需要下钻；若簇内全部是missing，应显示灰色缺测符号而不是NONE；若有suspect点但没有业务预警，符号可加斜线纹理并显示可疑比例。下钻后，三维对象、曲线和列表共享同一`assetId`过滤条件，返回上一级时恢复原来的时间窗和相机位置。LOD切换还要有迟滞区间，避免相机在阈值附近轻微抖动造成对象频繁创建和销毁。
 
-性能预算可以用屏幕占用而不是固定米数表达。测点圆点直径低于3像素时，增加几何细节没有收益；文字标签低于8像素时，应隐藏文字并保留可访问的列表入口；聚合圆点达到20像素以上且重叠严重时，优先显示数量和最高风险。每一级记录对象数、三角形数、材质切换次数和帧时间，按普通笔记本、值班室大屏和移动设备分别验收。这样，LOD阈值来自任务和设备能力，而不是照抄某个项目的距离常数。清单7.22做的就是这个换算：给定像素预算和当前相机距离，反解出聚合与拾取应当使用的世界半径。
+性能预算可以用屏幕占用而不是固定米数表达。测点圆点直径低于3像素时，增加几何细节没有收益；文字标签低于8像素时，应隐藏文字并保留可访问的列表入口；聚合圆点达到20像素以上且重叠严重时，优先显示数量和最高风险。每一级记录对象数、三角形数、材质切换次数和帧时间，按普通笔记本、值班室大屏和移动设备分别验收。这样，LOD阈值来自任务和设备能力，而不是照抄某个项目的距离常数。清单7.23做的就是这个换算：给定像素预算和当前相机距离，反解出聚合与拾取应当使用的世界半径。
 
-**清单 7.22  按相机距离换算聚合与拾取世界半径**
+**清单 7.23  按相机距离换算聚合与拾取世界半径**
 
 ```javascript
 function distanceToPoint(camera, point) {
@@ -988,9 +1067,9 @@ function radiusForObject(camera, point, px, canvasHeight) {
 
 手工求交的数值容差应与场景尺度相关。固定的$10^{-8}$在米级局部场景通常足够，但当模型缩放到毫米或数十公里时应按边长和相机距离调整。求交函数返回点坐标后，再计算点到相机的距离用于排序；若方向向量没有归一化，参数$t$只表示方向上的倍数，不能直接显示为“距离米数”。射线命中点还应带上对象层级、三角形索引和时间窗，详情卡据此解释用户点到的是模型表面、测点符号还是聚合簇。
 
-清单7.23把上面几步收进一个类：构造时保存相机、场景和画布，`pick`只接收客户端坐标，换画布尺寸或设备像素比时调用方不必改动。拾取测试要覆盖画布边缘、窄屏旋转、设备像素比为2的屏幕、对象被遮挡和相邻对象重叠。测试输入保存客户端坐标、画布矩形、相机参数和预期`assetId`，而不是只保存一张截图。若模型分块异步加载，点击发生在分块尚未到达时，界面应显示加载状态并允许重试；加载完成后用同一屏幕坐标重新计算射线，不要沿用旧的交点距离。
+清单7.24把上面几步收进一个类：构造时保存相机、场景和画布，`pick`只接收客户端坐标，换画布尺寸或设备像素比时调用方不必改动。拾取测试要覆盖画布边缘、窄屏旋转、设备像素比为2的屏幕、对象被遮挡和相邻对象重叠。测试输入保存客户端坐标、画布矩形、相机参数和预期`assetId`，而不是只保存一张截图。若模型分块异步加载，点击发生在分块尚未到达时，界面应显示加载状态并允许重试；加载完成后用同一屏幕坐标重新计算射线，不要沿用旧的交点距离。
 
-**清单 7.23  PointPicker：射线拾取器**
+**清单 7.24  PointPicker：射线拾取器**
 
 ```javascript
 class PointPicker {
@@ -1019,9 +1098,9 @@ class PointPicker {
 <figcaption>图 7.10  从屏幕坐标到场景交点的拾取过程</figcaption>
 </figure>
 
-若教学中手工实现Möller–Trumbore三角形求交，必须复制向量后再做减法、叉乘和缩放，避免破坏顶点与射线输入。函数返回的是交点的世界坐标，不是参数$t$；若`direction`没有归一化，$t$表示沿射线方向的缩放量而不等于米制距离，按交点远近排序时应使用`origin.distanceTo(point)`或先归一化方向向量。清单7.24是这样一份实现，注意每次运算都先`clone`再改，输入的顶点与射线不被修改：
+若教学中手工实现Möller–Trumbore三角形求交，必须复制向量后再做减法、叉乘和缩放，避免破坏顶点与射线输入。函数返回的是交点的世界坐标，不是参数$t$；若`direction`没有归一化，$t$表示沿射线方向的缩放量而不等于米制距离，按交点远近排序时应使用`origin.distanceTo(point)`或先归一化方向向量。清单7.25是这样一份实现，注意每次运算都先`clone`再改，输入的顶点与射线不被修改：
 
-**清单 7.24  M\"oller--Trumbore 三角形求交**
+**清单 7.25  M\"oller--Trumbore 三角形求交**
 
 ```javascript
 function intersectTriangle(origin, direction, a, b, c) {
@@ -1046,9 +1125,9 @@ function intersectTriangle(origin, direction, a, b, c) {
 
 ### 7.4.2 触控半径与世界单位
 
-`raycaster.params.Points.threshold`使用世界单位，不是像素。触控目标希望具有20像素左右的可点范围时，先按相机距离和视场角换算，清单7.25给出这段换算——相机拉远后阈值要跟着变大，写死一个常数会让远处的测点点不中：
+`raycaster.params.Points.threshold`使用世界单位，不是像素。触控目标希望具有20像素左右的可点范围时，先按相机距离和视场角换算，清单7.26给出这段换算——相机拉远后阈值要跟着变大，写死一个常数会让远处的测点点不中：
 
-**清单 7.25  屏幕像素到世界长度的换算**
+**清单 7.26  屏幕像素到世界长度的换算**
 
 ```javascript
 // 复用前文定义的 pixelsToWorld(px, distance, fovRad,

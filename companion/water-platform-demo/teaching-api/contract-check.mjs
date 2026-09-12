@@ -119,6 +119,27 @@ const run = async () => {
   check('400 错误体为 {code:"INVALID_RANGE", field:"from"}',
     isContractError(bad.json, 'INVALID_RANGE', 'from'), bad.text.slice(0, 160));
 
+  const rangeCall = (from, to) => call(`/api/assets/DAM-A-PZ-07/readings?${new URLSearchParams({from, to})}`, h);
+  for (const from of ['2026-07-01', '2026-07-01T00:00:00', '2026-02-30T00:00:00Z']) {
+    const result = await rangeCall(from, '2026-07-02T00:00:00Z');
+    check(`拒绝无时区或非法日期 ${from}`, result.status === 400, result.text.slice(0, 160));
+  }
+  const equal = await rangeCall('2026-07-01T08:00:00+08:00', '2026-07-01T00:00:00Z');
+  check('不同时区表示同一时刻时拒绝零长度时间窗', equal.status === 400, equal.text.slice(0, 160));
+  if (stage !== 'lesson52' && latest.json?.occurredAt) {
+    const point = latest.json, time = Date.parse(point.occurredAt);
+    const before = new Date(time - 1).toISOString(), after = new Date(time + 1).toISOString();
+    const left = await rangeCall(before, point.occurredAt);
+    const right = await rangeCall(point.occurredAt, after);
+    const utc = await rangeCall(new Date(time).toISOString(), after);
+    check('左窗排除恰好位于to的观测', left.status === 200 && Array.isArray(left.json)
+      && !left.json.some(r => r.eventId === point.eventId), left.text.slice(0, 160));
+    check('右窗包含恰好位于from的观测', right.status === 200 && Array.isArray(right.json)
+      && right.json.some(r => r.eventId === point.eventId), right.text.slice(0, 160));
+    check('UTC与带偏移的查询得到相同观测', utc.status === 200
+      && JSON.stringify(utc.json) === JSON.stringify(right.json), utc.text.slice(0, 160));
+  }
+
   // —— 5.2.2“一个会遇到的失败”：+ 号未编码，解析失败发生在进入方法之前 ——
   const plus = await call('/api/assets/DAM-A-PZ-07/readings'
     + '?from=2026-07-01T00:00:00 08:00&to=2026-07-02T00%3A00%3A00%2B08%3A00', h);
