@@ -156,9 +156,10 @@ def check_wordcount(texts, r, init):
         c, b, t = cur.get(f, 0), base.get(f, 0), TARGET[f]
         r.log("%-16s %8d %8d %+8d %8d %6d%%" % (f, b, c, c - b, t, round(100.0 * c / t)))
         if base and c < b:
-            r.fail("【防删除】%s 正文汉字 %d < 基线 %d，净减少 %d 字。本方案只允许增写；"
-                   "确需删除的段落必须在提交说明中逐段列出原文并说明替代内容。"
-                   % (f, c, b, b - c))
+            # R11-00 规则校准：历史字数基线只作参照，不再一票否决。
+            # 真正要防的是“无说明的成段删除”，由下面的增量检查 + migration_ledger 负责。
+            r.warn("%s 正文汉字 %d 低于第九轮历史基线 %d（仅提示；删减是否登记由增量检查把关）"
+                   % (f, c, b))
     # 增量防删除：静态基线是 O1 之前的旧值，随着各章增长，它已经拦不住
     # "从 38,000 删到 12,000 仍高于基线" 这类回退。再加一道与上一次提交的对比。
     # 第九轮 D1：允许"分层迁移"——把拓展层内容迁到附录/线上时，先在
@@ -175,8 +176,9 @@ def check_wordcount(texts, r, init):
                 or not isinstance(ent.get("allowed_drop"), int):
             r.fail("迁移登记条目非法：%s（需 allowed_drop 整数与 reason 说明）" % f)
     if total > TOTAL_CEILING:
-        r.fail("【篇幅上限】全书正文 %d 字 > 上限 %d 字（第九轮决策 D1）。"
-               "新增内容须以分层迁移换取篇幅，不得净增。" % (total, TOTAL_CEILING))
+        # R11-00 规则校准：篇幅上限是第九轮的管理口径，不是正确性检查，改为提示。
+        r.warn("全书正文 %d 字 > 第九轮参考上限 %d 字；请确认新增内容确有教学必要"
+               % (total, TOTAL_CEILING))
     try:
         import subprocess as _sp
         for f in FILES:
@@ -428,6 +430,13 @@ def check_build(r):
         r.fail("未生成 PDF")
 
 
+# R11-00 规则校准（2026-09-21）：以下三项是第五至九轮的“数量口径”
+# （每章至少多少个清单/图、每1200字一个载体）。它们催生过为凑数而重复打印完整程序的写法，
+# 第十一轮起只报告、不拦截；引用、环境配对、文献、编译、改稿批注、章末要件与
+# 未登记成段删除仍按原规则判定。
+ADVISORY = {"listings_deficit", "figures_deficit", "denseness_deficit"}
+
+
 def judge_metrics(r, init_gate, strict):
     if init_gate:
         os.makedirs(os.path.dirname(GATEFILE), exist_ok=True)
@@ -444,6 +453,10 @@ def judge_metrics(r, init_gate, strict):
         b = base.get(k)
         d = "" if b is None else "%+d" % (v - b)
         r.log("%-34s %8s %8d %8s" % (r.labels[k], "-" if b is None else b, v, d))
+        if k in ADVISORY:
+            if v:
+                r.warn("%s %d（数量口径，仅提示）" % (r.labels[k], v))
+            continue
         if strict and v:
             r.fail("【严格模式】%s 仍有 %d 项未清零" % (r.labels[k], v))
         elif b is not None and v > b:
