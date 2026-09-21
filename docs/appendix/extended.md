@@ -2,6 +2,18 @@
 
 这些拓展专题适用于课程设计、毕业设计和平台运维，可结合性能测量或故障排查任务选读。学习后端优化前，先完成第5章的接口、存储与事务实践，再对照清单和表格检查缓存、连接池与监控配置。
 
+## 服务边界、接口版本与健康检查
+
+案例水库采用模块化单体（第3章3.5.2节），下面的内容在平台拆分为多个服务、或接口对外公开之后才会用到，供课程设计选读。
+
+服务边界以业务能力划分。数据采集、读数查询、预警评估和通知可以是不同服务，但每个服务拥有明确的数据所有权和 API 契约；拆分不是把每个类都部署成独立进程。开发环境可用配置文件把逻辑服务名映射到固定地址，生产环境再接入服务注册与发现组件、健康检查和负载均衡。业务代码只依赖接口客户端，不能把某个注册中心的注解散落到领域层，这样基础设施实现与业务规则可以分别修改和测试。
+
+跨服务调用要显式处理超时、重试和降级。查询测站详情可以在短超时后返回缓存快照，并在界面标注数据时间；写入监测值则不能因为重试而重复落库，应把请求 ID 和幂等键贯穿网关、服务日志与数据库。链路追踪至少传递`traceId`和`requestId`，错误响应包含可定位的错误码而不暴露内部堆栈。服务之间若共享 PostgreSQL 表，边界会失去意义，应改为通过版本化 API 或消息事件交换数据。
+
+接口演进要兼顾兼容性和速度，并留下记录。对外公开的水利平台接口可以采用路径版本`/api/v1/assets`，在字段增加时保持旧字段语义不变；删除字段、改变单位或改变时间时区都属于破坏性变更，应发布`v2`并给出迁移窗口。版本号不应随着每次修复递增，补丁修复和兼容字段增加可以通过文档和变更日志说明。响应体可带`Deprecation`和`Sunset`提示，让调用方在停止旧版本前完成升级。
+
+服务发现的健康检查至少分为进程存活、依赖可达和业务可用三类。进程存活用于重启异常实例，依赖可达检查数据库、Redis 和 Kafka 连接，业务可用则验证关键表结构、时序写入权限和预警规则加载。网关路由切换时先摘除不健康实例，再等待正在处理的请求完成；客户端重试只针对明确的瞬态错误，写入请求必须携带幂等键。
+
 ## 后端性能优化与可观测性
 
 性能优化先测量再修改。数据库查询应建立与查询模式匹配的索引并使用分页；热点且允许短暂陈旧的数据可缓存；外部调用设置连接、读取和总超时；线程池与数据库连接池容量应依据压测结果配置。
@@ -21,18 +33,18 @@ import java.time.Duration;
 
 @Service
 class LatestReadingCache {
-    private final ReadingQueryRepository repository;
+    private final ReadingRepository repository;   // 5.4 节讲解模型的 Repository
 
-    LatestReadingCache(ReadingQueryRepository repository) {
+    LatestReadingCache(ReadingRepository repository) {
         this.repository = repository;
     }
 
     @Cacheable(cacheNames = "latest-reading", key = "#assetId",
                unless = "#result == null")
-    public ReadingResponse get(String assetId) {
-        return repository.findLatest(assetId)
-                .map(ReadingResponse::from)
-                .orElseThrow(() -> new EntityNotFoundException("测站无读数"));
+    public Optional<ReadingResponse> get(String assetId) {
+        // Spring Cache 会拆开 Optional 再缓存；尚无观测时 #result 为 null，不写缓存
+        return repository.findFirstByAssetIdOrderByOccurredAtDesc(assetId)
+                .map(ReadingResponse::from);
     }
 
     @CacheEvict(cacheNames = "latest-reading", key = "#assetId")
@@ -103,7 +115,7 @@ class CursorReadingService {
     }
 
     private String encode(Reading row) {
-        return row.getMeasuredAt().toString() + ":" + row.getId();
+        return row.getOccurredAt().toString() + ":" + row.getId();
     }
 }
 ```

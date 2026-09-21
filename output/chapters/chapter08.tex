@@ -247,9 +247,9 @@ Cesium & 流域/水网、地球与大范围地形浏览 & 坐标基准、瓦片�
 
 三维对象按工程—坝段—构件—测点组织，业务标识写入\texttt{userData.assetId}。模型文件只负责几何和材质，测点状态由后端事件驱动；数据更新时修改颜色、标签和详情，不重复加载整个坝体。
 
-水体材质中的时间变量使用统一名\texttt{u\_time}，避免局部变量自引用；清单\ref{lst:ch08-glsl}用它驱动水面起伏，每帧只更新这一个 uniform，不重建材质：
+水体材质用一个时间变量\texttt{u\_time}驱动。清单\ref{lst:ch08-glsl}是片元着色器，它只改变每个像素的颜色：绿色分量随横向纹理坐标和时间做正弦变化，水面上于是出现缓慢移动的明暗条纹。网格顶点没有移动，水面在几何上仍是一个平面；这种效果也与水动力计算无关，条纹的疏密和速度不代表波高或流速。要让水面真正起伏，需要在顶点着色器里改顶点位置；要表现真实流态，颜色应由水动力模型的计算结果映射而来。每帧只更新\texttt{u\_time}这一个 uniform，不重建材质：
 
-\begin{lstlisting}[label={lst:ch08-glsl},language=GLSL,caption={水面波动着色器}]
+\begin{lstlisting}[label={lst:ch08-glsl},language=GLSL,caption={水面颜色动画的片元着色器}]
 uniform float u_time;
 uniform float speed;
 varying vec2 vUv;
@@ -261,12 +261,14 @@ void main() {
 }
 \end{lstlisting}
 
-完整页面需要同时处理筛选、加载、空状态、质量码和三维定位。代码清单\ref{lst:ch08-monitoring-sfc}
-给出一个 Vue 3.4+ 单文件组件：左侧选择测点和时间范围，中部绘制 ECharts 曲线，点击列表或曲线
-数据点都调用同一定位桥接；\texttt{missing}使用断点，\texttt{suspect}使用半透明点，并在卡片上
-显示质量说明。组件卸载时释放 ECharts 实例，避免在路由切换后继续监听窗口尺寸。
+监测页面要把测点选择、加载与错误提示、质量码说明和三维定位放在一起。代码清单\ref{lst:ch08-monitoring-sfc}
+给出一个 Vue 3.4+ 单文件组件。它做四件事：用按钮列出测点，点击按钮时选中该测点，并通过注入的\texttt{sceneBridge}让三维场景定位到同一对象；
+选中的测点或 store 中的时间范围变化时重新读取观测并重画 ECharts 曲线；\texttt{missing}的值置为\texttt{null}，配合\texttt{connectNulls: false}让曲线在缺测处断开；
+曲线下方列出最近10条观测及其质量码的中文说明。组件卸载时移除窗口尺寸监听并释放 ECharts 实例。
+时间范围的选择控件、点击曲线数据点反向定位测点、可疑点的差异化显示不在这个清单里：前两项由第7章 S5 阶段页（清单\ref{lst:ch07-link-controller}与清单\ref{lst:ch07-point-picker}）实现，
+可疑点的显示留作本节练习——在\texttt{chartData}里按\texttt{quality}为数据项设置\texttt{itemStyle.opacity}。
 
-\begin{lstlisting}[label={lst:ch08-monitoring-sfc},language=Vue,caption={测点筛选、ECharts 曲线与三维定位联动组件}]
+\begin{lstlisting}[label={lst:ch08-monitoring-sfc},language=Vue,caption={测点选择、ECharts 曲线与三维定位组件}]
 <script setup>
 import { computed, inject, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';

@@ -68,15 +68,15 @@
 
 <a id="ref34"></a>[34] Eclipse Foundation. Jakarta Persistence Specification 3.1[EB/OL]. https://jakarta.ee/specifications/persistence/3.1/.
 
-<a id="ref35"></a>[35] Newman, Sam. Building Microservices: Designing Fine-Grained Systems[M]. Sebastopol: O'Reilly Media, 2021.
+<a id="ref35"></a>[35] PostgreSQL Global Development Group. PostgreSQL 16 Documentation[EB/OL]. https://www.postgresql.org/docs/16/.
 
-<a id="ref36"></a>[36] PostgreSQL Global Development Group. PostgreSQL 16 Documentation[EB/OL]. https://www.postgresql.org/docs/16/.
+<a id="ref36"></a>[36] Timescale, Inc.. TimescaleDB Documentation: Hypertables and Continuous Aggregates[EB/OL]. https://docs.tigerdata.com/.
 
-<a id="ref37"></a>[37] Timescale, Inc.. TimescaleDB Documentation: Hypertables and Continuous Aggregates[EB/OL]. https://docs.tigerdata.com/.
+<a id="ref37"></a>[37] Jones, Michael, Bradley, John, Sakimura, Nat. RFC 7519: JSON Web Token (JWT)[EB/OL]. https://www.rfc-editor.org/rfc/rfc7519.
 
-<a id="ref38"></a>[38] Jones, Michael, Bradley, John, Sakimura, Nat. RFC 7519: JSON Web Token (JWT)[EB/OL]. https://www.rfc-editor.org/rfc/rfc7519.
+<a id="ref38"></a>[38] Apache Software Foundation. Apache Kafka Documentation[EB/OL]. https://kafka.apache.org/documentation/.
 
-<a id="ref39"></a>[39] Apache Software Foundation. Apache Kafka Documentation[EB/OL]. https://kafka.apache.org/documentation/.
+<a id="ref39"></a>[39] Newman, Sam. Building Microservices: Designing Fine-Grained Systems[M]. Sebastopol: O'Reilly Media, 2021.
 
 <a id="ref40"></a>[40] three.js. GLTFLoader -- three.js Documentation[EB/OL]. https://threejs.org/docs/pages/GLTFLoader.html.
 

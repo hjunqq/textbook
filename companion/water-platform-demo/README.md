@@ -88,7 +88,7 @@ node teaching-api/closeloop-check.mjs http://localhost:8080                    #
 ./smoke.sh                                                                     # 端到端冒烟（第8章部署）
 ```
 
-前两个跑在教学接口上，不需要数据库。`--stage` 换成 `lesson52` 或 `full`，
-同一套契约断言就对 S3 的起点和终点各跑一遍——这是“页面一行不改就能换数据源”的证据。
+前两个跑在教学接口上，不需要数据库。`--stage` 换成 `lesson52`、`lesson54` 或 `full`，
+同一套契约断言就对 S3 的起点、中点和终点各跑一遍——这是“页面一行不改就能换数据源”的证据。
 
 第7章数据处理参考模块位于 `frontend/src/lesson71/`，在前端目录运行 `node src/lesson71/examples.js` 与 `node src/lesson71/event-window.js`；对应测试覆盖乱序、缺测、非法值与历史回放。

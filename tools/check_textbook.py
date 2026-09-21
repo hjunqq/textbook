@@ -222,7 +222,17 @@ def check_refs(texts, r):
         refs += re.findall(r"\\(?:ref|autoref|eqref|pageref)\{([^}]*)\}", t)
     if dup:
         r.fail("重复 label：%s" % ", ".join(sorted(set(dup))))
-    dangling = sorted(set(refs) - set(labels))
+    # R11：正文可以引用附录中的表和节（如附录B的表结构、附录C的专题），
+    # 附录文件的 label 计入“已定义”，否则这类合法引用会被误判为悬空。
+    appendix_labels = []
+    appdir = os.path.join(OUT, "appendix")
+    if os.path.isdir(appdir):
+        for fn in sorted(os.listdir(appdir)):
+            if fn.endswith(".tex"):
+                at = read(os.path.join(appdir, fn))
+                appendix_labels += (re.findall(r"\\label\{([^}]*)\}", at)
+                                    + re.findall(r"label=\{([^}]*)\}", at))
+    dangling = sorted(set(refs) - set(labels) - set(appendix_labels))
     if dangling:
         r.fail("悬空引用（\\ref 无对应 \\label）：%s" % ", ".join(dangling))
     # 随文引出：每个图/表/公式的 \\label 必须在它自己前后 PROX 行以内被 \\ref 到。

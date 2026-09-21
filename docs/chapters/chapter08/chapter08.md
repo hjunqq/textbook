@@ -110,20 +110,14 @@
 |:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:------------------------------------------------------------------|:-------------------------------------------------------------------------------------------------|:---------------------------------------------|:--------------------|
 | `POST /api/auth/login`                                                                                                                                                                                                                                                                                            | `username, password`                                              | `accessToken, expiresInSeconds, authorities`                                                     | 匿名；失败一律 401 固定文案                  | 骨架                |
 | `GET /api/assets`                                                                                                                                                                                                                                                                                                 | `assetType, after, limit`                                         | `assetId, displayName, assetType, unit`（数组）                                                  | 值班员、分析员；只返回 active                | 骨架                |
-|                                                                                                                                                                                                                                                                                                                   |                                                                   |                                                                                                  |                                              |                     |
-| `{id}/readings`                                                                                                                                                                                                                                                                                                   | `from, to`（ISO-8601 带时区），可选 `agg`                         | `occurredAt, value, unit, quality, eventId, version`（数组）；`quality` 取 valid/suspect/missing | 值班员、分析员；时间窗左闭右开；400 参数非法 | 骨架                |
-|                                                                                                                                                                                                                                                                                                                   |                                                                   |                                                                                                  |                                              |                     |
-| `{id}/readings/latest`                                                                                                                                                                                                                                                                                            | 无                                                                | 单个观测；尚无观测时 204                                                                         | 值班员、分析员；404 对象不存在               | 教学接口；第5章实现 |
+| `GET /api/assets/{id}/readings`                                                                                                                                                                                                                                                                                   | `from, to`（ISO-8601 带时区），可选 `agg`                         | `occurredAt, value, unit, quality, eventId, version`（数组）；`quality` 取 valid/suspect/missing | 值班员、分析员；时间窗左闭右开；400 参数非法 | 骨架                |
+| `GET /api/assets/{id}/readings/latest`                                                                                                                                                                                                                                                                            | 无                                                                | 单个观测；尚无观测时 204                                                                         | 值班员、分析员；404 对象不存在               | 教学接口；第5章实现 |
 | `POST /api/readings`                                                                                                                                                                                                                                                                                              | `assetId, occurredAt, value, unit, quality`；头 `Idempotency-Key` | 201 与新记录；重复键返回同一记录                                                                 | 分析员；人工补录或订正                       | 第5章               |
-|                                                                                                                                                                                                                                                                                                                   |                                                                   |                                                                                                  |                                              |                     |
-| `readings/{id}`                                                                                                                                                                                                                                                                                                   | PUT 带版本号                                                      | 单条记录 / 订正后的记录（版本 +1）                                                               | 分析员；观测不删除，只增版本                 | 第5章               |
+| `GET/PUT /api/readings/{id}`                                                                                                                                                                                                                                                                                      | PUT 带版本号                                                      | 单条记录 / 订正后的记录（版本 +1）                                                               | 分析员；观测不删除，只增版本                 | 第5章               |
 | `GET /api/warnings`                                                                                                                                                                                                                                                                                               | `level, status, assetId, page`                                    | 预警证据摘要；`level` 取 NONE、BLUE、YELLOW、ORANGE、RED 之一                                    | 值班员、分析员；未评估单独显示               | 第8章               |
-|                                                                                                                                                                                                                                                                                                                   |                                                                   |                                                                                                  |                                              |                     |
-| `{id}/ack`                                                                                                                                                                                                                                                                                                        | 请求追踪号、版本                                                  | 最新预警状态                                                                                     | 值班员；open 条件更新，重复可重试            | 第8章               |
+| `POST /api/warnings/{id}/ack`                                                                                                                                                                                                                                                                                     | 请求追踪号、版本                                                  | 最新预警状态                                                                                     | 值班员；open 条件更新，重复可重试            | 第8章               |
 | `POST /api/work-orders`                                                                                                                                                                                                                                                                                           | `warningId, ownerRole,` `dueAt, action`                           | 工单编号与状态                                                                                   | 值班员、审批人；预警必须存在                 | 第8章               |
-|                                                                                                                                                                                                                                                                                                                   |                                                                   |                                                                                                  |                                              |                     |
-| `work-orders/`                                                                                                                                                                                                                                                                                                    |                                                                   |                                                                                                  |                                              |                     |
-| `{id}/complete`                                                                                                                                                                                                                                                                                                   | `result`、版本                                                    | 回执与完成时间                                                                                   | 值班员；状态须为 in_progress                 | 第8章               |
+| `POST /api/work-orders/{id}/complete`                                                                                                                                                                                                                                                                             | `result`、版本                                                    | 回执与完成时间                                                                                   | 值班员；状态须为 in_progress                 | 第8章               |
 | **通用约定**：错误体统一为 `{code, message, field?}`；400 参数非法、401 未登录或令牌失效、403 角色无权、404 对象不存在、5xx 服务端故障。对象编码按表8.1（如 `DAM-A-PZ-07`），角色见表8.2。“骨架”指 companion/water-platform-demo 已实现并有测试；“教学接口”指第4章使用的本地模拟服务；“第 N 章”指由该章清单实现。 |                                                                   |                                                                                                  |                                              |                     |
 
 **表 8.4  教学接口的故障注入约定（仅教学接口识别，真实后端忽略）**
@@ -199,9 +193,9 @@
 
 三维对象按工程—坝段—构件—测点组织，业务标识写入`userData.assetId`。模型文件只负责几何和材质，测点状态由后端事件驱动；数据更新时修改颜色、标签和详情，不重复加载整个坝体。
 
-水体材质中的时间变量使用统一名`u_time`，避免局部变量自引用；清单8.1用它驱动水面起伏，每帧只更新这一个 uniform，不重建材质：
+水体材质用一个时间变量`u_time`驱动。清单8.1是片元着色器，它只改变每个像素的颜色：绿色分量随横向纹理坐标和时间做正弦变化，水面上于是出现缓慢移动的明暗条纹。网格顶点没有移动，水面在几何上仍是一个平面；这种效果也与水动力计算无关，条纹的疏密和速度不代表波高或流速。要让水面真正起伏，需要在顶点着色器里改顶点位置；要表现真实流态，颜色应由水动力模型的计算结果映射而来。每帧只更新`u_time`这一个 uniform，不重建材质：
 
-**清单 8.1  水面波动着色器**
+**清单 8.1  水面颜色动画的片元着色器**
 
 ```glsl
 uniform float u_time;
@@ -215,9 +209,9 @@ void main() {
 }
 ```
 
-完整页面需要同时处理筛选、加载、空状态、质量码和三维定位。代码清单8.2 给出一个 Vue 3.4+ 单文件组件：左侧选择测点和时间范围，中部绘制 ECharts 曲线，点击列表或曲线 数据点都调用同一定位桥接；`missing`使用断点，`suspect`使用半透明点，并在卡片上 显示质量说明。组件卸载时释放 ECharts 实例，避免在路由切换后继续监听窗口尺寸。
+监测页面要把测点选择、加载与错误提示、质量码说明和三维定位放在一起。代码清单8.2 给出一个 Vue 3.4+ 单文件组件。它做四件事：用按钮列出测点，点击按钮时选中该测点，并通过注入的`sceneBridge`让三维场景定位到同一对象； 选中的测点或 store 中的时间范围变化时重新读取观测并重画 ECharts 曲线；`missing`的值置为`null`，配合`connectNulls: false`让曲线在缺测处断开； 曲线下方列出最近10条观测及其质量码的中文说明。组件卸载时移除窗口尺寸监听并释放 ECharts 实例。 时间范围的选择控件、点击曲线数据点反向定位测点、可疑点的差异化显示不在这个清单里：前两项由第7章 S5 阶段页（清单7.13与清单7.24）实现， 可疑点的显示留作本节练习——在`chartData`里按`quality`为数据项设置`itemStyle.opacity`。
 
-**清单 8.2  测点筛选、ECharts 曲线与三维定位联动组件**
+**清单 8.2  测点选择、ECharts 曲线与三维定位组件**
 
 ```vue
 <script setup>
@@ -370,37 +364,24 @@ onUnmounted(() => {
 
 **表 8.7  第8章核心数据库字段字典**
 
-| 字段            | 类型                  | 约束                   | 单位         | 说明                               |
-|:----------------|:----------------------|:-----------------------|:-------------|:-----------------------------------|
-|                 |                       |                        |              |                                    |
-| asset_id        | text                  | 主键、唯一             | 无           | 工程对象和测点的稳定业务编码       |
-|                 |                       |                        |              |                                    |
-| asset_type      | text                  | 非空                   | 无           | 测点、闸门、坝段等项目分类         |
-| asset.geometry  | geometry(PointZ,4490) | 非空、GiST 索引        | 度、米       | 测点经纬度与高程位置               |
-| asset.metadata  | jsonb                 | 可为空                 | 无           | 厂商标识、量程和扩展属性           |
-|                 |                       |                        |              |                                    |
-| event_id        | text                  | 非空、唯一             | 无           | 消息幂等键，跨服务保持不变         |
-|                 |                       |                        |              |                                    |
-| occurred_at     | timestamptz           | 主键组成               | UTC          | 观测发生时间，不得晚于当前时间     |
-| reading.value   | numeric               | 缺测时为空             | 由监测项定义 | 原始数值，数据库不覆盖历史版本     |
-| reading.quality | text                  | valid/suspect/missing  | 无           | 第7章统一的三值质量码              |
-| reading.version | integer               | 非空、正数             | 无           | 同一事件的修订版本序号             |
-|                 |                       |                        |              |                                    |
-| level           | text                  |                        |              |                                    |
-| YELLOW/         |                       |                        |              |                                    |
-| ORANGE/RED      | 无                    | 规则评估得到的预警等级 |              |                                    |
-|                 |                       |                        |              |                                    |
-| evaluable       | boolean               | 非空                   | 无           | false 表示“未评估”而非无预警       |
-|                 |                       |                        |              |                                    |
-| evidence        | jsonb                 | 非空                   | 无           | 指标、阈值、规则版本组成的证据快照 |
-|                 |                       |                        |              |                                    |
-| warning_id      | bigint                | 外键、非空             | 无           | 对应的预警事件                     |
-|                 |                       |                        |              |                                    |
-| due_at          | timestamptz           | 非空                   | UTC          | 处置时限，供到期查询               |
-|                 |                       |                        |              |                                    |
-| input_snapshot  | jsonb                 | 非空                   | 无           | 可复现的输入范围与版本摘要         |
-|                 |                       |                        |              |                                    |
-| status          | text                  | 状态检查               | 无           | queued/running/succeeded/failed    |
+| 字段                     | 类型                  | 约束                        | 单位         | 说明                               |
+|:-------------------------|:----------------------|:----------------------------|:-------------|:-----------------------------------|
+| asset.asset_id           | text                  | 主键、唯一                  | 无           | 工程对象和测点的稳定业务编码       |
+| asset.asset_type         | text                  | 非空                        | 无           | 测点、闸门、坝段等项目分类         |
+| asset.geometry           | geometry(PointZ,4490) | 非空、GiST 索引             | 度、米       | 测点经纬度与高程位置               |
+| asset.metadata           | jsonb                 | 可为空                      | 无           | 厂商标识、量程和扩展属性           |
+| reading.event_id         | text                  | 非空、唯一                  | 无           | 消息幂等键，跨服务保持不变         |
+| reading.occurred_at      | timestamptz           | 主键组成                    | UTC          | 观测发生时间，不得晚于当前时间     |
+| reading.value            | numeric               | 缺测时为空                  | 由监测项定义 | 原始数值，数据库不覆盖历史版本     |
+| reading.quality          | text                  | valid/suspect/missing       | 无           | 第7章统一的三值质量码              |
+| reading.version          | integer               | 非空、正数                  | 无           | 同一事件的修订版本序号             |
+| warning.level            | text                  | NONE/BLUE/YELLOW/ORANGE/RED | 无           | 规则评估得到的预警等级             |
+| warning.evaluable        | boolean               | 非空                        | 无           | false 表示“未评估”而非无预警       |
+| warning.evidence         | jsonb                 | 非空                        | 无           | 指标、阈值、规则版本组成的证据快照 |
+| work_order.warning_id    | bigint                | 外键、非空                  | 无           | 对应的预警事件                     |
+| work_order.due_at        | timestamptz           | 非空                        | UTC          | 处置时限，供到期查询               |
+| model_run.input_snapshot | jsonb                 | 非空                        | 无           | 可复现的输入范围与版本摘要         |
+| model_run.status         | text                  | 状态检查                    | 无           | queued/running/succeeded/failed    |
 
 图8.4中的实线从主对象指向关联记录，标注一对多关系；虚线表示事件证据 和输入快照的追溯关系。`asset`分别关联观测和预警，预警再关联工单；模型运行以输入快照 和结果独立留痕。图中关系不表示消息同步到达，异步事件仍需用事件标识和状态版本处理乱序。
 

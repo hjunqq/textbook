@@ -49,6 +49,22 @@ def balanced(s, i):
                 return s[i+1:j], j+1
     raise ValueError("unbalanced")
 
+def flatten_shortstack(t):
+    """\\shortstack 只为纸面窄列手工折行；网页表格会自动换行。
+    不展开的话 pandoc 把栈内的 \\\\ 当成表格行结束，一条路径被拆成两三行残片。
+    这里把各段首尾相接：相邻的 \\texttt 合并成一个，其余文字直接连接。"""
+    out, pos = [], 0
+    for mo in re.finditer(r"\\shortstack\s*(\[[lcr]\])?\s*\{", t):
+        if mo.start() < pos:
+            continue
+        body, end = balanced(t, mo.end() - 1)
+        parts = [x.strip() for x in re.split(r"\\\\(?:\[[^\]]*\])?", body)]
+        joined = "".join(parts).replace("}\\texttt{", "")
+        out.append(t[pos:mo.start()] + joined)
+        pos = end
+    out.append(t[pos:])
+    return "".join(out)
+
 def find_env(s, env, start=0):
     b = s.find(r"\begin{%s}" % env, start)
     if b < 0:
@@ -323,6 +339,7 @@ class Conv:
         t = expand_case_params(t)        # 案例参数宏先展开为数值
         t = self.extract_lst(t)          # 先取代码,避免注释剥离伤及代码
         t = strip_comments(t)
+        t = flatten_shortstack(t)
         t = self.extract_fig(t)
         t = self.extract_tab(t)
         t = self.mark_boxes(t)

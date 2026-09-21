@@ -38,8 +38,13 @@ services:
       - ./db/001_init.sql:/docker-entrypoint-initdb.d/001_init.sql:ro
       - ./db/002_seed.sql:/docker-entrypoint-initdb.d/002_seed.sql:ro
     secrets: [db_password]
+    # 只绑定本机回环地址：宿主机上的 psql（README 的数据导入）与 5.4 节的 Lesson54Application
+    # 需要连到它；局域网其他机器连不进来。
+    ports: ["127.0.0.1:5432:5432"]
     healthcheck: {test: ["CMD-SHELL", "pg_isready -U qingyuan_app -d qingyuan"], interval: 10s, timeout: 5s, retries: 10}
-    networks: [data-net]
+    # data-net 是 internal 网络，Docker 不为只挂在 internal 网络上的容器做端口转发；
+    # 另挂一个普通桥接网络 db-host，上面的回环端口映射才生效。其他服务仍经 data-net 访问数据库。
+    networks: [data-net, db-host]
   redis:
     image: redis:7.2-alpine
     command: ["redis-server", "--appendonly", "yes"]
@@ -69,4 +74,4 @@ secrets:
   db_password: {file: ./secrets/db_password.txt}
   kafka_password: {file: ./secrets/kafka_password.txt}
 volumes: {pg-data: {}, redis-data: {}, kafka-data: {}}
-networks: {app-net: {driver: bridge}, data-net: {driver: bridge, internal: true}}
+networks: {app-net: {driver: bridge}, data-net: {driver: bridge, internal: true}, db-host: {driver: bridge}}

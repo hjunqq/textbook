@@ -6,7 +6,7 @@
 |---|---|---|---|
 | v0 | 起点 | 空骨架 | 仓库初始结构；第1章的 S0 演示记录见 S0-demo-record.md（由 teaching-api/record-demo.mjs 实录生成） |
 | v1 | 第4章 | 登录+只读监测页 | frontend/ 全部；S1 阶段页 lesson44.html + lesson44-detail.html 不依赖后端；S2 阶段页 lesson45.html 只靠 teaching-api 运行 |
-| v2 | 第5章 | JWT认证+观测API | S3 起点 backend/src/main/java/edu/example/lesson52/（单类、无库、无认证）；S3 终点 backend/ 全部 |
+| v2 | 第5章 | JWT认证+观测API | S3 起点 backend/src/main/java/edu/example/lesson52/（单类、无库、无认证）；S3 中点 edu/example/lesson54/（复用 qingyuan 包的实体、Repository、服务与控制器，接 PostgreSQL、无认证）；S3 终点 backend/ 全部 |
 | v3 | 第6章 | 三维场景页 | lesson61.html 为起点（坝体长方体 + 28 测点绑定）；GLTF 模型与 GIS 集成为课程实现 |
 | v4 | 第7章 | 曲线与三维联动 | S5 阶段页 lesson74.html（拾取→曲线→高亮双向联动），依赖 S3 与 S4 |
 | v5 | 第8章核心篇 | 质量检查+预警+工单+部署 | S6：classify.js（定级）+ 教学接口的 ack/工单端点 + closeloop-check.mjs（闭环核对）；db/、ReadingConsumer、compose、smoke.sh 骨架 |
@@ -48,7 +48,8 @@
 | backend/.../SecurityConfig.java | 5.6 | 无状态过滤链、CORS、教学账号 |
 | backend/.../AuthController.java | 5.6 | 登录端点（防账号枚举） |
 | backend/edu/example/lesson52/ | 5.2 | S3 阶段起点：清单 lst:ch05-first-controller + lst:ch05-first-params 合并成的可运行类；独立根包，避免与完整工程的 /api/assets 映射冲突 |
-| teaching-api/contract-check.mjs | 5.2.3 / 8.1 | 把表 tab:ch05-first-verify 与契约错误体写成可执行检查；--stage=teaching/lesson52/full 对三种数据来源跑同一套断言 |
+| backend/edu/example/lesson54/Lesson54Application.java | 5.4.1 / 5.4.2 | S3 阶段中点：不复制业务代码，只装配 qingyuan 包的 AssetEntity/ReadingEntity、两个 Repository、ReadingService、AssetController 与 ApiExceptionHandler；清单 lst:ch05-db-entity-repo、lst:ch05-db-controller、lst:ch05-rest-layer 取自这些文件 |
+| teaching-api/contract-check.mjs | 5.2.3 / 8.1 | 把表 tab:ch05-first-verify 与契约错误体写成可执行检查；--stage=teaching/lesson52/lesson54/full 对四种数据来源跑同一套断言 |
 | backend/.../ApiExceptionHandler.java | 5.5 / 8.1 | 契约错误体 {code, message, field?}；兜住控制器接不到的时间参数解析失败 |
 | backend/.../AssetController.java | 5.2 / 8.3 | DTO 映射，不暴露实体；readings/latest 按契约区分 404（对象不存在）与 204（尚无观测） |
 | backend/.../ReadingService.java | 5.4 / 8.3 | 事务边界、幂等预检 |

@@ -24,12 +24,54 @@
 
 \paragraph{本节层次}核心。
 
+\paragraph{进入本节所需知识}会写 Java 类、方法、\texttt{List}与\texttt{try/catch}。没有接触过 Maven、注解和数据库表的读者，先读附录B的 P2 单元（工程目录、Maven、注解与依赖注入）和 P3 单元（表、键、SQL 与事务），并完成两个单元的自测。
 
-\paragraph{进入本节所需知识}会写 Java 类、方法、\texttt{List}与\texttt{try/catch}；读过附录B的 P2 单元（工程目录、Maven、注解与依赖注入）和 P3 单元（表、键、SQL 与事务）。先完成两个单元的自测，再带着一次请求的路径、参数和响应学习后端职责；具体注解与 SQL 的使用在相应小节展开。
+第4章的页面向\texttt{/api/assets}发出请求，拿到一段 JSON，再把它画成列表。应答这个请求的程序就是后端。它要做的事情比“返回数据”多：确认请求者是谁、有没有权限，检查参数是否合理，按业务规则读写数据库，留下审计记录，有时还要通知别的系统。本节先说明一次请求在后端经过哪些环节，以及 HTTP 用什么方式表达“要做什么”和“结果如何”。从5.2节起动手写程序，顺序是：先让一个 Java 方法返回固定数据，再处理路径参数和查询参数，然后把固定数据换成数据库查询（5.4.1节），最后把一个类拆成控制器、服务和数据访问三层（5.4.2节）。分层放在最后，是因为只有写过“全都挤在一个类里”的版本，才看得出每一层替你解决了什么麻烦。
 
-后端位于用户界面与数据资源之间，承担身份校验、业务计算、持久化、审计和系统集成。典型请求链路为“浏览器或设备网关—控制器—应用服务—Repository—数据库”。控制器只处理协议转换和输入校验，业务规则放在服务层，数据访问集中在Repository；若进一步拆分为微服务，还需显式管理边界、版本和分布式失败\cite{newman2021}。
+\subsection{一次请求经过的环节}
 
-HTTP方法的基本语义见表\ref{tab:http-methods}。接口设计不仅要返回数据，还要正确使用状态码：创建成功通常返回201，参数无效返回400，未认证返回401，无权限返回403，资源不存在返回404，服务器异常返回500。
+以值班员查看渗压计 PZ-07 的最新观测为例。浏览器发出\texttt{GET /api/assets/}\allowbreak\texttt{DAM-A-PZ-07/}\allowbreak\texttt{readings/latest}，后端应答如下：
+
+\begin{lstlisting}[label={lst:ch05-latest-json},language=JSON,caption={最新观测接口的一次应答（状态码 200）}]
+{
+  "assetId": "DAM-A-PZ-07",
+  "occurredAt": "2026-07-01T23:55:00+08:00",
+  "value": 185.091,
+  "unit": "kPa",
+  "quality": "valid",
+  "eventId": "evt-pz-0287-6",
+  "version": 1
+}
+\end{lstlisting}
+
+清单\ref{lst:ch05-latest-json}的七个字段来自表\ref{tab:api-contract}的约定，每一个都对应水利观测数据的一项含义。\texttt{value}必须和\texttt{unit}一起读，185.091 是千帕还是米水头，差着一个数量级；\texttt{occurredAt}是仪器采样的时刻，带着时区偏移，它和服务器收到数据的时刻可能相差几分钟甚至几小时（补传）；\texttt{quality}是质量码，取\texttt{valid}、\texttt{suspect}或\texttt{missing}，后两种观测不能直接拿去判断预警；\texttt{eventId}标识这一次上报，重复收到时靠它识别；\texttt{version}从1开始，人工订正一次加1，原值保留。后端程序的很大一部分工作，就是保证这些含义在读写过程中不走样。
+
+图\ref{fig:ch05-request-chain}画出这次请求在后端内部走过的路。控制器（Controller）面对 HTTP：从路径里取出\texttt{DAM-A-PZ-07}，把返回的对象转成 JSON，决定状态码。应用服务（Service）面对业务：这个对象存在吗，最新观测是哪一条，没有观测算不算错误。Repository（数据访问层，专门负责查库和存库的那部分代码）面对数据库：把“某对象最新的一条观测”变成一条 SQL。数据库保存数据，并用主键、外键和检查约束拒绝不合规则的写入。调用自左向右，结果自右向左逐层返回；每一层只和相邻的层打交道，控制器里不拼 SQL，Repository 里不判断预警。
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth,thick,node distance=.45cm,
+  layer/.style={draw=Primary,rounded corners=2pt,text width=2.2cm,minimum height=.9cm,align=center,fill=PrimaryLight,text=PrimaryDark,font=\scriptsize}]
+  \node[layer] (client) {浏览器/网关\\HTTP请求};
+  \node[layer,right=of client] (controller) {Controller\\协议与校验};
+  \node[layer,right=of controller] (service) {Application Service\\用例与规则};
+  \node[layer,right=of service] (repo) {Repository\\查询与持久化};
+  \node[layer,right=of repo] (db) {PostgreSQL\\PostGIS\\TimescaleDB};
+  \foreach \a/\b in {client/controller,controller/service,service/repo,repo/db} {
+    \draw[->,Primary] ([yshift=2mm]\a.east)--([yshift=2mm]\b.west);
+    \draw[->,Accent] ([yshift=-2mm]\b.west)--([yshift=-2mm]\a.east);
+  }
+  \node[below=.35cm of service,font=\scriptsize,text=TextGray] {蓝色向右：调用\qquad 橙色向左：结果逐层返回};
+\end{tikzpicture}
+\caption{一次请求在后端经过的环节}
+\label{fig:ch05-request-chain}
+\end{figure}
+
+这四个环节不必一开始就写全。5.2节的程序只有控制器一层，数据直接写在代码里；5.4.1节接上 Repository 和数据库；5.4.2节再把业务判断移进服务层。设备协议（Modbus、MQTT 等）的接入属于边缘网关的职责，本章的后端从“网关已经把观测整理成 JSON 或消息”之后讲起。
+
+\subsection{用 HTTP 表达动作和结果}
+
+HTTP 请求的第一行由\textbf{方法}和\textbf{路径}组成。路径指明操作的对象，用名词；方法指明动作。表\ref{tab:http-methods}列出五种常用方法。
 
 \begin{table}[htbp]
 \centering
@@ -48,150 +90,19 @@ DELETE & 删除资源 & 删除尚未发布的规则 & 是 \\
 \end{tabular}
 \end{table}
 
-表\ref{tab:http-methods}中的幂等性描述的是同一请求重复执行后的资源最终状态，而不是网络层只发送一次。值班员在弱网环境下可能重复点击“提交处置”，客户端可以为一次业务操作生成\texttt{Idempotency-Key}，服务端以“用户+键+资源类型”建立唯一约束并缓存第一次响应；这样重试不会创建两条处置单。\texttt{POST}本身通常不是幂等的，只有把业务键、去重窗口和冲突响应写进契约，才能把它安全地用于设备重投。
+表\ref{tab:http-methods}最后一列的\textbf{幂等}，指同一个请求重复执行多次，资源最终的状态与执行一次相同。查询天然幂等；“把告警状态改为已确认”执行两次，结果仍是已确认；而\texttt{POST}创建处置单，执行两次就会出现两张单。值班员在弱网下重复点击“提交处置”，或者网关超时后重发观测，都会造成重复请求，所以写入接口必须约定怎样识别重复。具体做法是给每次上报带一个唯一编号，并让数据库拒绝重复的编号，5.5节讨论；本章前几节只涉及查询。
 
-\begin{figure}[htbp]
-\centering
-\begin{tikzpicture}[>=Stealth,thick,node distance=.45cm,
-  layer/.style={draw=Primary,rounded corners=2pt,text width=2.2cm,minimum height=.9cm,align=center,fill=PrimaryLight,text=PrimaryDark,font=\scriptsize}]
-  \node[layer] (client) {浏览器/网关\\HTTP请求};
-  \node[layer,right=of client] (controller) {Controller\\协议与校验};
-  \node[layer,right=of controller] (service) {Application Service\\用例与规则};
-  \node[layer,right=of service] (repo) {Repository\\查询与持久化};
-  \node[layer,right=of repo] (db) {PostgreSQL\\PostGIS\\TimescaleDB};
-  \foreach \a/\b in {client/controller,controller/service,service/repo,repo/db} {
-    \draw[->,Primary] ([yshift=2mm]\a.east)--([yshift=2mm]\b.west);
-    \draw[->,Accent] ([yshift=-2mm]\b.west)--([yshift=-2mm]\a.east);
-  }
-  \node[below=.35cm of service,font=\scriptsize,text=TextGray] {蓝色向右：调用\qquad 橙色向左：结果逐层返回};
-\end{tikzpicture}
-\caption{监测值写入分层链路}
-\label{fig:ch05-request-chain}
-\end{figure}
+路径按资源的层级来写。在案例平台里，测点等工程对象是稳定的资源（\texttt{/api/assets}）；观测是挂在对象下面、按时间不断追加的子资源（\texttt{/api/assets/DAM-A-PZ-07/readings}）；预警和工单是带状态流转的业务资源。“要哪一段时间”“按什么排序”这类条件不属于层级，放进查询参数：\texttt{?from=...\&to=...}。只有当一个业务动作无法表达成“修改某个资源的状态”时，才在路径里用动词，例如表\ref{tab:api-contract}中确认预警的\texttt{POST /api/warnings/w-0001/ack}。
 
-图\ref{fig:ch05-request-chain}把一次监测值写入拆成五个可测试边界：控制器负责把JSON转换为命令并拒绝格式错误，应用服务检查测站状态、质量码和时间窗口，Repository执行参数化查询，数据库保证约束与索引。任何一层都不应越过下一层直接修改另一层的内部状态；例如控制器不拼接SQL，Repository不决定预警业务规则。
-
-资源路径使用名词，例如\texttt{/api/assets/DAM-A-PZ-07/readings}；筛选条件放入查询参数，例如\texttt{?from=...\&to=...}。设备协议接入属于边缘网关职责，本章不展开Modbus或MQTT细节。
-
-资源建模先回答“系统管理的对象是什么”。测站是稳定资源，监测读数是按时间追加的子资源，告警处置单是具备状态迁移的业务资源。查询最新读数可以使用\texttt{GET /api/assets/DAM-A-PZ-07/readings/latest}，查询时间范围使用\texttt{GET /api/assets/DAM-A-PZ-07/readings?from=...\&to=...}；创建一条读数使用\texttt{POST /api/readings}，请求体包含测站 ID、采样时间、数值、单位和质量码。路径表达资源层级，查询参数表达视图条件，业务动作只有在无法用资源状态表达时才使用动词，例如表\ref{tab:api-contract}中的\texttt{POST /api/warnings/w-0001/ack}。
-
-分层结构的依赖由接口层指向业务与数据访问抽象：Controller 依赖 Application Service，Service 依赖领域对象和 Repository 接口，Repository 的具体实现依赖 PostgreSQL、PostGIS 或 TimescaleDB。领域对象不依赖 HTTP、JSON 和 Spring 注解，便于在单元测试中用内存对象验证规则。若把数据库实体直接作为响应体，内部字段、懒加载关系和审计信息可能泄露到外部契约；DTO 映射应在控制器或应用服务边界完成，并为时间、单位和质量码提供稳定格式。图\ref{fig:ch05-rest-contract}把“请求进入—校验—用例—响应”四个边界与失败返回位置标出，便于把接口测试从状态码断言扩展到字段、事务和审计证据。
-
-\begin{figure}[htbp]
-\centering
-\begin{tikzpicture}[>=Stealth,thick,
-  boundary/.style={draw=Primary,rounded corners=2pt,text width=2.7cm,minimum height=.85cm,align=center,fill=PrimaryLight,text=PrimaryDark,font=\scriptsize},
-  error/.style={boundary,draw=Accent,fill=white}]
-  \node[boundary] (http) at (0,0) {HTTP请求\\方法、路径、JSON};
-  \node[boundary] (validate) at (3.7,0) {Controller\\格式校验};
-  \node[boundary] (usecase) at (7.4,0) {Application Service\\用例、规则与事务};
-  \node[boundary] (dto) at (11.1,0) {响应映射与DTO\\稳定的外部字段};
-  \node[boundary] (repo) at (7.4,-1.8) {Repository\\查询与持久化};
-  \node[error] (bad) at (3.7,-1.8) {400/422\\输入错误};
-  \node[error] (domain) at (11.1,-1.8) {404/409\\对象不存在/状态冲突};
-  \draw[->,Primary] (http)--(validate);
-  \draw[->,Primary] (validate)--(usecase);
-  \draw[->,Primary] (usecase)--(dto);
-  \draw[<->,Primary] (usecase)--(repo);
-  \draw[->,Accent] (validate)--(bad);
-  \draw[->,Accent] (usecase.south east)--(domain.north west);
-\end{tikzpicture}
-\caption{REST接口的契约边界与失败返回}
-\label{fig:ch05-rest-contract}
-\end{figure}
-
-\begin{lstlisting}[label={lst:ch05-rest-layer},language=Java,caption={分层 REST 查询：DTO、服务与仓储接口}]
-public record LatestReadingResponse(
-        String assetId, double value, String unit,
-        Instant occurredAt, String quality) {}
-
-public interface ReadingQueryRepository {
-    Optional<Reading> findLatest(String assetId);
-}
-
-@Service
-public class ReadingQueryService {
-    private final ReadingQueryRepository repository;
-
-    public ReadingQueryService(ReadingQueryRepository repository) {
-        this.repository = repository;
-    }
-
-    @Transactional(readOnly = true)
-    public LatestReadingResponse latest(String assetId) {
-        Reading reading = repository.findLatest(assetId)
-                .orElseThrow(() -> new EntityNotFoundException("测站无读数"));
-        return new LatestReadingResponse(reading.getStationId(),
-                reading.getValue(), reading.getUnit(),
-                reading.getMeasuredAt(), reading.getQuality());
-    }
-}
-\end{lstlisting}
-
-清单\ref{lst:ch05-rest-layer}用只读事务包住查询，并把实体转换为响应 DTO；它没有把数据库实现类型暴露给控制器。查询结果为空时抛出领域可识别的异常，由统一异常处理器转换为404，客户端可以据此显示“暂无读数”或提示测站编号，而不是把空对象误当作水位为零。
-
-写入接口要把协议校验、业务校验和持久化顺序写清。协议层检查必填字段、数值格式和时间字符串，应用服务检查测站是否存在、采样时间是否落在允许窗口、质量码是否允许参与计算，Repository 在事务中保存记录。创建成功返回\texttt{201 Created}并在\texttt{Location}头给出新资源地址；重复的幂等键返回第一次创建的响应或\texttt{409 Conflict}，不能静默创建第二条记录。清单\ref{lst:ch05-rest-write}按这个顺序写：先\texttt{@Valid}校验请求体，再由服务层判断测站与时间窗，最后返回带\texttt{Location}的 201。
-
-\begin{lstlisting}[label={lst:ch05-rest-write},language=Java,caption={监测值写入：POST、校验与201 Location}]
-public record CreateReadingRequest(
-        @NotBlank String assetId,
-        // 上下限为示例阈值，工程取值以第8章8.1参数表为唯一来源
-        @NotNull @DecimalMin("0.0") @DecimalMax("1000.0") BigDecimal value,   // 量程按对象类型再校验，见测点台账
-        @NotBlank String unit,
-        @NotNull Instant occurredAt,
-        @NotBlank String quality) {}
-
-@RestController
-@RequestMapping("/api/readings")
-public class ReadingCommandController {
-    private final ReadingCommandService service;
-
-    public ReadingCommandController(ReadingCommandService service) {
-        this.service = service;
-    }
-
-    @PostMapping
-    ResponseEntity<ReadingResponse> create(
-            @Valid @RequestBody CreateReadingRequest request,
-            @RequestHeader(value = "Idempotency-Key", required = false) String key) {
-        Reading saved = service.create(request, key);
-        URI location = URI.create("/api/readings/" + saved.getId());
-        return ResponseEntity.created(location).body(ReadingResponse.from(saved));
-    }
-}
-\end{lstlisting}
-
-这里使用\texttt{BigDecimal}表达水位，避免用\texttt{double}承载边界校验时出现二进制浮点舍入误差；服务内部仍可按明确规则转换为数据库数值类型。\texttt{@Valid @RequestBody}只负责触发Bean Validation，诸如“测站属于当前工程”“时间不得早于上一条记录”等跨字段规则必须在服务层再次检查。控制器接收可选的幂等键，但不负责保存去重记录，去重状态由服务层和数据库唯一约束共同保证。
-
-分页、排序和过滤也要形成稳定的 URL 契约。\texttt{page}表示页码，起始值需由接口契约约定；下面示例采用从0开始的\texttt{page}、正数\texttt{size}，排序使用\texttt{sort=occurredAt,desc}，过滤使用\texttt{assetId}、\texttt{quality}和时间范围。服务端限制\texttt{size}上限，拒绝未知排序字段，返回\texttt{content}、\texttt{page}、\texttt{size}、\texttt{totalElements}和\texttt{totalPages}，这样前端可以显示总页数而不是用当前页长度猜测。
-
-游标分页适合持续追加的时序读数：客户端携带上一页最后一条记录的\texttt{occurredAt,id}，服务端按联合索引向后查找，避免高页码\texttt{OFFSET}扫描大量历史数据。游标应视为不透明字符串，不能让客户端自行修改时间边界；接口文档还要说明读数在分页期间追加时的排序稳定性。报表导出属于异步任务时，使用任务资源返回\texttt{202 Accepted}，由客户端轮询任务状态，而不是让一次 HTTP 请求长时间占用连接。
-
-服务发现与微服务边界必须以业务能力为中心。数据采集、读数查询、预警评估和通知可以是不同服务，但每个服务拥有明确的数据所有权和 API 契约；拆分不是把每个类都部署成独立进程。开发环境可用配置文件把逻辑服务名映射到固定地址，生产环境再接入服务注册与发现组件、健康检查和负载均衡。业务代码只依赖接口客户端，不能把某个注册中心的注解散落到领域层，这样基础设施实现与业务规则可以分别修改和测试。
-
-跨服务调用要显式处理超时、重试和降级。查询测站详情可以在短超时后返回缓存快照，并在界面标注数据时间；写入监测值则不能因为重试而重复落库，应把请求 ID 和幂等键贯穿网关、服务日志与数据库。链路追踪至少传递\texttt{traceId}和\texttt{requestId}，错误响应包含可定位的错误码而不暴露内部堆栈。服务之间若共享 PostgreSQL 表，边界会失去意义，应改为通过版本化 API 或消息事件交换数据。
-
-API 版本化需要在兼容性和演进速度之间作出可审计的选择。对外公开的水利平台接口可以采用路径版本\texttt{/api/v1/assets}，在字段增加时保持旧字段语义不变；删除字段、改变单位或改变时间时区都属于破坏性变更，应发布\texttt{v2}并给出迁移窗口。版本号不应随着每次修复递增，补丁修复和兼容字段增加可以通过文档和变更日志说明。响应体可带\texttt{Deprecation}和\texttt{Sunset}提示，让调用方在停止旧版本前完成升级。
-
-错误响应应同时满足机器可判断和人可理解。建议统一包含\texttt{type}、\texttt{title}、\texttt{status}、\texttt{code}、\texttt{detail}和\texttt{traceId}，其中\texttt{code}使用稳定枚举，\texttt{detail}只提供当前请求的上下文。参数错误可以按字段返回多个问题，资源不存在包含资源类型和业务 ID，权限失败不透露资源是否真实存在。日志中的\texttt{traceId}与响应中的值一致，运维人员可以从一次值班员操作追到网关、服务和数据库查询。
-
-幂等键的生命周期要覆盖消息最大重投和人工重试周期。服务端保存键、请求摘要、响应状态和过期时间；同一个键携带不同请求体时返回冲突，防止客户端误把一个键当作通用令牌。数据库唯一约束是最后一道防线，应用层缓存只用于快速返回，不能替代约束。处置单的状态迁移也要有唯一规则，例如只有\texttt{OPEN}可以变为\texttt{ACKNOWLEDGED}，重复确认返回当前状态而不是再次产生副作用。
-
-分页查询需要稳定排序，否则实时读数追加时会出现重复或漏项。排序字段后追加唯一 ID 作为 tie-breaker；服务端在响应中回显实际排序方向和时间区间，客户端翻页时携带同一条件。导出任务和大范围历史查询应限制最大时间跨度，超过阈值改为异步任务并在完成后提供下载地址。对外接口还应设置速率限制和请求体大小上限，避免错误客户端占满数据库连接。
-
-服务发现的健康检查至少分为进程存活、依赖可达和业务可用三类。进程存活用于重启异常实例，依赖可达检查数据库、Redis 和 Kafka 连接，业务可用则验证关键表结构、时序写入权限和预警规则加载。网关路由切换时先摘除不健康实例，再等待正在处理的请求完成；客户端重试只针对明确的瞬态错误，写入请求必须携带幂等键。通过这些约束，微服务边界才能在故障时保持数据一致和可观察。
-接口文档还应给出示例请求、示例响应、错误码和限流规则，并在每次版本发布时同步更新 OpenAPI 描述；值班员和前端开发者据此可以复现问题、核对字段单位并确认兼容范围。
+应答的第一行是\textbf{状态码}，调用方不必解析响应体就能知道结果属于哪一类。本章用到的有：200 成功并带响应体；201 创建成功；204 成功但没有内容；400 请求参数有误；401 没有提供有效身份；403 身份有效但无权操作；404 资源不存在；409 与资源当前状态冲突；500 服务器内部错误。对监测平台来说，204 与 404 的区别值得专门记住：请求\texttt{DAM-A-D-01}的最新观测，如果这支位移计已经登记但还没有上报过数据，应答是 204，页面显示“暂无观测”；如果编码打错成\texttt{DAM-A-XX-99}，平台里根本没有这个对象，应答才是 404。两种情况若都返回 404，值班员就无法区分“仪器还没数据”和“我输错了编码”。表\ref{tab:api-contract}对每个接口都写明了这类约定，后面各节的程序以它为准。
 
 \section{第一个 HTTP 接口：从固定数据到契约}\label{sec:ch05-first-api}
 
 \paragraph{本节层次}核心：5.2.1、5.2.2、5.2.3。
 
-\paragraph{进入本节所需知识}先读5.1节；按附录B P2准备 Java 17与 Maven，先运行固定数据接口。
+\paragraph{进入本节所需知识}5.1节；附录B的 P2 单元，并按其中的说明装好 Java 17 与 Maven；表\ref{tab:api-contract}的前四行；能用浏览器地址栏或\texttt{curl}发一个 GET 请求。
 
-
-\paragraph{业务问题}第4章的页面一直对着教学接口开发。现在要让\texttt{GET /api/assets}由自己写的 Java 程序应答，而且沿用页面已经使用的字段和响应格式。首先返回固定对象列表，观察 Java 方法与 HTTP 路径的映射；再处理路径参数与查询参数，把错误体做成契约规定的样子；最后用第4章的页面和教学接口的故障注入表反过来验证它。数据库到 5.4 节才接入。
-
-\paragraph{进入本节所需知识}附录B的 P2 单元（工程目录、Maven、注解、依赖注入）；表\ref{tab:api-contract}前三行；能用浏览器地址栏或\texttt{curl}发一个 GET 请求。
+\paragraph{业务问题}第4章的页面一直对着教学接口开发。现在要让\texttt{GET /api/assets}由自己写的 Java 程序应答，而且沿用页面已经使用的字段和响应格式。先返回固定的对象列表，观察 Java 方法怎样与 HTTP 路径对应；再处理路径参数与查询参数，把错误应答做成契约规定的样子；最后用契约核对脚本检查它。数据库到5.4节才接入。
 
 \subsection{返回固定数据的接口}
 
@@ -293,7 +204,21 @@ ResponseEntity<Map<String, String>> badRequest(BadRequest e) {
 }
 \end{lstlisting}
 
-\paragraph{一个会遇到的失败}\texttt{from=2026-07-01T00:00:00+08:00}直接放进地址栏，加号会被浏览器当作空格，服务端解析时报 400，错误体却不是契约格式而是 Spring 的默认页面。原因是类型转换失败发生在进入方法之前，\texttt{@ExceptionHandler(BadRequest.class)}接不到它。两件事要做：客户端把\texttt{+}编码成\texttt{\%2B}（第4章的\texttt{URLSearchParams}会自动做）；服务端在 5.5 节用\texttt{@ControllerAdvice}接住\texttt{MethodArgumentTypeMismatchException}，统一翻译成契约错误体。复现时分别观察参数转换前后发生的错误，确认类型转换异常与业务异常都返回约定的错误体。
+\paragraph{读懂清单里的 Java 写法}清单\ref{lst:ch05-first-params}的\texttt{latest}方法里有一条很长的链式调用，没有学过 Java 8 以后写法的读者可以把它读成一个循环。\texttt{FIXED.stream()}把列表变成可以逐个处理的序列；\texttt{filter(a -> a.assetId().equals(assetId))}只留下编码相符的元素，其中\texttt{a -> ...}是 lambda 表达式，即一个没有名字的函数，箭头左边的\texttt{a}是参数，右边是函数体；\texttt{findFirst()}取第一个，结果类型是\texttt{Optional<AssetDto>}——一个“可能有值、也可能为空”的盒子，用来代替容易被忘记检查的\texttt{null}；\texttt{orElseThrow(...)}表示盒子里有值就取出来，空就抛出异常；括号里的\texttt{() -> new NotFound(...)}是一个没有参数的 lambda，只有盒子为空时才执行它、创建异常。整条链与清单\ref{lst:ch05-stream-as-loop}的循环等价：
+
+\begin{lstlisting}[label={lst:ch05-stream-as-loop},language=Java,caption={与 stream 链式调用等价的循环写法}]
+AssetDto asset = null;
+for (AssetDto a : FIXED) {
+    if (a.assetId().equals(assetId)) { asset = a; break; }
+}
+if (asset == null) {
+    throw new NotFound("ASSET_NOT_FOUND", "对象 " + assetId + " 不存在");
+}
+\end{lstlisting}
+
+两种写法都可以用。本书后面的清单采用链式写法，是因为 Spring Data 的查询方法本来就返回\texttt{Optional}和\texttt{List}，链式调用可以直接接上去。另外两处语法：\texttt{record}是 Java 16 起提供的不可变数据类（本书用 Java 17），\texttt{a.assetId()}是它自动生成的访问方法，没有\texttt{get}前缀；\texttt{static class NotFound extends RuntimeException}定义了一个不需要在方法签名上声明的异常，抛出后由下面标了\texttt{@ExceptionHandler}的方法接住。
+
+\paragraph{一个会遇到的失败}\texttt{from=2026-07-01T00:00:00+08:00}直接放进地址栏，浏览器原样发出加号，而服务端按 URL 的规则把查询串里的加号解码成空格，时间解析失败，应答 400；错误体却不是契约格式，而是 Spring 默认的错误信息。原因是类型转换失败发生在进入方法之前，\texttt{@ExceptionHandler(BadRequest.class)}接不到它。两件事要做：客户端把\texttt{+}编码成\texttt{\%2B}（第4章的\texttt{URLSearchParams}会自动做）；服务端在 5.5 节用\texttt{@ControllerAdvice}接住\texttt{MethodArgumentTypeMismatchException}，统一翻译成契约错误体。复现时分别观察参数转换前后发生的错误，确认类型转换异常与业务异常都返回约定的错误体。
 
 图\ref{fig:ch05-error-results}是配套教学接口的两个错误响应。时间区间非法与对象不存在使用不同\texttt{code}；\texttt{field}只在需要指出具体输入项时出现。开发Java接口时，用相同请求核对这些字段。
 
@@ -306,7 +231,7 @@ ResponseEntity<Map<String, String>> badRequest(BadRequest e) {
 
 \subsection{用第4章的页面和故障表验证接口}
 
-接口验证分起点与终点两次进行。起点按表\ref{tab:ch05-first-verify}直接请求本节已实现的接口，检查固定数据、204、400与404；此时无登录端点，历史查询也只是空列表骨架。终点完成5.4节存储、5.5节全局异常处理和5.6节认证后，再把 S2 页面接入完整后端，重做表\ref{tab:ch04-stage-acceptance}的界面验收。教学接口的\texttt{teach=}由表\ref{tab:api-teach-faults}约定；真实后端用不带令牌、非法时间范围、不存在的对象和无观测对象触发相应行为。输入\texttt{from}晚于\texttt{to}应得到400且\texttt{field}为\texttt{from}；错误体尚未统一的类型转换失败在5.5节补齐。字段一致允许复用页面，认证和数据能力齐备才允许替换整个服务。
+写好的接口要对照契约检查，而且不止检查一次。现在这个程序只有固定数据，没有数据库，也没有登录，能检查的是表\ref{tab:ch05-first-verify}的四行：固定数据、204、404 和 400 各一例。5.4节接上数据库以后，用同样的请求再查一遍，这时对象和观测来自数据库。5.6节补上认证以后，后端才具备教学接口的全部行为，可以把第4章的 S2 页面接过来，重做表\ref{tab:ch04-stage-acceptance}的界面验收。教学接口靠\texttt{teach=}参数人为制造故障（表\ref{tab:api-teach-faults}）；真实后端没有这个参数，要用真实的请求去触发：不带令牌、把时间范围写反、请求不存在的对象、请求还没有观测的对象。
 
 \begin{table}[htbp]
 \centering
@@ -324,18 +249,24 @@ GET …/readings?from=2026-07-02…\&to=2026-07-01… & 400 & \texttt{\{code:"IN
 \end{tabular}
 \end{table}
 
-\paragraph{S3 阶段包与契约核对脚本。}清单\ref{lst:ch05-first-controller}与清单\ref{lst:ch05-first-params}对应配套目录\texttt{backend/src/main/java/edu/example/lesson52/}，它是 S3 的起点：一个类、没有数据库、没有认证。独立包\texttt{edu.example.lesson52}与完整工程的\texttt{edu.example.qingyuan}分开扫描；若将两组控制器放入同一扫描范围，两个\texttt{/api/assets}映射会冲突并导致启动失败。表\ref{tab:ch05-first-verify}的四行不必手工点，配套工程的\texttt{teaching-api/contract-check.mjs}把它们连同错误体形状写成了可执行检查：\texttt{node teaching-api/contract-check.mjs http://localhost:8080 --stage=lesson52}。同一个脚本把\texttt{--stage}换成\texttt{teaching}或\texttt{full}，就分别核对教学接口和接了数据库的完整后端。脚本分别检查各阶段已经实现的接口范围。若某项失败，应按报告核对该阶段的路径、状态码与字段；登录及完整持久化行为在 S3 终点另行联调。
+\paragraph{配套工程中的位置}清单\ref{lst:ch05-first-controller}与清单\ref{lst:ch05-first-params}对应配套目录\texttt{backend/src/main/java/edu/example/lesson52/}，是 S3 阶段的起点：一个类，没有数据库，没有认证。它放在独立的包\texttt{edu.example.lesson52}里，与完整工程的\texttt{edu.example.qingyuan}分开；Spring Boot 从启动类所在的包向下扫描组件，两组控制器若被同一次扫描发现，两个\texttt{/api/assets}映射冲突，应用启动即失败。表\ref{tab:ch05-first-verify}的四行不必手工逐个点，配套工程的契约核对脚本把它们连同错误体的形状写成了可执行的检查，运行方式见清单\ref{lst:ch05-contract-check-cmd}：
+
+\begin{lstlisting}[label={lst:ch05-contract-check-cmd},language=bash,caption={对 5.2 节的程序运行契约核对脚本}]
+node teaching-api/contract-check.mjs http://localhost:8080 --stage=lesson52
+\end{lstlisting}
+
+脚本逐项打印通过或失败；失败时按它报告的路径、状态码和字段去核对程序。同一个脚本把\texttt{--stage}换成\texttt{lesson54}、\texttt{full}或\texttt{teaching}，分别核对5.4节接了数据库的程序、带认证的完整后端和教学接口，每个阶段只检查该阶段已经实现的行为。
 
 \paragraph{自测}（1）把清单\ref{lst:ch05-first-controller}中的\texttt{@RestController}换成\texttt{@Controller}，访问\texttt{/api/assets}会发生什么？为什么？（框架把返回值当视图名去找模板，得到 404 或 500；\texttt{@RestController} = \texttt{@Controller} + \texttt{@ResponseBody}。）（2）\texttt{latest}方法为什么返回\texttt{ResponseEntity}而\texttt{assets}方法直接返回\texttt{List}？（前者需要区分 200 与 204 两种状态码，后者永远 200。）（3）不看代码，说出契约里“错误体统一为\texttt{\{code, message, field?\}}”在本节由哪两个方法保证，还有哪一类错误它们接不住。
 
 \section{Spring Boot企业级开发基础}
 
-\paragraph{本节层次}核心：5.3.1、5.3.3；指导实践：5.3.2、5.3.4、5.3.6；拓展：5.3.5。核心阅读按所列小节推进，实践成果按章末要求验收。
+\paragraph{本节层次}核心：5.3.1、5.3.3；指导实践：5.3.2、5.3.4、5.3.6；拓展：5.3.5。
 
 \paragraph{进入本节所需知识}先完成5.2节，能从请求路径找到控制器方法及返回对象。
 
 
-Spring Boot通过约定、自动配置和Starter依赖减少基础配置。自动配置会依据类路径、配置属性和已有Bean选择合适组件，但开发者仍应理解其条件，避免把“自动”误解为“不可控”。推荐目录如下：
+5.2节的程序只有一个控制器类，却能监听端口、解析路径、输出 JSON，这些事是 Spring Boot 替你做的。本节回答三个问题：这些能力从哪里来（起步依赖与自动配置，5.3.1节）；数据库地址、口令这类随环境变化的值放在哪里（配置文件，5.3.2节）；控制器需要的 Repository 和服务对象由谁创建、怎样交到它手里（依赖注入，5.3.3节）。5.4节接数据库、拆分三层时，这三样都要用到。工程目录的布局见清单\ref{lst:ch05-http}。
 
 \subsection{起步依赖与自动配置的边界}
 
@@ -392,8 +323,8 @@ spring:
 # application-development.yml
 spring:
   datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5432/water}
-    username: ${DB_USER:water_app}
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/qingyuan}
+    username: ${DB_USER:qingyuan_app}
     password: ${DB_PASSWORD:}
 security:
   jwt:
@@ -516,8 +447,8 @@ src/main/resources/application.yml
 \begin{lstlisting}[label={lst:ch05-application},language=YAML,caption={Spring Boot应用入口与JWT配置}]
 spring:
   datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5432/water}
-    username: ${DB_USER:water_app}
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/qingyuan}
+    username: ${DB_USER:qingyuan_app}
     password: ${DB_PASSWORD}
 security:
   jwt:
@@ -548,14 +479,239 @@ Spring Boot 3使用\texttt{jakarta.servlet.*}命名空间。旧项目从\texttt{
 
 \section{Jakarta Persistence与事务管理}
 
-\paragraph{本节层次}核心：5.4.1、5.4.9、5.4.10；指导实践：5.4.2、5.4.4、5.4.5、5.4.6、5.4.13；拓展：5.4.3、5.4.7、5.4.8、5.4.11、5.4.12、5.4.14。核心阅读按所列小节推进，实践成果按章末要求验收。
+\paragraph{本节层次}核心：5.4.1、5.4.2、5.4.10、5.4.11；指导实践：5.4.3、5.4.5、5.4.6、5.4.7、5.4.14；拓展：5.4.4、5.4.8、5.4.9、5.4.12、5.4.13、5.4.15。初学时读核心四小节即可。
 
 \paragraph{进入本节所需知识}先读5.3节核心内容与附录B P3，能解释表、主键、查询和事务。
 
 
-\subsection{实体映射与Repository基础}
+\subsection{把固定数据换成数据库查询}\label{sec:ch05-db-step}
 
-先建立实体映射与Repository，再讨论事务边界。实体标识应稳定；接口层DTO与持久化实体分离，避免数据库结构直接成为外部契约。
+\paragraph{业务问题}5.2节的四个测点写在 Java 代码里。工程上新装一支渗压计，就得改代码、重新编译、重新部署；历史观测的查询也一直返回空列表。测点台账和观测本来就存放在数据库的\texttt{asset}和\texttt{reading}两张表里（教学用到的列见附录B P3 单元的表\ref{tab:prep-p3-tables}，完整表结构见配套工程的\texttt{db/001\_init.sql}），现在让接口去读这两张表。接口的路径、字段和状态码一律不变，第4章的页面不应察觉数据来源换过。
+
+要补三样东西：一个与\texttt{asset}表对应的 Java 类（实体），一个负责查询的接口（Repository），以及数据库的连接配置。
+
+\paragraph{实体：一行记录对应一个对象}清单\ref{lst:ch05-db-entity}是配套工程的\texttt{AssetEntity.java}。\texttt{@Entity}声明这个类的对象与数据库表的行对应，\texttt{@Table}指出表名，\texttt{@Id}标出主键字段。字段名\texttt{assetId}与列名\texttt{asset\_id}的对应不用逐个声明：Spring Boot 默认把驼峰写法的字段名转换成下划线写法的列名。无参构造器留给框架，它从数据库读出一行后，先用无参构造器创建对象再填入各字段；业务代码使用带参数的构造器。实体只有读取方法、没有\texttt{set}方法，业务代码拿到对象后无法随手改动它的字段。表里的\texttt{geometry}、\texttt{elevation\_m}等列在实体中没有对应字段，这是允许的：实体只需声明本程序用到的列，空间位置到第6章才用。
+
+\begin{lstlisting}[label={lst:ch05-db-entity},language=Java,caption={AssetEntity：与 asset 表对应的实体}]
+package edu.example.qingyuan;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name = "asset")
+public class AssetEntity {
+    @Id private String assetId;
+    private String assetType;
+    private String displayName;
+    private String unit;
+    private boolean active = true;
+    protected AssetEntity() {}
+    public AssetEntity(String assetId, String assetType, String displayName, String unit) {
+        this.assetId = assetId; this.assetType = assetType; this.displayName = displayName; this.unit = unit;
+    }
+    public String getAssetId() { return assetId; }
+    public String getAssetType() { return assetType; }
+    public String getDisplayName() { return displayName; }
+    public String getUnit() { return unit; }
+    public boolean isActive() { return active; }
+}
+\end{lstlisting}
+
+\paragraph{Repository：只声明方法，不写实现}清单\ref{lst:ch05-db-repository}是一个接口，全工程找不到它的实现类。应用启动时，Spring Data 读取接口中的方法名，按“\texttt{findBy} + 条件 + \texttt{OrderBy} + 排序字段”的规则生成查询：\texttt{findByActiveTrue}\allowbreak\texttt{OrderByAssetId}被翻译成一条查询语句，大意是\texttt{select ... from asset}\allowbreak\texttt{ where active = true}\allowbreak\texttt{ order by asset\_id}。继承\texttt{JpaRepository<AssetEntity, String>}还带来一批现成的方法，两个类型参数分别是实体类型和主键类型，5.4.2节要用的\texttt{existsById}就在其中。方法名里的\texttt{Active}、\texttt{AssetId}必须与实体字段名对应；拼错了，编译照样通过，错误要到应用启动时才暴露，本小节末尾的故障练习会让你读一次这条错误。
+
+\begin{lstlisting}[label={lst:ch05-db-repository},language=Java,caption={AssetRepository：由方法名派生查询}]
+package edu.example.qingyuan;
+
+import java.util.List;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface AssetRepository extends JpaRepository<AssetEntity, String> {
+    List<AssetEntity> findByActiveTrueOrderByAssetId();
+}
+\end{lstlisting}
+
+\paragraph{控制器：只改数据来源}控制器的改动见清单\ref{lst:ch05-db-controller}，其余部分与5.2节相同。原来的\texttt{FIXED}列表删去，换成一个\texttt{AssetRepository}类型的字段。这个字段由构造器参数赋值，而全工程没有哪一行代码调用这个构造器：应用启动时，框架先创建 Repository 的实例，再把它作为参数创建控制器，这就是5.3.3节讲的构造器注入（构造器的第二个参数\texttt{ReadingService}在5.4.2节说明）。配套文件里每个接口方法上方还多一行\texttt{@PreAuthorize(...)}，那是5.6节的权限声明，启用认证之前不起作用，清单中略去。\texttt{AssetDto.from}把实体转换成接口约定的响应对象；\texttt{map(AssetDto::from)}中的\texttt{AssetDto::from}是方法引用，等价于 lambda 表达式\texttt{e -> AssetDto.from(e)}。实体不直接作为响应体返回，原因有两个。第一，表里以后可能增加只供内部使用的列（例如停用原因），它们不应自动出现在接口上。第二，接口字段一旦交给前端使用就不能随便改，而表结构还会调整。DTO（数据传输对象）就是隔在两者之间的一层。
+
+\begin{lstlisting}[label={lst:ch05-db-controller},language=Java,caption={AssetController 的改动：注入 Repository，用查询结果替换固定列表}]
+// —— AssetController.java 中发生变化的部分 ——
+    public record AssetDto(String assetId, String displayName, String assetType, String unit) {
+        static AssetDto from(AssetEntity e) {
+            return new AssetDto(e.getAssetId(), e.getDisplayName(), e.getAssetType(), e.getUnit());
+        }
+    }
+
+    private final AssetRepository assets;
+    private final ReadingService readings;
+
+    public AssetController(AssetRepository assets, ReadingService readings) {
+        this.assets = assets; this.readings = readings;
+    }
+    @GetMapping
+    public List<AssetDto> assets() {
+        return assets.findByActiveTrueOrderByAssetId().stream().map(AssetDto::from).toList();
+    }
+\end{lstlisting}
+
+\paragraph{连接配置}数据库在哪里、用什么账号连接，写在\texttt{src/main/resources/application.yml}中（清单\ref{lst:ch05-db-config}）。\texttt{\$\{DB\_URL:jdbc:postgresql://...\}}的含义是：有环境变量\texttt{DB\_URL}就用它，没有就用冒号后面的默认值，同一份配置文件因此可以不加修改地用于本机和容器。DDL 指建表、改表这类语句；\texttt{ddl-auto: validate}表示应用启动时只核对实体与表结构、不做改动，对不上就拒绝启动；表由\texttt{db/001\_init.sql}创建，应用本身不建表也不改表。
+
+\begin{lstlisting}[label={lst:ch05-db-config},language=YAML,caption={application.yml 中的数据源配置}]
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/qingyuan}
+    username: ${DB_USER:qingyuan_app}
+    password: ${DB_PASSWORD:teaching-only}
+  jpa:
+    open-in-view: false
+    hibernate.ddl-auto: validate
+\end{lstlisting}
+
+\paragraph{观测表的实体}\texttt{reading}表的主键由三列组成：哪个对象、什么时刻、第几个版本。同一对象、同一时刻、同一版本只能有一条记录；人工订正不覆盖原值，而是追加一条版本号加1的记录，“当时采到的是什么、后来改成了什么”都查得到。清单\ref{lst:ch05-db-reading-entity}用\texttt{@EmbeddedId}把这三列组合成一个主键对象\texttt{ReadingId}；\texttt{@Embeddable}表示\texttt{ReadingId}自己不对应一张表，它的三个字段嵌入\texttt{reading}表的三列；JPA 规定复合主键类要实现\texttt{Serializable}，照写即可。\texttt{value}的类型是\texttt{BigDecimal}而不是\texttt{double}：表中这一列是十进制的\texttt{numeric}，实体写成\texttt{Double}会在启动核对时被拒绝；二进制浮点数也无法精确表示 0.1、185.091 这样的十进制小数，误差会在累加和比较时显现（\texttt{0.1 + 0.2 == 0.3}为假），日降雨量累计、与阈值比较都属于这类运算。缺测时\texttt{value}为\texttt{null}，与 0 是两回事。
+
+\begin{lstlisting}[label={lst:ch05-db-reading-entity},language=Java,caption={ReadingEntity：复合主键与带单位的观测值（节选）}]
+@Entity
+@Table(name = "reading")
+public class ReadingEntity {
+    @EmbeddedId private ReadingId id;
+    // 幂等键：一次上报一个 eventId，重复收到时靠它识别
+    @Column(name = "event_id", nullable = false) private String eventId;
+    // 表中是 numeric 列，对应 BigDecimal；缺测时为 null，不是 0
+    @Column(name = "value") private BigDecimal value;
+    @Column(nullable = false) private String unit;
+    @Column(nullable = false) private String quality;
+    @Column(nullable = false) private String source;
+    // ……构造器与访问方法略，见配套文件
+
+    @Embeddable
+    public record ReadingId(@Column(name = "asset_id") String assetId,
+                            @Column(name = "occurred_at") OffsetDateTime occurredAt,
+                            int version) implements java.io.Serializable {}
+}
+\end{lstlisting}
+
+清单\ref{lst:ch05-db-reading-repository}是观测的 Repository。按时间窗查询不适合用方法名表达，改用\texttt{@Query}写出查询语句。这种语句叫 JPQL，写法与 SQL 相近，但\texttt{from}后面是实体类名，条件里用的是字段名（\texttt{r.id.occurredAt}）而不是列名。语句两端的三个双引号是 Java 的多行字符串；\texttt{:assetId}是命名参数，运行时由标了\texttt{@Param("assetId")}的方法参数填入，值与语句分开传递，就是附录B P3 单元讲的参数化查询。时间窗取左闭右开$[\mathit{from}, \mathit{to})$：查询“7月1日”和“7月2日”两天时，7月2日零点整的那条观测只出现在后一天的结果里，两天的结果拼接起来既不重复也不遗漏，统计日降雨量、日平均渗压时不会把边界上的观测算两次。取最新观测仍由方法名派生。方法名中的\texttt{IdAssetId}要读成\texttt{id.assetId}，即先进入主键对象\texttt{id}，再取其中的\texttt{assetId}；\texttt{First}表示只取一条。排序先按时间倒序，同一时刻再按版本号倒序，取到的是订正后的值。
+
+\begin{lstlisting}[label={lst:ch05-db-reading-repository},language=Java,caption={ReadingRepository：时间窗查询与最新一条}]
+package edu.example.qingyuan;
+
+import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.Optional;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+public interface ReadingRepository extends JpaRepository<ReadingEntity, ReadingEntity.ReadingId> {
+    /** [from, to)：相邻查询窗口的共同边界只出现在后一个窗口。 */
+    @Query("""
+            select r from ReadingEntity r where r.id.assetId = :assetId
+            and r.id.occurredAt >= :from and r.id.occurredAt < :to
+            order by r.id.occurredAt, r.id.version
+            """)
+    List<ReadingEntity> findInWindow(@Param("assetId") String assetId,
+            @Param("from") OffsetDateTime from, @Param("to") OffsetDateTime to);
+    boolean existsByEventId(String eventId);
+
+    /** 契约 GET /api/assets/{id}/readings/latest：同一时刻可能有多个版本，取版本号最大的那条。 */
+    Optional<ReadingEntity> findFirstByIdAssetIdOrderByIdOccurredAtDescIdVersionDesc(String assetId);
+}
+\end{lstlisting}
+
+\paragraph{运行与观察}这一步的可运行入口是配套工程的\texttt{edu.example.lesson54.Lesson54Application}。它没有自己的业务代码，只把上面几个类和5.4.2节的服务类装配起来，不启用认证，也不连接消息队列。配套工程只保留拆成三层之后的版本，5.4.1节和5.4.2节因此共用这一个入口；“全都写在控制器里”的中间状态只出现在书中的讲解里。先停掉5.2节的程序，按\texttt{STAGES.md}“S3 中点”的命令用 Docker 启动 PostgreSQL（初始化脚本自动建表并写入五个对象和几条观测），再启动这个入口。表\ref{tab:ch05-db-run}是应当看到的结果。
+
+\begin{table}[htbp]
+\centering
+\caption{接入数据库后的预期运行记录}
+\label{tab:ch05-db-run}
+\begin{tabular}{p{0.44\textwidth}p{0.08\textwidth}p{0.40\textwidth}}
+\toprule
+操作 & 状态码 & 观察 \\
+\midrule
+浏览器打开 /api/assets & 200 & 五个对象，按编码排序；比5.2节多出\texttt{DAM-A-PZ-08}，它来自数据库而不是代码 \\
+在数据库中执行\texttt{UPDATE asset SET active = false WHERE asset\_id = 'DAM-A-RF-01'}后刷新（执行方法和恢复命令见\texttt{STAGES.md}） & 200 & 只剩四个对象；程序没有重启，代码没有改动。练习后把\texttt{active}改回\texttt{true} \\
+/api/assets/DAM-A-D-01/readings/latest & 204 & 位移计已登记、尚无观测 \\
+/api/assets/DAM-A-PZ-07/readings，时间窗取宽，如\texttt{from=2026-01-01T00:00:00Z}、\texttt{to=2030-01-01T00:00:00Z} & 200 & 五条种子观测，其中一条\texttt{value}为\texttt{null}、\texttt{quality}为\texttt{missing}；时间以 UTC（末尾带 Z）给出，与带\texttt{+08:00}的写法指同一时刻 \\
+运行契约核对脚本，\texttt{--stage=lesson54} & — & 全部通过；状态码、字段名和错误体与5.2节一致 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{一个会遇到的失败}把清单\ref{lst:ch05-db-repository}的方法名改成\texttt{findByActiveTrueOrderByAssetCode}再启动。编译通过，应用却启动失败，日志末尾有一行\texttt{PropertyReferenceException: No property 'assetCode' found for type 'AssetEntity'}。原因是 Spring Data 在启动时解析方法名，\texttt{AssetEntity}没有名为\texttt{assetCode}的字段。改回\texttt{AssetId}后重新启动，再访问\texttt{/api/assets}确认恢复。另一个常见失败是数据库没有启动或口令不符，日志中出现\texttt{Connection refused}或\texttt{password authentication failed}，应用同样拒绝启动。这类错误都要从启动日志的最后一个\texttt{Caused by}读起，它指向最初的原因。
+
+\paragraph{自测}（1）\texttt{AssetRepository}没有实现类，\texttt{assets.findByActiveTrueOrderByAssetId()}调用的代码从哪里来？（Spring Data 在启动时按方法名生成实现。）（2）把\texttt{ddl-auto}从\texttt{validate}改成\texttt{update}，应用会按实体自动改表。监测平台为什么不这样做？（表结构由迁移脚本统一管理并经过评审；让程序自动改表，观测表的约束和索引可能在无人知晓时被改动。）（3）时间窗为什么取左闭右开而不是两端都闭？
+
+\subsection{从一个类到三层}\label{sec:ch05-layer-step}
+
+\paragraph{业务问题}接入数据库以后，“取最新观测”这个接口要回答的问题变多了：这个对象存在吗？存在的话，最新的一条是哪条？同一时刻有订正版本时取哪个？一条也没有时怎么应答？这些判断如果都写在控制器方法里，控制器既要处理 HTTP，又要懂业务规则，还要知道怎样查库。5.7节的消息消费者收到新观测时，也需要“按对象和时间查观测”“写入前检查是否重复”这些能力，而它根本不经过 HTTP，控制器里的代码它用不上。解决办法是把代码按职责分到三层，每层只回答一类问题，如图\ref{fig:ch05-request-chain}所示。
+
+\paragraph{服务层}清单\ref{lst:ch05-rest-layer}是配套工程的\texttt{ReadingService}。\texttt{@Service}把它登记为由框架创建和注入的组件。它对外提供两个查询方法，调用者不需要知道底下是哪一条 SQL。\texttt{latest}返回\texttt{Optional}：有观测就装着那条观测，没有就是空的。“没有观测”在这里是一种正常结果，不是异常；它对应 HTTP 的哪个状态码，服务层不关心，也不应该关心，因为调用它的不一定是 HTTP 请求。\texttt{@Transactional(readOnly = true)}声明这个方法在一个只读事务中执行，它告诉框架这个方法只读不写，框架和数据库可以据此省去一些工作；事务是什么在5.4.10节讲，这里先照写。
+
+\begin{lstlisting}[label={lst:ch05-rest-layer},language=Java,caption={ReadingService：服务层的两个查询方法}]
+@Service
+public class ReadingService {
+    private final ReadingRepository repository;
+    public ReadingService(ReadingRepository repository) { this.repository = repository; }
+
+    @Transactional(readOnly = true)
+    public List<ReadingEntity> find(String assetId, OffsetDateTime from, OffsetDateTime to) {
+        return repository.findInWindow(assetId, from, to);
+    }
+
+    /** 最新一条观测；对象存在但尚无观测时返回空，由控制层按契约转成 204。 */
+    @Transactional(readOnly = true)
+    public Optional<ReadingEntity> latest(String assetId) {
+        return repository.findFirstByIdAssetIdOrderByIdOccurredAtDescIdVersionDesc(assetId);
+    }
+    // ……幂等写入方法 accept(...) 见配套文件
+}
+\end{lstlisting}
+
+\paragraph{控制器只做协议转换}清单\ref{lst:ch05-layer-controller}是拆分之后控制器里的\texttt{latest}方法。它做三件事：用\texttt{existsById}确认对象存在，不存在就抛出异常，由统一的异常处理器转换成 404 和契约错误体；调用服务层取最新观测；把服务层返回的\texttt{Optional}翻译成 HTTP 应答，有值时转换成\texttt{ReadingDto}并应答 200，空值时应答 204。5.1节说的“204 与 404 要分开”，落到代码上就是这两个分支。
+
+\begin{lstlisting}[label={lst:ch05-layer-controller},language=Java,caption={AssetController.latest：对象不存在 404，尚无观测 204}]
+    @GetMapping("/{assetId}/readings/latest")
+    public ResponseEntity<ReadingDto> latest(@PathVariable String assetId) {
+        if (!assets.existsById(assetId)) {
+            throw new AssetNotFoundException(assetId);
+        }
+        return readings.latest(assetId)
+                .map(ReadingDto::from)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.noContent().build());
+    }
+\end{lstlisting}
+
+\paragraph{依赖方向与 DTO}三层之间的依赖是单向的：控制器依赖服务，服务依赖 Repository 接口，Repository 的实现依赖数据库；反过来不成立，\texttt{ReadingService}的代码里没有出现任何 HTTP 或 JSON 的类型，单元测试可以直接创建它，传入一个假的 Repository 来检验规则。图\ref{fig:ch05-rest-contract}标出一次请求可能在哪个边界上失败，以及各自对应的状态码：格式问题在控制器被拒绝（400），对象不存在或状态冲突由业务判断得出（404、409）。测试接口时，除了断言状态码，还应核对响应字段，并确认失败的请求没有留下写了一半的数据。
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth,thick,
+  boundary/.style={draw=Primary,rounded corners=2pt,text width=2.7cm,minimum height=.85cm,align=center,fill=PrimaryLight,text=PrimaryDark,font=\scriptsize},
+  error/.style={boundary,draw=Accent,fill=white}]
+  \node[boundary] (http) at (0,0) {HTTP请求\\方法、路径、JSON};
+  \node[boundary] (validate) at (3.7,0) {Controller\\格式校验};
+  \node[boundary] (usecase) at (7.4,0) {Application Service\\用例、规则与事务};
+  \node[boundary] (dto) at (11.1,0) {响应映射与DTO\\稳定的外部字段};
+  \node[boundary] (repo) at (7.4,-1.8) {Repository\\查询与持久化};
+  \node[error] (bad) at (3.7,-1.8) {400\\输入错误};
+  \node[error] (domain) at (11.1,-1.8) {404/409\\对象不存在/状态冲突};
+  \draw[->,Primary] (http)--(validate);
+  \draw[->,Primary] (validate)--(usecase);
+  \draw[->,Primary] (usecase)--(dto);
+  \draw[<->,Primary] (usecase)--(repo);
+  \draw[->,Accent] (validate)--(bad);
+  \draw[->,Accent] (usecase.south east)--(domain.north west);
+\end{tikzpicture}
+\caption{REST接口的契约边界与失败返回}
+\label{fig:ch05-rest-contract}
+\end{figure}
+
+\paragraph{运行与观察}仍然使用\texttt{Lesson54Application}。从5.2节的一个类，到接上数据库，再到拆成三层，程序内部变了三次，\texttt{--stage=lesson52}与\texttt{--stage=lesson54}核对的却是同一份契约，状态码、字段名和错误体都没有变。重构指的就是这种改动：内部结构变了，对外的行为不变；判断重构有没有改坏东西，靠的是这类可以重复执行的检查。再做一个反向试验：把清单\ref{lst:ch05-layer-controller}中\texttt{existsById}的判断删掉，重新启动后请求\texttt{/api/assets/DAM-A-XX-99/readings/latest}。应答从 404 变成了 204，一个不存在的对象被报告成“暂无观测”，契约核对脚本在“返回 404”这一项上报告失败。恢复这段判断后重新核对。
+
+\paragraph{自测}（1）\texttt{ReadingService.latest}为什么返回\texttt{Optional}，而不是在没有观测时抛出异常？（没有观测是正常结果；是否算错误、用哪个状态码表达，由调用方决定。）（2）消息消费者收到一条观测后需要写入数据库，它应该调用控制器、服务还是 Repository？为什么？（3）如果让\texttt{ReadingService}直接返回\texttt{ResponseEntity}，哪一条依赖方向被破坏了？
+
+\paragraph{后面几小节换一个简化的例子}配套工程的观测表用复合主键，而且只追加、不修改，这是监测数据的特点，却不方便演示“修改一条记录”时会遇到的问题。本节余下的小节讲关联与懒加载、分页、乐观锁、审计字段和事务，改用清单\ref{lst:ch05-jpa-entity}中简化的\texttt{Reading}类：它只有一个自增主键，带版本列，允许修改，接口路径相应写成\texttt{/api/readings/\{id\}}。这个类和清单末尾的\texttt{ReadingRepository}只在书里出现，配套工程中没有，不要与前面的\texttt{ReadingEntity}及其 Repository 混淆。
 
 \begin{lstlisting}[label={lst:ch05-jpa-entity},language=Java,caption={Jakarta实体映射}]
 import jakarta.persistence.*;
@@ -594,10 +750,10 @@ public class Reading {
     }
 
     public Long getId() { return id; }
-    public String getStationId() { return assetId; }
+    public String getAssetId() { return assetId; }
     public BigDecimal getValue() { return value; }
     public String getUnit() { return unit; }
-    public Instant getMeasuredAt() { return occurredAt; }
+    public Instant getOccurredAt() { return occurredAt; }
     public String getQuality() { return quality; }
     public long getVersion() { return version; }
     public Instant getCreatedAt() { return createdAt; }
@@ -632,7 +788,7 @@ public class Reading {
 }
 
 interface ReadingRepository extends JpaRepository<Reading, Long> {
-    Optional<Reading> findFirstByStationIdOrderByMeasuredAtDesc(String id);
+    Optional<Reading> findFirstByAssetIdOrderByOccurredAtDesc(String id);
 }
 \end{lstlisting}
 
@@ -662,7 +818,7 @@ class StationEntity {
 
     protected StationEntity() {}
     StationEntity(String assetId) { this.assetId = assetId; }
-    public String getStationId() { return assetId; }
+    public String getAssetId() { return assetId; }
     public Set<StationReadingEntity> getReadings() {
         return Collections.unmodifiableSet(readings);
     }
@@ -685,7 +841,7 @@ class StationReadingEntity {
     StationReadingEntity(Instant occurredAt) { this.occurredAt = occurredAt; }
     void attachTo(StationEntity station) { this.station = station; }
     public Long getId() { return id; }
-    public Instant getMeasuredAt() { return occurredAt; }
+    public Instant getOccurredAt() { return occurredAt; }
     public StationEntity getStation() { return station; }
 }
 \end{lstlisting}
@@ -715,7 +871,7 @@ public interface StationReadingQueryRepository
             @Param("to") Instant to);
 
     @EntityGraph(attributePaths = "station")
-    List<StationReadingEntity> findTop100ByOrderByMeasuredAtDescIdDesc();
+    List<StationReadingEntity> findTop100ByOrderByOccurredAtDescIdDesc();
 }
 \end{lstlisting}
 
@@ -743,14 +899,16 @@ DTO 投影 & 只取列表需要的列 & 避免把实体关系带出事务；字�
 
 \subsection{派生查询、Pageable 与稳定分页}
 
-Spring Data 的派生查询名称按“动词 + 属性 + 条件 + 排序”组合，例如\texttt{findByStationId\allowbreak AndQuality\allowbreak OrderByMeasuredAt\allowbreak DescIdDesc}。属性名必须与实体字段对应，重命名时编译器会提示错误；查询含义复杂或涉及时间半开区间时，优先使用\texttt{@Query}明确写出条件。所有列表接口都应限制\texttt{size}，默认排序追加唯一 ID 作为 tie-breaker，保证追加新读数时不会在页边界重复或漏掉记录。
+Spring Data 的派生查询名称按“动词 + 属性 + 条件 + 排序”组合，例如\texttt{findByAssetId\allowbreak AndQuality\allowbreak OrderByOccurredAt\allowbreak DescIdDesc}。方法名里的属性必须与实体字段名逐字对应（实体字段叫\texttt{assetId}，方法名就写\texttt{ByAssetId}）。派生查询在应用启动时才解析，字段改名后编译器查不出来，启动日志会报\texttt{PropertyReferenceException}；查询含义复杂或涉及时间半开区间时，优先使用\texttt{@Query}明确写出条件。所有列表接口都应限制\texttt{size}，默认排序追加唯一 ID 作为 tie-breaker，保证追加新读数时不会在页边界重复或漏掉记录。
+
+分页、排序和过滤也要形成稳定的 URL 契约。\texttt{page}表示页码，起始值需由接口契约约定；下面示例采用从0开始的\texttt{page}、正数\texttt{size}，排序使用\texttt{sort=occurredAt,desc}，过滤使用\texttt{assetId}、\texttt{quality}和时间范围。服务端限制\texttt{size}上限，拒绝未知排序字段，返回\texttt{content}、\texttt{page}、\texttt{size}、\texttt{totalElements}和\texttt{totalPages}，这样前端可以显示总页数而不是用当前页长度猜测。报表导出这类耗时操作不放在一次 HTTP 请求里等待：接口先应答\texttt{202 Accepted}并给出任务地址，由客户端轮询任务状态。
 
 \begin{lstlisting}[label={lst:ch05-pageable-repository},language=Java,caption={Pageable 分页查询与服务层上限}]
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 interface ReadingPageRepository extends JpaRepository<Reading, Long> {
-    Page<Reading> findByStationIdAndQuality(
+    Page<Reading> findByAssetIdAndQuality(
             String assetId, String quality, Pageable pageable);
 }
 
@@ -770,7 +928,7 @@ class ReadingPageService {
         Pageable request = PageRequest.of(page, bounded,
                 Sort.by(Sort.Order.desc("occurredAt"),
                         Sort.Order.desc("id")));
-        return repository.findByStationIdAndQuality(assetId, quality, request)
+        return repository.findByAssetIdAndQuality(assetId, quality, request)
                 .map(ReadingResponse::from);
     }
 }
@@ -817,7 +975,7 @@ class StationConfigEntity extends AuditedEntity {
     private String assetId;
     @Column(nullable = false) private boolean archived;
     public long getVersion() { return version; }
-    public String getStationId() { return assetId; }
+    public String getAssetId() { return assetId; }
     public boolean isArchived() { return archived; }
 }
 \end{lstlisting}
@@ -931,7 +1089,7 @@ class ReadingCommandService {
         Reading saved = repository.save(reading);
         auditService.record("SAVE_READING"); // 经另一Bean代理调用
         eventPublisher.publishEvent(
-                new ReadingSavedEvent(saved.getId(), saved.getStationId()));
+                new ReadingSavedEvent(saved.getId(), saved.getAssetId()));
     }
 }
 \end{lstlisting}
@@ -1087,23 +1245,22 @@ class ReadingUseCase {
     }
 
     @Transactional(readOnly = true)
-    ReadingResponse latest(String assetId) {
-        return repository.findFirstByStationIdOrderByMeasuredAtDesc(assetId)
-                .map(ReadingResponse::from)
-                .orElseThrow(() -> new EntityNotFoundException("测站无读数"));
+    Optional<ReadingResponse> latest(String assetId) {   // 空值由控制器转成 204
+        return repository.findFirstByAssetIdOrderByOccurredAtDesc(assetId)
+                .map(ReadingResponse::from);
     }
 
     @Transactional
     ReadingResponse save(Reading reading) {
         Reading saved = repository.save(reading);
         publisher.publishEvent(
-                new ReadingSavedEvent(saved.getId(), saved.getStationId()));
+                new ReadingSavedEvent(saved.getId(), saved.getAssetId()));
         return ReadingResponse.from(saved);
     }
 }
 \end{lstlisting}
 
-清单\ref{lst:ch05-read-only}中的查询在事务内完成实体到 DTO 的转换，写入则在保存后发布事件。若主事务回滚，\texttt{AFTER\_COMMIT}监听器不执行；若监听器自身失败，主事务也不会被重新回滚，因此监听器必须具备幂等、重试和失败告警。跨进程通知不能只依靠进程内事件，应把事件写入事务发件箱，再由可靠发布器投递 Kafka。
+清单\ref{lst:ch05-read-only}中的查询在事务内完成实体到 DTO 的转换，写入则在保存后发布事件。对象存在但还没有观测时，查询返回空的\texttt{Optional}，控制器按表\ref{tab:api-contract}应答204；对象本身不存在才是404，这两种结果在服务层就要分开。若主事务回滚，\texttt{AFTER\_COMMIT}监听器不执行；若监听器自身失败，主事务也不会被重新回滚，因此监听器必须具备幂等、重试和失败告警。跨进程通知不能只依靠进程内事件，应把事件写入事务发件箱，再由可靠发布器投递 Kafka。
 
 \subsection{统计量更新}
 
@@ -1143,7 +1300,7 @@ class WaterDataSummary {
 服务层按用例组织方法，例如“保存监测值”“确认告警”“查询测站详情”。输入DTO先通过Bean Validation完成格式校验，领域规则仍由服务或领域对象校验。统一响应不应把所有结果都包装成HTTP 200；HTTP状态码仍须表达协议层结果。清单\ref{lst:ch05-exception-handler}把校验失败翻译成 400 并指出出错字段，与表\ref{tab:api-contract}约定的错误体形状一致。
 
 \begin{lstlisting}[label={lst:ch05-exception-handler},language=Java,caption={参数校验异常处理}]
-// 与 5.1 节的 CreateReadingRequest 相比省略了 unit 和 quality，
+// 与 5.5.1 节的 CreateReadingRequest 相比省略了 unit 和 quality，
 // 用最小字段演示校验异常的响应结构，故单独命名
 record ReadingValidationPayload(
         @NotBlank String assetId,
@@ -1175,6 +1332,20 @@ class GlobalExceptionHandler {
 \subsection{读写接口的状态与版本处理}
 
 一个可交付的 REST 资源至少要说明集合查询、单项查询、创建、整体更新和删除的语义。案例平台对观测记录只允许“新增”和“订正为新版本”（见 8.1 节契约表），下面清单中的\texttt{DELETE}只用于讲解 REST 语义，真实平台不提供删除观测的接口。以监测读数为例，\texttt{GET /api/readings/{id}}返回单条记录，\texttt{GET /api/readings}支持分页与过滤，\texttt{POST /api/readings}创建新记录，\texttt{PUT /api/readings/{id}}替换可编辑字段，\texttt{DELETE /api/readings/{id}}删除尚未归档的记录。更新和删除前要检查资源版本、用户权限和业务状态；已进入审计归档的读数应采用逻辑失效或拒绝删除，而不是直接破坏时序证据。
+
+写入接口要把协议校验、业务校验和持久化顺序写清。协议层检查必填字段、数值格式和时间字符串，应用服务检查测站是否存在、采样时间是否落在允许窗口、质量码是否允许参与计算，Repository 在事务中保存记录。创建成功返回\texttt{201 Created}并在\texttt{Location}头给出新资源地址；重复的幂等键返回第一次创建的响应或\texttt{409 Conflict}，不能静默创建第二条记录。清单\ref{lst:ch05-rest-write}是写入接口的请求体，字段上的注解声明格式要求；清单\ref{lst:ch05-crud-controller}的\texttt{create}方法用\texttt{@Valid}触发这些校验，再交给服务层判断测站与时间窗，最后返回带\texttt{Location}的 201。
+
+\begin{lstlisting}[label={lst:ch05-rest-write},language=Java,caption={写入请求体 CreateReadingRequest：字段与格式校验}]
+public record CreateReadingRequest(
+        @NotBlank String assetId,
+        // 上下限为示例阈值，工程取值以第8章8.1参数表为唯一来源
+        @NotNull @DecimalMin("0.0") @DecimalMax("1000.0") BigDecimal value,   // 量程按对象类型再校验，见测点台账
+        @NotBlank String unit,
+        @NotNull Instant occurredAt,
+        @NotBlank String quality) {}
+\end{lstlisting}
+
+请求体用\texttt{BigDecimal}表达观测值，避免用\texttt{double}承载边界校验时出现二进制浮点舍入误差；服务内部仍可按明确规则转换为数据库数值类型。\texttt{@Valid @RequestBody}只负责触发Bean Validation，诸如“测站属于当前工程”“时间不得早于上一条记录”等跨字段规则必须在服务层再次检查。幂等键的处理见5.5.4节。
 
 \begin{lstlisting}[label={lst:ch05-crud-controller},language=Java,caption={监测读数 GET/POST/PUT/DELETE 控制器}]
 @RestController
@@ -1235,8 +1406,8 @@ record ReadingResponse(long id, String assetId, BigDecimal value,
                        String unit, Instant occurredAt, String quality,
                        long version) {
     static ReadingResponse from(Reading entity) {
-        return new ReadingResponse(entity.getId(), entity.getStationId(),
-                entity.getValue(), entity.getUnit(), entity.getMeasuredAt(),
+        return new ReadingResponse(entity.getId(), entity.getAssetId(),
+                entity.getValue(), entity.getUnit(), entity.getOccurredAt(),
                 entity.getQuality(), entity.getVersion());
     }
 }
@@ -1360,7 +1531,7 @@ HTTP 状态码应与业务结果一一对应。查询成功返回200，集合为
 
 创建接口的事务边界应覆盖“验证测站—生成实体—保存读数—写入审计”的完整用例。若数据库保存成功而审计失败，系统需要依据业务要求回滚主记录或将审计事件写入事务发件箱；不能在控制器中先保存实体、再用另一个连接写日志。更新接口在同一事务中读取版本、执行状态检查和写入新值，数据库的唯一约束与版本列负责处理并发竞争。删除接口若采用逻辑删除，应把删除时间、操作者和原因写入审计字段，查询默认过滤已删除记录，但管理员接口仍可按权限恢复或查看。
 
-幂等请求与重试的关系也要写进接口说明。客户端在连接超时后重试\texttt{POST}时，服务端先查询幂等键；如果已有相同请求摘要，则返回原响应和同一\texttt{Location}；如果摘要不同，返回409并要求客户端生成新键。幂等记录应保存到与业务写入同一事务的表中，过期时间覆盖网关重试、消息重投和人工补发的最大窗口。只放在内存 Map 中会在服务重启后丢失，无法保证关键基础设施数据的唯一性。
+幂等请求与重试的关系也要写进接口说明。客户端在连接超时后重试\texttt{POST}时，服务端先查询幂等键；如果已有相同请求摘要，则返回原响应和同一\texttt{Location}；如果摘要不同，返回409并要求客户端生成新键。幂等记录应保存到与业务写入同一事务的表中，过期时间覆盖网关重试、消息重投和人工补发的最大窗口。只放在内存 Map 中会在服务重启后丢失，无法保证关键基础设施数据的唯一性。带状态的资源还要约定状态迁移规则：处置单只有\texttt{OPEN}可以变为\texttt{ACKNOWLEDGED}，重复确认应答当前状态，不再次产生副作用。同一个幂等键携带不同的请求体时应答冲突，防止客户端把一个键当作通用令牌反复使用。
 
 \subsection{DTO 契约与单位转换}
 
@@ -1369,6 +1540,8 @@ DTO 是接口版本和领域模型之间的缓冲层。后端内部可以把水�
 响应 DTO 只输出读者需要的字段：资源 ID、测站 ID、数值、单位、采样时间、质量码、版本和更新时间。数据库主键、内部租户标识、软删除标记和审计人不应因为实体序列化而意外暴露。对枚举新增值时，服务端可以先在响应中保留未知值的兼容处理，客户端显示“未知状态”而不是解析失败；删除或重命名枚举则必须通过新 API 版本完成。
 
 \subsection{测试矩阵与接口可观测性}
+
+接口文档还应给出示例请求、示例响应、错误码和限流规则，并在每次版本发布时同步更新 OpenAPI 描述；值班员和前端开发者据此可以复现问题、核对字段单位并确认兼容范围。
 
 每个端点至少覆盖正常、参数错误、未认证、无权限、资源不存在、版本冲突和重复请求七类场景。正常场景验证状态码、响应体和\texttt{Location}；参数错误验证字段列表和错误码；未认证与无权限验证401/403的区别；资源不存在验证404不泄露其他资源信息；版本冲突验证409并保留数据库原值；重复请求验证幂等键返回同一资源。测试还要确认异常日志包含\texttt{traceId}，但不含完整 JWT、密码和个人信息。
 
@@ -1921,7 +2094,7 @@ CORS 预检请求只是在浏览器侧询问“是否允许这个源访问”，
 
 \section{事务事件与消息队列}
 
-\paragraph{本节层次}核心：5.7.1；指导实践：5.7.2、5.7.3、5.7.4、5.7.5；拓展：5.7.6。核心阅读按所列小节推进，实践成果按章末要求验收。
+\paragraph{本节层次}核心：5.7.1；拓展：5.7.2、5.7.3、5.7.4、5.7.5、5.7.6。本节引言和5.7.1讲清两个异步概念：“提交之后再做”，以及同步调用为什么会把下游的故障传给上游。5.7.2—5.7.6是 Kafka 生产者、消费者幂等、重试与死信、事务发件箱和分区顺序的完整实现，属于选学，用于课程设计或自学，运行它们需要配套工程的 Compose 环境。
 
 \paragraph{进入本节所需知识}先读5.4节事务基础与5.5节服务职责，能说明提交成功和处理成功的区别。
 
@@ -2227,7 +2400,7 @@ Kafka 主题由多个分区组成，分区是并行度和顺序边界。同一�
 
 \paragraph{进入本节所需知识}先完成本章接口与持久化实践；带着一项具体的延迟或资源问题阅读附录C。
 
-性能分析从 5.4 节的查询测试与执行计划开始：先定位耗时语句和资源瓶颈，再选择缓存、索引或连接池参数。附录C“拓展专题”分别介绍缓存与 Redis 一致性、游标分页、连接池与慢查询定位、Actuator 与结构化日志，以及性能故障的分层处置，供课程设计和运维任务查阅。基础课程要求能够读懂查询测试与执行计划，专题实现可按项目需要选学。
+性能分析从 5.4 节的查询测试与执行计划开始：先定位耗时语句和资源瓶颈，再选择缓存、索引或连接池参数。附录C“拓展专题”分别介绍缓存与 Redis 一致性、游标分页、连接池与慢查询定位、Actuator 与结构化日志，以及性能故障的分层处置，供课程设计和运维任务查阅。基础课程要求能够读懂查询测试与执行计划，专题实现可按项目需要选学。平台拆分为多个服务或接口对外公开后才需要考虑的服务边界、跨服务调用的超时与降级、接口版本和健康检查，见附录C的\ref{app:ext-service-boundary}节；微服务边界与分布式失败的系统论述可参考文献\cite{newman2021}。
 
 \section{测试策略与质量门禁}
 
@@ -2388,7 +2561,7 @@ class ReadingRepositoryIT {
 
     @AfterEach
     void cleanTestRows() {
-        repository.deleteByStationIdStartingWith("TEST-");
+        repository.deleteByAssetIdStartingWith("TEST-");
     }
 
     @Test
@@ -2454,7 +2627,7 @@ FastAPI & 类型提示驱动的 API、异步 I/O 或需要自动 OpenAPI 文档�
 接口验收应同时核对返回值和运行记录，包括事务边界的测试、幂等键的唯一约束、慢查询的执行计划、traceId 串起来的分层耗时，以及降级时“未评估”与“正常”之间的明确区分。示例统一采用 Java 17 与 Jakarta 命名空间，配置按 Profile 分环境外部化，使测试能够在明确的依赖和配置条件下重复执行。
 \section*{章末交付物}
 
-提交一个监测数据后端原型：测站最新水位查询与监测值写入接口；JPA实体和Repository；一项具有明确事务边界的服务；认证与权限说明；一条提交后事件或Kafka消费链路；以及接口测试和运行日志。
+提交一个监测数据后端原型：测站最新水位查询与监测值写入接口；JPA实体和Repository；一项具有明确事务边界的服务；认证与权限说明；一个提交后事件监听（5.7节引言的做法）；以及接口测试和运行日志。选做5.7.2—5.7.6的小组另交一条 Kafka 消费链路及其重复投递测试。
 
 \section*{思考题与练习题}
 

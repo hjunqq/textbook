@@ -73,6 +73,22 @@ PAIRS = [
      "companion/water-platform-demo/backend/src/main/java/edu/example/lesson52/AssetController.java"),
     ("lst:ch05-first-params", "output/chapters/chapter05.tex",
      "companion/water-platform-demo/backend/src/main/java/edu/example/lesson52/AssetController.java"),
+    ("lst:ch05-db-entity", "output/chapters/chapter05.tex",
+     "companion/water-platform-demo/backend/src/main/java/edu/example/qingyuan/AssetEntity.java"),
+    ("lst:ch05-db-repository", "output/chapters/chapter05.tex",
+     "companion/water-platform-demo/backend/src/main/java/edu/example/qingyuan/AssetRepository.java"),
+    ("lst:ch05-db-controller", "output/chapters/chapter05.tex",
+     "companion/water-platform-demo/backend/src/main/java/edu/example/qingyuan/AssetController.java"),
+    ("lst:ch05-db-reading-entity", "output/chapters/chapter05.tex",
+     "companion/water-platform-demo/backend/src/main/java/edu/example/qingyuan/ReadingEntity.java"),
+    ("lst:ch05-db-reading-repository", "output/chapters/chapter05.tex",
+     "companion/water-platform-demo/backend/src/main/java/edu/example/qingyuan/ReadingRepository.java"),
+    ("lst:ch05-rest-layer", "output/chapters/chapter05.tex",
+     "companion/water-platform-demo/backend/src/main/java/edu/example/qingyuan/ReadingService.java"),
+    ("lst:ch05-layer-controller", "output/chapters/chapter05.tex",
+     "companion/water-platform-demo/backend/src/main/java/edu/example/qingyuan/AssetController.java"),
+    ("lst:ch05-db-config", "output/chapters/chapter05.tex",
+     "companion/water-platform-demo/backend/src/main/resources/application.yml"),
 ]
 
 # 已确认的差异：(label, 书中原行) -> 原因
