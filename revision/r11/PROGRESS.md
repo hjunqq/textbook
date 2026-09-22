@@ -240,3 +240,17 @@
 1. 作者待定项未变：5.6 权限模型与配套是否统一；`FIELD_REQUIRED`/`VALIDATION_ERROR` 差异改脚本还是改处理器；`ApiExceptionHandler` 兜底可能把 403 翻成 500；第6章教学断面尺寸是否进参数表、数据集测点分布、配套是否附 GLB；`stack-e2e` 失败原因（master 上已存在）。
 2. 语言清理只做了本轮未重写的部分一遍；本轮重写的章节由各包的独立走读覆盖。全书没有经过学生试读。
 3. 第5章 5.6 层次行无核心分组、5.8 全节拓展，与前言“JWT 认证与基本授权”列为主线的口径存在张力：5.6.1（过滤链）、5.6.3（解析令牌）、5.6.5（登录端点）现为指导实践，核心内容由配套工程承担；是否把 5.6.1 升为核心由作者定。
+
+## 八、第五批（2026-09-23）：作者六项决定的落实
+
+| 项 | 决定 | 落实 |
+|---|---|---|
+| 1 权限模型 | 配套保持 DUTY/ANALYST/OPS 最小实现；5.6.1 升核心；细粒度权限、刷新令牌、撤销、会话迁移为拓展 | 5.6 原先的最小实现正文位于任何小节之前，字面上的 5.6.1 是“威胁模型与认证边界”。为使“5.6.1 为核心”落在真正的最小实现上，新增 `\subsection{过滤器链、令牌解析与方法授权}` 作为 5.6.1，原 5.6.1—5.6.8 顺延为 5.6.2—5.6.9，层次行：核心 5.6.1；指导实践 5.6.4、5.6.6；拓展其余。开头段写明配套只实现三角色最小版本，扩展写法配套未实现、课程不要求。章内与第8章 8.6 对 5.6.x 的字面引用已同步。**编号顺延与作者原话（“5.6.1 认证与授权边界”）不同，请确认。** |
+| 2 错误码 | 改 `ApiExceptionHandler`，不改脚本 | `MethodArgumentNotValidException`：首个字段错误的 `getCode()` 为 NotNull/NotBlank/NotEmpty → 400 `FIELD_REQUIRED`；否则 400 `VALIDATION_ERROR`；`field` 均为字段名。另补 `MissingRequestHeaderException` → `FIELD_REQUIRED`。书中 `lst:ch05-error-handler` 同步（逐字核对）；第8章 8.3.5 的故障练习按新行为改写。 |
+| 3 403→500 | 显式处理 `AccessDeniedException`、`AuthenticationException`，500 只兜底未预期异常；加越权回归测试 | 处理器新增 403 `FORBIDDEN`、401 `UNAUTHORIZED`。为让测试有真实的 `@Valid` 请求体与角色限制端点，落实契约已有的 `POST /api/readings`（`ReadingWriteController` + `ManualReadingService`，限 ANALYST，`Idempotency-Key` 头，重发返回原记录，同一时刻已有观测→409 `READING_EXISTS`），书中 5.5.1 两个清单改为与配套逐字一致并登记。新增 `ReadingWriteControllerTest`（`@WebMvcTest` + `@Import(SecurityConfig)`，服务层 mock）六个用例：201、缺字段→FIELD_REQUIRED、@Pattern 失败→VALIDATION_ERROR、缺幂等头→FIELD_REQUIRED、DUTY 调用→403 FORBIDDEN 且服务层未被调用、匿名→401。5.9.2 改印该测试节选。 |
+| 4 第6章 | 教学几何单列；重做数据集坐标；加教学 GLB | 6.1.2 新表 `tab:ch06-teaching-geometry`（顶宽8、底宽40、轴长160、坝基120、坝顶172，仅用于场景练习），8.1 参数表未动。`generate.py` 的 `stations()` 重写为“坝轴中点为原点的局部布置 + 高斯—克吕格反算”：PZ 4 断面×3 高程埋在坝内，D 坝顶/下游坡，WL 上游 150—700 m，RF 坝头及 1.1—1.7 km 流域；编码、SEED、观测序列与其他 CSV 逐字节不变；`stations.csv/json`、前端副本、`002_seed.sql` 同步。6.1.5、6.2.3 的派生数字重算（PZ-07 粗略/投影差 1.6 m→0.07 m，最远 RF-04 约 7.4 m，坝内为分米级）。新增 `frontend/public/models/generate-dam-glb.py`→`dam.glb`（1740 B，纯标准库生成，Y-up、米、基面 y=0），结构校验与 three r160 `GLTFLoader` 解析测试通过（`tests/lesson61-dam-glb.test.js`）；6.1.4 加载示例指向该文件。运行图 `s4-scene.png`、`s5-scene-chart.png` 按原方法（Playwright Chromium，同视口）重拍，README/manifest 记录差异（字体回退、坝体半透明以露出坝内测点）。 |
+| 5 stack-e2e | 修 Dockerfile，使所有 Vite 入口进入构建上下文 | `frontend/Dockerfile` 改为拷贝 `public/`、六个 HTML、`lesson44.css`；本地以同一文件集 `npm run build` 通过。compose 整栈只能由 CI `stack-e2e` 验证，结果见终验。 |
+| 6 篇幅 | 约 22 万字接受，不设新目标 | 记录于此；后续只因重复、逻辑或教学需要局部删改。 |
+
+### 8.1 本批检查（云端）
+`check_textbook.py --strict --build` 通过（388 页，Fandol 回退字体，Overfull 0）；`check_listings.py` 45 组一致；`audit_learning_path.py` errors 空；前端 vitest 12 文件 115 用例通过；tex2site + mkdocs 严格构建通过。Java 仍未在本环境编译，由 CI `backend`、`stage-lesson54`、`stack-e2e` 验证，结果回填于第九节。

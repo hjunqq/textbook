@@ -1147,21 +1147,21 @@ class WaterDataSummary {
 
 **第一层：请求体的形状**
 
-清单5.31用一个`record`描述请求体，字段上的注解来自 Bean Validation（5.3.1节的`spring-boot-starter-validation`）：`@NotBlank`要求字符串非空且不全是空白，`@NotNull`要求字段存在，`@Pattern`限定取值。控制器参数上的`@Valid`触发检查，不通过时框架抛出`MethodArgumentNotValidException`，控制器方法根本不会执行。
+清单5.31是配套工程的`ReadingWriteController.java`，请求体用控制器里嵌套的一个`record`描述，字段上的注解来自 Bean Validation（5.3.1节的`spring-boot-starter-validation`）：`@NotBlank`要求字符串非空且不全是空白，`@NotNull`要求字段存在，`@Pattern`限定取值。控制器参数上的`@Valid`触发检查，不通过时框架抛出`MethodArgumentNotValidException`，控制器方法根本不会执行。
 
-**清单 5.31  补录接口的请求体与控制器（书中示例，配套工程未包含）**
+**清单 5.31  ReadingWriteController：补录接口的请求体与控制器（配套工程，节选）**
 
 ```java
-public record CreateReadingRequest(
-        @NotBlank String assetId,
-        @NotNull OffsetDateTime occurredAt,
-        BigDecimal value,          // 缺测时为 null；能不能为空取决于 quality，由服务层判断
-        @NotBlank String unit,
-        @NotNull @Pattern(regexp = "valid|suspect|missing") String quality) {}
-
 @RestController
 @RequestMapping("/api/readings")
 public class ReadingWriteController {
+    public record CreateReadingRequest(
+            @NotBlank String assetId,
+            @NotNull OffsetDateTime occurredAt,
+            BigDecimal value,          // 缺测时为 null；能不能为空取决于 quality，由服务层判断
+            @NotBlank String unit,
+            @NotNull @Pattern(regexp = "valid|suspect|missing") String quality) {}
+
     private final ManualReadingService service;
     public ReadingWriteController(ManualReadingService service) { this.service = service; }
 
@@ -1181,9 +1181,9 @@ public class ReadingWriteController {
 
 **第二层：服务层的规则**
 
-清单5.32的`record`方法依次检查几条规则，全部通过才写入。
+清单5.32是配套工程的`ManualReadingService.java`，`record`方法依次检查几条规则，全部通过才写入。它用到的`findByEventId`是在5.4.1节的`ReadingRepository`里新增的一个派生查询。
 
-**清单 5.32  ManualReadingService.record：先查规则，再幂等写入（书中示例）**
+**清单 5.32  ManualReadingService.record：先查规则，再幂等写入（配套工程）**
 
 ```java
 @Service
@@ -1263,6 +1263,12 @@ public class ApiExceptionHandler {
         return body(HttpStatus.NOT_FOUND, "ASSET_NOT_FOUND", e.getMessage(), null);
     }
 
+    /** 服务层的业务规则（5.5.1 节 ManualReadingService）：错误码和出错字段由异常自己带出。 */
+    @ExceptionHandler(ManualReadingService.RuleViolation.class)
+    ResponseEntity<Map<String, String>> ruleViolation(ManualReadingService.RuleViolation e) {
+        return body(HttpStatus.BAD_REQUEST, e.code, e.getMessage(), e.field);
+    }
+
     /** from/to 写成不合法的时间格式，或把 + 号原样放进地址栏时走这里。 */
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     ResponseEntity<Map<String, String>> typeMismatch(MethodArgumentTypeMismatchException e) {
@@ -1276,13 +1282,27 @@ public class ApiExceptionHandler {
                 "缺少必填参数 " + e.getParameterName(), e.getParameterName());
     }
 
+    /** 这三种注解表达的都是“字段必须有”，它们的失败按契约算 FIELD_REQUIRED。 */
+    private static final Set<String> PRESENCE_CONSTRAINTS = Set.of("NotNull", "NotBlank", "NotEmpty");
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     ResponseEntity<Map<String, String>> invalid(MethodArgumentNotValidException e) {
-        String field = e.getBindingResult().getFieldErrors().stream()
-                .map(org.springframework.validation.FieldError::getField).findFirst().orElse(null);
-        return body(HttpStatus.BAD_REQUEST, "VALIDATION_ERROR", "请求参数无效", field);
+        FieldError first = e.getBindingResult().getFieldError();
+        if (first == null) {
+            return body(HttpStatus.BAD_REQUEST, "VALIDATION_ERROR", "请求参数无效", null);
+        }
+        if (PRESENCE_CONSTRAINTS.contains(first.getCode())) {
+            return body(HttpStatus.BAD_REQUEST, "FIELD_REQUIRED",
+                    "缺少必填字段 " + first.getField(), first.getField());
+        }
+        return body(HttpStatus.BAD_REQUEST, "VALIDATION_ERROR", "请求参数无效", first.getField());
     }
-    // ……INVALID_RANGE、路径不存在、ResponseStatusException 三个处理器见配套文件
+    // ……READING_EXISTS、INVALID_RANGE、缺请求头、路径不存在、ResponseStatusException 的处理器见配套文件
+
+    @ExceptionHandler(AccessDeniedException.class)
+    ResponseEntity<Map<String, String>> accessDenied(AccessDeniedException e) {
+        return body(HttpStatus.FORBIDDEN, "FORBIDDEN", "当前角色无权执行该操作", null);
+    }
 
     /** 兜底：技术细节留在服务端日志，响应体只给稳定错误码。 */
     @ExceptionHandler(Exception.class)
@@ -1294,17 +1314,15 @@ public class ApiExceptionHandler {
 }
 ```
 
-`typeMismatch`解决了5.2.2节留下的问题：地址栏里的加号被解码成空格、时间解析失败时，应答不再是 Spring 默认的错误页，而是`INVALID_PARAMETER`和出错的参数名。`invalid`处理上一小节`@Valid`检查的失败；契约的`field`是单数，这里取第一个出错的字段，页面据此把光标定位到对应的输入框。最后的兜底处理器接住一切没有预料到的异常：完整的堆栈写进服务端日志，应答里只有`INTERNAL_ERROR`。异常类名、SQL 片段和堆栈不发给客户端，它们对用户没有用处，却会向攻击者透露表结构和所用的框架。日志里可以记对象编码和事件编号，口令和完整令牌不能记。
+`typeMismatch`解决了5.2.2节留下的问题：地址栏里的加号被解码成空格、时间解析失败时，应答不再是 Spring 默认的错误页，而是`INVALID_PARAMETER`和出错的参数名。`invalid`处理上一小节`@Valid`检查的失败。`@NotNull`、`@NotBlank`、`@Pattern`的失败到这里已经汇成同一种异常，但契约把它们分成两类：缺字段是`FIELD_REQUIRED`，字段有值却不合形状是`VALIDATION_ERROR`；教学接口和第8章的核对脚本`closeloop-check.mjs`都按这个约定。区分的依据是`FieldError.getCode()`，它的值就是触发失败的注解名，`NotNull`、`NotBlank`、`NotEmpty`三种算缺字段，其余算形状不对。契约的`field`是单数，这里取第一个出错的字段，页面据此把光标定位到对应的输入框。最后的兜底处理器接住一切没有预料到的异常：完整的堆栈写进服务端日志，应答里只有`INTERNAL_ERROR`。异常类名、SQL 片段和堆栈不发给客户端，它们对用户没有用处，却会向攻击者透露表结构和所用的框架。日志里可以记对象编码和事件编号，口令和完整令牌不能记。
 
-新增一种业务异常，就在这个类里加一个方法。上一小节的`RuleViolation`对应的处理器只有一行：`return body(HttpStatus.BAD_REQUEST, e.code, e.getMessage(), e.field);`，`ReadingExists`照此转成 409 和`READING_EXISTS`。第8章为预警状态冲突添加的 409 处理器（清单8.17）也是这样写的。401 和 403 不经过这里：认证与授权发生在请求到达控制器之前的安全过滤链里，由5.6节的`SecurityConfig`直接写出同样形状的错误体。
+新增一种业务异常，就在这个类里加一个方法。上一小节的`RuleViolation`对应的处理器只有一行，错误码和字段都由异常自己带出；`ReadingExists`照此转成 409 和`READING_EXISTS`。第8章为预警状态冲突添加的 409 处理器（清单8.17）也是这样写的。
+
+401 和 403 要分开看。未登录的请求在到达控制器之前就被安全过滤链拒绝，由5.6节的`SecurityConfig`直接写出同样形状的错误体，不经过这个类。已登录但角色无权的请求则不同：`@PreAuthorize`的检查发生在调用控制器方法的过程中，拒绝时抛出的`AccessDeniedException`和别的异常一样先交给这个类。没有`accessDenied`这个处理器时，它会落进兜底分支，分析员调用只允许值班员调用的接口得到的是 500 而不是 403，`SecurityConfig`里配置的`accessDeniedHandler`也没有机会处理。这一条和`invalid`的两种错误码都由配套的`ReadingWriteControllerTest`验证，5.9.2节讲它的写法。
 
 **与 ProblemDetail 的关系**
 
 Spring 6 内置了`ProblemDetail`类，对应 RFC 9457（前身是 RFC 7807）定义的错误格式，字段是`type`、`title`、`status`、`detail`和`instance`，媒体类型为`application/problem+json`。本书的接口契约（表8.3）约定的是`{code, message, field?}`，第4章的页面、教学接口和后端都已按它实现，所以没有采用`ProblemDetail`。对外公开、需要与第三方系统对接的接口可以考虑使用这个标准格式。
-
-**一处如实记录的差异**
-
-缺少必填项时，错误码应该是`FIELD_REQUIRED`还是`VALIDATION_ERROR`？教学接口对请求体缺字段应答`FIELD_REQUIRED`，第8章的核对脚本`closeloop-check.mjs`也按这个码检查。配套后端的处理器里，缺少查询参数走`missing`，得到`FIELD_REQUIRED`；请求体缺字段走`invalid`，得到的却是`VALIDATION_ERROR`。状态码和`field`两边一致，只有`code`不同。差异出在表示层的异常翻译上，服务层和数据库与它无关：`@NotNull`、`@NotBlank`、`@Pattern`的失败都汇成同一种异常，`invalid`方法没有再细分。要对齐，可以在`invalid`里取出第一个`FieldError`的`getCode()`，值为`NotNull`或`NotBlank`时改用`FIELD_REQUIRED`。第8章把后端接到核对脚本上时会遇到这一项不通过，修正留到那里完成。
 
 **运行与观察**
 
@@ -1312,16 +1330,17 @@ Spring 6 内置了`ProblemDetail`类，对应 RFC 9457（前身是 RFC 7807）�
 
 ### 5.5.3 三层校验与错误码约定
 
-表5.8把前两小节的内容，连同5.4.6节的预警确认，按“在哪一层被拦下”整理在一起。确认预警的请求没有请求体，第一层能出错的只有路径里的编号不是数字；主要的检查在服务层，手段是条件更新；数据库一层则由`warning`表的`CHECK`和外键把关。
+表5.8把前两小节的内容，连同5.4.6节的预警确认，按“在哪一层被拦下”整理在一起。表示层先看权限再看形状：补录接口只对分析员开放，值班员调用得到 403。确认预警的请求没有请求体，形状一层能出错的只有路径里的编号不是数字；主要的检查在服务层，手段是条件更新；数据库一层则由`warning`表的`CHECK`和外键把关。
 
 **表 5.8  补录观测与确认预警：三层校验各自检查什么、怎样应答**
 
-| 层       | 检查的内容                                                         | 失败时抛出                                                   | 状态码与`code`                                                                     |
-|:---------|:-------------------------------------------------------------------|:-------------------------------------------------------------|:-----------------------------------------------------------------------------------|
-| 表示层   | 请求体字段齐全、类型与取值范围；路径和查询参数能解析               | 框架的校验与类型转换异常                                     | 400；`VALIDATION_ERROR`、`INVALID_PARAMETER`、`FIELD_REQUIRED`                     |
-| 服务层   | 对象已登记且在用；单位与台账一致；数值与质量码相容；该时刻尚无观测 | `AssetNotFound``Exception`、`RuleViolation`、`ReadingExists` | 404 `ASSET_NOT_FOUND`；400 `UNIT_MISMATCH`、`VALUE_REQUIRED`；409 `READING_EXISTS` |
-| 服务层   | 预警存在；可评估；当前状态允许这次流转                             | 第8章的`Missing`、`Conflict`                                 | 404 `WARNING_NOT_FOUND`；409 `NOT_EVALUABLE`、`ILLEGAL_TRANSITION`                 |
-| 持久化层 | 主键、唯一索引、外键、`CHECK`                                      | `DataIntegrity``ViolationException`                          | 重复事件：忽略或返回原记录；其余落到兜底的 500，说明前两层漏了检查                 |
+| 层       | 检查的内容                                                         | 失败时抛出                                                   | 状态码与`code`                                                                                                       |
+|:---------|:-------------------------------------------------------------------|:-------------------------------------------------------------|:---------------------------------------------------------------------------------------------------------------------|
+| 表示层   | 已登录的角色有权调用这个方法                                       | `@PreAuthorize`抛出的`AccessDenied``Exception`               | 403 `FORBIDDEN`（未登录的 401 在过滤链里应答，不到这一层）                                                           |
+| 表示层   | 请求体字段齐全、类型与取值范围；路径和查询参数、请求头能解析       | 框架的校验与类型转换异常                                     | 400；缺字段、缺参数、缺请求头为`FIELD_REQUIRED`，取值不合形状为`VALIDATION_ERROR`，参数无法解析为`INVALID_PARAMETER` |
+| 服务层   | 对象已登记且在用；单位与台账一致；数值与质量码相容；该时刻尚无观测 | `AssetNotFound``Exception`、`RuleViolation`、`ReadingExists` | 404 `ASSET_NOT_FOUND`；400 `UNIT_MISMATCH`、`VALUE_REQUIRED`；409 `READING_EXISTS`                                   |
+| 服务层   | 预警存在；可评估；当前状态允许这次流转                             | 第8章的`Missing`、`Conflict`                                 | 404 `WARNING_NOT_FOUND`；409 `NOT_EVALUABLE`、`ILLEGAL_TRANSITION`                                                   |
+| 持久化层 | 主键、唯一索引、外键、`CHECK`                                      | `DataIntegrity``ViolationException`                          | 重复事件：忽略或返回原记录；其余落到兜底的 500，说明前两层漏了检查                                                   |
 
 三层面向的入口不同。HTTP 请求三层都经过；消息消费者从服务层进入；数据修复脚本直接面对数据库。哪一层都不能假设前一层一定执行过。
 
@@ -1351,7 +1370,7 @@ DTO 把接口字段与表结构隔开（5.4.1节），它也是单位和时间�
 
 **本节层次**
 
-指导实践：5.6.1、5.6.3、5.6.5；拓展：5.6.2、5.6.4、5.6.6、5.6.7、5.6.8。
+核心：5.6.1；指导实践：5.6.4、5.6.6；拓展：5.6.2、5.6.3、5.6.5、5.6.7、5.6.8、5.6.9。
 
 **进入本节所需知识**
 
@@ -1359,7 +1378,9 @@ DTO 把接口字段与表结构隔开（5.4.1节），它也是单位和时间�
 
 认证回答“用户是谁”，授权回答“允许做什么”。本节用 JWT 做认证凭据。JWT（JSON Web Token）是一段带签名的字符串，里面写着用户标识、权限和有效期；服务端在登录成功时签发它，浏览器之后的每个请求都在`Authorization: Bearer <令牌>`头里带上它，服务端验证签名和有效期就知道请求者是谁，不必在内存里保存会话。Spring Security 6 把这些检查组织成一条过滤器链：请求到达控制器之前依次经过若干过滤器，每个过滤器只做一件事，任何一个拒绝了，请求就到不了控制器。这条链用 Lambda 风格的配置描述，方法级授权由`@EnableMethodSecurity`打开。
 
-配套工程实现的是这套机制的最小版本：`SecurityConfig`配置过滤器链和三个教学账号，`JwtService`签发和解析访问令牌，`JwtAuthenticationFilter`把令牌变成认证对象，`AuthController`提供登录端点；三个账号分别只有 DUTY、ANALYST、OPS 一种权限，令牌只有访问令牌一种，没有刷新端点。`lesson56/RefreshTokenVerifier`是刷新令牌的校验器，带一个单元测试。本节前半按这个最小版本讲过滤器链、令牌解析和方法授权；后半的细粒度权限枚举`WaterSystemPermission`、刷新令牌、撤销与轮换是在它之上的扩展写法，配套工程没有实现，清单只给出关键部分。
+配套工程实现的是这套机制的最小版本，本章也只要求掌握这个版本：`SecurityConfig`配置过滤器链和三个教学账号，`JwtService`签发和解析访问令牌，`JwtAuthenticationFilter`把令牌变成认证对象，`AuthController`提供登录端点；三个账号分别只有 DUTY、ANALYST、OPS 一种权限，令牌只有访问令牌一种，没有刷新端点，方法上用`@PreAuthorize`按这三个权限名放行。5.6.1节按这个最小版本讲过滤器链、令牌解析和方法授权，是本节的核心。5.6.2节起的细粒度权限枚举`WaterSystemPermission`、刷新令牌、撤销与轮换、会话迁移，是在它之上的工程扩展：配套工程没有实现，课程也不要求实现，清单只给出关键部分，供课程设计或将来接手真实系统时参考。`lesson56/RefreshTokenVerifier`是其中刷新令牌校验器的一个可运行片段，带一个单元测试。
+
+### 5.6.1 过滤器链、令牌解析与方法授权
 
 图5.5把一次受保护请求经过过滤器链的决策点展开。认证过滤器只负责从 Bearer 令牌得到可信主体和权限，授权规则再决定该主体能否访问具体方法；两者分开后，过期令牌得到 401，权限不足得到 403，业务方法不必自己解析令牌。图中两个“拒绝”分支说明：过滤器解析失败时不能当作匿名用户继续执行写操作，审计日志要记下拒绝原因和请求追踪 ID。
 
@@ -1409,7 +1430,7 @@ class SecurityConfig {
 }
 ```
 
-清单第一行关闭了 CSRF 防护。CSRF（跨站请求伪造）指别的网站诱导用户的浏览器向本平台发请求，浏览器会自动附上本平台的 Cookie，服务端误以为是用户本人在操作；防护办法是要求请求带一个别的网站拿不到的令牌。本例的 API 只从 Authorization 头读取 Bearer 令牌，别的网站的页面拿不到这个头，攻击不成立，所以可以关闭；改用 Cookie 保存凭据时要重新打开它，见5.6.4节。清单5.35的过滤器只做一件事：把`Bearer`头里的令牌解析成认证对象放进`SecurityContext`，解析失败就清空上下文继续放行，由后面的授权规则返回 401，过滤器自己不写响应体。清单开头的`WaterSystemPermission`枚举是扩展写法：权限按“能做什么”命名，全部写在一个枚举里，名称和取值就不会在各处漂移。
+清单第一行关闭了 CSRF 防护。CSRF（跨站请求伪造）指别的网站诱导用户的浏览器向本平台发请求，浏览器会自动附上本平台的 Cookie，服务端误以为是用户本人在操作；防护办法是要求请求带一个别的网站拿不到的令牌。本例的 API 只从 Authorization 头读取 Bearer 令牌，别的网站的页面拿不到这个头，攻击不成立，所以可以关闭；改用 Cookie 保存凭据时要重新打开它，见5.6.5节。清单5.35的过滤器只做一件事：把`Bearer`头里的令牌解析成认证对象放进`SecurityContext`，解析失败就清空上下文继续放行，由后面的授权规则返回 401，过滤器自己不写响应体。清单开头的`WaterSystemPermission`枚举是扩展写法：权限按“能做什么”命名，全部写在一个枚举里，名称和取值就不会在各处漂移。
 
 **清单 5.35  JWT认证过滤器**
 
@@ -1683,7 +1704,7 @@ class LoginController {
 }
 ```
 
-数据库里只保存密码的哈希，比对由`PasswordEncoder`完成。登录失败统一回答“用户名或密码错误”，不区分是用户名不存在还是密码错了：区分了，攻击者就能逐个试出哪些用户名存在。登录端点还要限制调用频率、记录失败次数和审计事件，5.6.3节展开；密码重置、二次认证和设备绑定由独立的身份系统负责，不是往 JWT 里多塞几个字段能解决的。刷新端点的检查比登录更容易写漏，清单5.41把三项必查列全：签名、`type`是否为`refresh`、旧 jti 是否已在轮换中作废。
+数据库里只保存密码的哈希，比对由`PasswordEncoder`完成。登录失败统一回答“用户名或密码错误”，不区分是用户名不存在还是密码错了：区分了，攻击者就能逐个试出哪些用户名存在。登录端点还要限制调用频率、记录失败次数和审计事件，5.6.4节展开；密码重置、二次认证和设备绑定由独立的身份系统负责，不是往 JWT 里多塞几个字段能解决的。刷新端点的检查比登录更容易写漏，清单5.41把三项必查列全：签名、`type`是否为`refresh`、旧 jti 是否已在轮换中作废。
 
 **清单 5.41  刷新令牌的签名、类型和轮换检查**
 
@@ -1773,7 +1794,7 @@ class RedisTokenRevocationService implements TokenRevocationService {
 }
 ```
 
-JWT 签出以后服务端不保存它，到期之前一直有效。用户注销或改密后要让令牌提前失效，只能把它的 jti 记进一份“已撤销”名单，过滤器每次都查一下，这就是令牌撤销。清单5.42把名单放在 Redis 里，每条记录的 TTL 等于原令牌的剩余寿命，令牌到期后记录自动消失，名单不会无限增长。另一种做法是给每个用户记一个令牌版本号：注销或改密时版本加一，过滤器比较令牌里的版本和账户当前版本。jti 名单适合撤销单个设备，版本号适合撤销用户的全部会话，两者可以并用。Redis 连不上时按5.6.6节的策略处理：写操作拒绝，只读请求可以放行；不能把“查不到”当作“没有撤销”。
+JWT 签出以后服务端不保存它，到期之前一直有效。用户注销或改密后要让令牌提前失效，只能把它的 jti 记进一份“已撤销”名单，过滤器每次都查一下，这就是令牌撤销。清单5.42把名单放在 Redis 里，每条记录的 TTL 等于原令牌的剩余寿命，令牌到期后记录自动消失，名单不会无限增长。另一种做法是给每个用户记一个令牌版本号：注销或改密时版本加一，过滤器比较令牌里的版本和账户当前版本。jti 名单适合撤销单个设备，版本号适合撤销用户的全部会话，两者可以并用。Redis 连不上时按5.6.7节的策略处理：写操作拒绝，只读请求可以放行；不能把“查不到”当作“没有撤销”。
 
 过滤器链解决“是谁”，方法级注解解决“能做什么”。清单5.43用`@PreAuthorize`把权限要求写在控制器方法上，权限名就是配套`SecurityConfig`里三个教学账号的 DUTY、ANALYST、OPS。清单后半是跨域配置。CORS（跨源资源共享）是浏览器的一条规则：页面向别的源（协议、域名或端口有一项不同）发请求时，浏览器先问对方服务器是否允许这个源读取应答，服务器用响应头回答；开发时 Vite 在 5173 端口、后端在 8080 端口，就是这种情况。跨域策略集中写在一处，不散落在各个控制器里。
 
@@ -1812,25 +1833,25 @@ class CorsConfig {
 
 配套工程只到这里：三个账号、三种权限、一种令牌，用`smoke.sh`或第4章的页面就能看到 401 和 403 的区别。认证与授权的测试写法见5.9.2节，`MockMvc`配合`@WithMockUser`模拟登录身份，覆盖合法令牌、无令牌和权限不足三种情形。后面的扩展写法各自还要补测试：签名错误、issuer 错误、type 错误、过期令牌、撤销 jti，以及旧 refresh jti 第二次使用被拒绝；测试用随机生成的密钥和固定时钟，不把真实密钥写进源码。
 
-### 5.6.1 威胁模型与认证边界
+### 5.6.2 威胁模型与认证边界
 
 安全设计先列出要保护的东西和攻击者可能走的路，这份清单叫威胁模型。案例水库平台要保护值班员身份、测站写入权限、预警处置记录、设备上报密钥和审计日志；攻击者可能伪造 Bearer 令牌、重放偷来的刷新令牌、利用错误信息的差异试探账号、用跨源页面诱导浏览器发请求，或者在日志和备份里翻找长期有效的密钥。JWT 只回答“令牌是谁签的、内容有没有被改”；令牌被复制后的重放、传输加密、账户停用和数据库权限，都要靠别的机制。
 
 访问令牌的有效期以泄露后可接受的暴露时间为上限，配套工程取 1800 秒；刷新令牌的寿命由设备风险、撤销能力和换班流程决定。有效期长，泄露后能被利用的时间就长；有效期短，客户端刷新得频繁，网络不稳时更容易被登出。取值时把网关超时、Redis 可用性、时钟偏差和移动网络重连一起考虑，写进配置和安全评审记录，不写成代码里的常数。
 
-### 5.6.2 密钥生命周期与配置管理
+### 5.6.3 密钥生命周期与配置管理
 
 签名用的 HMAC 密钥由密钥管理器或部署平台的机密变量提供，配套工程用环境变量`JWT_SECRET`或`JWT_SECRET_FILE`注入（8.6.1节），代码里那个默认值只供课堂演示。应用启动时检查密钥能否 Base64 解码、长度是否够算法要求、issuer 是否为空，有一项不对就拒绝启动，比在第一个登录请求上失败好定位。日志只输出密钥版本和摘要，不输出密钥本身、完整 JWT 或配置对象的`toString`。
 
 更换密钥分四步：生成新密钥并登记版本；验签同时接受新旧两把（按令牌头部的`kid`选择），签发只用新的；观察认证失败率，撤销异常版本；等最长的刷新令牌寿命加时钟容差过去以后，删除旧密钥。令牌没有`kid`时，验签只能按时间窗口逐个尝试候选密钥，下一次签发就把版本标识补上。
 
-### 5.6.3 密码、账户与登录防护
+### 5.6.4 密码、账户与登录防护
 
 密码不存明文，存的是 Spring Security 的`PasswordEncoder`算出的哈希。配套工程通过`PasswordEncoderFactories`类的`createDelegatingPasswordEncoder()`方法取得编码器，默认算法是 BCrypt，哈希值前面带着算法标识，将来换算法时旧记录仍能比对。数据库只保存哈希、算法版本、修改时间和失败计数，不保存明文，也不保存可以解回明文的密文。登录成功后失败计数清零，并记录设备和追踪 ID；连续失败后逐次延长等待时间或临时锁定。运维员重置密码时把账户的令牌版本加一，这个用户已签出的访问令牌和刷新令牌就全部失效。
 
 认证失败的对外表现要一致。用户名不存在、密码错误、账户停用和二次认证失败都返回同样的 401 描述，具体原因只写进审计；资源是否存在的检查放在权限判断之后，否则没有权限的用户可以从 404 和 403 的差别猜出哪些测站编号存在。审计事件记录主体、客户端、时间、结果码和`jti`，不记录密码、Authorization 头或完整刷新令牌。
 
-### 5.6.4 CSRF、CORS 与浏览器存储
+### 5.6.5 CSRF、CORS 与浏览器存储
 
 本章过滤器链关闭 CSRF，前提是 API 只从 Authorization 头读令牌，浏览器不会自动附带它。改用 HttpOnly Cookie 保存凭据以后，浏览器对每个请求都会自动带上 Cookie，别的网站的页面也能借用户的浏览器发出带 Cookie 的请求，这时就要打开 CSRF 令牌或采用双重提交方案。HttpOnly 只是让脚本读不到 Cookie，挡不住跨站请求本身。Cookie 的 SameSite、Secure、过期时间和域路径与部署拓扑一起定。
 
@@ -1838,25 +1859,25 @@ CORS 预检是浏览器在真正发请求之前先发一个`OPTIONS`请求问服
 
 令牌放在浏览器的哪里，各有代价。放在内存里最安全，但页面一刷新就没了；`sessionStorage`随标签页存在，同源脚本能读；`localStorage`能持久登录，页面一旦被注入脚本（XSS），令牌就长期暴露。要求更高的系统把刷新令牌放进受保护的 Cookie，访问令牌放内存，再配合内容安全策略、依赖审计和严格的 DOM 写入规则。不管选哪种，网络日志、错误监控和浏览器历史里都不该有令牌。
 
-### 5.6.5 权限建模与最小授权
+### 5.6.6 权限建模与最小授权
 
 配套工程把角色名直接当权限用：DUTY、ANALYST、OPS 各对应一个账号。系统变大以后，权限按“能做什么”命名比按角色命名稳定：`STATION_READ`允许读测站，`READING_WRITE`允许写观测，`ALERT_ACKNOWLEDGE`允许确认预警；值班员、专业分析员、审批人和运维员是角色，角色拥有哪些权限由服务端配置决定，调整时改配置，不改代码。资源范围要单独检查：有写观测的权限，不等于能改所有工程的观测或归档记录。
 
 方法级注解适合粗粒度的“能不能做这类事”，测站归属、时间窗口和状态迁移这些细粒度判断放在应用服务里。授权失败要在任何写入之前发生，先保存实体再检查权限，拒绝了也留下了副作用；批量接口逐条检查资源范围，一条请求不能顺带改到别的测站。增加权限向后兼容，删除权限或改变含义要发布新版本，审计里记下当时用的授权策略版本。
 
-### 5.6.6 撤销、重放与故障降级
+### 5.6.7 撤销、重放与故障降级
 
 撤销名单在 Redis 里，Redis 连不上时怎么办要事先定好。写入、改密和预警处置这类高风险操作拒绝并返回 503；读取公开状态可以用短时间的缓存，应答里标明缓存时间。名单记录带 TTL，至少覆盖令牌剩余寿命；用户版本号在数据库事务里更新，缓存过期后自然一致。撤销接口本身也要认证、幂等和审计，否则任何人提交一个 jti 就能把别人踢下线。
 
 重放检测不只用于刷新令牌，一次性登录链接、密码重置链接和设备注册码都是同一类问题：服务端保存随机值的哈希、主体、用途、首次使用时间和过期时间，第一次使用时原子地标记已用，第二次使用返回统一的错误。HTTP 重试和消息重投带请求 ID，按 ID 判断重复；按到达时间猜不可靠。同一个刷新会话族出现异常重放时，撤销这个用户的全部会话并通知运维员复核。
 
-### 5.6.7 认证链路的可观测性与演练
+### 5.6.8 认证链路的可观测性与演练
 
 认证链路要观察的指标有 401/403 的比率、签名失败次数、issuer 或 type 不匹配次数、刷新成功率、撤销查询延迟、Redis 错误、密钥版本分布和账户锁定次数。令牌解析失败的原因分类只进指标，不返回给客户端：签名错、过期、issuer 不符、type 错和已撤销分别计数，应答统一是 401；这样攻击者得不到试错反馈，运维员却能从指标看出是密钥配错了、时钟漂了还是有人在重放。指标标签不用完整用户名、令牌或原始 URL，否则监控系统自己就成了泄露点。日志用结构化字段记`traceId`、主体哈希、jti 哈希、权限结果和策略版本；审计日志单独存放，另设保留期和访问权限。
 
 演练要覆盖密钥配错、Redis 故障、旧密钥退役过早、时钟漂移、刷新令牌重放和网关改写错误码。每次记录发现用了多久、拒绝了多少请求、怎样恢复、哪些请求类型没覆盖到；恢复后检查旧令牌是否还能访问、撤销名单有没有异常增长、缓存里有没有过期的权限。接口契约里写明 Authorization 头的大小上限、令牌格式、401/403/429/503 的应答结构和重试建议。限流分三层：网关做基础限流，应用服务做账户和 jti 级别的风控，数据库靠唯一约束保证审计不重复，每层都不假定别的层已经做了。
 
-### 5.6.8 令牌失效与会话迁移
+### 5.6.9 令牌失效与会话迁移
 
 退出登录要同时处理浏览器和服务端两边。客户端清掉内存里的访问令牌，调用注销接口撤销当前刷新令牌的 jti，之后收到 401 就不再自动重试，否则失败请求会循环下去。服务端的注销接口先核对这个刷新会话属于当前用户和设备，再写撤销记录；运维员强制某人下线，则把账户版本加一并记下原因。一个用户在多台设备上登录时，注销一台不影响其他台，除非用户明确选择“退出全部会话”。
 
@@ -2338,16 +2359,40 @@ class AssetControllerTest {
 
 `@WithMockUser(authorities = "DUTY")`让这一次请求以“已登录、拥有 DUTY 权限”的身份执行，不必真的签发令牌；权限名与配套`SecurityConfig`中教学账号的权限一致。参数错误的测试多了一句`verifyNoInteractions(readings)`，它断言服务层没有被调用：被拒绝的请求不应该留下任何副作用，只断言状态码发现不了“先查了库、再报错”这种写法。断言错误码而不断言`message`的文字，文案调整时测试就不必跟着改。
 
-**一个会遇到的失败**
+**配套工程里的权限测试**
 
-运行这组测试，留意`userWithoutAuthorityIs403`的结果。如果应答是 500 而不是 403，原因在5.5.2节的兜底处理器：`@PreAuthorize`拒绝访问时抛出的`AccessDeniedException`发生在调用控制器方法的过程中，Spring MVC 先在`@ExceptionHandler`里找能处理它的方法，`@ExceptionHandler(Exception.class)`什么异常都接，于是把它翻译成了`INTERNAL_ERROR`，5.6节配置的`accessDeniedHandler`没有机会处理。配套工程的三个教学账号对现有的三个查询接口都有权限，这条路径平时走不到；第8章加上只允许值班员调用的确认接口以后，分析员去调用就会遇到。修正办法是在`ApiExceptionHandler`里为这种异常单独加一个处理器，把它原样抛出，交还给安全过滤链，见清单5.53。未登录的 401 不受影响，因为匿名请求在到达控制器之前就被过滤链拒绝了。
+清单5.52的`userWithoutAuthorityIs403`走的是“已登录但没有权限”这条路，它依赖5.5.2节`ApiExceptionHandler`里的`accessDenied`处理器：`@PreAuthorize`拒绝访问时抛出的`AccessDeniedException`发生在调用控制器方法的过程中，Spring MVC 先在`@ExceptionHandler`里找能处理它的方法；没有专门的处理器，`@ExceptionHandler(Exception.class)`会把它接住并翻译成 500 和`INTERNAL_ERROR`。配套工程的三个查询接口对三种角色都开放，这条路径在它们身上走不到；5.5.1节的补录接口只对分析员开放，值班员去调用就会遇到。配套的`ReadingWriteControllerTest`按清单5.53的写法覆盖了这一条和5.5.2节两种校验错误码：值班员补录得到 403 与`FORBIDDEN`，缺`assetId`得到`FIELD_REQUIRED`，质量码写成`bogus`得到`VALIDATION_ERROR`，每个失败用例末尾的`verifyNoInteractions(service)`断言服务层没有被碰过。未登录的 401 不经过这个类，匿名请求在到达控制器之前就被过滤链拒绝了。
 
-**清单 5.53  授权失败交还给安全过滤链处理（书中示例）**
+**清单 5.53  ReadingWriteControllerTest：权限不足必须是 403 而不是 500（配套工程，节选）**
 
 ```java
-// ApiExceptionHandler.java 中新增；AccessDeniedException 来自 org.springframework.security.access
-    @ExceptionHandler(AccessDeniedException.class)
-    void accessDenied(AccessDeniedException e) { throw e; }
+@WebMvcTest(ReadingWriteController.class)
+@Import(SecurityConfig.class)
+class ReadingWriteControllerTest {
+    @Autowired MockMvc mockMvc;
+    @MockBean ManualReadingService service;
+
+    private static final String KEY = "manual-pz07-20260701-0001";
+
+    private static MockHttpServletRequestBuilder postReading(String json) {
+        return post("/api/readings")
+                .header("Idempotency-Key", KEY)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json);
+    }
+
+    @Test
+    @WithMockUser(authorities = "DUTY")
+    void userWithoutAuthorityIs403NotInternalError() throws Exception {
+        mockMvc.perform(postReading("""
+                {"assetId":"DAM-A-PZ-07","occurredAt":"2026-07-01T08:00:00+08:00",
+                 "value":185.091,"unit":"kPa","quality":"valid"}
+                """))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("FORBIDDEN"));
+        verifyNoInteractions(service);
+    }
+}
 ```
 
 **测试数据与质量门禁**

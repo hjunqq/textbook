@@ -961,7 +961,7 @@ ResponseEntity<Map<String, String>> missingResource(WarningWorkflowService.Missi
 
 **一个会遇到的失败**
 
-“派单缺字段返回400且指出字段”这一项多半不通过。脚本期望错误码是`FIELD_REQUIRED`；而`@Valid`校验失败抛出的是`MethodArgumentNotValidException`，5.5节的统一处理器把它转成了`VALIDATION_ERROR`。状态码和`field`都对，只有`code`不同。处理办法有两种：在处理器里对`@NotNull`、`@NotBlank`两类失败改用`FIELD_REQUIRED`；或者与前端约定两种错误码都按“缺字段”显示。选一种，写明理由，再跑一次脚本确认。
+“派单缺字段返回400且指出字段”这一项检查的是错误码`FIELD_REQUIRED`。`@Valid`校验失败抛出的是`MethodArgumentNotValidException`，缺字段和字段取值不合形状都汇成这一种异常；5.5.2节的统一处理器按`FieldError.getCode()`把它们分开，`NotNull`、`NotBlank`、`NotEmpty`三种失败应答`FIELD_REQUIRED`，其余应答`VALIDATION_ERROR`。脚本发出的请求体只有`warningId`和`ownerRole`，缺的是`dueAt`和`action`，清单8.16的`CreateWorkOrder`给它们写的正是`@NotNull`和`@NotBlank`，所以得到`FIELD_REQUIRED`。要是把必填改用`@Size(min = 1)`之类的形状约束来表达，缺字段会被归到`VALIDATION_ERROR`，这一项就不通过：状态码和`field`都对而只有`code`不同时，先看注解用的是哪一种。
 
 **自测**
 
@@ -1975,7 +1975,7 @@ ROTATION: {password_days: 90, signing_key_overlap_hours: 24}
 VALIDATION: {require_non_empty: [DB_USER, DB_NAME], reject_default_password: true}
 ```
 
-换数据库口令时，先建新凭据并验证能连上，再撤销旧的。换 JWT 密钥时留一段新旧密钥同时有效的重叠期，处理中的请求才能正常结束（5.6.2节）。变量缺失、还在用示例口令、镜像用`latest`标签，这三种情况发布流水线直接失败。回滚之前先看数据库迁移是否向后兼容，能兼容才回退无状态的服务。
+换数据库口令时，先建新凭据并验证能连上，再撤销旧的。换 JWT 密钥时留一段新旧密钥同时有效的重叠期，处理中的请求才能正常结束（5.6.3节）。变量缺失、还在用示例口令、镜像用`latest`标签，这三种情况发布流水线直接失败。回滚之前先看数据库迁移是否向后兼容，能兼容才回退无状态的服务。
 
 #### 8.6.1.3 Nginx 反向代理与静态资源
 

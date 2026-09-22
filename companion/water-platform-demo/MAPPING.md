@@ -7,7 +7,7 @@
 | v0 | 起点 | 空骨架 | 仓库初始结构；第1章的 S0 演示记录见 S0-demo-record.md（由 teaching-api/record-demo.mjs 实录生成） |
 | v1 | 第4章 | 登录+只读监测页 | frontend/ 全部；S1 阶段页 lesson44.html + lesson44-detail.html 不依赖后端；S2 阶段页 lesson45.html 只靠 teaching-api 运行 |
 | v2 | 第5章 | JWT认证+观测API | S3 起点 backend/src/main/java/edu/example/lesson52/（单类、无库、无认证）；S3 中点 edu/example/lesson54/（复用 qingyuan 包的实体、Repository、服务与控制器，接 PostgreSQL、无认证）；S3 终点 backend/ 全部 |
-| v3 | 第6章 | 三维场景页 | lesson61.html 为起点（坝体长方体 + 28 测点绑定）；GLTF 模型与 GIS 集成为课程实现 |
+| v3 | 第6章 | 三维场景页 | lesson61.html 为起点（坝体长方体 + 28 测点绑定）；public/models/dam.glb 为 6.1.4 教学模型；GIS 集成为课程实现 |
 | v4 | 第7章 | 曲线与三维联动 | S5 阶段页 lesson74.html（拾取→曲线→高亮双向联动），依赖 S3 与 S4 |
 | v5 | 第8章核心篇 | 质量检查+预警+工单+部署 | S6：classify.js（定级）+ 教学接口的 ack/工单端点 + closeloop-check.mjs（闭环核对）；db/、ReadingConsumer、compose、smoke.sh 骨架 |
 
@@ -28,6 +28,7 @@
 | frontend/lesson45.html + src/lesson45/*.js | 4.5 | S2 阶段页：detail.js（清单 4.5.2）、state.js（4.5.3）、controller.js（4.5.4 故障单元） |
 | frontend/tests/lesson45.test.js | 4.5.4 / 4.5.8 | 竞态覆盖的自动化验证（先发请求被取消、最终页面属于后点击对象） |
 | frontend/lesson61.html + src/lesson61/*.js | 6.1.1 / 6.1.5 | S4 阶段起点：first-scene.js（清单 6.1 首个场景）、bind-assets.js（对象绑定），坐标取 public/datasets/stations.json |
+| frontend/public/models/generate-dam-glb.py → dam.glb | 6.1.4 | 教学坝体 GLB（表 tab:ch06-teaching-geometry 尺寸，米、+Y 向上、底面 y=0）；`--units mm --z-up` 生成触发单位/轴向检查的变体；tests/lesson61-dam-glb.test.js 用 GLTFLoader 解析并重放三项检查 |
 | frontend/src/utils/auth.js | 4.5 | TOKEN_KEY 单一契约 |
 | frontend/src/utils/request.js | 4.5 | 令牌注入、401 分流（认证端点豁免） |
 | frontend/src/utils/readings.js | 7.2 | 缺测断线、时间窗校验（纯函数，可测试） |

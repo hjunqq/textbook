@@ -1,10 +1,10 @@
 {
-  "package": "R10-05",
-  "captureTime": "2026-09-12T05:07:49.052Z",
-  "sourceCommit": "c99f4b86c0fe3850a729524b58af476de7ff61ea",
+  "package": "R10-05（S4/S5 于 R11 重拍）",
+  "captureTime": "2026-09-22T16:25:45.820Z",
+  "sourceCommit": "991f5342fd1e5cd33039513cf58af283d38c2b6d",
   "sourceHashes": {
-    "companion/illustrations/runtime/capture.cjs": "ef1b8359d5fc7eb77b7cff71bdfdd2ce80a114857238cbeb362848d0e0f08412",
-    "companion/illustrations/runtime/scene-display.cjs": "9e10666641584260ac15db1ca3c9c1543a8119d5eb98fd2381a4b1b97eec7b25",
+    "companion/illustrations/runtime/capture.cjs": "ca32499bb057fbf4f28cb17416e6f6faf2e5f0ba267f11b6de54d0cdf771a1f3",
+    "companion/illustrations/runtime/scene-display.cjs": "81296747090ced4f7d045729bb75add08b9983275a3a512ee5ddbbdad3245411",
     "companion/water-platform-demo/teaching-api/server.mjs": "27869474e1255aed3f0a07d306320901d110989abc4e2bf707ade83be93625f7",
     "companion/water-platform-demo/frontend/src/lesson45/detail.js": "e863e3fb8a9f92465b215606ee162b9fc7790317311242a25fdf265b1b386143",
     "companion/water-platform-demo/frontend/src/lesson45/state.js": "85b0355041743e7e20feca414a4c14083f9d6aa5210723265d73b7120b0f9ee7",
@@ -14,7 +14,7 @@
     "companion/water-platform-demo/frontend/src/lesson74/series-controller.js": "ae30c75ab29a1e47332a8887d3f61813db119368657430df0688b071d74aca89",
     "companion/water-platform-demo/frontend/src/utils/readings.js": "b70430e5bf9b6c0b601b0035f719a3b82cf21db5402b6a134bfb8022e9646c32",
     "companion/water-platform-demo/frontend/src/lesson44/assets.js": "f7b08dd35be9c59dcb7648ef9e33545abfba75ed4f5062e7e37220ed34845b61",
-    "companion/datasets/stations.csv": "64c2ae2d77e910cc85ca1a0723739663a5ba8d130502098d078cc40b0e0b96b6",
+    "companion/datasets/stations.csv": "d43db7eb1d443c0ce8f7e2caa8a99ca03cc905fac53d16783291521ffec700bc",
     "companion/datasets/water_level.csv": "9af3e648cfd5a42a99ac1a6ea28a898ce7ae470903fa3cb304f680463a88d4eb",
     "companion/datasets/warnings.json": "c615aa383264d1b1bf3f738b254814c029a0277cb79ec74725863fedbac0a24c"
   },
@@ -23,16 +23,17 @@
     "teachingApi": "node teaching-api/server.mjs 18114",
     "vite": "Vite createServer, port 5194, VITE_PROXY_TARGET=http://127.0.0.1:18114"
   },
-  "browser": "Microsoft Edge / Playwright, headless, deviceScaleFactor=2",
-  "browserExecutable": "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe",
+  "browser": "Chromium / Playwright, headless, deviceScaleFactor=2",
+  "browserExecutable": "/opt/pw-browsers/chromium-1194/chrome-linux/chrome",
   "notes": [
     "所有图片为真实浏览器运行结果；无图像后期绘制或数值替换。",
     "标注教学查看器的页面为采集专用fixture，调用实际配套模块或实际教学API；不是配套原页面或浏览器DevTools截图。",
     "请求等待和取消实验通过真实教学接口teach查询参数注入；截图与证据不含令牌。",
     "S1原页面筛选、排序后裁切；S4/S5由原阶段页调整相机，添加局部参考网格、垂直投影和编码标注。S5实际用鼠标点击PZ-07，原射线拾取器触发请求并显示同一编码曲线。显示与拾取证据见displayEvidence。",
-    "S4/S5截图聚焦PZ-07，不是阶段页默认视野。28个绑定对象及其坐标、几何体与观测值保持不变；局部网格10m，仅供坐标识读。",
+    "S4/S5截图聚焦PZ-07，不是阶段页默认视野。28个绑定对象及其坐标、几何体与观测值保持不变；坝体材质在截图时调为半透明以显示埋在坝内的渗压计；局部网格10m，仅供坐标识读。",
     "S6工单和预警状态保存在此次独立教学API进程内存中，截图不证明Java后端持久化/角色鉴权/实际工程处置。",
-    "S5缺测图选取固定CSV中WL-01在2026-07-01 03:05+08:00的真实missing记录；曲线数值未改，显示48个相邻采样点。"
+    "S5缺测图选取固定CSV中WL-01在2026-07-01 03:05+08:00的真实missing记录；曲线数值未改，显示48个相邻采样点。",
+    "R11：配套数据集测点布置改为按坝体布置（companion/datasets/generate.py 的 LAYOUT）后，s4-scene.png 与 s5-scene-chart.png 在 Linux 上用 Playwright + Chromium Chromium 重拍（字体回退为 Noto Sans CJK SC）；其余七张图的内容不涉及坐标，保留 R10-05 在 Edge 下采集的原图及其原清单条目，本次重跑得到的同内容图片未替换。"
   ],
   "pageErrors": [],
   "images": [
@@ -539,25 +540,25 @@
       "width": 2240,
       "height": 880,
       "printHeightAt16cm": 6.29,
-      "sha256": "1c8df74448626336b47e9c02e6337f8c6c51f2a4d7830df7d21840047b300ecf",
+      "sha256": "be351ca54d9b71aea3fd54ba3ab48ba1b7a0fba1aa6df2062fc6d1d453161c5a",
       "kind": "annotated-stage",
       "stage": "S4",
       "entry": "lesson61.html",
       "selectedAssetId": "DAM-A-PZ-07",
       "actualAssets": 28,
       "coordinate": [
-        688.6140250246217,
-        160.8,
-        -599.4000000001804
+        19.893294056336316,
+        123.5,
+        -5.993999999851951
       ],
       "groundY": 120,
       "gridSpacing": 10,
       "geometryAndCoordinatesUnchanged": true,
       "click": {
-        "x": 299.9999999999995,
-        "y": 160.88057127391656
+        "x": 300,
+        "y": 242.36542484214397
       },
-      "annotation": "采集时添加局部参考网格、投影线与编码标签；调整相机；不代表阶段页默认外观"
+      "annotation": "采集时添加局部参考网格、投影线与编码标签；调整相机；坝体材质调为半透明以显示埋在坝内的渗压计；不代表阶段页默认外观"
     },
     {
       "file": "output/images/runtime/s5-scene-chart.png",
@@ -570,7 +571,7 @@
       "width": 2240,
       "height": 880,
       "printHeightAt16cm": 6.29,
-      "sha256": "a57f85d10b19bda1b32f36625a558073e496e15f8187b8e982a4ebf9c20d99d3",
+      "sha256": "6b4670c78786d8c9b2f8a7d74d60b80d821cc9d6cf68945233b75c8aac2cef6a",
       "kind": "annotated-stage",
       "stage": "S5",
       "entry": "lesson74.html",
@@ -578,20 +579,20 @@
       "selectedAssetId": "DAM-A-PZ-07",
       "actualAssets": 28,
       "coordinate": [
-        688.6140250246217,
-        160.8,
-        -599.4000000001804
+        19.893294056336316,
+        123.5,
+        -5.993999999851951
       ],
       "groundY": 120,
       "gridSpacing": 10,
       "geometryAndCoordinatesUnchanged": true,
       "click": {
-        "x": 231.9999999999995,
-        "y": 160.88057127391656
+        "x": 231.99999999999997,
+        "y": 242.36542484214397
       },
-      "annotation": "采集时添加局部参考网格、投影线与编码标签；调整相机；不代表阶段页默认外观",
+      "annotation": "采集时添加局部参考网格、投影线与编码标签；调整相机；坝体材质调为半透明以显示埋在坝内的渗压计；不代表阶段页默认外观",
       "displayEvidence": {
-        "actualModuleUrl": "http://127.0.0.1:5194/node_modules/.vite/deps/echarts.js?v=ad8ef531",
+        "actualModuleUrl": "http://127.0.0.1:5194/node_modules/.vite/deps/echarts.js?v=9ce10a7c",
         "seriesDataUnchanged": true,
         "dataCount": 288,
         "textSpans": [
@@ -719,8 +720,8 @@
           "to": "DAM-A-PZ-07",
           "method": "Playwright mouse.click -> 原 PointPicker 射线拾取 -> select -> 教学 API",
           "click": {
-            "x": 231.9999999999995,
-            "y": 160.88057127391656
+            "x": 231.99999999999997,
+            "y": 242.36542484214397
           },
           "responseStatus": 200,
           "responseUrl": "http://127.0.0.1:5194/api/assets/DAM-A-PZ-07/readings?from=2026-07-01T00%3A00%3A00%2B08%3A00&to=2026-07-02T00%3A00%3A00%2B08%3A00",

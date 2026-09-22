@@ -102,6 +102,13 @@ PAIRS = [
      "companion/water-platform-demo/db/001_init.sql"),
     ("lst:ch05-error-handler", "output/chapters/chapter05.tex",
      "companion/water-platform-demo/backend/src/main/java/edu/example/qingyuan/ApiExceptionHandler.java"),
+    # R11 作者决定：5.5.1 的补录接口与服务层进入配套工程；403 与两种校验错误码由配套测试验证
+    ("lst:ch05-rest-write", "output/chapters/chapter05.tex",
+     "companion/water-platform-demo/backend/src/main/java/edu/example/qingyuan/ReadingWriteController.java"),
+    ("lst:ch05-command-service", "output/chapters/chapter05.tex",
+     "companion/water-platform-demo/backend/src/main/java/edu/example/qingyuan/ManualReadingService.java"),
+    ("lst:ch05-access-denied", "output/chapters/chapter05.tex",
+     "companion/water-platform-demo/backend/src/test/java/edu/example/qingyuan/ReadingWriteControllerTest.java"),
     ("lst:ch05-kafka-idempotency", "output/chapters/chapter05.tex",
      "companion/water-platform-demo/backend/src/main/java/edu/example/qingyuan/ReadingConsumer.java"),
     ("lst:ch05-unit-service-test", "output/chapters/chapter05.tex",

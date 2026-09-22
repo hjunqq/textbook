@@ -11,7 +11,7 @@
 | S3 起点 | 5.2 | `edu.example.lesson52.Lesson52Application` | Java 17、Maven；四个固定对象、部分固定观测，无登录和数据库 |
 | S3 中点 | 5.4.1–5.4.2 | `edu.example.lesson54.Lesson54Application` | Docker（只起 PostgreSQL）；对象与观测来自数据库，三层结构，无登录、不连 Kafka |
 | S3 终点 | 5.5–5.6、8.3 | 完整 `backend/` 与 Compose | 认证与消息消费齐备后承接 S2 联调 |
-| S4 | 6.1 | `lesson61.html` | 教学接口、Three.js；坝体几何体与28个测点 |
+| S4 | 6.1 | `lesson61.html` | 教学接口、Three.js；坝体几何体与28个测点；`public/models/dam.glb` 教学模型 |
 | S5 | 7.2–7.4 | `lesson74.html` | 教学接口或 S3 完整后端、S4场景；曲线与测点联动 |
 | S6 | 8.4、8.6 | `classify.js`、`closeloop-check.mjs`、`smoke.sh` | 教学接口验证受控闭环；完整工程按 8.6 用 Compose 与 `smoke.sh` 做部署验收 |
 
@@ -94,7 +94,9 @@ node teaching-api/contract-check.mjs http://localhost:8080 --stage=full
 
 ## S4：场景与对象绑定
 
-运行教学接口和 Vite，打开 `/lesson61.html`。坝体可旋转缩放；控制台 `bound.group.children.length` 应等于接口返回的对象数（教学数据为28），`bound.find('DAM-A-PZ-07')` 应返回相应对象。按6.1.5节检查表核对高程、轴方向和单位。
+运行教学接口和 Vite，打开 `/lesson61.html`。坝体可旋转缩放；控制台 `bound.group.children.length` 应等于接口返回的对象数（教学数据为28），`bound.find('DAM-A-PZ-07')` 应返回相应对象（高程 123.5 m，位于坝体内部；`dam.material.transparent = true; dam.material.opacity = 0.35` 可透视看到埋在坝内的12支渗压计）。按6.1.5节检查表核对高程、轴方向和单位。测点布置见 companion/datasets/generate.py 里的 `LAYOUT`：原点在坝轴线中点，x 沿坝轴线向东，上游为 -z。
+
+6.1.4 节的加载练习使用 `public/models/dam.glb`（由同目录 `generate-dam-glb.py` 生成，米、+Y 向上、底面 y=0）：三项检查中只有“基面”一项生效，把底面抬到 120 m 后包围盒应与几何体坝体一致；`python3 generate-dam-glb.py --units mm --z-up -o dam.glb` 可换成需要缩放和旋转的版本再试一次。
 
 按6.1.1节分别制造缺少光源、相机位置错误、停止渲染循环的黑屏情形；每次只改一个因素，恢复后验证。记录现象、原因、处理、结果。
 

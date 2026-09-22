@@ -18,6 +18,9 @@ public interface ReadingRepository extends JpaRepository<ReadingEntity, ReadingE
             @Param("from") OffsetDateTime from, @Param("to") OffsetDateTime to);
     boolean existsByEventId(String eventId);
 
+    /** 人工补录的幂等键重放（5.5.1 节）：同一个 Idempotency-Key 再次到达时返回上一次的记录。 */
+    Optional<ReadingEntity> findByEventId(String eventId);
+
     /** 契约 GET /api/assets/{id}/readings/latest：同一时刻可能有多个版本，取版本号最大的那条。 */
     Optional<ReadingEntity> findFirstByIdAssetIdOrderByIdOccurredAtDescIdVersionDesc(String assetId);
 }

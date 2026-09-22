@@ -992,7 +992,7 @@ ResponseEntity<Map<String, String>> missingResource(WarningWorkflowService.Missi
 
 \paragraph{运行与观察}按STAGES.md的S3终点启动完整后端和数据库，向\texttt{warning}表插入三行测试数据（\texttt{source\_event\_id}、\texttt{reason}、\texttt{rule\_version}、\texttt{evidence}都非空，随便填一个值即可）：一条\texttt{open}且可评估，一条\texttt{acknowledged}，一条\texttt{evaluable=false}、\texttt{level='NONE'}。然后把S6的核对脚本指向自己的后端，命令与8.4.2节相同：\texttt{node teaching-api/closeloop-check.mjs http://localhost:8080}。脚本先登录，再调用\texttt{GET /api/warnings}取预警列表，后面十几项检查都从这个列表里挑出待确认和未评估的事件；列表端点没有实现或返回403，脚本从第4项起会整片失败，所以先确认清单\ref{lst:ch08-controller}的\texttt{list}方法已经就位。脚本输出20行检查结果。逐行对照教学接口的输出（8.4.2节），不一致的那一行就是实现与契约有出入的地方。
 
-\paragraph{一个会遇到的失败}“派单缺字段返回400且指出字段”这一项多半不通过。脚本期望错误码是\texttt{FIELD\_REQUIRED}；而\texttt{@Valid}校验失败抛出的是\texttt{MethodArgumentNotValidException}，5.5节的统一处理器把它转成了\texttt{VALIDATION\_ERROR}。状态码和\texttt{field}都对，只有\texttt{code}不同。处理办法有两种：在处理器里对\texttt{@NotNull}、\texttt{@NotBlank}两类失败改用\texttt{FIELD\_REQUIRED}；或者与前端约定两种错误码都按“缺字段”显示。选一种，写明理由，再跑一次脚本确认。
+\paragraph{一个会遇到的失败}“派单缺字段返回400且指出字段”这一项检查的是错误码\texttt{FIELD\_REQUIRED}。\texttt{@Valid}校验失败抛出的是\texttt{MethodArgumentNotValidException}，缺字段和字段取值不合形状都汇成这一种异常；5.5.2节的统一处理器按\texttt{FieldError.getCode()}把它们分开，\texttt{NotNull}、\texttt{NotBlank}、\texttt{NotEmpty}三种失败应答\texttt{FIELD\_REQUIRED}，其余应答\texttt{VALIDATION\_ERROR}。脚本发出的请求体只有\texttt{warningId}和\texttt{ownerRole}，缺的是\texttt{dueAt}和\texttt{action}，清单\ref{lst:ch08-controller}的\texttt{CreateWorkOrder}给它们写的正是\texttt{@NotNull}和\texttt{@NotBlank}，所以得到\texttt{FIELD\_REQUIRED}。要是把必填改用\texttt{@Size(min = 1)}之类的形状约束来表达，缺字段会被归到\texttt{VALIDATION\_ERROR}，这一项就不通过：状态码和\texttt{field}都对而只有\texttt{code}不同时，先看注解用的是哪一种。
 
 \paragraph{自测}（1）把\texttt{transit}查询里的\texttt{and w.status = :expected}删掉，重新运行脚本，哪几项会从通过变成失败？（2）为什么\texttt{complete}里关闭预警也用\texttt{transit}，而不是直接\texttt{setStatus("closed")}？答案要点：（1）“未确认就派单被拒”和“重复确认被拒”；（2）预警可能已被别的操作改动，条件更新只在状态仍是\texttt{assigned}时才关闭。
 
@@ -2327,7 +2327,7 @@ ROTATION: {password_days: 90, signing_key_overlap_hours: 24}
 VALIDATION: {require_non_empty: [DB_USER, DB_NAME], reject_default_password: true}
 \end{lstlisting}
 
-换数据库口令时，先建新凭据并验证能连上，再撤销旧的。换 JWT 密钥时留一段新旧密钥同时有效的重叠期，处理中的请求才能正常结束（5.6.2节）。变量缺失、还在用示例口令、镜像用\texttt{latest}标签，这三种情况发布流水线直接失败。回滚之前先看数据库迁移是否向后兼容，能兼容才回退无状态的服务。
+换数据库口令时，先建新凭据并验证能连上，再撤销旧的。换 JWT 密钥时留一段新旧密钥同时有效的重叠期，处理中的请求才能正常结束（5.6.3节）。变量缺失、还在用示例口令、镜像用\texttt{latest}标签，这三种情况发布流水线直接失败。回滚之前先看数据库迁移是否向后兼容，能兼容才回退无状态的服务。
 
 \subsubsection{Nginx 反向代理与静态资源}
 Nginx负责三件事：提供Vue构建出的静态文件，把\texttt{/api/}开头的请求转发给后端，对外暴露健康检查路径。清单\ref{lst:ch08-nginx}中，\texttt{try\_files ... /index.html}是为Vue Router的history模式准备的：用户刷新\texttt{/monitoring}这样的地址时，Nginx找不到同名文件，就返回入口页，再由前端路由接管。第4章开发时靠Vite的代理转发\texttt{/api}，生产环境里这件事由Nginx来做。权限判断仍在Spring Security里，Nginx只是转发，并加上请求号\texttt{X-Request-Id}供日志关联。

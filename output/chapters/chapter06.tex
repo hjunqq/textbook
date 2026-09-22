@@ -103,7 +103,26 @@ addEventListener('resize', () => {
 
 \paragraph{几何体：顶点、三角形与法线}GPU 只会画三角形。几何体保存三样东西：顶点位置，哪三个顶点组成一个三角形（索引），以及每个顶点处表面的朝向（法线，光照计算用它判断这一面亮不亮）。在控制台输入\texttt{dam.geometry.attributes.position.count}得到24，\texttt{dam.geometry.index.count}得到36。长方体只有8个角，却有24个顶点，原因是每个角同时属于三个面，三个面的法线各不相同，同一个位置要存三份；36个索引对应$6\times2$个三角形。
 
-坝体断面用\texttt{Shape}画出轮廓，再用\texttt{ExtrudeGeometry}沿坝轴线方向拉伸。清单\ref{lst:ch06-dam-section}只替换清单\ref{lst:ch06-first-scene}的第3步，其余不动。断面底宽40\,m沿用前面的教学尺寸，顶宽8\,m是为画出梯形选的，两者都不是8.1节的工程参数；高度和基面高程取自8.1节。
+坝体断面用\texttt{Shape}画出轮廓，再用\texttt{ExtrudeGeometry}沿坝轴线方向拉伸。清单\ref{lst:ch06-dam-section}只替换清单\ref{lst:ch06-first-scene}的第3步，其余不动。这个坝体用到的尺寸集中在表\ref{tab:ch06-teaching-geometry}：坝高和基面高程取自8.1节，坝轴线长、底宽、顶宽和坝轴线的摆放方向是为了在场景里画出一个像样的梯形而定的教学尺寸，只在本章和第7章的场景练习里使用，表\ref{tab:case-parameters}的工程参数里没有它们。配套数据集里测点的位置（6.1.5节、6.2.3节）和6.1.4节的教学模型文件都按这张表布置。
+
+\begin{table}[htbp]
+\centering
+\caption{教学三维坝体的几何约定（仅用于场景练习，不是案例工程参数）}
+\label{tab:ch06-teaching-geometry}
+\begin{tabular}{p{3.4cm}p{2.6cm}p{7.4cm}}
+\toprule
+项目 & 取值 & 说明 \\
+\midrule
+坝基高程 & \cpBaseElev\,m & 取自表\ref{tab:case-parameters}；几何体 $y=0$ 对应这一高程 \\
+坝顶高程 & \cpCrestElev\,m & 取自表\ref{tab:case-parameters}，坝高\cpDamHeight\,m \\
+坝轴线长 & 160\,m & 教学尺寸；沿场景 $x$ 轴，$x\in[-80,80]$，原点在坝轴线中点 \\
+断面底宽 & 40\,m & 教学尺寸；$z\in[-20,20]$，上游面（铅直）在 $z=-20$ \\
+断面顶宽 & 8\,m & 教学尺寸；坝顶占 $z\in[-20,-12]$，下游坡面从坝趾 $(z{=}20,\,y{=}120)$ 到 $(z{=}-12,\,y{=}172)$ \\
+上下游方向 & 上游为 $-z$ & 场景 $x$ 指东、$y$ 向上，右手系的 $+z$ 指南，因此水库在坝体北侧 \\
+水面 & \cpNormalLevel\,m & 正常蓄水位，取自表\ref{tab:case-parameters}；平面 $160\times300$\,m，中心在 $z=-170$ \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \begin{lstlisting}[label={lst:ch06-dam-section},language=JavaScript,caption={用断面拉伸出坝体并加水面（替换 first-scene.js 的第3步）}]
 // 3a. 坝体横断面：断面局部坐标 x 指向下游、y 向上，单位 m
@@ -366,7 +385,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 \end{lstlisting}
 
-清单\ref{lst:ch06-gltf-load}加载一个 GLB，并用6.1.2节用过的包围盒做三项检查。配套工程没有随附坝体模型；练习时把任意一个有使用授权的 GLB 放到\texttt{frontend/public/models/dam.glb}，在\texttt{first-scene.js}末尾调用\texttt{loadDam(scene)}。函数里的阈值以坝高\cpDamHeight\,m为参照，换成别的模型时改为该模型的一个已知尺寸。
+清单\ref{lst:ch06-gltf-load}加载一个 GLB，并用6.1.2节用过的包围盒做三项检查。配套工程的\texttt{frontend/public/models/dam.glb}是一个教学模型：由同目录的\texttt{generate-dam-glb.py}（只用 Python 标准库）按表\ref{tab:ch06-teaching-geometry}的尺寸生成，一个梯形柱体、一种材质，长度单位为米、$+Y$向上、底面在$y=0$，与6.1.2节拉伸出的坝体同形，不承担任何真实工程语义。用这个文件时三项检查的答案是已知的：高度52落在$y$方向，所以不缩放、不旋转，只把底面从0抬到坝基高程\cpBaseElev\,m。脚本带\texttt{--units mm}和\texttt{--z-up}两个开关，可以故意生成毫米单位或$Z$轴向上的文件，用来看前两项检查怎样生效。练习时在\texttt{first-scene.js}末尾调用\texttt{loadDam(scene)}；换成设计单位交付的模型时，函数里的阈值改为该模型的一个已知尺寸。
 
 \begin{lstlisting}[label={lst:ch06-gltf-load},language=JavaScript,breaklines=true,caption={load-dam.js：加载 GLB 并核对单位、轴向与基面高程}]
 import * as THREE from 'three';
@@ -404,7 +423,7 @@ export async function loadDam(scene) {
 
 \paragraph{三项检查各对应哪个矩阵}单位不对改\texttt{scale}，轴向不对改\texttt{rotation}，基面不对改\texttt{position}，正是6.1.3节的$S$、$R$、$T$。顺序不能乱：先统一单位，尺寸才可比；先转正，才知道哪个方向是“底”。Three.js 按$M=TRS$合成矩阵，清单里的三处修改互不干扰。三项改正都作用在模型的根节点上，模型文件和内部各构件的相对关系保持原样，以后换新版本模型，只需重新核对这三个数。
 
-\paragraph{可观察结果}控制台的表格里\texttt{size.y}约为52；执行\texttt{new THREE.Box3().setFromObject(model)}，$y$范围为120到172。把模型地址故意写错，控制台出现“坝体模型加载失败”，页面上几何体坝体仍在，渲染循环不中断。
+\paragraph{可观察结果}加载教学模型后，控制台的表格里\texttt{size}为$(160,52,40)$；执行\texttt{new THREE.Box3()}\allowbreak\texttt{.setFromObject(model)}，得到的包围盒与6.1.2节的坝体相同，$y$范围为120到172，两个坝体在画面上重合。用\texttt{--units mm --z-up}重新生成文件再刷新，加载时前两项检查依次触发，最终包围盒不变。把模型地址故意写错，控制台出现“坝体模型加载失败”，页面上几何体坝体仍在，渲染循环不中断。
 
 \paragraph{颜色与贴图}模型颜色发灰或过曝，多半是色彩空间标错了。颜色贴图按 sRGB 编码保存，光照计算在线性空间进行，渲染器输出时再转回 sRGB。r152 以后这三处分别由贴图的\texttt{colorSpace}、内部的颜色管理和渲染器的\texttt{outputColorSpace}控制。\texttt{GLTFLoader}会替模型自带的贴图标好色彩空间；自己用\texttt{TextureLoader}加载贴图时要手工标注，如清单\ref{lst:ch06-color-space}。法线、粗糙度、金属度贴图存的是数据而不是颜色，保持线性，不标 sRGB。
 
@@ -463,7 +482,7 @@ export function bindAssets(scene, assets) {
 // 用法：const bound = bindAssets(scene, assets);  bound.find('DAM-A-PZ-07').material.color.set(0xffa000);
 \end{lstlisting}
 
-\paragraph{可观察结果与检查表}打开\texttt{/lesson61.html}，场景里出现\cpStationCount 个蓝色小球，从原点向东北方向排成一条斜线，相邻两个相距约150\,m（教学数据集这样布置，是为了逐个辨认；需要拉远视角才能看全）；阶段页把返回值挂在\texttt{window.bound}上，控制台执行\texttt{bound.find('DAM-A-PZ-07').position}，得到的向量$y$分量等于台账中该测点的高程160.8。表\ref{tab:ch06-bind-check}逐项列出要核对的内容。对象映射错一个，第7章的曲线就会挂到错误的球上，而页面不会报任何错。
+\paragraph{可观察结果与检查表}打开\texttt{/lesson61.html}，\cpStationCount 个蓝色小球按表\ref{tab:ch06-teaching-geometry}的约定分布在坝体周围：4个位移标点在坝顶、4个在下游坡面上，3个库水位计在坝体北侧（上游）150到700\,m的库区里，5个雨量站中1个在右岸坝头，其余4个散在1到2\,km外的近坝流域，拉远视角才能看全。12支渗压计埋在坝体内部的三个高程上，被灰蓝色的坝体挡住；在控制台执行\texttt{dam.material.transparent = true; dam.material.opacity = 0.35}，就能透过坝体看见它们。阶段页把返回值挂在\texttt{window.bound}上，控制台执行\texttt{bound.find('DAM-A-PZ-07').position}，得到的向量$y$分量等于台账中该测点的高程123.5，$x$约20、$z$约$-6$，即坝轴线中点以东20\,m、上游面以内14\,m、坝基以上3.5\,m处。表\ref{tab:ch06-bind-check}逐项列出要核对的内容。对象映射错一个，第7章的曲线就会挂到错误的球上，而页面不会报任何错。
 
 \begin{table}[htbp]
 \centering
@@ -482,7 +501,7 @@ export function bindAssets(scene, assets) {
 \end{tabular}
 \end{table}
 
-图\ref{fig:ch06-bound-scene}按编码定位并聚焦 PZ-07；场景实际绑定\cpStationCount 个测点。10 m 网格、垂直投影和坐标文字为采集时添加的识读标记，测点坐标与几何保持原样。对象总数与当前可见数量应分别核对。
+图\ref{fig:ch06-bound-scene}按编码定位并聚焦 PZ-07；场景实际绑定\cpStationCount 个测点。10 m 网格、垂直投影和坐标文字为采集时添加的识读标记，坝体也是为了露出埋在坝内的渗压计才调成半透明的，测点坐标与几何保持原样。对象总数与当前可见数量应分别核对。
 
 \begin{figure}[htbp]
 \centering
@@ -733,7 +752,7 @@ const normal = convertHeight({h: 245.30, kind: 'normal', anomaly: -8.62});
 
 \subsection{局部原点、轴向换算与测点重新定位}
 
-\paragraph{大坐标为什么会抖}案例水库场景原点（经度$111.2^\circ$、纬度$30.5^\circ$）在中央经线$111^\circ$的高斯—克吕格投影下，东坐标约519200\,m，北坐标约3375559\,m。JavaScript 的数值是64位浮点数，保存这样的坐标毫无问题；但几何体的顶点数据以32位浮点数（\texttt{Float32Array}）保存并送入 GPU，着色器里的运算也是32位。32位浮点数只有24位有效二进制位，约7位十进制有效数字。数值在$2^{21}$到$2^{22}$之间（约210万到420万）时，相邻两个可表示的数相差$2^{21-23}=0.25$。在控制台试一下：
+\paragraph{大坐标为什么会抖}案例水库场景原点（经度$111.2^\circ$、纬度$30.5^\circ$，取在坝轴线中点）在中央经线$111^\circ$的高斯—克吕格投影下，东坐标约519200\,m，北坐标约3375559\,m。JavaScript 的数值是64位浮点数，保存这样的坐标毫无问题；但几何体的顶点数据以32位浮点数（\texttt{Float32Array}）保存并送入 GPU，着色器里的运算也是32位。32位浮点数只有24位有效二进制位，约7位十进制有效数字。数值在$2^{21}$到$2^{22}$之间（约210万到420万）时，相邻两个可表示的数相差$2^{21-23}=0.25$。在控制台试一下：
 
 \begin{lstlisting}[label={lst:ch06-fround},language=JavaScript,caption={32位浮点数保存北坐标时的舍入}]
 Math.fround(3375558.74)   // 3375558.75：只能落在 0.25 m 的格点上
@@ -794,14 +813,14 @@ mesh.position.set(p.x, p.y, p.z);
 
 配套数据集\texttt{stations.json}里与位置有关的字段只有\texttt{longitude}、\texttt{latitude}和\texttt{elevation\_m}。案例约定经纬度为 CGCS2000（配套数据库的\texttt{geometry}列即声明为 EPSG:4490），高程与8.1节的特征水位同属1985国家高程基准，因此\texttt{elevation\_datum}字段不存在时函数直接放行；接入带有该字段的真实台账时，这个判断会拦下混入的椭球高。
 
-\paragraph{可观察结果}两种算法下 PZ-07 的位置对比：粗略换算得到$x\approx688.6$、$z\approx-599.4$，投影换算得到$x\approx690.1$、$z\approx-599.9$，平面上相差约1.6\,m；离原点最远的雨量站 RF-05 相差约6.6\,m。$y$都是160.8，没有变化。差别来自两处：每度的米数取了近似值；高斯—克吕格的坐标北与真北之间有一个小夹角（子午线收敛角）。对埋在坝体里的仪器，一两米的偏差可能跨过一条坝段分缝，而且离原点越远差得越多。重新用表\ref{tab:ch06-bind-check}核对一遍，五项结论应当与6.1.5节相同。
+\paragraph{可观察结果}两种算法下 PZ-07 的位置对比：粗略换算得到$x\approx19.89$、$z\approx-5.99$，投影换算得到$x\approx19.96$、$z\approx-6.02$，平面上相差约0.07\,m；$y$都是123.5，没有变化。差别随离原点的距离增大：坝轴线两端的测点（离原点60\,m）相差约0.25\,m，库区里的 WL-03（约700\,m）相差约2.0\,m，离原点最远的雨量站 RF-04（约1.6\,km）相差约7.4\,m。差别来自两处：每度的米数取了近似值（纬度$30.5^\circ$处一度经差约96.0\,km，粗略公式用的$111\cos\varphi$只有95.6\,km）；高斯—克吕格的坐标北与真北之间有一个小夹角（子午线收敛角）。原点选在坝上，坝体范围内两种算法的差别只有分米量级，这是局部原点靠近工程的好处；但同一段代码用到流域尺度就会差出好几米，而且粗略公式没有反算，场景里点到的位置换不回工程坐标。重新用表\ref{tab:ch06-bind-check}核对一遍，五项结论应当与6.1.5节相同。
 
 \paragraph{坝轴线桩号}大坝的施工图和测点考证表通常不写经纬度，而用工程自己的一套定位方式：沿坝轴线的\textbf{桩号}、到坝轴线的垂直距离（轴距，注明上游或下游）和高程。桩号“坝0+085.00”表示从坝轴线起点沿轴线走85\,m。这套坐标与断面图、坝段划分直接对应，值班员说“0+085断面的渗压计”，比报一串经纬度更容易让人明白位置。已知坝轴线起点的平面坐标$(E_s,N_s)$和轴线的坐标方位角$\alpha$（从坐标北顺时针量到轴线前进方向的角度），桩号$s$、下游轴距$d$的点的平面坐标为
 \[
   E=E_s+s\sin\alpha+d\cos\alpha,\qquad
   N=N_s+s\cos\alpha-d\sin\alpha ,
 \]
-这里假定面向桩号增大方向时下游在右手一侧，相反时$d$取负。算出$E$、$N$之后，其余步骤与清单\ref{lst:ch06-rebind}相同。如果把场景的局部原点取在坝轴线起点，并让$x$轴沿坝轴线，桩号就直接等于$x$坐标；6.1.2节的坝体正是让坝轴线沿$x$轴摆放的，那里的桩号与$x$只差一个常数。案例数据集没有提供桩号，课程设计使用真实工程资料时会遇到它。
+这里假定面向桩号增大方向时下游在右手一侧，相反时$d$取负。算出$E$、$N$之后，其余步骤与清单\ref{lst:ch06-rebind}相同。如果把场景的局部原点取在坝轴线起点，并让$x$轴沿坝轴线，桩号就直接等于$x$坐标；表\ref{tab:ch06-teaching-geometry}的坝体正是让坝轴线沿$x$轴摆放、原点取在轴线中点的，那里的桩号与$x$只差80\,m这个常数，PZ-07 的$x\approx20$对应桩号坝0+100。案例数据集没有提供桩号，课程设计使用真实工程资料时会遇到它。
 
 \paragraph{位置不对时先查哪一步}表\ref{tab:ch06-placement-faults}按现象列出排查顺序，与6.1.3节的$S$、$R$、$T$对照着看。先查元数据，再动代码；用手工偏移把模型“拖到看起来对齐”，只会让后端查询和剖面分析继续使用错误的位置。
 
@@ -825,7 +844,7 @@ mesh.position.set(p.x, p.y, p.z);
 \end{tabular}
 \end{table}
 
-\paragraph{自测}（1）某测点经度$111.2072^\circ$、纬度$30.5054^\circ$，它在3度带里的带号和中央经线是多少？（37带，$111^\circ$。）（2）局部原点改成另一个点以后，\texttt{toEngine(toLocal(p))}的结果会变吗？（不变；正算和反算用同一个原点即可。）（3）把\texttt{toLocal}里$z$的负号去掉，\texttt{toEngine}不改，点击场景反算出的北坐标会怎样？（相对原点南北颠倒。）坐标成果入库、转换审计和版本管理的做法见附录C的\ref{app:ext-ch06-crs-audit}节。
+\paragraph{自测}（1）台账里 PZ-07 的经度为$111.200208^\circ$、纬度为$30.500054^\circ$，它在3度带里的带号和中央经线是多少？（37带，$111^\circ$。）（2）局部原点改成另一个点以后，\texttt{toEngine(toLocal(p))}的结果会变吗？（不变；正算和反算用同一个原点即可。）（3）把\texttt{toLocal}里$z$的负号去掉，\texttt{toEngine}不改，点击场景反算出的北坐标会怎样？（相对原点南北颠倒。）坐标成果入库、转换审计和版本管理的做法见附录C的\ref{app:ext-ch06-crs-audit}节。
 
 \subsection{OGC地图与要素服务}
 

@@ -1,4 +1,4 @@
-# 教材运行截图（R10-05）
+# 教材运行截图（R10-05；S4/S5 于 R11 按新测点布置重拍）
 
 本目录保存截图采集脚本、教学查看器页面、源文件指纹和请求证据。图片输出到仓库根目录的 `output/images/runtime/`。查看器直接调用配套模块或教学 API；图片由浏览器截图生成，没有重画界面或替换观测值。
 
@@ -14,7 +14,7 @@ npm install --prefix companion/illustrations/runtime
 node companion/illustrations/runtime/capture.cjs
 ```
 
-Windows 默认优先使用已经安装的 Edge。也可通过 `BROWSER_EXECUTABLE` 指定浏览器完整路径；没有系统 Edge 时，先在本目录执行 `npx playwright install chromium`。已有 Playwright 安装可用 `PLAYWRIGHT_MODULE_PATH` 指定模块路径。Codex 工作环境的预装 Playwright 是本机后备路径，其他机器不依赖该后备路径。
+Linux 下可用 `PLAYWRIGHT_MODULE_PATH` 指向全局安装的 playwright、`BROWSER_EXECUTABLE` 指向 Playwright 的 Chromium（R11 的 S4/S5 即这样重拍，字体回退为 Noto Sans CJK SC）。Windows 默认优先使用已经安装的 Edge。也可通过 `BROWSER_EXECUTABLE` 指定浏览器完整路径；没有系统 Edge 时，先在本目录执行 `npx playwright install chromium`。已有 Playwright 安装可用 `PLAYWRIGHT_MODULE_PATH` 指定模块路径。Codex 工作环境的预装 Playwright 是本机后备路径，其他机器不依赖该后备路径。
 
 `capture.cjs` 会重新生成本目录的 HTML 查看器、`manifest.json`、`request-evidence.json`，以及九张 PNG。请先确认两个端口未被其他服务占用。
 
@@ -32,7 +32,7 @@ Windows 默认优先使用已经安装的 Edge。也可通过 `BROWSER_EXECUTABL
 | `s5-missing-gap.png` | `quality.html` | 原序列控制器与质量映射处理真实 CSV 中 WL-01 的缺测记录 |
 | `s6-work-order.png` | `work-order.html` | 实际确认、创建、完成、回查归档响应，以及未确认派单的409失败例 |
 
-S4/S5由 `scene-display.cjs` 调整原相机，添加10m局部参考网格、垂直投影和编码标签；这是带识读标记的运行图，不是原阶段页的默认视图。网格平面高程120m取自阶段坝体底面。28个实际测点的台账坐标、几何体及阶段源码保持不变。S4同时显示 `bound.find` 定位对象的坐标。
+S4/S5由 `scene-display.cjs` 调整原相机，添加10m局部参考网格、垂直投影和编码标签，并把坝体材质调为半透明（渗压计按台账埋在坝体内部，不透明时被挡住）；这是带识读标记的运行图，不是原阶段页的默认视图。网格平面高程120m取自阶段坝体底面。28个实际测点的台账坐标、几何体及阶段源码保持不变。S4同时显示 `bound.find` 定位对象的坐标。
 
 S5先切换到WL-01，再用真实鼠标点击PZ-07，原 `PointPicker` 完成射线拾取，经事件和教学API更新曲线；采集器断言返回200、288条观测、状态文字及高亮编码一致。等待动画结束后仅调整显示字号、面板和日期刻度。轴标签与状态文字为22 CSS px，16cm宽印刷时等效8.91pt；显示调整前后序列SHA-256一致。实际点击坐标、请求、返回条数和字号记录于manifest。
 
