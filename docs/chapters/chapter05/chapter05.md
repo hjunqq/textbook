@@ -8,23 +8,23 @@
 
 2.  使用Spring Boot组织配置、依赖注入、控制器与服务；
 
-3.  使用Jakarta Persistence完成实体映射、Repository访问和事务处理；
+3.  使用Jakarta Persistence完成实体映射、Repository访问、幂等写入和事务处理，用条件更新处理并发的状态修改；
 
 4.  使用Spring Security 6与JWT实现基本认证和授权；
 
-5.  区分进程内事件与跨服务消息，并使用消息队列实现可靠解耦；
+5.  说明“事务提交之后再做”的含义和同步调用怎样传递故障，会用提交后事件；了解跨服务消息队列的用途（Kafka 的生产、消费与幂等属于选学）；
 
 6.  通过缓存、分页、日志与指标改善服务性能和可运维性。
 
 **引言**
 
-智慧水利后端负责接入监测数据、执行业务规则、维护一致性并向前端提供接口。本章统一采用Java 17、Spring Boot 3.2+、Spring Security 6、Jakarta Persistence 3.1与Jakarta Servlet 6.x；JWT示例按jjwt 0.11.x接口编写。框架配置、注解语义与版本迁移细节可查阅对应版本的官方参考文档<sup>[[32]](../../references.md#ref32)[[33]](../../references.md#ref33)[[34]](../../references.md#ref34)</sup>；运行示例时应先核对 Java、依赖与容器版本。分布式事务和领域驱动设计作为选学内容，不作为首次后端课程的前置要求。本章延续第3章的架构决策：模块化单体内部按控制器、服务、数据访问分层，观测写入经Kafka削峰后进入TimescaleDB；案例水库峰值每秒10条观测、50并发查询的负载数字，是本章连接池、缓存与分页设计的直接依据。
+智慧水利后端负责接入监测数据、执行业务规则、维护一致性并向前端提供接口。本章统一采用Java 17、Spring Boot 3.2（配套工程锁定 3.2.10）、Spring Security 6、Jakarta Persistence 3.1与Jakarta Servlet 6.x；JWT示例按jjwt 0.11.x接口编写。框架配置、注解语义与版本迁移细节可查阅对应版本的官方参考文档<sup>[[33]](../../references.md#ref33)[[34]](../../references.md#ref34)[[35]](../../references.md#ref35)</sup>。本章延续第3章的架构决策：模块化单体，内部按控制器、服务、数据访问分层，数据存放在 PostgreSQL（含 PostGIS 与 TimescaleDB 扩展）。全章的实体、Repository、服务和控制器只有一套，就是配套工程`backend/`里的那一套；书中另外给出、配套工程没有的代码，清单标题里都注明“书中示例”。案例水库峰值每秒10条观测、50并发查询，这个量级下同步写入数据库并不吃力；配套工程让观测经 Kafka 进入后端，是为了演示网关与后端解耦的做法。本章主线要求读懂这条路径末端的服务层写入方法（5.4.4节）和“提交之后再做”的事件机制（5.7节引言与5.7.1节），Kafka 的生产、消费、重试和事务发件箱属于选学。分布式事务和领域驱动设计同样是选学内容。
 
 !!! tip "提示"
 
     **工程版本线：v1（前端只读切片） $\rightarrow$ v2（认证与观测API）**
 
-    起点是第4章交付的 v1 前端。本章结束时你应交付 **v2**：为 v1 提供真实数据的后端——登录签发 JWT、受保护的测点与观测查询、事务与幂等写入——对应仓库 `backend/` 的 `JwtService`、`JwtAuthenticationFilter`、`SecurityConfig`、`AuthController`、`AssetController`、`ReadingService`；验证命令 `mvn test`，联调后前端 401 分流与登录回跳应全部生效。
+    起点是第4章交付的 v1 前端。本章结束时你应交付 **v2**：为 v1 提供真实数据的后端，包括登录签发 JWT、受保护的测点与观测查询、事务与幂等写入，对应仓库 `backend/` 的 `JwtService`、`JwtAuthenticationFilter`、`SecurityConfig`、`AuthController`、`AssetController`、`ReadingService`；验证命令 `mvn test`，联调后前端 401 分流与登录回跳应全部生效。
 
 ## 5.1 后端服务与REST接口概述
 
@@ -58,7 +58,7 @@
 
 清单5.1的七个字段来自表8.3的约定，每一个都对应水利观测数据的一项含义。`value`必须和`unit`一起读，185.091 是千帕还是米水头，差着一个数量级；`occurredAt`是仪器采样的时刻，带着时区偏移，它和服务器收到数据的时刻可能相差几分钟甚至几小时（补传）；`quality`是质量码，取`valid`、`suspect`或`missing`，后两种观测不能直接拿去判断预警；`eventId`标识这一次上报，重复收到时靠它识别；`version`从1开始，人工订正一次加1，原值保留。后端程序的很大一部分工作，就是保证这些含义在读写过程中不走样。
 
-图5.1画出这次请求在后端内部走过的路。控制器（Controller）面对 HTTP：从路径里取出`DAM-A-PZ-07`，把返回的对象转成 JSON，决定状态码。应用服务（Service）面对业务：这个对象存在吗，最新观测是哪一条，没有观测算不算错误。Repository（数据访问层，专门负责查库和存库的那部分代码）面对数据库：把“某对象最新的一条观测”变成一条 SQL。数据库保存数据，并用主键、外键和检查约束拒绝不合规则的写入。调用自左向右，结果自右向左逐层返回；每一层只和相邻的层打交道，控制器里不拼 SQL，Repository 里不判断预警。
+图5.1画出这次请求在后端内部走过的路。控制器（Controller）面对 HTTP：从路径里取出`DAM-A-PZ-07`，把返回的对象转成 JSON，决定状态码。应用服务（Service）面对业务：这个对象存在吗，最新观测是哪一条，没有观测算不算错误。Repository（数据访问层，专门负责查库和存库的那部分代码）面对数据库：把“某对象最新的一条观测”变成一条 SQL。数据库保存数据，并用主键、外键和检查约束拒绝不合规则的写入。调用自左向右，结果自右向左返回；调用只朝这一个方向发生，控制器里不拼 SQL，Repository 里不判断预警。
 
 <figure markdown>
 ![图5.1](images/chapter05_fig_5_1.svg)
@@ -81,7 +81,7 @@ HTTP 请求的第一行由**方法**和**路径**组成。路径指明操作的�
 | PATCH  | 局部修改资源       | 修改告警状态       | 取决于操作定义     |
 | DELETE | 删除资源           | 删除尚未发布的规则 | 是                 |
 
-表5.1最后一列的**幂等**，指同一个请求重复执行多次，资源最终的状态与执行一次相同。查询天然幂等；“把告警状态改为已确认”执行两次，结果仍是已确认；而`POST`创建处置单，执行两次就会出现两张单。值班员在弱网下重复点击“提交处置”，或者网关超时后重发观测，都会造成重复请求，所以写入接口必须约定怎样识别重复。具体做法是给每次上报带一个唯一编号，并让数据库拒绝重复的编号，5.5节讨论；本章前几节只涉及查询。
+表5.1最后一列的**幂等**，指同一个请求重复执行多次，资源最终的状态与执行一次相同。查询天然幂等；“把告警状态改为已确认”执行两次，结果仍是已确认；而`POST`创建处置单，执行两次就会出现两张单。值班员在弱网下重复点击“提交处置”，或者网关超时后重发观测，都会造成重复请求，所以写入接口必须约定怎样识别重复。具体做法是给每次上报带一个唯一编号，并让数据库拒绝重复的编号，5.4.4节和5.5.4节讨论；本章前几节只涉及查询。
 
 路径按资源的层级来写。在案例平台里，测点等工程对象是稳定的资源（`/api/assets`）；观测是挂在对象下面、按时间不断追加的子资源（`/api/assets/DAM-A-PZ-07/readings`）；预警和工单是带状态流转的业务资源。“要哪一段时间”“按什么排序”这类条件不属于层级，放进查询参数：`?from=...&to=...`。只有当一个业务动作无法表达成“修改某个资源的状态”时，才在路径里用动词，例如表8.3中确认预警的`POST /api/warnings/w-0001/ack`。
 
@@ -231,7 +231,7 @@ if (asset == null) {
 
 ### 5.2.3 用第4章的页面和故障表验证接口
 
-写好的接口要对照契约检查，而且不止检查一次。现在这个程序只有固定数据，没有数据库，也没有登录，能检查的是表5.3的四行：固定数据、204、404 和 400 各一例。5.4节接上数据库以后，用同样的请求再查一遍，这时对象和观测来自数据库。5.6节补上认证以后，后端才具备教学接口的全部行为，可以把第4章的 S2 页面接过来，重做表4.9的界面验收。教学接口靠`teach=`参数人为制造故障（表8.4）；真实后端没有这个参数，要用真实的请求去触发：不带令牌、把时间范围写反、请求不存在的对象、请求还没有观测的对象。
+写好的接口要对照契约检查，而且不止检查一次。现在这个程序只有固定数据，没有数据库，也没有登录，能检查的是表5.3的四行：固定数据、204、404 和 400 各一例。5.4节接上数据库以后，用同样的请求再查一遍，这时对象和观测来自数据库。5.6节补上认证以后，后端才具备教学接口的全部行为，可以把第4章的 S2 页面接过来，重做表4.10的界面验收。教学接口靠`teach=`参数人为制造故障（表8.4）；真实后端没有这个参数，要用真实的请求去触发：不带令牌、把时间范围写反、请求不存在的对象、请求还没有观测的对象。
 
 **表 5.3  第一个接口的契约核对单**
 
@@ -258,248 +258,183 @@ node teaching-api/contract-check.mjs http://localhost:8080 --stage=lesson52
 
 （1）把清单5.2中的`@RestController`换成`@Controller`，访问`/api/assets`会发生什么？为什么？（框架把返回值当视图名去找模板，得到 404 或 500；`@RestController` = `@Controller` + `@ResponseBody`。）（2）`latest`方法为什么返回`ResponseEntity`而`assets`方法直接返回`List`？（前者需要区分 200 与 204 两种状态码，后者永远 200。）（3）不看代码，说出契约里“错误体统一为`{code, message, field?}`”在本节由哪两个方法保证，还有哪一类错误它们接不住。
 
-## 5.3 Spring Boot企业级开发基础
+## 5.3 Spring Boot 工程是怎样装起来的
 
 **本节层次**
 
-核心：5.3.1、5.3.3；指导实践：5.3.2、5.3.4、5.3.6；拓展：5.3.5。
+核心：5.3.1、5.3.2、5.3.3；拓展：5.3.4。
 
 **进入本节所需知识**
 
-先完成5.2节，能从请求路径找到控制器方法及返回对象。
+5.2节的程序已经跑通，能从请求路径找到对应的控制器方法；读过附录B P2 单元中关于`pom.xml`和依赖注入的两段。
 
-5.2节的程序只有一个控制器类，却能监听端口、解析路径、输出 JSON，这些事是 Spring Boot 替你做的。本节回答三个问题：这些能力从哪里来（起步依赖与自动配置，5.3.1节）；数据库地址、口令这类随环境变化的值放在哪里（配置文件，5.3.2节）；控制器需要的 Repository 和服务对象由谁创建、怎样交到它手里（依赖注入，5.3.3节）。5.4节接数据库、拆分三层时，这三样都要用到。工程目录的布局见清单5.10。
+5.2节的程序只有一个控制器类，却能监听端口、解析路径、输出 JSON，这些事是 Spring Boot 替你做的。本节回答三个问题：这些能力从哪里来（起步依赖与自动配置，5.3.1节）；数据库地址、口令这类随环境变化的值放在哪里（配置文件，5.3.2节）；控制器需要的 Repository 和服务对象由谁创建、怎样交到它手里（依赖注入，5.3.3节）。5.4节接数据库、拆分三层时，这三样都要用到。清单5.6是配套工程后端部分的目录，后面提到的文件都可以在里面找到。配套工程规模小，完整后端的十几个类都放在`edu.example.qingyuan`一个包里；类多起来以后，通常再按控制器、服务、数据访问分成子包。
 
-### 5.3.1 起步依赖与自动配置的边界
-
-起步依赖是一组经过验证的依赖坐标，目的是让项目以一致的版本组合获得 Web、验证、JPA、PostgreSQL 和 Actuator 能力。它不是一个运行时服务，也不会替业务代码决定领域规则；Maven 解析依赖树后，Spring Boot 才根据类路径中的类和配置条件创建自动配置 Bean。排查启动问题时，应先查看依赖树和条件评估报告，再决定是补充依赖、修改配置还是排除某项自动配置。
-
-**清单 5.6  Spring Boot 3.2 起步依赖与版本管理**
-
-```xml
-<parent>
-  <groupId>org.springframework.boot</groupId>
-  <artifactId>spring-boot-starter-parent</artifactId>
-  <version>3.2.12</version>
-</parent>
-<properties>
-  <java.version>17</java.version>
-</properties>
-<dependencies>
-  <dependency>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-starter-web</artifactId>
-  </dependency>
-  <dependency>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-starter-validation</artifactId>
-  </dependency>
-  <dependency>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-starter-data-jpa</artifactId>
-  </dependency>
-  <dependency>
-    <groupId>org.postgresql</groupId>
-    <artifactId>postgresql</artifactId>
-    <scope>runtime</scope>
-  </dependency>
-</dependencies>
-```
-
-清单5.6锁定 Java 17 和 Spring Boot 3.2 基线，依赖版本由父 POM 的依赖管理统一维护。PostgreSQL 驱动只在运行时需要，编译阶段依赖 JDBC 抽象；若后续接入 PostGIS 或 TimescaleDB，仍以 PostgreSQL 连接为基础，在数据库迁移脚本中启用扩展。生产项目应提交锁定的 Maven Wrapper 版本，构建机使用`./mvnw`而不是依赖本地 Maven 的偶然版本。
-
-自动配置的关键是条件注解：类路径存在某个类、容器中尚未有同类型 Bean、配置属性满足条件时，配置类才会生效。自定义 Bean 会改变“缺少 Bean”条件的结果，因此添加一个数据源或消息转换器可能使默认配置退让。开发者应把覆盖点写成显式配置，并在启动日志中记录生效的 Profile 和关键连接信息（密码保持隐藏），避免把自动配置当作不可追踪的黑盒。
-
-### 5.3.2 application.yml 与 Profile 多环境
-
-配置文件按环境拆分，公共配置放在`application.yml`，开发、测试和生产差异分别放在`application-development.yml`、`application-test.yml`和`application-production.yml`。启动时使用`SPRING_PROFILES_ACTIVE`选择 Profile，敏感值通过环境变量或密钥管理器注入。Profile 只表达环境差异，不应把业务阈值复制成多套；案例水库的工程参数仍以第8章 8.1 参数表为唯一来源。
-
-**清单 5.7  多环境配置与外部化密钥**
-
-```yaml
-# application.yml：所有环境共享的安全默认值
-spring:
-  application:
-    name: water-reading-service
-  jpa:
-    open-in-view: false
-  profiles:
-    default: development
-
-# application-development.yml
-spring:
-  datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5432/qingyuan}
-    username: ${DB_USER:qingyuan_app}
-    password: ${DB_PASSWORD:}
-security:
-  jwt:
-    issuer: ${JWT_ISSUER:water-platform-dev}
-
-# application-production.yml
-spring:
-  config:
-    activate:
-      on-profile: production
-  jpa:
-    hibernate:
-      ddl-auto: validate
-security:
-  jwt:
-    secret: ${JWT_SECRET_BASE64}
-    issuer: ${JWT_ISSUER}
-```
-
-清单5.7把生产环境的 JWT 密钥和发行者设为必填外部变量，缺少变量时让应用在启动阶段失败，而不是运行到认证请求才发现`issuer`为空。生产环境使用`ddl-auto: validate`只校验表结构，建表和扩展由版本化迁移脚本完成；开发环境可以使用`update`辅助实验，但不得把它作为生产建表策略。配置审计应检查 Profile 是否被正确激活、数据库 URL 是否指向允许的网络段和日志是否遮蔽密码。
-
-### 5.3.3 依赖注入与 Bean 生命周期
-
-控制反转把对象创建、依赖组装和销毁交给 Spring 容器；依赖注入则描述组件如何获得所需协作者。构造器注入能保证对象创建后依赖完整，字段注入会隐藏依赖并增加测试难度。一个 Bean 通常经历实例化、依赖注入、`@PostConstruct`初始化、投入使用和`@PreDestroy`销毁阶段；连接池、线程池和订阅应在对应生命周期内建立和关闭。
-
-**清单 5.8  构造器注入与 Bean 生命周期**
-
-```java
-@Configuration
-class WaterInfrastructureConfig {
-    @Bean(destroyMethod = "close")
-    ScheduledExecutorService refreshExecutor() {
-        return Executors.newScheduledThreadPool(2);
-    }
-}
-
-@Service
-class StationRefreshService {
-    private final StationRepository repository;
-    private final ScheduledExecutorService executor;
-    private ScheduledFuture<?> task;
-
-    StationRefreshService(StationRepository repository,
-                          ScheduledExecutorService executor) {
-        this.repository = repository;
-        this.executor = executor;
-    }
-
-    @PostConstruct
-    void start() {
-        task = executor.scheduleAtFixedRate(
-                repository::refreshLatest, 0, 30, TimeUnit.SECONDS);
-    }
-
-    @PreDestroy
-    void stop() {
-        if (task != null) task.cancel(true);
-    }
-}
-```
-
-清单5.8展示了基础设施 Bean 与业务服务的依赖方向。调度器由配置类创建并统一销毁，服务只依赖接口和执行器；测试时可以注入假的`StationRepository`和单线程执行器，验证刷新是否按预期发生。定时任务中的异常要被捕获并记录，否则一次未处理异常可能停止后续刷新；任务间隔还要结合数据库连接池容量和监测数据的时效要求确定。
-
-Bean 的作用域也影响生命周期。单例适合无状态服务和连接池，原型适合每次创建独立对象，请求作用域只在 Web 请求中使用。把请求上下文注入单例时，要通过代理或显式参数传递，不能把上一次请求的测站 ID 保存到共享字段。配置属性 record 采用构造器绑定，必须通过`@EnableConfigurationProperties`或`@ConfigurationPropertiesScan`注册；仅在 record 上写注解而没有启用扫描，容器不会创建可注入的`JwtProperties`。
-
-工程目录应与依赖方向一致：`controller`只依赖`service`，`service`依赖领域对象和仓储接口，`repository`适配 PostgreSQL/PostGIS/TimescaleDB，`config`集中放安全、序列化和外部客户端。测试代码按同样的包结构组织，配置文件分为测试 Profile 和生产 Profile，避免在测试中意外连接真实案例水库数据库。
-
-### 5.3.4 自动配置诊断与启动契约
-
-当应用启动失败时，先区分“没有 Bean”“Bean 有多个候选”“配置属性缺失”和“外部依赖不可达”四类原因。开启条件评估报告后，可以看到某个自动配置类为何匹配或未匹配；例如缺少 PostgreSQL 驱动会使数据源自动配置跳过，存在两个相同类型的 Repository 实现会触发歧义。解决问题的顺序应是检查依赖树、读取有效 Profile、核对环境变量、最后才考虑排除自动配置。直接添加随机注解可能掩盖根因，使后续环境再次失败。
-
-启动日志是部署契约的一部分。应用应输出应用名、版本、激活的 Profile、数据库主机（不含密码）、消息主题和健康检查地址；配置值按敏感级别脱敏，JWT 密钥只输出长度或摘要。容器编排系统在收到健康检查前不应把实例加入负载均衡，数据库迁移完成后才允许读取和写入请求。启动阶段如果发现 issuer、数据库 URL 或关键业务参数缺失，应立即失败并给出变量名，而不是使用空字符串继续运行。
-
-配置属性 record 可以集中表达一组强相关参数，并通过 Bean Validation 在启动时校验。发行者不能为空，超时时间必须为正数，数据库连接池大小应有上限。校验失败时应用不会进入可服务状态，运维人员可以在部署日志中定位具体字段。配置对象只负责承载值，密钥轮换、令牌撤销和环境权限仍由安全组件完成，避免把认证逻辑塞进 YAML 解析器。
-
-**清单 5.9  配置属性注册与启动校验**
-
-```java
-@ConfigurationProperties(prefix = "security.jwt")
-@Validated
-public record JwtProperties(
-        @NotBlank String secret,
-        @NotBlank String issuer,
-        @Min(60) @Max(86_400) long accessSeconds,
-        @Min(300) @Max(2_592_000) long refreshSeconds) {}
-
-@Configuration
-@EnableConfigurationProperties(JwtProperties.class)
-class SecurityPropertiesConfig {}
-```
-
-清单5.9把配置错误前移到启动阶段，并明确访问令牌和刷新令牌的有效期范围。生产值由密钥管理器注入，配置文件只保留变量占位符；测试可以提供一组短有效期值验证刷新逻辑，但不应把测试密钥复制到生产 Profile。若项目使用`@ConfigurationPropertiesScan`，可以在启动类统一开启扫描；两种注册方式选择其一即可，重复注册会造成 Bean 名称冲突。
-
-### 5.3.5 Bean 作用域、代理与资源释放
-
-单例 Bean 在应用上下文中只有一个实例，适合无状态服务、Repository 和连接池；它的字段必须线程安全，不能保存某个请求的测站 ID 或当前用户。请求作用域 Bean 每次 HTTP 请求创建，适合请求追踪信息；原型 Bean 每次注入时创建，适合短生命周期的可变对象。把请求作用域对象注入单例时，Spring 使用代理延迟解析当前请求，测试时则要显式建立请求上下文。
-
-生命周期回调要与资源类型匹配。数据库连接池和线程池由配置类创建，使用`destroyMethod`或`@PreDestroy`关闭；消息消费者在应用停止时先停止接收，再等待正在处理的消息完成；WebSocket 和定时刷新在组件或服务销毁时取消。若把资源创建写在构造器里而没有对应释放，容器重启和测试重复启动会留下线程、文件句柄或网络连接。
-
-代理机制还影响`@Transactional`、`@Async`和`@Cacheable`。这些注解通过代理拦截外部调用，同类内部使用`this.method()`绕过代理，因此不会获得事务、异步或缓存行为。解决方案是把不同边界拆到另一个 Bean，或在确有必要时使用编程式模板；不要通过反射强行调用代理。代码评审应把注解所在方法的调用路径写进测试，确保“看起来有注解”与“运行时真的生效”一致。
-
-### 5.3.6 工程骨架的测试切片
-
-工程骨架搭好后，应尽早验证各层能否独立启动。`@WebMvcTest`只加载控制器和 MVC 基础设施，适合检查 JSON、状态码和参数校验；`@DataJpaTest`加载实体、Repository 和事务测试数据库，适合验证查询与索引；完整的`@SpringBootTest`才会装配安全、消息和外部客户端。测试 Profile 使用独立数据库或容器，禁止依赖开发机正在运行的 PostgreSQL 实例。
-
-配置测试至少覆盖三种情况：合法 Profile 能启动并读取 issuer；缺少 JWT 密钥时启动失败；生产 Profile 的`ddl-auto`为`validate`且不会自动改表。依赖注入测试用假的 Repository 和时钟替换真实实现，验证刷新任务、超时和资源释放；集成测试再验证真实 PostgreSQL、Redis 或 Kafka 的连接。这样的分层测试能在代码进入控制器之前发现配置绑定和 Bean 生命周期问题。
-
-目录结构还应服务于模块边界。`common`保存跨模块共享的值对象和错误码，模块专用工具保留在各自目录；`api`只放外部 DTO 和客户端契约，`domain`不依赖 Spring Web；数据库迁移文件按版本命名并与发布记录关联。新增预警服务时，先复制边界和测试结构，再决定是否拆分进程，避免目录先于业务边界膨胀。 每个模块还应提供自己的 README，写明启动 Profile、依赖的外部服务、健康检查和测试命令；新成员按文档即可在隔离环境复现启动过程，减少“只在某台机器上可用”的隐性配置。 文档还应列出本地开发所需的端口、初始化命令和清理方式，保证测试结束后不会遗留后台进程。清单5.10给出本章工程的目录布局，可以对照它检查自己的工程：控制器、服务、领域与持久化各占一层，配置和迁移脚本单列。
-
-**清单 5.10  按职责分层的工程目录**
+**清单 5.6  配套工程后端部分的目录**
 
 ```bash
-src/main/java/com/example/water/
-  controller/   # HTTP适配
-  service/      # 用例与事务边界
-  repository/   # 数据访问
-  domain/       # 实体和值对象
-  config/       # 安全与基础设施配置
-src/main/resources/application.yml
+companion/water-platform-demo/
+  backend/
+    pom.xml                          # 依赖与 Java 版本
+    src/main/java/edu/example/
+      lesson52/                      # 5.2 节：一个控制器，固定数据
+      lesson54/                      # 5.4 节入口：只装配，不含业务代码
+      lesson56/                      # 5.6 节：刷新令牌校验器
+      qingyuan/                      # 完整后端：控制器、服务、实体、Repository、安全配置
+    src/main/resources/application.yml
+    src/test/java/edu/example/       # 测试，包结构与 main 相同
+  db/001_init.sql                    # 建表、约束与索引
+  db/002_seed.sql                    # 五个对象和几条种子观测
 ```
 
-配置应从代码中分离，并可被环境变量覆盖。密钥不得写入版本库。清单5.11的`application.yml`用`${JWT_SECRET}`这类占位符引用环境变量，仓库里只留变量名和默认的非敏感值。
+### 5.3.1 起步依赖：程序为什么能监听端口、输出 JSON
 
-**清单 5.11  Spring Boot应用入口与JWT配置**
+`Lesson52Application`的`main`方法只有一行`SpringApplication.run(...)`，没有创建服务器的代码。监听端口的是 Tomcat，把路径分派到控制器方法的是 Spring MVC，把`List`转成 JSON 的是 Jackson。这三个库都不用自己去找：`pom.xml`里声明一个`spring-boot-starter-web`，Maven 就把它们连同相互匹配的版本一起下载下来。这种“一项能力打包成一个依赖”的坐标叫**起步依赖**（starter）。清单5.7摘自配套工程的`pom.xml`，略去了安全、消息等后面几节才用到的依赖。
 
-```yaml
-spring:
-  datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5432/qingyuan}
-    username: ${DB_USER:qingyuan_app}
-    password: ${DB_PASSWORD}
-security:
-  jwt:
-    secret: ${JWT_SECRET_BASE64}
-    issuer: ${JWT_ISSUER:water-platform}
+**清单 5.7  pom.xml：导入 Spring Boot 3.2.10 的版本清单，声明起步依赖（节选）**
+
+```xml
+  <properties>
+    <java.version>17</java.version>
+    <spring-boot.version>3.2.10</spring-boot.version>
+  </properties>
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-dependencies</artifactId>
+        <version>${spring-boot.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+  <dependencies>
+    <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-web</artifactId></dependency>
+    <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-data-jpa</artifactId></dependency>
+    <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-validation</artifactId></dependency>
+    <dependency><groupId>org.postgresql</groupId><artifactId>postgresql</artifactId></dependency>
 ```
 
-依赖注入优先使用构造器，使依赖明确并便于测试。控制器把DTO交给服务，不直接访问数据库。清单5.12的控制器只有构造器注入的一个服务字段，测试时传入替身即可，不必启动数据库。
+四个依赖都没有写版本号。版本来自`dependencyManagement`里导入的`spring-boot-``dependencies`：它是一张版本清单（BOM），列出 Spring Boot 3.2.10 验证过的几百个库各自的版本，导入之后，清单里有的库一律按它取版本，Web、JPA 和 PostgreSQL 驱动之间不会因为版本不配套而出错。许多教程用的是另一种写法，在`pom.xml`开头用`<parent>`继承`spring-boot-``starter-parent`。两种写法在版本管理上效果相同，因为 parent 内部也是引用这张清单；区别是 parent 还顺带配置了几个构建插件。只导入 BOM 时这些要自己写，配套`pom.xml`里编译插件的`<parameters>``true</parameters>`就是一例，缺了它，`@PathVariable String assetId`这种不写参数名的绑定在运行时找不到名字，文件中的注释说明了后果。
 
-**清单 5.12  查询接口控制器**
+四个起步依赖分别带来：Web（Tomcat、Spring MVC、Jackson）、数据访问（JPA 与连接池，5.4节）、请求体校验（5.5节）和 PostgreSQL 的 JDBC 驱动。Spring Boot 3 建立在 Jakarta EE 之上，所以清单中的导入语句以`jakarta.persistence`、`jakarta.servlet`开头；网上以`javax.`开头的旧示例要改包名才能编译。
+
+库下载下来只是躺在类路径上，谁来创建 Tomcat、注册 JSON 转换器？这一步叫**自动配置**。Spring Boot 启动时检查一批条件：类路径上有 Tomcat 和 Spring MVC 的类，就创建内嵌服务器和请求分派器；有 Jackson，就注册 JSON 转换器；有 JPA 而且配置了数据库地址，就创建连接池。每一条都附带“你没有自己定义同类对象”这个前提，你定义了，默认的那份就让位。所以自动配置是一组带条件的默认值，条件和结果都查得到。
+
+**运行与观察**
+
+在`backend`目录执行`mvn dependency:tree`，在输出里找到`spring-boot-starter-web`一行，它下面挂着`tomcat-embed-core`、`spring-webmvc`和`jackson-databind`，版本号都不是你写的。再给5.2节的启动命令追加参数`-Dspring-boot.run.arguments=–debug`，启动日志里多出一份`CONDITIONS EVALUATION REPORT`：`Positive matches`一栏能找到`DispatcherServletAutoConfiguration`和`JacksonAutoConfiguration`，每一项后面写着它成立的条件；`Negative matches`一栏列出没有生效的配置和原因。以后遇到“某个功能为什么没起作用”，先读这份报告，再决定是补依赖还是改配置。
+
+### 5.3.2 连接配置：随环境变化的值放在哪里
+
+数据库地址在你的笔记本上是`localhost:5432`，在 Docker Compose 里是`postgres:5432`，到了部署环境又是另一个地址；口令各处也不同。这类值如果写在 Java 代码里，每换一个环境就要改代码、重新编译。Spring Boot 的做法是把它们集中写在`src/main/resources/application.yml`中，程序启动时读取。YAML 用缩进表示层级，`spring.datasource.url`这个配置项写出来就是`spring:`下面缩进一层的`datasource:`、再缩进一层的`url:`。
+
+配置值可以写成占位符。配套工程里数据库地址的写法是`${DB_URL:``jdbc:postgresql://``localhost:5432/qingyuan}`，读作：环境变量`DB_URL`有值就用它，没有就用冒号后面的默认值。同一份文件因此不加修改就能用在本机和容器里，差别只在启动前设了哪些环境变量。5.4.1节接数据库时用到的就是这一段（清单5.13），这里先弄清它的读法。
+
+口令为什么不写进仓库？仓库会被克隆、分享、公开，提交历史里出现过一次的口令，删掉文件也抹不掉。配套工程的`application.yml`给`DB_PASSWORD`留了默认值`teaching-only`，是为了让读者克隆下来就能运行，它对应的数据库只监听本机的 127.0.0.1。部署到多人可以访问的环境时，配置文件里只保留`${DB_PASSWORD}`、不给默认值，口令由运维通过环境变量或密钥文件提供；没提供时应用启动失败并指出缺少哪个变量，比带着一个人人知道的口令运行要好。5.6节的 JWT 签名密钥按同样的办法处理。
+
+环境之间差别较多时，可以按 Profile 拆文件：公共部分留在`application.yml`，某个环境特有的部分放进`application-test.yml`这样的文件，启动时用环境变量`SPRING_PROFILES_ACTIVE=test`选择。配套工程的差别只有几个地址和口令，用占位符就够了，没有拆分。预警阈值、特征水位这类业务参数不属于环境差异，它们以表8.1为准，不能在各环境的配置文件里各写一份。
+
+**运行与观察**
+
+环境变量不只能填占位符，还能直接覆盖配置项，规则是把配置项名字里的点换成下划线、字母大写：`server.port`对应`SERVER_PORT`。先设置`SERVER_PORT=8081`（PowerShell 写作`$env:SERVER_PORT=8081`，macOS/Linux 写作`export SERVER_PORT=8081`），再启动5.2节的程序，日志变成`Tomcat started on port 8081`，浏览器要改用 8081 端口访问；代码和配置文件都没有动。练习后关闭这个终端，或把变量清掉，免得影响后面的步骤。
+
+### 5.3.3 构造器注入：对象由谁创建
+
+5.4节的控制器要用到两个对象：查测点台账的`AssetRepository`和查观测的`ReadingService`；`ReadingService`自己又要用`ReadingRepository`。按学过的 Java 写法，控制器里应当有一行`new ReadingService(new ...)`。配套工程里却找不到这样的代码，控制器只在构造器参数里写明“我需要这两个对象”，见清单5.8。
+
+**清单 5.8  用构造器参数声明“我需要什么”（摘自配套工程的两个类）**
 
 ```java
+// ReadingService.java
+@Service
+public class ReadingService {
+    private final ReadingRepository repository;
+    public ReadingService(ReadingRepository repository) { this.repository = repository; }
+    // ……
+}
+
+// AssetController.java
 @RestController
 @RequestMapping("/api/assets")
-class AssetQueryController {
-    private final AssetQueryService queryService;
+public class AssetController {
+    private final AssetRepository assets;
+    private final ReadingService readings;
 
-    AssetQueryController(AssetQueryService queryService) {
-        this.queryService = queryService;
+    public AssetController(AssetRepository assets, ReadingService readings) {
+        this.assets = assets; this.readings = readings;
     }
+    // ……
+}
+```
 
-    @GetMapping("/{id}/readings/latest")   // 路径见 8.1 节契约表
-    ReadingResponse latest(@PathVariable String id) {
-        return queryService.latest(id);
+**谁 new 的**
+
+是 Spring 的容器。应用启动时，它从启动类所在的包向下扫描，找出带`@RestController`、`@Service`、`@Component`这类注解的类和 Repository 接口，为每个类创建一个对象。由容器创建和保管的对象叫 **Bean**。创建某个类之前，容器先看它的构造器需要哪些类型的参数，把那些类型的 Bean 先创建好再传进去。上面的例子里，顺序是`ReadingRepository`、`ReadingService`，然后才轮到`AssetController`。类只声明需要什么，由外部创建好再交给它，这种做法叫**依赖注入**；通过构造器参数来交，叫构造器注入。每种 Bean 默认只创建一个，所有请求共用，这一点的后果在5.3.4节说明。
+
+**为什么用构造器而不是字段**
+
+Spring 也允许在字段上写`@Autowired`，由容器在对象创建之后用反射把值填进去。本书的清单一律用构造器，理由有三条。字段可以声明成`final`，赋值一次之后不会被改动。对象只要创建出来，依赖就是齐全的，不存在“创建了但某个字段还是`null`”的中间状态。第三条最实用：不启动 Spring 也能创建这个类的对象，测试时自己调用构造器、自己传参数就行，字段注入的类离开容器则没法填那个字段。
+
+**测试时怎么传假的**
+
+清单5.9测试`ReadingService.latest`在“测点还没有观测”时的行为。`mock(``ReadingRepository.class)`用 Mockito（测试起步依赖自带）生成一个假的 Repository：它实现了接口的全部方法，默认什么都不做，`when(...).thenReturn(...)`规定某个方法被调用时返回什么。然后像普通 Java 一样`new ReadingService(fake)`。整个测试不连数据库、不启动 Spring，几十毫秒就跑完。
+
+**清单 5.9  自己调用构造器，传入假的 Repository（书中示例）**
+
+```java
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+class ReadingServiceTest {
+    @Test
+    void latestIsEmptyWhenAssetHasNoReading() {
+        ReadingRepository fake = mock(ReadingRepository.class);
+        when(fake.findFirstByIdAssetIdOrderByIdOccurredAtDescIdVersionDesc("DAM-A-D-01"))
+                .thenReturn(Optional.empty());
+
+        ReadingService service = new ReadingService(fake);   // 没有 Spring，就是普通的 new
+
+        assertThat(service.latest("DAM-A-D-01")).isEmpty();
     }
 }
 ```
 
-Spring Boot 3使用`jakarta.servlet.*`命名空间。旧项目从`javax.servlet.*`迁移时，应同步检查依赖、过滤器、验证注解和JPA包名。Jakarta Servlet 6.x是本章基线；迁移完成后还应通过编译、集成测试和容器启动检查确认包路径与运行时容器一致。
+**一个会遇到的失败**
+
+5.4.2节的程序跑通以后，把`ReadingService`类上的`@Service`注释掉，用完整工程的入口`WaterPlatformApplication`启动。应用启动失败，日志末尾的`APPLICATION FAILED TO START`下面有一句`required a bean of type 'edu.example.qingyuan.ReadingService' that could not be found`，前半句指出是哪个类的构造器的第几个参数。原因是去掉注解以后，扫描时不再把这个类当作 Bean，需要它的类就创建不出来。恢复注解后重新启动。5.4节的`Lesson54Application`用`@Import`直接点名装入`ReadingService`，不依赖扫描，所以这个试验要用完整工程的入口来做。
+
+**自测**
+
+（1）`AssetController`的构造器有两个参数，容器按什么顺序创建这三个对象？依据是什么？（2）清单5.9里的`service`是 Bean 吗？（不是，它是测试代码自己创建的普通对象，容器不知道它。）（3）把`ReadingService`改成字段注入，清单5.9的测试还能这样写吗？
+
+### 5.3.4 框架在背后做的另外几件事
+
+这一小节是选读，列出容器的三个行为。它们平时看不见，出问题时需要知道从哪里找原因。
+
+**Bean 是单例，字段不能存请求数据**
+
+`ReadingService`在整个应用里只有一个对象，Tomcat 的几十个工作线程同时调用它。如果在服务类里加一个字段`private String currentAssetId`，在方法开头赋值、后面读取，两个并发请求就会互相覆盖：值班员甲查 PZ-07，拿到的可能是值班员乙刚查的 WL-01 的数据。这种错误单人测试时发现不了。Bean 的字段只放构造器注入进来的、同样无状态的协作对象；每次请求的数据通过方法参数和局部变量传递。
+
+**注解靠代理生效**
+
+`@Transactional`、`@PreAuthorize`、`@Cacheable`这类注解本身不执行任何代码。容器发现某个 Bean 上有它们，注入给别人的就不是原对象，而是一个包了一层的**代理**：外部调用先到代理，代理开启事务或检查权限，再转给原对象。由此得到两条规则：只有经过容器注入的对象才带这些行为，清单5.9里自己`new`出来的`service`没有事务；同一个类内部用`this.方法()`互相调用不经过代理，被调用方法上的注解不起作用。第二条是事务最常见的失效原因，5.4.5节给出例子。
+
+**需要关闭的资源**
+
+线程池、外部连接这类对象要在应用停止时关闭。用`@Bean`方法创建的对象，Spring 在关闭时会寻找它的`close()`或`shutdown()`方法并调用；也可以用`@Bean(destroyMethod = "shutdown")`明确指定，指定的方法必须真实存在。Java 17 的`ExecutorService`只有`shutdown()`，`close()`是 Java 19 才加上的，写成`destroyMethod = "close"`会在启动时报找不到销毁方法。自己写的组件可以在一个方法上标`@PreDestroy`完成清理。数据库连接池由自动配置创建和关闭，不用操心。
 
 ## 5.4 Jakarta Persistence与事务管理
 
 **本节层次**
 
-核心：5.4.1、5.4.2、5.4.10、5.4.11；指导实践：5.4.3、5.4.5、5.4.6、5.4.7、5.4.14；拓展：5.4.4、5.4.8、5.4.9、5.4.12、5.4.13、5.4.15。初学时读核心四小节即可。
+核心：5.4.1、5.4.2、5.4.4、5.4.5、5.4.6；指导实践：5.4.3、5.4.7；拓展：5.4.8、5.4.9、5.4.10、5.4.11。标为拓展的四个小节是选读，前面七个小节不依赖它们。
 
 **进入本节所需知识**
 
-先读5.3节核心内容与附录B P3，能解释表、主键、查询和事务。
+5.3节的连接配置与构造器注入；附录B P3 单元，能解释表、主键、外键、参数化查询和事务。
 
 ### 5.4.1 把固定数据换成数据库查询
 
@@ -511,9 +446,9 @@ Spring Boot 3使用`jakarta.servlet.*`命名空间。旧项目从`javax.servlet.
 
 **实体：一行记录对应一个对象**
 
-清单5.13是配套工程的`AssetEntity.java`。`@Entity`声明这个类的对象与数据库表的行对应，`@Table`指出表名，`@Id`标出主键字段。字段名`assetId`与列名`asset_id`的对应不用逐个声明：Spring Boot 默认把驼峰写法的字段名转换成下划线写法的列名。无参构造器留给框架，它从数据库读出一行后，先用无参构造器创建对象再填入各字段；业务代码使用带参数的构造器。实体只有读取方法、没有`set`方法，业务代码拿到对象后无法随手改动它的字段。表里的`geometry`、`elevation_m`等列在实体中没有对应字段，这是允许的：实体只需声明本程序用到的列，空间位置到第6章才用。
+清单5.10是配套工程的`AssetEntity.java`。`@Entity`声明这个类的对象与数据库表的行对应，`@Table`指出表名，`@Id`标出主键字段。字段名`assetId`与列名`asset_id`的对应不用逐个声明：Spring Boot 默认把驼峰写法的字段名转换成下划线写法的列名。无参构造器留给框架，它从数据库读出一行后，先用无参构造器创建对象再填入各字段；业务代码使用带参数的构造器。实体只有读取方法、没有`set`方法，业务代码拿到对象后无法随手改动它的字段。表里的`geometry`、`elevation_m`等列在实体中没有对应字段，这是允许的：实体只需声明本程序用到的列，空间位置到第6章才用。
 
-**清单 5.13  AssetEntity：与 asset 表对应的实体**
+**清单 5.10  AssetEntity：与 asset 表对应的实体**
 
 ```java
 package edu.example.qingyuan;
@@ -544,9 +479,9 @@ public class AssetEntity {
 
 **Repository：只声明方法，不写实现**
 
-清单5.14是一个接口，全工程找不到它的实现类。应用启动时，Spring Data 读取接口中的方法名，按“`findBy` + 条件 + `OrderBy` + 排序字段”的规则生成查询：`findByActiveTrue``OrderByAssetId`被翻译成一条查询语句，大意是`select ... from asset`` where active = true`` order by asset_id`。继承`JpaRepository<AssetEntity, String>`还带来一批现成的方法，两个类型参数分别是实体类型和主键类型，5.4.2节要用的`existsById`就在其中。方法名里的`Active`、`AssetId`必须与实体字段名对应；拼错了，编译照样通过，错误要到应用启动时才暴露，本小节末尾的故障练习会让你读一次这条错误。
+清单5.11是一个接口，全工程找不到它的实现类。应用启动时，Spring Data 读取接口中的方法名，按“`findBy` + 条件 + `OrderBy` + 排序字段”的规则生成查询：`findByActiveTrue``OrderByAssetId`被翻译成一条查询语句，大意是`select ... from asset`` where active = true`` order by asset_id`。继承`JpaRepository<AssetEntity, String>`还带来一批现成的方法，两个类型参数分别是实体类型和主键类型，5.4.2节要用的`existsById`就在其中。方法名里的`Active`、`AssetId`必须与实体字段名对应；拼错了，编译照样通过，错误要到应用启动时才暴露，本小节末尾的故障练习会让你读一次这条错误。
 
-**清单 5.14  AssetRepository：由方法名派生查询**
+**清单 5.11  AssetRepository：由方法名派生查询**
 
 ```java
 package edu.example.qingyuan;
@@ -561,9 +496,9 @@ public interface AssetRepository extends JpaRepository<AssetEntity, String> {
 
 **控制器：只改数据来源**
 
-控制器的改动见清单5.15，其余部分与5.2节相同。原来的`FIXED`列表删去，换成一个`AssetRepository`类型的字段。这个字段由构造器参数赋值，而全工程没有哪一行代码调用这个构造器：应用启动时，框架先创建 Repository 的实例，再把它作为参数创建控制器，这就是5.3.3节讲的构造器注入（构造器的第二个参数`ReadingService`在5.4.2节说明）。配套文件里每个接口方法上方还多一行`@PreAuthorize(...)`，那是5.6节的权限声明，启用认证之前不起作用，清单中略去。`AssetDto.from`把实体转换成接口约定的响应对象；`map(AssetDto::from)`中的`AssetDto::from`是方法引用，等价于 lambda 表达式`e -> AssetDto.from(e)`。实体不直接作为响应体返回，原因有两个。第一，表里以后可能增加只供内部使用的列（例如停用原因），它们不应自动出现在接口上。第二，接口字段一旦交给前端使用就不能随便改，而表结构还会调整。DTO（数据传输对象）就是隔在两者之间的一层。
+控制器的改动见清单5.12，其余部分与5.2节相同。原来的`FIXED`列表删去，换成一个`AssetRepository`类型的字段。这个字段由构造器参数赋值，而全工程没有哪一行代码调用这个构造器：应用启动时，框架先创建 Repository 的实例，再把它作为参数创建控制器，这就是5.3.3节讲的构造器注入（构造器的第二个参数`ReadingService`在5.4.2节说明）。配套文件里每个接口方法上方还多一行`@PreAuthorize(...)`，那是5.6节的权限声明，启用认证之前不起作用，清单中略去。`AssetDto.from`把实体转换成接口约定的响应对象；`map(AssetDto::from)`中的`AssetDto::from`是方法引用，等价于 lambda 表达式`e -> AssetDto.from(e)`。实体不直接作为响应体返回，原因有两个。第一，表里以后可能增加只供内部使用的列（例如停用原因），它们不应自动出现在接口上。第二，接口字段一旦交给前端使用就不能随便改，而表结构还会调整。DTO（数据传输对象）就是隔在两者之间的一层。
 
-**清单 5.15  AssetController 的改动：注入 Repository，用查询结果替换固定列表**
+**清单 5.12  AssetController 的改动：注入 Repository，用查询结果替换固定列表**
 
 ```java
 // —— AssetController.java 中发生变化的部分 ——
@@ -587,9 +522,9 @@ public interface AssetRepository extends JpaRepository<AssetEntity, String> {
 
 **连接配置**
 
-数据库在哪里、用什么账号连接，写在`src/main/resources/application.yml`中（清单5.16）。`${DB_URL:jdbc:postgresql://...}`的含义是：有环境变量`DB_URL`就用它，没有就用冒号后面的默认值，同一份配置文件因此可以不加修改地用于本机和容器。DDL 指建表、改表这类语句；`ddl-auto: validate`表示应用启动时只核对实体与表结构、不做改动，对不上就拒绝启动；表由`db/001_init.sql`创建，应用本身不建表也不改表。
+数据库在哪里、用什么账号连接，写在`src/main/resources/application.yml`中（清单5.13）。`${DB_URL:jdbc:postgresql://...}`的含义是：有环境变量`DB_URL`就用它，没有就用冒号后面的默认值，同一份配置文件因此可以不加修改地用于本机和容器。DDL 指建表、改表这类语句；`ddl-auto: validate`表示应用启动时只核对实体与表结构、不做改动，对不上就拒绝启动；表由`db/001_init.sql`创建，应用本身不建表也不改表。
 
-**清单 5.16  application.yml 中的数据源配置**
+**清单 5.13  application.yml 中的数据源配置**
 
 ```yaml
 spring:
@@ -604,9 +539,9 @@ spring:
 
 **观测表的实体**
 
-`reading`表的主键由三列组成：哪个对象、什么时刻、第几个版本。同一对象、同一时刻、同一版本只能有一条记录；人工订正不覆盖原值，而是追加一条版本号加1的记录，“当时采到的是什么、后来改成了什么”都查得到。清单5.17用`@EmbeddedId`把这三列组合成一个主键对象`ReadingId`；`@Embeddable`表示`ReadingId`自己不对应一张表，它的三个字段嵌入`reading`表的三列；JPA 规定复合主键类要实现`Serializable`，照写即可。`value`的类型是`BigDecimal`而不是`double`：表中这一列是十进制的`numeric`，实体写成`Double`会在启动核对时被拒绝；二进制浮点数也无法精确表示 0.1、185.091 这样的十进制小数，误差会在累加和比较时显现（`0.1 + 0.2 == 0.3`为假），日降雨量累计、与阈值比较都属于这类运算。缺测时`value`为`null`，与 0 是两回事。
+`reading`表的主键由三列组成：哪个对象、什么时刻、第几个版本。同一对象、同一时刻、同一版本只能有一条记录；人工订正不覆盖原值，而是追加一条版本号加1的记录，“当时采到的是什么、后来改成了什么”都查得到。清单5.14用`@EmbeddedId`把这三列组合成一个主键对象`ReadingId`；`@Embeddable`表示`ReadingId`自己不对应一张表，它的三个字段嵌入`reading`表的三列；JPA 规范要求复合主键类实现`Serializable`。`value`的类型是`BigDecimal`而不是`double`：表中这一列是十进制的`numeric`，实体写成`Double`会在启动核对时被拒绝；二进制浮点数也无法精确表示 0.1、185.091 这样的十进制小数，误差会在累加和比较时显现（`0.1 + 0.2 == 0.3`为假），日降雨量累计、与阈值比较都属于这类运算。缺测时`value`为`null`，与 0 是两回事。
 
-**清单 5.17  ReadingEntity：复合主键与带单位的观测值（节选）**
+**清单 5.14  ReadingEntity：复合主键与带单位的观测值（节选）**
 
 ```java
 @Entity
@@ -629,9 +564,9 @@ public class ReadingEntity {
 }
 ```
 
-清单5.18是观测的 Repository。按时间窗查询不适合用方法名表达，改用`@Query`写出查询语句。这种语句叫 JPQL，写法与 SQL 相近，但`from`后面是实体类名，条件里用的是字段名（`r.id.occurredAt`）而不是列名。语句两端的三个双引号是 Java 的多行字符串；`:assetId`是命名参数，运行时由标了`@Param("assetId")`的方法参数填入，值与语句分开传递，就是附录B P3 单元讲的参数化查询。时间窗取左闭右开$[\mathit{from}, \mathit{to})$：查询“7月1日”和“7月2日”两天时，7月2日零点整的那条观测只出现在后一天的结果里，两天的结果拼接起来既不重复也不遗漏，统计日降雨量、日平均渗压时不会把边界上的观测算两次。取最新观测仍由方法名派生。方法名中的`IdAssetId`要读成`id.assetId`，即先进入主键对象`id`，再取其中的`assetId`；`First`表示只取一条。排序先按时间倒序，同一时刻再按版本号倒序，取到的是订正后的值。
+清单5.15是观测的 Repository。按时间窗查询不适合用方法名表达，改用`@Query`写出查询语句。这种语句叫 JPQL，写法与 SQL 相近，但`from`后面是实体类名，条件里用的是字段名（`r.id.occurredAt`）而不是列名。语句两端的三个双引号是 Java 的多行字符串；`:assetId`是命名参数，运行时由标了`@Param("assetId")`的方法参数填入，值与语句分开传递，就是附录B P3 单元讲的参数化查询。时间窗取左闭右开$[\mathit{from}, \mathit{to})$：查询“7月1日”和“7月2日”两天时，7月2日零点整的那条观测只出现在后一天的结果里，两天的结果拼接起来既不重复也不遗漏，统计日降雨量、日平均渗压时不会把边界上的观测算两次。取最新观测仍由方法名派生。方法名中的`IdAssetId`要读成`id.assetId`，即先进入主键对象`id`，再取其中的`assetId`；`First`表示只取一条。排序先按时间倒序，同一时刻再按版本号倒序，取到的是订正后的值。
 
-**清单 5.18  ReadingRepository：时间窗查询与最新一条**
+**清单 5.15  ReadingRepository：时间窗查询与最新一条**
 
 ```java
 package edu.example.qingyuan;
@@ -675,7 +610,7 @@ public interface ReadingRepository extends JpaRepository<ReadingEntity, ReadingE
 
 **一个会遇到的失败**
 
-把清单5.14的方法名改成`findByActiveTrueOrderByAssetCode`再启动。编译通过，应用却启动失败，日志末尾有一行`PropertyReferenceException: No property 'assetCode' found for type 'AssetEntity'`。原因是 Spring Data 在启动时解析方法名，`AssetEntity`没有名为`assetCode`的字段。改回`AssetId`后重新启动，再访问`/api/assets`确认恢复。另一个常见失败是数据库没有启动或口令不符，日志中出现`Connection refused`或`password authentication failed`，应用同样拒绝启动。这类错误都要从启动日志的最后一个`Caused by`读起，它指向最初的原因。
+把清单5.11的方法名改成`findByActiveTrueOrderByAssetCode`再启动。编译通过，应用却启动失败，日志末尾有一行`PropertyReferenceException: No property 'assetCode' found for type 'AssetEntity'`。原因是 Spring Data 在启动时解析方法名，`AssetEntity`没有名为`assetCode`的字段。改回`AssetId`后重新启动，再访问`/api/assets`确认恢复。另一个常见失败是数据库没有启动或口令不符，日志中出现`Connection refused`或`password authentication failed`，应用同样拒绝启动。这类错误都要从启动日志的最后一个`Caused by`读起，它指向最初的原因。
 
 **自测**
 
@@ -689,9 +624,9 @@ public interface ReadingRepository extends JpaRepository<ReadingEntity, ReadingE
 
 **服务层**
 
-清单5.19是配套工程的`ReadingService`。`@Service`把它登记为由框架创建和注入的组件。它对外提供两个查询方法，调用者不需要知道底下是哪一条 SQL。`latest`返回`Optional`：有观测就装着那条观测，没有就是空的。“没有观测”在这里是一种正常结果，不是异常；它对应 HTTP 的哪个状态码，服务层不关心，也不应该关心，因为调用它的不一定是 HTTP 请求。`@Transactional(readOnly = true)`声明这个方法在一个只读事务中执行，它告诉框架这个方法只读不写，框架和数据库可以据此省去一些工作；事务是什么在5.4.10节讲，这里先照写。
+清单5.16是配套工程的`ReadingService`。`@Service`把它登记为由框架创建和注入的组件。它对外提供两个查询方法，调用者不需要知道底下是哪一条 SQL。`latest`返回`Optional`：有观测就装着那条观测，没有就是空的。“没有观测”在这里是一种正常结果，不是异常；它对应 HTTP 的哪个状态码，服务层不关心，也不应该关心，因为调用它的不一定是 HTTP 请求。方法上的`@Transactional(readOnly = true)`与事务有关。事务是一组要么全部生效、要么全部不生效的数据库操作（附录B P3 单元），服务层的方法通常以它为单位执行。这两个方法只查不改，谈不上“全部不生效”；加上这个注解，是让方法里的查询共用同一个数据库连接，并向框架说明这里只读，Hibernate 因此不必为查出来的对象保留用于比对改动的副本。写入方法上的事务在5.4.4节和5.4.5节展开。
 
-**清单 5.19  ReadingService：服务层的两个查询方法**
+**清单 5.16  ReadingService：服务层的两个查询方法**
 
 ```java
 @Service
@@ -713,11 +648,11 @@ public class ReadingService {
 }
 ```
 
-**控制器只做协议转换**
+**控制器：协议转换，加一次存在性查询**
 
-清单5.20是拆分之后控制器里的`latest`方法。它做三件事：用`existsById`确认对象存在，不存在就抛出异常，由统一的异常处理器转换成 404 和契约错误体；调用服务层取最新观测；把服务层返回的`Optional`翻译成 HTTP 应答，有值时转换成`ReadingDto`并应答 200，空值时应答 204。5.1节说的“204 与 404 要分开”，落到代码上就是这两个分支。
+清单5.17是拆分之后控制器里的`latest`方法。它做三件事：用`existsById`确认对象存在，不存在就抛出异常，由统一的异常处理（5.5.2节）转换成 404 和契约错误体；调用服务层取最新观测；把服务层返回的`Optional`翻译成 HTTP 应答，有值时转换成`ReadingDto`并应答 200，空值时应答 204。5.1节说的“204 与 404 要分开”，落到代码上就是这两个分支。
 
-**清单 5.20  AssetController.latest：对象不存在 404，尚无观测 204**
+**清单 5.17  AssetController.latest：对象不存在 404，尚无观测 204**
 
 ```java
     @GetMapping("/{assetId}/readings/latest")
@@ -732,9 +667,13 @@ public class ReadingService {
     }
 ```
 
-**依赖方向与 DTO**
+**哪些查询可以留在控制器里**
 
-三层之间的依赖是单向的：控制器依赖服务，服务依赖 Repository 接口，Repository 的实现依赖数据库；反过来不成立，`ReadingService`的代码里没有出现任何 HTTP 或 JSON 的类型，单元测试可以直接创建它，传入一个假的 Repository 来检验规则。图5.3标出一次请求可能在哪个边界上失败，以及各自对应的状态码：格式问题在控制器被拒绝（400），对象不存在或状态冲突由业务判断得出（404、409）。测试接口时，除了断言状态码，还应核对响应字段，并确认失败的请求没有留下写了一半的数据。
+第一件事里，控制器直接调用了`AssetRepository`，没有经过服务层。配套工程是这样划界的：控制器负责 HTTP 协议转换，也可以直接用 Repository 做“这个编码存在吗”这种不含业务规则的单次查询；含有规则的查询，以及会被别的入口复用的查询与写入，放在服务层。“取最新观测”含有规则（同一时刻取订正后的版本），消息消费者写入观测时也要用到服务层的方法，所以它们在`ReadingService`里。“编码是否登记过”只是按主键查一次，没有规则可言，目前也只有 HTTP 入口关心它（消费者写入时由外键约束把关）；为它单设一个只转发一行的服务方法，得不到什么。这条界线会随需求移动。以后“存在”如果要附带条件，例如已停用的测点对值班员视为不存在，或者不同角色能看到的测点范围不同，它就成了业务规则，应当挪进服务层，让所有入口得到同一个答案。控制器里针对同一件事出现第二次查询，或者开始读取查出来的对象的字段做判断（例如`asset.isActive()`），也是该挪的信号。
+
+**依赖方向**
+
+依赖只朝一个方向：控制器依赖服务，也可以像上面那样直接依赖 Repository；服务依赖 Repository 接口；Repository 的实现依赖数据库。反过来不成立，Repository 不知道有服务，服务不知道有控制器。`ReadingService`的代码里没有出现任何 HTTP 或 JSON 的类型，单元测试可以直接创建它，传入一个假的 Repository 来检验规则，5.3.3节的清单5.9就是这样做的。图5.3标出一次请求可能在哪个边界上失败，以及各自对应的状态码：格式问题在控制器被拒绝（400），对象不存在或状态冲突由业务判断得出（404、409）。测试接口时，除了断言状态码，还应核对响应字段，并确认失败的请求没有留下写了一半的数据。
 
 <figure markdown>
 ![图5.3](images/chapter05_fig_5_3.svg)
@@ -743,565 +682,428 @@ public class ReadingService {
 
 **运行与观察**
 
-仍然使用`Lesson54Application`。从5.2节的一个类，到接上数据库，再到拆成三层，程序内部变了三次，`–stage=lesson52`与`–stage=lesson54`核对的却是同一份契约，状态码、字段名和错误体都没有变。重构指的就是这种改动：内部结构变了，对外的行为不变；判断重构有没有改坏东西，靠的是这类可以重复执行的检查。再做一个反向试验：把清单5.20中`existsById`的判断删掉，重新启动后请求`/api/assets/DAM-A-XX-99/readings/latest`。应答从 404 变成了 204，一个不存在的对象被报告成“暂无观测”，契约核对脚本在“返回 404”这一项上报告失败。恢复这段判断后重新核对。
+仍然使用`Lesson54Application`。从5.2节的一个类，到接上数据库，再到拆成三层，程序内部变了三次，`–stage=lesson52`与`–stage=lesson54`核对的却是同一份契约，状态码、字段名和错误体都没有变。重构指的就是这种改动：内部结构变了，对外的行为不变；判断重构有没有改坏东西，靠的是这类可以重复执行的检查。再做一个反向试验：把清单5.17中`existsById`的判断删掉，重新启动后请求`/api/assets/DAM-A-XX-99/readings/latest`。应答从 404 变成了 204，一个不存在的对象被报告成“暂无观测”，契约核对脚本在“返回 404”这一项上报告失败。恢复这段判断后重新核对。
 
 **自测**
 
-（1）`ReadingService.latest`为什么返回`Optional`，而不是在没有观测时抛出异常？（没有观测是正常结果；是否算错误、用哪个状态码表达，由调用方决定。）（2）消息消费者收到一条观测后需要写入数据库，它应该调用控制器、服务还是 Repository？为什么？（3）如果让`ReadingService`直接返回`ResponseEntity`，哪一条依赖方向被破坏了？
+（1）`ReadingService.latest`为什么返回`Optional`，而不是在没有观测时抛出异常？（没有观测是正常结果；是否算错误、用哪个状态码表达，由调用方决定。）（2）消息消费者收到一条观测后需要写入数据库，它应该调用控制器、服务还是 Repository？为什么？（3）如果让`ReadingService`直接返回`ResponseEntity`，哪一条依赖方向被破坏了？（4）`latest`方法里的`existsById`直接调用了 Repository。举一个需求变化的例子，说明它什么时候应当挪进服务层。
 
-**后面几小节换一个简化的例子**
+### 5.4.3 分页与稳定排序
 
-配套工程的观测表用复合主键，而且只追加、不修改，这是监测数据的特点，却不方便演示“修改一条记录”时会遇到的问题。本节余下的小节讲关联与懒加载、分页、乐观锁、审计字段和事务，改用清单5.21中简化的`Reading`类：它只有一个自增主键，带版本列，允许修改，接口路径相应写成`/api/readings/{id}`。这个类和清单末尾的`ReadingRepository`只在书里出现，配套工程中没有，不要与前面的`ReadingEntity`及其 Repository 混淆。
+**业务问题**
 
-**清单 5.21  Jakarta实体映射**
+`findInWindow`把时间窗里的观测全部取回。渗压计按5分钟一条计，一天288条，页面画一条日曲线没有问题；分析员把时间窗拉到一年，就是十万多条，全部装进内存、转成 JSON、经网络送到浏览器，数据库连接、服务器内存和页面都吃不消。列表类接口要守两条规矩：一次返回多少条有上限；翻页时既不重复也不漏掉。
 
-```java
-import jakarta.persistence.*;
-import java.math.BigDecimal;
-import java.time.Instant;
+时间窗是第一道限制，它是契约里的必填参数。第二道限制是在时间窗内分页。Spring Data 用`Pageable`表示“第几页、每页几条、按什么排序”，查询方法的返回类型写成`Page`，框架会多发一条`count`查询，把总条数和总页数一并带回。清单5.18在5.4.1节的 Repository 和5.4.2节的服务上各加一个方法。
 
-@Entity
-@Table(name = "reading")
-public class Reading {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    @Column(name = "asset_id", nullable = false, length = 32)
-    private String assetId;
-    @Column(nullable = false, precision = 12, scale = 4)
-    private BigDecimal value;
-    @Column(nullable = false, length = 12) private String unit;
-    @Column(nullable = false) private Instant occurredAt;
-    @Column(nullable = false, length = 16) private String quality;
-    @Version @Column(nullable = false) private long version;
-    @Column(nullable = false) private boolean archived;
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private Instant createdAt;
-    @Column(name = "updated_at", nullable = false)
-    private Instant updatedAt;
-
-    protected Reading() {}
-    public Reading(String assetId, BigDecimal value, String unit,
-                        Instant occurredAt, String quality, Instant now) {
-        this.assetId = assetId;
-        this.value = value;
-        this.unit = unit;
-        this.occurredAt = occurredAt;
-        this.quality = quality;
-        this.createdAt = now;
-        this.updatedAt = now;
-    }
-
-    public Long getId() { return id; }
-    public String getAssetId() { return assetId; }
-    public BigDecimal getValue() { return value; }
-    public String getUnit() { return unit; }
-    public Instant getOccurredAt() { return occurredAt; }
-    public String getQuality() { return quality; }
-    public long getVersion() { return version; }
-    public Instant getCreatedAt() { return createdAt; }
-    public Instant getUpdatedAt() { return updatedAt; }
-    public void replace(BigDecimal value, String unit, Instant occurredAt,
-                        String quality, Instant now) {
-        this.value = value;
-        this.unit = unit;
-        this.occurredAt = occurredAt;
-        this.quality = quality;
-        this.updatedAt = now;
-    }
-
-    /** 工厂方法：由 DTO 映射层调用，统一填充服务器时间。 */
-    public static Reading create(String assetId, BigDecimal value,
-                                      String unit, Instant occurredAt,
-                                      String quality) {
-        return new Reading(assetId, value, unit,
-                occurredAt, quality, Instant.now());
-    }
-
-    /** 带版本校验的替换：客户端版本与当前版本不一致即视为并发冲突。 */
-    public void replaceIfVersion(BigDecimal value, String unit,
-                                 Instant occurredAt, String quality,
-                                 long expectedVersion) {
-        if (this.version != expectedVersion)
-            throw new OptimisticLockException("版本不一致，请重新读取");
-        replace(value, unit, occurredAt, quality, Instant.now());
-    }
-
-    public boolean isArchived() { return archived; }
-}
-
-interface ReadingRepository extends JpaRepository<Reading, Long> {
-    Optional<Reading> findFirstByAssetIdOrderByOccurredAtDesc(String id);
-}
-```
-
-Repository提供基本数据访问，服务层决定一次用例需要哪些读写。查询列表时应分页，避免把多年监测记录一次加载到内存。
-
-实体映射需要同时定义对象身份、数值精度、生命周期和并发更新规则。水位属于有单位的测量值，使用`BigDecimal`并设置数据库精度，避免在累计统计时把二进制浮点误差当作工程变化；`occurredAt`记录设备采样时间，`createdAt`和`updatedAt`记录服务器侧生命周期。`version`由 JPA 在更新时递增，控制器将它映射为响应中的版本，服务层在替换前比较客户端版本。清单5.21通过实体访问器提供读数，DTO 的`ReadingResponse.from`能够通过公开的只读方法取值，而不会依赖反射或直接暴露字段。
-
-实体的无参构造器供 JPA 反射创建，业务构造器负责建立完整不变量；访问器默认只读，修改通过`replace`等有业务含义的方法完成。数据库列名、长度、精度和非空约束应与迁移脚本逐项对照，不能只相信 Java 类型。特别是字符串枚举要用稳定的代码值，展示文字由界面字典提供，这样新增中文名称不会破坏历史记录。
-
-### 5.4.3 关联关系与懒加载边界
-
-测站与读数是一对多关系，读数与测站是多对一关系。多对一侧通常使用懒加载，避免每读取一条读数都立即查询测站；一对多集合也使用懒加载，并通过专门的查询决定何时批量取出。清单5.22展示了双向关系的维护方式：只有聚合根方法可以建立关联，集合不直接暴露给控制器，序列化层使用 DTO 打断循环引用。
-
-**清单 5.22  测站与读数的懒加载关联**
+**清单 5.18  时间窗内的分页查询：页大小设上限，排序写明（书中示例）**
 
 ```java
-import jakarta.persistence.*;
-import java.time.Instant;
-import java.util.*;
+// —— ReadingRepository 中新增 ——
+    @Query("""
+            select r from ReadingEntity r where r.id.assetId = :assetId
+            and r.id.occurredAt >= :from and r.id.occurredAt < :to
+            """)
+    Page<ReadingEntity> findPageInWindow(@Param("assetId") String assetId,
+            @Param("from") OffsetDateTime from, @Param("to") OffsetDateTime to,
+            Pageable pageable);
 
-@Entity
-class StationEntity {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    @Column(name = "asset_id", nullable = false, unique = true)
-    private String assetId;
-    @OneToMany(mappedBy = "station", fetch = FetchType.LAZY)
-    private final Set<StationReadingEntity> readings = new LinkedHashSet<>();
-
-    protected StationEntity() {}
-    StationEntity(String assetId) { this.assetId = assetId; }
-    public String getAssetId() { return assetId; }
-    public Set<StationReadingEntity> getReadings() {
-        return Collections.unmodifiableSet(readings);
-    }
-    public void attach(StationReadingEntity reading) {
-        readings.add(reading);
-        reading.attachTo(this);
-    }
-}
-
-@Entity
-class StationReadingEntity {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "station_pk", nullable = false)
-    private StationEntity station;
-    @Column(nullable = false) private Instant occurredAt;
-
-    protected StationReadingEntity() {}
-    StationReadingEntity(Instant occurredAt) { this.occurredAt = occurredAt; }
-    void attachTo(StationEntity station) { this.station = station; }
-    public Long getId() { return id; }
-    public Instant getOccurredAt() { return occurredAt; }
-    public StationEntity getStation() { return station; }
-}
-```
-
-懒加载将关联数据的读取推迟到访问该关联时；查询用例需要安排这一时机。若在事务外调用集合访问器，会出现`LazyInitializationException`；若为了避免异常把所有关系改成`EAGER`，列表接口又会产生大量无关数据和更大的连接结果集。更安全的做法是在服务层打开事务，在查询中声明需要的关联，随后立即映射成 DTO 并结束实体生命周期。日志、JSON 序列化和模板渲染都不应隐式触发懒加载。
-
-### 5.4.4 N+1 查询与 fetch join
-
-N+1 的典型形状是先查询 N 条读数，再对每条读数访问一次测站字段，数据库日志中会出现 1 条集合查询加 N 条单项查询。数据量小的时候不明显，到了案例水库的历史查询或报表导出就会耗尽连接池。修复前先用 SQL 日志、慢查询日志或测试断言确认问题，再选择 fetch join、`@EntityGraph`、批量大小或 DTO 投影；不能仅凭“加了索引”推断 N+1 已消失。
-
-**清单 5.23  用 fetch join 消除列表接口的 N+1**
-
-```java
-import org.springframework.data.jpa.repository.*;
-import org.springframework.data.repository.query.Param;
-import java.time.Instant;
-import java.util.List;
-
-public interface StationReadingQueryRepository
-        extends JpaRepository<StationReadingEntity, Long> {
-    @Query("select r from StationReadingEntity r "
-         + "join fetch r.station s "
-         + "where s.assetId = :assetId "
-         + "and r.occurredAt >= :from and r.occurredAt < :to "
-         + "order by r.occurredAt desc, r.id desc")
-    List<StationReadingEntity> findForReport(
-            @Param("assetId") String assetId,
-            @Param("from") Instant from,
-            @Param("to") Instant to);
-
-    @EntityGraph(attributePaths = "station")
-    List<StationReadingEntity> findTop100ByOrderByOccurredAtDescIdDesc();
-}
-```
-
-清单5.23的`join fetch`适合有限时间窗的报表；它不适合直接套在带分页的多值集合上，因为连接后数据库先展开行，分页可能截断聚合结果。分页场景可以先按主键分页，再用第二次`where id in (...)`批量抓取关联，或改用只返回所需字段的 DTO 投影。`@EntityGraph`是声明式替代，优点是查询方法仍然可读，缺点是复杂条件下需要回到显式 JPQL 或原生 SQL。
-
-**表 5.5  JPA 查询策略与适用边界**
-
-| 策略            | 解决的问题                        | 使用边界与验证方式                                    |
-|:----------------|:----------------------------------|:------------------------------------------------------|
-| 派生查询        | 简单字段、排序和存在性判断        | 方法名必须可读；复杂条件拆成查询对象并用 SQL 日志核对 |
-| `@Query`        | 明确的 JPQL、fetch join 或聚合    | 参数命名一致；关联集合分页前先验证行数和重复          |
-| `Pageable/Page` | 列表分页、总数和排序              | 限制最大页大小；检查 count 查询是否走索引             |
-| DTO 投影        | 只取列表需要的列                  | 避免把实体关系带出事务；字段增加要同步契约测试        |
-| 原生 SQL        | PostGIS、TimescaleDB 等数据库特性 | 绑定参数、迁移脚本和方言版本必须一起评审              |
-
-选择策略时应先写出业务问题再选 API。表5.5中的派生查询适合“查某测站最新一条”，`Page`适合界面翻页，fetch join适合一次性生成小范围报告；三者都要以执行计划和集成测试确认，而不是把 Repository 方法数量当作性能指标。
-
-### 5.4.5 派生查询、Pageable 与稳定分页
-
-Spring Data 的派生查询名称按“动词 + 属性 + 条件 + 排序”组合，例如`findByAssetIdAndQualityOrderByOccurredAtDescIdDesc`。方法名里的属性必须与实体字段名逐字对应（实体字段叫`assetId`，方法名就写`ByAssetId`）。派生查询在应用启动时才解析，字段改名后编译器查不出来，启动日志会报`PropertyReferenceException`；查询含义复杂或涉及时间半开区间时，优先使用`@Query`明确写出条件。所有列表接口都应限制`size`，默认排序追加唯一 ID 作为 tie-breaker，保证追加新读数时不会在页边界重复或漏掉记录。
-
-分页、排序和过滤也要形成稳定的 URL 契约。`page`表示页码，起始值需由接口契约约定；下面示例采用从0开始的`page`、正数`size`，排序使用`sort=occurredAt,desc`，过滤使用`assetId`、`quality`和时间范围。服务端限制`size`上限，拒绝未知排序字段，返回`content`、`page`、`size`、`totalElements`和`totalPages`，这样前端可以显示总页数而不是用当前页长度猜测。报表导出这类耗时操作不放在一次 HTTP 请求里等待：接口先应答`202 Accepted`并给出任务地址，由客户端轮询任务状态。
-
-**清单 5.24  Pageable 分页查询与服务层上限**
-
-```java
-import org.springframework.data.domain.*;
-import org.springframework.data.jpa.repository.JpaRepository;
-
-interface ReadingPageRepository extends JpaRepository<Reading, Long> {
-    Page<Reading> findByAssetIdAndQuality(
-            String assetId, String quality, Pageable pageable);
-}
-
-@Service
-class ReadingPageService {
-    private static final int MAX_PAGE_SIZE = 200;
-    private final ReadingPageRepository repository;
-
-    ReadingPageService(ReadingPageRepository repository) {
-        this.repository = repository;
-    }
+// —— ReadingService 中新增 ——
+    private static final int MAX_PAGE_SIZE = 500;
 
     @Transactional(readOnly = true)
-    Page<ReadingResponse> page(String assetId, String quality,
-                               int page, int size) {
+    public Page<ReadingEntity> findPage(String assetId, OffsetDateTime from,
+                                        OffsetDateTime to, int page, int size) {
         int bounded = Math.min(Math.max(size, 1), MAX_PAGE_SIZE);
         Pageable request = PageRequest.of(page, bounded,
-                Sort.by(Sort.Order.desc("occurredAt"),
-                        Sort.Order.desc("id")));
-        return repository.findByAssetIdAndQuality(assetId, quality, request)
-                .map(ReadingResponse::from);
+                Sort.by("id.occurredAt", "id.version").ascending());
+        return repository.findPageInWindow(assetId, from, to, request);
     }
-}
 ```
 
-清单5.24返回的`Page`包含总元素数和总页数，适合需要页码跳转的管理界面；只需向后滚动时可以使用游标分页，避免高页码的`OFFSET`扫描。默认排序必须显式写出，不能依赖数据库自然顺序。查询服务只把实体映射成 DTO 后离开事务，避免序列化阶段再次访问懒加载关系。
+**页大小由服务端封顶**
 
-### 5.4.6 乐观锁与审计字段
+`size`来自请求参数，调用方写`size=1000000`，分页就形同虚设，所以服务层把它夹在 1 和 500 之间。页码从 0 开始是 Spring Data 的约定，接口文档里要写明。
 
-监测读数的修改通常不是高冲突写入，但测站配置、预警规则和人工订正可能被多个值班员同时编辑。`@Version`把冲突检测交给数据库更新条件：更新语句带上旧版本，影响行数为零就抛出乐观锁异常，异常处理器返回409，客户端重新读取后让用户决定是否合并。它不能替代权限检查，也不能保证跨表操作自动一致；跨聚合修改仍要由事务边界和约束共同保护。
+**排序必须能分出先后**
 
-审计字段至少分为创建时间、更新时间、操作者和来源。创建/更新时间可以由 Spring Data Auditing 自动填充，操作者来自经过认证的主体；设备上报的`assetId`和采样时间属于业务字段，不能用服务器时间覆盖。对逻辑删除记录保留删除时间和原因，查询默认过滤，审计查询按权限开放。
+数据库不保证没有`ORDER BY`的查询按什么顺序返回；排序键有并列时，并列的几行谁先谁后也不确定，两次查询可能不同。假如只按`occurredAt`排序，而某一时刻恰好有原始值和订正值两个版本，它们又正好落在页的边界上，那么第一页末尾和第二页开头可能是同一行，另一行则哪一页都不出现。办法是让排序键的组合唯一。对一个测点来说，`(occurredAt, version)`是主键去掉对象编码后剩下的部分，不会并列，清单中的`Sort`就按这两项写。
 
-**清单 5.25  乐观锁与审计字段映射**
+页码分页每翻一页都要数据库从头数到偏移位置，页码越大越慢，`count`查询在大表上也不便宜。只需要“继续往后加载”的场景可以改用游标分页：记住上一页最后一行的排序键，下一页从它后面取，见附录C的“分页、游标与查询预算”。导出全年数据这类耗时操作不放在一次请求里等：接口先应答`202 Accepted`并给出任务地址，由客户端轮询任务状态。
+
+到这里已经用过两种写查询的办法：方法名派生和`@Query`。表5.5把它们和后面会遇到的另外三种放在一起，选择时先写出业务问题，再挑够用的那一种。
+
+**表 5.5  JPA 查询的几种写法与适用范围**
+
+| 写法            | 适合的问题                               | 使用时注意                                              |
+|:----------------|:-----------------------------------------|:--------------------------------------------------------|
+| 方法名派生      | 单表、条件简单：取最新一条、判断是否存在 | 方法名与字段名逐字对应，拼错要到启动时才报错（5.4.1节） |
+| `@Query`        | 时间窗、多条件、需要写明排序             | 参数名与`@Param`一致；时间窗统一左闭右开                |
+| `Pageable/Page` | 需要总页数、能跳页的列表                 | 页大小封顶；排序键唯一；留意`count`查询的开销           |
+| DTO 投影        | 列表只用到少数几列                       | 查询直接返回`record`，不把整个实体带出服务层            |
+| 原生 SQL        | PostGIS 空间函数、TimescaleDB 时间桶聚合 | 参数绑定；语句与数据库版本、迁移脚本一起评审            |
+
+### 5.4.4 写入与约束：幂等写入与订正
+
+**业务问题**
+
+观测不是由页面录入的。网关把仪器读数整理成事件，经消息队列送到后端，由消费者调用服务层写入数据库。网络会抖动，网关等不到确认就重发，消息队列在消费者重启后也会把没确认的消息再投一次，所以同一条观测到达两次是常态。写入方法必须做到：同一条观测无论到达几次，库里只有一行。这就是5.1节说的幂等。消息队列怎样配置是5.7节的选学内容；服务层这个写入方法不管调用者是谁都要这样写，属于主线。
+
+事件的形状见清单5.19，它是配套工程的`ReadingEvent.java`。`eventId`由网关在采集时生成，重发时不变，后端靠它认出重复。
+
+**清单 5.19  ReadingEvent：一次观测上报携带的字段**
 
 ```java
-import jakarta.persistence.*;
-import org.springframework.data.annotation.*;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import java.time.Instant;
-
-@MappedSuperclass
-@EntityListeners(AuditingEntityListener.class)
-abstract class AuditedEntity {
-    @CreatedDate @Column(nullable = false, updatable = false)
-    private Instant createdAt;
-    @LastModifiedDate @Column(nullable = false)
-    private Instant updatedAt;
-    @CreatedBy @Column(length = 64, updatable = false)
-    private String createdBy;
-    @LastModifiedBy @Column(length = 64)
-    private String updatedBy;
-    public Instant getCreatedAt() { return createdAt; }
-    public Instant getUpdatedAt() { return updatedAt; }
-    public String getUpdatedBy() { return updatedBy; }
-}
-
-@Entity
-@Table(name = "station_config")
-class StationConfigEntity extends AuditedEntity {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    @Version @Column(nullable = false)
-    private long version;
-    @Column(name = "asset_id", nullable = false, unique = true)
-    private String assetId;
-    @Column(nullable = false) private boolean archived;
-    public long getVersion() { return version; }
-    public String getAssetId() { return assetId; }
-    public boolean isArchived() { return archived; }
-}
+/** Kafka 观测事件契约，字段与第8章 8.3 节一致。 */
+public record ReadingEvent(String eventId, String assetId, OffsetDateTime occurredAt,
+                           int version, BigDecimal value, String unit,
+                           String quality, String source) {}
 ```
 
-启用审计时要在配置类加入`@EnableJpaAuditing`并提供`AuditorAware<String>`，测试中用固定操作者替代真实登录主体。审计字段写入与业务更新必须属于同一事务；如果把审计写入另一个异步任务，主记录提交后任务失败会造成不可解释的缺口。清单5.25的版本列属于并发控制，审计人和时间属于追责信息，两者用途不同，不能用一个“更新时间”字段代替。
+清单5.20是`ReadingService`里的写入方法，也就是清单5.16末尾略去的那一段。
 
-### 5.4.7 索引设计与 PostgreSQL 迁移
+**清单 5.20  ReadingService.accept：先预检，再由唯一索引把关**
 
-索引要由过滤、排序、连接和唯一性共同决定。测站读数列表通常先按`station_id`过滤，再按`measured_at`和`id`倒序，因此联合索引应保持相同的前缀顺序；质量码只有在选择性较高或统计查询频繁时才适合放入索引。索引不能替代时间分区、TimescaleDB 超表或 PostGIS 空间索引，创建后要用`EXPLAIN (ANALYZE, BUFFERS)`核对实际执行计划；执行计划算子与代价模型的解释见 PostgreSQL 官方文档<sup>[[35]](../../references.md#ref35)</sup>，超表与连续聚合的行为约束见 TimescaleDB 官方文档<sup>[[36]](../../references.md#ref36)</sup>。
+```java
+    /** 幂等写入：先按 eventId 预检，并发重投由数据库复合唯一索引兜底。 */
+    @Transactional
+    public void accept(ReadingEvent event) {
+        if (repository.existsByEventId(event.eventId())) return;
+        repository.saveAndFlush(new ReadingEntity(
+                new ReadingEntity.ReadingId(event.assetId(), event.occurredAt(), event.version()),
+                event.eventId(), event.value(), event.unit(), event.quality(), event.source()));
+    }
+```
 
-**清单 5.26  PostgreSQL 索引与扩展迁移**
+**两道防线**
+
+第一道是`existsByEventId`：查一下这个编号写过没有，写过就直接返回。绝大多数重复在这里被挡掉。只靠它还不够：两个线程同时处理同一事件的两份拷贝时，可能都查到“没写过”，然后都去插入。第二道防线在数据库。`db/001_init.sql`给`reading`表建了一个唯一索引`reading_event_uidx`，覆盖`(occurred_at, event_id)`两列（建表语句见5.4.7节的清单5.26）。两个并发的插入只有一个能成功，另一个被数据库拒绝，Spring 把这个错误包装成`DataIntegrityViolationException`抛出。先查后写的检查挡不住并发，唯一约束才是最终的裁决者；预检的作用是让常见的重复不必走到报错这一步。索引里带上`occurred_at`，是因为`reading`是按时间分区的 TimescaleDB 超表，超表上的唯一索引必须包含分区列。
+
+**两处写法的原因**
+
+用`saveAndFlush`而不用`save`：`save`只是把对象交给 JPA，插入语句可能拖到事务提交时才发出；`saveAndFlush`让语句立刻执行，违反约束的异常就在这一行抛出，位置明确。异常在哪里接住也有讲究。`accept`方法内部不捕获它，因为数据库报错以后这个事务已经不能继续使用，只能回滚。配套工程在调用方`ReadingConsumer`里捕获，那里已经在事务之外：记一条“重复事件已忽略”的日志，然后正常返回，消息被确认，不会重投（见5.7.3节的清单5.48）。
+
+**订正：追加一个版本**
+
+观测写入以后不修改、不删除。仪器故障、抄录错误需要更正时，追加一行：对象和时刻不变，`version`加1，`source`记为人工，`revision_reason`写明原因，原来那一行原样保留。这是`reading`表把`version`放进主键的用意，也是契约表中`PUT /api/readings/{id}`一行“订正后的记录（版本 +1）”“观测不删除，只增版本”的含义：接口名义上是修改，落到库里是追加。这样做的理由来自监测业务。预警是依据当时的观测发出的，事后复盘要能回答“发预警那一刻系统看到的是什么值”；原值被覆盖，这个问题就无从回答。5.4.1节的“取最新一条”先按时间倒序、再按版本号倒序，取到的自然是订正后的值。
+
+**运行与观察**
+
+数据库按5.4.1节的方式启动后，种子数据里 PZ-07 有一条质量码为`suspect`的观测，事件编号`SEED-PZ07-004`。用清单5.21给它追加一个订正版本，执行方式与5.4.1节修改`active`的练习相同。
+
+**清单 5.21  订正一条可疑观测：复制原行，版本号加 1，写明原因**
 
 ```sql
--- V20260807_01__reading_indexes.sql
-CREATE EXTENSION IF NOT EXISTS postgis;
-CREATE EXTENSION IF NOT EXISTS timescaledb;
-
-CREATE INDEX IF NOT EXISTS idx_reading_station_time
-    ON reading (asset_id, occurred_at DESC, id DESC);
-CREATE INDEX IF NOT EXISTS idx_reading_quality_time
-    ON reading (quality, occurred_at DESC)
-    WHERE quality IN ('valid', 'suspect');
-CREATE TABLE IF NOT EXISTS reading_idempotency (
-    idempotency_key text PRIMARY KEY,
-    reading_id      bigint NOT NULL,
-    created_at      timestamptz NOT NULL DEFAULT now()
-);
--- 主键即唯一约束；若采用独立索引写法，注意与建表语句同批迁移
-CREATE INDEX IF NOT EXISTS idx_reading_idem_created
-    ON reading_idempotency (created_at);
-
--- 大表迁移时在低峰期执行，并在发布记录中保存执行耗时
+INSERT INTO reading(asset_id, occurred_at, version, event_id,
+                    value, unit, quality, source, revision_reason)
+SELECT asset_id, occurred_at, version + 1, 'REV-PZ07-004',
+       119.0, unit, 'valid', 'manual', '人工复核：现场记录为 119.0'
+FROM reading WHERE event_id = 'SEED-PZ07-004';
 ```
 
-清单5.26使用版本化迁移而不是让应用启动时猜测表结构。`ddl-auto: validate`只校验实体和数据库是否一致，生产环境的建表、扩展、索引和超表转换都应由迁移工具执行。索引创建会占用 I/O 和锁资源，大表可采用在线创建并单独观察；删除索引前先检查慢查询和回滚方案。迁移版本必须可重复检查，禁止把密码、真实连接串或未审计的临时 SQL 提交到教材仓库。
+再用宽时间窗请求`/api/assets/DAM-A-PZ-07/readings`，结果从五条变成六条：同一个`occurredAt`下有两行，`version`为1的仍是`suspect`的 121.9，`version`为2的是`valid`的 119.0。画曲线时同一时刻取版本号最大的一行。把这条`INSERT`原样再执行一次，数据库报`duplicate key value violates unique constraint`：对象、时刻、版本三项与刚写入的那一行相同，主键不允许第二行。
 
-建表策略要与发布流程绑定。开发 Profile 可以在一次性实验数据库上使用自动更新，帮助学生快速观察列映射；测试 Profile 使用迁移脚本建立干净数据库，确保约束、索引和扩展都经过验证；生产 Profile 只允许校验，迁移由发布流水线在备份和审批之后执行。这样，应用启动不会因为实体类的一个拼写变化而悄悄改写业务表，数据库变更也能在代码评审中看到完整差异。
+**需要知道的一个边界**
 
-一次迁移应当有明确的前置条件、执行动作、验证查询和回滚策略。新增可空列通常可以先发布，再由后台任务填充，最后在下一版本加非空约束；直接把大表列改为非空可能长时间持锁。删除列则要先停止读写、确认日志和报表不再引用，保留一个可恢复窗口。对时序表，分区或超表转换还要评估历史数据规模、压缩策略和保留期限，避免一次性操作阻塞实时写入。
+`JpaRepository`的`save`和`saveAndFlush`对“主键已经有值”的对象先按主键查一次：库里没有就插入，有就把字段更新成新值。`ReadingEntity`的主键由调用方给出，所以如果送来的事件与库里某一行的对象、时刻、版本都相同，只是`eventId`不同，`accept`会更新那一行，而不是报主键冲突。正常的网关不会发出这样的事件，配套的教学代码也没有拦它。要让数据库层面彻底做到只追加，写入可以改用第8章清单8.8那样的原生`INSERT ... ON CONFLICT DO NOTHING`语句，应用账号也不授予`reading`表的`UPDATE`和`DELETE`权限。
 
-索引列的顺序应由真实查询的选择性决定，而不是按字段名称排列。以测站和时间联合索引为例，先按`station_id`筛选能缩小扫描范围，再用时间倒序满足最新读数列表；若查询还经常过滤质量码，应通过执行计划判断把质量码放进联合索引还是建立部分索引。索引过多会拖慢写入、增加 vacuum 成本和备份体积，所以每个索引都要登记服务、查询模板、预计收益和删除条件。
+**自测**
 
-### 5.4.8 查询测试、执行计划与观测
+（1）去掉`existsByEventId`这一行，程序还幂等吗？代价是什么？（仍然幂等，唯一索引会拒绝重复；但每次重复都要走一遍“插入、报错、回滚”，日志里也多出一批异常。）（2）去掉唯一索引、只留预检呢？（3）值班员发现昨天 14:00 的渗压值抄错了，应该修改原行还是追加版本？复盘时各有什么后果？
 
-Repository 测试不能只验证返回了几条记录，还要验证查询语义和数据库行为。对最新读数测试“同一时间按 ID 取最大值”的稳定排序，对分页测试第一页、最后一页和空页，对时间范围测试左闭右开避免相邻窗口重复。对 fetch join 测试查询次数上限，使用 SQL 统计器或数据源代理确认没有 N+1；对乐观锁测试两个事务读取同一版本时只有一个更新成功。
+### 5.4.5 事务基础
 
-集成测试应使用独立的 PostgreSQL 数据库，并在测试开始时执行同一套迁移脚本。测试数据包含多个测站、相同时间戳的不同 ID、valid/suspect/missing 三种质量码以及跨月时间边界。这样既能验证索引前缀和排序，也能发现 DTO 映射把单位、时区或质量码丢失的问题。测试结束后回滚事务或销毁临时数据库，不能依赖开发机残留数据。
+**业务问题**
 
-执行计划是查询优化的证据。使用`EXPLAIN (ANALYZE, BUFFERS)`时记录规划时间、实际行数、共享命中率和是否发生顺序扫描；不要只看“用了索引”这一行。数据量变化后要重新分析统计信息，时间序列持续增长时还要观察分区裁剪和压缩段读取。优化目标是满足接口时延和数据库资源预算，而不是让每条 SQL 都套上索引。
+第8章的业务链里有一步“派单”：值班员确认预警以后创建处置工单。落到数据库是两条语句，一条把`warning`表中这条预警的状态从`acknowledged`改为`assigned`，一条向`work_order`表插入工单。如果第一条执行完，第二条因为某个字段超长而失败，库里就留下一条“已派单”却找不到工单的预警；值班员看到它已经派出，不会再管，实际上没有人去现场。
 
-应用层也应暴露可观测指标：按查询名统计耗时分位数、返回行数、分页页大小、慢查询次数和锁等待；日志中记录`traceId`、测站和时间窗口，不记录完整 SQL 参数中的敏感信息。发现慢查询时，先从请求追踪定位到 Repository，再对照执行计划和数据库指标，最后决定改查询、改索引还是调整缓存。缓存只适合允许短暂陈旧的读模型，不能掩盖实体关系和事务边界设计错误。
+**事务**就是用来排除这种中间状态的。它把几条语句捆成一个整体，结束方式只有两种：**提交**，全部生效；**回滚**，全部撤销，如同没有执行过。教科书用 ACID 四个字母概括事务的性质，放到派单这个例子里分别是：
 
-当时序数据达到保留期限，可以按业务规则归档或压缩，而不是直接删除在线表中的随机行。归档任务要记录批次号、时间窗口、行数和校验摘要，完成后再更新保留标记；查询服务默认只访问在线窗口，需要历史数据时走异步任务。任何清理操作都要经过审批、备份和演练，保证误删时能恢复并解释影响范围。
+- **原子性**（Atomicity）：改预警状态和插入工单要么都发生，要么都不发生。
 
-分页接口的总数查询也可能成为瓶颈。管理界面需要精确总页数时使用`Page`，但在持续追加的时序流中可以返回“是否还有下一页”和游标，避免对数百万行执行`count(*)`。接口文档应说明两种模式的排序、最大窗口和一致性范围；客户端不能把游标解码后自行改写时间边界，否则会跳过记录或重复处理。服务端应对非法游标返回400，并在日志中保留解析失败的错误码。
+- **一致性**（Consistency）：提交时数据库的约束全部成立，例如工单的`warning_id`必须指向存在的预警。应用层的规则（先确认才能派单）由代码在同一个事务里检查。
 
-查询对象还要保护数据库资源。限制单次时间跨度、最大页大小、并发导出任务数和每个租户的速率；复杂统计超过预算就创建异步任务，返回任务 ID 和进度。取消任务时释放连接和临时表，失败时保留执行计划摘要和迁移版本，方便运维复盘。这些约束与实体映射一起构成查询服务的运行条件，接口实现和测试应同时检查查询结果、资源占用与失败恢复。
+- **隔离性**（Isolation）：另一个请求不会看到“状态已改、工单还没插入”的半成品。隔离有强弱几档，见5.4.9节选读。
 
-数据访问评审还应检查三个容易被忽略的边界。第一，实体的时间字段必须明确时区，数据库连接和应用 JVM 统一使用 UTC，展示层再转换为值班员时区；第二，单位换算应在进入实体前完成并保存单位代码，不能让查询层猜测“米”或“毫米”；第三，删除和归档要区分业务证据与缓存数据，水位原始记录通常只允许追加订正，不允许物理覆盖。把这些边界写进实体约束、Repository 方法名和集成测试，才能让后续的事务、消息和预警计算建立在可信数据上。
+- **持久性**（Durability）：提交成功以后，即使服务器马上断电，重启后这两处修改都还在。
 
-还要把数据访问失败设计成可恢复的运维事件。连接池耗尽、锁等待超时、违反唯一约束和迁移版本不匹配分别对应不同的处理路径：前两者需要限流、重试或降级，唯一约束通常提示客户端重复提交，版本不匹配则应阻止实例加入流量并触发发布告警。异常日志记录 SQL 操作名、迁移版本、追踪 ID 和安全的参数摘要，响应只返回稳定错误码。值班员据此可以区分“请求需要修改”“稍后重试”和“发布需要回滚”，而不是面对一条无法行动的数据库异常文本。
+**在 Spring 里怎样划定事务**
 
-最后，查询契约应写入接口文档和回归测试：字段名称、单位、时区、排序、分页边界及错误码都要有固定示例。优化后用相同输入检查返回值和错误响应，并比较执行计划与耗时，确认性能变化没有破坏接口约定。 发布前还应由应用、数据库和运维共同复核迁移窗口、备份点与回滚责任人。
+在服务类的公开方法上加`@Transactional`。方法开始时框架开启事务，方法正常返回时提交，方法抛出运行时异常（`RuntimeException`及其子类）时回滚。清单5.22是第8章`WarningWorkflowService.dispatch`的骨架，完整代码见清单8.15。
 
-### 5.4.9 统计服务中的数值稳定性
-
-`WaterDataSummary`是服务层的内存统计对象，不是 JPA 实体，也不承担 Repository 或事务职责。它适合在一次批处理用例内聚合读数，完成后由服务决定是否持久化汇总表。这个对象不是线程安全的：两个线程同时更新可能读到相同的`dataCount`并覆盖结果；并且直接累加大量`double`会积累舍入误差。并发场景应按测站分片、在服务层串行处理，或使用数据库聚合与明确的锁策略。
-
-Welford 增量算法把新值与当前均值的差作为修正量，数值稳定性优于反复计算“总和除以计数”。本章示例用`averageLevel += (newLevel - averageLevel) / (dataCount + 1)`表达核心步骤；若业务要求厘米级可追溯，应把输入规范化为`BigDecimal`，并在批量汇总结束时统一舍入，而不是每条记录都截断。
-
-### 5.4.10 事务边界与传播
-
-`@Transactional`通常标注在公开服务方法上。Spring默认通过代理拦截外部调用；同一Bean内部用`this.method()`自调用不会经过代理，因此方法上的新事务注解不会生效。需要`REQUIRES_NEW`时，应把该职责放到另一Bean。
-
-**清单 5.27  事务代理、审计传播与提交后事件**
+**清单 5.22  一个事务里的两步：改预警状态，插入工单（骨架，完整代码见第8章）**
 
 ```java
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.*;
-import java.time.Instant;
-
-record ReadingSavedEvent(Long readingId, String assetId) {}
-
-@Service
-class AuditService {
-    private final AuditRepository auditRepository;
-    AuditService(AuditRepository auditRepository) {
-        this.auditRepository = auditRepository;
+    @Transactional
+    public WorkOrderEntity dispatch(long warningId, String ownerRole,
+                                    Instant dueAt, String action) {
+        if (warnings.transit(warningId, "acknowledged", "assigned") == 0)   // 第一条语句
+            throw new Conflict("ILLEGAL_TRANSITION", "必须先确认预警才能派单");
+        return orders.save(new WorkOrderEntity(warningId, ownerRole, dueAt, action));  // 第二条
     }
+```
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void record(String action) {
-        auditRepository.save(new AuditLog(action, Instant.now()));
-    }
-}
+事务的边界放在服务层的方法上，因为“一件业务上完整的事”正是服务方法表达的东西。放在控制器里，HTTP 的细节会和数据一致性搅在一起，消息消费者也用不上；放在 Repository 里又太细，每个 Repository 方法各开各的事务，两步之间就没有保护。有两个默认行为需要记住。一是回滚只针对运行时异常，方法声明抛出的受检异常默认不触发回滚，需要时写`@Transactional(rollbackFor = Exception.class)`。二是在方法里用`try/catch`把异常接住而不再抛出，框架就看不到异常，照常提交。5.4.2节的查询方法上写的是`@Transactional(readOnly = true)`，开启的是只读事务；它只是一个声明，拦不住方法里调用`save`，也不能代替数据库账号的权限控制。
 
+**最常见的坑：同类内部调用**
+
+5.3.4节说过，`@Transactional`靠代理生效，只有从外部经过代理进来的调用才会开启事务。清单5.23的写法看上去有事务，运行时却没有。
+
+**清单 5.23  同类内部调用绕过代理，事务注解不起作用**
+
+```java
 @Service
-class ReadingCommandService {
-    private final ReadingRepository repository;
-    private final AuditService auditService;
-    private final ApplicationEventPublisher eventPublisher;
-
-    ReadingCommandService(ReadingRepository repository,
-            AuditService auditService,
-            ApplicationEventPublisher eventPublisher) {
-        this.repository = repository;
-        this.auditService = auditService;
-        this.eventPublisher = eventPublisher;
+public class WarningWorkflowService {
+    // 控制器调用的是这个方法，它没有事务注解
+    public WorkOrderEntity dispatchWithDefaults(long warningId) {
+        return this.dispatch(warningId, "DUTY", Instant.now().plus(4, ChronoUnit.HOURS), "现场巡查");
+        //     ^^^^ 对象内部的直接调用，不经过代理：dispatch 上的 @Transactional 没有机会生效
     }
 
     @Transactional
-    public void save(Reading reading) {
-        Reading saved = repository.save(reading);
-        auditService.record("SAVE_READING"); // 经另一Bean代理调用
-        eventPublisher.publishEvent(
-                new ReadingSavedEvent(saved.getId(), saved.getAssetId()));
+    public WorkOrderEntity dispatch(long warningId, String ownerRole, Instant dueAt, String action) {
+        // ……两条语句
     }
 }
 ```
 
-主业务是否应与审计记录使用不同事务，取决于失败语义；不能只为展示传播行为而滥用新事务。首次后端课程重点掌握默认传播、回滚规则和事务边界即可。清单5.27还把领域事件发布放在保存之后，但事件处理器要等主事务提交成功才执行；如果保存回滚，提交后监听器不会收到该事件，从而避免把未落库的读数传播给下游。
+没有事务时，两条语句各自立即生效，第二条失败，第一条已经撤不回来，正是开头描述的事故。改法有两种：把`@Transactional`标在外部实际调用的那个方法上；或者把`dispatch`移到另一个 Bean，通过构造器注入后调用。判断“有没有事务”要看调用是不是从别的 Bean 进来的，看方法上有没有注解并不可靠。
 
-### 5.4.11 事务的 ACID 契约与边界
+**运行与观察**
 
-事务将一个业务用例中的多步数据库操作组织为共同提交或回滚的单元。原子性要求保存读数、更新最新值和写入审计要么全部成功、要么全部回滚；一致性要求外键、唯一键、非空和业务检查在提交点成立；隔离性控制并发事务之间能看到哪些中间状态；持久性要求提交后的数据在进程重启后仍可恢复。应用服务应围绕一个可说明的业务结果划定边界，例如“接收一个测站读数并生成审计事件”，而不是让控制器、Repository 和异步线程各自开启一段互不相干的事务。
+在`application.yml`里加一行`logging.level.``org.springframework.``transaction.``interceptor: TRACE`，重新启动后请求一次最新观测。日志里出现成对的两行：`Getting transaction for`` [edu.example.qingyuan.``ReadingService.latest]`和`Completing transaction`` for [...]`，这是代理在方法前后做的事。同类内部调用的那种写法看不到这两行。练习后删去这行配置。
 
-清单5.27中的`save`由外部调用进入事务代理，Repository 写入和审计调用共享默认事务；`AuditService.record`使用`REQUIRES_NEW`时会挂起外层事务，形成独立审计提交。图5.4把代理边界、挂起和提交后事件画成一条时序，读者可以据此判断“代码出现了注解”是否真的意味着运行时开启了新事务。
+**事务里不要等外部系统**
+
+事务开着的时候占用一个数据库连接，改过的行还被锁着。在事务里调用短信网关、请求另一个 HTTP 服务，对方慢几秒，连接和锁就多占几秒；对方调用成功以后事务又回滚，短信也追不回来。通知、刷新缓存、发消息这类动作放到事务提交之后再做，5.7节讲具体做法。
+
+**自测**
+
+（1）`dispatch`里第二条语句失败时，第一条语句改过的预警状态最终是什么？依据 ACID 的哪一条？（2）方法里写了`try { orders.save(...); } catch (Exception e) { log.warn(...); }`，第二步失败后事务提交还是回滚？（3）为什么说`readOnly = true`不能当作权限控制？
+
+### 5.4.6 状态修改与并发冲突
+
+**业务问题**
+
+观测只追加，预警和工单则要修改：预警的状态从`open`走到`acknowledged`、`assigned`、`closed`。两个值班员在各自的屏幕上看到同一条`open`的预警，几乎同时点了“确认”。按“先读出来，判断状态是 open，再写回 acknowledged”的写法，两个请求都读到`open`，都通过判断，都写入成功，两个人都以为是自己确认的，后面各自派单，现场就会收到两张工单。后写的人悄悄盖掉先写的人的结果，这类问题叫**丢失更新**。
+
+**主要做法：带状态条件的更新**
+
+把“我期望的旧状态”写进`UPDATE`的`WHERE`条件，让数据库在一条语句里同时完成判断和修改。清单5.24与第8章8.3节的写法一致，那里有配套的 SQL（清单8.10）和完整的服务与控制器。
+
+**清单 5.24  条件更新：影响行数为 0 就是冲突（与第8章写法一致）**
+
+```java
+// WarningRepository：返回值是被改动的行数
+    @Modifying(clearAutomatically = true)
+    @Query("""
+        update WarningEntity w set w.status = :next
+        where w.warningId = :id and w.status = :expected
+          and w.evaluable = true
+        """)
+    int transit(@Param("id") long id, @Param("expected") String expected,
+                @Param("next") String next);
+
+// WarningWorkflowService
+    @Transactional
+    public WarningEntity acknowledge(long warningId) {
+        int changed = warnings.transit(warningId, "open", "acknowledged");
+        WarningEntity current = load(warningId);            // 不存在则抛出 404 对应的异常
+        if (changed == 1) return current;
+        throw new Conflict("ILLEGAL_TRANSITION",            // 由统一处理器转成 409
+                "状态 " + current.getStatus() + " 不允许确认");
+    }
+```
+
+两个请求同时到达时，数据库让它们排队：第一条`UPDATE`改动1行；第二条等第一条提交以后重新检查条件，此时状态已经是`acknowledged`，条件不成立，改动0行。服务层看到0行，读出当前状态，抛出冲突异常，统一异常处理把它转成 **409 Conflict** 和契约错误体，第二位值班员的页面据此刷新，显示“已由他人确认”。409 的含义是：请求本身没有问题，但与资源当前的状态冲突。同一个请求因为超时被重发也走这条路，预警只会被确认一次，这就是契约表`ack`一行“重复可重试”的来历。`warning`表不需要为此增加任何列，状态字段本身就是并发控制的依据。
+
+**另一种做法：`@Version` 乐观锁**
+
+有些资源没有状态机，而是整行编辑，例如修改测点台账里的显示名称、量程和安装高程。两个人同时打开编辑页、先后保存，后保存的会覆盖先保存的。JPA 为此提供`@Version`，用法见清单5.25：给表加一个整数列，实体上标注解，其余由框架完成。
+
+**清单 5.25  @Version 乐观锁：需要给表加一列（书中示例）**
+
+```java
+@Entity
+@Table(name = "asset")
+public class AssetEntity {
+    @Id private String assetId;
+    @Version private long rowVersion;     // 需要迁移脚本给 asset 表加 row_version 列
+    // ……
+}
+// 保存时 Hibernate 发出的语句形如：
+//   UPDATE asset SET display_name = ?, row_version = 4 WHERE asset_id = ? AND row_version = 3
+// 影响 0 行时抛出 ObjectOptimisticLockingFailureException，统一处理器同样转成 409
+```
+
+编辑页读出数据时连同`rowVersion`一起拿到，保存时带回；期间别人改过，版本号对不上，保存被拒绝，页面提示重新加载。它的原理和条件更新相同，都是在`WHERE`里带上期望的旧值，只是比较的是一个专用的计数列，由框架在每次更新时自动加1。
+
+这一列与`reading.version`名字相近，含义完全不同，表5.6把两者并排列出。清单里特意把乐观锁的列叫作`rowVersion`，就是为了避免混用。
+
+**表 5.6  两个“版本”：观测的订正版本与 JPA 乐观锁版本**
+
+|            | 观测的订正版本`reading.version`          | 乐观锁版本（`@Version`列）             |
+|:-----------|:-----------------------------------------|:---------------------------------------|
+| 属于哪一层 | 业务语义：这是该时刻观测的第几次订正     | 并发控制：这一行被更新过几次           |
+| 谁来加1    | 业务代码，订正时追加一行新记录           | 框架，每次`UPDATE`时自动加1            |
+| 旧值去向   | 保留，各版本都查得到                     | 被覆盖，只剩最新的一行                 |
+| 出现在哪里 | 主键的一部分；接口响应的`version`字段    | 普通列；随编辑表单往返，不属于业务数据 |
+| 冲突的表现 | 两人同时订正得到相同的新版本号，主键重复 | 版本号对不上，更新0行，应答409         |
+
+**自测**
+
+（1）把`transit`查询里的`and w.status = :expected`删掉，两个值班员同时确认会发生什么？（2）观测表能不能用`@Version`来实现订正？为什么？（不能。`@Version`更新时覆盖原行，订正要求保留原值。）（3）两位分析员同时订正同一时刻的观测，各自算出的新版本号都是2，数据库会怎样处理第二个？（提示：分别考虑用清单5.21那样的`INSERT`语句写入，和5.4.4节“需要知道的一个边界”所说的经`save`写入。）
+
+### 5.4.7 索引与迁移脚本
+
+**索引跟着查询走**
+
+索引是数据库为某几列额外维护的一份有序目录，查询条件用到这些列时可以直接定位，不必逐行扫描。代价是每次写入都要同时维护它，所以索引只为确实存在的查询而建。清单5.26是`db/001_init.sql`中`reading`表的部分，三处索引各自对应前面几小节的一个查询。
+
+**清单 5.26  reading 表的主键、约束与索引（摘自 db/001_init.sql）**
+
+```sql
+CREATE TABLE IF NOT EXISTS reading (
+  asset_id text NOT NULL REFERENCES asset(asset_id), occurred_at timestamptz NOT NULL,
+  version integer NOT NULL DEFAULT 1, reading_id bigserial, event_id text NOT NULL,
+  value numeric, unit text NOT NULL, quality text NOT NULL, source text NOT NULL,
+  revision_reason text, received_at timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (asset_id, occurred_at, version),
+  CHECK (quality IN ('valid','suspect','missing')),
+  CHECK (value IS NOT NULL OR quality = 'missing')
+);
+SELECT create_hypertable('reading', by_range('occurred_at'), if_not_exists => TRUE);
+-- 超表唯一索引必须包含分区列，幂等键用复合唯一索引表达
+CREATE UNIQUE INDEX IF NOT EXISTS reading_event_uidx ON reading(occurred_at, event_id);
+CREATE INDEX IF NOT EXISTS reading_asset_time_idx ON reading(asset_id, occurred_at DESC);
+```
+
+主键`(asset_id, occurred_at, version)`本身就是一个索引，时间窗查询“某个对象、某段时间、按时间和版本排序”与它的列顺序完全一致。`reading_asset_time_idx`把时间倒过来排，为“取最新一条”服务。`reading_event_uidx`是5.4.4节的幂等键。多列索引的列顺序有讲究：查询条件必须从第一列用起才能定位。先按对象再按时间，符合“先选测点、再选时段”的查询习惯；反过来把时间放在第一列，查一个测点的数据就要翻遍这段时间里所有测点的记录。两条`CHECK`和一个外键是5.5.3节所说的最后一道校验：质量码只能取三个值；没有数值的观测只能是`missing`；观测必须挂在已登记的对象上。`create_hypertable`把表按时间切成块，查询带时间条件时只需要读相关的块，超表的行为约束见 TimescaleDB 官方文档<sup>[[36]](../../references.md#ref36)</sup>。
+
+**表结构用脚本管理**
+
+5.4.1节的配置里`ddl-auto`取`validate`，应用只核对、不改表，建表和改表都靠 SQL 脚本。脚本按顺序编号、提交进仓库、一经执行就不再修改，要改表就新增一个脚本；这样每个环境的表结构都能从脚本重建出来，改动也能在代码评审里看到。配套工程只有`001_init.sql`和`002_seed.sql`两个文件，由数据库容器第一次启动时执行；脚本多起来以后，通常交给数据库迁移工具（如 Flyway），由它记录每个库执行到了第几号。
+
+给运行中的大表改结构，要考虑锁和耗时。增加一个可以为空的列很快；直接增加带`NOT NULL`的列，或者给几千万行的表建索引，可能长时间阻塞写入，观测在这段时间里进不来。稳妥的顺序是分几次发布：先加可空列，程序开始写新列；后台分批回填旧行；最后再加非空约束。索引用`CREATE INDEX CONCURRENTLY`建立，可以不阻塞写入。每个迁移脚本除了改动本身，还应写明怎样验证、出问题怎样退回。
+
+### 5.4.8 选读：懒加载与 N+1 查询
+
+**问题是什么**
+
+配套工程的实体之间没有对象引用，`ReadingEntity`里只存了`assetId`这个字符串。JPA 也支持让一个实体直接引用另一个。假设预警列表要显示测点名称，可以给第8章的`WarningEntity`加一个指向`AssetEntity`的字段，标上`@ManyToOne(fetch = FetchType.LAZY)`。LAZY（懒加载）的意思是查预警时先不查测点，等代码第一次调用`w.getAsset().getDisplayName()`时再去查。列表里有50条预警、涉及20个不同的测点，就是1条查预警的语句，加上循环里陆续发出的20条查测点的语句。这种形状叫 **N+1 查询**：数据少时察觉不到，列表一长，接口的耗时几乎全花在这些零碎的小查询上。
+
+**怎么发现**
+
+打开 SQL 日志，在`application.yml`里加`logging.level.org.hibernate.SQL: DEBUG`，请求一次列表接口，数一数日志里的`select`：一次请求发出几十条几乎一样、只有参数不同的查询，就是它。另一个征兆是`LazyInitializationException`：5.4.1节的配置里`open-in-view`为`false`，服务方法返回、事务结束以后再去碰懒加载的字段，就会抛出这个异常。把关联改成`EAGER`可以让异常消失，但每次查预警都会顺带查测点，不需要测点的接口也逃不掉。
+
+**常用解法**
+
+在查询里写明这一次要把关联一起取回，见清单5.27。
+
+**清单 5.27  join fetch：一条语句取回预警及其测点（书中示例）**
+
+```java
+// WarningEntity 中增加的关联；列仍是 asset_id，只读映射，不影响原有的 assetId 字段
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "asset_id", insertable = false, updatable = false)
+    private AssetEntity asset;
+
+// WarningRepository
+    @Query("""
+        select w from WarningEntity w join fetch w.asset
+        where w.status in :statuses order by w.createdAt
+        """)
+    List<WarningEntity> findWithAsset(@Param("statuses") List<String> statuses);
+```
+
+`join fetch`让数据库用一次连接查询返回两张表的数据。关联数据要在服务方法内（事务还开着的时候）转换成 DTO，实体不带出服务层。方法名派生的查询可以用`@EntityGraph(attributePaths = "asset")`达到同样的效果。如果列表只需要测点名称这一列，更省事的是 DTO 投影：查询直接返回由预警字段和`displayName`组成的`record`，不加载整个实体。配套工程不在实体之间建立对象引用、需要时按编码另查，就是为了让这类问题不出现；实体之间关系复杂、一次要取多层数据的系统，才需要逐个接口地安排取数方式。
+
+### 5.4.9 选读：事务传播与隔离级别
+
+**传播：已有事务时再进入一个事务方法**
+
+5.4.5节的`dispatch`调用了两个 Repository 方法，它们都加入`dispatch`开启的事务，这是默认行为，叫`REQUIRED`：有事务就加入，没有就新开一个。绝大多数代码用默认值就够了。需要换一种的典型情形是审计：系统要求记录“谁在什么时候尝试确认了哪条预警”，即使确认因为冲突而失败也要留下记录。审计写入如果加入主事务，主事务一回滚，审计记录也跟着消失。清单5.28用`REQUIRES_NEW`让审计单独成为一个事务。
+
+**清单 5.28  REQUIRES_NEW：审计记录不随主事务回滚（书中示例）**
+
+```java
+@Service
+class AuditService {
+    private final AuditRepository audits;
+    AuditService(AuditRepository audits) { this.audits = audits; }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void record(String actor, String action, String target) {
+        audits.save(new AuditLog(actor, action, target, Instant.now()));
+    }
+}
+// WarningWorkflowService.acknowledge 的开头调用 audit.record(...)：
+// AuditService 是另一个 Bean，调用经过代理，传播设置才会生效
+```
+
+图5.4画出这次调用的时序：代理先开启主事务；进入`record`时主事务被挂起，审计在自己的事务里提交；回到主事务以后，它无论提交还是回滚，都不影响已经写下的审计记录。图右端的“提交成功以后”是5.7节提交后事件的位置。
 
 <figure markdown>
 ![图5.4](images/chapter05_fig_5_4.svg)
 <figcaption>图 5.4  事务代理、独立审计与提交后事件</figcaption>
 </figure>
 
-如果控制器在同一个 Bean 中用`this.save()`调用另一个带事务注解的方法，调用不会穿过代理，传播属性、只读标志和回滚规则都不会被重新评估。解决办法是把用例拆到另一个 Spring Bean，通过构造器注入调用；或者在确实需要动态边界时使用`TransactionTemplate`。把代理对象注入自己、依靠反射或强制打开全局事务都会增加理解成本，教材示例优先采用清晰的 Bean 边界。
+代价是主事务挂起期间仍占着一个连接，审计又占一个；把`REQUIRES_NEW`的方法放进循环里调用，连接池很快就会被占满。要看清实际发生了什么，把`org.springframework.orm.jpa`的日志级别设为`DEBUG`，能看到`Suspending current transaction, creating new transaction`这样的记录。表5.7列出全部七种传播行为，后五种很少用到，了解含义即可。
 
-事务边界还应考虑外部调用。数据库事务中不应等待慢 HTTP 请求、文件上传或人工确认；这些动作应先提交本地状态，再由事务发件箱或消息队列异步推进。若外部系统必须参与一致性，需要明确超时、补偿、幂等和人工处置，不要假定数据库回滚可以撤销已经发出的网络请求。
+**表 5.7  Spring 的七种事务传播行为**
 
-### 5.4.12 七种传播行为与使用场景
+| 传播行为           | 进入方法时                               | 典型用途                         |
+|:-------------------|:-----------------------------------------|:---------------------------------|
+| `REQUIRED`（默认） | 有事务就加入，没有就新开                 | 普通的业务读写                   |
+| `REQUIRES_NEW`     | 挂起外层事务，新开一个独立的             | 必须独立留存的审计、失败记录     |
+| `NESTED`           | 在外层事务里设保存点，可以只回滚到保存点 | 批量处理中允许单条失败           |
+| `SUPPORTS`         | 有事务就加入，没有就不用事务             | 可有可无的只读查询               |
+| `NOT_SUPPORTED`    | 挂起外层事务，以非事务方式执行           | 不应占用事务的统计、采样         |
+| `MANDATORY`        | 必须已有事务，否则抛出异常               | 只允许作为事务内一步的方法       |
+| `NEVER`            | 必须没有事务，否则抛出异常               | 明确禁止在事务里调用的外部适配器 |
 
-Spring 的传播行为描述“已有事务到达一个方法时怎么办”。`REQUIRED`是默认值：有事务就加入，没有就创建，适合一个用例内的普通读写；`REQUIRES_NEW`挂起外层并创建独立事务，适合必须独立保留的审计或失败记录，但会增加连接占用；`NESTED`在支持保存点的资源上建立嵌套边界，局部回滚不必撤销外层已完成的步骤，适合批次中允许单行失败的场景，使用前要确认数据库和事务管理器支持保存点。
+**隔离级别：并发事务互相能看到什么**
 
-`SUPPORTS`有事务就加入、没有就以非事务方式执行，适合可选的一致性读取；`NOT_SUPPORTED`会挂起外层并以非事务方式执行，适合不应锁住数据库的轻量指标采集，但它不能读取未提交状态；`MANDATORY`要求调用方已有事务，没有则立即失败，适合只能作为事务内部步骤的约束检查；`NEVER`要求调用方没有事务，发现事务就失败，适合明确禁止持有数据库锁的外部适配器。七种行为不是性能开关，选择时要从失败语义、锁持有时间和恢复方式解释原因。
+SQL 标准定义了四档隔离级别，从弱到强依次是 READ UNCOMMITTED、READ COMMITTED、REPEATABLE READ 和 SERIALIZABLE，越强越能避免并发带来的异常，付出的等待和重试也越多。常说的异常有四种。**脏读**是读到别的事务尚未提交、随后可能回滚的数据。**不可重复读**是同一事务里两次读同一行，得到不同的值。**幻读**是两次执行同一个范围查询，返回的行数不同。**丢失更新**是5.4.6节的情形，两个事务基于同一个旧值各自写回，后者盖掉前者。PostgreSQL 的默认级别是 READ COMMITTED：每条语句只看得到语句开始时已经提交的数据，不会脏读；同一事务里的两条查询之间，别人提交的修改是看得见的。它的 READ UNCOMMITTED 实际按 READ COMMITTED 执行，所以在 PostgreSQL 上做不出脏读实验。
 
-**清单 5.28  事务传播行为的服务边界示例**
+怎样发现隔离级别带来的问题？这类问题单人操作时从不出现，要用两个会话交错执行才能复现。开两个`psql`窗口，各自`BEGIN`，按预定顺序轮流执行语句，观察谁在等待、谁改动了0行。5.4.6节的条件更新在默认级别下就是安全的：第二条`UPDATE`遇到被第一条锁住的行会等待，对方提交以后，PostgreSQL 用最新的行重新检查`WHERE`条件，条件不再成立，改动0行。先`SELECT`、在 Java 里判断、再`UPDATE`的写法得不到这种保护。常用解法因此有三种，按优先顺序是：把判断写进`UPDATE`的条件或唯一约束，让数据库裁决；整行编辑用`@Version`；确实需要在一个事务里多次读取并保持一致的报表类计算，才在那一个方法上提高隔离级别，写作`@Transactional(isolation = Isolation.REPEATABLE_READ)`，并准备好在提交失败时重试。
 
-```java
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.*;
+### 5.4.10 选读：读执行计划
 
-@Service
-class ReadingBatchService {
-    private final ReadingRepository readings;
-    private final AuditService audit;
-    private final MetricService metrics;
+**问题是什么**
 
-    ReadingBatchService(ReadingRepository readings, AuditService audit,
-                        MetricService metrics) {
-        this.readings = readings;
-        this.audit = audit;
-        this.metrics = metrics;
-    }
+一条查询慢，原因可能是没有合适的索引、有索引但没有用上，或者返回的行实在太多。靠猜测加索引常常无效，还拖慢写入。
 
-    @Transactional(propagation = Propagation.REQUIRED)
-    public void saveBatch(List<Reading> batch) {
-        readings.saveAll(batch);
-        audit.record("BATCH_SAVED");
-        metrics.sample(batch.size());
-    }
-}
+**怎么发现**
 
-@Service
-class MetricService {
-    @Transactional(propagation = Propagation.NOT_SUPPORTED,
-                   readOnly = true)
-    public void sample(int count) {
-        // 只记录内存指标，不延长写事务的锁持有时间
-    }
-}
+让数据库自己说明它是怎样执行的。在`psql`里给查询加上`EXPLAIN (ANALYZE, BUFFERS)`前缀，数据库会实际执行这条语句，并打印执行计划，见清单5.29。
+
+**清单 5.29  查看时间窗查询的执行计划**
+
+```sql
+EXPLAIN (ANALYZE, BUFFERS)
+SELECT * FROM reading
+WHERE asset_id = 'DAM-A-PZ-07'
+  AND occurred_at >= '2026-01-01T00:00:00Z' AND occurred_at < '2030-01-01T00:00:00Z'
+ORDER BY occurred_at, version;
 ```
 
-清单5.28刻意把主写入、独立审计和不参与事务的指标分开。批次写入失败时，主事务回滚；审计是否保留失败事实由`AuditService`的传播属性决定；指标采集不应因为数据库回滚而伪装成已处理。实践中应在集成测试中记录事务状态和连接数，防止把`REQUIRES_NEW`放进大循环导致连接池耗尽。
+读计划先看三处。一看节点类型：`Index Scan`或`Index Only Scan`表示用上了索引，`Seq Scan`表示逐行扫描整张表或整个分块。二看估计行数（`rows=`）与实际行数（`actual ... rows=`）：两者相差几个数量级，说明统计信息过时，执行`ANALYZE reading`更新。三看`Execution Time`和`Buffers`：读了多少数据页，其中多少来自内存。种子数据只有几行，数据库多半直接选`Seq Scan`，对几行数据来说扫描比走索引更快，这是正常的；要看到索引起作用，先按`STAGES.md`用`db/load-s3-data.sql`导入完整的28测点数据集。各种节点的含义和代价估算见 PostgreSQL 官方文档<sup>[[37]](../../references.md#ref37)</sup>。
 
-### 5.4.13 隔离级别与并发异常
+**一个值得看的例子**
 
-隔离级别回答“一个事务能看到其他事务的哪些变化”。READ UNCOMMITTED 允许脏读，在 PostgreSQL 中通常按 READ COMMITTED 处理，不能把它当作真正的脏读实验；READ COMMITTED 是 PostgreSQL 默认值，每条语句看到一个新的已提交快照，适合大多数读写接口，但同一事务两次查询可能看到不同结果；REPEATABLE READ 固定事务快照，能避免不可重复读，但写入冲突会在提交时失败；SERIALIZABLE 进一步要求并发执行结果等价于串行执行，冲突时需要重试，吞吐和锁等待成本也更高。
+5.4.4节的预检`existsByEventId`生成的查询只有一个条件`event_id = ?`，而幂等键索引是`(occurred_at, event_id)`，`event_id`排在第二列。按5.4.7节的规则，条件没有从第一列用起，这个索引帮不上忙，数据量大了以后每次预检都接近全表扫描。用`EXPLAIN`验证这个判断，再考虑解法：预检时把`occurred_at`一起作为条件（事件里本来就有这个字段），查询就能用上这个索引，TimescaleDB 也只需要读对应时间的那一个分块。
 
-脏读是读取到尚未提交的数据，读到回滚值会使预警计算产生错误；不可重复读是同一事务两次读取同一行得到不同版本；幻读是两次范围查询返回的行集合变化；丢失更新是两个写者基于旧值覆盖彼此结果。`@Version`可以发现实体级丢失更新，唯一约束和检查约束负责拒绝非法状态，隔离级别则决定范围读取和并发写入之间的可见性。提升隔离级别后仍需处理并发冲突，并配置重试上限、退避与告警。
+**常用解法**
 
-**清单 5.29  隔离级别与乐观锁的集成测试思路**
+按查询条件和排序建立或调整多列索引；让查询条件对上索引的前导列；只取需要的列和行（分页、DTO 投影）；统计信息过时就更新。每次只改一处，改完用同一条`EXPLAIN`对比前后。缓存、连接池等应用层面的手段见5.8节和附录C。
 
-```java
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Transactional;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+### 5.4.11 选读：统计量的增量更新与数值稳定
 
-@SpringBootTest
-@ActiveProfiles("test")
-class ReadingConcurrencyTest {
-    // JUnit 5 的构造器注入需要 @Autowired，否则参数无法解析
-    private final ReadingCommandService service;
-    private final ReadingRepository repository;
+服务层有时要在内存里边接收观测边维护统计量，例如某测点当日的平均渗压。最直接的写法是保存总和与个数，要用时相除；更差的写法是每来一个新值就把当天的观测重新读一遍求平均，观测越多越慢。增量算法只保存当前均值和个数。已有$n$个样本、均值为$\bar{x}_n$时加入新值$x$，由均值的定义 $$\bar{x}_{n+1}=\frac{n\,\bar{x}_n+x}{n+1}
+  =\bar{x}_n+\frac{x-\bar{x}_n}{n+1}.$$ 右端的形式只用到新值与当前均值的差，修正量的大小与数据本身同一量级，不会出现“一个很大的总和加上一个很小的新值”这种损失有效数字的运算；这也是 Welford 增量算法计算均值和方差时的第一步。清单5.30按右端的形式实现，注意先用$n+1$做分母、再让计数加1，顺序反了结果就错。
 
-    @Autowired
-    ReadingConcurrencyTest(ReadingCommandService service,
-                           ReadingRepository repository) {
-        this.service = service;
-        this.repository = repository;
-    }
-
-    @Test
-    @Transactional(readOnly = true)
-    void repeatedReadUsesDeclaredSnapshot() {
-        // 测试中配合两个事务和 SQL 日志观察快照，而不是只断言返回值
-    }
-
-    @Test
-    void staleVersionIsConflict() {
-        Reading first = repository.findById(1L).orElseThrow();
-        Reading second = repository.findById(1L).orElseThrow();
-        service.replace(first, new BigDecimal("1.20"));
-        assertThatThrownBy(() -> service.replace(second, new BigDecimal("1.30")))
-                .isInstanceOf(OptimisticLockingFailureException.class);
-    }
-}
-```
-
-清单5.29强调测试应验证并发协议而非依赖线程睡眠。真实测试使用两个事务、屏障或数据库锁制造可重复的交错顺序，记录隔离级别、SQL 和回滚结果；随机压测则用于发现长尾锁等待。服务层把乐观锁异常转换为409，客户端重新读取后由专业分析员决定保留哪一个订正值，不能自动覆盖另一人的修改。
-
-回滚规则也属于事务契约。Spring 默认对未检查异常和`Error`回滚，对受检异常提交；业务服务若把受检异常作为“数据拒收”信号，就应明确使用`rollbackFor`，或者把异常转换为领域运行时异常。相反，某些可预期的通知失败可能允许主记录提交，此时使用`noRollbackFor`还不够，还要把失败原因写入重试表或事务发件箱。代码评审应逐个列出异常类型、数据库状态和补偿动作，避免 catch 后只打印日志导致半完成状态。
-
-批量导入的事务边界取决于业务语义。全批次原子提交能保证“全部成功或全部失败”，但一条坏数据会让整批回滚，并长时间占用锁；按测站或固定数量分块可以缩短事务，却必须返回每块的批次号、成功数和失败行号。无论选择哪一种，重复提交都要靠幂等键或唯一约束处理，重试不能依赖“上次大概执行到哪里”的内存变量。事务日志、审计记录和补发任务应能通过同一个追踪 ID 关联起来。
-
-数据库事务提交后，缓存刷新、指标增加和消息发布都可能失败。`AFTER_COMMIT`监听器不能把异常传回已经完成的主事务，因此处理器要采用幂等键、有限重试和死信记录；对关键跨服务事件，应由事务发件箱表保存事件内容和状态，再由独立发布器投递 Kafka，发布成功后更新状态。这样即使应用在提交后立刻崩溃，事件仍能从数据库恢复，而不是依赖进程内队列的偶然顺序。
-
-只读事务适合查询和报表，但它不会自动限制数据库用户写权限，也不会阻止代码调用`save`。服务层仍应通过接口设计避免写入，数据库账号可以在只读副本上使用更小权限；如果查询需要锁定行，应明确使用带锁查询而不是把`readOnly=true`当作锁。读写分离时要说明复制延迟，刚写入的读数不能立刻从滞后的副本读取，否则值班员会看到旧状态。
-
-事务测试至少包含：成功提交后事件被处理；主事务回滚时事件不被处理；审计独立事务在主事务失败时仍保留失败事实；两个版本同时更新时只有一个成功；死锁或序列化冲突按上限重试后返回稳定错误码。测试数据使用固定时钟和固定操作者，日志保存事务 ID、连接线程和隔离级别，避免用不可重复的 sleep 掩盖竞态。 测试报告还应保存数据库版本、迁移版本和测试用例的追踪标识，便于在不同环境复核相同结论。
-
-### 5.4.14 只读事务与提交后事件处理
-
-查询方法可以标注`@Transactional(readOnly = true)`，让连接驱动和 ORM 知道该事务不应执行写入；这不是数据库权限替代品，也不保证所有数据库都自动获得更高性能。只读方法仍需限制结果集、关闭懒加载泄漏并在事务内完成 DTO 映射。写方法则应在一个事务中完成状态检查、实体保存、审计和领域事件发布，事件处理器使用`AFTER_COMMIT`把指标或缓存刷新放到提交之后。
-
-**清单 5.30  只读查询与提交后事件的完整调用**
-
-```java
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.*;
-
-@Service
-class ReadingUseCase {
-    private final ReadingRepository repository;
-    private final ApplicationEventPublisher publisher;
-
-    ReadingUseCase(ReadingRepository repository,
-                   ApplicationEventPublisher publisher) {
-        this.repository = repository;
-        this.publisher = publisher;
-    }
-
-    @Transactional(readOnly = true)
-    Optional<ReadingResponse> latest(String assetId) {   // 空值由控制器转成 204
-        return repository.findFirstByAssetIdOrderByOccurredAtDesc(assetId)
-                .map(ReadingResponse::from);
-    }
-
-    @Transactional
-    ReadingResponse save(Reading reading) {
-        Reading saved = repository.save(reading);
-        publisher.publishEvent(
-                new ReadingSavedEvent(saved.getId(), saved.getAssetId()));
-        return ReadingResponse.from(saved);
-    }
-}
-```
-
-清单5.30中的查询在事务内完成实体到 DTO 的转换，写入则在保存后发布事件。对象存在但还没有观测时，查询返回空的`Optional`，控制器按表8.3应答204；对象本身不存在才是404，这两种结果在服务层就要分开。若主事务回滚，`AFTER_COMMIT`监听器不执行；若监听器自身失败，主事务也不会被重新回滚，因此监听器必须具备幂等、重试和失败告警。跨进程通知不能只依靠进程内事件，应把事件写入事务发件箱，再由可靠发布器投递 Kafka。
-
-### 5.4.15 统计量更新
-
-增量平均值在已有样本数为$n$、均值为$\bar{x}_n$时加入新值$x$，应计算 $$\bar{x}_{n+1}=\frac{\bar{x}_n n+x}{n+1}.$$ 计数和均值必须初始化，并在计算后再更新计数。清单5.31按上式做增量更新，而不是把历史观测全部读进内存再求和——后者在观测量增长后会先变慢、再耗尽堆内存。
-
-**清单 5.31  增量统计的数值稳定实现**
+**清单 5.30  增量均值的数值稳定实现**
 
 ```java
 class WaterDataSummary {
@@ -1319,295 +1121,237 @@ class WaterDataSummary {
 }
 ```
 
+`WaterDataSummary`是一个普通的内存对象，既不是实体，也不是 Bean。它不是线程安全的：两个线程同时调用`updateStatistics`，可能读到同一个`dataCount`，其中一次更新就丢了，道理与5.4.6节的丢失更新相同。并发场景下按测点分开、每个测点由一个线程顺序处理，或者把统计交给数据库的聚合函数。缺测的观测（`value`为`null`）不参与统计，调用前要先按质量码过滤。这里用`double`是因为均值本身就是近似的统计量；需要与阈值精确比较、或者累计降雨量这类求和，仍按5.4.1节的说明使用`BigDecimal`。
+
 !!! tip "提示"
 
-    选学：跨服务一致性可使用事务消息、Saga或补偿流程；DDD聚合可帮助表达复杂一致性边界。这些方法需要结合业务失败语义、幂等和可观测性学习，不作为本章基础代码的必要组成。
+    选学：跨服务的一致性可以用事务消息、Saga 或补偿流程处理，领域驱动设计中的聚合可以帮助表达复杂的一致性边界。这些方法要结合业务的失败语义、幂等和可观测性来学习，本章的基础代码用不到它们。
 
 ## 5.5 服务层与异常处理
 
 **本节层次**
 
-核心：5.5.1；指导实践：5.5.2、5.5.3、5.5.5；拓展：5.5.4、5.5.6。核心阅读按所列小节推进，实践成果按章末要求验收。
+核心：5.5.1、5.5.2；指导实践：5.5.3、5.5.4；拓展：5.5.5。
 
 **进入本节所需知识**
 
-先读5.2节与5.4节核心内容，区分输入校验、业务规则和数据库约束。
+5.2.2节的错误体与“一个会遇到的失败”；5.4.4节的幂等写入、5.4.5节的事务和5.4.6节的条件更新。
 
-服务层按用例组织方法，例如“保存监测值”“确认告警”“查询测站详情”。输入DTO先通过Bean Validation完成格式校验，领域规则仍由服务或领域对象校验。统一响应不应把所有结果都包装成HTTP 200；HTTP状态码仍须表达协议层结果。清单5.32把校验失败翻译成 400 并指出出错字段，与表8.3约定的错误体形状一致。
+前面几节的接口都是查询，出错的方式只有“对象不存在”和“参数不对”两种。写入和状态变更的请求要复杂一些：请求体可能缺字段，字段齐全但不合业务规则，规则都满足却被数据库约束拒绝，或者与别人的操作冲突。本节跟着两个契约里的请求走一遍，看它们在哪一层被检查、失败时怎样变成同一种形状的错误应答。一个是`POST /api/readings`，专业分析员人工补录一条观测；另一个是`POST /api/warnings/{id}/ack`，值班员确认预警。图5.3已经标出三个可能失败的位置，本节把每个位置上的代码补齐。
 
-**清单 5.32  参数校验异常处理**
+### 5.5.1 请求体与服务层规则：补录一条观测
 
-```java
-// 与 5.5.1 节的 CreateReadingRequest 相比省略了 unit 和 quality，
-// 用最小字段演示校验异常的响应结构，故单独命名
-record ReadingValidationPayload(
-        @NotBlank String assetId,
-        // 上下限为示例阈值，工程取值以第8章8.1参数表为唯一来源
-        @NotNull @DecimalMin("0.0") @DecimalMax("1000.0") BigDecimal value,   // 量程按对象类型再校验，见测点台账
-        @NotNull Instant occurredAt) {}
+**业务问题**
 
-@RestControllerAdvice
-class GlobalExceptionHandler {
-    @ExceptionHandler(EntityNotFoundException.class)
-    ResponseEntity<ProblemDetail> notFound(EntityNotFoundException ex) {
-        ProblemDetail problem = ProblemDetail.forStatus(404);
-        problem.setTitle("资源不存在");
-        problem.setDetail(ex.getMessage());
-        return ResponseEntity.status(404).body(problem);
-    }
+网关掉线期间的观测由人工从仪器记录本上补录。请求体按契约包含对象编码、采样时刻、数值、单位和质量码五项，请求头`Idempotency-Key`带一个由页面生成的唯一编号，用途与网关事件的`eventId`相同。后端要回答三个问题：请求体的形状对不对，内容合不合业务规则，能不能安全地写进去。
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    ResponseEntity<ProblemDetail> invalid(MethodArgumentNotValidException ex) {
-        ProblemDetail problem = ProblemDetail.forStatus(400);
-        problem.setTitle("请求参数无效");
-        return ResponseEntity.badRequest().body(problem);
-    }
-}
-```
+**第一层：请求体的形状**
 
-异常处理器把可预期错误转换为稳定契约；意外异常只向客户端返回通用信息，详细堆栈写入受控日志。日志应包含请求标识、测站标识和事件类型，但不得记录密码、完整令牌或敏感个人信息。
+清单5.31用一个`record`描述请求体，字段上的注解来自 Bean Validation（5.3.1节的`spring-boot-starter-validation`）：`@NotBlank`要求字符串非空且不全是空白，`@NotNull`要求字段存在，`@Pattern`限定取值。控制器参数上的`@Valid`触发检查，不通过时框架抛出`MethodArgumentNotValidException`，控制器方法根本不会执行。
 
-### 5.5.1 读写接口的状态与版本处理
-
-一个可交付的 REST 资源至少要说明集合查询、单项查询、创建、整体更新和删除的语义。案例平台对观测记录只允许“新增”和“订正为新版本”（见 8.1 节契约表），下面清单中的`DELETE`只用于讲解 REST 语义，真实平台不提供删除观测的接口。以监测读数为例，`GET /api/readings/``id`返回单条记录，`GET /api/readings`支持分页与过滤，`POST /api/readings`创建新记录，`PUT /api/readings/``id`替换可编辑字段，`DELETE /api/readings/``id`删除尚未归档的记录。更新和删除前要检查资源版本、用户权限和业务状态；已进入审计归档的读数应采用逻辑失效或拒绝删除，而不是直接破坏时序证据。
-
-写入接口要把协议校验、业务校验和持久化顺序写清。协议层检查必填字段、数值格式和时间字符串，应用服务检查测站是否存在、采样时间是否落在允许窗口、质量码是否允许参与计算，Repository 在事务中保存记录。创建成功返回`201 Created`并在`Location`头给出新资源地址；重复的幂等键返回第一次创建的响应或`409 Conflict`，不能静默创建第二条记录。清单5.33是写入接口的请求体，字段上的注解声明格式要求；清单5.34的`create`方法用`@Valid`触发这些校验，再交给服务层判断测站与时间窗，最后返回带`Location`的 201。
-
-**清单 5.33  写入请求体 CreateReadingRequest：字段与格式校验**
+**清单 5.31  补录接口的请求体与控制器（书中示例，配套工程未包含）**
 
 ```java
 public record CreateReadingRequest(
         @NotBlank String assetId,
-        // 上下限为示例阈值，工程取值以第8章8.1参数表为唯一来源
-        @NotNull @DecimalMin("0.0") @DecimalMax("1000.0") BigDecimal value,   // 量程按对象类型再校验，见测点台账
+        @NotNull OffsetDateTime occurredAt,
+        BigDecimal value,          // 缺测时为 null；能不能为空取决于 quality，由服务层判断
         @NotBlank String unit,
-        @NotNull Instant occurredAt,
-        @NotBlank String quality) {}
-```
+        @NotNull @Pattern(regexp = "valid|suspect|missing") String quality) {}
 
-请求体用`BigDecimal`表达观测值，避免用`double`承载边界校验时出现二进制浮点舍入误差；服务内部仍可按明确规则转换为数据库数值类型。`@Valid @RequestBody`只负责触发Bean Validation，诸如“测站属于当前工程”“时间不得早于上一条记录”等跨字段规则必须在服务层再次检查。幂等键的处理见5.5.4节。
-
-**清单 5.34  监测读数 GET/POST/PUT/DELETE 控制器**
-
-```java
 @RestController
 @RequestMapping("/api/readings")
-class ReadingCrudController {
-    private final ReadingApplicationService service;
-
-    ReadingCrudController(ReadingApplicationService service) {
-        this.service = service;
-    }
-
-    @GetMapping
-    Page<ReadingResponse> list(@PageableDefault(size = 20) Pageable pageable,
-                               @RequestParam(required = false) String assetId,
-                               @RequestParam(required = false) String quality) {
-        return service.list(pageable, assetId, quality);
-    }
-
-    @GetMapping("/{id}")
-    ReadingResponse get(@PathVariable long id) {
-        return service.get(id);
-    }
+public class ReadingWriteController {
+    private final ManualReadingService service;
+    public ReadingWriteController(ManualReadingService service) { this.service = service; }
 
     @PostMapping
-    ResponseEntity<ReadingResponse> create(@Valid @RequestBody CreateReadingRequest request,
-                                           UriComponentsBuilder builder) {
-        ReadingResponse created = service.create(request);
-        URI location = builder.path("/api/readings/{id}")
-                .buildAndExpand(created.id()).toUri();
-        return ResponseEntity.created(location).body(created);
-    }
-
-    @PutMapping("/{id}")
-    ReadingResponse replace(@PathVariable long id,
-                            @Valid @RequestBody ReplaceReadingRequest request) {
-        return service.replace(id, request);
-    }
-
-    @DeleteMapping("/{id}")
-    ResponseEntity<Void> delete(@PathVariable long id) {
-        service.delete(id);
-        return ResponseEntity.noContent().build();
+    @PreAuthorize("hasAuthority('ANALYST')")           // 契约：补录与订正限专业分析员
+    public ResponseEntity<AssetController.ReadingDto> create(
+            @RequestHeader("Idempotency-Key") String key,
+            @Valid @RequestBody CreateReadingRequest body) {
+        ReadingEntity saved = service.record(body, key);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(AssetController.ReadingDto.from(saved));
     }
 }
 ```
 
-清单5.34把协议层的五个入口连接到同一个应用服务。集合查询返回`Page`并由`Pageable`限制页大小，创建成功返回201和`Location`，删除成功返回204；异常由统一处理器转换为400、404或409。控制器没有直接访问 Repository，也没有把数据库实体作为响应体，因而可以独立替换持久化实现。
+注解能检查的只有单个字段的形状。`value`上没有写`@NotNull`，因为缺测的观测本来就没有数值；“只有质量码为`missing`时才允许没有数值”牵涉两个字段，要读到测点台账才能判断的“单位对不对”更不是注解能表达的。数值用`BigDecimal`、时刻用带时区偏移的`OffsetDateTime`，理由与5.4.1节相同。成功时应答 201 和新记录。契约里单条观测的地址`/api/readings/{id}`用的是表中的`reading_id`列，配套实体没有映射这一列；要在应答里加上`Location`头，先把它映射进实体，这留作练习。
 
-**清单 5.35  DTO 与实体的双向映射**
+**第二层：服务层的规则**
 
-```java
-record ReplaceReadingRequest(
-        @NotNull BigDecimal value,
-        @NotBlank String unit,
-        @NotNull Instant occurredAt,
-        @NotBlank String quality,
-        @NotNull Long version) {}
+清单5.32的`record`方法依次检查几条规则，全部通过才写入。
 
-record ReadingResponse(long id, String assetId, BigDecimal value,
-                       String unit, Instant occurredAt, String quality,
-                       long version) {
-    static ReadingResponse from(Reading entity) {
-        return new ReadingResponse(entity.getId(), entity.getAssetId(),
-                entity.getValue(), entity.getUnit(), entity.getOccurredAt(),
-                entity.getQuality(), entity.getVersion());
-    }
-}
-
-final class ReadingMapper {
-    private ReadingMapper() {}
-
-    static Reading toEntity(CreateReadingRequest request) {
-        return Reading.create(request.assetId(), request.value(),
-                request.unit(), request.occurredAt(), request.quality());
-    }
-}
-```
-
-清单5.35把外部字段转换集中在映射边界，单位、质量码和版本号不会因为数据库字段改名而泄露到 API。`version`为后续的乐观锁校验预留位置；更新请求携带旧版本时，服务层可以在保存前检查版本是否仍然匹配，冲突返回409并提示客户端重新读取，而不是覆盖另一个值班员刚提交的数据。清单5.36把写入、订正与失效三种命令放在同一个应用服务里，三种命令共用领域校验，并分别执行相应的状态迁移。
-
-**清单 5.36  应用服务中的写入、更新与删除规则**
+**清单 5.32  ManualReadingService.record：先查规则，再幂等写入（书中示例）**
 
 ```java
 @Service
-class ReadingApplicationService {
-    private final ReadingRepository repository;
-    private final StationRepository stations;
+public class ManualReadingService {
+    /** 违反业务规则：由统一异常处理转成 400，code 与 field 原样带出。 */
+    public static class RuleViolation extends RuntimeException {
+        public final String code, field;
+        public RuleViolation(String code, String message, String field) {
+            super(message); this.code = code; this.field = field;
+        }
+    }
+    /** 该对象在这一时刻已有观测：转成 409 READING_EXISTS。 */
+    public static class ReadingExists extends RuntimeException {
+        public ReadingExists(String assetId, OffsetDateTime occurredAt) {
+            super("对象 " + assetId + " 在 " + occurredAt + " 已有观测，更正请走订正");
+        }
+    }
 
-    ReadingApplicationService(ReadingRepository repository,
-                              StationRepository stations) {
-        this.repository = repository;
-        this.stations = stations;
+    private final AssetRepository assets;
+    private final ReadingRepository readings;
+    public ManualReadingService(AssetRepository assets, ReadingRepository readings) {
+        this.assets = assets; this.readings = readings;
     }
 
     @Transactional
-    ReadingResponse create(CreateReadingRequest request) {
-        if (!stations.existsById(request.assetId()))
-            throw new EntityNotFoundException("测站不存在");
-        Reading entity = ReadingMapper.toEntity(request);
-        return ReadingResponse.from(repository.save(entity));
-    }
+    public ReadingEntity record(CreateReadingRequest body, String idempotencyKey) {
+        AssetEntity asset = assets.findById(body.assetId()).filter(AssetEntity::isActive)
+                .orElseThrow(() -> new AssetController.AssetNotFoundException(body.assetId()));
+        if (!body.unit().equals(asset.getUnit()))
+            throw new RuleViolation("UNIT_MISMATCH",
+                    "对象 " + asset.getAssetId() + " 的单位是 " + asset.getUnit(), "unit");
+        if (body.value() == null && !"missing".equals(body.quality()))
+            throw new RuleViolation("VALUE_REQUIRED", "只有缺测（missing）的观测可以没有数值", "value");
 
-    @Transactional
-    ReadingResponse replace(long id, ReplaceReadingRequest request) {
-        Reading entity = repository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("读数不存在"));
-        entity.replaceIfVersion(request.value(), request.unit(),
-                request.occurredAt(), request.quality(), request.version());
-        return ReadingResponse.from(repository.save(entity));
-    }
-
-    @Transactional
-    void delete(long id) {
-        Reading entity = repository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("读数不存在"));
-        if (entity.isArchived()) throw new ConflictException("归档读数不可删除");
-        repository.delete(entity);
+        Optional<ReadingEntity> replay = readings.findByEventId(idempotencyKey);  // Repository 中新增的派生查询
+        if (replay.isPresent()) return replay.get();              // 重发的请求：返回上一次的记录
+        var id = new ReadingEntity.ReadingId(body.assetId(), body.occurredAt(), 1);
+        if (readings.existsById(id))                              // 这一时刻已有观测：应当走订正
+            throw new ReadingExists(body.assetId(), body.occurredAt());
+        return readings.saveAndFlush(new ReadingEntity(id, idempotencyKey,
+                body.value(), body.unit(), body.quality(), "manual"));
     }
 }
 ```
 
-服务层同时承担跨字段业务规则和事务边界。测站存在性、采样时间窗口、质量码取值域和归档状态都不能只依赖注解；它们需要读取当前领域状态并在同一事务中决定是否保存。更新使用版本号防止丢失写入，删除先检查归档标记，所有分支都能映射到明确的领域异常。
+对象必须已登记且在用，否则抛出5.4.2节已有的`AssetNotFoundException`。单位必须与台账一致：渗压计登记的是 kPa，补录时填了 m，数值差着一个数量级，这种错误只有对照台账才查得出来。第三条规则把质量码和数值联系起来。规则都通过以后按5.4.4节的方式幂等写入：幂等键已经写过，就返回上一次的记录，这正是契约“重复键返回同一记录”的要求。键是新的，还要再看一眼这个对象在这一时刻是否已有观测。已有的话，这次补录实际上是想更正它，应答 409，请分析员改走订正；5.4.4节说过，带着相同主键去`save`会把原行改写，这里必须拦住。两项都通过才插入。`RuleViolation`带着错误码和出错字段，服务层仍然不出现任何 HTTP 的类型，异常怎样变成状态码是下一小节的事。
 
-### 5.5.2 统一错误响应与参数校验
+**第三层：数据库约束**
 
-Spring Boot 3提供的`ProblemDetail`可以承载标准状态、标题、详情和扩展字段。参数缺失或格式错误返回400，权限不足返回403，资源不存在返回404，版本冲突或状态不允许返回409，未认证由安全过滤链返回401。错误响应不应把 Java 异常类名、SQL 片段和堆栈发给客户端；服务端日志通过`traceId`保留诊断信息，前端只根据稳定错误码显示可行动提示。
+`reading`表的两条`CHECK`（清单5.26）与上面的第三条规则、请求体上的`@Pattern`检查的是同一件事。重复并非多余：消息消费者调用的`accept`不经过这个服务，运维用 SQL 脚本修数据更是什么代码都不经过，数据库约束是所有写入路径共用的最后一道关。它报出来的错误对调用方很不友好，所以前两层要尽量在此之前把问题用明确的错误码说清楚。
 
-**清单 5.37  RestControllerAdvice 统一错误响应**
+### 5.5.2 统一错误体
+
+**业务问题**
+
+5.2.2节的错误处理写在控制器内部，只管得到那一个类；它也接不住时间参数解析失败，因为那发生在进入控制器方法之前。现在有了多个控制器，服务层还会抛出业务异常，需要一个全局的地方，把各种异常统一翻译成契约规定的`{code, message, field?}`。
+
+清单5.33节选自配套工程的`ApiExceptionHandler.java`。`@RestControllerAdvice`声明这个类对所有控制器生效；每个`@ExceptionHandler`方法负责一种异常，返回值就是 HTTP 应答。所有方法都通过同一个`body(...)`产出错误体，形状因此只在这一处定义。
+
+**清单 5.33  ApiExceptionHandler：把异常翻译成契约错误体（节选）**
 
 ```java
 @RestControllerAdvice
-class ReadingProblemAdvice {
-    /** 契约错误体：{code, message, field?}，见 8.1 节表的通用约定。
-     *  ProblemDetail 负责状态码与 application/problem+json，
-     *  三个扩展属性负责契约要求的字段，两者不冲突。 */
-    private static ProblemDetail of(HttpStatus status, String code, String message, String field) {
-        ProblemDetail problem = ProblemDetail.forStatus(status);
-        problem.setProperty("code", code);
-        problem.setProperty("message", message);
-        if (field != null) problem.setProperty("field", field);
-        return problem;
+public class ApiExceptionHandler {
+
+    private static ResponseEntity<Map<String, String>> body(
+            HttpStatus status, String code, String message, String field) {
+        Map<String, String> payload = new LinkedHashMap<>();
+        payload.put("code", code);
+        payload.put("message", message);
+        if (field != null) payload.put("field", field);
+        return ResponseEntity.status(status).body(payload);
+    }
+
+    @ExceptionHandler(AssetController.AssetNotFoundException.class)
+    ResponseEntity<Map<String, String>> assetNotFound(AssetController.AssetNotFoundException e) {
+        return body(HttpStatus.NOT_FOUND, "ASSET_NOT_FOUND", e.getMessage(), null);
+    }
+
+    /** from/to 写成不合法的时间格式，或把 + 号原样放进地址栏时走这里。 */
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    ResponseEntity<Map<String, String>> typeMismatch(MethodArgumentTypeMismatchException e) {
+        return body(HttpStatus.BAD_REQUEST, "INVALID_PARAMETER",
+                "参数 " + e.getName() + " 的取值无法解析，时间参数需为 ISO-8601 带时区格式", e.getName());
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    ResponseEntity<Map<String, String>> missing(MissingServletRequestParameterException e) {
+        return body(HttpStatus.BAD_REQUEST, "FIELD_REQUIRED",
+                "缺少必填参数 " + e.getParameterName(), e.getParameterName());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    ResponseEntity<ProblemDetail> invalid(MethodArgumentNotValidException ex) {
-        // 契约的 field 是单数：先报第一个出错的字段，前端据此定位输入框
-        String field = ex.getBindingResult().getFieldErrors()
-                .stream().map(FieldError::getField).findFirst().orElse(null);
-        return ResponseEntity.badRequest()
-                .body(of(HttpStatus.BAD_REQUEST, "VALIDATION_ERROR", "请求参数无效", field));
+    ResponseEntity<Map<String, String>> invalid(MethodArgumentNotValidException e) {
+        String field = e.getBindingResult().getFieldErrors().stream()
+                .map(org.springframework.validation.FieldError::getField).findFirst().orElse(null);
+        return body(HttpStatus.BAD_REQUEST, "VALIDATION_ERROR", "请求参数无效", field);
     }
+    // ……INVALID_RANGE、路径不存在、ResponseStatusException 三个处理器见配套文件
 
-    @ExceptionHandler(EntityNotFoundException.class)
-    ResponseEntity<ProblemDetail> notFound(EntityNotFoundException ex) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(of(HttpStatus.NOT_FOUND, "READING_NOT_FOUND", "观测记录不存在", null));
-    }
-
-    @ExceptionHandler(ConflictException.class)
-    ResponseEntity<ProblemDetail> conflict(ConflictException ex) {
-        return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(of(HttpStatus.CONFLICT, "READING_CONFLICT", "记录版本或状态冲突", null));
-    }
-
-    /** 时间参数解析失败发生在进入方法之前，控制器内的处理器接不到，只有这一层能兜住。 */
-    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    ResponseEntity<ProblemDetail> mismatch(MethodArgumentTypeMismatchException ex) {
-        return ResponseEntity.badRequest().body(of(HttpStatus.BAD_REQUEST, "INVALID_PARAMETER",
-                "参数 " + ex.getName() + " 需为 ISO-8601 带时区格式", ex.getName()));
+    /** 兜底：技术细节留在服务端日志，响应体只给稳定错误码。 */
+    @ExceptionHandler(Exception.class)
+    ResponseEntity<Map<String, String>> unexpected(Exception e) {
+        org.slf4j.LoggerFactory.getLogger(ApiExceptionHandler.class)
+                .error("未处理的服务端异常", e);
+        return body(HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL_ERROR", "服务端处理失败", null);
     }
 }
 ```
 
-清单5.37只把字段名和稳定错误码放入响应，具体原因留在受控日志。四个处理器产出同一形状的`{code, message, field?}`，与表8.3的通用约定、教学接口以及 5.2 节控制器的格式一致，前端可使用相同的字段读取和错误提示逻辑。`field`指向第一个出错的字段，帮助前端定位输入框；对跨字段错误，服务层抛出带业务码的异常。异常处理器本身也应有测试，确保新异常不会意外回落到500，并验证响应的`Content-Type`为`application/problem+json`。
+`typeMismatch`解决了5.2.2节留下的问题：地址栏里的加号被解码成空格、时间解析失败时，应答不再是 Spring 默认的错误页，而是`INVALID_PARAMETER`和出错的参数名。`invalid`处理上一小节`@Valid`检查的失败；契约的`field`是单数，这里取第一个出错的字段，页面据此把光标定位到对应的输入框。最后的兜底处理器接住一切没有预料到的异常：完整的堆栈写进服务端日志，应答里只有`INTERNAL_ERROR`。异常类名、SQL 片段和堆栈不发给客户端，它们对用户没有用处，却会向攻击者透露表结构和所用的框架。日志里可以记对象编码和事件编号，口令和完整令牌不能记。
 
-浮点边界是参数校验的常见陷阱。Jakarta Bean Validation 对`double`和`float`不保证`@DecimalMin`与`@DecimalMax`的十进制精确语义，二进制舍入可能让边界值在比较时偏离预期；水位、雨量等带单位的小数应使用`BigDecimal`或整数最小单位，并在转换时指定舍入模式。校验通过后仍要执行物理范围、单位换算和质量码优先级检查，避免“格式合法”被误解为“业务可信”。
+新增一种业务异常，就在这个类里加一个方法。上一小节的`RuleViolation`对应的处理器只有一行：`return body(HttpStatus.BAD_REQUEST, e.code, e.getMessage(), e.field);`，`ReadingExists`照此转成 409 和`READING_EXISTS`。第8章为预警状态冲突添加的 409 处理器（清单8.17）也是这样写的。401 和 403 不经过这里：认证与授权发生在请求到达控制器之前的安全过滤链里，由5.6节的`SecurityConfig`直接写出同样形状的错误体。
 
-### 5.5.3 三层校验与错误定位
+**与 ProblemDetail 的关系**
 
-参数校验可以分为表示层、领域层和持久化层三道闸。表示层验证 JSON 是否完整、类型是否正确、字符串长度和枚举值是否落在公开契约内；领域层验证测站是否存在、单位是否与测点配置匹配、采样时间是否满足时序顺序、质量码是否允许进入计算；持久化层通过非空约束、唯一约束、外键和检查约束保证最后一道数据完整性。各层面向不同入口：HTTP 请求先经过表示层，内部消息可能直接进入领域层，数据库脚本则直接接受持久化约束的检查。
+Spring 6 内置了`ProblemDetail`类，对应 RFC 9457（前身是 RFC 7807）定义的错误格式，字段是`type`、`title`、`status`、`detail`和`instance`，媒体类型为`application/problem+json`。本书的接口契约（表8.3）约定的是`{code, message, field?}`，第4章的页面、教学接口和后端都已按它实现，所以没有采用`ProblemDetail`。对外公开、需要与第三方系统对接的接口可以考虑使用这个标准格式。
 
-同一字段的错误要有稳定的错误码。`assetId`为空属于`FIELD_REQUIRED`，测站不存在属于`STATION_NOT_FOUND`，水位超出批准范围属于`LEVEL_OUT_OF_RANGE`，采样时间倒退属于`MEASURED_AT_ORDER`。错误码与 HTTP 状态码分离：字段错误和业务规则错误都可以返回400，但前端通过错误码决定提示文本和是否允许重试。错误详情不要包含数据库列名、SQL 或内部堆栈，以免把实现细节暴露给外部调用者。
+**一处如实记录的差异**
 
-校验分组适合处理创建和更新的差异。创建读数要求`assetId`、`occurredAt`、`value`和`quality`全部提供；更新读数可能只允许修改订正值和质量码，同时必须携带版本号；删除请求不需要读取体，但要检查资源状态和操作者权限。把三种请求复用为一个“万能 DTO”会产生大量可选字段，容易出现“字段缺失却被当作清空”的歧义。为每种用例定义独立 record，能让 OpenAPI 文档、测试和错误提示保持一致。
+缺少必填项时，错误码应该是`FIELD_REQUIRED`还是`VALIDATION_ERROR`？教学接口对请求体缺字段应答`FIELD_REQUIRED`，第8章的核对脚本`closeloop-check.mjs`也按这个码检查。配套后端的处理器里，缺少查询参数走`missing`，得到`FIELD_REQUIRED`；请求体缺字段走`invalid`，得到的却是`VALIDATION_ERROR`。状态码和`field`两边一致，只有`code`不同。差异出在表示层的异常翻译上，服务层和数据库与它无关：`@NotNull`、`@NotBlank`、`@Pattern`的失败都汇成同一种异常，`invalid`方法没有再细分。要对齐，可以在`invalid`里取出第一个`FieldError`的`getCode()`，值为`NotNull`或`NotBlank`时改用`FIELD_REQUIRED`。第8章把后端接到核对脚本上时会遇到这一项不通过，修正留到那里完成。
 
-### 5.5.4 HTTP 状态转换与事务语义
+**运行与观察**
 
-HTTP 状态码应与业务结果一一对应。查询成功返回200，集合为空仍返回200并给出空的`content`；创建成功返回201和`Location`，异步导入返回202并给出任务地址；替换成功返回200或204，删除成功返回204；参数解析失败返回400，缺少身份返回401，身份存在但权限不足返回403，资源找不到返回404，版本或状态冲突返回409，服务器暂时不可用返回503。不要把所有异常包装成200再在响应体中写一个`success=false`，这样会让网关、监控和浏览器缓存失去判断依据。
+启动`Lesson54Application`（它已经装入`ApiExceptionHandler`），在浏览器地址栏依次请求三个地址：`/api/assets/DAM-A-PZ-07/readings?from=abc&to=2030-01-01T00:00:00Z`，`/api/assets/DAM-A-PZ-07/readings?to=2030-01-01T00:00:00Z`，以及`/api/asset`。应答依次是 400 与`INVALID_PARAMETER`（`field`为`from`）、400 与`FIELD_REQUIRED`（`field`为`from`）、404 与`NOT_FOUND`，三个错误体的形状相同。对照表5.2的第二行：5.2节的程序对`/api/asset`应答的是 Spring 的通用错误，现在连路径写错也回到了契约之内。
 
-创建接口的事务边界应覆盖“验证测站—生成实体—保存读数—写入审计”的完整用例。若数据库保存成功而审计失败，系统需要依据业务要求回滚主记录或将审计事件写入事务发件箱；不能在控制器中先保存实体、再用另一个连接写日志。更新接口在同一事务中读取版本、执行状态检查和写入新值，数据库的唯一约束与版本列负责处理并发竞争。删除接口若采用逻辑删除，应把删除时间、操作者和原因写入审计字段，查询默认过滤已删除记录，但管理员接口仍可按权限恢复或查看。
+### 5.5.3 三层校验与错误码约定
 
-幂等请求与重试的关系也要写进接口说明。客户端在连接超时后重试`POST`时，服务端先查询幂等键；如果已有相同请求摘要，则返回原响应和同一`Location`；如果摘要不同，返回409并要求客户端生成新键。幂等记录应保存到与业务写入同一事务的表中，过期时间覆盖网关重试、消息重投和人工补发的最大窗口。只放在内存 Map 中会在服务重启后丢失，无法保证关键基础设施数据的唯一性。带状态的资源还要约定状态迁移规则：处置单只有`OPEN`可以变为`ACKNOWLEDGED`，重复确认应答当前状态，不再次产生副作用。同一个幂等键携带不同的请求体时应答冲突，防止客户端把一个键当作通用令牌反复使用。
+表5.8把前两小节的内容，连同5.4.6节的预警确认，按“在哪一层被拦下”整理在一起。确认预警的请求没有请求体，第一层能出错的只有路径里的编号不是数字；主要的检查在服务层，手段是条件更新；数据库一层则由`warning`表的`CHECK`和外键把关。
 
-### 5.5.5 DTO 契约与单位转换
+**表 5.8  补录观测与确认预警：三层校验各自检查什么、怎样应答**
 
-DTO 是接口版本和领域模型之间的缓冲层。后端内部可以把水位存为米制`BigDecimal`，外部请求允许厘米或毫米，但转换必须依据显式单位字段和工程配置完成，并在响应中返回统一单位。未知单位返回400，单位缺失不能默认为米；同一测站的历史数据应在存储层使用统一单位，避免查询时把不同量纲相加。时间字段统一使用带时区的 ISO 8601 字符串，服务层转换为`Instant`后再比较，展示时由前端选择值班员时区。
+| 层       | 检查的内容                                                         | 失败时抛出                                                   | 状态码与`code`                                                                     |
+|:---------|:-------------------------------------------------------------------|:-------------------------------------------------------------|:-----------------------------------------------------------------------------------|
+| 表示层   | 请求体字段齐全、类型与取值范围；路径和查询参数能解析               | 框架的校验与类型转换异常                                     | 400；`VALIDATION_ERROR`、`INVALID_PARAMETER`、`FIELD_REQUIRED`                     |
+| 服务层   | 对象已登记且在用；单位与台账一致；数值与质量码相容；该时刻尚无观测 | `AssetNotFound``Exception`、`RuleViolation`、`ReadingExists` | 404 `ASSET_NOT_FOUND`；400 `UNIT_MISMATCH`、`VALUE_REQUIRED`；409 `READING_EXISTS` |
+| 服务层   | 预警存在；可评估；当前状态允许这次流转                             | 第8章的`Missing`、`Conflict`                                 | 404 `WARNING_NOT_FOUND`；409 `NOT_EVALUABLE`、`ILLEGAL_TRANSITION`                 |
+| 持久化层 | 主键、唯一索引、外键、`CHECK`                                      | `DataIntegrity``ViolationException`                          | 重复事件：忽略或返回原记录；其余落到兜底的 500，说明前两层漏了检查                 |
 
-响应 DTO 只输出读者需要的字段：资源 ID、测站 ID、数值、单位、采样时间、质量码、版本和更新时间。数据库主键、内部租户标识、软删除标记和审计人不应因为实体序列化而意外暴露。对枚举新增值时，服务端可以先在响应中保留未知值的兼容处理，客户端显示“未知状态”而不是解析失败；删除或重命名枚举则必须通过新 API 版本完成。
+三层面向的入口不同。HTTP 请求三层都经过；消息消费者从服务层进入；数据修复脚本直接面对数据库。哪一层都不能假设前一层一定执行过。
 
-### 5.5.6 测试矩阵与接口可观测性
+状态码表达“哪一类结果”，给程序和网关看；`code`表达“具体是什么问题”，页面据此决定提示语和下一步动作。同样是 400，`UNIT_MISMATCH`应提示分析员核对单位，`INVALID_PARAMETER`多半是页面自己拼错了地址；同样是 409，`ILLEGAL_TRANSITION`要刷新列表，`NOT_EVALUABLE`要提示先处理数据质量。错误码一经发布就不改名，`message`的措辞可以调整，前端不应拿它做判断。失败不能包装成状态码 200 再在响应体里放一个`success:false`：网关、监控和浏览器都按状态码统计成败，这样做会让它们把失败全部记成成功。查询结果为空的列表应答 200 和空数组；204 只用于契约写明的“单个资源尚无内容”。
 
-接口文档还应给出示例请求、示例响应、错误码和限流规则，并在每次版本发布时同步更新 OpenAPI 描述；值班员和前端开发者据此可以复现问题、核对字段单位并确认兼容范围。
+为每个写入用例单独定义请求体`record`，不要让补录、订正、派单共用一个字段全部可选的大对象：那样“没传这个字段”和“要把这个字段清空”无从区分，校验注解也无处可写。接口的路径、字段、错误码和示例写成 OpenAPI 文档，与契约表8.3保持一致，每次发布时一同更新。
 
-每个端点至少覆盖正常、参数错误、未认证、无权限、资源不存在、版本冲突和重复请求七类场景。正常场景验证状态码、响应体和`Location`；参数错误验证字段列表和错误码；未认证与无权限验证401/403的区别；资源不存在验证404不泄露其他资源信息；版本冲突验证409并保留数据库原值；重复请求验证幂等键返回同一资源。测试还要确认异常日志包含`traceId`，但不含完整 JWT、密码和个人信息。
+### 5.5.4 幂等键与重试
 
-MockMvc 或 WebTestClient 可以在没有真实网络的情况下验证控制器协议，服务层单元测试使用假的 Repository 和时钟验证业务规则，PostgreSQL 集成测试验证唯一约束、检查约束和事务回滚。测试数据应在每个用例开始时明确准备，在结束时清理或使用独立事务回滚；不要依赖测试执行顺序。对于时间窗口和质量码，测试数据要覆盖边界值、闰秒处理约定和 missing/suspect/valid 三种质量状态。
+值班室的网络不总是可靠。页面提交补录后迟迟收不到应答，用户会再点一次，请求库的超时重试也可能自动重发。第一次请求其实可能已经成功，只是应答丢在了路上。服务端必须让“重发”与“只发一次”的结果相同。
 
-参数校验和异常处理的价值在于让失败尽早、信息稳定、恢复可行。失败响应告诉客户端应该修正输入、重新认证、重新读取资源还是稍后重试；服务端指标则按错误码统计参数错误率、冲突率和资源缺失率，帮助运维区分客户端缺陷与数据库故障。这样，接口设计就从“能返回 JSON”提升为可测试、可观测、可演进的后端契约。 接口文档应把这些约定转换为可执行示例：为每个端点列出请求头、路径参数、查询参数、请求体、成功响应、错误响应和重试建议。示例数据使用测站编号、采样时间和质量码的真实组合，避免只展示抽象的“foo/bar”。前端联调时先依据文档生成契约测试，后端发布时再用同一组样例验证字段名称、单位和状态码，发现不一致就阻断版本发布。
+对创建类的请求，办法是5.5.1节用到的幂等键。页面在用户打开补录表单时生成一个唯一编号，放进`Idempotency-Key`请求头，重发时保持不变。服务端有几条规则要守。幂等键与业务数据写在同一个事务里，本书直接把它存进`reading.event_id`并由唯一索引保护；放在内存的`Map`里，服务一重启就全忘了，多实例部署时各个实例之间也互不知情。同一个键再次到达时返回第一次的结果，不再执行一遍。同一个键却带着不同的请求体，说明客户端把一个键用在了两件事上，应答 409，不能悄悄当成重复而忽略；清单5.32为了简短没有比较请求体，补上这一步是一个不错的练习。键的有效期要覆盖客户端可能重试的最长时间。
 
-对于批量写入，接口还要说明部分成功语义。可以把每条读数放入独立结果数组，返回成功、重复、参数错误和业务拒收四种结果，并给出批次追踪 ID；也可以采用全批次原子事务，但要限制批量大小和锁持有时间。无论选择哪种方案，都必须记录每条测站 ID 和错误码，使值班员能够补发失败记录而不重复提交已经成功的读数。
+对状态流转类的请求，条件更新天然就是幂等的，不需要额外的键。确认预警的请求重发十次，预警也只从`open`变成`acknowledged`一次，后面九次得到 409 和当前状态。页面收到这个 409 以后重新读取预警：状态已经是自己想要的，就当作成功处理。
 
-批次接口还应限制单次记录数量、请求体大小和处理时长，并在响应中返回可检索的批次号。异步导入使用任务资源和进度状态，客户端轮询任务而不是长时间占用连接；任务失败时保留失败行号和错误码，便于只补发有问题的测点。这样既保护数据库连接池，也让数据修复过程可审计。
+### 5.5.5 DTO、单位与时间
 
-写入接口的审计字段还应记录采集来源、操作者、设备时间与服务器接收时间，并明确时钟偏差处理策略；当设备时间超出允许窗口时，服务端应保留原始值和拒收原因，便于后续核查而不是静默修正。接口响应中的`traceId`、批次号与幂等键关联后，值班员可以从一次补发操作追踪到数据库事务和审计事件。对于修改和删除操作，审计记录还应保存变更前后的关键字段、授权角色及审批依据，避免只留下“操作成功”而无法解释业务状态为何改变。
+DTO 把接口字段与表结构隔开（5.4.1节），它也是单位和时间口径的关口。
+
+单位必须明示。请求里不带单位的数值不能默认当成某个单位，5.5.1节因此要求`unit`必填，并与台账核对。同一个测点的历史数据在库里用同一个单位保存；要接受别的单位（现场记录本上的米水头），就在服务层按测点配置明确换算，换算后的单位随数值一起保存和返回。应答里的`value`永远和`unit`一起出现。
+
+时间统一用带时区偏移的 ISO 8601 字符串，对应 Java 的`OffsetDateTime`。`2026-07-01T08:00:00+08:00`与`2026-07-01T00:00:00Z`是同一时刻，数据库的`timestamptz`按时刻比较，5.9节的测试专门验证了这一点。不带偏移的时间字符串一律拒绝。页面按值班员所在的时区显示，属于前端的事。`occurredAt`是仪器采样的时刻，服务器收到数据的时刻是表里的`received_at`，补传的数据两者可以相差很久，后者不能拿来代替前者。
+
+应答 DTO 只放调用方需要的字段。`reading`表的`source`、`revision_reason`、`received_at`没有出现在`ReadingDto`里，将来要对分析员开放订正原因，是在 DTO 里加一个字段，而不是把实体直接返回。枚举型字段增加取值时（例如质量码以后多出一种），旧页面应能把不认识的值显示为“未知”而不是报错；删除或改名则属于破坏性变更，要随接口版本一起发布。
 
 ## 5.6 Spring Security 6与JWT
 
 **本节层次**
 
-指导实践：5.6.1、5.6.3、5.6.5；拓展：5.6.2、5.6.4、5.6.6、5.6.7、5.6.8。本节按所列层次学习；指导实践成果仍按章末要求验收。
+指导实践：5.6.1、5.6.3、5.6.5；拓展：5.6.2、5.6.4、5.6.6、5.6.7、5.6.8。
 
 **进入本节所需知识**
 
@@ -1622,9 +1366,9 @@ MockMvc 或 WebTestClient 可以在没有真实网络的情况下验证控制器
 <figcaption>图 5.5  Spring Security 6 的 JWT 认证与方法授权边界</figcaption>
 </figure>
 
-清单5.38是图5.5中那条过滤链的配置：会话置为无状态，认证端点放行，其余请求交给 JWT 过滤器。
+清单5.34是图5.5中那条过滤链的配置：会话置为无状态，认证端点放行，其余请求交给 JWT 过滤器。
 
-**清单 5.38  Spring Security过滤链**
+**清单 5.34  Spring Security过滤链**
 
 ```java
 import org.springframework.context.annotation.*;
@@ -1663,9 +1407,9 @@ class SecurityConfig {
 }
 ```
 
-浏览器若使用Cookie携带凭据，不能机械关闭CSRF防护；上例适用于只从Authorization头读取Bearer令牌的API。权限只使用一个枚举，避免名称和取值漂移。清单5.39的过滤器只做一件事：把`Bearer`头里的令牌解析成认证对象放进`SecurityContext`，解析失败就放行给后续环节返回 401，不在过滤器里直接写响应体。
+浏览器若使用Cookie携带凭据，不能机械关闭CSRF防护；上例适用于只从Authorization头读取Bearer令牌的API。权限只使用一个枚举，避免名称和取值漂移。清单5.35的过滤器只做一件事：把`Bearer`头里的令牌解析成认证对象放进`SecurityContext`，解析失败就放行给后续环节返回 401，不在过滤器里直接写响应体。
 
-**清单 5.39  JWT认证过滤器**
+**清单 5.35  JWT认证过滤器**
 
 ```java
 import jakarta.servlet.*;
@@ -1722,9 +1466,23 @@ class JwtAuthenticationFilter extends OncePerRequestFilter {
 }
 ```
 
-JWT 密钥通过配置注入并以足够长度的 Base64 值提供。本章示例锁定 jjwt 0.11.x：`parseClaimsJws` 返回 Claims 之前已经完成签名验证，签名不合法会抛出异常，应用不能先手工解码 Base64 再“验证”字段。刷新凭据须在有效期内使用，校验签名、`type=refresh`、issuer、subject、jti 和服务端会话状态；到期后重新登录。访问令牌到期可以触发刷新请求，刷新令牌本身到期则拒绝签发新令牌。清单5.40给出 jjwt 0.11.x 的正确调用顺序，注意签名验证发生在读取任何 Claim 之前。
+签名密钥、签发者和令牌有效期这一组值随环境变化，按5.3.2节的办法放在`application.yml`的`security.jwt`下，由环境变量提供。清单5.36用一个`record`把它们集中起来：`@ConfigurationProperties`按前缀把配置项绑定到同名字段，`@Validated`让字段上的校验注解在应用启动时执行。密钥为空、有效期写成 0，应用就拒绝启动并指出是哪一项，不必等到第一个登录请求才暴露。这个`record`要经过注册才会成为 Bean，清单5.34类上的`@EnableConfigurationProperties(JwtProperties.class)`做的就是这件事。
 
-**清单 5.40  jjwt 0.11.x 签名验证与访问令牌解析**
+**清单 5.36  JwtProperties：集中绑定 JWT 配置并在启动时校验**
+
+```java
+@ConfigurationProperties(prefix = "security.jwt")
+@Validated
+public record JwtProperties(
+        @NotBlank String secret,
+        @NotBlank String issuer,
+        @Min(60) @Max(86_400) long accessSeconds,
+        @Min(300) @Max(2_592_000) long refreshSeconds) {}
+```
+
+JWT 密钥以足够长度的 Base64 值提供。本章示例锁定 jjwt 0.11.x：`parseClaimsJws` 返回 Claims 之前已经完成签名验证，签名不合法会抛出异常，应用不能先手工解码 Base64 再“验证”字段。刷新凭据须在有效期内使用，校验签名、`type=refresh`、issuer、subject、jti 和服务端会话状态；到期后重新登录。访问令牌到期可以触发刷新请求，刷新令牌本身到期则拒绝签发新令牌。清单5.37给出 jjwt 0.11.x 的正确调用顺序，注意签名验证发生在读取任何 Claim 之前。
+
+**清单 5.37  jjwt 0.11.x 签名验证与访问令牌解析**
 
 ```java
 import io.jsonwebtoken.*;
@@ -1738,8 +1496,7 @@ import edu.example.lesson56.RefreshTokenVerifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-// JwtProperties 复用清单 lst:ch05-config-validation 中带
-// @Validated 启动校验的定义，此处不再重复声明
+// JwtProperties 的定义见上一个清单
 
 @Configuration
 class JwtClockConfiguration {
@@ -1781,9 +1538,9 @@ class JwtService {
 }
 ```
 
-清单5.41给出完整校验器，文件位于配套后端的`edu.example.lesson56`包。运行`mvn -Dtest=RefreshTokenVerifierTest test`可观察有效令牌通过、到期及篡改令牌被拒绝；固定时钟使边界测试可复现。该工具不新增HTTP端点，轮换会话由后续持久化实践实现。
+清单5.38给出完整校验器，文件位于配套后端的`edu.example.lesson56`包。运行`mvn -Dtest=RefreshTokenVerifierTest test`可观察有效令牌通过、到期及篡改令牌被拒绝；固定时钟使边界测试可复现。该工具不新增HTTP端点，轮换会话由后续持久化实践实现。
 
-**清单 5.41  拒绝到期刷新令牌的完整校验器**
+**清单 5.38  拒绝到期刷新令牌的完整校验器**
 
 ```java
 package edu.example.lesson56;
@@ -1843,7 +1600,7 @@ public final class RefreshTokenVerifier {
 
 令牌的声明应最小化。`sub`标识用户或服务主体，`iss`限制签发者，`aud`限制使用方，`iat`和`exp`描述有效时间，`jti`用于撤销和审计，`type`区分 access 与 refresh，权限集合只携带授权决策需要的稳定代码。不要把身份证号、手机号、设备密钥或完整业务对象放入 JWT；JWT 是带签名的可读载荷，不是加密容器。
 
-**清单 5.42  jjwt 0.11.x 签发访问与刷新令牌**
+**清单 5.39  jjwt 0.11.x 签发访问与刷新令牌**
 
 ```java
 import io.jsonwebtoken.Jwts;
@@ -1883,9 +1640,9 @@ class TokenIssuer {
 }
 ```
 
-清单5.42用不同的 jti 生成访问与刷新令牌，刷新令牌不携带业务权限，减少权限变更后的残留窗口。签发时间由注入的时钟提供，测试可以固定`Instant`验证过期边界；生产环境要考虑设备与服务器时钟偏差，允许的时钟容差必须写入安全配置并监控。密钥轮换时保留短暂的旧密钥验证窗口，并给每个密钥版本设置撤销和淘汰日期。清单5.43把这些约束落到登录端点上：密码比对走`PasswordEncoder`，成功后一次签发访问令牌与刷新令牌。
+清单5.39用不同的 jti 生成访问与刷新令牌，刷新令牌不携带业务权限，减少权限变更后的残留窗口。签发时间由注入的时钟提供，测试可以固定`Instant`验证过期边界；生产环境要考虑设备与服务器时钟偏差，允许的时钟容差必须写入安全配置并监控。密钥轮换时保留短暂的旧密钥验证窗口，并给每个密钥版本设置撤销和淘汰日期。清单5.40把这些约束落到登录端点上：密码比对走`PasswordEncoder`，成功后一次签发访问令牌与刷新令牌。
 
-**清单 5.43  登录端点、密码校验与令牌签发**
+**清单 5.40  登录端点、密码校验与令牌签发**
 
 ```java
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -1926,9 +1683,9 @@ class LoginController {
 }
 ```
 
-密码只保存经过适当成本因子哈希后的结果，登录错误统一返回“凭据无效”，不区分用户名不存在还是密码错误，避免账号枚举。登录端点应有速率限制、失败计数和审计事件；密码重置、二次认证和设备绑定属于更高层的身份系统，不能用把字段塞进 JWT 的方式替代。刷新端点的检查比登录更容易写漏，清单5.44把三项必查列全：签名、`type`是否为`refresh`、旧 jti 是否已在轮换中作废。
+密码只保存经过适当成本因子哈希后的结果，登录错误统一返回“凭据无效”，不区分用户名不存在还是密码错误，避免账号枚举。登录端点应有速率限制、失败计数和审计事件；密码重置、二次认证和设备绑定属于更高层的身份系统，不能用把字段塞进 JWT 的方式替代。刷新端点的检查比登录更容易写漏，清单5.41把三项必查列全：签名、`type`是否为`refresh`、旧 jti 是否已在轮换中作废。
 
-**清单 5.44  刷新令牌的签名、类型和轮换检查**
+**清单 5.41  刷新令牌的签名、类型和轮换检查**
 
 ```java
 import io.jsonwebtoken.*;
@@ -1982,9 +1739,9 @@ class RefreshService {
 }
 ```
 
-JWT 的声明字段、签名与校验语义以 RFC 7519 为规范依据<sup>[[37]](../../references.md#ref37)</sup>。刷新采用轮换策略：每次成功使用旧 refresh jti 后立即撤销，并生成新的 refresh jti；若同一旧令牌再次出现，系统可以判定重放并撤销整个会话族。过期刷新令牌直接拒绝。会话仓储的`consumeActive`须以条件更新原子地消费旧会话，且在同一数据库事务中登记新会话；先查询再写Redis不能保证并发轮换唯一。该仓储由持久化练习实现，Redis撤销缓存不替代会话事实。
+JWT 的声明字段、签名与校验语义以 RFC 7519 为规范依据<sup>[[38]](../../references.md#ref38)</sup>。刷新采用轮换策略：每次成功使用旧 refresh jti 后立即撤销，并生成新的 refresh jti；若同一旧令牌再次出现，系统可以判定重放并撤销整个会话族。过期刷新令牌直接拒绝。会话仓储的`consumeActive`须以条件更新原子地消费旧会话，且在同一数据库事务中登记新会话；先查询再写Redis不能保证并发轮换唯一。该仓储由持久化练习实现，Redis撤销缓存不替代会话事实。
 
-**清单 5.45  基于 jti 与版本号的令牌撤销**
+**清单 5.42  基于 jti 与版本号的令牌撤销**
 
 ```java
 import java.time.Duration;
@@ -2016,27 +1773,23 @@ class RedisTokenRevocationService implements TokenRevocationService {
 }
 ```
 
-清单5.45让撤销记录的 TTL 覆盖原令牌剩余寿命，避免黑名单永久增长。高并发平台还可以使用用户令牌版本号：用户注销或改密时递增版本，过滤器比较令牌中的版本与当前账户版本；jti 黑名单适合撤销单个设备，版本号适合撤销用户全部会话，两者可以组合。撤销状态读取失败时要按安全策略拒绝请求或进入受限降级，不能把 Redis 不可达默认为“令牌有效”。过滤链解决“是谁”，方法级注解解决“能做什么”：清单5.46用`@PreAuthorize`把角色判断写在服务方法上，跨域策略集中在一处配置，不散落在各个控制器。
+清单5.42让撤销记录的 TTL 覆盖原令牌剩余寿命，避免黑名单永久增长。高并发平台还可以使用用户令牌版本号：用户注销或改密时递增版本，过滤器比较令牌中的版本与当前账户版本；jti 黑名单适合撤销单个设备，版本号适合撤销用户全部会话，两者可以组合。撤销状态读取失败时要按安全策略拒绝请求或进入受限降级，不能把 Redis 不可达默认为“令牌有效”。过滤链解决“是谁”，方法级注解解决“能做什么”：清单5.43用`@PreAuthorize`把权限要求写在控制器方法上，权限名与配套`SecurityConfig`中三个教学账号的权限一致；跨域策略集中在一处配置，不散落在各个控制器。
 
-**清单 5.46  方法级权限与跨域策略**
+**清单 5.43  方法级权限与跨域策略**
 
 ```java
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-@RestController
-class StationWriteController {
-    @PreAuthorize("hasAuthority('READING_WRITE')")
-    @PostMapping("/api/readings")
-    ReadingResponse create(@Valid @RequestBody CreateReadingRequest request) {
-        return service.create(request);
-    }
+// AssetController.java（配套工程）：查询接口对三种角色开放
+    @GetMapping("/{assetId}/readings/latest")
+    @PreAuthorize("hasAnyAuthority('DUTY','ANALYST','OPS')")
+    public ResponseEntity<ReadingDto> latest(@PathVariable String assetId) { /* 见 5.4.2 节 */ }
 
-    private final ReadingApplicationService service;
-    StationWriteController(ReadingApplicationService service) {
-        this.service = service;
-    }
-}
+// ReadingWriteController.java（5.5.1 节）：补录只对专业分析员开放
+    @PostMapping
+    @PreAuthorize("hasAuthority('ANALYST')")
+    public ResponseEntity<AssetController.ReadingDto> create(/* 见 5.5.1 节 */) { /* …… */ }
 
 @Configuration
 class CorsConfig {
@@ -2129,14 +1882,27 @@ CORS 预检请求只是在浏览器侧询问“是否允许这个源访问”，
 
 **进入本节所需知识**
 
-先读5.4节事务基础与5.5节服务职责，能说明提交成功和处理成功的区别。
+5.4.4节的幂等写入和5.4.5节的事务基础，能说明“事务提交成功”和“后续处理成功”是两件事。
 
-同一应用进程内的领域事件可降低模块耦合。若处理必须在数据库事务成功后执行，应使用`@TransactionalEventListener`并指定`AFTER_COMMIT`，不能用普通`@EventListener`声称“提交后执行”。清单5.47用这个注解在观测入库提交之后才更新指标，事务回滚时监听器不会被触发，指标也就不会记录一条并不存在的观测。
+5.4.5节留下一条规矩：事务里不要等外部系统。观测入库之后还有几件事要做，例如更新指标、让缓存失效、通知预警评估，它们都应该在事务**提交之后**再做。提前做会出两种错：事务后来回滚了，指标里却多记了一条并不存在的观测；或者通知先到一步，对方回头查库，那条观测还没有提交，查不到。
 
-**清单 5.47  事务提交后的指标事件监听**
+Spring 在进程内提供了事件机制来表达“提交之后再做”。写入方只负责说明发生了什么，见清单5.44；谁来响应、做什么，写入方不知道，也不需要知道。
+
+**清单 5.44  在写入方法里发布事件（书中示例）**
 
 ```java
-import org.springframework.context.event.EventListener;
+public record ReadingSavedEvent(String eventId, String assetId, OffsetDateTime occurredAt) {}
+
+// ReadingService：构造器增加一个参数 ApplicationEventPublisher events，accept 方法末尾增加一行
+        events.publishEvent(new ReadingSavedEvent(
+                event.eventId(), event.assetId(), event.occurredAt()));
+```
+
+响应方用`@TransactionalEventListener`并指定`AFTER_COMMIT`，见清单5.45。事件虽然在事务进行中发布，监听方法却要等事务提交成功才被调用；事务回滚，它就不会被调用，指标也就不会记录一条并不存在的观测。普通的`@EventListener`没有这个效果，它在`publishEvent`那一刻立即执行，此时事务还没有提交。
+
+**清单 5.45  事务提交后的指标事件监听**
+
+```java
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.*;
 
@@ -2159,42 +1925,19 @@ class ReadingEventHandler {
 }
 ```
 
-跨服务通信必须使用网络可达的消息基础设施。清单5.48的 Kafka 监听器位于告警服务，消费数据服务发布的事件；它不是进程内事件监听器，两者的区别在于消息跨进程后必须自己处理重复投递。
-
-**清单 5.48  Kafka 消息监听与告警评估**
-
-```java
-record ReadingMessage(String eventId, String assetId,
-                      BigDecimal value, Instant occurredAt) {}
-
-@Component
-class AlertMessageListener {
-    private final AlertApplicationService alertService;
-
-    AlertMessageListener(AlertApplicationService alertService) {
-        this.alertService = alertService;
-    }
-
-    // 与后文幂等消费者分属不同消费组：两组各自独立消费同一主题
-    @KafkaListener(topics = "water.reading.saved", groupId = "alert-basic-v1")
-    void onReading(ReadingMessage message) {
-        alertService.evaluateIdempotently(message.eventId(), message.assetId(),
-                message.value(), message.occurredAt());
-    }
-}
-```
-
-消息系统不能自动保证业务恰好执行一次。生产者应考虑事务发件箱（outbox）或可靠发布；消费者用`eventId`去重，并配置有限重试、死信队列和监控。消息模式适合告警评估、通知和异步统计，不适合需要立即返回结果的简单查询。
-
-在分布式部署中，服务发现负责把逻辑服务名解析为可用实例，配置中心负责管理环境参数，网关负责认证、限流与路由。Spring Boot应用应通过明确的Starter和配置文件接入这些基础设施，并在健康检查中验证注册状态、心跳超时和实例摘除；业务代码只依赖稳定的服务接口，不把具体注册中心的客户端注解扩散到领域层。这样的边界便于在开发、测试和生产环境切换实现。
+提交后事件有两个限制。监听方法失败时，主事务已经提交，不会跟着回滚，所以监听方法里只放“失败了也无妨、或者可以重做”的动作，并记录失败日志。事件只存在于内存里：进程恰好在提交之后、监听方法执行之前崩溃，这个事件就丢了，另一个进程里的服务也收不到它。一条都不能丢的通知，或者要送到另一个服务的通知，需要消息队列，5.7.1节说明理由，具体实现是5.7.2节以后的选学内容。
 
 ### 5.7.1 为什么引入消息队列
 
-同步调用把生产者、消费者和网络故障绑在同一个请求里。写入服务保存读数后同步调用预警服务，若预警服务重启、网络抖动或处理变慢，写入请求就会超时；客户端重试又可能造成重复保存。同步链路还会把峰值流量直接传给下游，多个消费者同时扩容时难以平滑。Kafka 把事件写入持久化主题，生产者与消费者通过分区和偏移量解耦，消费者可以按自己的速度追赶积压。
+同步调用把生产者、消费者和网络故障绑在同一个请求里。写入服务保存观测后同步调用预警服务，若预警服务重启、网络抖动或处理变慢，写入请求就会超时；客户端重试又可能造成重复保存。同步链路还会把峰值流量直接传给下游，多个消费者同时扩容时难以平滑。消息队列（本书用 Kafka）把事件写入持久化的主题，生产者写完就返回，消费者按自己的速度读取，下游重启或变慢只会造成积压，不会让上游的请求失败。
 
-异步投递的可靠性取决于发送确认、失败恢复和消费端处理策略。生产者要处理发送失败、确认超时和序列化异常，消费者要处理重复投递、处理失败、顺序和重平衡；主题还要设置副本、保留时间、分区数和消费者组。事件体必须包含事件 ID、主体 ID、发生时间、模式版本和追踪 ID，不能只发送一个无法解释的数值。事件版本向后兼容时新增可选字段，破坏性变更发布新主题或新版本。
+异步投递的可靠性取决于发送确认、失败恢复和消费端处理策略。生产者要处理发送失败、确认超时和序列化异常，消费者要处理重复投递、处理失败、顺序和重平衡；主题还要设置副本、保留时间、分区数和消费者组。事件体必须包含事件 ID、主体 ID、发生时间、模式版本和追踪 ID，不能只发送一个无法解释的数值。事件版本向后兼容时新增可选字段，破坏性变更发布新主题或新版本。消息队列也不能自动保证业务恰好执行一次：同一条消息可能到达两次，消费者要像5.4.4节的写入方法那样幂等。它适合预警评估、通知和异步统计，不适合需要立即拿到结果的查询。
 
-**清单 5.49  Spring Kafka 生产与消费配置**
+### 5.7.2 生产者、事件模式与发送确认
+
+先看 Spring Kafka 的生产者与消费者配置，见清单5.46。
+
+**清单 5.46  Spring Kafka 生产与消费配置**
 
 ```yaml
 spring:
@@ -2220,13 +1963,11 @@ spring:
       concurrency: 3
 ```
 
-清单5.49把生产者确认设为`acks=all`并打开 Kafka 的幂等生产者，减少网络重试造成的重复记录；消费者关闭自动提交，让业务处理成功后再提交偏移量。`spring.json.trusted.packages`只允许教材事件包，不能为了省事写`*`，否则恶意消息可能诱导反序列化不应实例化的类型。生产配置还应通过机密变量注入 SASL、TLS 和凭据，日志不得输出连接密码。
-
-### 5.7.2 生产者、事件模式与发送确认
+清单5.46把生产者确认设为`acks=all`并打开 Kafka 的幂等生产者，减少网络重试造成的重复记录；消费者关闭自动提交，让业务处理成功后再提交偏移量。`spring.json.trusted.packages`只允许教材事件包，不能为了省事写`*`，否则恶意消息可能诱导反序列化不应实例化的类型。生产配置还应通过机密变量注入 SASL、TLS 和凭据，日志不得输出连接密码。
 
 生产者把领域对象转换为事件 DTO，再通过`KafkaTemplate`发送。发送成功只表示 broker 接受并按确认策略写入，不表示消费者已经处理；因此接口若需要立即反馈，只返回本地保存结果和事件 ID，消费者处理状态通过状态查询或通知接口提供。发送回调记录分区、偏移量和耗时，失败进入重试或发件箱，而不是在 HTTP 线程中无限阻塞。
 
-**清单 5.50  KafkaTemplate 生产者与发送回调**
+**清单 5.47  KafkaTemplate 生产者与发送回调**
 
 ```java
 import org.springframework.kafka.core.KafkaTemplate;
@@ -2264,69 +2005,55 @@ class ReadingEventPublisher {
 }
 ```
 
-清单5.50使用测站 ID 作为消息键，使同一测站的事件在同一分区内保持顺序；分区数量和热点测站要通过压测评估。生产者不能在回调里直接修改主业务记录，因为回调可能在另一个线程执行且原事务早已结束；发送失败应写入可重试存储，后台任务按照退避策略再次发送。事件 ID 在数据库和消息体中保持一致，便于消费者去重和运维追踪。
+清单5.47使用测站 ID 作为消息键，使同一测站的事件在同一分区内保持顺序；分区数量和热点测站要通过压测评估。生产者不能在回调里直接修改主业务记录，因为回调可能在另一个线程执行且原事务早已结束；发送失败应写入可重试存储，后台任务按照退避策略再次发送。事件 ID 在数据库和消息体中保持一致，便于消费者去重和运维追踪。
 
 ### 5.7.3 消费者幂等与去重约束
 
-Kafka 至少一次投递意味着消费者可能在业务提交后、偏移量提交前崩溃，重启后再次收到同一消息。幂等处理要把“是否处理过”与业务写入放进同一个数据库事务，并用事件 ID 唯一约束作为并发闸门。先插入去重表，若违反唯一约束则返回“已处理”；插入成功后执行预警评估和状态更新，事务提交后再提交偏移量。只在内存 Set 中去重会在重启或多实例之间失效。
+Kafka 保证的是至少一次投递：消费者可能在业务已经提交、偏移量还没来得及提交时崩溃，重启后同一条消息会再来一次。消费者因此必须幂等，而“是否处理过”要交给数据库的唯一约束来裁决，只在内存里用`Set`去重，重启以后或者多个实例之间都会失效。清单5.48是配套工程的`ReadingConsumer.java`（省略了导入语句）。
 
-**清单 5.51  事件去重表与消费者事务**
+**清单 5.48  ReadingConsumer：解析事件，交给幂等的服务方法，忽略重复**
 
 ```java
-import jakarta.persistence.*;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import java.time.Instant;
+@Component
+public class ReadingConsumer {
+    private static final Logger log = LoggerFactory.getLogger(ReadingConsumer.class);
+    private final ReadingService readings;
+    private final ObjectMapper objectMapper;
 
-@Entity
-@Table(name = "consumed_event",
-       uniqueConstraints = @UniqueConstraint(name = "uk_event_id",
-                                              columnNames = "eventId"))
-class ConsumedEvent {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    @Column(nullable = false, length = 64) private String eventId;
-    @Column(nullable = false) private Instant consumedAt;
-    protected ConsumedEvent() {}
-    ConsumedEvent(String eventId, Instant consumedAt) {
-        this.eventId = eventId; this.consumedAt = consumedAt;
-    }
-}
-
-@Service
-class ReadingAlertConsumer {
-    private final ConsumedEventRepository consumed;
-    private final AlertApplicationService alerts;
-
-    ReadingAlertConsumer(ConsumedEventRepository consumed,
-                         AlertApplicationService alerts) {
-        this.consumed = consumed; this.alerts = alerts;
+    public ReadingConsumer(ReadingService readings, ObjectMapper objectMapper) {
+        this.readings = readings; this.objectMapper = objectMapper;
     }
 
-    @Transactional
-    @KafkaListener(topics = "water.reading.saved", groupId = "alert-v1")
-    void onMessage(ReadingSavedMessage message) {
+    @KafkaListener(topics = "${app.kafka.reading-topic:qingyuan.reading.v1}",
+                   groupId = "qingyuan-quality")
+    public void consume(String eventJson) {
+        ReadingEvent event;
         try {
-            consumed.saveAndFlush(new ConsumedEvent(
-                    message.eventId(), Instant.now()));
-        } catch (DataIntegrityViolationException duplicate) {
-            return; // 唯一约束表明该事件已成功处理
+            event = objectMapper.readValue(eventJson, ReadingEvent.class);
+        } catch (Exception malformed) {
+            log.warn("丢弃无法解析的观测事件: {}", malformed.getMessage());
+            return; // 教学工程直接丢弃；生产应投入死信主题
         }
-        alerts.evaluate(message.assetId(), message.occurredAt(),
-                        message.quality(), message.traceId());
+        try {
+            readings.accept(event);
+        } catch (DataIntegrityViolationException duplicate) {
+            // 并发重投由唯一索引裁决：事务已回滚，在事务边界之外
+            // 捕获并确认消息，避免无谓的重试循环（与第8章口径一致）
+            log.debug("重复事件已忽略: {}", event.eventId());
+        }
     }
 }
 ```
 
-清单5.51的去重表应设置保留窗口，覆盖消息最大重投和人工补发周期；过期清理必须与审计要求协调，不能在仍可能重投时删除记录。若业务更新跨越多个数据库或调用外部系统，去重记录、状态更新和外部副作用需要事务发件箱、幂等 API 或补偿流程共同保证。消费者组扩容只改变分区分配，不会自动消除重复消息。
+消费者本身很薄，幂等靠的是5.4.4节的`ReadingService.accept`和`reading`表的唯一索引。监听方法上没有`@Transactional`：事务开在`accept`上，唯一索引拒绝重复时异常穿过事务代理抛出来，事务已经回滚；消费者在事务之外接住它，记一条日志后正常返回，这条消息就算处理完毕，不会反复重投。消息以 JSON 字符串接收、由消费者自己解析，解析失败怎么处理也就由自己决定；若改用5.7.2节配置中的`JsonDeserializer`，解析失败要交给下一小节的错误处理器。
+
+观测写入有现成的唯一键。有些消费者的业务动作没有这样的键，例如收到观测后重新评估预警，结果可能只是更新一个状态。这时单独建一张去重表，只有一个带唯一约束的`event_id`列和处理时间，在同一个数据库事务里先插入去重记录、再执行业务动作：插入违反唯一约束，说明这个事件处理过，直接返回。去重记录的保留时间要覆盖消息可能重投和人工补发的最长周期。业务动作如果还涉及外部系统，要靠对方接口的幂等或补偿流程配合，单靠去重表保证不了。消费者组扩容只改变分区的分配，不会消除重复消息。
 
 ### 5.7.4 重试、退避与死信队列
 
 失败要先分类。网络瞬断、数据库连接暂时耗尽和下游503属于可重试错误，应使用有限次数、指数退避和抖动；JSON 格式错误、未知事件版本、违反业务约束属于不可重试错误，应立即进入死信并通知值班员。无限重试会让一个坏消息长期阻塞分区，重试主题或死信主题要保留原事件、异常类型、首次失败时间、重试次数和原始追踪 ID。
 
-**清单 5.52  DefaultErrorHandler 与死信发布**
+**清单 5.49  DefaultErrorHandler 与死信发布**
 
 ```java
 import org.apache.kafka.common.TopicPartition;
@@ -2358,13 +2085,13 @@ class KafkaErrorHandlingConfig {
 }
 ```
 
-清单5.52把不可重试异常直接送入死信，把瞬态异常限制在30秒窗口内。生产环境还要监控重试次数、死信增长、消费延迟和分区积压；死信处理界面允许专业分析员查看原因、修复数据后按原事件 ID 补发，补发仍经过去重约束。重试任务不能绕过认证和审计，也不能把死信内容原样展示给无权限用户。
+清单5.49把不可重试异常直接送入死信，把瞬态异常限制在30秒窗口内。生产环境还要监控重试次数、死信增长、消费延迟和分区积压；死信处理界面允许专业分析员查看原因、修复数据后按原事件 ID 补发，补发仍经过去重约束。重试任务不能绕过认证和审计，也不能把死信内容原样展示给无权限用户。
 
 ### 5.7.5 事务发件箱与可靠发布
 
-数据库提交和 Kafka 发送是两个资源，直接在事务中先保存再发送可能出现“数据库已提交、消息发送失败”，先发送再提交则可能出现“消息已消费、数据库回滚”。事务发件箱把待发送事件作为业务事务的一部分写入`outbox_event`表，提交后由发布器轮询或使用 CDC 读取，发送成功后更新状态。发布器崩溃可以从状态为 pending 的记录继续，消费者仍需幂等，因为发送确认和状态更新之间也可能重试。清单5.53分两段：写入段与业务数据同一个事务，发布段是独立的定时任务，两段之间只通过`outbox_event`表的状态字段交接。
+数据库提交和 Kafka 发送是两个资源，直接在事务中先保存再发送可能出现“数据库已提交、消息发送失败”，先发送再提交则可能出现“消息已消费、数据库回滚”。事务发件箱把待发送事件作为业务事务的一部分写入`outbox_event`表，提交后由发布器轮询或使用 CDC 读取，发送成功后更新状态。发布器崩溃可以从状态为 pending 的记录继续，消费者仍需幂等，因为发送确认和状态更新之间也可能重试。清单5.50分两段：写入段与业务数据同一个事务，发布段是独立的定时任务，两段之间只通过`outbox_event`表的状态字段交接。
 
-**清单 5.53  事务发件箱写入与发布任务**
+**清单 5.50  事务发件箱写入与发布任务**
 
 ```java
 import jakarta.persistence.*;
@@ -2422,7 +2149,7 @@ class OutboxService {
 }
 ```
 
-发件箱表要有状态、尝试次数、最后错误、下次重试时间和创建时间索引；发布器用行锁或租约避免多实例重复领取，发送确认和状态更新采用幂等更新。对于高吞吐时序事件，可以按日期分区、批量发送并设置保留期限，历史成功记录归档而不是无限增长。发件箱解决的是“本地事务与消息之间的原子记录”，不能替代 Kafka 副本、TLS、消费者幂等和死信治理；分区、副本与消费组的语义以 Kafka 官方文档为准<sup>[[38]](../../references.md#ref38)</sup>。
+发件箱表要有状态、尝试次数、最后错误、下次重试时间和创建时间索引；发布器用行锁或租约避免多实例重复领取，发送确认和状态更新采用幂等更新。对于高吞吐时序事件，可以按日期分区、批量发送并设置保留期限，历史成功记录归档而不是无限增长。发件箱解决的是“本地事务与消息之间的原子记录”，不能替代 Kafka 副本、TLS、消费者幂等和死信治理；分区、副本与消费组的语义以 Kafka 官方文档为准<sup>[[39]](../../references.md#ref39)</sup>。
 
 消息安全还包括主题权限和数据脱敏。生产者只允许写入指定主题，消费者只允许读取所属组；不同环境使用不同集群凭据和主题前缀。事件中不放密码、JWT、个人信息或不必要的原始测点数据，日志使用事件 ID 和摘要定位。主题 ACL、Schema 版本、保留策略、灾备恢复和重放演练应纳入发布清单，确保异常时可以追踪“谁在何时向哪个主题写入了什么版本的事件”。
 
@@ -2450,165 +2177,212 @@ Kafka 主题由多个分区组成，分区是并行度和顺序边界。同一�
 
 先完成本章接口与持久化实践；带着一项具体的延迟或资源问题阅读附录C。
 
-性能分析从 5.4 节的查询测试与执行计划开始：先定位耗时语句和资源瓶颈，再选择缓存、索引或连接池参数。附录C“拓展专题”分别介绍缓存与 Redis 一致性、游标分页、连接池与慢查询定位、Actuator 与结构化日志，以及性能故障的分层处置，供课程设计和运维任务查阅。基础课程要求能够读懂查询测试与执行计划，专题实现可按项目需要选学。平台拆分为多个服务或接口对外公开后才需要考虑的服务边界、跨服务调用的超时与降级、接口版本和健康检查，见附录C的C.1节；微服务边界与分布式失败的系统论述可参考文献<sup>[[39]](../../references.md#ref39)</sup>。
+性能分析从5.4.10节的执行计划读起：先定位耗时语句和资源瓶颈，再选择缓存、索引或连接池参数。附录C“拓展专题”分别介绍缓存与 Redis 一致性、游标分页、连接池与慢查询定位、Actuator 与结构化日志，以及性能故障的分层处置，供课程设计和运维任务查阅，按项目需要选学。平台拆分为多个服务或接口对外公开后才需要考虑的服务边界、跨服务调用的超时与降级、接口版本和健康检查，见附录C的C.1节；微服务边界与分布式失败的系统论述可参考文献<sup>[[25]](../../references.md#ref25)</sup>。
 
 ## 5.9 测试策略与质量门禁
 
 **本节层次**
 
-指导实践。
+指导实践：5.9.1、5.9.2；拓展：5.9.3。
 
 **进入本节所需知识**
 
-先完成5.2节接口验证；数据库和认证测试使用5.4、5.6节的实践骨架。
+5.3.3节用假 Repository 测试服务的例子；5.4.1节的时间窗查询；5.5.2节的统一错误体；5.9.2节的无权限场景用到5.6节的权限声明。
 
-接口契约、事务要求与安全策略可以转化为测试用例，在开发和修改代码时重复执行。对水利工程安全监测平台而言，测试数据必须带有测站编号、采样时间、质量码和操作者上下文；检查 HTTP 状态码时，还需核对质量码与审计字段，防止无效读数通过接口后进入风险计算。测试报告应记录代码版本、数据库迁移版本、配置 Profile、时区和数据集版本，便于值班员在故障复盘时重现同一条件。
+5.2节以来，每一步都用契约核对脚本从外部检查接口。脚本要求程序和数据库都已经启动，出错时也只能告诉你“哪个接口不对”。测试代码从内部检查，粒度更细，运行更快，每次改动代码之后都可以全部重跑一遍。后端的测试按“启动多少东西”分成三档，见表5.9。越往下越接近真实运行，也越慢；数量上应当是上面多、下面少。
 
-单元测试关注一个类在依赖替身下的决策：例如服务层收到越界水位时是否拒绝写入、重复的幂等键是否返回同一结果、乐观锁冲突是否转换为409。它不启动 Servlet 容器，也不依赖真实网络。集成测试则验证多个边界的协作，包括 Spring MVC 参数绑定、Spring Security 过滤链、JPA 事务和 PostgreSQL 约束；这类测试允许启动应用上下文，但必须明确清理数据。端到端测试再覆盖 Kafka、Redis 或反向代理等外部依赖，数量应少而稳定，不能把所有业务分支都塞进一条慢测试。
+**表 5.9  后端测试的三档，以及配套工程中对应的测试**
 
-服务层的单元测试可以用 Mockito 构造仓储和时钟替身，重点断言“调用了什么”以及“拒绝了什么”。清单5.54给出一个可独立阅读的例子：测试使用固定时钟和明确的质量码，避免依赖当前时间导致偶发失败。异常断言应检查稳定的领域错误码，而不是绑定完整中文消息，这样日志文案调整不会破坏协议测试。
+| 档次     | 启动什么                                                                       | 适合检查                                        | 配套工程中的例子                                                         |
+|:---------|:-------------------------------------------------------------------------------|:------------------------------------------------|:-------------------------------------------------------------------------|
+| 单元测试 | 不启动 Spring，自己创建对象，依赖用假的                                        | 服务层规则、令牌的签发与校验、JSON 与事件的对应 | `JwtServiceTest`、`ReadingEvent``JsonTest`、`RefreshToken``VerifierTest` |
+| 切片测试 | 只启动一层：`@DataJpaTest`装入实体与 Repository，`@WebMvcTest`装入控制器与 MVC | 查询语义与排序；状态码、错误体与权限            | `ReadingWindowTest`（5.9.1节）                                           |
+| 整体测试 | `@SpringBootTest`装入全部 Bean，连接真实的数据库                               | 各层接在一起以后的行为、数据库约束              | 契约核对脚本；5.9.3节选读                                                |
 
-**清单 5.54  服务层单元测试：质量码与幂等决策**
+### 5.9.1 用切片测试验证时间窗查询
+
+5.4.1节说时间窗取左闭右开，相邻两个窗口拼起来不重不漏。这句话是否属实，取决于`findInWindow`里写的是`<`还是`<=`，一个字符之差，读代码很容易看漏。清单5.51是配套工程的`ReadingWindowTest.java`（省略了导入语句），它把这条约定写成了三个可以反复执行的检查。
+
+**清单 5.51  ReadingWindowTest：用内存数据库验证左闭右开的时间窗**
 
 ```java
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+/** 在内存测试库执行真实 JPA 查询；不连接或修改工程数据库。 */
+@DataJpaTest(showSql = false, properties = {
+        "spring.datasource.url=jdbc:h2:mem:reading-window;MODE=PostgreSQL;NON_KEYWORDS=VALUE",
+        "spring.datasource.driver-class-name=org.h2.Driver",
+        "spring.jpa.hibernate.ddl-auto=create-drop"
+})
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@Import(ReadingService.class)
+class ReadingWindowTest {
+    @Autowired ReadingRepository repository;
+    @Autowired ReadingService service;
 
-import java.math.BigDecimal;
-import java.time.Clock;
-import java.time.Instant;
-import java.time.ZoneOffset;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-
-class ReadingCommandServiceTest {
-    @Mock private ReadingRepository repository;
-    @Mock private IdempotencyStore idempotencyStore;
-    private ReadingCommandService service;
+    private final OffsetDateTime start = OffsetDateTime.parse("2026-07-01T08:00:00+08:00");
 
     @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-        Clock clock = Clock.fixed(Instant.parse("2026-08-07T00:00:00Z"),
-                ZoneOffset.UTC);
-        service = new ReadingCommandService(repository, idempotencyStore, clock);
+    void seed() {
+        add("DAM-A-PZ-07", start.minusHours(1), "before");
+        add("DAM-A-PZ-07", start, "start");
+        add("DAM-A-PZ-07", start.plusMinutes(30), "inside");
+        add("DAM-A-PZ-07", start.plusHours(1), "boundary");
+        add("DAM-A-PZ-07", start.plusHours(2), "end");
+        add("DAM-A-PZ-08", start, "other-asset");
+        repository.flush();
     }
 
     @Test
-    void rejectsMissingQualityReading() {
-        ReadingCommand command = new ReadingCommand("DAM-A-PZ-07",
-                new BigDecimal("48.20"), Instant.parse("2026-08-06T23:59:00Z"),
-                "missing", "event-1");
-        assertThatThrownBy(() -> service.save(command))
-                .isInstanceOf(DomainValidationException.class)
-                .hasMessageContaining("QUALITY_NOT_USABLE");
+    void includesFromExcludesToAndFiltersTheAsset() {
+        assertThat(service.find("DAM-A-PZ-07", start, start.plusHours(1)))
+                .extracting(ReadingEntity::getEventId).containsExactly("start", "inside");
     }
 
     @Test
-    void storesValidReadingOnceForAnIdempotencyKey() {
-        ReadingCommand command = new ReadingCommand("DAM-A-PZ-07",
-                new BigDecimal("48.20"), Instant.parse("2026-08-06T23:59:00Z"),
-                "valid", "event-2");
-        when(idempotencyStore.claim("event-2")).thenReturn(true);
-        service.save(command);
-        verify(repository).save(any(Reading.class));
+    void adjacentWindowsDoNotRepeatTheirSharedBoundary() {
+        var first = service.find("DAM-A-PZ-07", start, start.plusHours(1));
+        var second = service.find("DAM-A-PZ-07", start.plusHours(1), start.plusHours(2));
+        assertThat(second).extracting(ReadingEntity::getEventId).containsExactly("boundary");
+        assertThat(first).extracting(ReadingEntity::getEventId).doesNotContain("boundary");
+    }
+
+    @Test
+    void utcAndOffsetQueriesSelectTheSameInstants() {
+        assertThat(service.find("DAM-A-PZ-07", OffsetDateTime.parse("2026-07-01T00:00:00Z"),
+                OffsetDateTime.parse("2026-07-01T01:00:00Z")))
+                .extracting(ReadingEntity::getEventId).containsExactly("start", "inside");
+    }
+
+    private void add(String assetId, OffsetDateTime time, String eventId) {
+        repository.save(new ReadingEntity(new ReadingEntity.ReadingId(assetId, time, 1),
+                eventId, new BigDecimal("180.0"), "kPa", "valid", "test"));
     }
 }
 ```
 
-接口集成测试使用`@SpringBootTest`加载真实配置和安全过滤链，再用`MockMvc`发出 HTTP 请求。测试配置应使用专门的 Profile，令牌签名密钥、数据库 URL 和 Kafka 地址全部由测试环境注入，禁止读取开发机的生产变量。清单5.55把四种基本场景写成独立测试方法，并验证响应体中的错误码；无权限场景必须经过实际的过滤链，不能只调用控制器方法绕过授权。
+**测试类上的注解**
 
-**清单 5.55  MockMvc 接口测试：四种基础场景**
+`@DataJpaTest`只装入实体、Repository 和它们需要的基础设施，控制器、安全配置、消息消费者一概不装，启动比完整应用快得多。它不扫描`@Service`，所以用`@Import`把`ReadingService`单独加进来。`properties`把数据源换成 H2 内存数据库，开启它的 PostgreSQL 兼容模式，表由 Hibernate 按实体创建、测试结束即丢弃；`Replace.NONE`告诉框架就用这里写的地址，不要另行替换。每个测试方法在一个事务里运行，结束时自动回滚，`seed`插入的六行数据互不干扰。
+
+**三个测试各管一件事**
+
+测试数据是特意摆的：窗口起点之前一条，起点上一条，窗口内一条，终点上一条，再往后一条，另外给别的测点放一条。第一个测试断言结果恰好是起点和窗口内两条，顺带检查了别的测点没有混进来。第二个测试查询相邻的两个窗口，断言边界上那一条只出现在后一个窗口。第三个测试把同一个窗口改用 UTC 写法（`00:00Z`与`08:00+08:00`是同一时刻），结果应当相同。方法名直接写出被检查的约定，测试失败时看名字就知道哪条约定被破坏了。
+
+**运行与观察**
+
+在`backend`目录执行`mvn -Dtest=ReadingWindowTest test`，三个测试通过。然后把`ReadingRepository.findInWindow`里的`r.id.occurredAt < :to`改成`<=`再运行：前两个测试失败，报告里写着期望`["start", "inside"]`、实际多出一个`"boundary"`。改回去，重新运行确认通过。这个练习说明了测试的用处：半年以后有人顺手把`<`改成`<=`，挡住他的是这个测试，当初写在文档里的那句话起不了这个作用。
+
+**H2 的局限**
+
+H2 只是兼容 PostgreSQL 的语法。表是 Hibernate 按实体创建的，`db/001_init.sql`里的`CHECK`约束、幂等键的唯一索引和 TimescaleDB 超表在这个测试库里都不存在，5.4.4节的“重复事件被唯一索引拒绝”在这里测不出来。这类检查需要真实的 PostgreSQL，见5.9.3节。
+
+### 5.9.2 用 MockMvc 验证状态码、错误体与权限
+
+控制器的职责是协议转换，测试它就要检查协议：状态码、JSON 字段、错误体。`MockMvc`在不打开端口的情况下向 Spring MVC 投递请求，过滤器、参数绑定、控制器、异常处理都照常执行。清单5.52用`@WebMvcTest`只装入`AssetController`，它依赖的`AssetRepository`和`ReadingService`用`@MockBean`换成假的，数据库因此完全不参与；`ApiExceptionHandler`属于 MVC 的一部分，会被自动装入；安全配置需要用`@Import`点名。四个测试对应每个接口至少要覆盖的四种场景：正常、参数错误、无权限、资源不存在。
+
+**清单 5.52  AssetControllerTest：四种基本场景（书中示例，配套工程未包含）**
 
 ```java
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+@WebMvcTest(AssetController.class)
+@Import(SecurityConfig.class)
+class AssetControllerTest {
+    @Autowired MockMvc mockMvc;
+    @MockBean AssetRepository assets;
+    @MockBean ReadingService readings;
 
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.http.MediaType;
-import org.springframework.security.test.web.servlet.request.
-        SecurityMockMvcRequestPostProcessors;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.web.servlet.MockMvc;
-
-@SpringBootTest
-@AutoConfigureMockMvc
-@ActiveProfiles("test")
-class ReadingControllerIT {
-    @Autowired private MockMvc mockMvc;
+    private static final String LATEST = "/api/assets/DAM-A-PZ-07/readings/latest";
 
     @Test
-    void returnsLatestReadingForAnAuthorizedUser() throws Exception {
-        mockMvc.perform(get("/api/assets/DAM-A-PZ-07/readings/latest")
-                .with(SecurityMockMvcRequestPostProcessors.user("analyst")
-                        .roles("ANALYST")))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.assetId").value("DAM-A-PZ-07"));
+    @WithMockUser(authorities = "DUTY")
+    void latestReturnsTheReading() throws Exception {
+        when(assets.existsById("DAM-A-PZ-07")).thenReturn(true);
+        when(readings.latest("DAM-A-PZ-07")).thenReturn(Optional.of(new ReadingEntity(
+                new ReadingEntity.ReadingId("DAM-A-PZ-07",
+                        OffsetDateTime.parse("2026-07-01T23:55:00+08:00"), 1),
+                "evt-pz-0287-6", new BigDecimal("185.091"), "kPa", "valid", "test")));
+        mockMvc.perform(get(LATEST))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.assetId").value("DAM-A-PZ-07"))
+                .andExpect(jsonPath("$.unit").value("kPa"));
     }
 
     @Test
-    void rejectsInvalidParameter() throws Exception {
-        // 对象编码不符合 DAM-区-类型-序号 的格式：进入方法前即由校验拦截为 400
-        mockMvc.perform(get("/api/assets/bad id/readings/latest")
-                .with(SecurityMockMvcRequestPostProcessors.user("analyst")
-                        .roles("ANALYST")))
-            .andExpect(status().isBadRequest())
-            // 错误响应采用 ProblemDetail 结构，稳定错误码放在扩展字段 code
-            .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+    @WithMockUser(authorities = "DUTY")
+    void reversedRangeIsRejectedBeforeTouchingTheService() throws Exception {
+        mockMvc.perform(get("/api/assets/DAM-A-PZ-07/readings")
+                        .param("from", "2026-07-02T00:00:00Z").param("to", "2026-07-01T00:00:00Z"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_RANGE"))
+                .andExpect(jsonPath("$.field").value("from"));
+        verifyNoInteractions(readings);
     }
 
     @Test
-    void rejectsUserWithoutReadPermission() throws Exception {
-        mockMvc.perform(get("/api/assets/DAM-A-PZ-07/readings/latest")
-                .with(SecurityMockMvcRequestPostProcessors.user("operator")))
-            .andExpect(status().isForbidden());
+    void anonymousRequestIs401() throws Exception {
+        mockMvc.perform(get(LATEST))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
     }
 
     @Test
-    void returnsNotFoundForUnknownAsset() throws Exception {
-        mockMvc.perform(get("/api/assets/DAM-A-XX-99/readings/latest")
-                .with(SecurityMockMvcRequestPostProcessors.user("analyst")
-                        .roles("ANALYST")))
-            .andExpect(status().isNotFound())
-            .andExpect(jsonPath("$.code").value("ASSET_NOT_FOUND"));
+    @WithMockUser(authorities = "GUEST")
+    void userWithoutAuthorityIs403() throws Exception {
+        mockMvc.perform(get(LATEST)).andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(authorities = "DUTY")
+    void unknownAssetIs404WithContractBody() throws Exception {
+        when(assets.existsById("DAM-A-XX-99")).thenReturn(false);
+        mockMvc.perform(get("/api/assets/DAM-A-XX-99/readings/latest"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("ASSET_NOT_FOUND"));
     }
 }
 ```
 
-Testcontainers 用一次性容器提供接近生产版本的 PostgreSQL、Redis 或 Kafka，避免开发机服务残留造成“本地通过、流水线失败”。容器启动后先执行版本化迁移，再插入最小数据集；每个测试用例使用事务回滚或唯一的测试批次 ID 清理数据，不能依赖测试执行顺序。清单5.56展示 PostgreSQL 容器与 Spring 测试属性的绑定；CI 应缓存镜像层但不缓存业务数据，容器退出时收集日志和数据库诊断信息。
+`@WithMockUser(authorities = "DUTY")`让这一次请求以“已登录、拥有 DUTY 权限”的身份执行，不必真的签发令牌；权限名与配套`SecurityConfig`中教学账号的权限一致。参数错误的测试多了一句`verifyNoInteractions(readings)`，它断言服务层没有被调用：被拒绝的请求不应该留下任何副作用，只断言状态码发现不了“先查了库、再报错”这种写法。断言错误码而不断言`message`的文字，文案调整时测试就不必跟着改。
 
-**清单 5.56  Testcontainers：隔离 PostgreSQL 集成环境**
+**一个会遇到的失败**
+
+运行这组测试，留意`userWithoutAuthorityIs403`的结果。如果应答是 500 而不是 403，原因在5.5.2节的兜底处理器：`@PreAuthorize`拒绝访问时抛出的`AccessDeniedException`发生在调用控制器方法的过程中，Spring MVC 先在`@ExceptionHandler`里找能处理它的方法，`@ExceptionHandler(Exception.class)`什么异常都接，于是把它翻译成了`INTERNAL_ERROR`，5.6节配置的`accessDeniedHandler`没有机会处理。配套工程的三个教学账号对现有的三个查询接口都有权限，这条路径平时走不到；第8章加上只允许值班员调用的确认接口以后，分析员去调用就会遇到。修正办法是在`ApiExceptionHandler`里为这种异常单独加一个处理器，把它原样抛出，交还给安全过滤链，见清单5.53。未登录的 401 不受影响，因为匿名请求在到达控制器之前就被过滤链拒绝了。
+
+**清单 5.53  授权失败交还给安全过滤链处理（书中示例）**
 
 ```java
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
+// ApiExceptionHandler.java 中新增；AccessDeniedException 来自 org.springframework.security.access
+    @ExceptionHandler(AccessDeniedException.class)
+    void accessDenied(AccessDeniedException e) { throw e; }
+```
 
+**测试数据与质量门禁**
+
+测试数据分两类。对象台账、单位这类基准数据由脚本统一准备，在测试里只读；观测、预警这类数据由每个测试自己创建，用`TEST-`开头的编码或测试事务的自动回滚保证互不干扰，测试之间不依赖执行顺序。依赖当前时间的逻辑注入固定时钟（配套的`JwtServiceTest`就是这样测令牌过期的），不用`Thread.sleep`等待。
+
+提交代码之前至少执行`mvn test`和对应阶段的契约核对脚本；团队协作时把这两步交给持续集成，在每次合并前自动执行。覆盖率数字只能说明代码被执行过，不能说明结果被检查过：一段权限判断可以被“覆盖”到，却没有任何断言在看它的返回值。失败的业务断言不要用“自动重试几次”来对付，那只会把缺陷藏起来。
+
+### 5.9.3 选读：用 Testcontainers 连接真实的 PostgreSQL
+
+**问题是什么**
+
+幂等键的唯一索引、质量码的`CHECK`约束、TimescaleDB 超表的行为，H2 都模拟不了。拿开发机上正在运行的数据库来测也不可靠：里面残留着上次练习的数据，别人的机器和持续集成环境里又没有这个库。
+
+**常用解法**
+
+Testcontainers 在测试开始时用 Docker 启动一个一次性的数据库容器，测试结束后销毁。清单5.54使用与配套工程相同的镜像，让容器执行同一份`001_init.sql`，然后验证5.4.4节的第二道防线。使用它需要在`pom.xml`里增加`org.testcontainers`的`postgresql`和`junit-jupiter`两个测试依赖，运行测试的机器上要有 Docker。
+
+**清单 5.54  用一次性 PostgreSQL 容器验证唯一索引（书中示例，配套工程未包含）**
+
+```java
 @Testcontainers
-@SpringBootTest
-class ReadingRepositoryIT {
+@DataJpaTest
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+class ReadingConstraintIT {
     @Container
-    static final PostgreSQLContainer<?> POSTGRES =
-            new PostgreSQLContainer<>("postgres:16-alpine")
-                    .withDatabaseName("textbook_test")
-                    .withUsername("test")
-                    .withPassword("test");
-
-    @Autowired private ReadingRepository repository;
+    static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>(
+            DockerImageName.parse("timescale/timescaledb-ha:pg16")
+                    .asCompatibleSubstituteFor("postgres"))
+            .withCopyFileToContainer(MountableFile.forHostPath("../db/001_init.sql"),
+                    "/docker-entrypoint-initdb.d/001_init.sql");
 
     @DynamicPropertySource
     static void databaseProperties(DynamicPropertyRegistry registry) {
@@ -2618,46 +2392,35 @@ class ReadingRepositoryIT {
         registry.add("spring.jpa.hibernate.ddl-auto", () -> "validate");
     }
 
-    @AfterEach
-    void cleanTestRows() {
-        repository.deleteByAssetIdStartingWith("TEST-");
-    }
+    @Autowired ReadingRepository repository;
+    @Autowired JdbcTemplate jdbc;
 
     @Test
-    void readsTheSameOrderingAsProduction() {
-        // 先由迁移脚本建立表，再插入 TEST- 前缀的数据并断言游标顺序。
+    void sameEventAtTheSameInstantIsRejectedByTheUniqueIndex() {
+        jdbc.update("insert into asset(asset_id, asset_type, display_name, unit, geometry) "
+                + "values ('TEST-PZ-01', '渗压', '测试渗压', 'kPa', "
+                + "ST_SetSRID(ST_MakePoint(111.2, 30.5, 160.0), 4490))");
+        OffsetDateTime t = OffsetDateTime.parse("2026-07-01T08:00:00+08:00");
+        repository.saveAndFlush(new ReadingEntity(new ReadingEntity.ReadingId("TEST-PZ-01", t, 1),
+                "evt-dup", new BigDecimal("180.0"), "kPa", "valid", "test"));
+        // 同一事件换一个版本号再写：主键不同，但 (occurred_at, event_id) 相同
+        assertThatThrownBy(() -> repository.saveAndFlush(
+                new ReadingEntity(new ReadingEntity.ReadingId("TEST-PZ-01", t, 2),
+                        "evt-dup", new BigDecimal("180.0"), "kPa", "valid", "test")))
+                .isInstanceOf(DataIntegrityViolationException.class);
     }
 }
 ```
 
-测试数据准备要区分“固定基准数据”和“用例临时数据”。测站元数据、单位和质量码字典属于基准数据，使用版本化 SQL 或`@Sql`在套件启动时加载，并在测试中只读；读数、告警事件和撤销令牌属于临时数据，使用工厂方法按用例生成，包含明确的事件 ID 和时间窗口。清理应覆盖数据库行、Redis 键、Kafka 测试主题和审计日志，失败时保留失败用例的样本快照而不是静默吞掉异常。对并发测试还应为每个线程分配独立测站或批次，避免清理线程删除另一个用例尚未断言的数据。
-
-四场景覆盖表5.6把题目要求落实到测试层次。正常场景验证业务结果和审计字段；参数错误验证字段级错误码以及不产生副作用；无权限验证401/403与敏感字段不泄露；资源不存在验证404并确认没有创建缓存或事件。每个新增接口都至少登记一行覆盖矩阵，变更权限、质量码或事务边界时重新执行全表，而不是只运行“绿色”的正常用例。
-
-**表 5.6  读数接口四场景测试覆盖**
-
-| 场景       | 测试层次                  | 关键断言                                     | 数据与清理                        |
-|:-----------|:--------------------------|:---------------------------------------------|:----------------------------------|
-| 正常       | MockMvc + Repository      | 200/201、质量码、审计人、事件 ID             | 使用 TEST- 测站，事务后删除       |
-| 参数错误   | Controller 单元 + MockMvc | 400、字段级错误码、仓储未被调用              | 不写数据库，不写缓存或发件箱      |
-| 无权限     | Spring Security 集成      | 未认证为401，缺少角色为403，响应不含令牌细节 | 使用短期测试主体，测试后撤销      |
-| 资源不存在 | Service + MockMvc         | 404、稳定的 NOT_FOUND 错误码、无副作用       | 读取不存在 ID，确认无缓存键和事件 |
-
-测试运行顺序应由构建工具统一管理，并行执行时隔离数据库 Schema 或测试批次。失败重试只能用于标记为瞬态的基础设施错误，业务断言失败不得自动重试掩盖缺陷。覆盖率数字只是信号：一段错误的权限判断可以被“执行过”却没有被有效断言。发布门禁至少包括编译、迁移、单元测试、集成测试、静态检查和关键接口的契约测试；长时间的 Testcontainers 套件可放在合并分支，但每次提交仍运行快速的 MockMvc 和服务单元测试。
-
-测试的输出还应能回答“哪一条证据证明这次变更安全”。每个失败用例保存请求摘要、用户角色、traceId、迁移版本和相关事件 ID；密码、JWT、连接串和完整测站坐标等敏感字段在报告中脱敏。接口契约测试把路径、方法、必填字段、响应状态和错误码固化为版本化文件，前后端在合并前共同校验，避免只改了 DTO 就悄悄改变客户端可见结构。数据库迁移测试先在空库执行全部版本，再从最近生产快照升级，分别检查索引、约束、TimescaleDB 超表和回滚脚本。
-
-质量码和预警判定需要专门的性质测试。对同一事件重复投递，业务状态只能改变一次；对时间逆序或缺测记录，系统必须写入相应质量码，并且不可进入风险打分；当数据恢复为 valid 时，后续事件可以重新评估，但不能修改已经归档的原始值。可以用参数化测试生成边界水位、边界时间和四种权限组合，再用随机顺序检验幂等性与事务隔离。这些用例分别检查重复投递、顺序变化与质量变化是否仍符合协议要求。
-
-上线前的回归清单按风险排序：先跑认证和撤销，再跑质量码、事务和消息幂等，最后跑报表与大范围分页。任何一个关键套件失败都阻断发布；非关键外部依赖不可用时，测试应验证受控降级和明确的503，而不是把异常吞掉后返回空数组。值班员看到的告警必须能反查到失败测试、发布版本和责任人，修复后用同一数据集重跑，并把失败原因、修改内容和复验结果关联到发布记录。
+`ddl-auto`取`validate`，表由初始化脚本创建，测试同时也核对了实体与真实表结构是否一致，这正是5.4.1节启动时那一步核对。容器启动要十几秒到几十秒，这一档测试不适合每改一行代码就跑，通常放在提交前和持续集成里执行；类名以`IT`结尾是 Maven 区分集成测试的习惯。
 
 !!! tip "提示"
 
     **选学：Python Web 框架的场景化比较。**
 
-    主线后端采用 Spring Boot；若读者在数据分析服务中遇到 Python，可用表5.7建立边界意识。这里比较的是适用场景、生态与部署约束，不构成对某一框架的统一推荐，也不替代本章 Java 示例。
+    主线后端采用 Spring Boot；若读者在数据分析服务中遇到 Python，可用表5.10了解三个常见框架各自适合的场景和部署时要自己补齐的部分。
 
-**表 5.7  Python Web 框架的场景、生态与部署约束**
+**表 5.10  Python Web 框架的场景、生态与部署约束**
 
 | 框架    | 适用场景与生态                                                                             | 部署约束                                                                                                   |
 |:--------|:-------------------------------------------------------------------------------------------|:-----------------------------------------------------------------------------------------------------------|
@@ -2667,15 +2430,15 @@ class ReadingRepositoryIT {
 
 ## 5.10 小结
 
-一次“提交观测读数”的请求先经过 Spring Security 6 的过滤器链验证 JWT 并解析权限，再进入控制器完成参数校验，然后由服务层开启事务、经 Repository 落库；需要可靠发布的事件与业务数据在同一事务中写入发件箱，提交后由发布器投递到 Kafka，最后由消费者幂等处理。
+一次“补录观测”的请求先经过 Spring Security 6 的过滤器链验证 JWT 并解析权限，再进入控制器完成请求体的格式校验，然后由服务层在一个事务里检查业务规则、按幂等键写入，最后由数据库的主键、唯一索引和检查约束把关；任何一步失败，都由统一的异常处理翻译成契约规定的`{code, message, field?}`。事务提交之后才做的动作交给提交后事件。要送到另一个服务、或者一条都不能丢的通知，才用到选学部分的消息队列和事务发件箱。
 
-检查实现时，应分别验证格式、业务规则与持久化约束；服务层需检查同类内部调用是否绕过事务代理，导致 `@Transactional` 失效；持久化层需检查 N+1 查询和事务外的懒加载；事件如果在事务提交之前发布，回滚后消息已经发了出去；消费者若没有去重的唯一约束，一次重试就会变成一次重复入库。密钥硬编码、Actuator 端点全量暴露、日志回显异常堆栈，也都应在上线前排除。
+全章只有一套模型。观测只追加：重复到达靠`eventId`和唯一索引识别，更正靠追加订正版本，原值保留。预警和工单要修改状态：用带状态条件的更新，影响行数为0就是冲突，应答 409。观测的订正版本`reading.version`是业务语义，JPA 的`@Version`是并发控制，两者不是一回事。
 
-接口验收应同时核对返回值和运行记录，包括事务边界的测试、幂等键的唯一约束、慢查询的执行计划、traceId 串起来的分层耗时，以及降级时“未评估”与“正常”之间的明确区分。示例统一采用 Java 17 与 Jakarta 命名空间，配置按 Profile 分环境外部化，使测试能够在明确的依赖和配置条件下重复执行。
+检查实现时留意几处常见的错：同类内部调用绕过事务代理，`@Transactional`没有生效；在方法里接住异常不再抛出，事务照常提交；事件在提交之前就被处理，回滚以后副作用已经发生；写入方法只有“先查后写”，没有唯一约束兜底，一次并发重试就变成重复入库；兜底的异常处理器把授权失败翻译成了 500。密钥硬编码、日志回显令牌或异常堆栈，也应在上线前排除。
 
 ## 5.11 章末交付物
 
-提交一个监测数据后端原型：测站最新水位查询与监测值写入接口；JPA实体和Repository；一项具有明确事务边界的服务；认证与权限说明；一个提交后事件监听（5.7节引言的做法）；以及接口测试和运行日志。选做5.7.2—5.7.6的小组另交一条 Kafka 消费链路及其重复投递测试。
+提交一个监测数据后端原型：测点最新观测查询接口（区分 204 与 404），以及补录观测或确认预警二者之一；JPA实体和Repository；一项具有明确事务边界的服务；统一的契约错误体；认证与权限说明；一个提交后事件监听（5.7节引言的做法）；以及接口测试和运行日志。选做5.7.2—5.7.6的小组另交一条 Kafka 消费链路及其重复投递测试。
 
 ## 5.12 思考题与练习题
 
@@ -2685,26 +2448,28 @@ class ReadingRepositoryIT {
 
 2.  Spring同一Bean内部自调用一定会触发方法上的事务代理。（判断：对／错）
 
-3.  加入第$n+1$个样本时，增量均值的分母应为（）。A. $n-1$B. $n$C. $n+1$D. $2n$
+3.  （选做，对应5.4.11节）加入第$n+1$个样本时，增量均值的分母应为（）。A. $n-1$B. $n$C. $n+1$D. $2n$
 
 4.  Spring Security 6启用方法授权使用（）。A. `@EnableMethodSecurity`B. `@EnableGlobalMethodSecurity`C. `@EnableEurekaClient`D. `@Async`
 
-5.  跨服务告警事件适合使用（）。A. 进程内普通事件B. Kafka主题C. 浏览器DOM事件D. CSS媒体查询
+5.  要送到另一个服务、并且进程重启后不能丢失的告警事件，适合使用（）。A. 进程内普通事件B. 消息队列的主题（如 Kafka）C. 浏览器DOM事件D. CSS媒体查询
 
-6.  消费者记录并检查`eventId`有助于实现幂等处理。（判断：对／错）
+6.  写入方法先按`eventId`预检、再由数据库唯一索引兜底，可以使重复到达的观测只入库一次。（判断：对／错）
 
 **简答与设计题**
 
-7.  说明控制器、应用服务、Repository和数据库之间的职责边界。
+7.  说明控制器、应用服务、Repository和数据库之间的职责边界；配套工程的控制器直接调用`existsById`，说明这样做的理由和应当改为经过服务层的条件。
 
 8.  解释为什么同Bean事务自调用可能失效，并给出两种改进思路。
 
-9.  设计测站最新水位查询与监测值写入接口，列出方法、路径和主要状态码。
+9.  设计测点最新观测查询与观测补录接口，列出方法、路径、主要状态码和错误码。
 
-10. 比较`@TransactionalEventListener(AFTER_COMMIT)`与Kafka监听器的适用范围。
+10. 比较`@TransactionalEventListener(AFTER_COMMIT)`与跨服务消息队列各自的适用范围；同步调用下游服务会带来什么问题？
 
 11. 设计JWT密钥管理和刷新流程，说明如何校验`type=refresh`、`issuer`、`jti`及有效期，并拒绝过期刷新令牌，并用 Redis TTL 撤销记录与令牌轮换防止重放。
 
+12. 说明观测的订正版本`reading.version`与 JPA `@Version`乐观锁版本的区别。两个值班员同时确认同一条预警时，后端怎样保证只有一人成功？另一人得到什么应答？
+
 **实践题**
 
-12. 使用Spring Boot实现本章章末交付物；所有单元测试和接口测试均须包含正常、参数错误、无权限和资源不存在场景。
+13. 使用Spring Boot实现本章章末交付物；接口测试须包含正常、参数错误、无权限和资源不存在四种场景。选做：按5.7.2—5.7.6节补一条 Kafka 消费链路及其重复投递测试。

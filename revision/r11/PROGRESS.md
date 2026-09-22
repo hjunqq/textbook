@@ -8,8 +8,11 @@
 |---|---|---|
 | R11-00 | 完成 | 接手核对、规则校准（决策 D-2026-09-21-8） |
 | R11-01 | 8项均已修改；Java 相关项未能在本环境编译验证 | 见第二节 |
-| R11-02 | 第5章5.1—5.4样章已重编，待作者通读和本机运行 S3 中点 | 见第三节 |
-| R11-03—R11-06 | 未开始 | 下一步先做 R11-03 的第7章（LTTB 后移），再做第4章 |
+| R11-02 | 样章 + 补正小包完成：第5章主线统一到配套模型，5.3 精简，错误体合并 | 见第三节、第五节 |
+| R11-03 | 第7章、第4章重编完成，经独立走读复核并修正 | 见第五节 |
+| R11-04 | 第3章、第6章重编完成，经独立走读复核并修正 | 见第五节 |
+| R11-05 | 第8章改为 PZ-07 业务链综合应用；第1、2、9章及前言尚未做 | 见第五节 |
+| R11-06 | 未开始 | 全书语言/层次标签/习题/发布同步 |
 
 接手时核对：origin/master = 8b54678，origin/revision/undergraduate-r11 = d465437（仅 PLAN.md）。作者电脑上的工作目录检出的是 master，AGENTS.md 与仓库一致，未发现未提交的正文修订。本轮修改在云端克隆的修订分支上完成；该环境无推送权限，提交以 git bundle 和补丁交回，由作者拉入修订分支。
 
@@ -121,10 +124,54 @@
 
 独立复核发现并已改正的实质性问题：compose 中 PostgreSQL 只挂在 internal 网络，端口映射不会生效（已加挂 `db-host` 网络）；运行记录表里“最近一小时”的时间窗只在数据卷创建后30分钟内成立（改为宽时间窗并在 STAGES.md 说明）；`UPDATE active=false` 练习没有给执行方法和恢复步骤（已补）；“double 会把185.091变成185.0909…”的说法不准确（改为 numeric 列与累加比较误差）；“加号被浏览器当作空格”不准确（是服务端按 URL 规则解码）；`record` 自 Java 16 起而非17；契约边界图中的422未在正文引入（删去）。
 
-## 五、已知遗留
+## 五、第二批（2026-09-22）：R11-02 补正、R11-03、R11-04、R11-05（第8章）
 
-1. 第5章5.4.3以后仍使用与配套工程不同的讲解模型（自增主键的 `Reading`、`/api/readings/{id}`、`ProblemDetail`）。本轮只加了一段说明，没有统一。是否把这些小节改到配套模型上，或压缩后迁往附录C，需要作者定方向。
-2. 5.5节 `lst:ch05-exception-handler` 用 `ProblemDetail`，而契约错误体是 `{code, message, field?}`，`lst:ch05-problem-advice` 已按契约写。两个清单并存，建议 R11-03 之前合并。
-3. 第5章各节“本节层次”标签仍在；5.1—5.4已缩短，其余未动。
-4. `Lesson54Application` 未经编译和运行（环境原因见检查记录），需作者本机执行 `mvn -q test` 和 STAGES.md“S3 中点”。
-5. 编辑走读不等于学生试教；样章尚未经过任何学生试读。
+### 5.1 R11-02 补正小包（作者 2026-09-21 决定）
+
+四项决定的落点：(1) 主线统一到配套模型——5.3.3、5.4.1—5.4.7、5.5 全节、5.7.3、5.9.1 的清单均取自 `edu.example.qingyuan` 或 `db/001_init.sql`；(2) 自增主键 `Reading` 及其 Repository/CRUD 控制器/命令服务、`StationEntity` 关联清单、隔离测试清单删除，N+1、传播与隔离、执行计划、增量统计压为 5.4.8—5.4.11 选读；(3) `lst:ch05-exception-handler`（ProblemDetail）与 `lst:ch05-problem-advice` 合并为 `lst:ch05-error-handler`，取自配套 `ApiExceptionHandler.java`，ProblemDetail 只留三句对比；(4) 5.4.4 讲订正即追加版本，5.4.6 用预警状态条件更新讲并发冲突（影响行数0→409），`@Version` 简述，表 `tab:ch05-two-versions` 并列两个“版本”。正文已无对观测的 PUT 覆盖与 DELETE。
+
+六项具体问题：A 5.3 改为四小节（起步依赖／连接配置／构造器注入／选读），用 `AssetController←AssetRepository/ReadingService` 讲注入，`JwtProperties` 移 5.6，测试切片移 5.9；B 起步依赖清单改为配套 `pom.xml` 3.2.10 的 BOM 导入片段并登记 PAIRS，说明与继承 parent 的异同；C `@Bean(destroyMethod="close")` 用在 `ExecutorService` 上在 Java 17 会启动失败（`close()` 自 Java 19 起），该清单不再承担 DI 教学而删除，5.3.4 一句写明正确写法 `shutdown`；D 5.4.2 改为“控制器负责协议转换，并可直接用 Repository 做不含规则的单次存在性查询；含规则、会被消息消费者复用的查询与写入放服务层”，与 `existsById` 一致，自测同步；E “先照写”“不要混淆”“讲解用的模型”等限定语通过统一实现消除，`readOnly` 首次出现当场解释；F 学习目标第5条、引言（不再写“经Kafka削峰”）、tipbox、5.7 引言与层次、小结、交付物、客观题3/5/6、简答10、实践题及附录A答案3/5/6/7/9/10/12/13同步，Kafka 配置清单移出核心小节。
+
+新登记 PAIRS 7组（pom、ReadingEvent、ReadingService.accept、001_init.sql、ApiExceptionHandler、ReadingConsumer、ReadingWindowTest）。第5章字数 32469→33120，未减少。
+
+补正中发现、未改 Java、由作者定的配套疑点：① `ApiExceptionHandler` 的 `Exception.class` 兜底可能先于 `accessDeniedHandler` 接住 `AccessDeniedException`，把 403 翻成 500（当前三个账号对查询接口都有权限，触发不到；第8章加 DUTY 专属端点后会暴露；5.9.2 写成条件式失败练习）；② `JpaRepository.save` 对已有主键走 merge，`accept` 在“主键相同、eventId 不同”时会更新原行而非报冲突（5.4.4 如实写出并给出 `INSERT … ON CONFLICT DO NOTHING` 做法）；③ `existsByEventId` 用不上 `(occurred_at,event_id)` 索引前导列（5.4.10 作为 EXPLAIN 练习）；④ 5.6 权限模型（`WaterSystemPermission`、刷新令牌）与配套（DUTY/ANALYST/OPS，无刷新端点）仍是两套，留 R11-06；⑤ 契约行 `GET/PUT /api/readings/{id}` 依赖 `reading_id`，配套实体未映射，补录与订正接口配套未实现。
+
+### 5.2 各章顺序与迁移（详表见各章工作记录，此处只记结构与去向）
+
+**第7章（R11-03）** 四节不变。7.1 六小节压为五：7.1.1 一条观测记录长什么样（合并旧7.1.1+7.1.6，新增三条真实 JSON）、7.1.2 质量码与缺测（前提）；旧7.1.2 时间窗口与 LTTB 跨节后移为 7.2.6。7.2 新增 7.2.1 第一条真实观测曲线（`lst:ch07-first-curve` 节选自 `lesson74/main.js` 与 `series-controller.js`，配故障练习）；旧7.2.1 选型→7.2.3；渲染/性能→7.2.7；专题地图→7.2.8；色彩→7.2.9。7.3 LOD 移到节末；7.4 触控与信息面板互换。LTTB 原理、公式（补叉积推导）、图、清单保留，新增“为什么适合监测曲线／什么时候不能用（预警判定、统计、审计）”。删除：`lst:ch07-chart`（与登记清单 append-data 重复）、`lst:ch07-visual-encoding`（与色板/专题层/新 suspect-symbol 重复）、`lst:ch07-pixels-to-world`（重写前一清单）；迁附录C：图表运行期预算/缓存/状态恢复（`app:ext-ch07-chart-runtime`）、颜色令牌与验收矩阵（`app:ext-ch07-color-tokens`）。改正：`tab:ch7-view-contract` 列了接口不返回的 `stateVersion`/`source`；“三千多万米”应为三千九百万米；渗压采样周期与数据集（5 min）不符处写明为讨论设定。字数 22606→19026。
+
+**第4章（R11-03）** 八节不变。4.2 拆为三小节（文档流／表单与原生校验／键盘路径）；4.3 重排为盒模型→单位→Flex→Grid→断点→Flex 故障定位（指导）→层叠上下文（拓展）→大屏与暗色（拓展，样式迁附录C）；4.4 节首新增“从已学语言到 JavaScript”与表 `tab:ch04-js-bridge`；4.5 保持结构，补 Promise/async 白话解释，4.5.7/4.5.8 压缩；4.6 五个 subsubsection 取消并入；4.7 入口清单前移，阅读顺序 main.js→App.vue→路由→登录；4.8.3 部署迁附录C。删除的重复副本：第三份 login+fetch 封装 `lst:ch04-a49-auth-client`、ES 模块重复清单 `lst:ch04-js-lifecycle`、第二份完整 `defineConfig`、`lst:ch04-a48-env` 中的第四份 fetch、Flex/Grid 两个完整 HTML 页面只印 style 与 body、筛选页完整 SFC 只印相对 4.6.1/4.6.2 的改动、`fig:ch04-a46-lifecycle-cleanup`。迁附录C：`app:ext-fe-focus-list`（焦点管理、虚拟列表）、`app:ext-fe-theme`、`app:ext-fe-auth`、`app:ext-fe-release`。改正的技术错误 8 处：`lst:ch04-a44-modules` 未定义变量 `rawLevel`/`value`；`build.target es2020` 与顶层 await 冲突→es2022；`VITE_API_BASE` 与 request.js 读的 `VITE_API_ORIGIN` 不一致、会拼成 `/api/api`；路由清单导入路径 `./` 应为 `../`；筛选页用了契约里没有的 `asset.warning`/`asset.value`；main.js 归属 4.5.4 而非 4.5.5；“返回422”契约无此码；Pinia 方法名 `loadReadings` 应为 `loadLatest`。字数 30265→22718。
+
+**第3章（R11-04）** 六节不变。3.1 五小节：需求与用例／系统边界／把需求分给模块（新）／质量属性场景／UML；3.2 架构类型三段式合并为“三个不同的问题”，MVC 四段，原型三段；3.3 重写为两类接口／走查“查询 PZ-07 最新观测”（表 `tab:ch03-walk-latest`）／走查“渗压超阈值产生预警”（表 `tab:ch03-walk-warning`）／接口设计经验；3.4 按变化来源划分／抽象与信息隐藏／新增一类传感器要改哪里／内聚耦合分级（拓展）；3.5 `sec:ch03-load-estimate` 原样，微服务与事件驱动改为“回答什么问题—何时值得—代价”；3.6 ADR 升为核心，评估方法与 90 分钟演练互换并标拓展。新增图 `fig:ch03-module-flow` 与六张表。删除：架构重要性长段、UML 逐条定义、“架构决策核心要素”五段、SafeHome 式非水利示例（GUI 控件、文本编辑器）、原型的问卷/小组讨论、构件协作三遍叙述、复杂度与风险泛论；迁附录C：基于构件的设计与复用（`app:ext-component-based-design`）。改正：`lst:ch03-monitoring-dto` 缺 `unit` 且字段名不符契约；`lst:ch03-controller` 无法表达 204；`lst:ch03-usecase-service` 每条入库都发异常事件；“执行计划见5.7节”指错。新增练习第13题（走查“确认黄色预警”），附录A已补答案。字数 35643→23478。
+
+**第6章（R11-04）** 四节不变。6.1：首个场景（不动）→ 6.1.2 用几何体搭出坝体（新）→ 6.1.3 坐标变换与透视投影（补齐次坐标、M=TRS、V、P、透视除法）→ 6.1.4 加载现成模型（加单位/轴向/基面检查）→ 6.1.5 测点绑定（不动）→ 6.1.6 拓展：管线、能力探测、LOD 与实例化。6.2：CGCS2000→高程基准→新 6.2.3 局部原点、轴向换算与测点重新定位（含 `Math.fround` 实测）→OGC 服务→Cesium。6.3 公式顺序理顺；6.4 保留全部 `sec:ch06-twin-*` 标签，6.4.3 压缩，6.4.18“发展重点”撤掉。删除第二套 Three.js 骨架 `lst:ch06-three-minimal`；迁附录C：GeoServer 发布与缓存（`app:ext-ch06-gis-ops`）、坐标成果审计（`app:ext-ch06-crs-audit`）、倾斜摄影外业与空三检核（`app:ext-ch06-photogrammetry`）。改正：`lst:ch06-local-origin` 的 `z = north − origin` 镜像错误（应为 `−(north − origin)`，与 bind-assets.js 和第7章一致）；`lst:ch06-proj4-convert` 说“往返”却无反算；`DAM-001` 等编码不符 8.1；`stations.csv` 应为 `stations.json`。新增练习第18、19题，附录A已补答案。字数 30755→25734。作者待定：6.1.2 教学断面尺寸（顶宽8/底宽40/坝长160 m）是否进参数表；6.2.3 新写“坝轴线桩号”一段，数据集无桩号字段；数据集把28测点沿约4 km 斜线排开，与“埋在坝体里”不自洽；配套无 GLB，6.1.4 让学生自备。
+
+**第8章（R11-05）** 六节不变，8.1 三张唯一来源表保留（契约表 readings 行按实际返回补 `assetId`）。章首改为 S6 三入口说明；8.1.3 末“PZ-07 六问”；8.2.1 新表 `tab:ch08-chain-modules`（每步用哪一章成果、本章加什么、配套入口）；8.2.3 指向 S5 页与 `MonitoringDashboard.vue`，`lst:ch08-monitoring-sfc` 删除；8.3 重排为 8.3.1 数据模型→8.3.2 质量检查→8.3.3 关系模型（DDL 与 `001_init.sql` 逐字一致并登记）→8.3.4 业务链 SQL→8.3.5 后端（工单/预警实体、条件更新 `transit`/`completeIfInProgress`、四个端点含新增 `GET /api/warnings`、409/404 映射）→8.3.6 前端 `api/warnings.js`→8.3.7 物理设计要点（拓展）→8.3.8；8.4.1 定级（`lst:ch08-classify-js` 节选自配套并登记）、8.4.2 七步走查为核心，8.4.3 拓展；闸门泄流与水量平衡计算题移到 8.5.5/8.5.11 公式之后；8.5 授权段与六幅截图图注与 HEAD 逐字节一致（已 diff 复核）；8.6 保留 compose/secrets/nginx，加 `smoke.sh` 步骤与口令失败例。删除与第4/5/7章重复的 Vue store/router/scene-bridge/entry 清单、实体与 Kafka 消费者清单、旧8.3.7 后半约60行要求堆叠、哈希分区说法（DDL 中不存在）；迁附录C：运维 SQL 17段、连续聚合与保留、告警规则与备份演练（`sec:appc-ch08-ops`）。改正：控制器调用不存在的 `service.start`、契约无 `/start` 端点（工单默认 `in_progress`）；预警状态集缺 `assigned`；旧“确认”非条件更新且会 500；`hasRole('DUTY_OFFICER')` 与配套 `DUTY` 不符；`Double score` 在 validate 下被拒→`BigDecimal`；公式先用后给。配套 `db/001_init.sql` 追加 `source_event_id` 列、状态 CHECK、索引、`work_order`、`model_run`（均可重复执行，**未在 PostgreSQL 上执行**）。字数 41736→28986。作者待定：`closeloop-check.mjs` 期望缺字段码 `FIELD_REQUIRED` 而配套 `@Valid` 失败返回 `VALIDATION_ERROR`，正文写为故障练习，是否改处理器或脚本。
+
+### 5.3 独立走读复核
+
+两轮走读（第4/7章一轮，第3/6/8章一轮）共 34 条意见，全部处理。其中实质性错误：第7章声称 `tests/lesson74.test.js` 保存坐标/相机参数（不实）；第4章 4.7.1 让学生整体替换路由表会删掉后续章节依赖的 `/monitoring`，且引用不存在的组件；4.3 的观察结果在给定 HTML 骨架上看不到；4.2.2 有 `novalidate` 却无脚本；第8章正文声称 `001_init.sql` 已含 `source_event_id`、`work_order`（原先没有）；`GET /api/warnings` 未实现导致闭环脚本在第4项停下；第3章“确认预警”在模块表、接口表、图和走查表里归属不一致；第6章“r156 起内置 addons 映射”应为 r144；若干字面案例参数改为 `case-params.tex` 宏。
+
+### 5.4 检查（本批）
+
+| 检查 | 结果 |
+|---|---|
+| `check_textbook.py --strict --build` | 通过；见下方编译记录 |
+| `check_listings.py` | 42 组一致，0 不一致（本批新增 11 组） |
+| `audit_learning_path.py` | errors 空，核心引用拓展 0 |
+| 前端 vitest（lesson44/45/71/74、series-controller、window-chart、lesson84 等） | 走读代理实测通过（112 项全套上一批已跑；本批抽跑 lesson74/series-controller 18 项、lesson84 28 项） |
+| 教学接口：七步 curl、`closeloop-check.mjs` | 20 项通过（第8章代理实测） |
+| 后端 `mvn test`、lesson54 启动、`--stage=lesson54` | **未运行**（Maven Central 403，无 Docker）。已在 `.github/workflows/ci.yml` 新增 `stage-lesson54` 作业：Java 17、GitHub Actions 服务容器 `timescale/timescaledb-ha:pg16`（一次性、随作业销毁，不触碰任何已有数据卷），执行 `mvn -q test`→psql 执行 001/002 脚本→启动 `Lesson54Application`→`--stage=lesson54`→两项运行记录表观察，全部日志与退出码作为 artifact `stage-lesson54-logs` 保留；`on.push` 增加 `revision/**`，推送修订分支即触发。本环境无 `gh` 且无推送权限，触发操作：作者推送后在 Actions 页查看，或手动 `workflow_dispatch` |
+| `001_init.sql` 新增段 | 未执行；`stage-lesson54` 与 `stack-e2e` 作业会执行 |
+| tex2site + mkdocs 严格构建 | 见编译记录 |
+| 学生试读 | 未进行 |
+
+编译记录（云端容器，Ubuntu，TeX Live 2024，xelatex；中文字体回退 FandolSong/FandolHei，非作者本机的思源字体；总页数因此**不可与本机比较**，只用于错误与 Overfull 检查）：第一次全书编译 388 页，Overfull 17 处（第5章 pom 清单长行 4 处、长 `	exttt` 12 处、附录1处），已用 `breakatwhitespace=false`/`llowbreak` 处理后重编译，结果见提交说明。
+
+### 5.5 遗留与待作者决定
+
+1. R11-05 剩余：第1、2、9章及前言（学时方案按达成程度、v0—v5 与 S0—S6 映射表、“不跳章”与按编号跳读的矛盾）未做。
+2. R11-06 未做：全书“本节层次/进入本节所需知识”统一、6.4 与 5.6 中残留的“应……应……”句、术语与习题答案全查、站点浏览器检查。
+3. 5.6 权限模型与配套两套并存（见 5.1 ⑤）。
+4. 上述“作者待定”各项。
+5. 编辑走读不等于学生试教；无任何学生试读。

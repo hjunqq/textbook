@@ -1,1 +1,22 @@
-{}
+{
+  "chapter03.tex": {
+    "allowed_drop": 12500,
+    "reason": "R11-04：3.1/3.2/3.3/3.4 三段式架构论述与UML定义罗列合并；重复的构件协作叙述改为两份走查记录；基于构件的设计迁附录C（app:ext-component-based-design）。逐段去向见 revision/r11/PROGRESS.md 第五节"
+  },
+  "chapter04.tex": {
+    "allowed_drop": 8100,
+    "reason": "R11-03：重复的HTML骨架/fetch封装/登录页只保留登记清单版本；焦点管理、虚拟列表、暗色主题、认证联调深入检查、发布回滚迁附录C（app:ext-fe-*）。逐段去向见 PROGRESS.md 第五节"
+  },
+  "chapter06.tex": {
+    "allowed_drop": 5200,
+    "reason": "R11-04：第二套Three.js骨架删除；GeoServer运维、坐标成果审计、倾斜摄影外业细则迁附录C（app:ext-ch06-*）；6.4.3与6.4.18论文腔压缩。见 PROGRESS.md 第五节"
+  },
+  "chapter07.tex": {
+    "allowed_drop": 3900,
+    "reason": "R11-03：LTTB后移；重复的ECharts骨架与视觉编码清单合并；图表运行期预算与颜色令牌迁附录C（app:ext-ch07-*）。见 PROGRESS.md 第五节"
+  },
+  "chapter08.tex": {
+    "allowed_drop": 13400,
+    "reason": "R11-05：与第4/5/7章重复的Vue/JPA/Kafka实现改为指路；运维SQL、连续聚合、告警与备份演练迁附录C（sec:appc-ch08-ops）；8.3.4物理设计与8.3.7要求堆叠压缩。见 PROGRESS.md 第五节"
+  }
+}

@@ -73,6 +73,8 @@ PAIRS = [
      "companion/water-platform-demo/backend/src/main/java/edu/example/lesson52/AssetController.java"),
     ("lst:ch05-first-params", "output/chapters/chapter05.tex",
      "companion/water-platform-demo/backend/src/main/java/edu/example/lesson52/AssetController.java"),
+    ("lst:ch08-classify-js", "output/chapters/chapter08.tex",
+     "companion/water-platform-demo/frontend/src/lesson84/classify.js"),
     ("lst:ch05-db-entity", "output/chapters/chapter05.tex",
      "companion/water-platform-demo/backend/src/main/java/edu/example/qingyuan/AssetEntity.java"),
     ("lst:ch05-db-repository", "output/chapters/chapter05.tex",
@@ -89,6 +91,28 @@ PAIRS = [
      "companion/water-platform-demo/backend/src/main/java/edu/example/qingyuan/AssetController.java"),
     ("lst:ch05-db-config", "output/chapters/chapter05.tex",
      "companion/water-platform-demo/backend/src/main/resources/application.yml"),
+    # R11-02 补正：第5章统一到配套工程模型后新增的对应关系
+    ("lst:ch05-boot-dependencies", "output/chapters/chapter05.tex",
+     "companion/water-platform-demo/backend/pom.xml"),
+    ("lst:ch05-reading-event", "output/chapters/chapter05.tex",
+     "companion/water-platform-demo/backend/src/main/java/edu/example/qingyuan/ReadingEvent.java"),
+    ("lst:ch05-accept", "output/chapters/chapter05.tex",
+     "companion/water-platform-demo/backend/src/main/java/edu/example/qingyuan/ReadingService.java"),
+    ("lst:ch05-index-migration", "output/chapters/chapter05.tex",
+     "companion/water-platform-demo/db/001_init.sql"),
+    ("lst:ch05-error-handler", "output/chapters/chapter05.tex",
+     "companion/water-platform-demo/backend/src/main/java/edu/example/qingyuan/ApiExceptionHandler.java"),
+    ("lst:ch05-kafka-idempotency", "output/chapters/chapter05.tex",
+     "companion/water-platform-demo/backend/src/main/java/edu/example/qingyuan/ReadingConsumer.java"),
+    ("lst:ch05-unit-service-test", "output/chapters/chapter05.tex",
+     "companion/water-platform-demo/backend/src/test/java/edu/example/qingyuan/ReadingWindowTest.java"),
+    # R11 补正：第8章 8.3.3 的三段 DDL 与 db/001_init.sql 单一来源
+    ("lst:ch08-sql-asset", "output/chapters/chapter08.tex",
+     "companion/water-platform-demo/db/001_init.sql"),
+    ("lst:ch08-sql-reading", "output/chapters/chapter08.tex",
+     "companion/water-platform-demo/db/001_init.sql"),
+    ("lst:ch08-sql-workflow", "output/chapters/chapter08.tex",
+     "companion/water-platform-demo/db/001_init.sql"),
 ]
 
 # 已确认的差异：(label, 书中原行) -> 原因

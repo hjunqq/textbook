@@ -1,5 +1,5 @@
 // S5 阶段包：图表与三维对象的双向联动。
-// 与 7.3 节清单“ECharts与Three.js对象的双向联动控制器”逐字一致。
+// 与 7.2.4 节清单“ECharts与Three.js对象的双向联动控制器”逐字一致。
 //
 // 它不 import echarts 也不 import three：chart 与 scene 都是构造时传进来的。
 // 因此这个模块可以用两个假对象在 Node 里直接测试——见 tests/lesson74.test.js。

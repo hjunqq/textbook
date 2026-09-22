@@ -40,8 +40,8 @@
 | frontend/src/lesson74/window-chart.js + tests/window-chart.test.js | 7.2.2 | 与清单 lst:ch07-append-data 一致；实测 ECharts 折线更新、300点窗口、缺测与双轴 |
 | frontend/src/views/LoginView.vue | 4.5.7 / 4.7 | 登录与安全回跳 |
 | frontend/src/router/index.js | 4.7.1 | 路由守卫 |
-| frontend/src/stores/monitoring.js | 4.7.4 / 8.3 | Pinia 状态与查询参数 |
-| frontend/src/components/MonitoringDashboard.vue | 7.2 / 8.3 | ECharts 曲线、缺测与可疑呈现 |
+| frontend/src/stores/monitoring.js | 4.7.4 / 8.2.3 | Pinia 状态与查询参数 |
+| frontend/src/components/MonitoringDashboard.vue | 7.2 / 8.2.3 | ECharts 曲线、缺测与可疑呈现 |
 | frontend/tests/*.test.js | 4.8.1 | vitest 单元测试 |
 | backend/.../JwtService.java | 5.6 | jjwt 0.11.x 签发与校验 |
 | backend/.../JwtAuthenticationFilter.java | 5.6 | Bearer 解析入 SecurityContext |

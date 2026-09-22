@@ -48,47 +48,47 @@
 
 <a id="ref24"></a>[24] Parnas, David L.. On the Criteria to be Used in Decomposing Systems into Modules[J]. Communications of the ACM, 1972, 15(12): 1053--1058.
 
-<a id="ref25"></a>[25] Vue.js Team. Vue.js 3 Documentation[EB/OL]. https://vuejs.org/guide/.
+<a id="ref25"></a>[25] Newman, Sam. Building Microservices: Designing Fine-Grained Systems[M]. Sebastopol: O'Reilly Media, 2021.
 
-<a id="ref26"></a>[26] Vue Router Team. Vue Router Documentation[EB/OL]. https://router.vuejs.org/.
+<a id="ref26"></a>[26] Vue.js Team. Vue.js 3 Documentation[EB/OL]. https://vuejs.org/guide/.
 
-<a id="ref27"></a>[27] Pinia Team. Pinia Documentation[EB/OL]. https://pinia.vuejs.org/.
+<a id="ref27"></a>[27] Vue Router Team. Vue Router Documentation[EB/OL]. https://router.vuejs.org/.
 
-<a id="ref28"></a>[28] Vite Team. Vite Documentation[EB/OL]. https://vite.dev/guide/.
+<a id="ref28"></a>[28] Pinia Team. Pinia Documentation[EB/OL]. https://pinia.vuejs.org/.
 
-<a id="ref29"></a>[29] MDN Web Docs. Web technology references: HTML, CSS, JavaScript[EB/OL]. https://developer.mozilla.org/.
+<a id="ref29"></a>[29] Vite Team. Vite Documentation[EB/OL]. https://vite.dev/guide/.
 
-<a id="ref30"></a>[30] W3C. Web Content Accessibility Guidelines (WCAG) 2.2[EB/OL]. https://www.w3.org/TR/WCAG22/.
+<a id="ref30"></a>[30] MDN Web Docs. Web technology references: HTML, CSS, JavaScript[EB/OL]. https://developer.mozilla.org/.
 
-<a id="ref31"></a>[31] Norman, Donald A.. The Design of Everyday Things[M]. New York: Basic Books, 2013.
+<a id="ref31"></a>[31] W3C. Web Content Accessibility Guidelines (WCAG) 2.2[EB/OL]. https://www.w3.org/TR/WCAG22/.
 
-<a id="ref32"></a>[32] VMware Tanzu / Broadcom. Spring Boot Reference Documentation[EB/OL]. https://docs.spring.io/spring-boot/.
+<a id="ref32"></a>[32] Norman, Donald A.. The Design of Everyday Things[M]. New York: Basic Books, 2013.
 
-<a id="ref33"></a>[33] VMware Tanzu / Broadcom. Spring Security Reference Documentation[EB/OL]. https://docs.spring.io/spring-security/reference/.
+<a id="ref33"></a>[33] VMware Tanzu / Broadcom. Spring Boot Reference Documentation[EB/OL]. https://docs.spring.io/spring-boot/.
 
-<a id="ref34"></a>[34] Eclipse Foundation. Jakarta Persistence Specification 3.1[EB/OL]. https://jakarta.ee/specifications/persistence/3.1/.
+<a id="ref34"></a>[34] VMware Tanzu / Broadcom. Spring Security Reference Documentation[EB/OL]. https://docs.spring.io/spring-security/reference/.
 
-<a id="ref35"></a>[35] PostgreSQL Global Development Group. PostgreSQL 16 Documentation[EB/OL]. https://www.postgresql.org/docs/16/.
+<a id="ref35"></a>[35] Eclipse Foundation. Jakarta Persistence Specification 3.1[EB/OL]. https://jakarta.ee/specifications/persistence/3.1/.
 
 <a id="ref36"></a>[36] Timescale, Inc.. TimescaleDB Documentation: Hypertables and Continuous Aggregates[EB/OL]. https://docs.tigerdata.com/.
 
-<a id="ref37"></a>[37] Jones, Michael, Bradley, John, Sakimura, Nat. RFC 7519: JSON Web Token (JWT)[EB/OL]. https://www.rfc-editor.org/rfc/rfc7519.
+<a id="ref37"></a>[37] PostgreSQL Global Development Group. PostgreSQL 16 Documentation[EB/OL]. https://www.postgresql.org/docs/16/.
 
-<a id="ref38"></a>[38] Apache Software Foundation. Apache Kafka Documentation[EB/OL]. https://kafka.apache.org/documentation/.
+<a id="ref38"></a>[38] Jones, Michael, Bradley, John, Sakimura, Nat. RFC 7519: JSON Web Token (JWT)[EB/OL]. https://www.rfc-editor.org/rfc/rfc7519.
 
-<a id="ref39"></a>[39] Newman, Sam. Building Microservices: Designing Fine-Grained Systems[M]. Sebastopol: O'Reilly Media, 2021.
+<a id="ref39"></a>[39] Apache Software Foundation. Apache Kafka Documentation[EB/OL]. https://kafka.apache.org/documentation/.
 
 <a id="ref40"></a>[40] three.js. GLTFLoader -- three.js Documentation[EB/OL]. https://threejs.org/docs/pages/GLTFLoader.html.
 
-<a id="ref41"></a>[41] Open Geospatial Consortium. Web Map Service (WMS) Standard[EB/OL]. https://www.ogc.org/publications/standard/wms/.
+<a id="ref41"></a>[41] EPSG Geodetic Parameter Dataset. China Geodetic Coordinate System 2000 (EPSG:4490)[EB/OL]. https://epsg.org/crs_4490/China-Geodetic-Coordinate-System-2000.html.
 
-<a id="ref42"></a>[42] Open Geospatial Consortium. Web Map Tile Service (WMTS) Standard[EB/OL]. https://www.ogc.org/standards/wmts/.
+<a id="ref42"></a>[42] 李建成. 最新中国陆地数字高程基准模型：重力似大地水准面CNGG2011[J]. 测绘学报, 2012, 41(5): 651--660.
 
-<a id="ref43"></a>[43] Open Geospatial Consortium. OGC WCS Standard | Web Coverage Service Specification[EB/OL]. https://www.ogc.org/standards/wcs/.
+<a id="ref43"></a>[43] Open Geospatial Consortium. Web Map Service (WMS) Standard[EB/OL]. https://www.ogc.org/publications/standard/wms/.
 
-<a id="ref44"></a>[44] EPSG Geodetic Parameter Dataset. China Geodetic Coordinate System 2000 (EPSG:4490)[EB/OL]. https://epsg.org/crs_4490/China-Geodetic-Coordinate-System-2000.html.
+<a id="ref44"></a>[44] Open Geospatial Consortium. Web Map Tile Service (WMTS) Standard[EB/OL]. https://www.ogc.org/standards/wmts/.
 
-<a id="ref45"></a>[45] 李建成. 最新中国陆地数字高程基准模型：重力似大地水准面CNGG2011[J]. 测绘学报, 2012, 41(5): 651--660.
+<a id="ref45"></a>[45] Open Geospatial Consortium. OGC WCS Standard | Web Coverage Service Specification[EB/OL]. https://www.ogc.org/standards/wcs/.
 
 <a id="ref46"></a>[46] Cesium GS. Cesium3DTileset -- CesiumJS Documentation[EB/OL]. https://cesium.com/learn/cesiumjs/ref-doc/Cesium3DTileset.html.
 
@@ -108,13 +108,13 @@
 
 <a id="ref54"></a>[54] 陶飞, 刘蔚然, 张萌, others. 数字孪生五维模型及十大领域应用[J]. 计算机集成制造系统, 2019, 25(1): 1--18.
 
-<a id="ref55"></a>[55] Steinarsson, Sveinn. Downsampling Time Series for Visual Representation. 2013. <https://skemman.is/handle/1946/15343>
+<a id="ref55"></a>[55] 中华人民共和国水利部. 水文资料整编规范[S]. , 2020.
 
-<a id="ref56"></a>[56] 中华人民共和国水利部. 水文资料整编规范[S]. , 2020.
+<a id="ref56"></a>[56] Apache Software Foundation. Apache ECharts: An Open Source JavaScript Visualization Library[EB/OL]. https://echarts.apache.org/en/.
 
 <a id="ref57"></a>[57] Apache Software Foundation. Apache ECharts Documentation[EB/OL]. https://echarts.apache.org/handbook/.
 
-<a id="ref58"></a>[58] Apache Software Foundation. Apache ECharts: An Open Source JavaScript Visualization Library[EB/OL]. https://echarts.apache.org/en/.
+<a id="ref58"></a>[58] Steinarsson, Sveinn. Downsampling Time Series for Visual Representation. 2013. <https://skemman.is/handle/1946/15343>
 
 <a id="ref59"></a>[59] 中华人民共和国水利部. 混凝土坝安全监测技术规范[S]. , 2013. <https://std.samr.gov.cn/hb/search/stdHBDetailed?id=8B1827F1E7A8BB19E05397BE0A0AB44A>
 
