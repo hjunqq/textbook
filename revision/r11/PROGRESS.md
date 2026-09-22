@@ -11,7 +11,7 @@
 | R11-02 | 样章 + 补正小包完成：第5章主线统一到配套模型，5.3 精简，错误体合并 | 见第三节、第五节 |
 | R11-03 | 第7章、第4章重编完成，经独立走读复核并修正 | 见第五节 |
 | R11-04 | 第3章、第6章重编完成，经独立走读复核并修正 | 见第五节 |
-| R11-05 | 第8章改为 PZ-07 业务链综合应用；第1、2、9章及前言尚未做 | 见第五节 |
+| R11-05 | 完成：第8章 PZ-07 业务链；前言与第1、2、9章按真实课程能力重写 | 见第五、六节 |
 | R11-06 | 未开始 | 全书语言/层次标签/习题/发布同步 |
 
 接手时核对：origin/master = 8b54678，origin/revision/undergraduate-r11 = d465437（仅 PLAN.md）。作者电脑上的工作目录检出的是 master，AGENTS.md 与仓库一致，未发现未提交的正文修订。本轮修改在云端克隆的修订分支上完成；该环境无推送权限，提交以 git bundle 和补丁交回，由作者拉入修订分支。
@@ -161,7 +161,7 @@
 | `audit_learning_path.py` | errors 空，核心引用拓展 0 |
 | 前端 vitest（lesson44/45/71/74、series-controller、window-chart、lesson84 等） | 走读代理实测通过（112 项全套上一批已跑；本批抽跑 lesson74/series-controller 18 项、lesson84 28 项） |
 | 教学接口：七步 curl、`closeloop-check.mjs` | 20 项通过（第8章代理实测） |
-| 后端 `mvn test`、lesson54 启动、`--stage=lesson54` | **未运行**（Maven Central 403，无 Docker）。已在 `.github/workflows/ci.yml` 新增 `stage-lesson54` 作业：Java 17、GitHub Actions 服务容器 `timescale/timescaledb-ha:pg16`（一次性、随作业销毁，不触碰任何已有数据卷），执行 `mvn -q test`→psql 执行 001/002 脚本→启动 `Lesson54Application`→`--stage=lesson54`→两项运行记录表观察，全部日志与退出码作为 artifact `stage-lesson54-logs` 保留；`on.push` 增加 `revision/**`，推送修订分支即触发。本环境无 `gh` 且无推送权限，触发操作：作者推送后在 Actions 页查看，或手动 `workflow_dispatch` |
+| 后端 `mvn test`、lesson54 启动、`--stage=lesson54` | 本环境未运行（Maven Central 403，无 Docker）；**已由 CI 在 dcc0ec8 上通过**，见第六节 6.3。作业定义：`.github/workflows/ci.yml` 的 `stage-lesson54`：Java 17、GitHub Actions 服务容器 `timescale/timescaledb-ha:pg16`（一次性、随作业销毁，不触碰任何已有数据卷），执行 `mvn -q test`→psql 执行 001/002 脚本→启动 `Lesson54Application`→`--stage=lesson54`→两项运行记录表观察，全部日志与退出码作为 artifact `stage-lesson54-logs` 保留；`on.push` 增加 `revision/**`，推送修订分支即触发。本环境无 `gh` 且无推送权限，触发操作：作者推送后在 Actions 页查看，或手动 `workflow_dispatch` |
 | `001_init.sql` 新增段 | 未执行；`stage-lesson54` 与 `stack-e2e` 作业会执行 |
 | tex2site + mkdocs 严格构建 | 见编译记录 |
 | 学生试读 | 未进行 |
@@ -175,3 +175,47 @@
 3. 5.6 权限模型与配套两套并存（见 5.1 ⑤）。
 4. 上述“作者待定”各项。
 5. 编辑走读不等于学生试教；无任何学生试读。
+
+## 六、第三批（2026-09-22）：R11-05 前言与第1、2、9章；CI 结果回填
+
+### 6.1 结构与去向
+
+**前言**：“学习方法”改为“怎样读这本书”，只留一条阅读规则（按章顺序读核心与指导实践，拓展在完成对应阶段后再读），删去“不建议跳章”与“按编号跳读”的矛盾；新增表 `tab:preface-version-stage`（v0—v5 ↔ S0—S6 ↔ 章节 ↔ 配套入口 ↔ 能力，含 S3 起点/中点/终点）；课程目标改为与 docs/index.md 一致的四条能力；技术篇四条与第4—7章现状对齐，应用篇改为 PZ-07 业务链、8.5 独立选读；三个学时方案改为按达成程度编制（32学时到 S3 中点：2+4+4+9+11+2；48学时到 S5：2+4+3+10+13+6+6+2+2；56学时到 S6 与部署，讲授:实验≈30:26），`tab:preface-core-optional` 六行按各章现行层次重核；配套资源段的文件名与 STAGES/MAPPING 一致。
+
+**第1章**：1.1 八小节压为五（定义／政策主线与发展脉络（合并旧1.1.2、1.1.4、1.1.5，引文全部保留）／感知通信（升为核心）／智能边界／贯穿场景（补黄色以上人工确认、模拟建议不驱动闸门、suspect/missing 不参与评估，与第8章一致））；1.1.6 无出处的国内外路径对照删除；1.2.1 增加与 S0 实录五次请求、四种失败及 `tab:ch03-walk-latest` 的对应；1.2.4 的洪水链复述改为引用 1.1.5 的图并只留子系统边界结论；1.2.5 每条原则改为“解决什么问题—正例—反例—落到哪一章”；1.3 改为“为什么水利平台需要软件工程”+指路第2章，`fig:sdlc-flow` 与雨量测点例迁第2章2.1；1.2.4/1.2.5 的评审与治理段迁附录C（`app:ext-ch01-platform-review`）。字数 14189→10158。
+
+**第2章**：2.1 五小节合为整体流程；2.2 保留瀑布/原型/迭代增量/敏捷/模型选择，螺旋、Scrum、看板、DevOps 压为 2.2.6 拓展；2.3.2+2.3.3 合并；2.6 改为四小节（从含糊陈述到验收条件／评审检查单／拓展：变更控制与追踪矩阵／方法迁移，并与 `tab:ch03-req-mon` 衔接，预警状态改为第8章实际的四态）；2.2.9/2.6.2 的评审记录与基线治理迁附录C（`app:ext-ch02-baseline-governance`）。第1章原练习9、10移为第2章13、14，答案随迁。字数 23175→18634。
+
+**第9章**：9.1 按四条能力回顾并明确未涉及内容；O 表引用改正（ADR 在 3.6.1）；9.2.3 升为核心；新增练习6、7（O1—O7 自查、故障记录改写），附录A补答案。字数 6022→5648。
+
+### 6.2 独立走读复核
+
+一轮走读 21 条，全部处理。实质性问题：1.1.3 标为拓展却被学习目标/交付物/习题依赖（升为核心）；第9章全部习题依赖拓展小节（9.2.3 升核心并补两题）；前言 S2 行与第4章层次不一致（三处统一为 4.6.1—4.6.2 核心）；48学时表第4/5章学时与覆盖范围不匹配（改为10/13）；答案第1章第3题按四层名称重写；术语表“质量码”误含“修正”。
+
+### 6.3 CI 结果（运行 35681402744，提交 dcc0ec8，2026-09-22 02:58Z 起）
+
+| 作业 | 结果 |
+|---|---|
+| docker compose 配置校验 | 通过 |
+| 前端测试与构建 | 通过 |
+| 后端测试（`mvn -B -q test`） | 通过 |
+| 在线版严格构建 | 通过 |
+| 书中清单与配套代码一致 | 通过 |
+| 教学接口契约与第8章闭环 | 通过 |
+| S3 起点可启动且契约一致（lesson52） | 通过 |
+| **S3 中点（lesson54）：mvn test → 001/002 建库 → 启动 Lesson54Application → `--stage=lesson54` → 运行记录表两项观察** | **通过（1 m 16 s）**；日志与退出码在 artifact `stage-lesson54-logs` |
+| 整栈端到端（compose + smoke） | **失败**（exit 1，56 s） |
+
+`stack-e2e` 的失败不是本轮引入：master 8b54678 上的运行 35567664778（第九轮末）同一作业已失败（58 s）。本环境无权读取作业日志，未能定位原因；从时长看在 `docker compose up --build --wait` 阶段即失败。本轮对 compose 的改动（PostgreSQL 回环端口与 `db-host` 网络）和 `001_init.sql` 追加段已由 `stage-lesson54`（同一镜像、同一脚本）证明可执行，但 compose 整栈仍待作者提供日志或本机复现。
+
+据此，第四节中“未运行”的 `mvn test`、`Lesson54Application` 启动、`--stage=lesson54`、`001_init.sql` 新增段四项改记为 **CI 通过**；`--stage=full` 与 `smoke.sh` 仍为待核。
+
+### 6.4 本批检查
+
+`check_textbook.py --strict --build` 通过（386 页，Fandol 回退字体，Overfull 0）；`check_listings.py` 42 组一致；`audit_learning_path.py` errors 空；tex2site + mkdocs 严格构建通过；`migration_ledger.json` 登记 chapter01 4200、chapter02 4700 随本包提交，下一提交清空。
+
+### 6.5 遗留
+
+1. R11-06 未做：全书“本节层次/进入本节所需知识”统一、5.6/6.4 残留“应……应……”句、术语与习题答案全查、站点浏览器检查、PDF 逐章目检。
+2. `stack-e2e` 失败原因待作者日志。
+3. 上批列出的“作者待定”各项未变。

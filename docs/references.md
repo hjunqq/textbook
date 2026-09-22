@@ -4,13 +4,13 @@
 
 <a id="ref2"></a>[2] 中华人民共和国水利部. 水利部关于大力推进智慧水利建设的指导意见[EB/OL]. http://www.mwr.gov.cn/zw/tzgg/tzgs/202112/t20211227_1556994.html.
 
-<a id="ref3"></a>[3] 中国政府网. 水利部关于推进水库、水闸、蓄滞洪区运行管理数字孪生的指导意见[EB/OL]. https://www.gov.cn/gongbao/2024/issue_11726/202411/content_6989758.html.
+<a id="ref3"></a>[3] 中共中央, 国务院. 中共中央、国务院印发《数字中国建设整体布局规划》[EB/OL]. https://www.gov.cn/zhengce/2023-02/27/content_5743484.htm?menuid=104.
 
-<a id="ref4"></a>[4] 中华人民共和国水利部. SL/T 651--2014 水文监测数据通信规约[EB/OL]. https://std.samr.gov.cn/hb/search/stdHBDetailed?id=8B1827F24E36BB19E05397BE0A0AB44A.
+<a id="ref4"></a>[4] 中国政府网. 水利部关于推进水库、水闸、蓄滞洪区运行管理数字孪生的指导意见[EB/OL]. https://www.gov.cn/gongbao/2024/issue_11726/202411/content_6989758.html.
 
-<a id="ref5"></a>[5] 中国政府网. 水利部：五方面推进数字孪生水利建设[EB/OL]. https://www.gov.cn/lianbo/bumen/202306/content_6887458.htm.
+<a id="ref5"></a>[5] 中华人民共和国水利部. SL/T 651--2014 水文监测数据通信规约[EB/OL]. https://std.samr.gov.cn/hb/search/stdHBDetailed?id=8B1827F24E36BB19E05397BE0A0AB44A.
 
-<a id="ref6"></a>[6] 中共中央, 国务院. 中共中央、国务院印发《数字中国建设整体布局规划》[EB/OL]. https://www.gov.cn/zhengce/2023-02/27/content_5743484.htm?menuid=104.
+<a id="ref6"></a>[6] 中国政府网. 水利部：五方面推进数字孪生水利建设[EB/OL]. https://www.gov.cn/lianbo/bumen/202306/content_6887458.htm.
 
 <a id="ref7"></a>[7] ISO/IEC/IEEE. Systems and software engineering --- Software life cycle processes[S]. , 2017.
 

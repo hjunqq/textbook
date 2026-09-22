@@ -6,8 +6,8 @@
 |---|---|---|---|
 | S0 | 第1章 | `S0-demo-record.md` | 固定演示记录；解释一次查询的六个环节 |
 | S1 | 4.2–4.4 | `lesson44.html`、`lesson44-detail.html` | Node、浏览器；静态列表、详情、筛选与排序 |
-| S2 核心 | 4.5 | `lesson45.html` | 教学接口；原生 JavaScript、四种状态与竞态处理 |
-| S2 指导实践 | 4.6–4.7 | `index.html`、`src/router/`等骨架 | Vue、Pinia与登录守卫；按书中清单完成详情路由 |
+| S2 核心 | 4.5、4.6.1–4.6.2 | `lesson45.html` | 教学接口；原生 JavaScript、四种状态与竞态处理 |
+| S2 指导实践 | 4.6.3–4.7 | `index.html`、`src/router/`等骨架 | Vue、Pinia与登录守卫；按书中清单完成详情路由 |
 | S3 起点 | 5.2 | `edu.example.lesson52.Lesson52Application` | Java 17、Maven；四个固定对象、部分固定观测，无登录和数据库 |
 | S3 中点 | 5.4.1–5.4.2 | `edu.example.lesson54.Lesson54Application` | Docker（只起 PostgreSQL）；对象与观测来自数据库，三层结构，无登录、不连 Kafka |
 | S3 终点 | 5.5–5.6、8.3 | 完整 `backend/` 与 Compose | 认证与消息消费齐备后承接 S2 联调 |

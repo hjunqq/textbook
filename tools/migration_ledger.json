@@ -1,1 +1,10 @@
-{}
+{
+  "chapter01.tex": {
+    "allowed_drop": 4200,
+    "reason": "R11-05：1.1 政策/发展脉络/建设路径四小节合并，无出处对照删除；1.2.4—1.2.5 治理段迁附录C（app:ext-ch01-platform-review）；1.3 与第2章2.1重复部分并入第2章。见 PROGRESS.md 第六节"
+  },
+  "chapter02.tex": {
+    "allowed_drop": 4700,
+    "reason": "R11-05：2.1 五小节合为整体流程；2.2 Scrum/看板/DevOps 压为拓展；2.2.9/2.6.2 评审与基线治理迁附录C（app:ext-ch02-baseline-governance）。见 PROGRESS.md 第六节"
+  }
+}
