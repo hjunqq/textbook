@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * S3 阶段起点：教材清单 5.1（返回写死的对象列表）与清单 5.2（路径参数、查询参数与契约错误体）
+ * S3 阶段起点：教材清单 5.2（返回写死的对象列表）与清单 5.3（路径参数、查询参数与契约错误体）
  * 合并成的一个可运行的类——书中第二个清单的注释写着“放在 AssetController 里”，这里就是那个类。
  * 除合并所需的 import 外，方法体与书中逐字一致。
  *

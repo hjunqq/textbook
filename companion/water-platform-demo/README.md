@@ -47,7 +47,7 @@ psql "postgresql://qingyuan_app:<密码>@localhost:5432/qingyuan" -f db/load-s3-
 - 错误口令 → 401，登录页就地提示，不发生页面跳转；
 - 传入 `from >= to` 的时间窗 → 前端 `readingQuery` 直接拒绝，不发出请求；
 - Kafka 收到重复 `eventId` 事件 → 由 `(occurred_at, event_id)` 复合唯一索引裁决，
-  消费者在事务边界之外捕获冲突并确认消息（第8章 8.3 节的口径）。
+  消费者在事务边界之外捕获冲突并确认消息（第5章 5.4.4 节的唯一索引与 5.7.3 节的消费者口径）。
 
 ## 各自运行测试
 

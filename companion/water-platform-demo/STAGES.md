@@ -13,7 +13,7 @@
 | S3 终点 | 5.5–5.6、8.3 | 完整 `backend/` 与 Compose | 认证与消息消费齐备后承接 S2 联调 |
 | S4 | 6.1 | `lesson61.html` | 教学接口、Three.js；坝体几何体与28个测点 |
 | S5 | 7.2–7.4 | `lesson74.html` | 教学接口或 S3 完整后端、S4场景；曲线与测点联动 |
-| S6 | 8.4 | `classify.js`、`closeloop-check.mjs` | 教学接口验证受控闭环；完整工程另做部署验收 |
+| S6 | 8.4、8.6 | `classify.js`、`closeloop-check.mjs`、`smoke.sh` | 教学接口验证受控闭环；完整工程按 8.6 用 Compose 与 `smoke.sh` 做部署验收 |
 
 ## S0：解释请求
 
