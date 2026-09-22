@@ -254,3 +254,28 @@
 
 ### 8.1 本批检查（云端）
 `check_textbook.py --strict --build` 通过（388 页，Fandol 回退字体，Overfull 0）；`check_listings.py` 45 组一致；`audit_learning_path.py` errors 空；前端 vitest 12 文件 115 用例通过；tex2site + mkdocs 严格构建通过。Java 仍未在本环境编译，由 CI `backend`、`stage-lesson54`、`stack-e2e` 验证，结果回填于第九节。
+
+## 九、终验记录（2026-09-23）
+
+### 9.1 CI（运行于 aebe2aa，作者查看）
+9 个作业中 8 个通过：docker compose 配置校验、前端测试与构建、后端测试（含新增 `ReadingWriteControllerTest` 六用例：FIELD_REQUIRED / VALIDATION_ERROR / 缺幂等头 / 越权 403 / 匿名 401 / 201）、在线版严格构建、清单一致、教学接口契约与闭环、S3 起点、S3 中点。`stack-e2e` 失败：Docker 内 `npm run build` 报 `Could not resolve "../../../shared/time.mjs" from "src/utils/readings.js"`。
+
+### 9.2 收尾修复（stack-e2e）
+- 原因：`src/utils/readings.js` 与 `src/lesson71/{quality,event-window,standardize,resample}.js` 都引用 `companion/water-platform-demo/shared/time.mjs`（前后端共用的时间解析），该目录在 `frontend/` 之外，而 compose 的构建上下文是 `./frontend`，`shared/` 进不了镜像。全仓库检索确认这是前端源码唯一一处跳出 `frontend/` 的相对依赖（测试文件里对 `output/case-params.tex` 的引用不参与镜像构建）。
+- 修法：`docker-compose.yml` 的 frontend 构建改为 `context: .`（water-platform-demo）+ `dockerfile: frontend/Dockerfile`；Dockerfile 在 `/work/frontend` 下工作，`COPY shared /work/shared`，其余按原相对目录结构拷贝，`../../../shared/time.mjs` 在镜像内解析到 `/work/shared/time.mjs`。新增 `.dockerignore`（node_modules、dist、target、.git）。未改任何 import 路径，未复制重复文件。
+- 本地验证：本环境 Docker 守护进程可启动但 Docker Hub 被出口策略拦截（`node:20-alpine`、`nginx:1.27-alpine` 均 403），无法真正 `docker build`。改做等价的干净构建：在空目录里只放 Dockerfile 各 `COPY` 指令所列的文件（`shared/`、`package.json`、`package-lock.json`、`src/`、`public/`、六个 HTML、`lesson44.css`、`vite.config.js`），`npm ci` 后 `npm run build` 通过，`dist/` 含六个入口页、`datasets/`、`models/`。`docker compose config -q` 通过。
+- `docker compose up -d --build --wait → smoke.sh → --stage=full` 在本环境无法执行（镜像拉取被拦），由 CI `stack-e2e` 在推送后执行，结果由作者查看后回填于 9.3。
+
+### 9.3 终验汇总
+
+| 项 | 结果 | 出处 |
+|---|---|---|
+| 后端测试（`mvn -B -q test`，含 `ReadingWriteControllerTest`） | 通过 | CI `backend`（aebe2aa） |
+| 权限 403 回归（DUTY 调 ANALYST 端点→403 FORBIDDEN，非 500） | 通过 | 同上，用例 `userWithoutAuthorityIs403NotInternalError` |
+| 闭环错误码（缺字段→FIELD_REQUIRED；`closeloop-check.mjs` 未改） | 通过（教学接口）；真实后端由 `stack-e2e` 的 `--stage=full` 覆盖契约部分 | CI `teaching-api` |
+| S3 中点（lesson54：建库→启动→契约核对） | 通过 | CI `stage-lesson54` |
+| 前端 Docker 整栈（compose build + smoke + full contract） | 修复后**待 CI 复跑**；本地等价干净构建通过 | 见 9.2 |
+| 全文静态门禁（`--strict`）、清单一致 45 组、学习路径审计 | 通过 | 云端 |
+| PDF（`--strict --build`，388 页，Fandol 回退字体，Overfull 0） | 通过 | 云端 |
+| 网站（tex2site + mkdocs 严格构建；逐页 headless 检查） | 通过 | 云端（逐页检查为 R11-06 时所做，之后正文改动已重新生成并严格构建） |
+| 学生试读 / 试教 | **未做** | — |

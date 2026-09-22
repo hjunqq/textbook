@@ -1,6 +1,7 @@
 services:
   frontend:
-    build: ./frontend
+    # 上下文取本目录：前端源码通过 ../../../shared/time.mjs 引用 frontend/ 之外的共用模块
+    build: {context: ., dockerfile: frontend/Dockerfile}
     depends_on: {backend: {condition: service_healthy}}
     ports: ["8080:80"]
     networks: [app-net]
