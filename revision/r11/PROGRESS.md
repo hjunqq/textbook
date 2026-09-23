@@ -292,3 +292,13 @@ eb2fbae 推送后 CI 运行 9 个作业全部通过（作者 2026-09-23 查看�
 - **检查**：`python tools/check_textbook.py --strict --build` 通过；386页→386页（同一本机、同字体），无编译错误、Overfull、缺字或未定义引用。封面及版权页已渲染目检，书名、画面、说明无裁切或遮挡；PDF第3页至末页逐页文本比较完全一致。门禁正文字数194412→194412，各章及附录源码未改。详细结果见 `cover-build.txt`、`cover-verification.json`。
 - **范围**：配套代码与网站未改，未重跑代码测试、网站构建或CI；未合并master、未发布正式版本。保留原有 `Claude outputs/` 与前端 `dist/` 未跟踪目录。
 - **交付**：`output/智慧水利平台架构与开发-R11-封面提升版.pdf`、`output/封面预览-R11.png`。PDF按现有生成物规则保留在本机；封面预览、可重建源文件、原创图与生成记录随工作包提交。
+
+## 十一、强化封面的智慧水利主题（2026-09-23，R11-06-cover-smart）
+
+作者反馈“看不出智慧水利”，在上一包 `d55a82c` 基础上编辑封面图。
+
+- **修改位置与去向**：`output/main.tex` 的封面图片引用改为 `output/images/generated/cover-smart-water-r11.png`。旧图 `cover-reservoir-r11.png` 保留，作为本次编辑的来源素材；原预览和PDF亦保留。保留自然库区、坝体和晨光，增加监测节点、数据连接、局部数字孪生网格及模型/曲线面板，使工程实体与数字平台的关系在封面尺寸下可辨。
+- **内容范围**：无章节正文删除、迁移或回收，无新增小节、代码、编号图表；正文字数194412→194412。仅新增一幅封面概念渲染，未改工程参数、接口、代码、正文首行缩进或书名排版；版权页既有“AI生成教学渲染”说明继续适用。无需L1/L2素材回收。
+- **素材记录**：内置 `image_gen` 以上一版为参考进行编辑，完整提示词见 `cover-smart-image-prompt.json`，像素和SHA256见 `output/images/generated/provenance.json`。图中的数字面板为概念表达，不是实际监测数据或软件截图；15.2cm印刷宽度下约328.5dpi。
+- **检查**：`python tools/check_textbook.py --strict --build` 通过；386页→386页，无编译错误、Overfull、缺字或未定义引用。已按实际页面渲染目检，节点、数据连接与面板清楚，标题和图像无裁切。PDF第2页至末页逐页文本比较完全一致。结果见 `cover-smart-build.txt` 与 `cover-smart-verification.json`。配套代码、网站均未改，未重跑对应测试或CI。
+- **交付**：`output/智慧水利平台架构与开发-R11-智慧水利封面版.pdf`、`output/封面预览-R11-智慧水利.png`。PDF依现有规则仅保留于本机；图片、预览、源文件与生成记录随包提交。未合并master或发布正式版本。
