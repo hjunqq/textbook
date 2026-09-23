@@ -281,3 +281,14 @@ eb2fbae 推送后 CI 运行 9 个作业全部通过（作者 2026-09-23 查看�
 | PDF（`--strict --build`，388 页，Fandol 回退字体，Overfull 0） | 通过 | 云端 |
 | 网站（tex2site + mkdocs 严格构建；逐页 headless 检查） | 通过 | 云端（逐页检查为 R11-06 时所做，之后正文改动已重新生成并严格构建） |
 | 学生试读 / 试教 | **未做** | — |
+
+## 十、封面主视觉提升（2026-09-23，R11-06-cover）
+
+作者指定基线 `4f299a314178605ca33bbe4666de7faad4033091`，要求生成有质感的首页图并放入教材。工作仍在 `revision/undergraduate-r11`。
+
+- **修改位置**：`output/main.tex` 的 titlepage；原抽象坝体横幅换为 `output/images/generated/cover-reservoir-r11.png`。深青蓝库区、自然晨光、山体层次和轻微数据纹理构成主视觉；书名仍由LaTeX排版，封面标题配色改为深青色，正文配色与版式不变。版权页补充封面为“AI生成教学渲染”的来源说明。
+- **原位置—去向—理由**：原封面装饰性TikZ绘图从titlepage替换，完整旧图保存在 `4f299a3:output/main.tex` 的titlepage中。该图无编号、无正文引用，不承载章节原理或精确参数；替换用于提升封面视觉。无章节正文删除、迁移或回收，无新增教学单元，未调整迁移登记及门禁。
+- **素材**：内置 `image_gen` 原创生成；文件为1967×800像素，15.2cm印刷宽度约329dpi，等比嵌入。来源与SHA256见 `output/images/generated/provenance.json`；完整提示词见本目录 `cover-image-prompt.json`。画面为虚构工程的装饰性渲染，不表达案例工程参数。
+- **检查**：`python tools/check_textbook.py --strict --build` 通过；386页→386页（同一本机、同字体），无编译错误、Overfull、缺字或未定义引用。封面及版权页已渲染目检，书名、画面、说明无裁切或遮挡；PDF第3页至末页逐页文本比较完全一致。门禁正文字数194412→194412，各章及附录源码未改。详细结果见 `cover-build.txt`、`cover-verification.json`。
+- **范围**：配套代码与网站未改，未重跑代码测试、网站构建或CI；未合并master、未发布正式版本。保留原有 `Claude outputs/` 与前端 `dist/` 未跟踪目录。
+- **交付**：`output/智慧水利平台架构与开发-R11-封面提升版.pdf`、`output/封面预览-R11.png`。PDF按现有生成物规则保留在本机；封面预览、可重建源文件、原创图与生成记录随工作包提交。

@@ -1,0 +1,14 @@
+{
+  "package": "R11-06-cover",
+  "base": "4f299a314178605ca33bbe4666de7faad4033091",
+  "pages_before": 386,
+  "pages_after": 386,
+  "changed_text_pages_after_frontmatter": [],
+  "pdf": "output/智慧水利平台架构与开发-R11-封面提升版.pdf",
+  "pdf_sha256": "105b38c77b1d60726e6ef3d4e0d10e06ad9adcde31c49c5824aef1b55936833d",
+  "image": "output/images/generated/cover-reservoir-r11.png",
+  "print_width_cm": 15.2,
+  "effective_dpi": 328.7,
+  "preview": "output/封面预览-R11.png",
+  "source_scope": "仅修改封面图、封面配色与版权页生成来源说明；各章与附录源码未改。"
+}

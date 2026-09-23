@@ -456,53 +456,23 @@
 
 \begin{titlepage}
 \thispagestyle{empty}
+\definecolor{CoverInk}{HTML}{173844}
+\definecolor{CoverAccent}{HTML}{547D86}
 \setlength{\parindent}{0pt}
 \vspace*{1.0cm}
-{\sffamily\small\color{Primary}水利工程专业教材\par}
+{\sffamily\small\color{CoverAccent}水利工程专业教材\par}
 \vspace{1.5cm}
-{\sffamily\bfseries\fontsize{36}{46}\selectfont\color{PrimaryDark}智慧水利平台\par}
+{\sffamily\bfseries\fontsize{36}{46}\selectfont\color{CoverInk}智慧水利平台\par}
 \vspace{0.15cm}
-{\sffamily\bfseries\fontsize{36}{46}\selectfont\color{PrimaryDark}架构与开发\par}
+{\sffamily\bfseries\fontsize{36}{46}\selectfont\color{CoverInk}架构与开发\par}
 \vspace{0.7cm}
 {\sffamily\large\color{TextGray}从业务需求到可运行的平台\par}
 \vspace{1.5cm}
 \noindent
-\begin{tikzpicture}[x=1cm,y=1cm,line cap=round,line join=round]
-  \path[use as bounding box] (0,0) rectangle (15.2,6.2);
-  \fill[PrimaryLight!55] (0,0.3) rectangle (15.2,5.9);
-  % 地形与库面：抽象等高线组成的工程场景。
-  \foreach \offset in {0,0.3,0.6,0.9} {
-    \draw[Primary!18,line width=.7pt]
-      (0,4.2+\offset) .. controls (2,5.4+\offset) and (3.5,3.7+\offset) ..
-      (5.2,4.4+\offset) .. controls (6.8,5.1+\offset) and (8.7,4.5+\offset) .. (9.5,5.3+\offset);
-  }
-  \fill[Primary!14] (0.6,2.8) .. controls (1.8,4.3) and (3.8,3.5) .. (5.4,4.2)
-    -- (8.5,3.3) -- (6.7,2.3) -- cycle;
-  \foreach \yy in {3.05,3.3,3.55} {
-    \draw[Primary!40] (1.4,\yy) .. controls (2.3,\yy+.3) and (3.1,\yy-.1) .. (4.4,\yy+.2);
-  }
-  % 混凝土坝的三个面，白色孔口与水流。
-  \filldraw[fill=Primary!27,draw=Primary!55] (5.4,4.2)--(8.5,3.3)--(8.2,1.45)--(4.8,2.35)--cycle;
-  \filldraw[fill=white,draw=Primary!55] (5.4,4.2)--(5.75,4.45)--(8.85,3.55)--(8.5,3.3)--cycle;
-  \filldraw[fill=Primary!45,draw=Primary!55] (8.5,3.3)--(8.85,3.55)--(8.8,1.7)--(8.2,1.45)--cycle;
-  \foreach \xx/\yy in {5.8/3.58,6.6/3.35,7.4/3.12} {
-    \fill[white] (\xx,\yy)--(\xx+.4,\yy-.12)--(\xx+.25,\yy-.93)--(\xx-.17,\yy-.82)--cycle;
-    \draw[Primary!55,line width=1.7pt] (\xx+.02,\yy-.82)
-      .. controls (\xx-.12,\yy-1.25) and (\xx+.35,\yy-1.5) .. (\xx+.8,\yy-1.75);
-  }
-  % 工程测点到数据图形。
-  \draw[Primary!65,dashed,line width=1pt] (6.8,4.05)--(10.1,4.05)--(10.1,2.1)--(11,2.1);
-  \fill[Accent] (6.8,4.05) circle (3pt);
-  \draw[white,line width=1pt] (6.8,4.05) circle (4.5pt);
-  \draw[Primary!60,line width=.8pt] (10.9,1.45)--(10.9,4.55) (10.9,1.45)--(14.3,1.45);
-  \foreach \yy in {2.2,3,3.8} {\draw[Primary!15] (11,\yy)--(14.3,\yy);}
-  \draw[Primary,line width=1.4pt] (11.15,2.1)--(11.7,2.5)--(12.25,2.35)--(12.8,3.6)--(13.4,3.85)--(14,3.45);
-  \foreach \xx/\yy in {11.15/2.1,11.7/2.5,12.25/2.35,12.8/3.6,13.4/3.85,14/3.45}
-    {\fill[white] (\xx,\yy) circle (2.5pt); \draw[Primary] (\xx,\yy) circle (2.5pt);}
-\end{tikzpicture}
+\includegraphics[width=15.2cm,height=6.2cm,keepaspectratio]{images/generated/cover-reservoir-r11.png}
 \par
 \vspace{0.7cm}
-{\sffamily\color{PrimaryDark}需求分析\quad /\quad 前后端开发\quad /\quad 三维场景\quad /\quad 数据展示\par}
+{\sffamily\color{CoverInk}需求分析\quad /\quad 前后端开发\quad /\quad 三维场景\quad /\quad 数据展示\par}
 \vfill
 {\sffamily\color{TextGray}2026年9月\par}
 \end{titlepage}
@@ -511,7 +481,7 @@
 \noindent\begin{minipage}{0.9\textwidth}
 {\sffamily\bfseries\color{PrimaryDark}版权与商标声明}\par\medskip
 \small
-51WIM 及 51WORLD 为北京五一视界数字孪生科技股份有限公司的商标或注册商标，本书仅作技术说明性使用。第8.5节6幅产品界面截图经该公司书面授权刊出，仅限本书纸质版与出版社发行的电子版使用。书中另有原创原理图、AI生成教学渲染与配套程序运行图，图注分别说明来源；生成场景用于教学识读，不作为现场照片或工程测量成果。
+51WIM 及 51WORLD 为北京五一视界数字孪生科技股份有限公司的商标或注册商标，本书仅作技术说明性使用。第8.5节6幅产品界面截图经该公司书面授权刊出，仅限本书纸质版与出版社发行的电子版使用。封面主视觉为AI生成教学渲染。书中另有原创原理图、AI生成教学渲染与配套程序运行图，图注分别说明来源；生成场景用于教学识读，不作为现场照片或工程测量成果。
 \end{minipage}
 \vspace*{1.2cm}
 \cleardoublepage
