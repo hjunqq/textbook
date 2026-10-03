@@ -159,8 +159,8 @@
 
 \subsection*{客观题}
 \begin{description}
-  \item[第1题] B（Spring Boot）。平台后端服务基于Spring Boot 3.2+构建，负责接口、鉴权与业务编排。
-  \item[第2题] C（PostgreSQL/PostGIS）。观测点空间数据与业务数据由PostgreSQL存储，PostGIS提供空间能力，时序侧配TimescaleDB。
+  \item[第1题] B。消息重投是常态，\texttt{event\_id}唯一约束是数据库层的兜底：影响行数为0时记录重复并确认消息（见清单\ref{lst:ch08-sql-idempotent-insert}）。A让脏数据进入存储，C会形成无限重试，D会抹掉原始记录和审计依据。
+  \item[第2题] C。缺测不是数值0，也不能用旧值冒充当前状态；证据不足时结论为“未评估”并保留原因，界面不得给出颜色结论。
   \item[第3题] 错。红色预警仍须走人工审批流程，任何预警等级都不得自动转为闸门等控制命令。
   \item[第4题] 对。Three.js适合工程级精细场景，Cesium适合大范围地理场景，应按空间尺度与任务目标选择。
   \item[第5题] 对。预演结果必须标注模型版本与“模拟”状态，防止与实测数据混淆并保证可追溯。
