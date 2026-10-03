@@ -8,8 +8,8 @@ services:
     build: ./backend
     environment:
       SPRING_PROFILES_ACTIVE: docker
-      DB_URL: jdbc:postgresql://postgres:5432/qingyuan
-      DB_USER: qingyuan_app
+      DB_URL: jdbc:postgresql://postgres:5432/reservoir
+      DB_USER: reservoir_app
       DB_PASSWORD_FILE: /run/secrets/db_password
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       # 生产环境改为 JWT_SECRET_FILE 指向 secret 文件并定期轮换
@@ -28,7 +28,7 @@ services:
     networks: [app-net, data-net]
   postgres:
     image: timescale/timescaledb-ha:pg16   # 同时含 PostGIS 与 TimescaleDB 扩展
-    environment: {POSTGRES_DB: qingyuan, POSTGRES_USER: qingyuan_app, POSTGRES_PASSWORD_FILE: /run/secrets/db_password}
+    environment: {POSTGRES_DB: reservoir, POSTGRES_USER: reservoir_app, POSTGRES_PASSWORD_FILE: /run/secrets/db_password}
     # 只挂这两个初始化脚本，不要整个 ./db 目录：
     # Postgres 会按字母序执行 /docker-entrypoint-initdb.d 下的所有 .sql，
     # 而 db/load-s3-data.sql 是给宿主机 psql 手工跑的（用 \copy 读 ../datasets/*.csv），
@@ -38,7 +38,7 @@ services:
       - ./db/001_init.sql:/docker-entrypoint-initdb.d/001_init.sql:ro
       - ./db/002_seed.sql:/docker-entrypoint-initdb.d/002_seed.sql:ro
     secrets: [db_password]
-    healthcheck: {test: ["CMD-SHELL", "pg_isready -U qingyuan_app -d qingyuan"], interval: 10s, timeout: 5s, retries: 10}
+    healthcheck: {test: ["CMD-SHELL", "pg_isready -U reservoir_app -d reservoir"], interval: 10s, timeout: 5s, retries: 10}
     networks: [data-net]
   redis:
     image: redis:7.2-alpine

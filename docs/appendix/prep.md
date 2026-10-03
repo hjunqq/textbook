@@ -90,7 +90,7 @@ Spring Boot 工程的源代码在`src/main/java`下按包名分目录，测试�
 **清单 B.3  最小的 HTTP 接口：注解告诉框架“这是入口”**
 
 ```java
-package edu.example.qingyuan;
+package edu.example.reservoir;
 
 import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;

@@ -132,7 +132,7 @@
 \item \textbf{课程设计方案：}以第8章贯穿案例为中心，要求学生分组完成需求说明、架构设计、前端页面、后端接口和三维场景集成，可与毕业设计或综合实训衔接。
 \end{itemize}
 
-\paragraph{每节的学习层次}从第1章起，各节开头的“本节层次”标明小节的学习要求。\textbf{核心}：能解释原理、完成小规模实现和基本题，是课堂讲授与闭卷考核的范围。\textbf{指导实践}：能在工程骨架上修改、运行和验证，主要在随堂实验中完成。\textbf{拓展}：分析适用条件与代价，供课程设计与自学，不作为基础课程的独立编码要求。核心理论按所列小节递进，无须先读拓展；认证、部署等实践仍须按章末要求完成。例如，读懂接口校验原理后，要在骨架上运行一次错误输入，核对响应状态与错误体，才能形成相应的课程成果。
+\paragraph{每节的学习层次}全书各小节分为三个层次，各节对应的层次列在配套网站“线上拓展专题”的“各节学习层次”表中，供教师安排课时时查阅。\textbf{核心}：能解释原理、完成小规模实现和基本题，是课堂讲授与闭卷考核的范围。\textbf{指导实践}：能在工程骨架上修改、运行和验证，主要在随堂实验中完成。\textbf{拓展}：分析适用条件与代价，供课程设计与自学，不作为基础课程的独立编码要求。核心理论按所列小节递进，无须先读拓展；认证、部署等实践仍须按章末要求完成。例如，读懂接口校验原理后，要在骨架上运行一次错误输入，核对响应状态与错误体，才能形成相应的课程成果。
 
 \paragraph{课堂主线与选学专题}表\ref{tab:preface-core-optional}列出课堂主线与进阶专题。课堂主线包含核心知识及相应的指导实践，选学专题用于课程设计、毕业设计或自学。教师可依据课程成果要求选取任务，学生应先完成相应主线的实现与验证，再开展进阶练习。
 
@@ -158,7 +158,7 @@
 
 \section*{贯穿案例卡}
 
-全书用两个教学案例分工协作。\textbf{水利工程安全监测平台}是贯穿主线，载体是虚构的案例水库：第1章用它建立业务闭环认知，第3章为它完成架构设计，第4--8章沿v0到v5的工程版本线把它从空仓库逐步做成完整平台（第4章前端只读切片、第5章认证与观测API、第6章三维场景、第7章观测展示联动、第8章完整平台与数字孪生拓展），第9章以它复盘全书的工程方法。\textbf{案例灌区用水计划}只服务于第2章的需求分析教学——配水申报的多方冲突比安全监测更适合练习需求获取与建模；第2章末尾的迁移一节会把这套方法映射回水库主线。两案例共享需求分析的方法，业务对象与流程各有侧重。案例水库的工程参数、测点编码、角色和预警等级统一按8.1节使用，表\ref{tab:preface-case-card}摘列常用参数，便于前置章节查阅：
+全书用两个教学案例分工协作。\textbf{水利工程安全监测平台}是贯穿主线，载体是虚构的案例水库：第1章用它建立业务闭环认知，第3章为它完成架构设计，第4--8章按阶段S1到S6把它从空骨架逐步做成完整平台（第4章S1静态页面与S2监测页面、第5章S3认证与观测API、第6章S4三维场景、第7章S5观测展示联动、第8章S6完整平台与数字孪生拓展；第1章的一次查询演示记为S0），第9章以它复盘全书的工程方法。\textbf{案例灌区用水计划}只服务于第2章的需求分析教学——配水申报的多方冲突比安全监测更适合练习需求获取与建模；第2章末尾的迁移一节会把这套方法映射回水库主线。两案例共享需求分析的方法，业务对象与流程各有侧重。案例水库的工程参数、测点编码、角色和预警等级统一按8.1节使用，表\ref{tab:preface-case-card}摘列常用参数，便于前置章节查阅：
 
 \begin{table}[htbp]
 \centering
@@ -201,7 +201,7 @@ Issues反馈渠道 & 勘误、环境问题和可复现实验报告 & 在配套�
 
 \paragraph{配套工程的使用。}\texttt{companion/water-platform-demo/}提供登录认证、测点与观测查询、消息消费入库、容器启动和前后端测试，并按教学阶段组织练习代码。先通过README中的启动检查，再按\texttt{STAGES.md}选择本章入口。\texttt{MAPPING.md}列出书中清单与文件路径的对应关系；遇到跨文件调用时，可据此找到依赖和调用方。各阶段的页面、接口和测试结果须保存到课程交付记录中，后续集成时逐项核对。
 
-\paragraph{代码仓库结构。}配套代码的根目录为\texttt{companion/}\allowbreak\texttt{water-platform-}\allowbreak\texttt{demo/}（运行版本以随书发行包及\texttt{MAPPING.md}为准）。\texttt{frontend/}的可运行入口是\texttt{package.json}、\texttt{src/}\allowbreak\texttt{main.js}、\texttt{src/router/}\allowbreak\texttt{index.js}、\texttt{src/stores/}\allowbreak\texttt{monitoring.js}、\texttt{src/utils/}\allowbreak\texttt{request.js}和\texttt{src/components/}\allowbreak\texttt{MonitoringDashboard.vue}，并配有\texttt{vite.config.js}、\texttt{Dockerfile}和\texttt{nginx.conf}；\texttt{backend/}包含\texttt{pom.xml}、\texttt{src/main/java/}\allowbreak\texttt{edu/example/}\allowbreak\texttt{qingyuan/}下的实体、Repository、服务、JWT 过滤器和安全配置，以及\texttt{application.yml}和\texttt{Dockerfile}；\texttt{db/}包含\texttt{001\_init.sql}与\texttt{load-s3-data.sql}；根目录的\texttt{docker-compose.yml}负责编排前端、后端、PostgreSQL、Redis和Kafka，\texttt{secrets/}只提交\texttt{*.example}模板。目录中的每个服务都提供配置样例和健康检查说明，学生可以先运行最小链路，再逐个替换为章节中的实现。
+\paragraph{代码仓库结构。}配套代码的根目录为\texttt{companion/}\allowbreak\texttt{water-platform-}\allowbreak\texttt{demo/}（运行版本以随书发行包及\texttt{MAPPING.md}为准）。\texttt{frontend/}的可运行入口是\texttt{package.json}、\texttt{src/}\allowbreak\texttt{main.js}、\texttt{src/router/}\allowbreak\texttt{index.js}、\texttt{src/stores/}\allowbreak\texttt{monitoring.js}、\texttt{src/utils/}\allowbreak\texttt{request.js}和\texttt{src/components/}\allowbreak\texttt{MonitoringDashboard.vue}，并配有\texttt{vite.config.js}、\texttt{Dockerfile}和\texttt{nginx.conf}；\texttt{backend/}包含\texttt{pom.xml}、\texttt{src/main/java/}\allowbreak\texttt{edu/example/}\allowbreak\texttt{reservoir/}下的实体、Repository、服务、JWT 过滤器和安全配置，以及\texttt{application.yml}和\texttt{Dockerfile}；\texttt{db/}包含\texttt{001\_init.sql}与\texttt{load-s3-data.sql}；根目录的\texttt{docker-compose.yml}负责编排前端、后端、PostgreSQL、Redis和Kafka，\texttt{secrets/}只提交\texttt{*.example}模板。目录中的每个服务都提供配置样例和健康检查说明，学生可以先运行最小链路，再逐个替换为章节中的实现。
 
 \paragraph{示例数据集。}\texttt{companion/datasets/}（仓库提交\texttt{4fed08e}）由\texttt{generate.py}生成，固定随机种子为\texttt{20260807}。\texttt{stations.csv/json}含28个测点元数据，字段为\texttt{asset\_id}、\texttt{asset\_type}、\texttt{display\_name}、单位、经纬度、\texttt{elevation\_m}、量程、精度、阈值和投运日期；\texttt{water\_level.csv}含3个库水位测点各1,200条、5分钟间隔的观测；\texttt{rainfall.csv}含5个雨量测点各288条，\texttt{piezometer.csv}含12个渗压测点各288条；8个位移测点当前仅提供\texttt{stations}中的元数据与阈值，其观测序列留作第7章练习用\texttt{generate.py}扩展生成。三类已生成观测共同使用\texttt{asset\_id}、\texttt{occurred\_at}、\texttt{version}、\texttt{event\_id}、\texttt{value}、\texttt{unit}、\texttt{quality}和\texttt{source}字段；\texttt{warnings.json}含蓝、黄、橙、红、无预警（NONE）与未评估样例。质量码只取\texttt{valid}、\texttt{suspect}、\texttt{missing}，文件中的缺测、超量程和跳变记录均保留原因。使用前应先阅读README中的字段说明，确认时间采用ISO 8601、时区采用UTC+8，并在报告中注明数据版本。
 

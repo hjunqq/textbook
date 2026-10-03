@@ -76,7 +76,7 @@ Error [ERR_MODULE_NOT_FOUND]: Cannot find module
 \paragraph{注解}以\texttt{@}开头的注解是附在类、方法或参数上的标记，本身不执行任何逻辑；框架启动时扫描这些标记来决定“这个类要作为 HTTP 入口”“这个方法响应 GET 请求”。清单\ref{lst:prep-p2-controller}展示一个返回资产列表的接口，注释说明各注解的作用。\texttt{record}是 Java 17 的不可变数据类，一行声明就得到构造器、访问方法和\texttt{equals}，第5章用它表示接口的请求与响应。
 
 \begin{lstlisting}[label={lst:prep-p2-controller},language=Java,caption={最小的 HTTP 接口：注解告诉框架“这是入口”}]
-package edu.example.qingyuan;
+package edu.example.reservoir;
 
 import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;

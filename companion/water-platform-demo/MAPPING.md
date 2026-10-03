@@ -1,15 +1,18 @@
 # 仓库文件与教材章节对应表
 
-## 工程版本线（与教材第4—8章开头的版本卡对应）
+## 阶段（与教材第4—8章开头的“本章项目任务”对应）
 
-| 版本 | 完成于 | 能力 | 本仓库对应 |
+全书只用一套阶段编号 S0–S6；各阶段的运行方式与验收见 STAGES.md。
+
+| 阶段 | 完成于 | 能力 | 本仓库对应 |
 |---|---|---|---|
-| v0 | 起点 | 空骨架 | 仓库初始结构；第1章的 S0 演示记录见 S0-demo-record.md（由 teaching-api/record-demo.mjs 实录生成） |
-| v1 | 第4章 | 登录+只读监测页 | frontend/ 全部；S1 阶段页 lesson44.html + lesson44-detail.html 不依赖后端；S2 阶段页 lesson45.html 只靠 teaching-api 运行 |
-| v2 | 第5章 | JWT认证+观测API | S3 起点 backend/src/main/java/edu/example/lesson52/（单类、无库、无认证）；S3 终点 backend/ 全部 |
-| v3 | 第6章 | 三维场景页 | lesson61.html 为起点（坝体长方体 + 28 测点绑定）；GLTF 模型与 GIS 集成为课程实现 |
-| v4 | 第7章 | 曲线与三维联动 | S5 阶段页 lesson74.html（拾取→曲线→高亮双向联动），依赖 S3 与 S4 |
-| v5 | 第8章核心篇 | 质量检查+预警+工单+部署 | S6：classify.js（定级）+ 教学接口的 ack/工单端点 + closeloop-check.mjs（闭环核对）；db/、ReadingConsumer、compose、smoke.sh 骨架 |
+| S0 | 第1章 | 解释一次查询 | S0-demo-record.md（由 teaching-api/record-demo.mjs 实录生成） |
+| S1 | 4.2–4.4 | 静态列表与详情 | lesson44.html + lesson44-detail.html，不依赖后端 |
+| S2 | 4.5–4.7 | 登录+只读监测页 | lesson45.html 只靠 teaching-api 运行；Vue 部分为 frontend/ 的路由、Pinia 与登录骨架 |
+| S3 | 第5章 | JWT认证+观测API | 起点 backend/src/main/java/edu/example/lesson52/（单类、无库、无认证）；终点 backend/ 全部 |
+| S4 | 第6章 | 三维场景页 | lesson61.html（坝体长方体 + 28 测点绑定）；GLTF 模型与 GIS 集成为课程实现 |
+| S5 | 第7章 | 曲线与三维联动 | lesson74.html（拾取→曲线→高亮双向联动），依赖 S3 与 S4 |
+| S6 | 第8章核心篇 | 质量检查+预警+工单+部署 | classify.js（定级）+ 教学接口的 ack/工单端点 + closeloop-check.mjs（闭环核对）；db/、ReadingConsumer、compose、smoke.sh 骨架 |
 
 本仓库包含各阶段可运行的教学切片；完整业务界面、详情路由、GLTF/GIS集成等课程任务由读者在骨架上完成。已提供能力与学生待完成任务逐项见 STAGES.md。
 
