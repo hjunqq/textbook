@@ -102,6 +102,9 @@
   `output/online/online.tex`：它不进入 `main.tex`，由 tex2site 生成 `docs/chapters/online/online.md`。
   迁入时保留原文，在每节开头用“对应正文”注明来源小节；专题内部可用自己的 `\label`/`\ref`，
   指向书中的 `\ref` 取自 `main.aux`。迁移仍须登记 `tools/migration_ledger.json`。
+- 第十一轮起，各节的学习层次写在节标题下一行的源码注释 `% 本节层次：…` 中，**不印入正文**；
+  节标题下改为一段承上启下的导语（上一节讲了什么、本节讲什么）。不再使用“本节层次”“进入本节所需知识”
+  两个段落标题。调整层次后运行 `python tools/learning_layers_table.py` 更新线上专题中的“各节学习层次”表。
 - 历轮审查报告、修改方案、修改记录和需求大纲已移入 `process/`；本文件中按书名号提到的
   过程文件均在该目录下。
 

@@ -40,7 +40,9 @@ def main():
                 section += 1
                 subsection = 0
                 key = f'{chapter}.{section}'
-                match = re.search(r'\\paragraph\{本节层次\}([^\n]+)', block)
+                # 第十一轮起层次写在源码注释“% 本节层次：…”中，不再印在正文里
+                raw = source[header.end():end]
+                match = re.search(r'%\s*本节层次：([^\n]+)', raw)
                 stamp = match[1] if match else ''
                 layers = {}
                 parent_layer = stamp.split('。')[0] if stamp.startswith(('核心。', '指导实践。', '拓展。')) else ''
@@ -58,7 +60,9 @@ def main():
                 if not match:
                     errors.append(f'{key} 缺少层次说明')
                 layer = parent_layer or '混合'
-                prereq = bool(re.search(r'\\paragraph\{(?:进入本节所需知识|学习衔接)\}', block))
+                # 衔接：节标题后、第一个小节前有一段正文导语
+                lead = block.split('\\subsection{')[0]
+                prereq = any(re.match(r'[\u4e00-\u9fff“]', ln.strip()) for ln in lead.split('\n'))
             else:
                 subsection += 1
                 key = f'{chapter}.{section}.{subsection}'

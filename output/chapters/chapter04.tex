@@ -16,16 +16,13 @@
 智慧水利平台的前端把测站、工程、告警和调度数据转化为可理解、可操作的界面。本章采用Vue 3.4+、Vue Router 4、Pinia 2与Vite 5作为教学基线；框架API与配置项随版本演进，遇到与书中示例不一致时，一律以各自官方文档为准\cite{vueDocs,vueRouterDocs,piniaDocs,viteDocs}。示例遵循HTML、CSS和ECMAScript标准，语言与平台特性可在MDN查证\cite{mdnWebDocs}，不依赖特定浏览器的私有能力。本章的页面都围绕水利工程安全监测平台展开：第3章为它选定的模块化单体与MVC分层，在前端对应视图、状态与请求的职责切分；页面中的测点与预警演示数字一律取自8.1节参数表。
 
 \begin{tipbox}
-\paragraph{工程版本线：v0（空仓库） $\rightarrow$ v1（前端只读切片）}起点是配套仓库的空前端骨架。本章结束时你应交付 \textbf{v1}：一个能登录、能按测点与时间窗查询并渲染曲线的只读监测页面——对应仓库 \texttt{frontend/} 的 \texttt{utils/auth.js}、\texttt{utils/request.js}、\texttt{views/LoginView.vue}、\texttt{router/index.js}、\texttt{stores/monitoring.js} 与 \texttt{components/MonitoringDashboard.vue}；验证命令 \texttt{npm ci \&\& npm test \&\& npm run build}。
+\paragraph{本章项目任务：从v0（空仓库）到v1（前端只读切片）}起点是配套仓库的空前端骨架。本章结束时你应交付 \textbf{v1}：一个能登录、能按测点与时间窗查询并渲染曲线的只读监测页面——对应仓库 \texttt{frontend/} 的 \texttt{utils/auth.js}、\texttt{utils/request.js}、\texttt{views/LoginView.vue}、\texttt{router/index.js}、\texttt{stores/monitoring.js} 与 \texttt{components/MonitoringDashboard.vue}；验证命令 \texttt{npm ci \&\& npm test \&\& npm run build}。
 \end{tipbox}
 
 \section{Web基础概念与浏览器架构}
+% 本节层次：核心。
 
-\paragraph{本节层次}核心。
-
-\paragraph{进入本节所需知识}先读1.2.1节的一次查询追踪；按附录B P0准备终端与浏览器开发者工具。
-
-
+第1章追踪过一次查询从浏览器发出、到数据库再返回页面的全过程。从本章开始动手实现其中的前端部分，第一步是弄清浏览器拿到网页之后做了什么。
 
 在地址栏输入监测页面的网址并回车，到页面上出现水位卡片，浏览器大致做了五件事。第一，\textbf{请求}：通过HTTP或HTTPS向服务器要来HTML文件，再按HTML里的引用继续要CSS、JavaScript和图片。第二，\textbf{解析结构}：把HTML文本解析成一棵节点树，叫作DOM（文档对象模型）；页面上的每个标题、按钮、列表项都是这棵树上的一个节点。第三，\textbf{解析样式}：把CSS解析成样式规则树（CSSOM），并算出每个节点最终用什么字号、颜色和边距。第四，\textbf{布局与绘制}：根据结构和样式算出每个元素在屏幕上的位置和大小，再画成像素。第五，\textbf{执行脚本}：JavaScript读取或修改DOM——例如收到新的水位后改写卡片里的数字——浏览器随后重新布局和绘制受影响的部分。
 
@@ -61,12 +58,9 @@
 浏览器兼容性应通过标准API、特性检测和自动化测试控制。例如，应检测\texttt{WebSocket}是否存在，再决定使用实时连接还是降级到轮询，而不能只依据浏览器名称。资源缓存则应由HTTP缓存头控制；监测实时值不宜与长期静态资源采用同一缓存策略。
 
 \section{HTML基础与语义化}
+% 本节层次：核心：4.2.1。
 
-\paragraph{本节层次}核心：4.2.1。
-
-\paragraph{进入本节所需知识}先读4.1节，能区分浏览器取得文档与呈现页面两步。
-
-
+浏览器显示页面的第一步是解析HTML。本节介绍HTML怎样描述页面的结构和含义，并为监测页面搭一个语义清楚的骨架，后面的样式和脚本都建立在这个骨架之上。
 
 HTML描述内容的结构和语义。\texttt{header}、\texttt{nav}、\texttt{main}、\texttt{section}、\texttt{article}与\texttt{footer}等元素能够表达区域含义，有助于无障碍工具、搜索引擎和开发者理解页面。标题级别应连续，表单控件应有\texttt{label}，图片应提供\texttt{alt}文本。
 
@@ -267,12 +261,9 @@ dialog.addEventListener('cancel', closeDialog);
 在验收阶段，可以把图\ref{fig:ch04-document-flow}转化为一张检查清单：首先检查源文件是否有唯一的\texttt{main}、连续标题和可计算的表单名称；然后在 Elements 面板检查 DOM 是否与设计的地标一致；最后用 Performance 面板观察一次批量数据更新是否引起多次布局。对于动态预警，再用屏幕阅读器确认普通状态更新不会抢占焦点，需要立即由值班员处理的事件使用\texttt{alert}区域。验收记录应同时包含文档结构、渲染性能与键盘交互的检查结果。
 
 \section{CSS样式与响应式布局}
+% 本节层次：核心：4.3.1、4.3.2；指导实践：4.3.4、4.3.5、4.3.6、4.3.8；拓展：4.3.3、4.3.7。
 
-\paragraph{本节层次}核心：4.3.1、4.3.2；指导实践：4.3.4、4.3.5、4.3.6、4.3.8；拓展：4.3.3、4.3.7。
-
-\paragraph{进入本节所需知识}先读4.2节，能找到元素、属性与文档层次；以同一页面观察布局变化。
-
-
+有了结构，接下来用CSS决定页面的样子。本节从盒模型和尺寸单位讲起，依次介绍定位、Flexbox和Grid两种布局方式，再讨论大屏、桌面和手机上的响应式适配，以及暗色主题和可访问性检查。
 
 CSS负责视觉呈现。规则由选择器和声明块组成，层叠结果主要受来源、优先级和出现顺序影响。工程中宜使用类选择器组织组件样式，避免依赖过深的DOM层级。
 
@@ -767,12 +758,9 @@ Flex 的视觉顺序还涉及语义和键盘路径。\texttt{order}只改变绘�
 表\ref{tab:ch04-flex-diagnostics}可作为联调记录模板：每次修改只改变一个影响因素，并在四种视口、两种主题和键盘操作下复测。这样，CSS 调试就从“调到看起来差不多”变成可以由同伴复核的工程过程。
 
 \section{JavaScript基础编程}
+% 本节层次：核心：4.4.1、4.4.2、4.4.3、4.4.4、4.4.5、4.4.7、4.4.8；指导实践：4.4.6。
 
-\paragraph{本节层次}核心：4.4.1、4.4.2、4.4.3、4.4.4、4.4.5、4.4.7、4.4.8；指导实践：4.4.6。
-
-\paragraph{进入本节所需知识}使用已学程序设计基础和4.2节的文档结构；先实现数据处理，再更新 DOM。
-
-
+静态的页面还不能响应值班员的操作，也不能显示实时变化的数据，这需要JavaScript。同学们已经学过Python、Java等语言，本节着重介绍JavaScript与它们不同的地方：类型与相等判断、函数与闭包、模块，以及怎样用脚本读写页面、响应点击和处理异常。
 
 现代JavaScript使用\texttt{const}声明不重新赋值的绑定，使用\texttt{let}声明需要变化的绑定。基本类型包括数字、字符串、布尔值、\texttt{null}、\texttt{undefined}、\texttt{bigint}与\texttt{symbol}；对象、数组和函数属于引用类型。
 
@@ -1054,10 +1042,9 @@ button.addEventListener('click', () => {
 高频监测数据不应逐条触发复杂布局。可以先把数据聚合到内存，再按固定帧率更新图表；列表较长时采用分页或虚拟滚动。
 
 \section{数据请求与页面状态}\label{sec:ch04-request-state}
+% 本节层次：核心：4.5.1、4.5.2、4.5.3、4.5.4、4.5.9；指导实践：4.5.5、4.5.6、4.5.7；拓展：4.5.8。
 
-\paragraph{本节层次}核心：4.5.1、4.5.2、4.5.3、4.5.4、4.5.9；指导实践：4.5.5、4.5.6、4.5.7；拓展：4.5.8。核心阅读后完成自测，实践中验证代理和认证。
-
-\paragraph{进入本节所需知识}4.4 节的函数、数组方法与 DOM 写入；能打开浏览器开发者工具的“网络”面板，看到一次请求的状态码与耗时（终端、端口与开发者工具的用法见附录B的 P0 单元）；表\ref{tab:api-contract}中“对象列表”与“最新观测”两个端点的字段。本节不需要自己编写后端：教学接口（配套工程 \texttt{teaching-api}）按同一契约用固定数据集应答，第5章完成认证与数据存储的 S3 终点后，用通过契约核对的后端替换教学接口，页面业务字段保持一致。
+到目前为止，页面上的数据都是写死在代码里的。本节让页面向服务器请求真实数据，并处理请求过程中可能出现的各种情况：正在加载、没有数据、请求失败、旧数据覆盖新数据，以及登录与身份验证。
 
 \paragraph{业务问题}值班员打开测点详情页，要看到该测点的最新观测值、时间和质量码。页面必须先显示“正在读取”，再显示数据或“暂无观测”，请求失败时说明原因；值班员连续点击两个测点时，最后显示的必须是最后点击的那个。本节最后交付的是一个能在教学接口上运行、四种状态都能观察到的详情页脚本，它也是 4.6 节 Vue 组件和 4.7 节 Pinia 仓库的前身。
 
@@ -1376,7 +1363,6 @@ export function bindList(listEl, outputEl, assets) {
 
 \subsection{request.js：JWT、401 与超时的统一入口}
 
-
 浏览器使用第5章后端签发的 JWT 完成认证：登录接口成功后，前端保存短期访问令牌，后续请求在\texttt{Authorization: Bearer <token>}中携带它；收到 401 时清除令牌并跳转登录页，不能继续用旧令牌重试。教学示例把令牌放入\texttt{sessionStorage}，浏览器标签页关闭后令牌消失，代价是同源脚本若发生 XSS 可能读取它；生产系统应结合严格的 CSP、短过期时间、刷新策略和更安全的 HttpOnly Cookie 方案评估，绝不能把签名密钥放入以\texttt{VITE\_}开头的前端变量。
 
 统一请求封装还应处理 JSON 解析、204 空响应、超时和错误代码，避免每个组件各自复制一套\texttt{fetch}。清单\ref{lst:ch04-a45-request}给出可直接放入 Vite 5 项目的\texttt{src/api/request.js}；请求函数只负责传输和认证，页面层根据错误代码决定显示“重新登录”“稍后重试”还是“检查测站输入”。
@@ -1433,7 +1419,6 @@ export async function request(path, options = {}) {
 
 \subsection{Vite 代理与环境变量}
 
-
 开发环境中的浏览器页面通常运行在 Vite 的开发端口，后端运行在另一个端口；直接请求会触发跨域限制。Vite 的\texttt{server.proxy}可以把以\texttt{/api}开头的请求转发到后端，浏览器仍然看到同源路径，生产环境再由 Nginx 或网关完成同样的路径转发。代理只服务于开发过程，不能被误解为后端认证或网络隔离。
 
 只有以\texttt{VITE\_}开头的变量会被暴露到客户端代码，变量值会在构建时静态替换，因此可以放 API 基地址、功能开关和代理地址，不能放数据库密码、JWT 签名密钥或内部网络凭据。开发、测试和生产应分别维护环境文件，并在 CI 中检查必需变量是否存在。清单\ref{lst:ch04-a45-vite}给出按模式读取环境变量的 Vite 5 配置，\texttt{loadEnv}只加载指定前缀，代理目标缺失时使用明确的本地默认值。
@@ -1465,7 +1450,6 @@ export default defineConfig(({ mode }) => {
 异步页面的验收可以沿着一条证据链进行：先观察事件循环是否在绘制前合并状态，再用 Promise 状态确认一次请求不会被重复落定；切换测站时查看旧请求是否收到取消信号，模拟 401 和超时确认页面分别跳转登录或给出重试提示；最后在 Vite 开发环境检查\texttt{/api}代理和不同模式的\texttt{import.meta.env}值。这些检查覆盖了令牌从登录签发到请求携带、失效清理的使用过程，并核对各阶段的页面反馈。
 
 \subsection{登录与受保护接口的前后端联调}
-
 
 受保护的测站列表需要前端携带令牌，并由后端依次完成验签和权限检查。第5章的登录控制器返回访问令牌，令牌至少包含主体、发行者、有效期、令牌类型和权限代码；前端登录页保存访问令牌，\texttt{request.js}在每次受保护请求中注入 Bearer 头，后端的 \texttt{SecurityFilterChain} 和 JWT 过滤器验签后把主体放入安全上下文，授权规则再决定是否允许执行控制器或业务方法。图\ref{fig:ch04-jwt-integration}把这条链路与失败分支并列画出，调试时可逐段定位是凭据错误、令牌过期、权限不足还是网络转发问题。
 
@@ -1581,7 +1565,6 @@ export async function loadAssets() {
 
 \subsection{拓展：事件循环与任务调度}
 
-
 浏览器的 JavaScript 执行线程一次只处理一个同步任务。当前任务完成后，事件循环先清空微任务队列，再从任务队列取出下一个宏任务；网络回调、定时器和用户输入通常进入任务队列，\texttt{Promise.then}、\texttt{queueMicrotask}和\texttt{MutationObserver}回调进入微任务队列。因此，在一个同步函数里安排“同步输出—定时器—微任务”三种工作，实际执行顺序并不是书写顺序。
 
 微任务适合完成同一任务内的短小收尾，例如把多个状态变化合并后再通知组件；长时间执行的微任务会阻塞绘制和用户输入，连续递归的\texttt{queueMicrotask}甚至会形成饥饿。处理大量测点时，应把计算分批放入任务队列或交给 Web Worker，并在动画帧中批量写入 DOM。清单\ref{lst:ch04-a45-event-loop}用日志顺序展示三类工作的调度次序。
@@ -1608,12 +1591,9 @@ console.log('同步：结束读取');
 4.6 节用 Vue 组件承接同一份状态模型；4.7 节把\texttt{showAsset}的序号校验搬进 Pinia 仓库；4.8 节给出 S1/S2 两个阶段的验收检查单。完成第5章的存储、统一异常处理和认证后，先停掉教学接口并启动完整 Spring Boot 后端，再执行契约检查，核对页面的四种状态。
 
 \section{Vue 3组件化开发}
+% 本节层次：核心：4.6.1、4.6.2；指导实践：4.6.3、4.6.4。
 
-\paragraph{本节层次}核心：4.6.1、4.6.2；指导实践：4.6.3、4.6.4。
-
-\paragraph{进入本节所需知识}先读4.4节与4.5节核心内容，能区分数据状态、事件处理和页面更新。
-
-
+上一节用原生JavaScript完成了测点详情页，但随着页面变复杂，手工同步数据和界面越来越容易出错。本节引入Vue 3框架：用响应式状态描述数据，用模板描述界面，用组件把页面拆成可以复用的部分。
 
 传统命令式写法需要在数据变化后手动寻找并更新多个DOM节点。水利仪表盘一旦包含曲线、表格和告警标识，这些更新容易分散。Vue使用响应式状态和声明式模板：开发者描述“状态如何映射为界面”，框架负责同步DOM。组件化仍需遵循可理解反馈和一致交互等基本设计原则\cite{norman2013}。
 
@@ -1937,12 +1917,9 @@ props、emit、slot 和 provide/inject 形成四条不同的依赖路径。props
 组件拆分完成后，可以把列表页看成一条可替换的管线：\texttt{request.js}负责认证、超时和错误分类，页面负责状态编排，\texttt{StationRow}负责单行呈现，Pinia负责跨路由共享的当前测站。每个部分都能用假数据独立测试，再用一次端到端测试验证真实接口连接。地图侧栏、移动端值班视图与大屏轮播可复用请求和状态模块，并按各自空间与交互要求调整呈现组件。
 
 \section{Vue Router与Pinia应用组织}
+% 本节层次：指导实践：4.7.1、4.7.2、4.7.3、4.7.4。
 
-\paragraph{本节层次}指导实践：4.7.1、4.7.2、4.7.3、4.7.4。
-
-\paragraph{进入本节所需知识}先读4.6节核心内容；指导实践复用4.5节的请求与认证骨架。
-
-
+一个监测平台通常有登录页、测点列表、测点详情等多个页面，它们之间需要切换，也需要共享登录状态和查询条件。本节用Vue Router组织页面导航，用Pinia管理跨页面共享的状态。
 
 Vue Router把 URL 映射到页面组件，\texttt{App.vue}中的\texttt{<router-view />}用于显示当前路由匹配的页面组件。路由表应包含稳定的路径、名称、组件和元数据；页面级组件使用动态导入可以把首屏代码与详情页代码分开下载。导航过程由三部分协作完成：路由负责页面切换和参数解析，页面负责展示与交互，后端负责最终的身份和权限判定。
 
@@ -2260,11 +2237,9 @@ createApp(App).use(createPinia()).use(router).mount('#app');
 \end{lstlisting}
 
 \section{调试、构建与阶段验收}\label{sec:ch04-stage-acceptance}
+% 本节层次：核心：4.8.1；指导实践：4.8.2；拓展：4.8.3。
 
-\paragraph{本节层次}核心：4.8.1；指导实践：4.8.2；拓展：4.8.3。
-
-\paragraph{进入本节所需知识}先完成4.2–4.5节核心页；Vue与路由成果按4.6–4.7节指导实践另行验收。
-
+前端功能完成后，还要能够调试问题、构建发布并通过验收。本节给出本章两个阶段成果的检查单，介绍常用的调试方法，以及Vite的工程化配置与性能优化。
 
 \subsection{阶段验收：S1 与 S2 的检查单}
 
@@ -2284,7 +2259,7 @@ S2 & 核心页：列表、最新观测、四种状态与快速切换；指导实
 \end{tabular}
 \end{table}
 
-\paragraph{S1 阶段包与清单对应关系}配套仓库的\texttt{frontend/lesson44.html}（列表）与\texttt{lesson44-detail.html}（详情）就是 S1 的成品，执行\texttt{npm run dev}后直接打开，不需要启动后端，也没有引入框架。该阶段包组合了前四节的页面、样式与交互代码：页面骨架取自清单\ref{lst:ch04-html-shell}的语义结构，卡片样式取自清单\ref{lst:ch04-css-responsive}，列表渲染沿用清单\ref{lst:ch04-a44-dom}的\texttt{DocumentFragment}与\texttt{textContent}写法，点击处理沿用清单\ref{lst:ch04-a44-events}的事件委托，编码输入的校验沿用清单\ref{lst:ch04-html-vue}与清单\ref{lst:ch04-a44-dom-script}的“先判断再更新”结构。固定数据写在\texttt{src/lesson44/assets.js}里，28 个测点及其最新观测取自配套数据集，与教学接口、真实后端同源；字段名就是表\ref{tab:api-contract}的\texttt{assetId}、\texttt{displayName}、\texttt{value}、\texttt{unit}、\texttt{quality}和\texttt{occurredAt}。4.5 节把数据来源换成\texttt{fetch}后，字段名称与含义保持一致，原有渲染和校验代码可继续使用。
+\paragraph{S1 的配套代码与清单对应关系}配套仓库的\texttt{frontend/lesson44.html}（列表）与\texttt{lesson44-detail.html}（详情）就是 S1 的成品，执行\texttt{npm run dev}后直接打开，不需要启动后端，也没有引入框架。该阶段包组合了前四节的页面、样式与交互代码：页面骨架取自清单\ref{lst:ch04-html-shell}的语义结构，卡片样式取自清单\ref{lst:ch04-css-responsive}，列表渲染沿用清单\ref{lst:ch04-a44-dom}的\texttt{DocumentFragment}与\texttt{textContent}写法，点击处理沿用清单\ref{lst:ch04-a44-events}的事件委托，编码输入的校验沿用清单\ref{lst:ch04-html-vue}与清单\ref{lst:ch04-a44-dom-script}的“先判断再更新”结构。固定数据写在\texttt{src/lesson44/assets.js}里，28 个测点及其最新观测取自配套数据集，与教学接口、真实后端同源；字段名就是表\ref{tab:api-contract}的\texttt{assetId}、\texttt{displayName}、\texttt{value}、\texttt{unit}、\texttt{quality}和\texttt{occurredAt}。4.5 节把数据来源换成\texttt{fetch}后，字段名称与含义保持一致，原有渲染和校验代码可继续使用。
 
 \paragraph{S1 的空值、空结果与未知编码检查}第一，8 个位移测点在数据集中没有观测，\texttt{value}为\texttt{null}；按值升序排序时它们必须留在末尾，把\texttt{null}当成 0 会让它们挤到最前面，看起来像读数最低的一批测点。第二，筛选结果为空时页面要写出“暂无测点”，留白无法让人区分“没有匹配”和“代码坏了”。第三，把详情页地址里的编码改成\texttt{DAM-A-XX-99}：它格式合法但台账里没有，页面必须说明未找到并回显这个编码，以便区分未知对象与页面加载失败；该测试对应表\ref{tab:ch04-stage-acceptance}的 S1 故障项。三条都在\texttt{tests/lesson44.test.js}里有对应用例，可以先运行测试再对照页面。
 
