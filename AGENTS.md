@@ -98,6 +98,13 @@
 
 ## 四、必须保留的既有约束
 
+- 第十一轮（2026-10-03，决策 D-2026-10-03-8）起，拓展层内容的迁移去向为**线上拓展专题**
+  `output/online/online.tex`：它不进入 `main.tex`，由 tex2site 生成 `docs/chapters/online/online.md`。
+  迁入时保留原文，在每节开头用“对应正文”注明来源小节；专题内部可用自己的 `\label`/`\ref`，
+  指向书中的 `\ref` 取自 `main.aux`。迁移仍须登记 `tools/migration_ledger.json`。
+- 历轮审查报告、修改方案、修改记录和需求大纲已移入 `process/`；本文件中按书名号提到的
+  过程文件均在该目录下。
+
 - `pandoc/`、`build.bat` 是合法 GBK 编码，**不要动**。
 - 原理、流程、精确几何和数据关系图继续用 TikZ。依据作者2026-09-12对“插图不够真实、插图太少”的反馈，
   允许在正文中使用原创写实教学渲染和配套程序实际运行截图（`output/images/generated/`、`output/images/runtime/`）；
