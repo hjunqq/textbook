@@ -16,6 +16,8 @@ SRC = REPO / "output/chapters"
 APPENDIX = REPO / "output/appendix/answers.tex"
 APPENDIX_B = REPO / "output/appendix/prep.tex"
 APPENDIX_C = REPO / "output/appendix/extended.tex"
+# 线上拓展专题：不进入印刷版 main.tex，只生成网站页面（第十一轮迁移去向）
+ONLINE = REPO / "output/online/online.tex"
 OUT = REPO / "docs"
 TIKZ = ROOT / "tikz"
 AUX = REPO / "output/main.aux"
@@ -23,7 +25,7 @@ WEBFIGS = HERE / "webfigs"
 
 CHAPTERS = [("preface", 0), ("chapter01", 1), ("chapter02", 2), ("chapter03", 3),
             ("chapter04", 4), ("chapter05", 5), ("chapter06", 6), ("chapter07", 7),
-            ("chapter08", 8), ("chapter09", 9), ("answers", "A"), ("prep", "B"), ("extended", "C")]
+            ("chapter08", 8), ("chapter09", 9), ("answers", "A"), ("prep", "B"), ("extended", "C"), ("online", "D")]
 
 LANG_MAP = {"javascript": "javascript", "js": "javascript", "vue": "vue", "css": "css",
             "html": "html", "json": "json", "yaml": "yaml", "yml": "yaml", "sql": "sql",
@@ -320,6 +322,8 @@ class Conv:
 
     def run(self, texpath):
         t = texpath.read_text(encoding="utf-8")
+        if self.name == "online":
+            number_online_labels(t, self.chap)
         t = expand_case_params(t)        # 案例参数宏先展开为数值
         t = self.extract_lst(t)          # 先取代码,避免注释剥离伤及代码
         t = strip_comments(t)
@@ -407,6 +411,38 @@ class Conv:
         return "\n".join(out)
 
 # ---------- 行内 LaTeX 简化(用于 caption 等) ----------
+
+def number_online_labels(t, chap):
+    """线上专题不参与全书编译，main.aux 中没有它的标签。
+    按 Conv.num 相同的规则（各类浮动体分别按出现顺序计数）预先编号，
+    使专题内部的 \\ref 能解析；指向书中标签的 \\ref 仍取自 main.aux。"""
+    cnt = {"fig": 0, "tab": 0, "lst": 0, "sec": 0, "sub": 0}
+    pat = re.compile(r"\\begin\{(figure|table|lstlisting)\}(\[[^\]]*\])?|\\(section|subsection)\{")
+    for mo in pat.finditer(t):
+        if mo.group(1) == "lstlisting":
+            cnt["lst"] += 1
+            lab = re.search(r"label=\{?([A-Za-z0-9:_-]+)", mo.group(2) or "")
+            if lab:
+                AUXMAP[lab.group(1)] = "%s.%d" % (chap, cnt["lst"])
+            continue
+        if mo.group(1):
+            kind = "fig" if mo.group(1) == "figure" else "tab"
+            cnt[kind] += 1
+            end = t.find("\\end{%s}" % mo.group(1), mo.end())
+            lab = re.search(r"\\label\{([^}]+)\}", t[mo.end():end])
+            if lab:
+                AUXMAP[lab.group(1)] = "%s.%d" % (chap, cnt[kind])
+            continue
+        if mo.group(3) == "section":
+            cnt["sec"] += 1; cnt["sub"] = 0
+            num = "%s.%d" % (chap, cnt["sec"])
+        else:
+            cnt["sub"] += 1
+            num = "%s.%d.%d" % (chap, cnt["sec"], cnt["sub"])
+        _, endpos = balanced(t, mo.end() - 1)
+        lab = re.match(r"\s*\\label\{([^}]+)\}", t[endpos:])
+        if lab:
+            AUXMAP[lab.group(1)] = num
 
 def latex_inline_to_md(s):
     s = re.sub(r"\\texttt\{([^}]*)\}", r"`\1`", s)
@@ -544,7 +580,9 @@ def main():
     for name, chap in CHAPTERS:
         if only and name not in only:
             continue
-        src = APPENDIX if name == "answers" else APPENDIX_B if name == "prep" else APPENDIX_C if name == "extended" else SRC / (name + ".tex")
+        src = APPENDIX if name == "answers" else APPENDIX_B if name == "prep" else APPENDIX_C if name == "extended" else ONLINE if name == "online" else SRC / (name + ".tex")
+        if not src.exists():
+            continue
         global REFPATH
         REFPATH = {"preface": "references.md", "answers": "../references.md", "prep": "../references.md", "extended": "../references.md"}.get(name, "../../references.md")
         c = Conv(name, chap)
@@ -558,6 +596,9 @@ def main():
             dest = OUT / "appendix" / "prep.md"
         elif name == "extended":
             dest = OUT / "appendix" / "extended.md"
+        elif name == "online":
+            # 与各章同层，TikZ 图分发到 chapters/online/images 时相对路径一致
+            dest = OUT / "chapters" / "online" / "online.md"
         else:
             dest = OUT / "chapters" / name / (name + ".md")
         dest.parent.mkdir(parents=True, exist_ok=True)
