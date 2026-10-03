@@ -885,6 +885,25 @@ function cancelLongPress() {
 
 无数据、加载中、权限不足、接口失败和数据质量可疑是五种不同状态。界面应分别给出原因与可执行动作，例如重试、切换时间范围、申请权限或查看质量详情。空白图表不能让用户猜测是“确实没有数据”还是“接口已经失败”。
 
+以渗压计 PZ-07 的24小时曲线为例。若这一天测点正常上报，曲线连续；若中间断了三小时，曲线在缺测处断开（清单\ref{lst:ch07-missing-disconnect}已经实现）；若查询的时间段落在测点安装之前，接口返回204，图表区应写“该时段没有观测记录”；若接口返回503，图表区应写“数据服务暂不可用”并给出重试按钮。后两种情况在屏幕上都“没有线”，含义却完全不同：前者是事实，后者是故障。表\ref{tab:ch07-chart-states}把五种状态与图表区的表现对应起来，第4章4.5节的页面四种状态在这里多了一种“数据可疑”。
+
+\begin{table}[htbp]
+\centering
+\caption{监测曲线的五种状态与图表区表现}
+\label{tab:ch07-chart-states}
+\begin{tabular}{p{2.0cm}p{3.6cm}p{3.6cm}p{3.4cm}}
+\toprule
+状态 & 判断依据 & 图表区显示 & 用户可执行动作 \\
+\midrule
+加载中 & 请求已发出、尚未返回 & 骨架或加载提示，保留坐标轴 & 等待；超时后转为失败 \\
+无数据 & 接口返回204或空数组 & “该时段没有观测记录” & 调整时间范围 \\
+权限不足 & 接口返回403 & “无权查看该测点” & 申请权限或联系审批人 \\
+接口失败 & 网络错误、5xx或超时 & “数据服务暂不可用”，不保留旧曲线冒充新结果 & 重试，记下追踪号报修 \\
+数据可疑 & 返回数据含suspect质量码 & 曲线照常绘制，可疑点用空心标记 & 查看质量详情 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 \subsection{专题地图的表达方式}
 
 专题地图把数值、类别和空间关系叠加到同一地理底图上。等值线适合表达连续场的等值边界，例如水位面、降雨量或淹没深度；色斑图把栅格或分区值映射为连续色带，适合观察空间梯度，但必须标注分级方法、单位和缺测区域；流向箭头用方向和长度表达水流、风场或输水路径，箭头密度要受屏幕尺度控制；站点符号地图用位置、形状和边框表达测点、闸门、雨量站或网关状态，适合点击查询和联动。四种图层可以组合，但每一层都要有独立图例和可关闭开关，避免底图颜色与专题色带相互污染。
@@ -1244,6 +1263,58 @@ function radiusForObject(camera, point, px, canvasHeight) {
 
 批量更新时先按\texttt{assetId}建立对象索引，再在一帧内合并修改。高频观测值不必全部驱动材质变化；只有跨越状态边界或用户正在查看该对象时才更新三维外观，从而避免无意义的GPU和DOM开销。
 
+清单\ref{lst:ch07-status-batch}把这两点写成代码。\texttt{buildIndex}在场景加载完成后执行一次，为每个带\texttt{assetId}的测点克隆一份独立材质——若多个测点共用同一材质，改一个测点的颜色会把所有测点一起改掉。\texttt{queueStatus}可以被消息推送高频调用，它只记下每个测点的最新状态，真正改颜色的工作放到下一帧统一完成，而且只在等级变化时才改。颜色取值与清单\ref{lst:ch07-warning-palette}的\texttt{warningPalette}一致。
+
+\begin{lstlisting}[label={lst:ch07-status-batch},language=JavaScript,breaklines=true,caption={测点状态的批量更新：建立索引、合并到下一帧、只在等级变化时改色}]
+import * as THREE from 'three';
+
+const warningColor = {   // 取值与“预警等级与质量状态的双维度色彩配置”清单一致
+  NONE: '#607D8B', BLUE: '#1976D2', YELLOW: '#F9A825',
+  ORANGE: '#EF6C00', RED: '#C62828'
+};
+
+// 场景加载完成后调用一次：assetId → { mesh, level }
+export function buildIndex(scene) {
+  const index = new Map();
+  scene.traverse(obj => {
+    if (obj.isMesh && obj.userData.assetId) {
+      obj.material = obj.material.clone();   // 每个测点独立材质
+      index.set(obj.userData.assetId, { mesh: obj, level: 'NONE' });
+    }
+  });
+  return index;
+}
+
+const pending = new Map();
+let scheduled = false;
+
+// 推送可能一秒到达几十条：只登记最新值，下一帧统一应用
+export function queueStatus(index, update) {
+  pending.set(update.assetId, update);
+  if (scheduled) return;
+  scheduled = true;
+  requestAnimationFrame(() => {
+    scheduled = false;
+    for (const { assetId, level, quality } of pending.values()) {
+      const entry = index.get(assetId);
+      if (!entry) {
+        console.warn('场景中没有该测点', assetId);
+        continue;
+      }
+      if (entry.level !== level) {
+        const hex = warningColor[level] ?? warningColor.NONE;
+        entry.mesh.material.color.set(new THREE.Color(hex));
+        entry.level = level;
+      }
+      entry.mesh.userData.suspect = quality === 'suspect';  // 描边层据此绘制
+    }
+    pending.clear();
+  });
+}
+\end{lstlisting}
+
+验证时可以在一秒内对 PZ-07 连续调用二十次\texttt{queueStatus}，其中等级只在第十次由 NONE 变为 YELLOW：材质颜色应只改变一次，且最终为黄色。再故意推送一条场景中不存在的\texttt{assetId}，控制台应出现“场景中没有该测点”的警告，而其他测点照常更新。
+
 \section{监测点互动与拾取技术}\label{sec:monitoring-interaction}
 
 \paragraph{本节层次}核心：7.4.1、7.4.3；指导实践：7.4.4；拓展：7.4.2。核心阅读按所列小节推进，实践成果按章末要求验收。
@@ -1368,6 +1439,23 @@ raycaster.params.Points.threshold = pickingRadiusWorld;
 第一次点击显示测点名称、当前值、单位、质量码、状态和更新时间；展开详情后显示短期曲线、阈值版本和相邻测点；进一步进入专题页才加载多年历史、模型结果和处置记录。渐进披露减少遮挡，也让移动端保留足够大的触控区域。
 
 拾取到多个重叠对象时，优先按交点距离排序，但不能直接替用户决定业务对象。界面可列出候选项，或先选择聚合簇再下钻。无权限的敏感属性不进入浏览器载荷，仅显示允许公开的概要。
+
+表\ref{tab:ch07-panel-layers}以 PZ-07 为例列出三层信息各放什么、什么时候加载。第一层的数据随状态推送已经在前端，点击即显示；第二层在展开时才请求24小时曲线；第三层要跳转到专题页并按需查询。这样安排的好处是点击响应快、首屏载荷小，失败也被隔离在各自层级——历史数据服务不可用时，值班员仍能看到当前值和质量码，面板只在第二层显示“曲线暂不可用”。
+
+\begin{table}[htbp]
+\centering
+\caption{测点信息面板的三层渐进披露（以 PZ-07 为例）}
+\label{tab:ch07-panel-layers}
+\begin{tabular}{p{1.8cm}p{4.6cm}p{2.8cm}p{3.4cm}}
+\toprule
+层级 & 显示内容 & 加载时机 & 加载失败时 \\
+\midrule
+第一层 & 名称、当前值与单位、质量码、预警等级、更新时间 & 随状态推送，点击即显示 & 显示数据龄期，标注“陈旧” \\
+第二层 & 24小时曲线、阈值版本、相邻测点 & 展开详情时请求 & 曲线区提示不可用，第一层保留 \\
+第三层 & 多年历史、模型结果、处置记录 & 进入专题页后按需查询 & 专题页单独报错，不影响场景 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \subsection{案例联调与验收}
 
