@@ -1,0 +1,22 @@
+  OK   值班员登录成功
+  OK   PZ-07 有最新观测
+  OK   观测带质量码且取值合法
+  OK   预警列表可读
+  OK   等级取 NONE/BLUE/YELLOW/ORANGE/RED
+  OK   存在 evaluable=false 的“未评估”事件，且其 level 为 NONE
+  OK   未评估事件不允许确认（409）
+  OK   该 409 是契约错误体
+  OK   存在待处理的 open 预警
+  OK   未确认就派单被拒（409）
+  OK   该 409 是契约错误体
+  OK   值班员确认成功，状态转为 acknowledged
+  OK   重复确认被拒（409）
+  OK   派单缺字段返回 400 且指出字段
+  OK   派单成功返回 201 与工单号
+  OK   工单初始状态为 in_progress
+  OK   完成工单缺 result 返回 400
+  OK   工单完成返回 200 且状态为 completed
+  OK   处置回写后预警归档为 closed
+  OK   已完成的工单不能重复完成（409）
+
+第8章闭环 @ http://localhost:18080：通过 20，失败 0

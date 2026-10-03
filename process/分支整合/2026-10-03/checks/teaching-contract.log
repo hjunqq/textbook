@@ -1,0 +1,29 @@
+  OK   POST /api/auth/login 返回 200 与 accessToken
+  OK   登录响应含 expiresInSeconds 与 authorities
+  OK   GET /api/assets 返回 200 与数组
+  OK   对象字段为 assetId/displayName/assetType/unit（驼峰，不是下划线）
+  OK   GET …/DAM-A-PZ-07/readings/latest 返回 200
+  OK   观测字段为 assetId/occurredAt/value/unit/quality
+  OK   质量码取 valid/suspect/missing 之一
+  OK   GET …/DAM-A-D-01/readings/latest 返回 204（无观测，不是 404 也不是 200）
+  OK   204 响应体为空
+  OK   GET …/DAM-A-XX-99/readings/latest 返回 404
+  OK   404 错误体为 {code:"ASSET_NOT_FOUND", message}
+  OK   from 晚于 to 返回 400
+  OK   400 错误体为 {code:"INVALID_RANGE", field:"from"}
+  OK   拒绝无时区或非法日期 2026-07-01
+  OK   拒绝无时区或非法日期 2026-07-01T00:00:00
+  OK   拒绝无时区或非法日期 2026-02-30T00:00:00Z
+  OK   不同时区表示同一时刻时拒绝零长度时间窗
+  OK   左窗排除恰好位于to的观测
+  OK   右窗包含恰好位于from的观测
+  OK   UTC与带偏移的查询得到相同观测
+  OK   时间参数无法解析时返回 400
+  OK   该 400 也必须是契约错误体，而不是框架默认页面
+  OK   不带令牌访问返回 401
+  OK   401 错误体为契约形状
+  OK   teach=delay:800 延迟后仍正常返回
+  OK   teach=unauthorized 返回 401 与契约错误体
+  OK   teach=invalid 返回 400 且 field 为 from
+
+阶段 teaching @ http://localhost:18080：通过 27，失败 0

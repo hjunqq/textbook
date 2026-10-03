@@ -9,8 +9,8 @@
 | S0 | 第1章 | 解释一次查询 | S0-demo-record.md（由 teaching-api/record-demo.mjs 实录生成） |
 | S1 | 4.2–4.4 | 静态列表与详情 | lesson44.html + lesson44-detail.html，不依赖后端 |
 | S2 | 4.5–4.7 | 登录+只读监测页 | lesson45.html 只靠 teaching-api 运行；Vue 部分为 frontend/ 的路由、Pinia 与登录骨架 |
-| S3 | 第5章 | JWT认证+观测API | 起点 backend/src/main/java/edu/example/lesson52/（单类、无库、无认证）；终点 backend/ 全部 |
-| S4 | 第6章 | 三维场景页 | lesson61.html（坝体长方体 + 28 测点绑定）；GLTF 模型与 GIS 集成为课程实现 |
+| S3 | 第5章 | JWT认证+观测API | 起点 backend/src/main/java/edu/example/lesson52/（单类、无库、无认证）；中点 edu/example/lesson54/（复用 reservoir 包的实体、Repository、服务与控制器，接 PostgreSQL、无认证）；终点 backend/ 全部 |
+| S4 | 第6章 | 三维场景页 | lesson61.html 为起点（坝体长方体 + 28 测点绑定）；public/models/dam.glb 为 6.1.4 教学模型；GIS 集成为课程实现 |
 | S5 | 第7章 | 曲线与三维联动 | lesson74.html（拾取→曲线→高亮双向联动），依赖 S3 与 S4 |
 | S6 | 第8章核心篇 | 质量检查+预警+工单+部署 | classify.js（定级）+ 教学接口的 ack/工单端点 + closeloop-check.mjs（闭环核对）；db/、ReadingConsumer、compose、smoke.sh 骨架 |
 
@@ -31,6 +31,7 @@
 | frontend/lesson45.html + src/lesson45/*.js | 4.5 | S2 阶段页：detail.js（清单 4.5.2）、state.js（4.5.3）、controller.js（4.5.4 故障单元） |
 | frontend/tests/lesson45.test.js | 4.5.4 / 4.5.8 | 竞态覆盖的自动化验证（先发请求被取消、最终页面属于后点击对象） |
 | frontend/lesson61.html + src/lesson61/*.js | 6.1.1 / 6.1.5 | S4 阶段起点：first-scene.js（清单 6.1 首个场景）、bind-assets.js（对象绑定），坐标取 public/datasets/stations.json |
+| frontend/public/models/generate-dam-glb.py → dam.glb | 6.1.4 | 教学坝体 GLB（表 tab:ch06-teaching-geometry 尺寸，米、+Y 向上、底面 y=0）；`--units mm --z-up` 生成触发单位/轴向检查的变体；tests/lesson61-dam-glb.test.js 用 GLTFLoader 解析并重放三项检查 |
 | frontend/src/utils/auth.js | 4.5 | TOKEN_KEY 单一契约 |
 | frontend/src/utils/request.js | 4.5 | 令牌注入、401 分流（认证端点豁免） |
 | frontend/src/utils/readings.js | 7.2 | 缺测断线、时间窗校验（纯函数，可测试） |
@@ -43,15 +44,16 @@
 | frontend/src/lesson74/window-chart.js + tests/window-chart.test.js | 7.2.2 | 与清单 lst:ch07-append-data 一致；实测 ECharts 折线更新、300点窗口、缺测与双轴 |
 | frontend/src/views/LoginView.vue | 4.5.7 / 4.7 | 登录与安全回跳 |
 | frontend/src/router/index.js | 4.7.1 | 路由守卫 |
-| frontend/src/stores/monitoring.js | 4.7.4 / 8.3 | Pinia 状态与查询参数 |
-| frontend/src/components/MonitoringDashboard.vue | 7.2 / 8.3 | ECharts 曲线、缺测与可疑呈现 |
+| frontend/src/stores/monitoring.js | 4.7.4 / 8.2.3 | Pinia 状态与查询参数 |
+| frontend/src/components/MonitoringDashboard.vue | 7.2 / 8.2.3 | ECharts 曲线、缺测与可疑呈现 |
 | frontend/tests/*.test.js | 4.8.1 | vitest 单元测试 |
 | backend/.../JwtService.java | 5.6 | jjwt 0.11.x 签发与校验 |
 | backend/.../JwtAuthenticationFilter.java | 5.6 | Bearer 解析入 SecurityContext |
 | backend/.../SecurityConfig.java | 5.6 | 无状态过滤链、CORS、教学账号 |
 | backend/.../AuthController.java | 5.6 | 登录端点（防账号枚举） |
 | backend/edu/example/lesson52/ | 5.2 | S3 阶段起点：清单 lst:ch05-first-controller + lst:ch05-first-params 合并成的可运行类；独立根包，避免与完整工程的 /api/assets 映射冲突 |
-| teaching-api/contract-check.mjs | 5.2.3 / 8.1 | 把表 tab:ch05-first-verify 与契约错误体写成可执行检查；--stage=teaching/lesson52/full 对三种数据来源跑同一套断言 |
+| backend/edu/example/lesson54/Lesson54Application.java | 5.4.1 / 5.4.2 | S3 阶段中点：不复制业务代码，只装配 reservoir 包的 AssetEntity/ReadingEntity、两个 Repository、ReadingService、AssetController 与 ApiExceptionHandler；清单 lst:ch05-db-entity-repo、lst:ch05-db-controller、lst:ch05-rest-layer 取自这些文件 |
+| teaching-api/contract-check.mjs | 5.2.3 / 8.1 | 把表 tab:ch05-first-verify 与契约错误体写成可执行检查；--stage=teaching/lesson52/lesson54/full 对四种数据来源跑同一套断言 |
 | backend/.../ApiExceptionHandler.java | 5.5 / 8.1 | 契约错误体 {code, message, field?}；兜住控制器接不到的时间参数解析失败 |
 | backend/.../AssetController.java | 5.2 / 8.3 | DTO 映射，不暴露实体；readings/latest 按契约区分 404（对象不存在）与 204（尚无观测） |
 | backend/.../ReadingService.java | 5.4 / 8.3 | 事务边界、幂等预检 |

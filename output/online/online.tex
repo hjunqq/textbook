@@ -177,105 +177,551 @@
 
 \section{生产环境的认证与安全细节}\label{online:security}
 
-\paragraph{对应正文}第5章5.6节（Spring Security 6与JWT）。正文保留威胁模型、账户与浏览器安全要点和代码审查清单；本节收录密钥生命周期、撤销与重放、认证可观测与演练、令牌失效与会话迁移的完整论述，以及账户、浏览器存储和权限建模的原文。
+\paragraph{对应正文}第5章5.6节。正文实现DUTY、ANALYST、OPS三角色和访问令牌；本专题进一步讨论细粒度权限、刷新令牌、撤销与密钥轮换。以下为工程扩展示例，未接入配套最小应用；\texttt{lesson56/RefreshTokenVerifier}单独提供可运行校验器及测试。完整平台仍以正文与配套文件为准。
+
+\subsection{细粒度权限、刷新与撤销的扩展实现}
+
+图\ref{fig:online-ch05-auth-sequence}展示增加刷新端点后的认证流程，区别于正文的重新登录方案。
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[>=Stealth,thick,
+  auth/.style={draw=Primary,rounded corners=2pt,fill=PrimaryLight,text=PrimaryDark,text width=2.05cm,minimum height=.9cm,align=center,font=\scriptsize},
+  reject/.style={auth,draw=Accent,fill=white}]
+  \node[auth] (login) at (0,0) {登录\\提交凭据};
+  \node[auth] (issue) at (2.75,0) {认证服务\\签发令牌对};
+  \node[auth] (api) at (5.5,0) {API请求\\Bearer access};
+  \node[auth] (filter) at (8.25,0) {JWT过滤器\\验签\\类型、有效期};
+  \node[auth] (decision) at (11,0) {URL/方法授权\\角色与权限};
+  \node[auth] (service) at (13.75,0) {业务服务\\执行用例};
+  \node[auth] (refresh) at (2.75,-2) {刷新端点\\验证refresh并轮换};
+  \node[reject] (unauth) at (8.25,-2) {401\\认证失败};
+  \node[reject] (denied) at (11,-2) {403\\权限不足};
+  \foreach \a/\b in {login/issue,issue/api,api/filter,filter/decision,decision/service}
+    \draw[->,Primary] (\a)--(\b);
+  \draw[->,Accent] (filter)--(unauth);
+  \draw[->,Accent] (decision)--(denied);
+  \draw[->,Accent,dashed] (unauth.west)--node[above,align=center,font=\scriptsize]{access过期且\\持有有效refresh}(refresh.east);
+  \draw[->,Primary] (refresh)--(issue);
+  \node[below=.3cm of denied,font=\scriptsize,text=TextGray] {403不触发令牌刷新};
+\end{tikzpicture}
+\caption{Spring Security 6 与 JWT 的认证授权时序}
+\label{fig:online-ch05-auth-sequence}
+\end{figure}
+
+
+
+
+清单\ref{lst:online-ch05-security-chain}是图\ref{fig:ch05-security-filter}中那条过滤链的配置：会话置为无状态，认证端点放行，其余请求交给 JWT 过滤器。
+
+\begin{lstlisting}[label={lst:online-ch05-security-chain},language=Java,caption={Spring Security过滤链}]
+import org.springframework.context.annotation.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.config.annotation.method.configuration.*;
+import org.springframework.security.config.annotation.web.builders.*;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.*;
+import org.springframework.security.web.authentication.*;
+
+@Configuration
+@EnableMethodSecurity
+@EnableConfigurationProperties(JwtProperties.class)
+class SecurityConfig {
+    @Bean
+    SecurityFilterChain securityFilterChain(HttpSecurity http,
+            JwtAuthenticationFilter jwtFilter) throws Exception {
+        return http
+            .csrf(AbstractHttpConfigurer::disable)
+            // 接入下文的 corsConfigurationSource Bean；
+            // 只定义 Bean 而不调用 .cors() 时该配置不会生效
+            .cors(Customizer.withDefaults())
+            .sessionManagement(s -> s.sessionCreationPolicy(
+                    SessionCreationPolicy.STATELESS))
+            .exceptionHandling(e -> e
+                    .authenticationEntryPoint((request, response, ex) ->
+                            response.sendError(HttpStatus.UNAUTHORIZED.value()))
+                    .accessDeniedHandler((request, response, ex) ->
+                            response.sendError(HttpStatus.FORBIDDEN.value())))
+            .authorizeHttpRequests(a -> a
+                    .requestMatchers("/actuator/health", "/api/auth/**").permitAll()
+                    .anyRequest().authenticated())
+            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+            .build();
+    }
+}
+\end{lstlisting}
+
+清单第一行关闭了 CSRF 防护。CSRF（跨站请求伪造）指别的网站诱导用户的浏览器向本平台发请求，浏览器会自动附上本平台的 Cookie，服务端误以为是用户本人在操作；防护办法是要求请求带一个别的网站拿不到的令牌。本例的 API 只从 Authorization 头读取 Bearer 令牌，别的网站的页面拿不到这个头，攻击不成立，所以可以关闭；改用 Cookie 保存凭据时要重新打开它，见本专题“CSRF、CORS 与浏览器存储”部分。清单\ref{lst:online-ch05-jwt-filter}的过滤器只做一件事：把\texttt{Bearer}头里的令牌解析成认证对象放进\texttt{SecurityContext}，解析失败就清空上下文继续放行，由后面的授权规则返回 401，过滤器自己不写响应体。清单开头的\texttt{WaterSystemPermission}枚举是扩展写法：权限按“能做什么”命名，全部写在一个枚举里，名称和取值就不会在各处漂移。
+
+\begin{lstlisting}[label={lst:online-ch05-jwt-filter},language=Java,caption={JWT认证过滤器}]
+import jakarta.servlet.*;
+import jakarta.servlet.http.*;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.web.filter.OncePerRequestFilter;
+import java.io.IOException;
+import java.util.stream.Collectors;
+
+enum WaterSystemPermission {
+    STATION_READ, READING_WRITE, ALERT_ACKNOWLEDGE
+}
+
+class JwtAuthenticationFilter extends OncePerRequestFilter {
+    private final JwtService jwtService;
+    private final TokenRevocationService revocations;
+
+    JwtAuthenticationFilter(JwtService jwtService,
+                            TokenRevocationService revocations) {
+        this.jwtService = jwtService;
+        this.revocations = revocations;
+    }
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain chain)
+            throws ServletException, IOException {
+        String header = request.getHeader("Authorization");
+        if (header != null && header.startsWith("Bearer ")) {
+            String token = header.substring("Bearer ".length());
+            try {
+                Claims claims = jwtService.parseAccess(token);
+                String jti = claims.getId();
+                if (jti != null && !revocations.isRevoked(jti)) {
+                    var authorities = jwtService.permissions(claims).stream()
+                            .map(SimpleGrantedAuthority::new)
+                            .collect(Collectors.toUnmodifiableSet());
+                    var authentication = new UsernamePasswordAuthenticationToken(
+                            claims.getSubject(), null, authorities);
+                    authentication.setDetails(new WebAuthenticationDetailsSource()
+                            .buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                }
+            } catch (JwtException ex) {
+                SecurityContextHolder.clearContext();
+            }
+        }
+        chain.doFilter(request, response);
+    }
+}
+\end{lstlisting}
+
+签名密钥、签发者和令牌有效期这一组值随环境变化，按5.3.2节的办法放在\texttt{application.yml}的\texttt{security.jwt}下，由环境变量提供。清单\ref{lst:ch05-config-validation}用一个\texttt{record}把它们集中起来：\texttt{@ConfigurationProperties}按前缀把配置项绑定到同名字段，\texttt{@Validated}让字段上的校验注解在应用启动时执行。密钥为空、有效期写成 0，应用就拒绝启动并指出是哪一项，不必等到第一个登录请求才暴露。这个\texttt{record}要经过注册才会成为 Bean，清单\ref{lst:online-ch05-security-chain}类上的\texttt{@EnableConfigurationProperties(JwtProperties.class)}做的就是这件事。
+
+\begin{lstlisting}[label={lst:ch05-config-validation},language=Java,caption={JwtProperties：集中绑定 JWT 配置并在启动时校验}]
+@ConfigurationProperties(prefix = "security.jwt")
+@Validated
+public record JwtProperties(
+        @NotBlank String secret,
+        @NotBlank String issuer,
+        @Min(60) @Max(86_400) long accessSeconds,
+        @Min(300) @Max(2_592_000) long refreshSeconds) {}
+\end{lstlisting}
+
+JWT 密钥是一串足够长的 Base64 值。本章锁定 jjwt 0.11.x：\texttt{parseClaimsJws}在返回 Claims 之前已经完成签名验证，签名不对就抛异常；先手工解码 Base64 再去“检查”字段的写法跳过了签名验证，等于相信了任何人写的令牌。清单\ref{lst:online-ch05-jwt-parse}给出正确的调用顺序，签名验证发生在读取任何声明之前。令牌分两种：访问令牌（\texttt{type=access}）短期有效，每个请求都带；刷新令牌（\texttt{type=refresh}）寿命长得多，只在访问令牌到期时发给刷新端点换一对新令牌，用户不必重新登录。刷新令牌本身到期就拒绝换发，用户重新登录。\texttt{parseRefresh}把刷新令牌交给下面的校验器，它检查签名、类型、签发者、主体、jti 和有效期。
+
+\begin{lstlisting}[label={lst:online-ch05-jwt-parse},language=Java,caption={jjwt 0.11.x 签名验证与访问令牌解析}]
+import io.jsonwebtoken.*;
+import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.io.Decoders;
+import javax.crypto.SecretKey;
+import java.util.List;
+import java.time.Clock;
+import org.springframework.stereotype.Service;
+import edu.example.lesson56.RefreshTokenVerifier;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+// JwtProperties 的定义见上一个清单
+
+@Configuration
+class JwtClockConfiguration {
+    @Bean
+    Clock jwtClock() { return Clock.systemUTC(); }
+}
+
+@Service
+class JwtService {
+    private final SecretKey key;
+    private final JwtProperties properties;
+    private final Clock clock;
+
+    JwtService(JwtProperties properties, Clock clock) {
+        this.properties = properties;
+        this.clock = clock;
+        this.key = Keys.hmacShaKeyFor(
+                Decoders.BASE64.decode(properties.secret()));
+    }
+
+    Claims parseAccess(String token) {
+        Claims claims = Jwts.parserBuilder().setSigningKey(key)
+                .requireIssuer(properties.issuer()).build()
+                .parseClaimsJws(token).getBody();
+        if (!"access".equals(claims.get("type", String.class)))
+            throw new JwtException("token type is not access");
+        return claims;
+    }
+
+    List<String> permissions(Claims claims) {
+        return claims.get("permissions", List.class);
+    }
+
+    /** 刷新令牌的签名、声明和有效期统一交给完整校验器。 */
+    Claims parseRefresh(String token) {
+        return new RefreshTokenVerifier(key, properties.issuer(),
+                clock).parse(token);
+    }
+}
+\end{lstlisting}
+
+清单\ref{lst:ch05-refresh-verifier}是这个校验器，文件在配套后端的\texttt{edu.example.lesson56}包里。在\texttt{backend}目录运行\texttt{mvn -Dtest=RefreshTokenVerifierTest test}，可以看到有效令牌通过、到期令牌和篡改过的令牌被拒绝；测试注入固定时钟，到期边界才能反复验证。它只做校验，不是 HTTP 端点；把它接到刷新端点上是清单\ref{lst:ch05-jwt-refresh}的事。
+
+\begin{lstlisting}[label={lst:ch05-refresh-verifier},language=Java,breaklines=true,caption={拒绝到期刷新令牌的完整校验器}]
+package edu.example.lesson56;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.Jwts;
+import java.time.Clock;
+import java.time.Instant;
+import java.util.Date;
+import java.util.Objects;
+import javax.crypto.SecretKey;
+
+/** jjwt 0.11.x：只验证刷新令牌，轮换与撤销记录由调用方在事务中处理。 */
+public final class RefreshTokenVerifier {
+    private final SecretKey key;
+    private final String issuer;
+    private final Clock clock;
+
+    public RefreshTokenVerifier(SecretKey key, String issuer, Clock clock) {
+        this.key = Objects.requireNonNull(key);
+        if (issuer == null || issuer.isBlank()) throw new IllegalArgumentException("issuer is required");
+        this.issuer = issuer;
+        this.clock = Objects.requireNonNull(clock);
+    }
+
+    public Claims parse(String token) {
+        Instant now = clock.instant();
+        Claims claims = Jwts.parserBuilder().setSigningKey(key)
+                .requireIssuer(issuer).require("type", "refresh")
+                .setClock(() -> Date.from(now)).build()
+                .parseClaimsJws(token).getBody();
+        Date expiry = claims.getExpiration();
+        if (expiry == null || !expiry.toInstant().isAfter(now))
+            throw new JwtException("refresh token must have a future expiration");
+        if (claims.getSubject() == null || claims.getSubject().isBlank())
+            throw new JwtException("refresh token subject is required");
+        if (claims.getId() == null || claims.getId().isBlank())
+            throw new JwtException("refresh token jti is required");
+        return claims;
+    }
+}
+\end{lstlisting}
+
+\begin{tipbox}
+版本迁移提示：jjwt 0.12.x 将解析器接口拆为\texttt{Jwts.parser().verifyWith(key).build()}与\texttt{parseSignedClaims(token).getPayload()}两步，对应本章 0.11.x 的\texttt{parserBuilder().setSigningKey(key).build()}和\texttt{parseClaimsJws(token).getBody()}。迁移时逐项核对签名算法、issuer、type、过期处理和异常类型，不能只做方法名替换。
+\end{tipbox}
+
+认证链路可以拆成凭据校验、令牌签发、请求认证、权限决策、撤销与轮换五个环节。图\ref{fig:online-ch05-auth-sequence}画出访问令牌和刷新令牌各自走的路：访问令牌携带权限进入过滤器；刷新令牌只发送到刷新端点，服务端验证类型和撤销状态后签发新的令牌对。刷新令牌不能当普通 API 凭据用，完整令牌也不出现在浏览器日志、URL 或错误消息里，因为拿到它的人就能冒充用户。
+
+
+令牌里只放授权用得到的几项声明。\texttt{sub}标识用户或服务主体，\texttt{iss}是签发者，\texttt{aud}是使用方，\texttt{iat}和\texttt{exp}是签发和到期时间，\texttt{type}区分 access 与 refresh，权限集合只带授权决策需要的稳定代码。\texttt{jti}是每个令牌唯一的编号：撤销某一个令牌、在审计里指认某一个令牌，靠的都是它。身份证号、手机号、设备密钥和完整业务对象不放进 JWT，因为 JWT 只是签了名，内容任何人都能解开看，它不是加密容器。
+
+\begin{lstlisting}[label={lst:online-ch05-jwt-issue},language=Java,caption={jjwt 0.11.x 签发访问与刷新令牌}]
+import io.jsonwebtoken.Jwts;
+import java.time.Instant;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
+
+record TokenPair(String accessToken, String refreshToken,
+                 Instant accessExpiresAt, Instant refreshExpiresAt) {}
+
+class TokenIssuer {
+    private final JwtProperties properties;
+    private final SecretKey key;
+
+    TokenIssuer(JwtProperties properties, SecretKey key) {
+        this.properties = properties;
+        this.key = key;
+    }
+
+    TokenPair issue(String subject, List<String> permissions, Instant now) {
+        Instant accessExp = now.plusSeconds(properties.accessSeconds());
+        Instant refreshExp = now.plusSeconds(properties.refreshSeconds());
+        String access = build(subject, permissions, "access", now, accessExp);
+        String refresh = build(subject, List.of(), "refresh", now, refreshExp);
+        return new TokenPair(access, refresh, accessExp, refreshExp);
+    }
+
+    private String build(String subject, List<String> permissions, String type,
+                         Instant issuedAt, Instant expiresAt) {
+        return Jwts.builder().setId(UUID.randomUUID().toString())
+                .setSubject(subject).setIssuer(properties.issuer())
+                .setIssuedAt(Date.from(issuedAt)).setExpiration(Date.from(expiresAt))
+                .claim("type", type).claim("permissions", permissions)
+                .signWith(key).compact();
+    }
+}
+\end{lstlisting}
+
+清单\ref{lst:online-ch05-jwt-issue}给访问令牌和刷新令牌各生成一个 jti；刷新令牌不带权限，权限变更后旧权限只在访问令牌的剩余寿命内残留。签发时间由注入的时钟提供，测试可以固定\texttt{Instant}验证到期边界。生产环境里设备时钟与服务器可能差几秒到几分钟，允许多大偏差写在安全配置里；更换密钥时保留一小段新旧密钥都能验签的窗口，正在处理的请求才不会突然全部失败。清单\ref{lst:online-ch05-login}是登录端点：密码比对走\texttt{PasswordEncoder}，成功后一次签发访问令牌与刷新令牌。配套工程的\texttt{AuthController}是它的单令牌版本，应答只有访问令牌和权限列表。
+
+\begin{lstlisting}[label={lst:online-ch05-login},language=Java,caption={登录端点、密码校验与令牌签发}]
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
+
+record LoginRequest(String username, String password) {}
+record LoginResponse(String accessToken, String refreshToken,
+                     Instant accessExpiresAt, Instant refreshExpiresAt) {}
+
+@RestController
+@RequestMapping("/api/auth")
+class LoginController {
+    private final UserAccountService accounts;
+    private final PasswordEncoder passwordEncoder;
+    private final TokenIssuer issuer;
+    private final Clock clock;
+
+    LoginController(UserAccountService accounts, PasswordEncoder passwordEncoder,
+                    TokenIssuer issuer, Clock clock) {
+        this.accounts = accounts;
+        this.passwordEncoder = passwordEncoder;
+        this.issuer = issuer;
+        this.clock = clock;
+    }
+
+    @PostMapping("/login")
+    LoginResponse login(@Valid @RequestBody LoginRequest request) {
+        UserAccount account = accounts.findEnabled(request.username())
+                .orElseThrow(() -> new BadCredentialsException("用户名或密码错误"));
+        if (!passwordEncoder.matches(request.password(), account.passwordHash()))
+            throw new BadCredentialsException("用户名或密码错误");
+        TokenPair pair = issuer.issue(account.id(), account.permissions(),
+                Instant.now(clock));
+        return new LoginResponse(pair.accessToken(), pair.refreshToken(),
+                pair.accessExpiresAt(), pair.refreshExpiresAt());
+    }
+}
+\end{lstlisting}
+
+数据库里只保存密码的哈希，比对由\texttt{PasswordEncoder}完成。登录失败统一回答“用户名或密码错误”，不区分是用户名不存在还是密码错了：区分了，攻击者就能逐个试出哪些用户名存在。登录端点还要限制调用频率、记录失败次数和审计事件，本专题“密码、账户与登录防护”部分展开；密码重置、二次认证和设备绑定由独立的身份系统负责，不是往 JWT 里多塞几个字段能解决的。刷新端点的检查比登录更容易写漏，清单\ref{lst:ch05-jwt-refresh}把三项必查列全：签名、\texttt{type}是否为\texttt{refresh}、旧 jti 是否已在轮换中作废。
+
+\begin{lstlisting}[label={lst:ch05-jwt-refresh},language=Java,caption={刷新令牌的签名、类型和轮换检查}]
+import io.jsonwebtoken.*;
+import java.time.Instant;
+import java.time.Clock;
+import org.springframework.security.authentication.BadCredentialsException;
+
+// 实现须以事务中的条件更新消费未过期且主体匹配的会话，返回旧会话；
+// 同一 jti 的并发调用至多一个成功。登录时也须登记新 refresh 会话。
+record RefreshSession(String subject, java.util.List<String> permissions) {}
+interface RefreshSessionRepository {
+    java.util.Optional<RefreshSession> consumeActive(
+        String jti, String subject, Instant now);
+    void saveActive(String jti, RefreshSession session, Instant expiresAt);
+}
+
+@org.springframework.stereotype.Service
+class RefreshService {
+    private final JwtService jwtService;
+    private final TokenIssuer issuer;
+    private final TokenRevocationService revocations;
+    private final RefreshSessionRepository sessions;
+    private final Clock clock;
+
+    RefreshService(JwtService jwtService, TokenIssuer issuer,
+                   TokenRevocationService revocations,
+                   RefreshSessionRepository sessions, Clock clock) {
+        this.jwtService = jwtService;
+        this.issuer = issuer;
+        this.revocations = revocations;
+        this.sessions = sessions;
+        this.clock = clock;
+    }
+
+    @org.springframework.transaction.annotation.Transactional
+    TokenPair refresh(String token) {
+        Claims claims = jwtService.parseRefresh(token);
+        String jti = claims.getId();
+        if (jti == null || revocations.isRevoked(jti))
+            throw new BadCredentialsException("刷新会话已撤销");
+        Instant now = Instant.now(clock);
+        RefreshSession session = sessions.consumeActive(jti, claims.getSubject(), now)
+                .orElseThrow(() -> new BadCredentialsException("刷新会话不存在"));
+        revocations.revoke(jti, claims.getExpiration().toInstant());
+        TokenPair next = issuer.issue(session.subject(), session.permissions(), now);
+        Claims nextClaims = jwtService.parseRefresh(next.refreshToken());
+        sessions.saveActive(nextClaims.getId(), session,
+                nextClaims.getExpiration().toInstant());
+        return next;
+    }
+}
+\end{lstlisting}
+
+JWT 的声明字段、签名与校验语义以 RFC 7519 为准\cite{rfc7519}。刷新采用轮换：旧刷新令牌的 jti 用过一次就作废，同时发一个新的。同一个旧令牌第二次出现，说明它被复制过，这叫重放，此时可以把这个用户的整个会话族一起撤销。到期的刷新令牌直接拒绝。\texttt{consumeActive}用一条带条件的 UPDATE 原子地把旧会话标为已用，并在同一个数据库事务里登记新会话，两个并发的刷新请求最多一个成功；“先查询再写 Redis”做不到这一点，两个请求可能都查到“未用过”。这个仓储按5.4.6节的条件更新实现；Redis 里的撤销记录只是缓存，会话事实在数据库里。
+
+\begin{lstlisting}[label={lst:ch05-revocation},language=Java,caption={基于 jti 与版本号的令牌撤销}]
+import java.time.Duration;
+import java.time.Instant;
+import org.springframework.data.redis.core.StringRedisTemplate;
+
+interface TokenRevocationService {
+    boolean isRevoked(String jti);
+    void revoke(String jti, Instant expiresAt);
+}
+
+@Service
+class RedisTokenRevocationService implements TokenRevocationService {
+    private final StringRedisTemplate redis;
+
+    RedisTokenRevocationService(StringRedisTemplate redis) {
+        this.redis = redis;
+    }
+
+    public boolean isRevoked(String jti) {
+        return Boolean.TRUE.equals(redis.hasKey("jwt:revoked:" + jti));
+    }
+
+    public void revoke(String jti, Instant expiresAt) {
+        Duration remaining = Duration.between(Instant.now(), expiresAt);
+        if (!remaining.isNegative() && !remaining.isZero())
+            redis.opsForValue().set("jwt:revoked:" + jti, "1", remaining);
+    }
+}
+\end{lstlisting}
+
+JWT 签出以后服务端不保存它，到期之前一直有效。用户注销或改密后要让令牌提前失效，只能把它的 jti 记进一份“已撤销”名单，过滤器每次都查一下，这就是令牌撤销。清单\ref{lst:ch05-revocation}把名单放在 Redis 里，每条记录的 TTL 等于原令牌的剩余寿命，令牌到期后记录自动消失，名单不会无限增长。另一种做法是给每个用户记一个令牌版本号：注销或改密时版本加一，过滤器比较令牌里的版本和账户当前版本。jti 名单适合撤销单个设备，版本号适合撤销用户的全部会话，两者可以并用。Redis 连不上时按本专题“撤销、重放与故障降级”部分的策略处理：写操作拒绝，只读请求可以放行；不能把“查不到”当作“没有撤销”。
+
+过滤器链解决“是谁”，方法级注解解决“能做什么”。清单\ref{lst:online-ch05-method-security}用\texttt{@PreAuthorize}把权限要求写在控制器方法上，权限名就是配套\texttt{SecurityConfig}里三个教学账号的 DUTY、ANALYST、OPS。清单后半是跨域配置。CORS（跨源资源共享）是浏览器的一条规则：页面向别的源（协议、域名或端口有一项不同）发请求时，浏览器先问对方服务器是否允许这个源读取应答，服务器用响应头回答；开发时 Vite 在 5173 端口、后端在 8080 端口，就是这种情况。跨域策略集中写在一处，不散落在各个控制器里。
+
+\begin{lstlisting}[label={lst:online-ch05-method-security},language=Java,caption={方法级权限与跨域策略}]
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+// AssetController.java（配套工程）：查询接口对三种角色开放
+    @GetMapping("/{assetId}/readings/latest")
+    @PreAuthorize("hasAnyAuthority('DUTY','ANALYST','OPS')")
+    public ResponseEntity<ReadingDto> latest(@PathVariable String assetId) { /* 见 5.4.2 节 */ }
+
+// ReadingWriteController.java（5.5.1 节）：补录只对专业分析员开放
+    @PostMapping
+    @PreAuthorize("hasAuthority('ANALYST')")
+    public ResponseEntity<AssetController.ReadingDto> create(/* 见 5.5.1 节 */) { /* …… */ }
+
+@Configuration
+class CorsConfig {
+    @Bean
+    CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration c = new CorsConfiguration();
+        c.setAllowedOrigins(List.of("https://water.example.edu"));
+        c.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
+        c.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/api/**", c);
+        return source;
+    }
+}
+\end{lstlisting}
+
+方法级权限是前端按钮隐藏之外的第二道边界：按钮藏起来只是看不见，直接发请求照样能到后端。CORS 只约束浏览器能不能读跨源应答，和身份认证是两回事；允许的来源、方法和请求头写成明确的白名单，带凭据的请求不能允许任意来源。401 表示没有认证，403 表示认证了但没有权限，前者页面要跳登录页，后者不跳，所以两者不能混用。日志记权限代码和追踪 ID，不回显完整 JWT。
+
+配套工程只到这里：三个账号、三种权限、一种令牌，用\texttt{smoke.sh}或第4章的页面就能看到 401 和 403 的区别。认证与授权的测试写法见5.9.2节，\texttt{MockMvc}配合\texttt{@WithMockUser}模拟登录身份，覆盖合法令牌、无令牌和权限不足三种情形。后面的扩展写法各自还要补测试：签名错误、issuer 错误、type 错误、过期令牌、撤销 jti，以及旧 refresh jti 第二次使用被拒绝；测试用随机生成的密钥和固定时钟，不把真实密钥写进源码。
+
+\subsection{威胁模型与认证边界}
+
+安全设计先列出要保护的东西和攻击者可能走的路，这份清单叫威胁模型。案例水库平台要保护值班员身份、测站写入权限、预警处置记录、设备上报密钥和审计日志；攻击者可能伪造 Bearer 令牌、重放偷来的刷新令牌、利用错误信息的差异试探账号、用跨源页面诱导浏览器发请求，或者在日志和备份里翻找长期有效的密钥。JWT 只回答“令牌是谁签的、内容有没有被改”；令牌被复制后的重放、传输加密、账户停用和数据库权限，都要靠别的机制。
+
+访问令牌的有效期以泄露后可接受的暴露时间为上限，配套工程取 1800 秒；刷新令牌的寿命由设备风险、撤销能力和换班流程决定。有效期长，泄露后能被利用的时间就长；有效期短，客户端刷新得频繁，网络不稳时更容易被登出。取值时把网关超时、Redis 可用性、时钟偏差和移动网络重连一起考虑，写进配置和安全评审记录，不写成代码里的常数。
 
 \subsection{密钥生命周期与配置管理}
 
-HMAC 密钥必须来自受控密钥管理器或部署平台的机密变量，应用配置只保存变量名和密钥版本。启动时校验 Base64 可解码、长度满足算法要求、issuer 非空且当前版本处于有效窗口；校验失败立即阻止实例接收流量。日志只能输出密钥版本和摘要，不能输出密钥本身、完整 JWT 或配置对象的\texttt{toString}。
+签名用的 HMAC 密钥由密钥管理器或部署平台的机密变量提供，配套工程用环境变量\texttt{JWT\_SECRET}或\texttt{JWT\_SECRET\_FILE}注入（8.6.1节），代码里那个默认值只供课堂演示。应用启动时检查密钥能否 Base64 解码、长度是否够算法要求、issuer 是否为空，有一项不对就拒绝启动，比在第一个登录请求上失败好定位。日志只输出密钥版本和摘要，不输出密钥本身、完整 JWT 或配置对象的\texttt{toString}。
 
-密钥轮换分为准备、双读、切换和退役四步。准备阶段生成新密钥并登记版本；双读阶段验证器按令牌头部的\texttt{kid}选择旧或新密钥，但签发只使用新密钥；切换阶段撤销异常版本并观察认证失败率；退役阶段等待最长刷新令牌寿命加时钟容差后删除旧密钥。若令牌没有\texttt{kid}，轮换时只能按时间窗口尝试有限的候选密钥，并应在下一次签发中补上版本标识。
+更换密钥分四步：生成新密钥并登记版本；验签同时接受新旧两把（按令牌头部的\texttt{kid}选择），签发只用新的；观察认证失败率，撤销异常版本；等最长的刷新令牌寿命加时钟容差过去以后，删除旧密钥。令牌没有\texttt{kid}时，验签只能按时间窗口逐个尝试候选密钥，下一次签发就把版本标识补上。
 
 \subsection{密码、账户与登录防护}
 
-密码存储使用 Spring Security 的\texttt{PasswordEncoder}，例如 BCrypt 或 Argon2，并由安全基线规定成本因子。数据库只保存哈希、算法版本、修改时间和失败计数，不保存明文或可逆加密后的密码。登录成功后清零失败计数并记录设备和追踪 ID；连续失败触发指数退避或临时锁定，解锁由风险策略决定。管理员重置密码时应递增账户令牌版本，使旧访问和刷新令牌全部失效。
+密码不存明文，存的是 Spring Security 的\texttt{PasswordEncoder}算出的哈希。配套工程通过\texttt{PasswordEncoderFactories}类的\texttt{createDelegatingPasswordEncoder()}方法取得编码器，默认算法是 BCrypt，哈希值前面带着算法标识，将来换算法时旧记录仍能比对。数据库只保存哈希、算法版本、修改时间和失败计数，不保存明文，也不保存可以解回明文的密文。登录成功后失败计数清零，并记录设备和追踪 ID；连续失败后逐次延长等待时间或临时锁定。运维员重置密码时把账户的令牌版本加一，这个用户已签出的访问令牌和刷新令牌就全部失效。
 
-认证异常的外部表现要统一。用户名不存在、密码错误、账户停用和二次认证失败都返回相同的401描述，详细原因只写入受控审计；资源存在性检查在权限判断之后执行，避免未授权用户通过404/403差异推测测站编号。审计事件记录主体、客户端、时间、结果码和关联的\texttt{jti}，但不记录密码、Authorization 头或完整刷新令牌。
+认证失败的对外表现要一致。用户名不存在、密码错误、账户停用和二次认证失败都返回同样的 401 描述，具体原因只写进审计；资源是否存在的检查放在权限判断之后，否则没有权限的用户可以从 404 和 403 的差别猜出哪些测站编号存在。审计事件记录主体、客户端、时间、结果码和\texttt{jti}，不记录密码、Authorization 头或完整刷新令牌。
 
 \subsection{CSRF、CORS 与浏览器存储}
 
-本章过滤链关闭 CSRF 的前提是 API 只从 Authorization 头读取 Bearer 令牌，且访问令牌不由浏览器自动附带。如果改用 HttpOnly Cookie 保存凭据，浏览器会自动发送 Cookie，必须启用 CSRF 令牌或采用双重提交方案；把 Cookie 标记为 HttpOnly 只能降低脚本读取风险，不能阻止跨站请求本身。SameSite、Secure、过期时间和域路径应与部署拓扑一起评审。
+本章过滤器链关闭 CSRF，前提是 API 只从 Authorization 头读令牌，浏览器不会自动附带它。改用 HttpOnly Cookie 保存凭据以后，浏览器对每个请求都会自动带上 Cookie，别的网站的页面也能借用户的浏览器发出带 Cookie 的请求，这时就要打开 CSRF 令牌或采用双重提交方案。HttpOnly 只是让脚本读不到 Cookie，挡不住跨站请求本身。Cookie 的 SameSite、Secure、过期时间和域路径与部署拓扑一起定。
 
-CORS 预检请求只是在浏览器侧询问“是否允许这个源访问”，服务端仍要执行身份认证和方法授权。生产环境把来源列入白名单，明确允许的方法、请求头、暴露头和缓存时长；不能因为预检失败就放开\texttt{*}，也不能把 CORS 当作防火墙。非浏览器设备、Kafka 消费者和内部任务不受 CORS 保护，仍需使用服务身份和网络策略。
+CORS 预检是浏览器在真正发请求之前先发一个\texttt{OPTIONS}请求问服务器“允许这个源吗”，服务器答应了，浏览器才发真正的请求；真正的请求照样要经过认证和授权。生产环境把来源写成白名单，明确允许的方法、请求头、暴露头和缓存时长。预检失败时正确的做法是把来源加进白名单，把允许来源改成\texttt{*}等于关掉这道检查。非浏览器的设备、Kafka 消费者和内部任务不经过浏览器，CORS 管不到它们，它们靠服务身份和网络策略。
 
-前端存储策略要根据威胁模型选择。内存存储能缩短刷新后的暴露时间但页面刷新会丢失；\texttt{sessionStorage}限定标签页生命周期，却仍可能被同源脚本读取；\texttt{localStorage}便于持久登录但一旦发生 XSS 会长期暴露。更高要求的系统可以把刷新凭据放入受保护 Cookie，将短期访问令牌保存在内存，并配合 CSP、依赖审计和严格的 DOM 写入规则。无论选择哪种方案，网络日志、错误监控和浏览器历史都不应包含令牌。
+令牌放在浏览器的哪里，各有代价。放在内存里最安全，但页面一刷新就没了；\texttt{sessionStorage}随标签页存在，同源脚本能读；\texttt{localStorage}能持久登录，页面一旦被注入脚本（XSS），令牌就长期暴露。要求更高的系统把刷新令牌放进受保护的 Cookie，访问令牌放内存，再配合内容安全策略、依赖审计和严格的 DOM 写入规则。不管选哪种，网络日志、错误监控和浏览器历史里都不该有令牌。
 
 \subsection{权限建模与最小授权}
 
-权限代码要表达稳定能力而不是界面按钮。例如\texttt{STATION\_READ}允许读取测站，\texttt{READING\_WRITE}允许写入读数，\texttt{ALERT\_ACKNOWLEDGE}允许确认预警；“值班员”“专业分析员”“审批人”和“运维员”是角色，角色到权限的映射由服务端配置管理。资源范围还要单独检查：拥有读数写入权限不代表可以修改所有工程或归档记录。
+配套工程把角色名直接当权限用：DUTY、ANALYST、OPS 各对应一个账号。系统变大以后，权限按“能做什么”命名比按角色命名稳定：\texttt{STATION\_READ}允许读测站，\texttt{READING\_WRITE}允许写观测，\texttt{ALERT\_ACKNOWLEDGE}允许确认预警；值班员、专业分析员、审批人和运维员是角色，角色拥有哪些权限由服务端配置决定，调整时改配置，不改代码。资源范围要单独检查：有写观测的权限，不等于能改所有工程的观测或归档记录。
 
-方法级注解适合表达粗粒度能力，细粒度的测站归属、时间窗口和状态迁移放在应用服务。授权判断失败应保持无副作用，不能先保存实体再检查权限；批量接口要逐条验证资源范围，避免一条请求越权覆盖其他测站。权限增加采用向后兼容策略，权限删除或含义改变则发布版本化变更，并在审计中记录授权策略版本。
+方法级注解适合粗粒度的“能不能做这类事”，测站归属、时间窗口和状态迁移这些细粒度判断放在应用服务里。授权失败要在任何写入之前发生，先保存实体再检查权限，拒绝了也留下了副作用；批量接口逐条检查资源范围，一条请求不能顺带改到别的测站。增加权限向后兼容，删除权限或改变含义要发布新版本，审计里记下当时用的授权策略版本。
 
 \subsection{撤销、重放与故障降级}
 
-撤销服务不可达时，系统必须事先确定“安全失败”还是“可用优先”。对写入、密码修改和预警处置等高风险操作应拒绝请求并返回503，读取公开状态可以使用短时间缓存但要标记缓存时间。Redis 黑名单记录应带 TTL，TTL 至少覆盖令牌剩余寿命；用户版本号变更要通过事务更新并在缓存失效后最终一致。撤销接口本身需要认证、幂等和审计，不能让任意客户端提交 jti 即可封禁其他用户。
+撤销名单在 Redis 里，Redis 连不上时怎么办要事先定好。写入、改密和预警处置这类高风险操作拒绝并返回 503；读取公开状态可以用短时间的缓存，应答里标明缓存时间。名单记录带 TTL，至少覆盖令牌剩余寿命；用户版本号在数据库事务里更新，缓存过期后自然一致。撤销接口本身也要认证、幂等和审计，否则任何人提交一个 jti 就能把别人踢下线。
 
-重放检测不仅适用于刷新令牌，也适用于一次性登录链接、密码重置链接和设备注册码。服务端保存随机值的哈希、主体、用途、首次使用时间和过期时间；第一次消费后原子地标记已用，重复消费返回统一错误。消息或 HTTP 重试必须携带请求 ID，不能通过比较请求到达时间猜测是否重复。检测到同一刷新会话族的异常重放时，可撤销该用户全部会话并通知运维复核。
+重放检测不只用于刷新令牌，一次性登录链接、密码重置链接和设备注册码都是同一类问题：服务端保存随机值的哈希、主体、用途、首次使用时间和过期时间，第一次使用时原子地标记已用，第二次使用返回统一的错误。HTTP 重试和消息重投带请求 ID，按 ID 判断重复；按到达时间猜不可靠。同一个刷新会话族出现异常重放时，撤销这个用户的全部会话并通知运维员复核。
 
 \subsection{认证链路的可观测性与演练}
 
-安全指标包括401/403比率、签名失败、issuer/type 不匹配、刷新成功率、撤销查询延迟、Redis 错误、密钥版本分布和账户锁定次数。指标标签不能使用完整用户名、令牌或高基数的原始 URL，避免监控系统本身泄露隐私。日志采用结构化字段记录\texttt{traceId}、主体哈希、jti 哈希、权限结果和策略版本；审计日志单独存储并设置保留和访问权限。
+认证链路要观察的指标有 401/403 的比率、签名失败次数、issuer 或 type 不匹配次数、刷新成功率、撤销查询延迟、Redis 错误、密钥版本分布和账户锁定次数。令牌解析失败的原因分类只进指标，不返回给客户端：签名错、过期、issuer 不符、type 错和已撤销分别计数，应答统一是 401；这样攻击者得不到试错反馈，运维员却能从指标看出是密钥配错了、时钟漂了还是有人在重放。指标标签不用完整用户名、令牌或原始 URL，否则监控系统自己就成了泄露点。日志用结构化字段记\texttt{traceId}、主体哈希、jti 哈希、权限结果和策略版本；审计日志单独存放，另设保留期和访问权限。
 
-演练应覆盖密钥误配、Redis 故障、旧密钥退役过早、时钟漂移、刷新令牌重放和网关错误转码。每次演练记录检测时间、拒绝比例、恢复步骤和未覆盖的请求类型；恢复后检查旧令牌是否仍能访问、黑名单是否增长异常、缓存是否持有过期权限。演练结果应能说明每种故障影响了哪些请求、哪些操作被拒绝，以及恢复后如何重新验证权限。
-
-接口契约中还应明确 Authorization 头的大小上限、令牌格式、401/403/429/503 的响应结构和重试建议。网关负责基础限流，应用服务负责账户和 jti 级别的风控，数据库负责审计唯一性；三层职责不能互相假定。发布前使用自动化扫描检查依赖漏洞、弱密钥、调试端点和错误日志，人工复核权限矩阵与数据范围。这样，学生可以把安全实现从一段过滤器代码扩展为可部署、可轮换、可审计的系统能力。
+演练要覆盖密钥配错、Redis 故障、旧密钥退役过早、时钟漂移、刷新令牌重放和网关改写错误码。每次记录发现用了多久、拒绝了多少请求、怎样恢复、哪些请求类型没覆盖到；恢复后检查旧令牌是否还能访问、撤销名单有没有异常增长、缓存里有没有过期的权限。接口契约里写明 Authorization 头的大小上限、令牌格式、401/403/429/503 的应答结构和重试建议。限流分三层：网关做基础限流，应用服务做账户和 jti 级别的风控，数据库靠唯一约束保证审计不重复，每层都不假定别的层已经做了。
 
 \subsection{令牌失效与会话迁移}
 
-退出登录需要同步处理浏览器保存的令牌和服务端会话。客户端应清除内存中的访问令牌、撤销当前 refresh jti，并在下一次请求收到401时停止自动重试，避免失败请求形成循环。服务端注销接口验证当前 refresh 会话的主体和设备范围，再写入撤销记录；管理员强制下线则递增账户版本并记录原因。多个终端同时在线时，注销一个设备不应误伤其他设备，除非操作明确选择“退出全部会话”。
+退出登录要同时处理浏览器和服务端两边。客户端清掉内存里的访问令牌，调用注销接口撤销当前刷新令牌的 jti，之后收到 401 就不再自动重试，否则失败请求会循环下去。服务端的注销接口先核对这个刷新会话属于当前用户和设备，再写撤销记录；运维员强制某人下线，则把账户版本加一并记下原因。一个用户在多台设备上登录时，注销一台不影响其他台，除非用户明确选择“退出全部会话”。
 
-会话迁移要考虑密钥轮换和权限变更。权限从“可写入”降为“只读”后，已签发的短期 access token 仍可能在剩余寿命内携带旧权限；高风险权限可以采用更短的 access 有效期、实时版本检查或敏感接口再次查询账户状态。普通读取允许短暂使用令牌声明以降低延迟，但预警确认、规则发布和测站配置修改应在服务层执行最新权限检查。
+权限变更不会立刻反映到已签出的令牌上。用户从“可写入”改成“只读”以后，手里的访问令牌在剩余寿命内仍带着旧权限。高风险操作有三种办法缩短这个窗口：访问令牌有效期更短，过滤器实时比较账户版本，或者敏感接口在服务层再查一次账户状态。普通读取可以直接相信令牌里的声明，预警确认、规则发布和测站配置修改在服务层用最新权限判断。
 
-令牌解析失败的错误分类只用于内部指标，不直接返回给客户端。签名失败、过期、issuer 不匹配、type 错误和撤销状态分别计数，响应统一为401；权限不足返回403；触发账户或 IP 限流返回429并给出重试时间；密钥服务或撤销存储不可用返回503。这样既不给攻击者提供试错反馈，又让运维能从指标判断是密钥配置错误、时钟漂移还是恶意重放。
+刷新端点限制调用频率和来源。客户端只在访问令牌临近到期或收到明确的 401 时刷新一次，多个并发请求用一把互斥锁合并成一次刷新，否则它们会同时去消费同一个旧 jti，只有一个能成功，其余全部被登出。轮换成功后客户端只保留最新的一对令牌；轮换失败就清掉本地凭据回到登录页，被撤销的旧令牌不能继续用。
 
-刷新端点要限制调用频率和来源，不能接受跨域任意站点的请求体。客户端只在访问令牌临近过期或收到明确的401时刷新一次，使用互斥锁合并并发刷新，避免多个请求同时消费同一个旧 refresh jti。服务端轮换成功后返回新令牌对和过期时间，客户端只保留最新一对；如果轮换失败，清除本地凭据并要求重新登录，不能继续使用已经被撤销的旧令牌。
+审计数据分两类：登录成功、登录失败、刷新、撤销、密钥切换是认证事件；创建观测、确认预警、修改配置是业务操作。两类共用 traceId 和主体，保留期、可读角色和脱敏规则各自设定。审计表以事件 ID 为唯一约束，写审计失败时按5.4.5节的事务边界决定是回滚主操作、写入发件箱还是转人工补偿，不能悄悄丢掉。
 
-审计数据要区分“认证事件”和“业务操作”。登录成功、登录失败、刷新、撤销、密钥切换属于认证事件；创建读数、确认预警、修改配置属于业务操作。两类事件共享 traceId 和主体，但保留不同的保留期限、访问角色和脱敏规则。审计表设置事件 ID 唯一约束，写入失败时按照 5.4 节确立的事务边界决定回滚主操作、写入发件箱或进入人工补偿，不能静默丢失。
+多个服务是否共用一把 JWT 签名密钥要明确决定。共用一把验签方便，泄露影响也大，任何一个服务都能伪造其他服务信任的令牌；改用非对称算法集中签发，各服务只拿验签用的公钥，签发服务保护好私钥。不管用 HMAC 还是非对称算法，issuer、audience、允许的算法列表和密钥版本都写进契约，绝不按令牌头部里写的算法名去信任一个没见过的算法。
 
-安全配置应在启动检查和运行检查中分别验证。启动检查确认 issuer、密钥版本、撤销存储地址和 CORS 白名单存在；运行检查周期性验证密钥即将过期、Redis 延迟、刷新失败率和时间同步偏差。健康端点可以报告“认证依赖不可用”，但不能在响应中泄露密钥版本之外的敏感配置。发布流水线在切换流量前先调用认证探针，验证合法令牌、非法签名和撤销令牌的三条路径。
+写这部分代码时容易犯的错，集中在几处：手工 Base64 解码后直接相信 Claims；用没有验签的解析方法；把 refresh 当 access 用；把密钥放进前端变量或提交到 Git；异常信息里回显完整令牌；用放宽 CORS 代替权限；在过滤器里做数据库写事务。配套工程能跑通，只说明这条链的骨架是对的；上面这几条一处没守住，认证就形同虚设。
 
-在多服务部署中，不同服务是否共享 JWT 签名密钥要有明确决策。共享密钥便于验证但扩大泄露影响，任一服务都能伪造其他服务信任的令牌；公钥验证和集中签发可以缩小签名权限，服务只持有验证公钥，签发服务通过安全通道保护私钥。无论采用 HMAC 还是非对称算法，issuer、audience、算法白名单和密钥版本都写入契约，禁止根据令牌头部的算法字段动态信任未知算法。
+\section{前后端认证联调的深入检查}\label{app:ext-fe-auth}\label{online:frontend-auth}
 
-最后，教材示例中的安全代码必须配套“不能做什么”的检查清单：不手工 Base64 解码后信任 Claims，不使用未验签的解析 API，不把 refresh 当 access，不把密钥放在前端变量或 Git，不在异常中回显完整令牌，不用 CORS 放宽替代权限，不在过滤器里执行数据库写事务。代码审查、自动化测试和部署演练共同覆盖这些边界，学生才不会把一个能运行的 Demo 误当作生产级认证系统。
+\paragraph{对应正文}第4章4.5.7—4.5.8节与第5章5.6节。
 
-\section{前端认证联调的测试与故障复盘}\label{online:frontend-auth}
+本节接第4章4.5.7、4.5.8节，需要第5章5.6节的认证与授权。
 
-\paragraph{对应正文}第4章4.5.7节（登录与受保护接口的前后端联调）。正文保留错误状态的前端处理矩阵（表\ref{tab:ch04-auth-errors}）；本节收录状态机测试设计、字段兼容、代理与存储、故障注入式验收和联调记录归档等展开内容。
+\paragraph{先画状态机}认证相关的页面状态至少有六种：匿名、已登录、令牌即将过期、令牌已过期、权限不足和服务不可达。每种状态都要规定界面文案、是否保留原路径、是否允许重试，以及日志里应出现的事件。例如匿名用户访问测点详情，守卫保存\texttt{redirect=/assets/DAM-A-PZ-07}并跳转登录，登录成功后只恢复一次导航；后端返回 403 时停留在业务页面并显示权限说明，不再跳到登录页。令牌过期后页面在登录页和业务页之间反复跳转，通常是把这六种状态折叠成了“有令牌”和“没令牌”两种。
 
-认证联调的难点往往不在“能否登录”，而在多个请求同时发生、页面刷新和网络抖动时是否仍然保持同一套状态语义。测试设计应先画出状态机：匿名、已登录、令牌即将过期、令牌已过期、权限不足和服务不可达是六种不同状态；每种状态都要规定界面文案、是否保留原路径、是否允许重试以及日志中应出现的事件。比如匿名用户访问测站详情，守卫保存\texttt{redirect=/assets/DAM-A-PZ-07}并跳转登录；登录成功后只恢复一次导航；如果后端返回 403，则停留在业务页面并显示权限说明，而不是再次跳到登录页。
+\paragraph{登出与多标签页}登出除了删除浏览器里的令牌，还要调用后端的撤销接口，或者让短期令牌自然过期；多个标签页通过\texttt{storage}事件同步退出状态。刷新令牌如果放在 HttpOnly Cookie 里，前端读不到它，只能根据刷新接口的结果更新内存中的访问令牌。
+
+\paragraph{字段升级的节奏}前后端对字段的兼容按“先增加、后切换、再清理”进行。后端新增\texttt{qualityFlag}时，一段时间内同时返回新旧字段；前端先读新字段、缺失时回退旧字段，并统计回退次数；确认所有客户端升级后再删除旧字段。删除之前检查缓存、导出任务和消息消费者。日期时间统一用带时区的 ISO 8601 字符串，数值单位写进字段说明，枚举值变化由版本化接口或兼容映射处理。组件不直接拼接 URL、读取令牌或解释状态码，这些集中在请求模块里；路径前缀或分页字段调整时，只改这一处。
+
+\paragraph{跨域与预检}开发时浏览器向 Vite 发同源请求，再由代理转发。生产环境如果前端与接口不同源，允许的来源、方法、请求头和是否允许凭据由网关与后端共同约定。带\texttt{Authorization}头的请求会先发一次\texttt{OPTIONS}预检，服务端要正确应答预检，但预检通过不等于真正的请求可以跳过认证。\texttt{Access-Control-Allow-Origin: *}不能与带凭据的请求同时使用，允许来源应是配置好的白名单，不能把请求里的\texttt{Origin}原样返回。遇到“浏览器报跨域、curl 正常”时，分别检查预检响应、实际响应和网关是否丢掉了认证头。
+
+\paragraph{令牌放在哪里}\texttt{sessionStorage}便于教学演示，标签页之间互相隔离，但同源脚本可以读取它；HttpOnly Cookie 让脚本读不到令牌，代价是服务端要设置 SameSite、Secure 并防护 CSRF。无论哪种方式，访问令牌都不能出现在 URL、页面标题或埋点参数里；浏览器控制台只输出状态码、错误码和追踪 ID，服务端日志对令牌做哈希或只记录 jti；前端构建产物中不能出现 JWT 签名密钥、数据库连接串和内部网段。
+
+\paragraph{认证的性能}一次受保护请求的耗时分为令牌解析、撤销查询和业务查询三段。每次请求都访问远程撤销存储会增加延迟，完全不查又无法及时吊销泄露的令牌；折中做法是访问令牌设为短期，把 jti 撤销集合缓存在 Redis，过期时间与令牌的 exp 对齐。角色到权限的展开在服务端完成，前端据此隐藏不该出现的按钮，但“按钮不可见”不能代替后端授权。批量读取测点时，后端限制单次数量和时间窗口，避免一个合法令牌被用来放大高负载接口。
+
+\paragraph{可重放的联调记录}固定测试数据和时间窗口：每个测点至少准备一条 valid、一条 suspect 和一条 missing 读数，分别验证正常展示、可信度降低和不参与判断；告警处置单准备“待确认—已确认—已关闭”三种状态，检查不同角色能执行的动作。测试请求携带固定的\texttt{X-Request-Id}，应用日志保留它以及测点编码、质量码和耗时，数据库审计记录补充操作者和事务结果。定位一次失败请求时，先记下用户动作和路由，再记请求方法、路径、状态码、错误码和追踪 ID，最后核对过滤器日志、业务日志与审计表是否指向同一操作者和测点。联调结束后删除调试开关和临时账号，把前端构建版本、后端提交号、数据库迁移版本、代理目标和测试账号角色一并归档，下次升级照同一份记录重放，就能分清问题来自新代码还是环境变化。
+
+\paragraph{按角色走查}在案例水库的演练中，值班员从测点列表打开详情，专业分析员提交处置意见，审批人确认后才允许关闭事件。三个角色看到的按钮、请求权限和审计结果必须一致；任何一个角色在页面上看到可点击的操作却收到 403，就回到路由元数据、后端方法授权和角色映射逐层核对。
+
 
 请求并发时的“竞态覆盖”已在 4.5.4 节用清单\ref{lst:ch04-r1-race}处理；自动化测试可以让第一个模拟请求延迟 200 毫秒、第二个只延迟 20 毫秒，再快速调用两次\texttt{showAsset}，断言页面最终文字属于第二个对象、第一个请求收到取消信号。
 
-前后端对字段的兼容要采用“先增加、后切换、再清理”的节奏。后端新增\texttt{qualityFlag}时，可以在一段时间同时返回旧字段和新字段，前端先读取新字段、缺失时回退旧字段，并在日志中统计回退次数；确认所有客户端已经升级后再删除旧字段。删除字段前要检查缓存、导出任务和消息消费者，不能只在 Swagger 页面中看到接口变更就直接发布。日期时间统一使用带时区的 ISO 8601 字符串，数值单位写进字段说明，枚举值变化则由版本化接口或兼容映射处理。
-
-本章的联调案例以水利工程安全监测平台为背景，但验收方法可以迁移到其他水利业务。无论是测站读数、告警处置还是工程巡检，均可沿“输入契约—认证上下文—业务状态—持久化结果—界面反馈”五个问题追踪。发生故障时先用\texttt{traceId}把浏览器 Network、网关访问日志、应用日志和数据库审计串起来，再判断属于前端状态、网络转发、认证授权还是领域规则；不要一看到页面空白就修改 CSS，也不要一看到 401 就延长令牌有效期。保存请求标识与定位结果，修复后再执行同一操作，核对故障是否消失及其他状态是否正常。
-
-开发代理与生产环境的跨域配置需要分别检查。浏览器向开发服务器发送同源请求，再由代理转发到后端；生产环境的允许来源、允许方法、允许请求头和是否允许凭据必须由网关与后端共同约定。带 Authorization 头的请求会触发预检，服务端应正确响应\texttt{OPTIONS}，但不能因为预检通过就跳过真正请求的认证。\texttt{Access-Control-Allow-Origin:*}与带凭据请求不能同时使用，允许来源也应是配置白名单而不是反射任意\texttt{Origin}。发现“浏览器报跨域、curl 正常”时，应分别检查预检响应、实际响应和网关是否丢失认证头。
-
-令牌存储还要与页面威胁模型匹配。\texttt{sessionStorage}便于教学演示和标签页隔离，但同源脚本可以读取它；HttpOnly Cookie 能阻止脚本直接读取令牌，却要求服务端设置 SameSite、Secure 和 CSRF 防护。无论采用哪种方式，都不能把访问令牌放在 URL、页面标题或埋点参数中。浏览器控制台只输出状态码、错误码和追踪 ID，服务端日志对令牌做哈希或只记录 jti。前端构建产物中也不能出现 JWT 签名密钥、数据库连接串和内部网段。
-
-认证性能要从令牌解析、撤销查询和业务查询三个阶段测量。每次请求都访问远程撤销存储会增加延迟，完全不查撤销又无法快速吊销泄露令牌；可按风险把访问令牌设为短期，把 jti 撤销集合缓存到 Redis 并设置与令牌 exp 对齐的过期时间。权限代码应使用稳定枚举，角色展开在服务端完成，前端只用于隐藏不应操作的控件，不能以“按钮不可见”代替后端授权。批量读取测站时，后端还要限制单次资源数量和查询时间窗口，避免一个合法令牌成为高负载接口的放大器。
-
 发布前可以进行一次“故障注入式”验收：把响应状态依次改为 401、403、404、409、429 和 503；把响应延迟设置为 100 毫秒、超时阈值和超时阈值的两倍；将令牌的 exp 调整到过去、将 issuer 改成错误值、删掉 permissions 字段；再让代理返回无效 JSON。每个场景都要记录页面是否可操作、是否产生重复请求、是否保存了原路径、是否有泄露敏感信息和是否生成唯一 traceId。每次注入故障后，页面都应保留可用操作、说明失败原因并提供恢复入口，同时将故障与正常水位、空告警结果明确区分。
-
-当后端接口需要升级时，先在契约测试中锁定字段类型和枚举取值，再在前端适配层集中处理兼容逻辑。组件不要直接拼接 URL、读取 token 或解释状态码；它们调用经过封装的 API 函数，由适配层把后端错误转换为稳定的领域错误。这样，即使网关把路径从\texttt{/api}迁移到版本化前缀，或后端把分页字段从\texttt{total}扩展为\texttt{totalElements}，页面仍然只需替换一处适配代码。对案例水库这种值班系统，接口的可观测性和可回退性与视觉效果同样重要。
-
-为了让联调结果可复现，还应固定测试数据和时间窗口。每个测站至少准备一条 valid 读数、一条 suspect 读数和一条 missing 读数，分别验证正常展示、可信等级降低和停止打分；告警处置单准备“待确认—已确认—已关闭”三种状态，检查不同角色能执行的动作。测试请求携带固定的\texttt{X-Request-Id}，响应日志保留该值、测站 ID、质量码和耗时，数据库审计记录再补充操作者和事务结果。将页面截图、接口报文、日志与持久化状态按请求标识关联，即可复查同一次操作在各层的结果。
-
-联调完成后要删除调试开关和临时账号，复查构建产物中是否残留测试地址、令牌样本或密码字段。代码评审重点看三处：所有受保护请求是否统一经过请求封装，所有失败分支是否保持稳定错误码，所有涉及权限的后端方法是否有独立测试。验收时核对前端、网关、Spring Security 和数据库审计记录，确认同一用户的请求、权限判定与最终读写结果一致。
-
-最后应把联调证据归档到版本化测试记录：记录前端构建版本、后端 Git 提交、数据库迁移版本、代理目标和测试账号角色，附上脱敏请求样例及关键日志的 traceId。下一次升级依照同一记录重放，就能判断问题是新代码引入还是环境漂移；对于值班系统，这种可追溯性比临时把页面“调到能显示”更重要。
-
-在课堂练习中，学生可以先用浏览器开发者工具完成状态码和请求头观察，再用后端测试替身注入过期令牌、缺失字段和延迟响应，最后把结果写入联调表。练习评价不只看页面是否出现数据，还要检查是否正确区分认证、授权、网络和业务错误，是否保留了测站上下文，是否遵守令牌和个人信息的脱敏要求。
-
-练习报告还应说明一次失败请求如何从页面回溯到服务端：先记录用户动作和路由，再记录请求方法、路径、状态码、响应错误码和 traceId，最后核对过滤器日志、业务日志与审计表是否指向同一操作者和测站。若链路中任何一段缺失，系统就难以在值班交接时复原现场。
 
 定位联调故障时，可先用状态码判断请求结果，再用错误码查找业务原因；按 traceId 检索跨服务时间线，最后核对审计记录中的写入结果。值班员提交的测站编号、发生时间和页面提示，应能对应到这些记录。
 
-在案例水库演练中，值班员先从测站列表打开详情，专业分析员随后提交处置意见，审批人确认后才允许关闭事件。三个角色看到的按钮、请求权限和审计结果必须一致；若任何一个角色在页面上看到可点击操作却收到 403，应回到路由元数据、后端方法授权和角色映射逐层核对。通过这种真实工作流走查，学生能把前端组件、JWT 权限和水利业务责任联系起来。
-
 \section{从业务约束到物理设计的完整推导}\label{online:db-design}
 
-\paragraph{对应正文}第8章8.3.4节（从业务约束到物理设计的推导）。正文保留业务事实到字段、事务边界和索引推导三段；本节收录外键、枚举与数值约束、时序分区、连续聚合、备份、权限、模式演进、测试与文档的完整论述。
+\paragraph{对应正文}第8章8.3.7节（从业务约束到物理设计的推导）。正文保留业务事实到字段、事务边界和索引推导三段；本节收录外键、枚举与数值约束、时序分区、连续聚合、备份、权限、模式演进、测试与文档的完整论述。
 
 外键是数据库层最直接的业务保证。\texttt{warning.asset\_id}要求预警必须指向仍可识别的工程对象；
 \texttt{work\_order.warning\_id}要求工单不能脱离预警凭空出现；模型运行不直接外键到每一条观测，
@@ -411,17 +857,11 @@ JSONB 证据、备份副本和压缩后的增长系数；写入峰值还要考�
 工程和时间窗分组，运维员可以区分“设备没有上报”“数据到达但质量不合格”“规则未运行”和“工单没有
 及时关闭”。不同状态对应不同处置入口：检查设备、复核数据、恢复规则任务或催办工单。
 
-\section{第1章补充阅读：平台形态与架构评审}\label{online:ch01}
+\section{平台形态并存时的隔离、抽查与评审方法}\label{app:ext-ch01-platform-review}\label{online:ch01}
 
-\paragraph{对应正文}第1章1.2.4节（典型子系统与业务实例）、1.2.5节（架构设计原则）和1.3.2节（生命周期与核心活动）。正文保留子系统划分、一条完整业务链、五项设计原则及其正例与反例；本节收录多尺度平台的扩展讨论、架构评审方法和生命周期证据要求。
+\paragraph{对应正文}第1章1.2节。
 
-\subsection{多尺度平台的扩展讨论}
-
-在区域级灌区场景中，同一底座可以复用对象目录、质量码和权限体系，但业务链路会改为“用水户申报—管理站复核—渠道能力校核—配水计划审批—执行回执—偏差复盘”。流域级平台则可能消费区域级汇总数据，运行联合调度模型并向多个区域发布建议。三个尺度之间通过版本化接口交换最小必要数据，交换记录包含来源、时间、质量和责任域；任一跨域接口失败，都应给出数据龄期和降级提示，不能让下游把旧数据误当成实时状态。
-
-业务实例还应明确非功能约束。汛期高峰时，查询、模型计算、预警推送和控制审批会同时竞争资源，平台需要区分读写路径和优先级；网络中断时，边缘侧可以暂存观测，但必须标记采集时间和补传顺序；权限变更时，已经批准的任务要保留原审批证据，新任务按新权限校验；模型换版时，旧版本结果必须仍可回放。把这些约束写入架构和验收用例，平台形态才真正转化为可运行的系统。
-
-平台形态的选型还应考虑演进顺序。新建工程通常先从工程级闭环开始：把测点、对象、质量规则和岗位流程做实，再把经过脱敏和汇总的数据交给区域级或流域级服务；已有区域平台则应先盘点接口、对象编码和历史数据质量，再决定哪些能力下沉到工程现场，哪些能力上收为统一服务。迁移过程中要保留旧接口的兼容期和数据回放能力，不能因为换了平台形态就丢失历史告警、审批记录或模型输入快照。对外共享的数据还要经过分级和脱敏，控制域中的设备状态、联锁条件和指令日志不能随公共报表一起发布。
+\subsection{“问题—尺度—证据”卡片与租户隔离}
 
 形态选型可以用一张“问题—尺度—证据”卡片完成。问题栏写清需要解决的业务动作，尺度栏写清涉及的工程、管理站、区域或流域范围，证据栏写清需要看到的字段、时延、权限和回执。例如“管理站是否能在网络波动时完成配水计划复核”属于区域与工程交界问题，既要有本地缓存和数据龄期标记，也要有计划版本、审批人和恢复后补传记录；“多工程联合调度是否采用同一来水过程”属于流域协同问题，重点则是统一时空基准、模型版本和跨域交换协议。卡片让选型讨论围绕可验证行为展开，而不是围绕“平台大不大”争论。
 
@@ -431,7 +871,7 @@ JSONB 证据、备份副本和压缩后的增长系数；写入峰值还要考�
 
 每次形态调整都应同步更新接口目录、权限矩阵、运行手册和回滚预案。这些交付物共同构成平台形态选择的可审计依据，也为后续容量、性能和安全评估提供共同输入；评估结论随版本和责任边界一并归档，归档包至少包含形态选择依据、数据域说明、接口版本、权限矩阵、样本结果和回滚负责人——这些材料同时是后续扩展到更大空间尺度时判断兼容性的基线。
 
-\subsection{把设计原则变成评审任务}
+\subsection{架构原则的“正例—反例—证据”三栏评审}
 
 架构评审还可以采用“正例—反例—证据”三栏法。正例描述系统应当如何工作，反例描述一个看似方便但会造成责任或数据风险的实现，证据栏则指定测试数据、日志字段、权限记录或演练步骤。以“高风险操作受控”为例，正例是专业分析员提交调度建议、审批人批准、值班员按设备回执执行；反例是任何能打开页面的人都能调用控制接口；证据应包括角色令牌、审批事件、指令有效期、设备回执和回滚记录。以“全过程可观测”为例，正例是一次预警可以追溯到输入快照和模型版本，反例是只保存最终颜色，证据则是追踪ID、规则版本和复核结论。三栏法让原则变成可执行的评审任务。
 
@@ -441,15 +881,12 @@ JSONB 证据、备份副本和压缩后的增长系数；写入峰值还要考�
 
 评审结论应绑定版本号和复核日期，避免同一条原则在后续迭代中失去上下文；每次复核保留参与角色和未关闭风险的清单，随发布包一并保存。
 
-\subsection{生命周期各阶段的证据}
 
-生命周期的每一阶段都应留下能被下一阶段复用的证据。需求阶段产出范围、角色、场景、约束和验收条件；架构阶段产出组件边界、数据流、部署视图、权限和关键决策；实现与集成阶段产出可构建的版本、迁移脚本和接口契约；验证阶段覆盖正常、异常、降级、回滚和安全边界；部署运行阶段维护指标、日志、备份、值守和演练记录；维护演化阶段评估变更影响并更新追踪矩阵；退役阶段则明确数据归档、访问关闭、设备拆除和凭证回收。缺少任一类证据，团队就无法判断问题发生在需求、设计、代码、环境还是运行操作。
+\section{生命周期选型评审记录与需求基线治理}\label{app:ext-ch02-baseline-governance}\label{online:ch02}
 
-生命周期评审可设置三个问题。第一，当前版本能否从一个业务目标找到需求、设计、测试和运行证据；第二，发生网络、数据、模型或权限故障时，是否有明确的降级和回退责任；第三，变更完成后，旧数据、旧客户端和历史审计是否仍可解释。若任一问题回答不清，就应把它登记为下一周期的工程任务，而不是用“系统已上线”代替验收。
+\paragraph{对应正文}第2章2.2、2.6节。
 
-\section{第2章补充阅读：生命周期模型的选型评审}\label{online:ch02}
-
-\paragraph{对应正文}第2章2.2.9节（模型选择）。正文保留两张选型表、两个选型案例和“不选什么以及为什么”；本节收录选型评审的输出要求、“先排除、再组合、后试验”的评审顺序、评审记录要素，以及与合同、招采和安全审查节奏的对齐。
+\subsection{选型评审记录与两周试验}
 
 选型评审的输出至少包括：项目特征证据、模型组合、每个模型的前置条件、第一轮可验证交付物、主要风险、审批人和模型切换触发条件。项目进行中如果用户参与频率下降、接口风险暴露或合规范围扩大，应重新评估活动顺序、参与方式与验证条件，并更新模型选择记录。评审时可对照前后两版记录，说明调整依据及其对交付计划的影响。
 
@@ -457,27 +894,11 @@ JSONB 证据、备份副本和压缩后的增长系数；写入峰值还要考�
 
 评审记录还应标出参与者、评审日期和所依据的基线版本，下一轮评审先核对这些字段，确认各方比较的是同一范围，再讨论模型是否需要调整。记录中还要写明模型选择后的第一个可验证交付物、风险负责人、预期证据、观察窗口和停止条件；若证据不足，就延长验证或退回组合设计，不能用“进度已完成”替代模型有效性。人员、设备或试点范围变化后，可据此比较前后条件，核查原先的风险判断和验证结果是否仍然适用。
 
-在水利项目中，过程模型还要和合同、招采及安全审查节奏对齐。涉及闸门控制或防洪调度的需求，即使采用短周期迭代，也应把设计审查、联调试验和上线审批列为不可跳过的里程碑；普通报表功能则可在同一基线下快速迭代。项目负责人据此安排不同节奏的工作流，并在每次评审时检查证据是否覆盖业务、技术和安全三类目标。
-
-\subsection{需求规格说明的评审与变更管理细节}
-
-\paragraph{对应正文}第2章2.6.1节（需求评审检查单）与2.6.2节（需求变更控制流程）。正文保留检查单、变更控制闭环图、批量调整与实现选择两个例子、追踪矩阵演练和课堂练习。
-
-评审角色的关注点不同。业务代表核对流程是否符合规程和岗位责任，审批人核对状态和授权边界，专业分析员核对模型输入、单位和版本，开发人员核对接口、数据结构和异常处理，测试人员核对判据与测试数据，安全与运维人员核对审计、备份、监控和回滚。会议主持人应按检查单逐项点名，不能只由最熟悉系统的人代替所有角色发言。对于有争议的条目，先记录双方的事实和假设，再安排最小验证动作；未验证项保持“待补证据”状态，不进入已批准基线。
-
-追踪矩阵的粒度应与变更影响相匹配。一个需求若同时关联多个接口和测试用例，变更时不能只勾掉其中一格；应先标记受影响的设计决策、数据迁移、权限、监控和培训，再决定是否需要回归整条业务链。反向追踪同样重要：如果测试发现“重复提交生成两个任务”，测试人员应能回到唯一需求编号，确认是接口幂等约束、数据库唯一索引还是状态转换规则缺失。
+\subsection{需求基线的版本包、变更委员会与基线复核}
 
 矩阵可以放在版本库中由构建检查，或由项目管理工具维护，但字段含义必须固定。需求ID、版本、来源、责任人、设计对象、接口路径、测试用例、验收结果和变更号共同关联需求来源、实现与验收结果；删除一条需求时保留废止原因和替代需求，不能让历史测试失去解释。发布前由需求负责人抽样反向追踪，确保“已完成”至少有一项可复现证据，未完成项明确进入下一版本。
 
-变更申请可按影响分为一般、重要和紧急三类。一般变更只影响页面文案或查询排序，产品负责人评审后更新故事和测试；重要变更影响数据结构、权限、接口兼容性或质量阈值，需要架构、安全、测试和运维共同签字，并安排迁移和回滚演练；紧急变更用于正在发生的安全或运行事故，允许先采取受控缓解措施，但必须在事后补齐影响分析、批准记录和回归测试。分类依据是影响范围与失败后果，不是提出人的职位或声音大小。每类变更都要有观察窗口和关闭条件，观察结束后把实际结果写回变更记录。
-
 实施变更时要维护“旧版本可读、新版本可验证、失败可回退”三条边界。数据库字段增加可以先向后兼容，再在新版本使用；字段含义改变时应新建版本或迁移脚本，保留旧字段读取期；接口响应新增字段要确认旧客户端忽略它不会破坏流程。涉及代理键和个人信息时，迁移脚本只搬运业务标识，不把身份证号等敏感字段复制到新主键；回滚时要检查审计记录和外部消息是否已经发出，不能只恢复数据库快照而留下无法解释的任务状态。
-
-追踪矩阵还可以支持发布说明和缺陷复盘。发布前按版本筛选所有“已批准且未关闭”的需求，核对每条都有测试结果、迁移记录和运行指标；发布后若出现偏差事件重复、计划时段错位或权限越界，先从告警或测试编号反查到需求，再判断是实现缺陷、需求遗漏还是现场假设失效。若属于需求遗漏，新增需求必须关联原缺陷和变更号，避免只修代码而让基线继续描述错误行为。矩阵因此既是文档，也是团队共同维护的质量索引。
-
-接口需求应同时写出请求、响应、错误和幂等语义。以提交用水计划为例，SRS要说明必填字段、时间格式、代理键、重复请求的判定、权限不足的状态码、校核失败的业务错误码以及审计事件的字段；仅写一条URL和“返回成功”无法支撑前后端联调。数据字典的字段编号、接口契约的字段名和数据库迁移脚本应互相引用，任何一个字段改名都要先评估客户端、报表和历史数据的影响。接口版本可以通过路径或媒体类型演进，但兼容期、下线日期和通知对象必须写进变更记录。
-
-质量属性需求应配套测量方案。性能条目要写负载模型、数据规模、缓存状态和统计分位数；可用性条目要区分计划维护、网络中断和服务进程故障；可靠性条目要指定重试、幂等和最大恢复时间；安全条目要说明授权边界、审计留存和敏感字段处理。评审人看到阈值时，还要追问谁采集指标、在哪里保存原始数据、失败后谁负责响应。若阈值来自试点假设，应标注“待验证”，并在观察窗口结束后决定升级、放宽或撤销，避免把未经测量的口号写进验收合同。
 
 基线发布需要一个可复现的版本包。除了SRS正文，还应冻结引用的模型文件、数据字典、接口示例、测试数据、评审纪要和待确认问题；版本包生成校验摘要，发布人和审批人签名。开发、测试和运维使用同一摘要确认自己拿到的是同一份需求，遇到争议时先核对版本再讨论实现。修订时保留差异说明，指出新增、修改、废止和迁移字段，不能用“全文更新”四个字替代影响分析。
 
@@ -489,7 +910,7 @@ JSONB 证据、备份副本和压缩后的增长系数；写入峰值还要考�
 
 \section{第3章补充阅读：需求复述与原型方法}\label{online:ch03}
 
-\paragraph{对应正文}第3章3.1.4节（需求分析和用例建模）与3.2.3节（原型定义与细化）。正文保留 REQ-MON 需求登记和三个核心用例、架构原型的定义；本节收录多终端、可靠性、安全与易用性需求的复述，以及原型构建、反馈收集与细化的通用方法。
+\paragraph{对应正文}第3章3.1.1节（需求与用例）与3.2.3节（用原型检验分层和模块的划分）。正文保留 REQ-MON 需求登记和三个核心用例、架构原型的定义；本节收录多终端、可靠性、安全与易用性需求的复述，以及原型构建、反馈收集与细化的通用方法。
 
 \subsection{平台的非功能需求复述}
 
@@ -539,44 +960,49 @@ JSONB 证据、备份副本和压缩后的增长系数；写入峰值还要考�
 
 性能优化应从测量结果出发。处理耗时较高时，先比较过滤与分析算法；若试用机器学习识别异常趋势，应在同一组标注样本上测量漏报、误报和推理耗时。网络受限时，可测试压缩与异步传输，并检查压缩开销和队列等待是否抵消收益；存储受限时，先检查查询与索引，再评估时序存储的扩展方案；并发请求增加时，可评估负载均衡。每次调整使用相同输入与负载，记录时延和资源占用，发现性能退化时恢复上一配置。
 
-\section{第5章补充阅读：服务间协作与接口演进}\label{online:ch05-api}
+\section{服务边界、接口版本与健康检查}\label{app:ext-service-boundary}\label{online:ch05-api}
 
-\paragraph{对应正文}第5章5.1节（后端服务与REST接口概述）。正文保留请求链路、HTTP方法与状态码、资源建模、分层依赖、读写接口与分页参数；本节收录游标分页、服务发现与健康检查、跨服务超时重试、API版本化、幂等键生命周期和接口文档维护。
+\paragraph{对应正文}第5章5.1节与第8章8.6节。
+
+案例水库采用模块化单体（第3章\ref{sec:ch03-load-estimate}节）。下面的内容在平台拆成多个服务、或者接口对外公开之后才会用到。
+
+服务边界按业务能力划分。数据采集、观测查询、预警评估和通知可以是不同的服务，每个服务有明确的数据所有权和 API 契约；拆分不是把每个类都部署成独立进程。开发环境用配置文件把逻辑服务名映射到固定地址，生产环境再接服务注册与发现、健康检查和负载均衡。业务代码只依赖接口客户端，注册中心的注解不进领域层，基础设施和业务规则才能分别修改和测试。
+
+跨服务调用显式处理超时、重试和降级。查测站详情可以在短超时后返回缓存快照，界面标注数据时间；写观测值不能因为重试而重复落库，请求 ID 和幂等键从网关一直带到服务日志和数据库。链路追踪传\texttt{traceId}和\texttt{requestId}，错误应答给可定位的错误码，不暴露内部堆栈。两个服务共享同一张 PostgreSQL 表，边界就名存实亡了，改成通过版本化 API 或消息事件交换数据。
+
+接口演进要兼容，也要留记录。对外公开的接口用路径版本\texttt{/api/v1/assets}，加字段时旧字段语义不变；删字段、改单位、改时区都是破坏性变更，发布\texttt{v2}并给迁移窗口。版本号不随每次修复递增，补丁和兼容的字段增加写进文档和变更日志。应答里带\texttt{Deprecation}和\texttt{Sunset}头，调用方在旧版本停用前有时间升级。
+
+服务发现的健康检查分进程存活、依赖可达和业务可用三类，含义与第8章8.6.1节相同：进程存活用来重启异常实例，依赖可达检查数据库、Redis 和 Kafka 连接，业务可用验证关键表结构、时序写入权限和预警规则加载。网关切换路由时先摘掉不健康的实例，再等正在处理的请求完成；客户端只对明确的瞬态错误重试，写入请求带幂等键。
+
 
 游标分页适合持续追加的时序读数：客户端携带上一页最后一条记录的\texttt{occurredAt,id}，服务端按联合索引向后查找，避免高页码\texttt{OFFSET}扫描大量历史数据。游标应视为不透明字符串，不能让客户端自行修改时间边界；接口文档还要说明读数在分页期间追加时的排序稳定性。报表导出属于异步任务时，使用任务资源返回\texttt{202 Accepted}，由客户端轮询任务状态，而不是让一次 HTTP 请求长时间占用连接。
 
-服务发现与微服务边界必须以业务能力为中心。数据采集、读数查询、预警评估和通知可以是不同服务，但每个服务拥有明确的数据所有权和 API 契约；拆分不是把每个类都部署成独立进程。开发环境可用配置文件把逻辑服务名映射到固定地址，生产环境再接入服务注册与发现组件、健康检查和负载均衡。业务代码只依赖接口客户端，不能把某个注册中心的注解散落到领域层，这样基础设施实现与业务规则可以分别修改和测试。
-
-跨服务调用要显式处理超时、重试和降级。查询测站详情可以在短超时后返回缓存快照，并在界面标注数据时间；写入监测值则不能因为重试而重复落库，应把请求 ID 和幂等键贯穿网关、服务日志与数据库。链路追踪至少传递\texttt{traceId}和\texttt{requestId}，错误响应包含可定位的错误码而不暴露内部堆栈。服务之间若共享 PostgreSQL 表，边界会失去意义，应改为通过版本化 API 或消息事件交换数据。
-
-API 版本化需要在兼容性和演进速度之间作出可审计的选择。对外公开的水利平台接口可以采用路径版本\texttt{/api/v1/assets}，在字段增加时保持旧字段语义不变；删除字段、改变单位或改变时间时区都属于破坏性变更，应发布\texttt{v2}并给出迁移窗口。版本号不应随着每次修复递增，补丁修复和兼容字段增加可以通过文档和变更日志说明。响应体可带\texttt{Deprecation}和\texttt{Sunset}提示，让调用方在停止旧版本前完成升级。
-
-幂等键的生命周期要覆盖消息最大重投和人工重试周期。服务端保存键、请求摘要、响应状态和过期时间；同一个键携带不同请求体时返回冲突，防止客户端误把一个键当作通用令牌。数据库唯一约束是最后一道防线，应用层缓存只用于快速返回，不能替代约束。处置单的状态迁移也要有唯一规则，例如只有\texttt{OPEN}可以变为\texttt{ACKNOWLEDGED}，重复确认返回当前状态而不是再次产生副作用。
-
-分页查询需要稳定排序，否则实时读数追加时会出现重复或漏项。排序字段后追加唯一 ID 作为 tie-breaker；服务端在响应中回显实际排序方向和时间区间，客户端翻页时携带同一条件。导出任务和大范围历史查询应限制最大时间跨度，超过阈值改为异步任务并在完成后提供下载地址。对外接口还应设置速率限制和请求体大小上限，避免错误客户端占满数据库连接。
-
-服务发现的健康检查至少分为进程存活、依赖可达和业务可用三类。进程存活用于重启异常实例，依赖可达检查数据库、Redis 和 Kafka 连接，业务可用则验证关键表结构、时序写入权限和预警规则加载。网关路由切换时先摘除不健康实例，再等待正在处理的请求完成；客户端重试只针对明确的瞬态错误，写入请求必须携带幂等键。通过这些约束，微服务边界才能在故障时保持数据一致和可观察。
-
 接口文档还应给出示例请求、示例响应、错误码和限流规则，并在每次版本发布时同步更新 OpenAPI 描述；值班员和前端开发者据此可以复现问题、核对字段单位并确认兼容范围。
 
-\section{第6章补充阅读：坐标转换的审计与发布}\label{online:ch06-crs}
+\section{坐标成果的入库、审计与版本管理}\label{app:ext-ch06-crs-audit}\label{online:ch06-crs}
 
-\paragraph{对应正文}第6章6.2.3节（高程基准与空间一致性）。正文保留高程换算、坐标元数据、投影变形、轴序、误差传播、排错路径、分带计算实例、发布分区与精度预算；本节收录转换流水线的审计步骤、验收记录与版本通知要求。
+\paragraph{对应正文}第6章6.2节。
 
-\paragraph{转换流水线的审计步骤}
-数据接收阶段先读取坐标参考系和高程基准，缺少元数据的数据进入隔离区；预处理阶段按带宽、中央经线和轴序完成转换，保留原始文件和工具版本；质量阶段用独立控制点计算残差，检查是否存在整体平移、旋转或比例误差；发布阶段生成服务能力文档、EPSG声明和数据字典；运行阶段对新增测点继承同一转换配置，并在配置变更时重新运行回归检查。任何一步失败都应返回明确的错误原因，值班员可以据此补齐资料或回退版本。
+第6章6.2.1至6.2.3节给出了坐标、高程和局部原点的换算。数据来自多个单位、平台长期运行时，还要把换算过程管起来。
 
-三维平台还要处理动态数据的时间基准。监测值的时间戳、坐标采集时间和模型发布时刻应分别保存，不能把“当前显示时间”写回测量数据。洪水演进动画可以在局部坐标中播放，但每个水位面、测点状态和告警事件仍需关联原始时间基准。跨系统交换时使用带时区的ISO 8601或明确的UTC毫秒值，服务端统一转换，前端只负责格式化展示。
+\paragraph{元数据分两级保存}数据集级元数据保存统一的坐标系和版本：水平坐标系、投影方法、带宽、带号、中央经线、尺度因子、假东与假北、东坐标是否带带号前缀、高程类型、高程基准、单位、精度等级、转换模型版本和生产软件版本。要素级属性保存测站、控制点或构件的采集方法、精度和质量标识。同一图层混有不同来源的数据时，入库时拆成多个数据集并分别建立转换记录；来自外单位的数据同时保存原始坐标、转换前后的 EPSG 代码和转换日期。转换成功不等于精度合格，转换记录里还要有控制点数量、残差统计和审核人，成果复核时可以重算。
 
-在验收记录中还要标注转换执行的日期、操作者和软件环境，保留输入文件哈希与输出文件哈希。后续若更新PROJ数据库或高程模型，先在隔离环境重算并比较差异，再决定是否发布新版本；旧版本数据保持可查询，便于审计和回滚。
+\paragraph{原始区、标准区、发布区}测量成果进入平台后分三层存放。原始区保存外业文件和原始坐标，不覆盖；标准区完成 EPSG、单位、高程基准和质量码的统一，生成带版本的数据库表；发布区按 WMS、WFS 或三维瓦片的需要生成切片、索引和缓存。每层保存源文件哈希、处理工具、参数和责任人，服务刷新只读取通过质量检查的标准区数据。出现定位问题时，可以按哈希和版本回放整条处理链。
 
-坐标版本更新还应通知地图服务、三维瓦片和监测接口的维护者，形成变更单与回滚点；发布说明列出受影响的图层、测站和查询时间窗，值班员据此安排抽查。
+\paragraph{转换流水线的检查点}接收阶段读取坐标系和高程基准，缺少元数据的数据进入隔离区，补全后重新校验；预处理阶段按带宽、中央经线和轴序完成转换，保留原始文件和工具版本；质量阶段用独立控制点计算残差，平面和高程分开统计最大绝对误差、均方根误差和样本数，检查是否存在整体平移、旋转或比例误差；发布阶段生成服务能力文档、EPSG 声明和数据字典；运行阶段新增测点继承同一套转换配置，配置变更时重新运行回归检查。控制点要覆盖坝轴线两端、闸室、廊道出入口和场景边界，不能集中在一小块区域。
 
-转换链中的每个参数都应能由脚本读取并打印，避免人工复制时丢失小数位或符号。验收人员依据同一脚本和样本数据复核结果，复核记录与发布版本一并归档。复核过程同时检查坐标轴方向、单位和高程基准标签，确保数值与语义保持一致。若标签缺失，数据进入隔离区等待补全后再发布。补全后重新执行同一套样本校验并更新审核状态。审核状态还应记录复核人、复核时间和使用的样本版本。并保留复核结论。
+\paragraph{精度预算与变更控制}坐标精度预算在需求阶段分配到数据采集、控制测量、转换计算、模型简化和渲染显示各环节。测量层的毫米级精度经过投影和局部原点平移后仍要可逆；模型简化允许视觉误差，但不改变用于定位闸门或测点的控制顶点；屏幕显示可以按像素取整，查询和分析仍使用原始的米制坐标。每次改变中央经线、局部原点或高程模型，重新生成控制点报告，并与上一版本比较残差和服务范围。
+
+长期运行的平台把坐标配置当作基础设施契约，而不是前端常量。配置中心记录当前版本，后端接口在应答里返回坐标版本，前端加载模型时核对版本；不匹配时显示待更新状态并停止自动叠加，避免把新测量数据投到旧场景上。坐标版本更新要通知地图服务、三维瓦片和监测接口的维护者，发布说明列出受影响的图层、测站和查询时间窗，值班员据此抽查。
+
+\paragraph{可重复性测试}用同一组经纬度和元数据在开发机、持续集成环境和生产镜像里各转换一次，比较东、北坐标和高程；差异超过约定精度时冻结发布，检查 PROJ 数据文件、浮点模式和参数顺序。测试样本既包含中央经线附近的点，也包含分带边缘的点和高程异常符号变化的点。部署后抽查一个测站，依次执行地图点选、三维拾取、后端查询和原始坐标回放，核对各步骤指向同一对象。验收记录写明转换日期、操作者、软件环境以及输入、输出文件的哈希；更新 PROJ 数据库或高程模型时，先在隔离环境重算并比较差异，旧版本数据保持可查询。
+
+\paragraph{教学实验}先用一个已知控制点验证公式，再扩展到整批测站。实验报告列出原始经度、带宽、带号、中央经线、投影参数、转换后坐标、局部原点和误差统计；使用软件默认值时说明默认值的来源和适用条件。再做一个故意改变轴序或高程类型的反例，观察地图、三维模型和查询结果怎样分离。
+
 
 \section{逐句追加的复核要求汇编}\label{online:review-notes}
 
-\paragraph{对应正文}第6章6.2.1节（OGC地图与要素服务）、第7章7.4.2节（触控半径与世界单位）与第8章8.3.5节（Vue前端页面组织）。这些句子原以单句逐行追加在段落末尾，内容为复核与归档的细节要求，现集中收录于此。
+\paragraph{对应正文}第6章6.2.4节（OGC地图与要素服务）、第7章7.4.3节（触控、长按与世界单位）与第8章8.3.6节（前端：预警状态与处置操作）。这些句子原以单句逐行追加在段落末尾，内容为复核与归档的细节要求，现集中收录于此。
 
 对异常响应还要检查Content-Type、错误码和重试建议，前端按契约展示可操作的提示。服务端同时限制错误详情长度，避免把数据库或文件系统信息暴露给外部用户。客户端日志只保留必要上下文和traceId。故障恢复后再开放自动刷新。恢复记录应关联演练编号和验证人员。并标注验证结果。记录已归档并可追溯。后续复测沿用同一编号和样本。
 
@@ -593,6 +1019,666 @@ API 版本化需要在兼容性和演进速度之间作出可审计的选择。�
 
 对于降雨情景，平台把流域面积320\,km$^2$作为输入范围与结果解释的背景，不把面积直接当作瞬时来水量。三种降雨情景共享同一初始水位和闸门设备参数，只改变降雨过程与不确定性说明；输出的水位包络线标注情景名、时间步长和模型版本。若情景结果超过校核洪水位，系统先生成会商任务，再允许专业人员比较提前泄洪、维持水位和分时调度等方案。情景、参数和批准方案按版本关联。每次发布还应把参数快照和计算结果校验和写入审计日志，供恢复演练与课程验收复核。
 
+\section{基于构件的设计与复用}\label{app:ext-component-based-design}
+
+\paragraph{对应正文}第3章相关小节，具体入口见下文说明。
+
+第3章3.4节按“因为什么而改动”划分模块，并用一个具体变化检验边界。模块如果要跨项目复用，例如把案例水库的监测接入、认证与审计用到灌区或河道项目上，还需要多做三件事：从领域里找出通用构件，接入前检验构件是否合格，把接口和配置设计成适合复用的样子。这套做法称为基于构件的设计（Component-Based Design，CBD），供课程设计选读。
+
+\subsection{领域工程：找出可复用的构件}
+
+领域工程是对某一类应用做调研，找出其中反复出现的通用功能，把它们做成可复用的构件。在水利信息系统里，身份验证、日志与审计、设备接入、观测数据的质量检查几乎每个项目都需要，流程和规则也大同小异，适合提取。
+
+提取分两步。第一步识别通用功能：比较领域内的几个应用，列出它们共有的功能模块。第二步设计通用构件并封装领域知识：例如通用的身份验证构件除了校验用户名和密码，还把用户管理、权限控制的相关规则一并封装在内部；新项目只需配置和调用，不用重新开发。
+
+\subsection{构件合格性检验}
+
+构件接入系统之前，要检验它的接口行为、性能和质量约束是否满足需求。检验结果决定三种去向：直接采用，增加一层适配后采用，或者更换实现。
+
+\paragraph{单元测试}单元测试验证构件内部的逻辑。对一个数据处理构件，检查它对各种输入的转换和计算是否正确，及时发现并修复内部缺陷。
+
+\paragraph{集成测试}集成测试在构件装进系统以后进行，检查它与其他模块的交互是否正常。以通信构件为例，重点观察三种失败形态：连接建立不上；报文能发出但字段被截断；重传后同一条读数被写入两次。这三种情况在单元测试里都看不出来，只有把构件放回真实的系统环境才会暴露。
+
+\subsection{面向复用的接口与配置设计}
+
+\paragraph{接口标准化}对外提供通用的接口形式（如 REST API），调用方就不必为每个新系统改写一次适配代码。监测数据接入构件如果提供标准化的 REST 接口，监测平台、移动巡检应用和专题分析系统都可以直接调用，不用关心它的内部实现。
+
+\paragraph{配置灵活性}把随场景变化的部分做成参数。传感器数据采集构件可以通过配置文件指定传感器类型、连接方式和采样频率，同一个构件就能适应不同类型的传感器和不同的工作环境。
+
+\paragraph{案例}案例水库的监测接入模块遵循通用的接口标准和通信协议，不依赖特定业务系统的内部实现，因此可以移植到其他水利信息系统：河道水文监测系统用它采集流量、水位和雨量，泵站运行监测系统用它接入振动、电流和视频数据，各自更换一批协议适配器即可。
+
+
+
+\section{对话框焦点管理与长列表渲染}\label{app:ext-fe-focus-list}
+
+\paragraph{对应正文}第4章相关小节，具体入口见下文说明。
+
+本节两段脚本接第4章4.2.3节和4.4.6节，需要4.4节的 DOM 与事件基础。
+
+\paragraph{对话框的焦点管理}弹出详情对话框时，键盘焦点要移到对话框标题；关闭时回到触发它的按钮，值班员才能接着刚才的位置继续操作。清单\ref{lst:ch04-a41-focus}用原生\texttt{<dialog>}元素实现：\texttt{openDialog}先记下当前焦点所在的元素，\texttt{showModal()}打开模态对话框后把焦点交给带\texttt{autofocus}的标题；\texttt{closeDialog}关闭对话框并把焦点还回去；按 Esc 触发的\texttt{cancel}事件走同一个关闭函数。脚本只管交互，样式仍交给 CSS。换成 Vue 组件时，把两个函数放进组件，并在\texttt{onUnmounted}里移除事件监听。在控制台运行后只用键盘操作：回车打开，Esc 关闭，焦点应回到“查看测站详情”按钮上。
+
+\begin{lstlisting}[label={lst:ch04-a41-focus},language=JavaScript,caption={监测详情对话框的焦点管理}]
+document.body.insertAdjacentHTML('beforeend', `
+  <button id="open-station" type="button">查看测站详情</button>
+  <dialog id="station-dialog">
+    <h2 autofocus>测站详情</h2>
+    <p>此处显示经过后端校验的测站信息。</p>
+    <button data-close type="button">关闭</button>
+  </dialog>`);
+
+const dialog = document.querySelector('#station-dialog');
+const openButton = document.querySelector('#open-station');
+let lastFocused = null;
+
+function openDialog() {
+  lastFocused = document.activeElement;
+  dialog.showModal();
+  dialog.querySelector('[autofocus]')?.focus();
+}
+
+function closeDialog() {
+  dialog.close();
+  lastFocused?.focus();
+}
+
+openButton.addEventListener('click', openDialog);
+dialog.querySelector('[data-close]')
+  .addEventListener('click', closeDialog);
+dialog.addEventListener('cancel', closeDialog);
+\end{lstlisting}
+
+\paragraph{只渲染可视窗口的长列表}列表到上万行时，瓶颈在节点数量和布局计算。虚拟滚动只为可视区域附近的几行创建节点，并把滚动位置换算成数据下标。清单\ref{lst:ch04-a44-virtual-list}是固定行高时的基本思路：占位层把滚动条撑到全量高度，可见的 8 行用绝对定位放到各自的位置，滚动时重新计算起始下标。运行后拖动滚动条，“元素”面板里始终只有 8 个行节点。实际使用还要处理行高不固定、键盘焦点落在被回收的行上，以及向读屏软件说明“第几项，共几项”；测点卡片高度差别很大时，先用分页或分组折叠，确认性能不够再引入虚拟滚动。
+
+\begin{lstlisting}[label={lst:ch04-a44-virtual-list},language=JavaScript,caption={长测站列表的可视窗口渲染思路}]
+const root = document.createElement('div');
+root.innerHTML = '<div id="virtual-list" style="height:160px;overflow:auto"></div>';
+document.body.append(root);
+const viewport = root.querySelector('#virtual-list');
+const records = Array.from({ length: 1000 }, (_, index) => ({
+  assetId: `DAM-A-PZ-${String(index + 1).padStart(4, '0')}`,
+  value: (180 + index / 100).toFixed(2)
+}));
+const rowHeight = 32;
+// 占位层把滚动条撑到全量高度，可见行再absolute定位到对应位置；
+// 没有它 scrollTop 永远到不了后面的行
+const spacer = document.createElement('div');
+spacer.style.cssText =
+  `position:relative;height:${records.length * rowHeight}px`;
+viewport.append(spacer);
+
+function renderWindow() {
+  const first = Math.floor(viewport.scrollTop / rowHeight);
+  const visible = records.slice(first, first + 8);
+  spacer.replaceChildren(...visible.map((record, offset) => {
+    const row = document.createElement('div');
+    row.style.cssText = `position:absolute;left:0;right:0;` +
+      `top:${(first + offset) * rowHeight}px;height:${rowHeight}px`;
+    row.textContent = `${record.assetId}：${record.value} kPa`;
+    return row;
+  }));
+}
+viewport.addEventListener('scroll', renderWindow, { passive: true });
+renderWindow();
+\end{lstlisting}
+
+
+
+\section{明暗主题与高对比度样式}\label{app:ext-fe-theme}
+
+\paragraph{对应正文}第4章相关小节，具体入口见下文说明。
+
+CSS 自定义属性在运行时可以被继承和覆盖，适合承载一整套主题。文字色、背景色、边框色、状态色和间距集中定义在\texttt{:root}或页面容器上，组件通过\texttt{var()}读取；值班室降低环境亮度时，只替换这一组变量，地图、卡片和表格保持同样的对比关系。暗色主题不能简单地把白色换成黑色，还要重新检查文字与背景的对比度、曲线颜色的区分度、预警颜色在暗底上的可见性和焦点环的边界。
+
+主题由用户通过按钮或系统偏好决定，不随业务预警等级自动切换。\texttt{prefers-color-scheme}作为初始值，用户显式选择后存到本地并覆盖系统偏好；主题切换只改变呈现用的变量，不改变 DOM 顺序和语义。截图、打印和投影场景还要有高对比度的后备色，“正常”与“预警”不能只靠颜色区分。
+
+清单\ref{lst:ch04-a43-dark-theme}给出明暗主题和高对比度状态样式。\texttt{data-theme}属性由应用状态控制；\texttt{forced-colors}分支让操作系统的高对比度模式接管边框和文本颜色。把这段样式与清单\ref{lst:ch04-a41-landmarks}的页面组合后，先用窄屏和键盘完成基本任务，再到 1920、2560 和 3840 像素的画布上检查，最后切换暗色和高对比度模式，每种条件下水位、预警和时间信息都应可读。
+
+\begin{lstlisting}[label={lst:ch04-a43-dark-theme},language=CSS,caption={监测页面的明暗主题与高对比度}]
+:root {
+  --surface: #ffffff;
+  --surface-raised: #f5f9ff;
+  --ink: #263238;
+  --border: #b0bec5;
+  --normal: #1565c0;
+  --warning: #d46b08;
+}
+
+[data-theme="dark"] {
+  --surface: #17212b;
+  --surface-raised: #0f151b;
+  --ink: #f5f7fa;
+  --border: #607d8b;
+  --normal: #90caf9;
+  --warning: #ffb74d;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { color-scheme: dark; }
+}
+
+.monitor-panel {
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+.monitor-panel.is-warning {
+  outline: .2rem solid var(--warning);
+}
+@media (forced-colors: active) {
+  .monitor-panel.is-warning { outline: 2px solid CanvasText; }
+}
+\end{lstlisting}
+
+
+
+\section{前端构建产物的发布与回滚}\label{app:ext-fe-release}
+
+\paragraph{对应正文}第4章相关小节，具体入口见下文说明。
+
+本节承接第4章4.8.3节。清单\ref{lst:ch04-a48-deploy}给出构建与部署的命令和反向代理的两条关键规则：前端容器只提供静态文件，\texttt{/api/}转给后端，其余找不到的路径回退到\texttt{index.html}。
+
+\begin{lstlisting}[label={lst:ch04-a48-deploy},language=bash,caption={Vite 产物与 Docker Compose 部署契约}]
+# 构建阶段：在固定 Node 版本中生成 dist/
+docker build --target build -t water-web-build .
+# 运行阶段：静态服务器只读挂载产物，API 由反向代理转发
+docker compose up -d water-web nginx
+
+# nginx 关键规则（伪配置，部署时写入站点配置）
+location /api/ { proxy_pass http://water-api:8080/; }
+location / { try_files $uri $uri/ /index.html; }
+\end{lstlisting}
+
+\paragraph{深链接与缓存分层}浏览器直接打开\texttt{/assets/DAM-A-PZ-07}时，静态服务器先找同名文件，找不到就回退到\texttt{index.html}，再由 Vue Router 渲染详情页；\texttt{/api/}必须先于这条回退规则匹配。缓存头分三层：\texttt{index.html}短缓存并要求重新验证，避免用户拿到旧入口去请求已经删除的代码块；带内容哈希的脚本和样式长期缓存；监测接口按数据时效禁止缓存或设置很短的有效期。部署后用真实浏览器和命令行各验证一次，只看服务器状态码不够。
+
+\paragraph{构建流水线}流水线分为依赖安装、静态检查、单元测试、生产构建、产物检查和发布六步。依赖安装使用锁文件（\texttt{npm ci}），不同机器得到相同版本；静态检查关注未使用变量、可访问性和路径别名解析；测试至少覆盖路由守卫、筛选计算和请求错误分类；构建日志记录 Node、Vite 和插件版本；产物体积超过预算时阻断发布。
+
+\paragraph{不可变目录与回滚}每次构建把\texttt{dist/}复制为带提交号的版本目录，生成一份包含入口哈希、资源清单和构建时间的 manifest；反向代理通过符号链接或配置项指向当前版本。切换后依次检查首页、登录、测点详情和接口健康状态。发现路由 404、资源加载失败或接口异常时，切回上一个 manifest 即可恢复。回滚只改变静态文件的指向，不动数据库和时序数据；上一个版本保留到确认监测业务稳定之后再清理。
+
+\paragraph{产物安全检查}检查分源代码、产物和运行时三个面。源代码扫描禁止把令牌、私钥和内部密码提交到仓库；产物扫描检查压缩后的 JavaScript 是否残留调试开关、源代码地图是否暴露内部路径；运行时检查内容安全策略、HTTPS、跨域策略和错误页面是否泄露堆栈。环境变量的\texttt{VITE\_}前缀不是保密机制，进入前端产物的值一律视为公开。发布记录写明发布人、构建提交号、镜像摘要、变更范围、接口兼容性、验证结果和回滚入口，值班员交接班时据此判断当前版本状态。
+
+
+
+\section{地图服务的发布、缓存与运维}\label{app:ext-ch06-gis-ops}
+
+\paragraph{对应正文}第6章相关小节，具体入口见下文说明。
+
+第6章6.2.4节说明了 WMS、WMTS、WFS、WCS 和 3D Tiles 各返回什么，以及怎样在 Cesium 里接入自建底图。把这些服务长期运行起来，还要处理发布、缓存、版本和故障。
+
+\paragraph{各类服务的数据生命周期}WMS 的样式和图例变化时重新渲染即可，不必重建原始数据；WMTS 适合版本稳定的底图，更新时按区域和层级增量切片；WFS 的属性字段属于业务契约，字段改名通过版本化接口发布；WCS 的覆盖数据保留像元分辨率、NoData 值、单位和采样时间，供模型计算复现；3D Tiles 在每个瓦片里维护几何、纹理和层级元数据，客户端按视域和屏幕误差请求。这几类服务的缓存策略、权限边界和更新节奏各不相同，不宜包装成一个笼统的“地图接口”。
+
+\paragraph{GeoServer 发布步骤}发布分四步，每一步都可以单独回退：在工作区登记数据源和坐标元数据；创建工作空间和图层；配置样式与访问权限；在 GeoWebCache（GWC）里创建或绑定瓦片矩阵集（gridset）并预生成热点区域的缓存。发布前用 GetCapabilities 确认服务版本、图层名和坐标系，发布后用一条 GetMap、一条 GetFeature 和一条 GetCoverage 请求做冒烟测试：GetMap 看颜色和图例，GetFeature 查属性、几何和轴序，GetCoverage 抽几个像元与原始文件比对，3D Tiles 检查 LOD 切换、纹理色彩空间和业务标识是否保留。冒烟通过后再启动预生成；预生成任务按层级和工程范围拆分，失败的任务可以重跑，缓存目录带版本号，避免新旧瓦片混用。缓存清理和重新切片要有任务编号与进度记录，不在高峰时段整体删除。
+
+GeoServer 的 GWC 默认只内置 EPSG:4326 与 EPSG:900913 两个瓦片矩阵集，CGCS2000 经纬度（EPSG:4490）的需要手工创建，并核对原点、瓦片宽高、分辨率和层级数。清单\ref{lst:ch06-geoserver-gridset}是一个教学配置片段：层0让$1^\circ\times1^\circ$的范围恰好落入一张$256\times256$的瓦片，以后逐层减半。
+
+\begin{lstlisting}[label={lst:ch06-geoserver-gridset},language=YAML,breaklines=true,caption={GeoServer GWC EPSG:4490 gridset配置要点}]
+gridSet:
+  name: EPSG:4490
+  srs: 4490
+  tileWidth: 256
+  tileHeight: 256
+  extent: [113.0, 34.0, 114.0, 35.0]
+  metersPerUnit: 111319.490793
+  levels:
+    # 层 0 让 1°×1° 范围恰好落入一张 256×256 瓦片：
+    # 1/256 ≈ 0.00390625 度/像素，逐层减半
+    - {level: 0, resolution: 0.00390625}
+    - {level: 1, resolution: 0.001953125}
+  cacheLayers:
+    - water:cgcs2000_basemap
+\end{lstlisting}
+
+实际工程从测区范围和服务规范计算分辨率、矩阵宽高与最大层级。图层声明的坐标系与瓦片矩阵集不一致时，缓存在切片阶段就会错位；最大层级没有与 Cesium 的\texttt{maximumLevel}同步时，客户端会持续请求不存在的瓦片，日志里出现大量404。发布脚本把这两项作为启动前检查。
+
+\paragraph{能力文档、缓存键与监控}每个服务维护一份能力文档，列出服务版本、操作、图层或覆盖名称、坐标系、轴序、输出格式、最大请求范围和异常编码，示例请求使用脱敏域名和小范围数据。样式变更会改变 WMS 的像素结果，但不改变 WFS 属性和 WCS 像元，所以图层发布记录分别保存样式版本和数据版本。缓存键至少包含图层、样式、坐标系、范围、宽高、时间维度和数据版本；带时间维度的水位或降雨图层，时间参数必须进入缓存键，否则不同时刻会显示同一张图片。平台启动时对 GetCapabilities 做健康检查，运行中记录应答时延、返回字节数、缓存命中率、4xx 与 5xx 数量和上游数据库耗时。WMS 渲染失败时，前端提示专题图不可用并保留基础底图；WFS 或 WCS 不可用时，相关查询按钮置为不可用，不把空结果显示成“没有测站”或“没有积水”。查询参数进入数据库或栅格处理器之前做白名单校验，日志记录请求摘要、追踪号、图层、坐标系和耗时，不记录完整令牌。
+
+\paragraph{3D Tiles 发布检查}检查瓦片内容的空间参考、几何误差和属性透传。每个瓦片的包围体用于视锥裁剪和屏幕空间误差判断，包围体错误会造成过早卸载或加载过多；业务属性通过稳定的对象编码关联到后端，不把完整的监测记录塞进瓦片。转换工具的输出日志包含源模型、坐标转换、LOD 阈值、纹理压缩和失败对象，抽样加载根节点、中间层和叶节点之后再开放服务。模型更新使用新目录和新版本号，客户端完成切换后再回收旧目录，避免长连接用户读到发布了一半的状态。
+
+\paragraph{向 OGC API 迁移}OGC API 路线强调资源、链接和可发现性：Features 返回集合与分页链接，Tiles 返回瓦片集和地址模板，Coverages 返回覆盖描述与取子集的能力，Maps 返回渲染结果及样式信息。经典 WMS、WFS、WCS 仍是存量系统的主流，平台可以采用“兼容层加新接口”的做法：内部数据模型统一，对外按客户端能力提供两种接口；代理层把旧的键值对参数转换为新的路径和查询参数，并记录新旧请求的对应关系。迁移期间对同一测站和同一块 DEM 样本做双接口比对，坐标、属性数量和像元统计一致后再逐步切换；能力文档标出推荐接口和弃用时间，监控按接口版本分别统计流量，确认没有客户端被意外切断。
+
+\paragraph{故障演练}人为关闭 GWC、缩小 WCS 允许范围或撤销某个图层的权限，观察客户端是否显示清楚的状态、服务端是否留下审计记录、缓存是否保持版本隔离。再用错误坐标系、越界范围、超大图片、未知图层和过期令牌等异常输入逐一请求，检查服务是否返回稳定的错误码和正确的 Content-Type，错误详情是否泄露内部路径、数据库或文件系统信息。演练结果写入运行手册，下一次发布前按同一脚本、同一批样本复核。
+
+
+
+\section{倾斜摄影的外业设计、空三检核与成果验收}\label{app:ext-ch06-photogrammetry}
+
+\paragraph{对应正文}第6章相关小节，具体入口见下文说明。
+
+第6章6.3.1节说明了倾斜摄影的流程、四种点和精度评定公式。下面是生产环节的细则，供参加实际项目的读者查阅；各项限差以项目适用的规范条款为准。
+
+\paragraph{外业设计}影像覆盖范围要超过成果边界，航带端部和转弯区留出缓冲；建筑物立面、坝肩和峡谷等遮挡严重的部位增加交叉航线或补拍方向，并在任务书里记录补拍原因。曝光时间、光圈和感光度与飞行速度、光照和地表反射率匹配，避免运动模糊和高光饱和。飞行日志保存航线版本、起降时间、设备编号、镜头组合、定位定姿数据（POS）来源、坐标基准、天气和异常处置，与影像文件用同一个任务编号关联。
+
+\paragraph{像控点与检查点的记录}每个点保存点号、现场照片、点位描述、平面坐标、高程、坐标参考系、测量设备、观测时段和质量等级。点位选在纹理稳定、边缘清楚、多个视角都能辨认的位置；坝顶栏杆、水面反光区和临时堆料区会随时间变化，不宜作控制点。检查点使用同样的记录格式，在空三求解阶段锁定为独立数据，最终验收时才参与误差统计。
+
+控制点的布设按工程对象的几何层次考虑：坝轴线两端控制整体方向，坝顶和坝脚控制高差与坡面，闸室、溢洪道和廊道出入口控制局部构件，场景边界控制模型裁切和瓦片范围。每一层至少保留一组独立检查点，误差统计才能分别回答“整体是否平移”“局部是否变形”“边界是否翘曲”。所有点都布在坝顶时，平面指标可能很好，坝脚和峡谷侧壁的失真却发现不了。项目报告把点位分层、点数和每层的最大残差列成表。
+
+\paragraph{内业检查}处理从影像完整性检查开始：核对文件数量、命名、时间戳、相机姿态、POS 轨迹和坐标单位，统计模糊、过曝、欠曝、遮挡和重叠不足的影像。检查结果分为“可进入空三”“需补拍或重采”“隔离待人工复核”三类，原始影像和检查报告只读保存。匀光匀色保持地物纹理的相对关系，处理参数和输出版本写入报告，增强操作不覆盖原始像素。
+
+\paragraph{空三的四个阶段}第一阶段检测每幅影像的特征点，在相邻影像和交叉航带之间匹配连接点，并经几何一致性检验剔除错误对应。第二阶段读取相机内方位元素、镜头畸变参数和 POS 初值，建立观测方程；相机标定文件注明获取日期、适用镜头和坐标单位。第三阶段把像控点作为带权观测加入光束法平差，迭代估计相机外方位元素、连接点坐标和必要的系统改正；平差报告列出迭代次数、单位权中误差、控制点残差和未参与平差的检查点清单。第四阶段用独立检查点验证成果；误差集中在某条航带或某个高差突变区时，回查航带重叠、POS 时间同步、控制点坐标和镜头标定，而不是调高软件的容差。
+
+空三参数的调整采用小步回归：冻结通过检查的影像、控制点和相机标定版本，每次只改变一个参数组（连接点匹配阈值、POS 权重或畸变模型），输出平差迭代、控制点残差和独立检查点的$m_p$、$m_h$，与上一版本比较。整体误差下降而某一航带误差上升时，保留两版结果并分析原因。重复飞行或季度更新时，稳定的控制点作为跨期公共点，新增检查点用来检验地表变化；发生过施工变化的点位标注“不可跨期比较”，避免把工程改造误判为摄影测量误差。
+
+\paragraph{密集匹配与中间成果}密集匹配之前冻结通过空三验收的相机和点云版本。水面、玻璃和植被边缘纹理不足，会出现空洞；坝体混凝土纹理重复，会出现条纹；狭窄廊道视角不足，可能生成错误表面。处理报告记录点云密度、异常点剔除规则、空洞填补策略和人工修补区域；用于变形监测的几何不做视觉平滑。从点云到网格的每一步保留可回放的中间成果：点云阶段记录坐标基准、密度和分类规则，网格阶段记录三角形数量、孔洞填补和简化误差，纹理阶段记录影像选择、接缝处理和压缩参数，切片阶段记录层级、包围盒、瓦片格式和服务版本。坝面、闸门和监测仪器等关键对象同时保存原始高密度模型与发布用的轻量模型，用稳定的对象编码关联：平台运行时使用轻量瓦片，专业复核时回到原始模型核对尺寸和位置。
+
+\paragraph{语义检查}把坝顶、坝脚、溢洪道边墙和库岸水线分别作为可查询对象，检查对象编码是否与 BIM 或 GIS 目录一致；同一构件在不同 LOD 里的几何简化，核对其中心线、端点和高程是否在允许范围内。监测仪器的位置与实测点号一一对应，模型更新只替换几何和纹理，不改变历史观测的对象主键。模型表面与控制点一致而对象属性错配时，成果退回语义校核环节。
+
+\paragraph{验收结论}交付验收覆盖几何精度、坐标基准、对象语义、版本血缘和服务性能五个方面，分别保存检查数据、误差报告、属性映射表和加载测试结果。平面限差、高程限差、中误差计算口径和粗差处置规则作为一个整体签字确认；项目采用地方细化规范或合同中更严的要求时，注明版本、条款和适用范围；规范版本变化后重新计算检查点并保留旧版报告。验收单给出“通过、限期整改、退回重算”三种结论之一，连同责任人、完成日期和复核证据：通过表示精度和语义均满足适用条款；限期整改表示问题已经定位，且不影响隔离范围以外的成果；退回重算表示控制网、基准或关键对象存在系统性风险。平台的发布服务只读取“通过”版本。每次复核保存输入清单、软件环境和脚本版本，同一批检查点在另一台机器上应得到相同结果；跨期更新的报告注明哪些差异来自新采集、哪些来自处理参数。
+
+
+
+\section{观测图表的更新预算、缓存与状态恢复}\label{app:ext-ch07-chart-runtime}
+
+\paragraph{对应正文}第7章相关小节，具体入口见下文说明。
+
+第7章7.2.7节说明了渲染器选择和更新节奏。图表从课堂演示走向长期运行的值班页面时，还会遇到下面几类问题。
+
+\paragraph{缩放、查询与缓存}\texttt{dataZoom}只改变视图范围，浏览器里不必保留多年的原始数据。用户拖动到尚未缓存的时间段时，控制器按当前范围和合适的聚合粒度向服务端请求，并取消上一个未完成的请求；新应答返回后核对时间窗版本，晚到的旧应答不覆盖用户已经选定的新范围，做法与4.5.4节的序号核对相同。缓存键至少包含\texttt{assetId}、起止时间、聚合粒度、质量过滤条件、规则版本和时区，少了其中任何一项，同一条曲线在不同过滤条件下就可能被错误复用。在开发工具里显示缓存命中率、查询耗时和返回点数，可以看到“缩放流畅”主要取决于服务端按粒度聚合，而不是前端的某个技巧。
+
+\paragraph{联动事件的一致性}图表点击、三维拾取和列表选择走同一个事件模型，事件里带着\texttt{assetId}、\texttt{occurredAt}、当前时间窗、质量码和来源组件。控制器先比较事件版本，再决定是否更新其他视图；给事件设幂等键，重复点击只更新一次焦点。指针移动产生的高频预览可以节流，确认预警、提交工单和导出报告不能节流。时间窗输入采用防抖并显示加载状态。服务端返回时如果规则版本已经变化，界面提示“按新规则重新计算”，不要静默替换颜色。地图、图表与三维场景之间共用一个选择状态对象，例如\texttt{\{assetId, timeRange, qualityFilter, scenarioVersion\}}；切换场景版本时清空或重新校验它，避免把上一版本的测点高亮到新模型上。
+
+\paragraph{保护用户的上下文}数据刷新不重置当前的缩放范围、选中测点、键盘焦点和已展开的详情。规则版本改变时先保留旧视图并提示差异，用户确认后再切换。导出的图片或表格使用与屏幕相同的时间窗和过滤条件，并把采样周期、聚合方法、质量过滤和规则版本写入元数据，值班员看到的屏幕、分析员导出的报告和事后回放的记录才能互相核对。
+
+\paragraph{刷新与断线后的恢复}浏览器刷新、网络短暂中断和标签页挂起都会打断实时页面。状态层可以保存一份快照：最近一次通过校验的时间窗、各序列的摘要、规则版本和最后一个事件游标。恢复时先显示“数据恢复中”，再按游标向服务端补拉增量，补拉的数据重新经过去重、迟到判断和质量规则。快照里不保存整个 ECharts 配置对象，也不保存临时的颜色，否则旧的合并结果会被当成新状态。补拉完成之前，断线期间在图上保持缺测阴影，不画成连续曲线。值班员确认预警的操作由后端记录确认人、时间和规则版本，刷新页面或换一台设备后确认状态仍在。
+
+\paragraph{可以复用的回归数据}图表部分准备五组数据：单点连续到达；同一事件重复到达；乱序与迟到；含\texttt{missing}区间；一条序列删除后再加入。逐组检查曲线是否按\texttt{id}更新、旧图例是否清理、缺测是否断线、参考线是否与参数版本一致、联动能否在图表与三维之间往返。再在窄屏、深色主题、灰度打印和纯键盘操作下各测一遍，并确认实例销毁后没有残留的订阅。地图部分另加边界外的点、跨瓦片的点和坐标转换失败的点。每个失败用例保存输入快照、预期图形和实际图形，升级 ECharts 版本时用同一组数据回归。三维交互的回归再覆盖原点变更、LOD 切换和时间回放三者的组合，并记录相机位置、视场角、设备像素比、窗口尺寸、渲染器和浏览器版本，同一个点击坐标在不同设备上的结果才能对比；命中的三维对象、图表数据下标和事件时间三者不一致时，先修坐标或状态契约，不要靠调大拾取半径掩盖。
+
+
+
+\section{颜色令牌、验收矩阵与色板版本}\label{app:ext-ch07-color-tokens}
+
+\paragraph{对应正文}第7章相关小节，具体入口见下文说明。
+
+第7章7.2.9节给出了色板类型、对比度公式和冗余通道的做法。多人协作、多主题的平台还需要把颜色当作配置来管理。
+
+\paragraph{颜色令牌}先建立颜色令牌表，再让组件引用令牌名称，页面里不直接写十六进制色值。令牌分六组：背景、正文、边框、顺序型色阶、预警等级和质量状态。背景令牌有浅色和深色两套取值，正文令牌同时记录普通文字和大号文字的对比度结果。切换大屏主题时只替换一组令牌并重新计算对比度，不会出现地图已经变暗、图例仍是浅色文字的局部失配。每个令牌还记录适用对象和禁用对象：红色预警令牌只表示需要立即处置的业务等级，不兼作“数据无效”；蓝色预警令牌不兼作链接色或选中色。同一个点既是\texttt{suspect}又是橙色预警时，详情里质量码、等级、规则版本和处置建议分列为独立字段，颜色只是辅助。
+
+\paragraph{验收矩阵}一张静态截图通过对比度检查，不能说明运行时也可读。按“背景×状态×组件×通道”建立矩阵：背景取浅色、深色、灰度和投影；状态取 NONE、BLUE、YELLOW、ORANGE、RED 与\texttt{valid}、\texttt{suspect}、\texttt{missing}的组合；组件取地图点、折线、柱状图、表格、按钮和弹窗；通道检查颜色、文字、图标、纹理和键盘焦点。每一格记录前景色、背景色、对比度、有无非颜色提示、读屏软件读出的文本和截图编号。某一格只依赖颜色时记为不通过，补上文字或形状后再复查。
+
+\paragraph{状态变化时的可读性}预警等级从 NONE 升为 BLUE，界面除了变色，还显示“出现需关注变化”的文字，并在时间轴上留下状态变化的记录；从 BLUE 升为 YELLOW，同时更新处置入口和确认状态。质量码从\texttt{valid}变为\texttt{missing}时折线断开；恢复为\texttt{valid}后缺测区间保持空白，详情里显示恢复时间，补传的数据不伪装成连续的实时数据。动画时间要短并且可以暂停，闪烁只用于需要立即确认的事件。
+
+\paragraph{色板版本}色板与预警规则版本一起放进配置仓库。每次调整蓝、黄、橙、红的色值，记录变更原因、影响的页面、对比度复测结果和导出报告样例；历史报告按生成时的色板版本解释，同一个等级在不同月份的报告里含义一致。前端加载令牌时发现版本不匹配，开发环境给出明显提示，生产环境回退到最近一次通过验收的版本并上报监控。
+
+\paragraph{打印与导出}黑白打印时用线型、填充纹理和缩写文字区分等级。导出的表格把颜色还原成“预警等级”和“质量码”两列，并在表头给出解释。图片的替代文本按“对象—数值—质量—预警—时间”的顺序生成。验收时对比屏幕、打印件和导出文件，检查等级、质量与时间在三处是否能被一致地识别。
+
+
+
+\section{第8章数据库与部署的运行维护练习}\label{sec:appc-ch08-ops}
+
+\paragraph{对应正文}第8章相关小节，具体入口见下文说明。
+
+第8章核心路线只用到建表、幂等写入、条件更新和按事件追溯。本节收录其余的数据库练习和部署运维要点。表结构见第8章8.3.3节；所有语句都在隔离的练习库里执行，保留和压缩策略会删数据、改存储格式，不要对着有真实数据的库试。
+
+\subsection{迁移版本、清单查询与空间查询}
+
+迁移脚本要能重复执行，执行过的版本记在数据库里。清单\ref{lst:ch08-sql-migration}用一张轻量的版本表记迁移名称和校验摘要；发布工具另记执行人、开始时间、结束时间和失败日志。迁移中途失败时，恢复脚本只回滚本次版本，不删已有的业务数据。
+
+\begin{lstlisting}[label={lst:ch08-sql-migration},language=SQL,caption={可重复执行的迁移版本记录}]
+CREATE TABLE IF NOT EXISTS schema_migration (
+    version      text PRIMARY KEY,
+    description  text NOT NULL,
+    checksum     text NOT NULL,
+    applied_at   timestamptz NOT NULL DEFAULT now(),
+    applied_by   text NOT NULL
+);
+
+INSERT INTO schema_migration(version, description, checksum, applied_by)
+-- checksum 由发布流水线对迁移脚本正文计算后填入，禁止手工编造
+VALUES ('QY-DDL-001', 'core asset reading warning ddl',
+        'sha256:9f2d1c0a...(流水线填入)', current_user)
+ON CONFLICT (version) DO NOTHING;
+\end{lstlisting}
+
+对象清单是最频繁的读路径之一。清单\ref{lst:ch08-sql-asset-list}用状态和类型过滤有效测点，只取前端需要的列：不写\texttt{SELECT *}，以后加了列接口载荷也不会悄悄变大，数据库也更容易用上覆盖索引。分页用稳定的\texttt{asset\_id}游标（\ref{app:ext-perf}节），页码在数据增删之后会漂移。
+
+\begin{lstlisting}[label={lst:ch08-sql-asset-list},language=SQL,caption={按类型和状态读取测点清单}]
+SELECT asset_id, display_name, asset_type, unit,
+       ST_X(geometry) AS longitude,
+       ST_Y(geometry) AS latitude,
+       elevation_m
+FROM asset
+WHERE active = true
+  AND asset_type = :asset_type
+  AND (:after_id IS NULL OR asset_id > :after_id)
+ORDER BY asset_id
+LIMIT :page_size;
+\end{lstlisting}
+
+空间查询先说清输入多边形的坐标系。清单\ref{lst:ch08-sql-spatial-query}把外部边界转换到 4490，先用 GiST 索引支持的包围盒过滤（\texttt{\&\&}），再做精确的\texttt{ST\_Within}判断。输入无效时接口在参数校验阶段就返回错误；交给数据库执行，得到的是空结果，会被当成“区域内没有测点”。
+
+\begin{lstlisting}[label={lst:ch08-sql-spatial-query},language=SQL,caption={影响区内测点的空间查询}]
+WITH area AS (
+    SELECT ST_Transform(
+        ST_SetSRID(ST_GeomFromText(:wkt), :input_srid), 4490
+    ) AS boundary
+)
+SELECT a.asset_id, a.display_name, a.asset_type
+FROM asset AS a CROSS JOIN area
+WHERE a.active
+  AND a.geometry && area.boundary
+  AND ST_Within(a.geometry, area.boundary)
+ORDER BY a.asset_id;
+\end{lstlisting}
+
+工单到期查询用数据库的当前时间和明确的状态集合。清单\ref{lst:ch08-sql-due-work-order}排除已取消或已完成的工单，连预警等级一起返回，值班员先处理等级高、临近截止的。更新状态时带版本号（8.3.4节的条件更新），两个角色才不会互相覆盖。
+
+\begin{lstlisting}[label={lst:ch08-sql-due-work-order},language=SQL,caption={即将到期工单查询}]
+SELECT w.work_order_id, w.warning_id, w.owner_role,
+       w.due_at, w.action, p.level
+FROM work_order AS w
+JOIN warning AS p ON p.warning_id = w.warning_id
+WHERE w.status = 'in_progress'
+  AND w.due_at <= now() + INTERVAL '2 hours'
+ORDER BY p.level DESC, w.due_at;
+\end{lstlisting}
+
+模型运行审计把版本和输入快照一起返回。清单\ref{lst:ch08-sql-model-audit}按模型名称和时间窗筛出成功与失败的运行；失败的运行只用来定位故障，下游不拿它当结果。结果要重新发布时新建一条运行记录，旧结果不覆盖。
+
+\begin{lstlisting}[label={lst:ch08-sql-model-audit},language=SQL,caption={模型运行审计查询}]
+SELECT run_id, model_name, model_version, status,
+       started_at, finished_at, input_snapshot
+FROM model_run
+WHERE model_name = :model_name
+  AND started_at >= :start_at
+  AND started_at < :end_at
+ORDER BY started_at DESC;
+\end{lstlisting}
+
+建表顺序见第8章8.3.3节。已经产生证据的表不能靠删表来回滚：先停止写入，导出审计快照，再把迁移标记为失效。升级字段按“增加列—双写—回填—切换—观察—清理”六步走，观察期内保留旧列，直到备份和一次恢复演练都成功。
+
+\subsection{连续聚合、保留与压缩}
+
+连续聚合是TimescaleDB提供的一种物化视图：数据库按时间桶预先算好平均值、最值和样本数，并随新数据自动刷新，重复读取趋势时不必每次扫描原始观测。清单\ref{lst:ch08-sql-cagg}在\texttt{reading}上建立十五分钟聚合\texttt{reading\_15m}，只纳入\texttt{valid}观测，并保留样本数，页面可以据此解释“平均值为什么没有算上某条数据”。刷新策略要有一个回看窗口来覆盖迟到的消息；例中回看30天、延迟5分钟是教学参数，实际窗口应覆盖通信补传和消息重投的最长时间。
+
+\begin{lstlisting}[label={lst:ch08-sql-cagg},language=SQL,caption={十五分钟连续聚合视图与刷新策略}]
+CREATE MATERIALIZED VIEW reading_15m
+WITH (timescaledb.continuous) AS
+SELECT asset_id,
+       time_bucket('15 minutes', occurred_at) AS bucket,
+       avg(value) AS value_avg, min(value) AS value_min,
+       max(value) AS value_max, count(*) AS sample_count
+FROM reading
+WHERE quality = 'valid'
+GROUP BY asset_id, bucket
+WITH NO DATA;
+
+SELECT add_continuous_aggregate_policy(
+    'reading_15m',
+    start_offset => INTERVAL '30 days',
+    end_offset => INTERVAL '5 minutes',
+    schedule_interval => INTERVAL '5 minutes'
+);
+\end{lstlisting}
+
+聚合结果适合重复读取的统计，当不了证据。预警计算可以读十五分钟平均值来降低延迟，触发处置之前保留对应的原始时间窗、样本数和质量分布。聚合表不手工编辑；数值要修正，回到原始观测追加订正版本，再刷新聚合。
+
+连续聚合查询只读已物化的时间桶。清单\ref{lst:ch08-sql-aggregate-query}把桶边界、样本数一起返回，前端在样本不足时显示“数据稀疏”，不画一条看似连续的折线。数据库统一用 UTC 存时间，展示层按用户时区转换，跨时区部署才不会乱。
+
+\begin{lstlisting}[label={lst:ch08-sql-aggregate-query},language=SQL,caption={读取十五分钟连续聚合结果}]
+SELECT bucket, value_avg, value_min, value_max, sample_count
+FROM reading_15m
+WHERE asset_id = :asset_id
+  AND bucket >= :start_at
+  AND bucket < :end_at
+ORDER BY bucket;
+\end{lstlisting}
+
+迟到的消息会让最近的聚合桶需要重算。清单\ref{lst:ch08-sql-refresh-aggregate}是手工刷新某个窗口的语句，运维员确认补传范围后执行，变更记录里写明起止时间。日常刷新仍由自动策略负责；手工刷新是补救手段，不是绕过质量审核的常规入口。
+
+\begin{lstlisting}[label={lst:ch08-sql-refresh-aggregate},language=SQL,caption={补传后的连续聚合刷新}]
+CALL refresh_continuous_aggregate(
+    'reading_15m', :refresh_start, :refresh_end
+);
+
+INSERT INTO schema_migration(version, description, checksum, applied_by)
+VALUES (:audit_version, 'late data aggregate refresh', :checksum, current_user);
+\end{lstlisting}
+
+冷数据的保留期服从证据保留期限。清单\ref{lst:ch08-sql-retention}用 TimescaleDB 的策略对象表达自动清理窗口；730 天是教学取值，生产项目的值从法规、合同和审计要求里来，删除前先完成备份校验。某段数据还被未关闭的工单引用时，业务服务先延长它的保留期。
+
+\begin{lstlisting}[label={lst:ch08-sql-retention},language=SQL,caption={时序数据保留策略示例}]
+SELECT add_retention_policy(
+    'reading', drop_after => INTERVAL '730 days'
+);
+
+-- 发布前由项目配置替换保留窗口，并核对审计与备份要求
+SELECT hypertable_name, num_chunks, compression_enabled
+FROM timescaledb_information.hypertables
+WHERE hypertable_name = 'reading';
+\end{lstlisting}
+
+压缩避开还在频繁更新的热数据。清单\ref{lst:ch08-sql-compression}按时间列组织压缩，30 天以前的块才压；质量修订窗口没关闭的数据不压，压缩块上的更新代价很高。压缩不是删除，恢复演练照样要验证索引、连续聚合和原始版本都能读。
+
+\begin{lstlisting}[label={lst:ch08-sql-compression},language=SQL,caption={按时间块配置时序压缩}]
+ALTER TABLE reading SET (
+    timescaledb.compress,
+    timescaledb.compress_segmentby = 'asset_id',
+    timescaledb.compress_orderby = 'occurred_at DESC'
+);
+
+SELECT add_compression_policy(
+    'reading', compress_after => INTERVAL '30 days'
+);
+\end{lstlisting}
+
+时间分块的意义是把“最近的数据最常用”变成物理上的局部性：查最近一小时不碰几年前的块，归档两年前的数据不锁住正在写入的块。块的大小用有代表性的写入数据压测后确定：太小，规划器要管理大量对象；太大，压缩和备份的粒度变粗。
+
+\subsection{健康检查、备份登记、权限视图与修订审计}
+
+数据库健康检查找的是约束被违反的前兆。清单\ref{lst:ch08-sql-health-check}统计缺坐标、质量码不在集合内和时间戳在未来的记录；它不改数据，只出报告。每日检查结果和发布版本关联起来，出现异常时才分得清是设备问题、迁移问题还是程序问题。
+
+\begin{lstlisting}[label={lst:ch08-sql-health-check},language=SQL,caption={核心表健康检查}]
+SELECT 'asset_without_geometry' AS check_name, count(*) AS failures
+FROM asset WHERE geometry IS NULL
+UNION ALL
+SELECT 'reading_bad_quality', count(*)
+FROM reading WHERE quality NOT IN ('valid','suspect','missing')
+UNION ALL
+SELECT 'reading_in_future', count(*)
+FROM reading WHERE occurred_at > now();
+\end{lstlisting}
+
+备份恢复演练验证的是“业务链能不能恢复”，不是“文件在不在”。清单\ref{lst:ch08-sql-backup-scope}只登记快照的元信息，导出数据和权限由备份工具负责。演练完成后用一条事件 ID 串起测点、观测、预警、工单和模型运行，确认外键和 JSONB 证据都能读。
+
+\begin{lstlisting}[label={lst:ch08-sql-backup-scope},language=SQL,caption={备份快照登记}]
+CREATE TABLE IF NOT EXISTS backup_snapshot (
+    snapshot_id  text PRIMARY KEY,
+    started_at   timestamptz NOT NULL,
+    finished_at  timestamptz,
+    object_count integer NOT NULL,
+    checksum     text NOT NULL,
+    verified     boolean NOT NULL DEFAULT false
+);
+INSERT INTO backup_snapshot(snapshot_id, started_at, object_count, checksum)
+VALUES (:snapshot_id, now(), :object_count, :checksum);
+\end{lstlisting}
+
+权限查询只返回当前角色可见的对象。清单\ref{lst:ch08-sql-role-view}用视图把敏感字段包起来，报表用户看得到编码、等级和统计结果，看不到用不着的个人信息和设备密钥。视图是数据库这一层的最小权限，应用层授权和数据库审计照样要有。
+
+\begin{lstlisting}[label={lst:ch08-sql-role-view},language=SQL,caption={面向报表角色的最小视图}]
+CREATE OR REPLACE VIEW warning_report AS
+SELECT warning_id, asset_id, level, evaluable,
+       score, reason, status, created_at
+FROM warning
+WHERE status <> 'closed' OR created_at >= now() - INTERVAL '90 days';
+
+GRANT SELECT ON warning_report TO report_reader;
+\end{lstlisting}
+
+异常数据的修复要能审计。清单\ref{lst:ch08-sql-revision-audit}在写入新观测版本之前先登记修订前后的值、原因和批准人；没有批准号的修订，接口拒绝提交。审计表可以单独归档，前端只显示最新值不是删它的理由。
+
+\begin{lstlisting}[label={lst:ch08-sql-revision-audit},language=SQL,caption={观测修订审计登记}]
+CREATE TABLE IF NOT EXISTS reading_revision_audit (
+    audit_id       bigserial PRIMARY KEY,
+    event_id       text NOT NULL,
+    old_value      numeric,
+    new_value      numeric,
+    old_quality    text NOT NULL,
+    new_quality    text NOT NULL,
+    reason         text NOT NULL,
+    approved_by    text NOT NULL,
+    audited_at     timestamptz NOT NULL DEFAULT now()
+);
+\end{lstlisting}
+
+数据库的观察指标和业务指标对着看。清单\ref{lst:ch08-sql-observability}从系统视图读超表大小、索引大小和最近一条数据的时间，给压测和运维看板提供证据，不直接下“系统健康”的结论。指标异常时同时看 Kafka 积压、质量码分布和工单延迟，只看数据库 CPU 看不出问题在哪。
+
+\begin{lstlisting}[label={lst:ch08-sql-observability},language=SQL,caption={数据库容量与新鲜度观察}]
+SELECT hypertable_name, table_bytes, index_bytes,
+       total_bytes
+FROM hypertable_detailed_size('reading');
+
+SELECT max(occurred_at) AS latest_reading,
+       now() - max(occurred_at) AS data_lag
+FROM reading;
+\end{lstlisting}
+
+备份同时覆盖结构、数据、权限和扩展。PostGIS 的空间列、TimescaleDB 的超表元数据、连续聚合策略和角色授权，缺任何一项恢复后都可能查不出来。全量备份之外保留增量或归档日志，定期在隔离环境恢复一次。恢复后按事件标识查测点、原始观测、质量结论、预警记录、工单回执和模型输入，再检查角色授权对不对、新的时间块能不能继续写入；有一项失败就记为恢复缺口。
+
+数据库权限按最小必要分配：采集角色只写观测和发件箱；质量角色能改质量标记，不能改原始值；预警角色能创建和关闭预警；值班员能确认工单并提交回执；专业分析员能读脱敏的历史数据；运维员才能做分区、压缩和恢复。数据库角色与应用角色一一对应，凭据放在密钥服务里，代码和教材示例不出现真实口令。审计日志记角色、对象、操作、时间、请求追踪号和结果摘要，数据库行为才能和 Kafka 消息、HTTP 请求、前端操作对上。
+
+模式演进先考虑兼容。加可空列通常向后兼容；删列和改枚举要经过观察期；大表加非空约束先回填并验证，再分阶段切换。实体类和 DTO 不另起一套字段名，数据库字典是唯一来源，代码审查时逐列核对。后端把\texttt{asset}映射成 Java 实体时保留\texttt{asset\_id}、\texttt{geometry}和\texttt{metadata}的原语义，空间类型的转换策略写明；S3 生成示例数据时按同一套编码规则和质量码集合生成。
+
+测试覆盖约束、查询计划和故障恢复三层。单元测试验证质量优先级和分类结果；集成测试验证外键、唯一键、空间坐标系、超表写入和连续聚合；端到端测试验证从事件接入到工单回执的链路。性能测试用与目标测点规模相近的数据分布，分别记高峰写入、最近查询、空间查询、预警队列和聚合刷新的延迟。故障测试包括消息重复、乱序、数据库短暂不可用、超表块压缩失败和恢复后重放，每个故障写明预期的质量码、状态转移和用户看到的提示。
+
+容量规划从测点数量、采样周期和保留期限推：先算每天的事件行数，再加索引、JSONB 证据、备份副本和压缩后的增长系数；写入峰值考虑设备同时上线、补传和消息重投。算出来的只是初始值，最终用接近生产分布的回放数据压测。压测记平均吞吐之外的 P95、P99 延迟、锁等待、超表块数量、连续聚合刷新滞后，以及故障重试后积压恢复的时间。
+
+\subsection{告警规则、容量与备份恢复演练}
+
+健康检查的三个层次见第8章8.6.1节；业务烟测在发布后和每日交接时各跑一次。清单\ref{lst:ch08-alert-rules}是一组告警规则的基线。
+
+\begin{lstlisting}[language=YAML,caption={监控指标与告警规则基线},label={lst:ch08-alert-rules}]
+groups:
+  - name: reservoir-platform
+    interval: 30s
+    rules:
+      - alert: ApiReadinessFailed
+        expr: api_readiness == 0
+        for: 2m
+        labels: {severity: critical, owner: ops}
+      - alert: ReadingIngestLag
+        expr: reservoir_reading_ingest_lag_seconds > 300
+        for: 5m
+        labels: {severity: warning, owner: duty}
+      - alert: TimescaleDiskPressure
+        expr: reservoir_db_free_bytes < 20000000000
+        for: 10m
+        labels: {severity: critical, owner: ops}
+      - alert: WarningAckTimeout
+        expr: reservoir_warning_unacked_seconds > 900
+        for: 5m
+        labels: {severity: warning, owner: duty}
+\end{lstlisting}
+
+清单里的规则按基础设施（\texttt{ApiReadinessFailed}、\texttt{TimescaleDiskPressure}）、数据链路（\texttt{ReadingIngestLag}）和业务闭环（\texttt{WarningAckTimeout}）分组，每条告警有责任角色（\texttt{owner}）和处置手册。阈值结合补传的最大重投周期、TimescaleDB 压缩窗口和工单确认时限来定，再用历史分位数校准。告警和恢复都记时间、规则版本、当前值和证据链接；同一根因的指标按服务和时间窗聚合，否则一次故障会刷出几十条告警。
+
+容量评估覆盖 API 并发、Kafka 分区、Redis 内存、数据库写入吞吐和时序增长。\cpStationCount 个测点的教学规模单节点就能跑，推不出生产容量；压测把补传、模型运行和备份的并发都算进去。扩容前后用同一场景复测，记消息最老年龄、WAL 增长、磁盘剩余比例和查询 P95，看容量提升有没有换来数据延迟或权限错误。
+
+备份策略回答三个问题：可接受的数据丢失窗口（RPO）是多少，一致性点在哪里，怎样验证恢复。PostgreSQL 用全量加 WAL 归档（WAL 是 PostgreSQL 的预写日志，记录每一次修改，配合全量备份可以恢复到任意时刻）；TimescaleDB 的压缩和分区任务与备份窗口错开；对象存储保存模型、纹理、报告和备份清单的版本；Kafka 保留足够长的日志供重放，重放靠\texttt{event\_id}唯一约束去重。Redis 只放可重建的缓存，不进备份范围。清单\ref{lst:ch08-backup-rehearsal}把这些写成一份演练配置。
+
+\begin{lstlisting}[language=YAML,caption={备份恢复演练与健康检查清单},label={lst:ch08-backup-rehearsal}]
+backup: {schedule: "15 2 * * *", retention_days: 35, mode: "base-plus-wal", verify: [checksum, restore-schema, latest-reading-time]}
+object_store: {versioning: true, retention_days: 90}
+kafka: {topic: reservoir.reading.v1, replay_window_hours: 72}
+rehearsal:
+  target: isolated-restore
+  steps: [stop-writes, restore-postgres-and-wal, restore-object-manifest, start-api-readonly, verify-trace, replay-with-event-id-deduplication, run-smoke-test]
+  pass_conditions: [latest_reading_within_rpo, api_readiness_up, no_duplicate_warning, audit_trace_continuous]
+\end{lstlisting}
+
+清单\ref{lst:ch08-backup-rehearsal}把“有备份”变成可观察的证据。开始前冻结变更窗口，记下最后一个观测、预警和工单 ID；恢复后先以只读模式校验对象关系、时序最新时间和审计链，再开放写入。Kafka 只重放恢复点之后、数据库里没有的事件；缓存由 API 按数据库重建。\texttt{pass\_conditions}里任何一条不满足，演练就是不通过，记录里写明是缺备份、迁移出错还是有解释不了的事件。
+
+生产故障按观测、隔离、恢复、复盘的顺序处置。运维员先看探针和指标是不是同时异常，一个浏览器出问题不等于全局故障；再按运行手册摘掉异常实例或暂停消费，保住数据库和消息证据；恢复后用业务烟测验证从测点到工单的链路，专业分析员复核质量码和预警有没有重复计算。每次演练记下恢复时长、数据丢失窗口、告警命中率和人工确认点，反过来校准保留策略、探针阈值和容量预算。
+
+环境一致性还要查时区、字符集、容器用户和文件权限。数据库统一用 UTC 存发生时间，展示层按值班员时区转换；所有容器以非 root 用户运行，备份目录只给备份进程写权限。发布前用同一份配置渲染开发、测试、生产三套文件，比较键的集合，多了或少了变量就停止发布。配置差异写进决策记录，不靠运维员记着。
+
+服务启动分迁移、就绪、接流量三个阶段。迁移在独立的一次性容器里执行并记录版本，API 进程启动时只验证当前版本，多个副本不同时改表结构。就绪探针恢复后逐步放量：先让一个实例接只读查询，再开观测写入和工单写入。错误率或延迟超过发布阈值就停止放量、保留旧副本，回不回滚由值班员和审批人一起定。
+
+监控标签只用稳定的维度：测点编号、工程编号、服务名和环境。用户姓名、完整请求参数和原始观测值不进指标，一是基数太高，二是泄露敏感信息。日志记请求号、状态码、耗时和错误类型，详细堆栈只进受控的日志库。运维看板同时展示基础设施、数据质量和业务闭环，值班员看到的是能据此行动的提示，不是解释不了的技术计数。
+
+告警处理有确认、抑制、升级、恢复四个状态。值班员确认不等于故障解决了，烟测和业务链路验证通过才能关闭事件；维护窗口内的预期告警可以抑制，抑制规则有开始和结束时间。关键告警超过确认时限自动升级给运维员，超过处置时限再通知审批人。每次升级保留原始告警和责任转移记录，交接后上下文才不丢。
+
+Kafka 重放和定时补传都可能造成重复事件。服务端靠\texttt{event\_id}唯一约束和事务保证幂等；演练时运维员主动重放一条已经消费过的消息，看会不会重复创建预警或工单。重放窗口覆盖消息的最大重投周期，分区、偏移量和过滤条件写进演练记录。发现重复时先暂停消费者，保留现场，由开发人员依据审计链修复，不直接删数据库记录。
+
+备份保留多久，由恢复目标、法规要求和容量预算一起定。太短，长周期趋势无法复盘；太长，成本和恢复扫描时间上去。清理任务只删已通过校验且超出保留期的版本，删之前生成清单等审批。压缩、分区和归档策略每次变更先在恢复环境验证，线上压缩不能拖慢实时写入。
+
+部署验收包含故障注入，不只走正常路径：停掉 Redis，看 API 是否降级为数据库查询；暂停 Kafka 消费，看积压告警和恢复后的幂等；限制数据库磁盘，看容量告警和写入保护；撤销一个角色，看 403 是否正确显示。每项注入设最长持续时间和回滚动作，演练完确认没有遗留进程、临时密钥或没关的维护窗口。
+
+部署实验提交这些记录：编排文件的版本、渲染后的非敏感配置、探针应答、告警触发与恢复时间、备份校验摘要、恢复后的业务烟测和变更审批号。教师据此判断部署可不可重复、数据可不可恢复、权限有没有效、运维责任清不清楚。迁到多节点编排环境时，再补节点故障、持久卷调度和跨节点网络的恢复测试。
+
+
+\section{教学组织与学时建议}\label{online:teaching-guide}
+
+\paragraph{对应正文}前言的学习顺序与阶段表；以下安排供教师按教学条件选用。
+
+三个学时方案按学生最终能做到什么来编制，学时少的方案少走几个阶段，已走过的阶段仍然完整。方案之间的差别在于沿表\ref{tab:preface-version-stage}走到哪个阶段：32学时走到 S3 中点，48学时走到 S5，56学时走到 S6 并完成部署验收。每个方案都包含表\ref{tab:preface-core-optional}左列的对应部分，右列的选学专题留给课程设计或自学。
+
+\begin{itemize}
+\item \textbf{32学时方案（到 S3 中点）：}学生能解释一次请求的全过程，把一句含糊需求写成验收条件，在教学接口上做出带四种状态的监测页面，写出第一个 HTTP 接口并把它接到数据库。不讲三维场景、曲线联动和预警闭环；第6--8章可作为课程设计的阅读材料。表\ref{tab:preface-32-hours}是章节分配，适合专业方向课或选修课。
+\begin{table}[htbp]
+\centering
+\caption{32学时方案章节分配（到 S3 中点）}
+\label{tab:preface-32-hours}
+\begin{tabular}{p{2.8cm}p{1.4cm}p{8.2cm}}
+\toprule
+章节或环节 & 学时 & 课堂重点 \\
+\midrule
+第1章 & 2 & 平台组成、三类规范、一次查询的六个环节（S0）、预警闭环 \\
+第2章 & 4 & 用例与异常流、数据字典、从含糊需求到验收条件 \\
+第3章 & 4 & 需求分给模块、接口契约、走查一次查询 \\
+第4章 4.1--4.5 & 9 & 静态页面（S1）、请求与四种页面状态、竞态故障（S2 核心） \\
+第5章 5.1--5.4 & 11 & 第一个接口（S3 起点）、数据库查询与三层（S3 中点） \\
+复习与个人答辩 & 2 & 对着自己的页面和接口解释一次失败 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\item \textbf{48学时方案（到 S5）：}在32学时的基础上完成认证与授权（S3 终点）、坝体场景与测点绑定（S4）、曲线与三维联动（S5）。第8章只读8.1--8.2，了解业务链怎样由已学模块接成，不做预警与工单的实现。表\ref{tab:preface-48-hours}给出分配。
+\begin{table}[htbp]
+\centering
+\caption{48学时方案章节分配（到 S5）}
+\label{tab:preface-48-hours}
+\begin{tabular}{p{2.8cm}p{1.4cm}p{8.2cm}}
+\toprule
+章节或环节 & 学时 & 课堂重点 \\
+\midrule
+第1章 & 2 & 平台组成、三类规范、一次查询的六个环节（S0）、预警闭环 \\
+第2章 & 4 & 用例与异常流、数据字典、从含糊需求到验收条件 \\
+第3章 & 3 & 需求分给模块、接口契约、走查两条路径 \\
+第4章 & 10 & S1 静态页面、S2 四种状态与竞态、Vue 路由与登录守卫 \\
+第5章 5.1--5.6 & 13 & S3 起点、中点与终点：接口、数据库、三层、认证与授权 \\
+第6章 6.1--6.2 & 6 & 几何体坝体、模型加载、坐标与高程、测点绑定（S4） \\
+第7章 7.1--7.4 & 6 & 观测记录与质量码、第一条曲线、双向联动（S5） \\
+第8章 8.1--8.2 & 2 & 读懂 PZ-07 业务链用到哪些已学模块 \\
+复习与项目答辩 & 2 & 演示 S5 页面，解释一次切换测点时的请求过程 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\item \textbf{56学时方案（到 S6 与部署）：}讲授第1--8章的核心与指导实践小节，第4、5章各占14学时，其中一半用于随堂实验；第8章完成质量门禁、预警定级、确认与工单闭环，并用 Compose 与冒烟测试做一次部署验收。第6章6.3--6.4、第8章8.5和第9章9.2.1--9.2.2作为选读。表\ref{tab:preface-56-hours}给出分配，讲授与实验之比约为30:26。
+\begin{table}[htbp]
+\centering
+\caption{56学时方案章节分配（到 S6 与部署）}
+\label{tab:preface-56-hours}
+\begin{tabular}{p{2.8cm}p{1.2cm}p{1.2cm}p{7.0cm}}
+\toprule
+章节或环节 & 讲授 & 实验 & 课堂重点 \\
+\midrule
+第1章 & 2 & 0 & 一次请求的完整过程、平台分层、三类规范与业务闭环 \\
+第2章 & 3 & 2 & 用例、异常流、数据字典与可验证需求 \\
+第3章 & 3 & 2 & 需求分给模块、接口契约、两条走查记录、一份 ADR（架构决策记录） \\
+第4章 & 7 & 7 & 页面、数据请求与四种状态、Vue 组件、路由与共享状态 \\
+第5章 & 7 & 7 & 第一个 HTTP 接口、数据库与三层、校验与事务、认证与权限 \\
+第6章 & 3 & 2 & 几何体坝体、坐标与高程、模型加载与测点绑定 \\
+第7章 & 3 & 2 & 观测记录与质量码、第一条曲线、测点状态与联动 \\
+第8章 & 2 & 3 & 质量门禁、四级定级、确认与工单闭环、部署冒烟测试 \\
+第9章与答辩 & 0 & 1 & 按课程成果回顾、现场小修改与解释 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\item \textbf{课程设计方案：}以第8章贯穿案例为中心，要求学生分组完成需求说明、架构设计、前端页面、后端接口和三维场景集成，可与毕业设计或综合实训衔接。
+\end{itemize}
+
+
 % BEGIN learning-layers
 \section{各节学习层次}\label{online:layers}
 
@@ -602,55 +1688,55 @@ API 版本化需要在兼容性和演进速度之间作出可审计的选择。�
 \toprule
 节 & 标题 & 各小节层次 \\
 \midrule
-1.1 & 智慧水利的概念与发展 & 核心：1.1.1、1.1.2、1.1.7；拓展：1.1.3、1.1.4、1.1.5、1.1.6 \\
+1.1 & 智慧水利的概念与发展 & 核心：1.1.1、1.1.2、1.1.3、1.1.5；拓展：1.1.4 \\
 1.2 & 智慧水利平台架构体系 & 核心：1.2.1、1.2.2、1.2.3、1.2.4、1.2.5 \\
-1.3 & 软件工程方法概述 & 核心：1.3.1、1.3.2、1.3.3 \\
+1.3 & 为什么水利平台需要软件工程 & 核心 \\
 2.1 & 软件生命周期 & 核心 \\
-2.2 & 软件生命周期模型与选型 & 核心：2.2.1、2.2.2、2.2.3、2.2.5；指导实践：2.2.9；拓展：2.2.4、2.2.6、2.2.7、2.2.8 \\
-2.3 & 需求获取与理解 & 核心：2.3.1、2.3.2、2.3.4、2.3.5、2.3.6；指导实践：2.3.3 \\
+2.2 & 软件生命周期模型与选型 & 核心：2.2.1、2.2.2、2.2.3、2.2.4；指导实践：2.2.5；拓展：2.2.6 \\
+2.3 & 需求获取与理解 & 核心：2.3.1、2.3.2、2.3.3、2.3.4、2.3.5 \\
 2.4 & 需求分析的任务与原则 & 核心：2.4.1、2.4.2 \\
 2.5 & 结构化分析 & 核心：2.5.1、2.5.2、2.5.3、2.5.4；指导实践：2.5.5、2.5.6、2.5.7 \\
-2.6 & 软件需求规格说明与验收 & 核心：2.6.3；指导实践：2.6.1；拓展：2.6.2 \\
-3.1 & 软件架构及其描述 & 核心：3.1.2、3.1.3、3.1.4；指导实践：3.1.1 \\
+2.6 & 软件需求规格说明与验收 & 核心：2.6.1、2.6.4；指导实践：2.6.2；拓展：2.6.3 \\
+3.1 & 软件架构及其描述 & 核心：3.1.1、3.1.2、3.1.3、3.1.4、3.1.5 \\
 3.2 & 架构类型与分层 & 核心：3.2.1、3.2.2；指导实践：3.2.3 \\
-3.3 & 构件与接口设计 & 核心：3.3.2；指导实践：3.3.1 \\
-3.4 & 模块化与依赖 & 核心：3.4.1、3.4.2、3.4.3；指导实践：3.4.4 \\
+3.3 & 接口与数据流 & 核心：3.3.1、3.3.2、3.3.3；指导实践：3.3.4 \\
+3.4 & 模块化与依赖 & 核心：3.4.1、3.4.2、3.4.3；拓展：3.4.4 \\
 3.5 & 架构选择 & 核心：3.5.1、3.5.2；拓展：3.5.3、3.5.4、3.5.5 \\
-3.6 & 架构评审 & 指导实践：3.6.1、3.6.2、3.6.3；拓展：3.6.4、3.6.5 \\
+3.6 & 架构评审 & 核心：3.6.1；指导实践：3.6.2；拓展：3.6.3、3.6.4、3.6.5 \\
 4.1 & Web基础概念与浏览器架构 & 核心 \\
-4.2 & HTML基础与语义化 & 核心：4.2.1 \\
-4.3 & CSS样式与响应式布局 & 核心：4.3.1、4.3.2；指导实践：4.3.4、4.3.5、4.3.6、4.3.8；拓展：4.3.3、4.3.7 \\
+4.2 & HTML基础与语义化 & 核心：4.2.1、4.2.2；指导实践：4.2.3 \\
+4.3 & CSS样式与响应式布局 & 核心：4.3.1、4.3.2、4.3.3、4.3.4、4.3.5；指导实践：4.3.6；拓展：4.3.7、4.3.8 \\
 4.4 & JavaScript基础编程 & 核心：4.4.1、4.4.2、4.4.3、4.4.4、4.4.5、4.4.7、4.4.8；指导实践：4.4.6 \\
-4.5 & 数据请求与页面状态 & 核心：4.5.1、4.5.2、4.5.3、4.5.4、4.5.9；指导实践：4.5.5、4.5.6、4.5.7；拓展：4.5.8 \\
+4.5 & 数据请求与页面状态 & 核心：4.5.1、4.5.2、4.5.3、4.5.4、4.5.10；指导实践：4.5.5、4.5.6、4.5.7；拓展：4.5.8、4.5.9 \\
 4.6 & Vue 3组件化开发 & 核心：4.6.1、4.6.2；指导实践：4.6.3、4.6.4 \\
 4.7 & Vue Router与Pinia应用组织 & 指导实践：4.7.1、4.7.2、4.7.3、4.7.4 \\
 4.8 & 调试、构建与阶段验收 & 核心：4.8.1；指导实践：4.8.2；拓展：4.8.3 \\
-5.1 & 后端服务与REST接口概述 & 核心 \\
+5.1 & 后端服务与REST接口概述 & 核心：5.1.1、5.1.2 \\
 5.2 & 第一个 HTTP 接口：从固定数据到契约 & 核心：5.2.1、5.2.2、5.2.3 \\
-5.3 & Spring Boot企业级开发基础 & 核心：5.3.1、5.3.3；指导实践：5.3.2、5.3.4、5.3.6；拓展：5.3.5 \\
-5.4 & Jakarta Persistence与事务管理 & 核心：5.4.1、5.4.9、5.4.10；指导实践：5.4.2、5.4.4、5.4.5、5.4.6、5.4.13；拓展：5.4.3、5.4.7、5.4.8、5.4.11、5.4.12、5.4.14 \\
-5.5 & 服务层与异常处理 & 核心：5.5.1；指导实践：5.5.2、5.5.3、5.5.5；拓展：5.5.4、5.5.6 \\
-5.6 & Spring Security 6与JWT & 指导实践：5.6.1、5.6.2 \\
-5.7 & 事务事件与消息队列 & 核心：5.7.1；指导实践：5.7.2、5.7.3、5.7.4、5.7.5；拓展：5.7.6 \\
+5.3 & Spring Boot 工程是怎样装起来的 & 核心：5.3.1、5.3.2、5.3.3；拓展：5.3.4 \\
+5.4 & Jakarta Persistence与事务管理 & 核心：5.4.1、5.4.2、5.4.4、5.4.5、5.4.6；指导实践：5.4.3、5.4.7；拓展：5.4.8、5.4.9、5.4.10、5.4.11 \\
+5.5 & 服务层与异常处理 & 核心：5.5.1、5.5.2；指导实践：5.5.3、5.5.4；拓展：5.5.5 \\
+5.6 & Spring Security 6与JWT & 核心：5.6.1；指导实践：5.6.2；拓展：5.6.3 \\
+5.7 & 事务事件与消息队列 & 核心：5.7.1；拓展：5.7.2、5.7.3、5.7.4、5.7.5、5.7.6。本节引言和5.7.1讲清两个异步概念：“提交之后再做”，以及同步调用为什么会把下游的故障传给上游。5.7.2—5.7.6是 Kafka 生产者、消费者幂等、重试与死信、事务发件箱和分区顺序的完整实现，属于选学，用于课程设计或自学，运行它们需要配套工程的 Compose 环境 \\
 5.8 & 性能诊断与可观测性专题 & 拓展 \\
-5.9 & 测试策略与质量门禁 & 指导实践 \\
-6.1 & WebGL2与Three.js三维渲染基础 & 核心：6.1.1、6.1.2、6.1.4、6.1.5；拓展：6.1.3 \\
-6.2 & GIS服务、坐标与二三维集成 & 核心：6.2.2、6.2.3；指导实践：6.2.1；拓展：6.2.4 \\
-6.3 & 倾斜摄影与BIM模型构建 & 拓展：6.3.1、6.3.2 \\
+5.9 & 测试策略与质量门禁 & 指导实践：5.9.1、5.9.2；拓展：5.9.3 \\
+6.1 & WebGL2与Three.js三维渲染基础 & 核心：6.1.1、6.1.2、6.1.3、6.1.4、6.1.5；拓展：6.1.6 \\
+6.2 & GIS服务、坐标与二三维集成 & 核心：6.2.1、6.2.2、6.2.3；指导实践：6.2.4；拓展：6.2.5 \\
+6.3 & 倾斜摄影与BIM模型构建 & 拓展：6.3.1、6.3.2、6.3.3 \\
 6.4 & 数字孪生水利平台架构概览 & 拓展：6.4.1、6.4.2、6.4.3、6.4.4、6.4.5、6.4.6 \\
-7.1 & 面向可视化的数据准备 & 核心：7.1.1、7.1.2、7.1.6；指导实践：7.1.3、7.1.4；拓展：7.1.5 \\
-7.2 & 图表与实时联动 & 核心：7.2.1、7.2.4、7.2.5；指导实践：7.2.2；拓展：7.2.3、7.2.6、7.2.7 \\
-7.3 & 三维场景中的监测点绘制 & 核心：7.3.3；指导实践：7.3.1；拓展：7.3.2 \\
-7.4 & 监测点互动与拾取技术 & 核心：7.4.1、7.4.3；指导实践：7.4.4；拓展：7.4.2 \\
+7.1 & 面向可视化的数据准备 & 核心：7.1.1、7.1.2；指导实践：7.1.3；拓展：7.1.4、7.1.5 \\
+7.2 & 图表与实时联动 & 核心：7.2.1、7.2.3、7.2.4、7.2.5；指导实践：7.2.2；拓展：7.2.6、7.2.7、7.2.8、7.2.9 \\
+7.3 & 三维场景中的监测点绘制 & 核心：7.3.2；指导实践：7.3.1；拓展：7.3.3 \\
+7.4 & 监测点互动与拾取技术 & 核心：7.4.1、7.4.2；指导实践：7.4.4；拓展：7.4.3 \\
 8.1 & 需求分析与业务闭环 & 核心：8.1.1、8.1.2、8.1.3 \\
 8.2 & 总体架构与三维场景设计 & 核心：8.2.1；指导实践：8.2.3；拓展：8.2.2 \\
-8.3 & 数据模型、前端展示与后端处理 & 核心：8.3.1；指导实践：8.3.2、8.3.3、8.3.5、8.3.6、8.3.7；拓展：8.3.4、8.3.8 \\
-8.4 & 智能分析、预警与业务闭环 & 核心：8.4.1；指导实践：8.4.2；拓展：8.4.3 \\
-8.5 & 数字孪生水利平台案例 & 拓展：8.5.1、8.5.2、8.5.3、8.5.4、8.5.5、8.5.6、8.5.7、8.5.8、8.5.9、8.5.10、8.5.11、8.5.12、8.5.13、8.5.14 \\
+8.3 & 数据模型、前端展示与后端处理 & 核心：8.3.1、8.3.2；指导实践：8.3.3、8.3.4、8.3.5、8.3.6；拓展：8.3.7、8.3.8 \\
+8.4 & 智能分析、预警与业务闭环 & 核心：8.4.1、8.4.2；拓展：8.4.3 \\
+8.5 & 数字孪生水利平台案例 & 拓展：8.5.1—8.5.14 \\
 8.6 & 系统部署、运维与验收 & 指导实践：8.6.1、8.6.2、8.6.3 \\
 9.1 & 全书回顾 & 核心 \\
-9.2 & 技术发展趋势与展望 & 拓展：9.2.1、9.2.2、9.2.3 \\
-9.3 & 对读者的建议与后续学习指引 & 核心：9.3.1；拓展：9.3.2、9.3.3、9.3.4 \\
+9.2 & 技术发展趋势与展望 & 核心：9.2.3；拓展：9.2.1、9.2.2 \\
+9.3 & 对读者的建议与后续学习指引 & 核心：9.3.1；拓展：9.3.2、9.3.3 \\
 \bottomrule
 \end{longtable}
 % END learning-layers

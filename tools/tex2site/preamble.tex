@@ -4,7 +4,10 @@
 \setCJKmainfont{Noto Sans CJK SC}
 \setCJKsansfont{Noto Sans CJK SC}
 \setCJKmonofont{Noto Sans Mono CJK SC}
-\setmainfont{TeX Gyre Heros}
+\IfFileExists{texgyreheros-regular.otf}{%
+  \setmainfont{TeX Gyre Heros}}{%
+  \setmainfont{lmsans10-regular.otf}[BoldFont=lmsans10-bold.otf,
+    ItalicFont=lmsans10-oblique.otf,BoldItalicFont=lmsans10-boldoblique.otf]}
 \usepackage{xcolor}
 \definecolor{Primary}{HTML}{1565C0}
 \definecolor{PrimaryLight}{HTML}{E3F2FD}

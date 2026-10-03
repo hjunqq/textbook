@@ -173,7 +173,7 @@
       "requestBody": null,
       "status": 200,
       "location": null,
-      "rawBody": "{\"warningId\":\"w-0001\",\"assetId\":\"DAM-A-WL-01\",\"level\":\"BLUE\",\"evaluable\":true,\"score\":0.36,\"reason\":\"水位出现需关注变化\",\"status\":\"acknowledged\",\"acknowledgedAt\":\"2026-09-12T05:07:42.017Z\"}",
+      "rawBody": "{\"warningId\":\"w-0001\",\"assetId\":\"DAM-A-WL-01\",\"level\":\"BLUE\",\"evaluable\":true,\"score\":0.36,\"reason\":\"水位出现需关注变化\",\"status\":\"acknowledged\",\"acknowledgedAt\":\"2026-09-22T16:25:37.399Z\"}",
       "body": {
         "warningId": "w-0001",
         "assetId": "DAM-A-WL-01",
@@ -182,7 +182,7 @@
         "score": 0.36,
         "reason": "水位出现需关注变化",
         "status": "acknowledged",
-        "acknowledgedAt": "2026-09-12T05:07:42.017Z"
+        "acknowledgedAt": "2026-09-22T16:25:37.399Z"
       }
     },
     {
@@ -214,7 +214,7 @@
       },
       "status": 200,
       "location": null,
-      "rawBody": "{\"workOrderId\":\"wo-0001\",\"warningId\":\"w-0001\",\"ownerRole\":\"运维员\",\"dueAt\":\"2026-07-06T12:00:00+08:00\",\"action\":\"教学演练：现场核查预警对应的监测点\",\"status\":\"completed\",\"result\":\"教学演练：完成现场核查并登记处理结果\",\"completedAt\":\"2026-09-12T05:07:42.027Z\"}",
+      "rawBody": "{\"workOrderId\":\"wo-0001\",\"warningId\":\"w-0001\",\"ownerRole\":\"运维员\",\"dueAt\":\"2026-07-06T12:00:00+08:00\",\"action\":\"教学演练：现场核查预警对应的监测点\",\"status\":\"completed\",\"result\":\"教学演练：完成现场核查并登记处理结果\",\"completedAt\":\"2026-09-22T16:25:37.410Z\"}",
       "body": {
         "workOrderId": "wo-0001",
         "warningId": "w-0001",
@@ -223,7 +223,7 @@
         "action": "教学演练：现场核查预警对应的监测点",
         "status": "completed",
         "result": "教学演练：完成现场核查并登记处理结果",
-        "completedAt": "2026-09-12T05:07:42.027Z"
+        "completedAt": "2026-09-22T16:25:37.410Z"
       }
     },
     {
@@ -232,7 +232,7 @@
       "requestBody": null,
       "status": 200,
       "location": null,
-      "rawBody": "[{\"warningId\":\"w-0001\",\"assetId\":\"DAM-A-WL-01\",\"level\":\"BLUE\",\"evaluable\":true,\"score\":0.36,\"reason\":\"水位出现需关注变化\",\"status\":\"closed\",\"acknowledgedAt\":\"2026-09-12T05:07:42.017Z\"},{\"warningId\":\"w-0005\",\"assetId\":\"DAM-A-WL-01\",\"level\":\"NONE\",\"evaluable\":false,\"score\":null,\"reason\":\"缺测导致未评估\",\"status\":\"closed\"}]",
+      "rawBody": "[{\"warningId\":\"w-0001\",\"assetId\":\"DAM-A-WL-01\",\"level\":\"BLUE\",\"evaluable\":true,\"score\":0.36,\"reason\":\"水位出现需关注变化\",\"status\":\"closed\",\"acknowledgedAt\":\"2026-09-22T16:25:37.399Z\"},{\"warningId\":\"w-0005\",\"assetId\":\"DAM-A-WL-01\",\"level\":\"NONE\",\"evaluable\":false,\"score\":null,\"reason\":\"缺测导致未评估\",\"status\":\"closed\"}]",
       "body": [
         {
           "warningId": "w-0001",
@@ -242,7 +242,7 @@
           "score": 0.36,
           "reason": "水位出现需关注变化",
           "status": "closed",
-          "acknowledgedAt": "2026-09-12T05:07:42.017Z"
+          "acknowledgedAt": "2026-09-22T16:25:37.399Z"
         },
         {
           "warningId": "w-0005",
@@ -337,44 +337,44 @@
     "selectedAssetId": "DAM-A-PZ-07",
     "actualAssets": 28,
     "coordinate": [
-      688.6140250246217,
-      160.8,
-      -599.4000000001804
+      19.893294056336316,
+      123.5,
+      -5.993999999851951
     ],
     "groundY": 120,
     "gridSpacing": 10,
     "geometryAndCoordinatesUnchanged": true,
     "click": {
-      "x": 299.9999999999995,
-      "y": 160.88057127391656
+      "x": 300,
+      "y": 242.36542484214397
     },
     "viewport": {
       "width": 600,
       "height": 440
     },
-    "annotation": "采集时添加局部参考网格、投影线与编码标签；调整相机；不代表阶段页默认外观"
+    "annotation": "采集时添加局部参考网格、投影线与编码标签；调整相机；坝体材质调为半透明以显示埋在坝内的渗压计；不代表阶段页默认外观"
   },
   "s5Display": {
     "selectedAssetId": "DAM-A-PZ-07",
     "actualAssets": 28,
     "coordinate": [
-      688.6140250246217,
-      160.8,
-      -599.4000000001804
+      19.893294056336316,
+      123.5,
+      -5.993999999851951
     ],
     "groundY": 120,
     "gridSpacing": 10,
     "geometryAndCoordinatesUnchanged": true,
     "click": {
-      "x": 231.9999999999995,
-      "y": 160.88057127391656
+      "x": 231.99999999999997,
+      "y": 242.36542484214397
     },
     "viewport": {
       "width": 464,
       "height": 440
     },
-    "annotation": "采集时添加局部参考网格、投影线与编码标签；调整相机；不代表阶段页默认外观",
-    "actualModuleUrl": "http://127.0.0.1:5194/node_modules/.vite/deps/echarts.js?v=ad8ef531",
+    "annotation": "采集时添加局部参考网格、投影线与编码标签；调整相机；坝体材质调为半透明以显示埋在坝内的渗压计；不代表阶段页默认外观",
+    "actualModuleUrl": "http://127.0.0.1:5194/node_modules/.vite/deps/echarts.js?v=9ce10a7c",
     "seriesDataUnchanged": true,
     "dataCount": 288,
     "textSpans": [
@@ -502,8 +502,8 @@
       "to": "DAM-A-PZ-07",
       "method": "Playwright mouse.click -> 原 PointPicker 射线拾取 -> select -> 教学 API",
       "click": {
-        "x": 231.9999999999995,
-        "y": 160.88057127391656
+        "x": 231.99999999999997,
+        "y": 242.36542484214397
       },
       "responseStatus": 200,
       "responseUrl": "http://127.0.0.1:5194/api/assets/DAM-A-PZ-07/readings?from=2026-07-01T00%3A00%3A00%2B08%3A00&to=2026-07-02T00%3A00%3A00%2B08%3A00",

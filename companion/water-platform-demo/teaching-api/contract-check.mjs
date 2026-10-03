@@ -4,22 +4,24 @@
 // 同一个脚本对三种数据来源都应当全绿——这就是“教学接口可替换”的含义：
 //   node teaching-api/server.mjs                                     # 教学接口
 //   mvn spring-boot:run -Dspring-boot.run.main-class=edu.example.lesson52.Lesson52Application
+//   mvn spring-boot:run -Dspring-boot.run.main-class=edu.example.lesson54.Lesson54Application   # 5.4 节：接数据库，无认证
 //   mvn spring-boot:run                                              # 完整后端（需数据库）
 //
-// 用法：node teaching-api/contract-check.mjs [baseUrl] [--stage=teaching|lesson52|full]
+// 用法：node teaching-api/contract-check.mjs [baseUrl] [--stage=teaching|lesson52|lesson54|full]
 //   node teaching-api/contract-check.mjs http://localhost:8080 --stage=teaching
 //
 // 三种来源的数据深度不同，所以分阶段裁剪期望：
 //   teaching  固定数据集全量（28 个对象），支持 teach= 故障注入
 //   lesson52  5.2 节的四个写死对象，只有 DAM-A-PZ-07 有观测
+//   lesson54  5.4 节：对象与观测来自数据库（db/002_seed.sql），三层结构与统一错误体已有，仍无认证
 //   full      真实数据库，对象与观测由 db/002_seed.sql 决定
 // 但**契约形状**（状态码、字段名、错误体）三者必须完全一致，这才是核对的重点。
 
 const args = process.argv.slice(2);
 const base = (args.find(a => a.startsWith('http')) ?? 'http://localhost:8080').replace(/\/$/, '');
 const stage = (args.find(a => a.startsWith('--stage='))?.slice(8)) ?? 'teaching';
-if (!['teaching', 'lesson52', 'full'].includes(stage)) {
-  console.error(`未知阶段 ${stage}，可选 teaching / lesson52 / full`);
+if (!['teaching', 'lesson52', 'lesson54', 'full'].includes(stage)) {
+  console.error(`未知阶段 ${stage}，可选 teaching / lesson52 / lesson54 / full`);
   process.exit(2);
 }
 
@@ -38,9 +40,10 @@ async function call(path, options = {}) {
   return { status: res.status, json, text };
 }
 
-// 认证：教学接口与完整后端要求令牌，lesson52 阶段还没有认证（5.6 节才加）
+// 认证：教学接口与完整后端要求令牌，lesson52 与 lesson54 阶段还没有认证（5.6 节才加）
+const noAuth = stage === 'lesson52' || stage === 'lesson54';
 async function login() {
-  if (stage === 'lesson52') return {};
+  if (noAuth) return {};
   const res = await call('/api/auth/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -157,7 +160,7 @@ const run = async () => {
   }
 
   // —— 通用约定：未认证 401 ——
-  if (stage !== 'lesson52') {
+  if (!noAuth) {
     const anon = await call('/api/assets');
     check('不带令牌访问返回 401', anon.status === 401, `status=${anon.status}`);
     check('401 错误体为契约形状', isContractError(anon.json), anon.text.slice(0, 160));

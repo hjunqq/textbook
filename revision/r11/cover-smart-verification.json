@@ -1,0 +1,14 @@
+{
+  "package": "R11-06-cover-smart",
+  "base": "d55a82c",
+  "pages_before": 386,
+  "pages_after": 386,
+  "changed_text_pages_after_cover": [],
+  "pdf": "output/智慧水利平台架构与开发-R11-智慧水利封面版.pdf",
+  "pdf_sha256": "81e71e832d126fd3890cd43e0cb45454bfdae1c7d6f63d298c1537251a07b998",
+  "image": "output/images/generated/cover-smart-water-r11.png",
+  "print_width_cm": 15.2,
+  "effective_dpi": 328.5,
+  "preview": "output/封面预览-R11-智慧水利.png",
+  "source_scope": "仅替换封面图片，书名排版、版权页、各章与附录未改。"
+}

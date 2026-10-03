@@ -1,4 +1,4 @@
-// S5 阶段页（7.3–7.4 节）：真实观测曲线与三维对象联动。
+// S5 阶段页（7.2–7.4 节）：真实观测曲线与三维对象联动。
 // 运行依赖 S3 与 S4——先有能返回观测的接口（教学接口或第5章的后端），
 // 再有第6章绑好测点的场景，本页只做“把两者连起来”这一件事。
 //
@@ -50,6 +50,7 @@ const range = readingQuery({ from: '2026-07-01T00:00:00+08:00', to: '2026-07-02T
 async function loadSeries(assetId, signal) {
   const query = new URLSearchParams(range).toString();
   const res = await fetch(`/api/assets/${assetId}/readings?${query}`, { headers: auth, signal });
+  // 按 8.1 节契约，/readings 没有观测时返回 []，204 只用于 /readings/latest；此行为防御性处理
   if (res.status === 204) return [];
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));

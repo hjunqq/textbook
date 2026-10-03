@@ -9,7 +9,7 @@ import jakarta.persistence.*;
 public class ReadingEntity {
     @EmbeddedId private ReadingId id;
     // 幂等键：数据库层为 (occurred_at, event_id) 复合唯一索引
-    //（TimescaleDB 超表的唯一索引必须包含分区列，见第8章 8.3 节）
+    //（TimescaleDB 超表的唯一索引必须包含分区列，见第5章 5.4.7 节）
     @Column(name = "event_id", nullable = false) private String eventId;
     // 对应 001_init.sql 的 numeric（见 8.3 数据字典）。用 Double 会被 ddl-auto: validate 拒绝，
     // 也不符合 5.5 节“带单位的小数应使用 BigDecimal”的口径。

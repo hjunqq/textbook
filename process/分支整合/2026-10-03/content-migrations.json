@@ -1,0 +1,82 @@
+[
+  {
+    "from": "revision:appendix/app:ext-service-boundary",
+    "to": "online/online:ch05-api",
+    "policy": "本科重编的集中讲解；保留质量线独有故障注入/竞态等例子；保留两组引用标签"
+  },
+  {
+    "from": "revision:appendix/app:ext-fe-auth",
+    "to": "online/online:frontend-auth",
+    "policy": "本科重编的集中讲解；保留质量线独有故障注入/竞态等例子；保留两组引用标签"
+  },
+  {
+    "from": "revision:appendix/app:ext-ch06-crs-audit",
+    "to": "online/online:ch06-crs",
+    "policy": "本科重编的集中讲解；保留质量线独有故障注入/竞态等例子；保留两组引用标签"
+  },
+  {
+    "from": "revision:appendix/app:ext-ch01-platform-review",
+    "to": "online/online:ch01",
+    "policy": "本科重编的集中讲解；保留质量线独有故障注入/竞态等例子；保留两组引用标签"
+  },
+  {
+    "from": "revision:appendix/app:ext-ch02-baseline-governance",
+    "to": "online/online:ch02",
+    "policy": "本科重编的集中讲解；保留质量线独有故障注入/竞态等例子；保留两组引用标签"
+  },
+  {
+    "from": "revision:appendix/app:ext-component-based-design",
+    "to": "online/app:ext-component-based-design",
+    "policy": "全文迁移，不进入印刷版"
+  },
+  {
+    "from": "revision:appendix/app:ext-fe-focus-list",
+    "to": "online/app:ext-fe-focus-list",
+    "policy": "全文迁移，不进入印刷版"
+  },
+  {
+    "from": "revision:appendix/app:ext-fe-theme",
+    "to": "online/app:ext-fe-theme",
+    "policy": "全文迁移，不进入印刷版"
+  },
+  {
+    "from": "revision:appendix/app:ext-fe-release",
+    "to": "online/app:ext-fe-release",
+    "policy": "全文迁移，不进入印刷版"
+  },
+  {
+    "from": "revision:appendix/app:ext-ch06-gis-ops",
+    "to": "online/app:ext-ch06-gis-ops",
+    "policy": "全文迁移，不进入印刷版"
+  },
+  {
+    "from": "revision:appendix/app:ext-ch06-photogrammetry",
+    "to": "online/app:ext-ch06-photogrammetry",
+    "policy": "全文迁移，不进入印刷版"
+  },
+  {
+    "from": "revision:appendix/app:ext-ch07-chart-runtime",
+    "to": "online/app:ext-ch07-chart-runtime",
+    "policy": "全文迁移，不进入印刷版"
+  },
+  {
+    "from": "revision:appendix/app:ext-ch07-color-tokens",
+    "to": "online/app:ext-ch07-color-tokens",
+    "policy": "全文迁移，不进入印刷版"
+  },
+  {
+    "from": "revision:appendix/sec:appc-ch08-ops",
+    "to": "online/sec:appc-ch08-ops",
+    "policy": "全文迁移，不进入印刷版"
+  },
+  {
+    "from": "两分支第5章5.6节扩展示例",
+    "to": "online:security",
+    "policy": "原扩展代码全文保留，核心改为真实三角色配套实现；核心代码与配套新增一致性检查"
+  },
+  {
+    "from": "revision:preface/推荐教学组织方式",
+    "to": "online/online:teaching-guide",
+    "policy": "教师学时与组织表整体迁移；学生阶段入口保留正文，统一S0–S6，不并列旧版本号"
+  }
+]

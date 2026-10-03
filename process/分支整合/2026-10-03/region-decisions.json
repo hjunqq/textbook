@@ -1,0 +1,1242 @@
+[
+  {
+    "file": "DECISIONS.md",
+    "region": 1,
+    "choice": "C",
+    "before_ours": 462,
+    "before_revision": 694,
+    "after": 1156
+  },
+  {
+    "file": "companion/water-platform-demo/MAPPING.md",
+    "region": 1,
+    "choice": "C",
+    "before_ours": 623,
+    "before_revision": 727,
+    "after": 732
+  },
+  {
+    "file": "companion/water-platform-demo/docker-compose.yml",
+    "region": 1,
+    "choice": "T",
+    "before_ours": 149,
+    "before_revision": 410,
+    "after": 410
+  },
+  {
+    "file": "output/appendix/answers.tex",
+    "region": 1,
+    "choice": "C",
+    "before_ours": 502,
+    "before_revision": 505,
+    "after": 524
+  },
+  {
+    "file": "output/appendix/answers.tex",
+    "region": 2,
+    "choice": "C",
+    "before_ours": 332,
+    "before_revision": 1159,
+    "after": 1166
+  },
+  {
+    "file": "output/appendix/answers.tex",
+    "region": 3,
+    "choice": "T",
+    "before_ours": 237,
+    "before_revision": 266,
+    "after": 266
+  },
+  {
+    "file": "output/chapters/chapter01.tex",
+    "region": 1,
+    "choice": "O",
+    "before_ours": 133,
+    "before_revision": 105,
+    "after": 133
+  },
+  {
+    "file": "output/chapters/chapter01.tex",
+    "region": 2,
+    "choice": "O",
+    "before_ours": 23,
+    "before_revision": 266,
+    "after": 23
+  },
+  {
+    "file": "output/chapters/chapter01.tex",
+    "region": 3,
+    "choice": "C",
+    "before_ours": 4401,
+    "before_revision": 279,
+    "after": 197
+  },
+  {
+    "file": "output/chapters/chapter01.tex",
+    "region": 4,
+    "choice": "O",
+    "before_ours": 183,
+    "before_revision": 129,
+    "after": 183
+  },
+  {
+    "file": "output/chapters/chapter01.tex",
+    "region": 5,
+    "choice": "C",
+    "before_ours": 280,
+    "before_revision": 143,
+    "after": 316
+  },
+  {
+    "file": "output/chapters/chapter01.tex",
+    "region": 6,
+    "choice": "C",
+    "before_ours": 190,
+    "before_revision": 215,
+    "after": 406
+  },
+  {
+    "file": "output/chapters/chapter01.tex",
+    "region": 7,
+    "choice": "C",
+    "before_ours": 200,
+    "before_revision": 1244,
+    "after": 1247
+  },
+  {
+    "file": "output/chapters/chapter01.tex",
+    "region": 8,
+    "choice": "T",
+    "before_ours": 1960,
+    "before_revision": 242,
+    "after": 242
+  },
+  {
+    "file": "output/chapters/chapter01.tex",
+    "region": 9,
+    "choice": "O",
+    "before_ours": 58,
+    "before_revision": 61,
+    "after": 58
+  },
+  {
+    "file": "output/chapters/chapter02.tex",
+    "region": 1,
+    "choice": "O",
+    "before_ours": 62,
+    "before_revision": 70,
+    "after": 62
+  },
+  {
+    "file": "output/chapters/chapter02.tex",
+    "region": 2,
+    "choice": "T",
+    "before_ours": 118,
+    "before_revision": 839,
+    "after": 839
+  },
+  {
+    "file": "output/chapters/chapter02.tex",
+    "region": 3,
+    "choice": "T",
+    "before_ours": 538,
+    "before_revision": 467,
+    "after": 467
+  },
+  {
+    "file": "output/chapters/chapter02.tex",
+    "region": 4,
+    "choice": "O",
+    "before_ours": 115,
+    "before_revision": 225,
+    "after": 115
+  },
+  {
+    "file": "output/chapters/chapter02.tex",
+    "region": 5,
+    "choice": "T",
+    "before_ours": 2464,
+    "before_revision": 191,
+    "after": 191
+  },
+  {
+    "file": "output/chapters/chapter02.tex",
+    "region": 6,
+    "choice": "O",
+    "before_ours": 94,
+    "before_revision": 104,
+    "after": 94
+  },
+  {
+    "file": "output/chapters/chapter02.tex",
+    "region": 7,
+    "choice": "T",
+    "before_ours": 588,
+    "before_revision": 162,
+    "after": 162
+  },
+  {
+    "file": "output/chapters/chapter02.tex",
+    "region": 8,
+    "choice": "O",
+    "before_ours": 108,
+    "before_revision": 126,
+    "after": 108
+  },
+  {
+    "file": "output/chapters/chapter02.tex",
+    "region": 9,
+    "choice": "O",
+    "before_ours": 117,
+    "before_revision": 109,
+    "after": 117
+  },
+  {
+    "file": "output/chapters/chapter02.tex",
+    "region": 10,
+    "choice": "T",
+    "before_ours": 361,
+    "before_revision": 377,
+    "after": 377
+  },
+  {
+    "file": "output/chapters/chapter02.tex",
+    "region": 11,
+    "choice": "T",
+    "before_ours": 467,
+    "before_revision": 178,
+    "after": 178
+  },
+  {
+    "file": "output/chapters/chapter02.tex",
+    "region": 12,
+    "choice": "T",
+    "before_ours": 215,
+    "before_revision": 277,
+    "after": 277
+  },
+  {
+    "file": "output/chapters/chapter02.tex",
+    "region": 13,
+    "choice": "C",
+    "before_ours": 778,
+    "before_revision": 166,
+    "after": 791
+  },
+  {
+    "file": "output/chapters/chapter03.tex",
+    "region": 1,
+    "choice": "T",
+    "before_ours": 195,
+    "before_revision": 300,
+    "after": 300
+  },
+  {
+    "file": "output/chapters/chapter03.tex",
+    "region": 2,
+    "choice": "C",
+    "before_ours": 110,
+    "before_revision": 114,
+    "after": 74
+  },
+  {
+    "file": "output/chapters/chapter03.tex",
+    "region": 3,
+    "choice": "T",
+    "before_ours": 2261,
+    "before_revision": 202,
+    "after": 202
+  },
+  {
+    "file": "output/chapters/chapter03.tex",
+    "region": 4,
+    "choice": "T",
+    "before_ours": 3647,
+    "before_revision": 148,
+    "after": 148
+  },
+  {
+    "file": "output/chapters/chapter03.tex",
+    "region": 5,
+    "choice": "O",
+    "before_ours": 88,
+    "before_revision": 131,
+    "after": 88
+  },
+  {
+    "file": "output/chapters/chapter03.tex",
+    "region": 6,
+    "choice": "T",
+    "before_ours": 75,
+    "before_revision": 27,
+    "after": 27
+  },
+  {
+    "file": "output/chapters/chapter03.tex",
+    "region": 7,
+    "choice": "T",
+    "before_ours": 73,
+    "before_revision": 193,
+    "after": 193
+  },
+  {
+    "file": "output/chapters/chapter03.tex",
+    "region": 8,
+    "choice": "T",
+    "before_ours": 10358,
+    "before_revision": 2409,
+    "after": 2409
+  },
+  {
+    "file": "output/chapters/chapter03.tex",
+    "region": 9,
+    "choice": "O",
+    "before_ours": 93,
+    "before_revision": 115,
+    "after": 93
+  },
+  {
+    "file": "output/chapters/chapter03.tex",
+    "region": 10,
+    "choice": "T",
+    "before_ours": 1174,
+    "before_revision": 70,
+    "after": 70
+  },
+  {
+    "file": "output/chapters/chapter03.tex",
+    "region": 11,
+    "choice": "O",
+    "before_ours": 74,
+    "before_revision": 120,
+    "after": 74
+  },
+  {
+    "file": "output/chapters/chapter03.tex",
+    "region": 12,
+    "choice": "C",
+    "before_ours": 774,
+    "before_revision": 0,
+    "after": 531
+  },
+  {
+    "file": "output/chapters/chapter04.tex",
+    "region": 1,
+    "choice": "C",
+    "before_ours": 432,
+    "before_revision": 457,
+    "after": 345
+  },
+  {
+    "file": "output/chapters/chapter04.tex",
+    "region": 2,
+    "choice": "C",
+    "before_ours": 146,
+    "before_revision": 307,
+    "after": 454
+  },
+  {
+    "file": "output/chapters/chapter04.tex",
+    "region": 3,
+    "choice": "T",
+    "before_ours": 176,
+    "before_revision": 155,
+    "after": 155
+  },
+  {
+    "file": "output/chapters/chapter04.tex",
+    "region": 4,
+    "choice": "T",
+    "before_ours": 302,
+    "before_revision": 462,
+    "after": 462
+  },
+  {
+    "file": "output/chapters/chapter04.tex",
+    "region": 5,
+    "choice": "T",
+    "before_ours": 170,
+    "before_revision": 482,
+    "after": 482
+  },
+  {
+    "file": "output/chapters/chapter04.tex",
+    "region": 6,
+    "choice": "T",
+    "before_ours": 131,
+    "before_revision": 521,
+    "after": 521
+  },
+  {
+    "file": "output/chapters/chapter04.tex",
+    "region": 7,
+    "choice": "O",
+    "before_ours": 87,
+    "before_revision": 61,
+    "after": 87
+  },
+  {
+    "file": "output/chapters/chapter04.tex",
+    "region": 8,
+    "choice": "C",
+    "before_ours": 456,
+    "before_revision": 435,
+    "after": 892
+  },
+  {
+    "file": "output/chapters/chapter04.tex",
+    "region": 9,
+    "choice": "C",
+    "before_ours": 184,
+    "before_revision": 177,
+    "after": 362
+  },
+  {
+    "file": "output/chapters/chapter04.tex",
+    "region": 10,
+    "choice": "O",
+    "before_ours": 91,
+    "before_revision": 316,
+    "after": 91
+  },
+  {
+    "file": "output/chapters/chapter04.tex",
+    "region": 11,
+    "choice": "T",
+    "before_ours": 275,
+    "before_revision": 441,
+    "after": 441
+  },
+  {
+    "file": "output/chapters/chapter04.tex",
+    "region": 12,
+    "choice": "T",
+    "before_ours": 396,
+    "before_revision": 646,
+    "after": 646
+  },
+  {
+    "file": "output/chapters/chapter04.tex",
+    "region": 13,
+    "choice": "T",
+    "before_ours": 285,
+    "before_revision": 181,
+    "after": 181
+  },
+  {
+    "file": "output/chapters/chapter04.tex",
+    "region": 14,
+    "choice": "T",
+    "before_ours": 275,
+    "before_revision": 480,
+    "after": 480
+  },
+  {
+    "file": "output/chapters/chapter04.tex",
+    "region": 15,
+    "choice": "T",
+    "before_ours": 0,
+    "before_revision": 66,
+    "after": 66
+  },
+  {
+    "file": "output/chapters/chapter04.tex",
+    "region": 16,
+    "choice": "T",
+    "before_ours": 410,
+    "before_revision": 400,
+    "after": 400
+  },
+  {
+    "file": "output/chapters/chapter04.tex",
+    "region": 17,
+    "choice": "T",
+    "before_ours": 99,
+    "before_revision": 801,
+    "after": 801
+  },
+  {
+    "file": "output/chapters/chapter04.tex",
+    "region": 18,
+    "choice": "T",
+    "before_ours": 277,
+    "before_revision": 394,
+    "after": 394
+  },
+  {
+    "file": "output/chapters/chapter04.tex",
+    "region": 19,
+    "choice": "O",
+    "before_ours": 73,
+    "before_revision": 108,
+    "after": 73
+  },
+  {
+    "file": "output/chapters/chapter04.tex",
+    "region": 20,
+    "choice": "C",
+    "before_ours": 631,
+    "before_revision": 0,
+    "after": 563
+  },
+  {
+    "file": "output/chapters/chapter05.tex",
+    "region": 1,
+    "choice": "C",
+    "before_ours": 357,
+    "before_revision": 361,
+    "after": 233
+  },
+  {
+    "file": "output/chapters/chapter05.tex",
+    "region": 2,
+    "choice": "T",
+    "before_ours": 67,
+    "before_revision": 514,
+    "after": 514
+  },
+  {
+    "file": "output/chapters/chapter05.tex",
+    "region": 3,
+    "choice": "T",
+    "before_ours": 5415,
+    "before_revision": 390,
+    "after": 390
+  },
+  {
+    "file": "output/chapters/chapter05.tex",
+    "region": 4,
+    "choice": "C",
+    "before_ours": 267,
+    "before_revision": 350,
+    "after": 456
+  },
+  {
+    "file": "output/chapters/chapter05.tex",
+    "region": 5,
+    "choice": "T",
+    "before_ours": 629,
+    "before_revision": 787,
+    "after": 787
+  },
+  {
+    "file": "output/chapters/chapter05.tex",
+    "region": 6,
+    "choice": "T",
+    "before_ours": 84,
+    "before_revision": 32,
+    "after": 32
+  },
+  {
+    "file": "output/chapters/chapter05.tex",
+    "region": 7,
+    "choice": "T",
+    "before_ours": 92,
+    "before_revision": 471,
+    "after": 471
+  },
+  {
+    "file": "output/chapters/chapter05.tex",
+    "region": 8,
+    "choice": "O",
+    "before_ours": 122,
+    "before_revision": 191,
+    "after": 122
+  },
+  {
+    "file": "output/chapters/chapter05.tex",
+    "region": 9,
+    "choice": "T",
+    "before_ours": 80,
+    "before_revision": 435,
+    "after": 435
+  },
+  {
+    "file": "output/chapters/chapter05.tex",
+    "region": 10,
+    "choice": "O",
+    "before_ours": 103,
+    "before_revision": 159,
+    "after": 103
+  },
+  {
+    "file": "output/chapters/chapter05.tex",
+    "region": 11,
+    "choice": "O",
+    "before_ours": 187,
+    "before_revision": 237,
+    "after": 187
+  },
+  {
+    "file": "output/chapters/chapter05.tex",
+    "region": 12,
+    "choice": "O",
+    "before_ours": 311,
+    "before_revision": 151,
+    "after": 311
+  },
+  {
+    "file": "output/chapters/chapter05.tex",
+    "region": 13,
+    "choice": "O",
+    "before_ours": 199,
+    "before_revision": 3602,
+    "after": 199
+  },
+  {
+    "file": "output/chapters/chapter05.tex",
+    "region": 14,
+    "choice": "O",
+    "before_ours": 81,
+    "before_revision": 269,
+    "after": 81
+  },
+  {
+    "file": "output/chapters/chapter05.tex",
+    "region": 15,
+    "choice": "O",
+    "before_ours": 54,
+    "before_revision": 76,
+    "after": 54
+  },
+  {
+    "file": "output/chapters/chapter05.tex",
+    "region": 16,
+    "choice": "T",
+    "before_ours": 76,
+    "before_revision": 323,
+    "after": 323
+  },
+  {
+    "file": "output/chapters/chapter05.tex",
+    "region": 17,
+    "choice": "C",
+    "before_ours": 700,
+    "before_revision": 185,
+    "after": 728
+  },
+  {
+    "file": "output/chapters/chapter06.tex",
+    "region": 1,
+    "choice": "C",
+    "before_ours": 153,
+    "before_revision": 263,
+    "after": 217
+  },
+  {
+    "file": "output/chapters/chapter06.tex",
+    "region": 2,
+    "choice": "O",
+    "before_ours": 88,
+    "before_revision": 142,
+    "after": 88
+  },
+  {
+    "file": "output/chapters/chapter06.tex",
+    "region": 3,
+    "choice": "C",
+    "before_ours": 415,
+    "before_revision": 156,
+    "after": 572
+  },
+  {
+    "file": "output/chapters/chapter06.tex",
+    "region": 4,
+    "choice": "C",
+    "before_ours": 280,
+    "before_revision": 411,
+    "after": 692
+  },
+  {
+    "file": "output/chapters/chapter06.tex",
+    "region": 5,
+    "choice": "T",
+    "before_ours": 93,
+    "before_revision": 13186,
+    "after": 13186
+  },
+  {
+    "file": "output/chapters/chapter06.tex",
+    "region": 6,
+    "choice": "T",
+    "before_ours": 222,
+    "before_revision": 222,
+    "after": 222
+  },
+  {
+    "file": "output/chapters/chapter06.tex",
+    "region": 7,
+    "choice": "T",
+    "before_ours": 2511,
+    "before_revision": 154,
+    "after": 154
+  },
+  {
+    "file": "output/chapters/chapter06.tex",
+    "region": 8,
+    "choice": "T",
+    "before_ours": 10315,
+    "before_revision": 209,
+    "after": 209
+  },
+  {
+    "file": "output/chapters/chapter06.tex",
+    "region": 9,
+    "choice": "O",
+    "before_ours": 72,
+    "before_revision": 114,
+    "after": 72
+  },
+  {
+    "file": "output/chapters/chapter06.tex",
+    "region": 10,
+    "choice": "T",
+    "before_ours": 54,
+    "before_revision": 56,
+    "after": 56
+  },
+  {
+    "file": "output/chapters/chapter06.tex",
+    "region": 11,
+    "choice": "O",
+    "before_ours": 162,
+    "before_revision": 270,
+    "after": 162
+  },
+  {
+    "file": "output/chapters/chapter06.tex",
+    "region": 12,
+    "choice": "O",
+    "before_ours": 192,
+    "before_revision": 161,
+    "after": 192
+  },
+  {
+    "file": "output/chapters/chapter06.tex",
+    "region": 13,
+    "choice": "O",
+    "before_ours": 147,
+    "before_revision": 169,
+    "after": 147
+  },
+  {
+    "file": "output/chapters/chapter06.tex",
+    "region": 14,
+    "choice": "O",
+    "before_ours": 136,
+    "before_revision": 119,
+    "after": 136
+  },
+  {
+    "file": "output/chapters/chapter06.tex",
+    "region": 15,
+    "choice": "O",
+    "before_ours": 143,
+    "before_revision": 165,
+    "after": 143
+  },
+  {
+    "file": "output/chapters/chapter06.tex",
+    "region": 16,
+    "choice": "O",
+    "before_ours": 103,
+    "before_revision": 216,
+    "after": 103
+  },
+  {
+    "file": "output/chapters/chapter06.tex",
+    "region": 17,
+    "choice": "O",
+    "before_ours": 58,
+    "before_revision": 238,
+    "after": 58
+  },
+  {
+    "file": "output/chapters/chapter06.tex",
+    "region": 18,
+    "choice": "O",
+    "before_ours": 165,
+    "before_revision": 1568,
+    "after": 165
+  },
+  {
+    "file": "output/chapters/chapter06.tex",
+    "region": 19,
+    "choice": "O",
+    "before_ours": 215,
+    "before_revision": 512,
+    "after": 215
+  },
+  {
+    "file": "output/chapters/chapter06.tex",
+    "region": 20,
+    "choice": "O",
+    "before_ours": 193,
+    "before_revision": 77,
+    "after": 193
+  },
+  {
+    "file": "output/chapters/chapter06.tex",
+    "region": 21,
+    "choice": "O",
+    "before_ours": 332,
+    "before_revision": 873,
+    "after": 332
+  },
+  {
+    "file": "output/chapters/chapter06.tex",
+    "region": 22,
+    "choice": "O",
+    "before_ours": 222,
+    "before_revision": 128,
+    "after": 222
+  },
+  {
+    "file": "output/chapters/chapter06.tex",
+    "region": 23,
+    "choice": "O",
+    "before_ours": 57,
+    "before_revision": 87,
+    "after": 57
+  },
+  {
+    "file": "output/chapters/chapter06.tex",
+    "region": 24,
+    "choice": "O",
+    "before_ours": 271,
+    "before_revision": 429,
+    "after": 271
+  },
+  {
+    "file": "output/chapters/chapter06.tex",
+    "region": 25,
+    "choice": "O",
+    "before_ours": 198,
+    "before_revision": 477,
+    "after": 198
+  },
+  {
+    "file": "output/chapters/chapter06.tex",
+    "region": 26,
+    "choice": "O",
+    "before_ours": 104,
+    "before_revision": 103,
+    "after": 104
+  },
+  {
+    "file": "output/chapters/chapter06.tex",
+    "region": 27,
+    "choice": "O",
+    "before_ours": 166,
+    "before_revision": 386,
+    "after": 166
+  },
+  {
+    "file": "output/chapters/chapter06.tex",
+    "region": 28,
+    "choice": "O",
+    "before_ours": 209,
+    "before_revision": 211,
+    "after": 209
+  },
+  {
+    "file": "output/chapters/chapter06.tex",
+    "region": 29,
+    "choice": "O",
+    "before_ours": 30,
+    "before_revision": 77,
+    "after": 30
+  },
+  {
+    "file": "output/chapters/chapter06.tex",
+    "region": 30,
+    "choice": "O",
+    "before_ours": 470,
+    "before_revision": 82,
+    "after": 470
+  },
+  {
+    "file": "output/chapters/chapter06.tex",
+    "region": 31,
+    "choice": "O",
+    "before_ours": 517,
+    "before_revision": 218,
+    "after": 517
+  },
+  {
+    "file": "output/chapters/chapter06.tex",
+    "region": 32,
+    "choice": "O",
+    "before_ours": 354,
+    "before_revision": 476,
+    "after": 354
+  },
+  {
+    "file": "output/chapters/chapter06.tex",
+    "region": 33,
+    "choice": "O",
+    "before_ours": 81,
+    "before_revision": 158,
+    "after": 81
+  },
+  {
+    "file": "output/chapters/chapter06.tex",
+    "region": 34,
+    "choice": "O",
+    "before_ours": 144,
+    "before_revision": 219,
+    "after": 144
+  },
+  {
+    "file": "output/chapters/chapter06.tex",
+    "region": 35,
+    "choice": "O",
+    "before_ours": 207,
+    "before_revision": 492,
+    "after": 207
+  },
+  {
+    "file": "output/chapters/chapter06.tex",
+    "region": 36,
+    "choice": "O",
+    "before_ours": 141,
+    "before_revision": 604,
+    "after": 141
+  },
+  {
+    "file": "output/chapters/chapter06.tex",
+    "region": 37,
+    "choice": "O",
+    "before_ours": 243,
+    "before_revision": 371,
+    "after": 243
+  },
+  {
+    "file": "output/chapters/chapter06.tex",
+    "region": 38,
+    "choice": "O",
+    "before_ours": 124,
+    "before_revision": 2249,
+    "after": 124
+  },
+  {
+    "file": "output/chapters/chapter06.tex",
+    "region": 39,
+    "choice": "C",
+    "before_ours": 698,
+    "before_revision": 183,
+    "after": 757
+  },
+  {
+    "file": "output/chapters/chapter06.tex",
+    "region": 40,
+    "choice": "C",
+    "before_ours": 121,
+    "before_revision": 335,
+    "after": 398
+  },
+  {
+    "file": "output/chapters/chapter07.tex",
+    "region": 1,
+    "choice": "C",
+    "before_ours": 197,
+    "before_revision": 233,
+    "after": 197
+  },
+  {
+    "file": "output/chapters/chapter07.tex",
+    "region": 2,
+    "choice": "C",
+    "before_ours": 85,
+    "before_revision": 144,
+    "after": 81
+  },
+  {
+    "file": "output/chapters/chapter07.tex",
+    "region": 3,
+    "choice": "O",
+    "before_ours": 89,
+    "before_revision": 173,
+    "after": 89
+  },
+  {
+    "file": "output/chapters/chapter07.tex",
+    "region": 4,
+    "choice": "T",
+    "before_ours": 5140,
+    "before_revision": 409,
+    "after": 409
+  },
+  {
+    "file": "output/chapters/chapter07.tex",
+    "region": 5,
+    "choice": "O",
+    "before_ours": 92,
+    "before_revision": 102,
+    "after": 92
+  },
+  {
+    "file": "output/chapters/chapter07.tex",
+    "region": 6,
+    "choice": "T",
+    "before_ours": 75,
+    "before_revision": 231,
+    "after": 231
+  },
+  {
+    "file": "output/chapters/chapter07.tex",
+    "region": 7,
+    "choice": "O",
+    "before_ours": 78,
+    "before_revision": 108,
+    "after": 78
+  },
+  {
+    "file": "output/chapters/chapter07.tex",
+    "region": 8,
+    "choice": "T",
+    "before_ours": 2139,
+    "before_revision": 0,
+    "after": 0
+  },
+  {
+    "file": "output/chapters/chapter08.tex",
+    "region": 1,
+    "choice": "C",
+    "before_ours": 737,
+    "before_revision": 180,
+    "after": 15
+  },
+  {
+    "file": "output/chapters/chapter08.tex",
+    "region": 2,
+    "choice": "C",
+    "before_ours": 209,
+    "before_revision": 417,
+    "after": 182
+  },
+  {
+    "file": "output/chapters/chapter08.tex",
+    "region": 3,
+    "choice": "O",
+    "before_ours": 123,
+    "before_revision": 102,
+    "after": 123
+  },
+  {
+    "file": "output/chapters/chapter08.tex",
+    "region": 4,
+    "choice": "O",
+    "before_ours": 92,
+    "before_revision": 101,
+    "after": 92
+  },
+  {
+    "file": "output/chapters/chapter08.tex",
+    "region": 5,
+    "choice": "C",
+    "before_ours": 84,
+    "before_revision": 168,
+    "after": 76
+  },
+  {
+    "file": "output/chapters/chapter08.tex",
+    "region": 6,
+    "choice": "T",
+    "before_ours": 30814,
+    "before_revision": 91,
+    "after": 91
+  },
+  {
+    "file": "output/chapters/chapter08.tex",
+    "region": 7,
+    "choice": "T",
+    "before_ours": 1377,
+    "before_revision": 1024,
+    "after": 1024
+  },
+  {
+    "file": "output/chapters/chapter08.tex",
+    "region": 8,
+    "choice": "O",
+    "before_ours": 84,
+    "before_revision": 121,
+    "after": 84
+  },
+  {
+    "file": "output/chapters/chapter08.tex",
+    "region": 9,
+    "choice": "T",
+    "before_ours": 499,
+    "before_revision": 95,
+    "after": 95
+  },
+  {
+    "file": "output/chapters/chapter08.tex",
+    "region": 10,
+    "choice": "C",
+    "before_ours": 66,
+    "before_revision": 287,
+    "after": 66
+  },
+  {
+    "file": "output/chapters/chapter08.tex",
+    "region": 11,
+    "choice": "O",
+    "before_ours": 149,
+    "before_revision": 390,
+    "after": 149
+  },
+  {
+    "file": "output/chapters/chapter08.tex",
+    "region": 12,
+    "choice": "O",
+    "before_ours": 0,
+    "before_revision": 492,
+    "after": 0
+  },
+  {
+    "file": "output/chapters/chapter08.tex",
+    "region": 13,
+    "choice": "O",
+    "before_ours": 157,
+    "before_revision": 1227,
+    "after": 157
+  },
+  {
+    "file": "output/chapters/chapter08.tex",
+    "region": 14,
+    "choice": "O",
+    "before_ours": 89,
+    "before_revision": 86,
+    "after": 89
+  },
+  {
+    "file": "output/chapters/chapter08.tex",
+    "region": 15,
+    "choice": "O",
+    "before_ours": 100,
+    "before_revision": 81,
+    "after": 100
+  },
+  {
+    "file": "output/chapters/chapter08.tex",
+    "region": 16,
+    "choice": "O",
+    "before_ours": 94,
+    "before_revision": 93,
+    "after": 94
+  },
+  {
+    "file": "output/chapters/chapter08.tex",
+    "region": 17,
+    "choice": "T",
+    "before_ours": 148,
+    "before_revision": 158,
+    "after": 158
+  },
+  {
+    "file": "output/chapters/chapter08.tex",
+    "region": 18,
+    "choice": "O",
+    "before_ours": 81,
+    "before_revision": 105,
+    "after": 81
+  },
+  {
+    "file": "output/chapters/chapter08.tex",
+    "region": 19,
+    "choice": "T",
+    "before_ours": 1075,
+    "before_revision": 233,
+    "after": 233
+  },
+  {
+    "file": "output/chapters/chapter08.tex",
+    "region": 20,
+    "choice": "T",
+    "before_ours": 3251,
+    "before_revision": 119,
+    "after": 119
+  },
+  {
+    "file": "output/chapters/chapter08.tex",
+    "region": 21,
+    "choice": "C",
+    "before_ours": 99,
+    "before_revision": 345,
+    "after": 348
+  },
+  {
+    "file": "output/chapters/chapter08.tex",
+    "region": 22,
+    "choice": "T",
+    "before_ours": 54,
+    "before_revision": 120,
+    "after": 120
+  },
+  {
+    "file": "output/chapters/chapter09.tex",
+    "region": 1,
+    "choice": "O",
+    "before_ours": 11,
+    "before_revision": 73,
+    "after": 11
+  },
+  {
+    "file": "output/chapters/chapter09.tex",
+    "region": 2,
+    "choice": "T",
+    "before_ours": 124,
+    "before_revision": 211,
+    "after": 211
+  },
+  {
+    "file": "output/chapters/chapter09.tex",
+    "region": 3,
+    "choice": "T",
+    "before_ours": 163,
+    "before_revision": 113,
+    "after": 113
+  },
+  {
+    "file": "output/chapters/chapter09.tex",
+    "region": 4,
+    "choice": "O",
+    "before_ours": 75,
+    "before_revision": 134,
+    "after": 75
+  },
+  {
+    "file": "output/chapters/chapter09.tex",
+    "region": 5,
+    "choice": "T",
+    "before_ours": 38,
+    "before_revision": 96,
+    "after": 96
+  },
+  {
+    "file": "output/chapters/preface.tex",
+    "region": 1,
+    "choice": "C",
+    "before_ours": 440,
+    "before_revision": 116,
+    "after": 213
+  },
+  {
+    "file": "output/chapters/preface.tex",
+    "region": 2,
+    "choice": "O",
+    "before_ours": 392,
+    "before_revision": 308,
+    "after": 392
+  },
+  {
+    "file": "output/chapters/preface.tex",
+    "region": 3,
+    "choice": "C",
+    "before_ours": 935,
+    "before_revision": 990,
+    "after": 1079
+  }
+]

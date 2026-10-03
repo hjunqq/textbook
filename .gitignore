@@ -115,3 +115,7 @@ companion/water-platform-demo/backend/target/
 # 本地临时目录（编译中间件、tex2site 构建、待删除素材），不入库
 temp/
 _to_delete/
+
+# Python caches at every directory depth
+__pycache__/
+*.py[cod]

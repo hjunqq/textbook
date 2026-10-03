@@ -1,0 +1,13 @@
+test_generated_station_data_and_frontend_copy_are_identical (__main__.ReconciliationTest.test_generated_station_data_and_frontend_copy_are_identical) ... ok
+test_glb_coordinate_transform_matches_exercise (__main__.ReconciliationTest.test_glb_coordinate_transform_matches_exercise) ... ok
+test_java_packages_follow_file_locations_and_new_namespace (__main__.ReconciliationTest.test_java_packages_follow_file_locations_and_new_namespace) ... ok
+test_license_restricted_product_images_are_not_on_website (__main__.ReconciliationTest.test_license_restricted_product_images_are_not_on_website) ... ok
+test_online_and_print_labels_are_unique_and_resolvable (__main__.ReconciliationTest.test_online_and_print_labels_are_unique_and_resolvable) ... ok
+test_online_topics_survive_learning_layer_regeneration (__main__.ReconciliationTest.test_online_topics_survive_learning_layer_regeneration) ... ok
+test_stage54_ci_and_compose_use_same_database_names (__main__.ReconciliationTest.test_stage54_ci_and_compose_use_same_database_names) ... ok
+test_student_text_uses_comment_layers_and_one_stage_system (__main__.ReconciliationTest.test_student_text_uses_comment_layers_and_one_stage_system) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.045s
+
+OK

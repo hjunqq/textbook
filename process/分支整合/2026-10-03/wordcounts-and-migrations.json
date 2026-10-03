@@ -1,0 +1,82 @@
+[
+  {
+    "file": "preface.tex",
+    "master": 4678,
+    "merged": 4296,
+    "delta": -382,
+    "reason": "教师学时方案迁到线上 online:teaching-guide；保留学生阶段入口表并统一S0–S6；不再同时印刷两套进度编号。",
+    "undergraduate": 5357
+  },
+  {
+    "file": "chapter01.tex",
+    "master": 12105,
+    "merged": 10525,
+    "delta": -1580,
+    "reason": "按本科重编把生命周期活动图和解释移至第2章2.1；删去重复的发展史叙述；架构评审、平台隔离与证据卡移至线上 online:ch01；保留政策、感知链路、业务场景和术语表。",
+    "undergraduate": 10158
+  },
+  {
+    "file": "chapter02.tex",
+    "master": 21537,
+    "merged": 19808,
+    "delta": -1729,
+    "reason": "以本科重编的生命周期、选型、需求分析顺序合并重复讲解；选型评审与需求基线治理迁至线上 online:ch02；保留结构化分析、图表和练习。",
+    "undergraduate": 18654
+  },
+  {
+    "file": "chapter03.tex",
+    "master": 33436,
+    "merged": 23789,
+    "delta": -9647,
+    "reason": "采用需求→模块→接口→架构选择的重编顺序，消除前后两套需求/模块/接口讲解；构件设计移至线上 app:ext-component-based-design，冗余需求复述与原型方法保留于 online:ch03；保留质量线术语表。",
+    "undergraduate": 23478
+  },
+  {
+    "file": "chapter04.tex",
+    "master": 28666,
+    "merged": 23180,
+    "delta": -5486,
+    "reason": "保留从原生页面到请求状态再到Vue的递进路线；焦点/虚拟列表、主题、发布与回滚完整移至线上相应 app:ext-fe-* 专题；认证联调归并 online:frontend-auth；重复演示代码改为引用实际阶段文件，保留质量线解释与失败例。",
+    "undergraduate": 22720
+  },
+  {
+    "file": "chapter05.tex",
+    "master": 26297,
+    "merged": 29790,
+    "delta": 3493,
+    "reason": "最小认证主线统一为真实三角色配套；原细粒度权限、刷新、撤销等代码全文迁至 online:security，核心清单与配套新增四组校验；旧平行实体/服务示例由真实 Asset/Reading 模型替代。",
+    "undergraduate": 34201
+  },
+  {
+    "file": "chapter06.tex",
+    "master": 24658,
+    "merged": 23108,
+    "delta": -1550,
+    "reason": "采用本科重编的几何体→投影→模型加载→坐标流程；保留质量线6.4六小节与在线孪生专题；GIS运维、坐标审计、摄影验收完整移至线上 app:ext-ch06-*，重复最小场景由 lesson61 单一实例替代。",
+    "undergraduate": 26281
+  },
+  {
+    "file": "chapter07.tex",
+    "master": 23627,
+    "merged": 20238,
+    "delta": -3389,
+    "reason": "采用本科重编的第一条曲线与双向联动次序；保留质量线状态批量更新与术语表；图表预算/缓存/恢复和颜色令牌验收移至线上 app:ext-ch07-*；删除与已印清单相同的重复画图和状态代码。",
+    "undergraduate": 19026
+  },
+  {
+    "file": "chapter08.tex",
+    "master": 36453,
+    "merged": 28335,
+    "delta": -8118,
+    "reason": "保留PZ-07业务链与真实DDL/补录/错误处理，冗长高级SQL与部署练习全文迁至线上 sec:appc-ch08-ops；保留质量线14小节数字孪生案例及六幅授权插图；重复通用孪生原理统一引用第6章6.4，不在8.5复印。",
+    "undergraduate": 28725
+  },
+  {
+    "file": "chapter09.tex",
+    "master": 5941,
+    "merged": 5749,
+    "delta": -192,
+    "reason": "保留本科课程能力总结与后续学习路线，去除印刷学习层次文字；无成段技术内容删除。",
+    "undergraduate": 5812
+  }
+]

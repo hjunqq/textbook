@@ -6,13 +6,14 @@
 |---|---|---|---|
 | S0 | 第1章 | `S0-demo-record.md` | 固定演示记录；解释一次查询的六个环节 |
 | S1 | 4.2–4.4 | `lesson44.html`、`lesson44-detail.html` | Node、浏览器；静态列表、详情、筛选与排序 |
-| S2 核心 | 4.5 | `lesson45.html` | 教学接口；原生 JavaScript、四种状态与竞态处理 |
-| S2 指导实践 | 4.6–4.7 | `index.html`、`src/router/`等骨架 | Vue、Pinia与登录守卫；按书中清单完成详情路由 |
+| S2 核心 | 4.5、4.6.1–4.6.2 | `lesson45.html` | 教学接口；原生 JavaScript、四种状态与竞态处理 |
+| S2 指导实践 | 4.6.3–4.7 | `index.html`、`src/router/`等骨架 | Vue、Pinia与登录守卫；按书中清单完成详情路由 |
 | S3 起点 | 5.2 | `edu.example.lesson52.Lesson52Application` | Java 17、Maven；四个固定对象、部分固定观测，无登录和数据库 |
-| S3 终点 | 5.4–5.6、8.3 | 完整 `backend/` 与 Compose | 持久化、认证及契约错误体齐备后承接 S2 联调 |
-| S4 | 6.1 | `lesson61.html` | 教学接口、Three.js；坝体几何体与28个测点 |
+| S3 中点 | 5.4.1–5.4.2 | `edu.example.lesson54.Lesson54Application` | Docker（只起 PostgreSQL）；对象与观测来自数据库，三层结构，无登录、不连 Kafka |
+| S3 终点 | 5.5–5.6、8.3 | 完整 `backend/` 与 Compose | 认证与消息消费齐备后承接 S2 联调 |
+| S4 | 6.1 | `lesson61.html` | 教学接口、Three.js；坝体几何体与28个测点；`public/models/dam.glb` 教学模型 |
 | S5 | 7.2–7.4 | `lesson74.html` | 教学接口或 S3 完整后端、S4场景；曲线与测点联动 |
-| S6 | 8.4 | `classify.js`、`closeloop-check.mjs` | 教学接口验证受控闭环；完整工程另做部署验收 |
+| S6 | 8.4、8.6 | `classify.js`、`closeloop-check.mjs`、`smoke.sh` | 教学接口验证受控闭环；完整工程按 8.6 用 Compose 与 `smoke.sh` 做部署验收 |
 
 ## S0：解释请求
 
@@ -41,7 +42,7 @@ npm run dev
 
 Vue指导实践以 `/login`、`/monitoring` 和 `src/router/index.js` 为已提供骨架。按4.6–4.7节实现 `/assets/:id` 详情路由并验证刷新、参数变化和登录回跳；提交修改后的代码与独立证据。现有路由表不包含这条详情路由，不能用 `lesson45.test.js` 代替该项验收。
 
-## S3：分开验收起点和终点
+## S3：分开验收起点、中点和终点
 
 先停教学接口，释放8080。在终端一运行起点：
 
@@ -58,7 +59,31 @@ node teaching-api/contract-check.mjs http://localhost:8080 --stage=lesson52
 
 起点只提供四个固定对象、PZ-07最新值和空历史查询；没有登录端点。直接请求 `/api/assets` 观察四元素数组，核对204、400与404，先不用 S2 的自动登录页。时间参数中的 `+` 应编码为 `%2B`；类型转换失败的统一错误体在5.5节接入。
 
-终点：完成 `README.md` 中的 secrets 和数据准备，停掉起点，在本目录的独立终端执行：
+中点（5.4.1–5.4.2节）：停掉起点。在本目录准备数据库口令文件并只启动 PostgreSQL，再从 `backend/` 启动中点入口：
+
+```powershell
+Copy-Item secrets/db_password.txt.example secrets/db_password.txt   # 已有则跳过；口令自行修改
+docker compose up -d postgres
+cd backend
+$env:DB_PASSWORD_FILE = "../secrets/db_password.txt"
+mvn spring-boot:run "-Dspring-boot.run.main-class=edu.example.lesson54.Lesson54Application"
+```
+
+macOS/Linux 把第4行写成 `export DB_PASSWORD_FILE=../secrets/db_password.txt`。终端二回到本目录：
+
+```powershell
+node teaching-api/contract-check.mjs http://localhost:8080 --stage=lesson54
+```
+
+中点的对象和观测来自 `db/002_seed.sql`：五个对象，PZ-07 与 WL-01 有观测，D-01 刻意没有观测（204）。它与起点走同一份契约，但数据不同，所以 `/api/assets` 返回五个元素而不是四个。验证端口已映射：`docker compose port postgres 5432` 应输出 `127.0.0.1:5432`。故障练习：把 `AssetRepository` 的方法名 `findByActiveTrueOrderByAssetId` 改成 `findByActiveTrueOrderByAssetCode` 再启动，读启动日志里的 `PropertyReferenceException`；改回后验证。口令文件内容与数据库初始化时不一致会得到 `password authentication failed`——数据库口令只在数据卷第一次创建时写入，改口令后需 `docker compose down -v` 重建数据卷（会清空数据）。口令文件在 Windows 上请保存为不带回车的单行（LF 或无换行）：数据库会把行尾的回车当作口令的一部分，而后端读取时会去掉它，两边就对不上。
+
+种子观测的时间是“数据卷第一次创建的时刻往前推10—50分钟”，之后不再变化。查询历史观测时用一个宽的时间窗，例如 `?from=2026-01-01T00:00:00Z&to=2030-01-01T00:00:00Z`（UTC 写法不含加号，可直接放进地址栏）。做过 `UPDATE asset SET active = false ...` 的练习后记得改回 `true`，否则后续阶段的页面会少一个对象：
+
+```powershell
+docker compose exec postgres psql -U reservoir_app -d reservoir -c "UPDATE asset SET active = true WHERE asset_id = 'DAM-A-RF-01'"
+```
+
+终点：完成 `README.md` 中的 secrets 和数据准备，停掉中点，在本目录的独立终端执行：
 
 ```powershell
 docker compose up -d --build
@@ -69,7 +94,9 @@ node teaching-api/contract-check.mjs http://localhost:8080 --stage=full
 
 ## S4：场景与对象绑定
 
-运行教学接口和 Vite，打开 `/lesson61.html`。坝体可旋转缩放；控制台 `bound.group.children.length` 应等于接口返回的对象数（教学数据为28），`bound.find('DAM-A-PZ-07')` 应返回相应对象。按6.1.5节检查表核对高程、轴方向和单位。
+运行教学接口和 Vite，打开 `/lesson61.html`。坝体可旋转缩放；控制台 `bound.group.children.length` 应等于接口返回的对象数（教学数据为28），`bound.find('DAM-A-PZ-07')` 应返回相应对象（高程 123.5 m，位于坝体内部；`dam.material.transparent = true; dam.material.opacity = 0.35` 可透视看到埋在坝内的12支渗压计）。按6.1.5节检查表核对高程、轴方向和单位。测点布置见 companion/datasets/generate.py 里的 `LAYOUT`：原点在坝轴线中点，x 沿坝轴线向东，上游为 -z。
+
+6.1.4 节的加载练习使用 `public/models/dam.glb`（由同目录 `generate-dam-glb.py` 生成，米、+Y 向上、底面 y=0）：三项检查中只有“基面”一项生效，把底面抬到 120 m 后包围盒应与几何体坝体一致；`python3 generate-dam-glb.py --units mm --z-up -o dam.glb` 可换成需要缩放和旋转的版本再试一次。
 
 按6.1.1节分别制造缺少光源、相机位置错误、停止渲染循环的黑屏情形；每次只改一个因素，恢复后验证。记录现象、原因、处理、结果。
 

@@ -1,0 +1,5 @@
+Committed dam.glb: bbox=(160,52,40), valid glTF 2.0
+units='m', zup=False: normalized bbox=(160,52,40), elevations 120..172
+units='m', zup=True: normalized bbox=(160,52,40), elevations 120..172
+units='mm', zup=False: normalized bbox=(160,52,40), elevations 120..172
+units='mm', zup=True: normalized bbox=(160,52,40), elevations 120..172
