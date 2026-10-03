@@ -1,4 +1,4 @@
-package edu.example.qingyuan;
+package edu.example.reservoir;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
@@ -14,7 +14,7 @@ import java.util.List;
 
 /** HS256 访问令牌的签发与校验（jjwt 0.11.x），与第5章口径一致。 */
 public class JwtService {
-    public static final String ISSUER = "qingyuan-teaching";
+    public static final String ISSUER = "reservoir-teaching";
     private final javax.crypto.SecretKey key;
     private final Duration accessTtl;
     private final Clock clock;

@@ -1,4 +1,4 @@
-package edu.example.qingyuan;
+package edu.example.reservoir;
 
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;

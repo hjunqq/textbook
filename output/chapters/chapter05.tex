@@ -180,7 +180,7 @@ public class ReadingCommandController {
 清单\ref{lst:ch05-first-controller}是完整的一个类。三个注解各管一件事：\texttt{@RestController}告诉框架这个类的方法返回 JSON；\texttt{@RequestMapping}给出公共前缀；\texttt{@GetMapping}把一个方法绑到一条路径上。方法体里没有任何 Web 代码——它只是返回一个\texttt{List}，框架负责把它序列化成 JSON 并加上状态码 200。四个测点的编码与名称取自表\ref{tab:case-parameters}的测点设定，单位与数据集一致。
 
 \begin{lstlisting}[label={lst:ch05-first-controller},language=Java,caption={AssetController：返回写死的对象列表}]
-package edu.example.qingyuan;
+package edu.example.reservoir;
 
 import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -306,7 +306,7 @@ GET …/readings?from=2026-07-02…\&to=2026-07-01… & 400 & \texttt{\{code:"IN
 \end{tabular}
 \end{table}
 
-\paragraph{S3 阶段包与契约核对脚本。}清单\ref{lst:ch05-first-controller}与清单\ref{lst:ch05-first-params}对应配套目录\texttt{backend/src/main/java/edu/example/lesson52/}，它是 S3 的起点：一个类、没有数据库、没有认证。独立包\texttt{edu.example.lesson52}与完整工程的\texttt{edu.example.qingyuan}分开扫描；若将两组控制器放入同一扫描范围，两个\texttt{/api/assets}映射会冲突并导致启动失败。表\ref{tab:ch05-first-verify}的四行不必手工点，配套工程的\texttt{teaching-api/contract-check.mjs}把它们连同错误体形状写成了可执行检查：\texttt{node teaching-api/contract-check.mjs http://localhost:8080 --stage=lesson52}。同一个脚本把\texttt{--stage}换成\texttt{teaching}或\texttt{full}，就分别核对教学接口和接了数据库的完整后端。脚本分别检查各阶段已经实现的接口范围。若某项失败，应按报告核对该阶段的路径、状态码与字段；登录及完整持久化行为在 S3 终点另行联调。
+\paragraph{S3 阶段包与契约核对脚本。}清单\ref{lst:ch05-first-controller}与清单\ref{lst:ch05-first-params}对应配套目录\texttt{backend/src/main/java/edu/example/lesson52/}，它是 S3 的起点：一个类、没有数据库、没有认证。独立包\texttt{edu.example.lesson52}与完整工程的\texttt{edu.example.reservoir}分开扫描；若将两组控制器放入同一扫描范围，两个\texttt{/api/assets}映射会冲突并导致启动失败。表\ref{tab:ch05-first-verify}的四行不必手工点，配套工程的\texttt{teaching-api/contract-check.mjs}把它们连同错误体形状写成了可执行检查：\texttt{node teaching-api/contract-check.mjs http://localhost:8080 --stage=lesson52}。同一个脚本把\texttt{--stage}换成\texttt{teaching}或\texttt{full}，就分别核对教学接口和接了数据库的完整后端。脚本分别检查各阶段已经实现的接口范围。若某项失败，应按报告核对该阶段的路径、状态码与字段；登录及完整持久化行为在 S3 终点另行联调。
 
 \paragraph{自测}（1）把清单\ref{lst:ch05-first-controller}中的\texttt{@RestController}换成\texttt{@Controller}，访问\texttt{/api/assets}会发生什么？为什么？（框架把返回值当视图名去找模板，得到 404 或 500；\texttt{@RestController} = \texttt{@Controller} + \texttt{@ResponseBody}。）（2）\texttt{latest}方法为什么返回\texttt{ResponseEntity}而\texttt{assets}方法直接返回\texttt{List}？（前者需要区分 200 与 204 两种状态码，后者永远 200。）（3）不看代码，说出契约里“错误体统一为\texttt{\{code, message, field?\}}”在本节由哪两个方法保证，还有哪一类错误它们接不住。
 

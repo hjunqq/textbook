@@ -162,7 +162,7 @@ public class ReadingCommandController {
 **清单 5.3  AssetController：返回写死的对象列表**
 
 ```java
-package edu.example.qingyuan;
+package edu.example.reservoir;
 
 import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -280,7 +280,7 @@ ResponseEntity<Map<String, String>> badRequest(BadRequest e) {
 
 **S3 阶段包与契约核对脚本。**
 
-清单5.3与清单5.4对应配套目录`backend/src/main/java/edu/example/lesson52/`，它是 S3 的起点：一个类、没有数据库、没有认证。独立包`edu.example.lesson52`与完整工程的`edu.example.qingyuan`分开扫描；若将两组控制器放入同一扫描范围，两个`/api/assets`映射会冲突并导致启动失败。表5.3的四行不必手工点，配套工程的`teaching-api/contract-check.mjs`把它们连同错误体形状写成了可执行检查：`node teaching-api/contract-check.mjs http://localhost:8080 –stage=lesson52`。同一个脚本把`–stage`换成`teaching`或`full`，就分别核对教学接口和接了数据库的完整后端。脚本分别检查各阶段已经实现的接口范围。若某项失败，应按报告核对该阶段的路径、状态码与字段；登录及完整持久化行为在 S3 终点另行联调。
+清单5.3与清单5.4对应配套目录`backend/src/main/java/edu/example/lesson52/`，它是 S3 的起点：一个类、没有数据库、没有认证。独立包`edu.example.lesson52`与完整工程的`edu.example.reservoir`分开扫描；若将两组控制器放入同一扫描范围，两个`/api/assets`映射会冲突并导致启动失败。表5.3的四行不必手工点，配套工程的`teaching-api/contract-check.mjs`把它们连同错误体形状写成了可执行检查：`node teaching-api/contract-check.mjs http://localhost:8080 –stage=lesson52`。同一个脚本把`–stage`换成`teaching`或`full`，就分别核对教学接口和接了数据库的完整后端。脚本分别检查各阶段已经实现的接口范围。若某项失败，应按报告核对该阶段的路径、状态码与字段；登录及完整持久化行为在 S3 终点另行联调。
 
 **自测**
 

@@ -36,7 +36,7 @@ docker compose up -d --build
 当前目录解析，坐标与种子数据一致）：
 
 ```bash
-psql "postgresql://qingyuan_app:<密码>@localhost:5432/qingyuan" -f db/load-s3-data.sql
+psql "postgresql://reservoir_app:<密码>@localhost:5432/reservoir" -f db/load-s3-data.sql
 ```
 
 ## 正常链路与故障链路

@@ -1,4 +1,4 @@
-package edu.example.qingyuan;
+package edu.example.reservoir;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

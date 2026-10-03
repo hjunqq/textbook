@@ -98,7 +98,7 @@ ALLOWED = {
         "同上，通配导入已覆盖",
     ("lst:ch05-first-controller", "import org.springframework.web.bind.annotation.RestController;"):
         "同上，通配导入已覆盖",
-    ("lst:ch05-first-controller", "package edu.example.qingyuan;"):
+    ("lst:ch05-first-controller", "package edu.example.reservoir;"):
         "配套改为 package edu.example.lesson52，避免与完整工程的 AssetController "
         "撞包名和 /api/assets 映射；5.2.3 节正文已说明这一点，读者自建工程时用书上的包名即可",
 }

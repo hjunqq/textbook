@@ -1,4 +1,4 @@
-package edu.example.qingyuan;
+package edu.example.reservoir;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;

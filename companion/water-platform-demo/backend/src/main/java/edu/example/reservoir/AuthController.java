@@ -1,4 +1,4 @@
-package edu.example.qingyuan;
+package edu.example.reservoir;
 
 import jakarta.validation.constraints.NotBlank;
 import java.util.List;

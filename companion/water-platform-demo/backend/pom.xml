@@ -1,7 +1,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0">
   <modelVersion>4.0.0</modelVersion>
   <groupId>edu.example</groupId>
-  <artifactId>qingyuan-api</artifactId>
+  <artifactId>reservoir-api</artifactId>
   <version>0.1.0</version>
   <properties>
     <java.version>17</java.version>
@@ -68,7 +68,7 @@
           <execution>
             <goals><goal>repackage</goal></goals>
             <configuration>
-              <mainClass>edu.example.qingyuan.WaterPlatformApplication</mainClass>
+              <mainClass>edu.example.reservoir.WaterPlatformApplication</mainClass>
             </configuration>
           </execution>
         </executions>

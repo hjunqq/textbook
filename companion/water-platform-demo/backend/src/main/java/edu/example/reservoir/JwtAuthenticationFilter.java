@@ -1,4 +1,4 @@
-package edu.example.qingyuan;
+package edu.example.reservoir;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;

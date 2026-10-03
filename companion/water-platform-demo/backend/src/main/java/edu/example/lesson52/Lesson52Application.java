@@ -20,10 +20,10 @@ import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServic
  * 启动前先停掉教学接口（teaching-api），否则 8080 端口冲突——
  * 这正是 5.2.1 节“预期运行记录”表里最后一行要观察的现象。
  *
- * 本类刻意放在 edu.example.lesson52 包下，而不是 edu.example.qingyuan：
+ * 本类刻意放在 edu.example.lesson52 包下，而不是 edu.example.reservoir：
  * Spring Boot 的组件扫描以 @SpringBootApplication 所在包为根，
- * 放在 qingyuan 下会被完整工程一起扫到，两个 /api/assets 映射冲突，启动即失败。
- * 完整工程（S3 终点）的入口仍是 edu.example.qingyuan.WaterPlatformApplication。
+ * 放在 reservoir 下会被完整工程一起扫到，两个 /api/assets 映射冲突，启动即失败。
+ * 完整工程（S3 终点）的入口仍是 edu.example.reservoir.WaterPlatformApplication。
  */
 @SpringBootApplication(exclude = {
         // 5.2 节明确说“数据库到 5.4 节才接入”“本节还没有认证”。

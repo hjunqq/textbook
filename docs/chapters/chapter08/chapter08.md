@@ -1943,7 +1943,7 @@ class ReadingKafkaConsumer {
         this.ingestion = ingestion;
     }
 
-    @KafkaListener(topics = "qingyuan.reading.v1",
+    @KafkaListener(topics = "reservoir.reading.v1",
                    groupId = "monitoring-quality")
     public void onMessage(ReadingEvent event) {
         try {
@@ -2736,14 +2736,14 @@ class ScenarioSliceAcceptanceTest {
 
 ```yaml
 services:
-  web: {image: registry.example.com/qingyuan-web:APP_VERSION, ports: ["8080:80"], depends_on: {api: {condition: service_healthy}}}
+  web: {image: registry.example.com/reservoir-web:APP_VERSION, ports: ["8080:80"], depends_on: {api: {condition: service_healthy}}}
   api:
-    image: registry.example.com/qingyuan-api:APP_VERSION
-    environment: {SPRING_PROFILES_ACTIVE: production, DB_URL: jdbc:postgresql://postgres:5432/qingyuan, DB_PASSWORD_FILE: /run/secrets/db_password, KAFKA_BOOTSTRAP_SERVERS: kafka:9092, REDIS_URL: redis://redis:6379}
+    image: registry.example.com/reservoir-api:APP_VERSION
+    environment: {SPRING_PROFILES_ACTIVE: production, DB_URL: jdbc:postgresql://postgres:5432/reservoir, DB_PASSWORD_FILE: /run/secrets/db_password, KAFKA_BOOTSTRAP_SERVERS: kafka:9092, REDIS_URL: redis://redis:6379}
     secrets: [db_password, kafka_password]
     depends_on: {postgres: {condition: service_healthy}, kafka: {condition: service_healthy}, redis: {condition: service_healthy}}
     healthcheck: {test: ["CMD-SHELL", "wget -qO- http://localhost:8080/actuator/health/readiness | grep -q UP"], interval: 10s, timeout: 3s, retries: 12}
-  postgres: {image: timescale/timescaledb-ha:pg16, volumes: [pg-data:/var/lib/postgresql/data], healthcheck: {test: ["CMD-SHELL", "pg_isready -U qingyuan_app -d qingyuan"]}}
+  postgres: {image: timescale/timescaledb-ha:pg16, volumes: [pg-data:/var/lib/postgresql/data], healthcheck: {test: ["CMD-SHELL", "pg_isready -U reservoir_app -d reservoir"]}}
   redis: {image: redis:7.2-alpine, command: ["redis-server", "--appendonly", "yes"], volumes: [redis-data:/data], healthcheck: {test: ["CMD", "redis-cli", "ping"], interval: 10s, timeout: 3s, retries: 5}}
   kafka: {image: apache/kafka:3.7.2, volumes: [kafka-data:/var/lib/kafka/data], healthcheck: {test: ["CMD-SHELL", "/opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --list >/dev/null 2>&1"], interval: 15s, timeout: 10s, retries: 8}}
 secrets: {db_password: {file: ./secrets/db_password.txt}, kafka_password: {file: ./secrets/kafka_password.txt}}
@@ -2761,9 +2761,9 @@ volumes: {pg-data: {}, redis-data: {}, kafka-data: {}}
 ```yaml
 APP_VERSION: "2026.08.07-rc1"
 SPRING_PROFILE: "production"
-DB_USER: "qingyuan_app"
-DB_NAME: "qingyuan"
-KAFKA_TOPIC_READING: "qingyuan.reading.v1"
+DB_USER: "reservoir_app"
+DB_NAME: "reservoir"
+KAFKA_TOPIC_READING: "reservoir.reading.v1"
 SECRETS: {DB_PASSWORD_FILE: "/run/secrets/db_password", JWT_SIGNING_KEY: "injected-by-secret-manager"}
 ROTATION: {password_days: 90, signing_key_overlap_hours: 24}
 VALIDATION: {require_non_empty: [DB_USER, DB_NAME], reject_default_password: true}
@@ -2781,16 +2781,16 @@ Nginx负责 TLS 终止、静态文件缓存和 API 反向代理，不承载权�
 worker_processes auto;
 events { worker_connections 1024; }
 http {
-  upstream qingyuan_api { server api:8080; keepalive 32; }
+  upstream reservoir_api { server api:8080; keepalive 32; }
   server {
     listen 80; server_name water.example.edu; root /usr/share/nginx/html;
     client_max_body_size 20m;
     location /assets/ { try_files $uri =404; }
     # Vue Router history 模式：非资源路径回退到入口页
     location / { try_files $uri $uri/ /index.html; }
-    location /api/ { proxy_pass http://qingyuan_api; proxy_set_header Host $host; proxy_set_header X-Request-Id $request_id; proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for; proxy_read_timeout 30s; }
-    location /healthz { proxy_pass http://qingyuan_api/actuator/health/liveness; access_log off; }
-    location /readyz { proxy_pass http://qingyuan_api/actuator/health/readiness; access_log off; }
+    location /api/ { proxy_pass http://reservoir_api; proxy_set_header Host $host; proxy_set_header X-Request-Id $request_id; proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for; proxy_read_timeout 30s; }
+    location /healthz { proxy_pass http://reservoir_api/actuator/health/liveness; access_log off; }
+    location /readyz { proxy_pass http://reservoir_api/actuator/health/readiness; access_log off; }
   }
 }
 ```
@@ -2805,7 +2805,7 @@ http {
 
 ```yaml
 groups:
-  - name: qingyuan-platform
+  - name: reservoir-platform
     interval: 30s
     rules:
       - alert: ApiReadinessFailed
@@ -2813,15 +2813,15 @@ groups:
         for: 2m
         labels: {severity: critical, owner: ops}
       - alert: ReadingIngestLag
-        expr: qingyuan_reading_ingest_lag_seconds > 300
+        expr: reservoir_reading_ingest_lag_seconds > 300
         for: 5m
         labels: {severity: warning, owner: duty}
       - alert: TimescaleDiskPressure
-        expr: qingyuan_db_free_bytes < 20000000000
+        expr: reservoir_db_free_bytes < 20000000000
         for: 10m
         labels: {severity: critical, owner: ops}
       - alert: WarningAckTimeout
-        expr: qingyuan_warning_unacked_seconds > 900
+        expr: reservoir_warning_unacked_seconds > 900
         for: 5m
         labels: {severity: warning, owner: duty}
 ```
@@ -2837,7 +2837,7 @@ groups:
 ```yaml
 backup: {schedule: "15 2 * * *", retention_days: 35, mode: "base-plus-wal", verify: [checksum, restore-schema, latest-reading-time]}
 object_store: {versioning: true, retention_days: 90}
-kafka: {topic: qingyuan.reading.v1, replay_window_hours: 72}
+kafka: {topic: reservoir.reading.v1, replay_window_hours: 72}
 rehearsal:
   target: isolated-restore
   steps: [stop-writes, restore-postgres-and-wal, restore-object-manifest, start-api-readonly, verify-trace, replay-with-event-id-deduplication, run-smoke-test]

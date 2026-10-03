@@ -1,4 +1,4 @@
-package edu.example.qingyuan;
+package edu.example.reservoir;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
@@ -17,8 +17,8 @@ public class ReadingConsumer {
         this.readings = readings; this.objectMapper = objectMapper;
     }
 
-    @KafkaListener(topics = "${app.kafka.reading-topic:qingyuan.reading.v1}",
-                   groupId = "qingyuan-quality")
+    @KafkaListener(topics = "${app.kafka.reading-topic:reservoir.reading.v1}",
+                   groupId = "reservoir-quality")
     public void consume(String eventJson) {
         ReadingEvent event;
         try {

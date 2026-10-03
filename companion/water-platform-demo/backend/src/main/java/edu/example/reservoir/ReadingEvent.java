@@ -1,4 +1,4 @@
-package edu.example.qingyuan;
+package edu.example.reservoir;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;

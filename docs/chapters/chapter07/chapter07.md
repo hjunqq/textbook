@@ -801,8 +801,8 @@ const stationLayer = readings
 const thematicOption = {
   tooltip: {trigger: 'item'},
   // geo 组件是 coordinateSystem:'geo' 的前提：需先用
-  // echarts.registerMap('qingyuan', geoJson) 注册库区边界
-  geo: {map: 'qingyuan', roam: true,
+  // echarts.registerMap('reservoir', geoJson) 注册库区边界
+  geo: {map: 'reservoir', roam: true,
     itemStyle: {areaColor: '#f4f6f8', borderColor: '#9aa5b1'}},
   visualMap: {min: 0, max: 100, dimension: 2,
     text: ['高', '低'], calculable: true},
