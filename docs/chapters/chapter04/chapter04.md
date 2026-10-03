@@ -20,9 +20,9 @@
 
 !!! tip "提示"
 
-    **本章项目任务：从v0（空仓库）到v1（前端只读切片）**
+    **本章项目任务：阶段S1与S2**
 
-    起点是配套仓库的空前端骨架。本章结束时你应交付 **v1**：一个能登录、能按测点与时间窗查询并渲染曲线的只读监测页面——对应仓库 `frontend/` 的 `utils/auth.js`、`utils/request.js`、`views/LoginView.vue`、`router/index.js`、`stores/monitoring.js` 与 `components/MonitoringDashboard.vue`；验证命令 `npm ci && npm test && npm run build`。
+    配套工程按S0–S6七个阶段逐步建成，本章完成其中的S1和S2。S1在4.2–4.4节完成：不依赖后端的测点列表与详情两个静态页面。S2在4.5–4.7节完成：能登录、能请求最新观测并正确处理四种页面状态的监测页面，再迁移到Vue组件、路由和Pinia——对应仓库 `frontend/` 的 `utils/auth.js`、`utils/request.js`、`views/LoginView.vue`、`router/index.js`、`stores/monitoring.js` 与 `components/MonitoringDashboard.vue`；验证命令 `npm ci && npm test && npm run build`。两个阶段的验收检查单见4.8.1节。
 
 ## 4.1 Web基础概念与浏览器架构
 

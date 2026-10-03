@@ -17,7 +17,7 @@
 智慧水利后端负责接入监测数据、执行业务规则、维护一致性并向前端提供接口。本章统一采用Java 17、Spring Boot 3.2+、Spring Security 6、Jakarta Persistence 3.1与Jakarta Servlet 6.x；JWT示例按jjwt 0.11.x接口编写。框架配置、注解语义与版本迁移细节可查阅对应版本的官方参考文档\cite{springBootDocs,springSecurityDocs,jakartaPersistence}；运行示例时应先核对 Java、依赖与容器版本。分布式事务和领域驱动设计作为选学内容，不作为首次后端课程的前置要求。本章延续第3章的架构决策：模块化单体内部按控制器、服务、数据访问分层，观测写入经Kafka削峰后进入TimescaleDB；案例水库峰值每秒10条观测、50并发查询的负载数字，是本章连接池、缓存与分页设计的直接依据。
 
 \begin{tipbox}
-\paragraph{本章项目任务：从v1（前端只读切片）到v2（认证与观测API）}起点是第4章交付的 v1 前端。本章结束时你应交付 \textbf{v2}：为 v1 提供真实数据的后端——登录签发 JWT、受保护的测点与观测查询、事务与幂等写入——对应仓库 \texttt{backend/} 的 \texttt{JwtService}、\texttt{JwtAuthenticationFilter}、\texttt{SecurityConfig}、\texttt{AuthController}、\texttt{AssetController}、\texttt{ReadingService}；验证命令 \texttt{mvn test}，联调后前端 401 分流与登录回跳应全部生效。
+\paragraph{本章项目任务：阶段S3}起点是第4章完成的S2前端。本章完成阶段S3：为前端提供真实数据的后端——登录签发 JWT、受保护的测点与观测查询、事务与幂等写入——对应仓库 \texttt{backend/} 的 \texttt{JwtService}、\texttt{JwtAuthenticationFilter}、\texttt{SecurityConfig}、\texttt{AuthController}、\texttt{AssetController}、\texttt{ReadingService}。S3分两步验收：5.2节的起点只返回固定数据；5.4–5.6节完成持久化与认证后到达终点，验证命令 \texttt{mvn test}，联调后前端 401 分流与登录回跳应全部生效。
 \end{tipbox}
 
 \section{后端服务与REST接口概述}

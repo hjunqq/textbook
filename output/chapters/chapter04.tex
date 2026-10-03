@@ -16,7 +16,7 @@
 智慧水利平台的前端把测站、工程、告警和调度数据转化为可理解、可操作的界面。本章采用Vue 3.4+、Vue Router 4、Pinia 2与Vite 5作为教学基线；框架API与配置项随版本演进，遇到与书中示例不一致时，一律以各自官方文档为准\cite{vueDocs,vueRouterDocs,piniaDocs,viteDocs}。示例遵循HTML、CSS和ECMAScript标准，语言与平台特性可在MDN查证\cite{mdnWebDocs}，不依赖特定浏览器的私有能力。本章的页面都围绕水利工程安全监测平台展开：第3章为它选定的模块化单体与MVC分层，在前端对应视图、状态与请求的职责切分；页面中的测点与预警演示数字一律取自8.1节参数表。
 
 \begin{tipbox}
-\paragraph{本章项目任务：从v0（空仓库）到v1（前端只读切片）}起点是配套仓库的空前端骨架。本章结束时你应交付 \textbf{v1}：一个能登录、能按测点与时间窗查询并渲染曲线的只读监测页面——对应仓库 \texttt{frontend/} 的 \texttt{utils/auth.js}、\texttt{utils/request.js}、\texttt{views/LoginView.vue}、\texttt{router/index.js}、\texttt{stores/monitoring.js} 与 \texttt{components/MonitoringDashboard.vue}；验证命令 \texttt{npm ci \&\& npm test \&\& npm run build}。
+\paragraph{本章项目任务：阶段S1与S2}配套工程按S0–S6七个阶段逐步建成，本章完成其中的S1和S2。S1在4.2–4.4节完成：不依赖后端的测点列表与详情两个静态页面。S2在4.5–4.7节完成：能登录、能请求最新观测并正确处理四种页面状态的监测页面，再迁移到Vue组件、路由和Pinia——对应仓库 \texttt{frontend/} 的 \texttt{utils/auth.js}、\texttt{utils/request.js}、\texttt{views/LoginView.vue}、\texttt{router/index.js}、\texttt{stores/monitoring.js} 与 \texttt{components/MonitoringDashboard.vue}；验证命令 \texttt{npm ci \&\& npm test \&\& npm run build}。两个阶段的验收检查单见4.8.1节。
 \end{tipbox}
 
 \section{Web基础概念与浏览器架构}

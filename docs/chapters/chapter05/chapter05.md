@@ -22,9 +22,9 @@
 
 !!! tip "提示"
 
-    **本章项目任务：从v1（前端只读切片）到v2（认证与观测API）**
+    **本章项目任务：阶段S3**
 
-    起点是第4章交付的 v1 前端。本章结束时你应交付 **v2**：为 v1 提供真实数据的后端——登录签发 JWT、受保护的测点与观测查询、事务与幂等写入——对应仓库 `backend/` 的 `JwtService`、`JwtAuthenticationFilter`、`SecurityConfig`、`AuthController`、`AssetController`、`ReadingService`；验证命令 `mvn test`，联调后前端 401 分流与登录回跳应全部生效。
+    起点是第4章完成的S2前端。本章完成阶段S3：为前端提供真实数据的后端——登录签发 JWT、受保护的测点与观测查询、事务与幂等写入——对应仓库 `backend/` 的 `JwtService`、`JwtAuthenticationFilter`、`SecurityConfig`、`AuthController`、`AssetController`、`ReadingService`。S3分两步验收：5.2节的起点只返回固定数据；5.4–5.6节完成持久化与认证后到达终点，验证命令 `mvn test`，联调后前端 401 分流与登录回跳应全部生效。
 
 ## 5.1 后端服务与REST接口概述
 
