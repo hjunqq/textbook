@@ -612,12 +612,12 @@ def main():
             if dependencies:
                 job["graphics_sha256"] = dependencies
             expected_jobs.append(job)
-        if name.startswith("chapter"):
+        if name.startswith("chapter") or name == "online":
             active_images = {fname for fname, _ in c.tikz_jobs} | {fname for _, fname in c.raster_jobs}
             image_dir = dest.parent / "images"
             if image_dir.is_dir():
                 for old in image_dir.iterdir():
-                    if re.fullmatch(r"chapter\d+_fig_[\d_]+\.(?:svg|png)", old.name) and old.name not in active_images:
+                    if re.fullmatch(r"(?:chapter\d+|online)_fig_[\dA-Z_]+\.(?:svg|png)", old.name) and old.name not in active_images:
                         old.unlink()
         report[name] = {"figs": c.cnt["fig"], "tabs": c.cnt["tab"], "lsts": c.cnt["lst"],
                         "tikz": len(c.tikz_jobs), "raster": len(c.raster_jobs),

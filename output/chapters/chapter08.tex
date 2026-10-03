@@ -696,9 +696,26 @@ DDL 的执行顺序也属于系统设计的一部分。部署脚本先安装扩�
 DDL 解决了“表能否创建”的问题，平台上线还需要回答“数据能否安全地进入、查询和恢复”。本小节把
 常用操作拆成短小而完整的 SQL 练习，所有语句都假定在只读副本或隔离的迁移事务中执行。练习时比较
 索引、约束和查询条件对结果与执行计划的影响。每段语句都配有
-输入前提、结果解释和回滚边界，后续 Java Repository 可以把它们转成参数化查询。
+输入前提、结果解释和回滚边界，后续 Java Repository 可以把它们转成参数化查询。表\ref{tab:ch08-sql-exercise-map}把这21段练习按用途分成五组，可以先读每组第一段，再按课程项目的需要选做。
 
-迁移脚本必须可重复执行，并把版本写入数据库。代码清单\ref{lst:ch08-sql-migration}示例用一个轻量
+\begin{table}[htbp]
+\centering
+\caption{数据库练习的分组与对应清单}
+\label{tab:ch08-sql-exercise-map}
+\begin{tabular}{p{3.4cm}p{4.6cm}p{4.6cm}}
+\toprule
+分组 & 回答的问题 & 对应清单 \\
+\midrule
+迁移与基础查询 & 结构如何安全上线，测点和观测怎样读出来 & 清单\ref{lst:ch08-sql-migration}至清单\ref{lst:ch08-sql-quality-count} \\
+幂等写入与业务队列 & 重复消息怎样不重复入库，预警、工单和模型运行怎样排队 & 清单\ref{lst:ch08-sql-idempotent-insert}至清单\ref{lst:ch08-sql-model-audit} \\
+时序聚合、保留与压缩 & 曲线读聚合结果，旧数据怎样保留和压缩 & 清单\ref{lst:ch08-sql-aggregate-query}至清单\ref{lst:ch08-sql-compression} \\
+带并发条件的状态写入 & 两个角色同时处理时怎样不互相覆盖 & 清单\ref{lst:ch08-sql-warning-ack}、清单\ref{lst:ch08-sql-work-order-close} \\
+健康检查、备份、权限与追溯 & 数据是否健康、能否恢复、谁能看、能否追到源头 & 清单\ref{lst:ch08-sql-health-check}至清单\ref{lst:ch08-sql-trace-event} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{迁移与基础查询}迁移脚本必须可重复执行，并把版本写入数据库。代码清单\ref{lst:ch08-sql-migration}示例用一个轻量
 版本表记录迁移名称和校验摘要；发布工具还应记录执行人、开始时间、结束时间和失败日志。若
 迁移中途失败，恢复脚本只回滚本次版本，不直接删除已有业务数据。
 
@@ -783,7 +800,7 @@ GROUP BY asset_id
 ORDER BY asset_id;
 \end{lstlisting}
 
-消息重投是流式系统的常态。代码清单\ref{lst:ch08-sql-idempotent-insert}展示“先插入、冲突即忽略”的
+\paragraph{幂等写入与业务队列}消息重投是流式系统的常态。代码清单\ref{lst:ch08-sql-idempotent-insert}展示“先插入、冲突即忽略”的
 数据库兜底；应用收到 0 行影响时应记录重复事件并确认消息，而不是反复重试。若同一业务事件需要
 修订，必须生成新的版本并写明原因，不能利用冲突绕过审计规则。
 
@@ -839,7 +856,7 @@ WHERE model_name = :model_name
 ORDER BY started_at DESC;
 \end{lstlisting}
 
-连续聚合查询只读取已物化的时间桶。代码清单\ref{lst:ch08-sql-aggregate-query}把桶边界、样本数和
+\paragraph{时序聚合、保留与压缩}连续聚合查询只读取已物化的时间桶。代码清单\ref{lst:ch08-sql-aggregate-query}把桶边界、样本数和
 质量语义一起返回，前端可以在样本不足时显示“数据稀疏”而不绘制误导性的折线。对于跨越夏令时或
 多时区的部署，数据库统一使用 UTC，展示层再按用户时区转换。
 
@@ -896,7 +913,7 @@ SELECT add_compression_policy(
 );
 \end{lstlisting}
 
-状态更新必须包含并发控制条件。代码清单\ref{lst:ch08-sql-warning-ack}用“当前状态仍为 open”的
+\paragraph{带并发条件的状态写入}状态更新必须包含并发控制条件。代码清单\ref{lst:ch08-sql-warning-ack}用“当前状态仍为 open”的
 条件完成确认；若影响行数为 0，说明另一个角色已经处理，服务应返回最新状态而不是覆盖它。此规则
 也适用于工单完成和模型运行取消，避免前端的旧页面把新处置结果改回去。
 
@@ -922,7 +939,7 @@ SELECT warning_id FROM work_order WHERE work_order_id = :work_order_id;
 COMMIT;
 \end{lstlisting}
 
-数据库健康检查关注约束违反的前兆。代码清单\ref{lst:ch08-sql-health-check}统计缺少有效坐标、异常
+\paragraph{健康检查、备份、权限与追溯}数据库健康检查关注约束违反的前兆。代码清单\ref{lst:ch08-sql-health-check}统计缺少有效坐标、异常
 质量码和未来时间戳的记录；它不自动改数据，只产生检查报告。每日检查结果应和发布版本关联，才能在
 出现异常时判断是设备问题、迁移问题还是程序问题。
 
