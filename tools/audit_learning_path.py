@@ -62,7 +62,7 @@ def main():
                 layer = parent_layer or '混合'
                 # 衔接：节标题后、第一个小节前有一段正文导语
                 lead = block.split('\\subsection{')[0]
-                prereq = any(re.match(r'[\u4e00-\u9fff“]', ln.strip()) for ln in lead.split('\n'))
+                prereq = any(re.match(r'[\u4e00-\u9fff“\d]|\\paragraph\{业务问题\}', ln.strip()) for ln in lead.split('\n'))
             else:
                 subsection += 1
                 key = f'{chapter}.{section}.{subsection}'
